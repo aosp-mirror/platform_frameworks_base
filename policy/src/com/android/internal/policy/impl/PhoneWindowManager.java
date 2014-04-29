@@ -3859,12 +3859,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                                 mKeyguardDelegate.isShowingAndNotOccluded() :
                                                 mKeyguardDelegate.isShowing()));
 
-        if (keyCode == KeyEvent.KEYCODE_POWER
-                || keyCode == KeyEvent.KEYCODE_SLEEP
-                || keyCode == KeyEvent.KEYCODE_WAKEUP) {
-            policyFlags |= WindowManagerPolicy.FLAG_WAKE;
-        }
-
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                     + " interactive=" + interactive + " keyguardActive=" + keyguardActive
@@ -3878,8 +3872,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Basic policy based on interactive state.
         int result;
-        boolean isWakeKey = (policyFlags & (WindowManagerPolicy.FLAG_WAKE
-                | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
+        boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
+                || event.isWakeKey();
         if (interactive || (isInjected && !isWakeKey)) {
             // When the screen is on or if the key is injected pass the key to the application.
             result = ACTION_PASS_TO_USER;

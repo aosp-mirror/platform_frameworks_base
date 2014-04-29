@@ -167,6 +167,7 @@ import android.util.SparseArray;
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long NS_PER_MS = 1000000;
+    private static final String LABEL_PREFIX = "AXIS_";
 
     /**
      * An invalid pointer id.
@@ -1368,6 +1369,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     private static native long nativeReadFromParcel(long nativePtr, Parcel parcel);
     private static native void nativeWriteToParcel(long nativePtr, Parcel parcel);
+
+    private static native String nativeAxisToString(int axis);
+    private static native int nativeAxisFromString(String label);
 
     private MotionEvent() {
     }
@@ -3051,8 +3055,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @return The symbolic name of the specified axis.
      */
     public static String axisToString(int axis) {
-        String symbolicName = AXIS_SYMBOLIC_NAMES.get(axis);
-        return symbolicName != null ? symbolicName : Integer.toString(axis);
+        String symbolicName = nativeAxisToString(axis);
+        return symbolicName != null ? LABEL_PREFIX + symbolicName : Integer.toString(axis);
     }
 
     /**
@@ -3064,17 +3068,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see KeyEvent#keyCodeToString(int)
      */
     public static int axisFromString(String symbolicName) {
-        if (symbolicName == null) {
-            throw new IllegalArgumentException("symbolicName must not be null");
+        if (symbolicName.startsWith(LABEL_PREFIX)) {
+            symbolicName = symbolicName.substring(LABEL_PREFIX.length());
         }
-
-        final int count = AXIS_SYMBOLIC_NAMES.size();
-        for (int i = 0; i < count; i++) {
-            if (symbolicName.equals(AXIS_SYMBOLIC_NAMES.valueAt(i))) {
-                return i;
-            }
+        int axis = nativeAxisFromString(symbolicName);
+        if (axis >= 0) {
+            return axis;
         }
-
         try {
             return Integer.parseInt(symbolicName, 10);
         } catch (NumberFormatException ex) {
