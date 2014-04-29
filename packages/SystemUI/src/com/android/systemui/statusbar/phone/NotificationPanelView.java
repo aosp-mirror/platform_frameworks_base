@@ -36,11 +36,8 @@ public class NotificationPanelView extends PanelView implements
     private View mKeyguardStatusView;
 
     private NotificationStackScrollLayout mNotificationStackScroller;
-    private int[] mTempLocation = new int[2];
-    private int[] mTempChildLocation = new int[2];
-    private View mNotificationParent;
     private boolean mTrackingSettings;
-    private float mExpandedHeight = -1;
+    private int mNotificationTopPadding;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -70,7 +67,18 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
-        mNotificationParent = findViewById(R.id.notification_container_parent);
+        mNotificationTopPadding = getResources().getDimensionPixelSize(
+                R.dimen.notifications_top_padding);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        int keyguardBottomMargin =
+                ((MarginLayoutParams) mKeyguardStatusView.getLayoutParams()).bottomMargin;
+        mNotificationStackScroller.setTopPadding(mStatusBar.isOnKeyguard()
+                ? mKeyguardStatusView.getBottom() + keyguardBottomMargin
+                : mHeader.getBottom() + mNotificationTopPadding);
     }
 
     @Override
@@ -93,18 +101,6 @@ public class NotificationPanelView extends PanelView implements
         }
 
         return super.dispatchPopulateAccessibilityEvent(event);
-    }
-
-    /**
-     * Gets the relative position of a view on the screen in regard to this view.
-     *
-     * @param requestedView the view we want to find the relative position for
-     * @return
-     */
-    private int getRelativeTop(View requestedView) {
-        getLocationOnScreen(mTempLocation);
-        requestedView.getLocationOnScreen(mTempChildLocation);
-        return mTempChildLocation[1] - mTempLocation[1];
     }
 
     @Override
@@ -167,42 +163,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onHeightUpdated(float expandedHeight) {
-        updateNotificationStackHeight(expandedHeight);
-    }
-
-    /**
-     * Update the height of the {@link #mNotificationStackScroller} to the new expanded height.
-     * This is much more efficient than doing it over the layout pass.
-     *
-     * @param expandedHeight the new expanded height
-     */
-    private void updateNotificationStackHeight(float expandedHeight) {
-        if (mExpandedHeight == expandedHeight) return;
-        mExpandedHeight = expandedHeight;
-        mNotificationStackScroller.setIsExpanded(expandedHeight > 0.0f);
-        float childOffset = getRelativeTop(mNotificationStackScroller)
-                - mNotificationParent.getTranslationY();
-        int newStackHeight = (int) (expandedHeight - childOffset);
-        int itemHeight = mNotificationStackScroller.getItemHeight();
-        int bottomStackPeekSize = mNotificationStackScroller.getBottomStackPeekSize();
-        int minStackHeight = itemHeight + bottomStackPeekSize;
-        if (newStackHeight >= minStackHeight) {
-            mNotificationParent.setTranslationY(0);
-            mNotificationStackScroller.setCurrentStackHeight(newStackHeight);
-        } else {
-
-            // We did not reach the position yet where we actually start growing,
-            // so we translate the stack upwards.
-            int translationY = (newStackHeight - minStackHeight);
-            // A slight parallax effect is introduced in order for the stack to catch up with
-            // the top card.
-            float partiallyThere = (float) newStackHeight / minStackHeight;
-            partiallyThere = Math.max(0, partiallyThere);
-            translationY += (1 - partiallyThere) * bottomStackPeekSize;
-            mNotificationParent.setTranslationY(translationY);
-            mNotificationStackScroller.setCurrentStackHeight(
-                    (int) (expandedHeight - (childOffset + translationY)));
-        }
+        mNotificationStackScroller.setStackHeight(expandedHeight);
     }
 
     @Override

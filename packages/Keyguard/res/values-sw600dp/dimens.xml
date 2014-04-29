@@ -32,7 +32,7 @@
 
     <!-- Keyguard dimensions -->
     <!-- Size of the clock font in keyguard's status view -->
-    <dimen name="kg_status_clock_font_size">141dp</dimen>
+    <dimen name="kg_status_clock_font_size">120dp</dimen>
 
     <!-- Size of the generic status lines keyguard's status view  -->
     <dimen name="kg_status_line_font_size">16sp</dimen>
