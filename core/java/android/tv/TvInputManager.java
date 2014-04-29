@@ -21,9 +21,16 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pools.Pool;
+import android.util.Pools.SimplePool;
 import android.util.SparseArray;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventSender;
 import android.view.Surface;
 import android.view.View;
 
@@ -138,7 +145,8 @@ public final class TvInputManager {
         mUserId = userId;
         mClient = new ITvInputClient.Stub() {
             @Override
-            public void onSessionCreated(ComponentName name, IBinder token, int seq) {
+            public void onSessionCreated(ComponentName name, IBinder token, InputChannel channel,
+                    int seq) {
                 synchronized (mSessionCreateCallbackRecordMap) {
                     SessionCreateCallbackRecord record = mSessionCreateCallbackRecordMap.get(seq);
                     mSessionCreateCallbackRecordMap.delete(seq);
@@ -148,7 +156,7 @@ public final class TvInputManager {
                     }
                     Session session = null;
                     if (token != null) {
-                        session = new Session(name, token, mService, mUserId);
+                        session = new Session(token, channel, mService, mUserId);
                     }
                     record.postSessionCreated(session);
                 }
@@ -321,13 +329,30 @@ public final class TvInputManager {
 
     /** The Session provides the per-session functionality of TV inputs. */
     public static final class Session {
+        static final int DISPATCH_IN_PROGRESS = -1;
+        static final int DISPATCH_NOT_HANDLED = 0;
+        static final int DISPATCH_HANDLED = 1;
+
+        private static final long INPUT_SESSION_NOT_RESPONDING_TIMEOUT = 2500;
+
         private final ITvInputManager mService;
         private final int mUserId;
+
+        // For scheduling input event handling on the main thread. This also serves as a lock to
+        // protect pending input events and the input channel.
+        private final InputEventHandler mHandler = new InputEventHandler(Looper.getMainLooper());
+
+        private final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
+        private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
+
         private IBinder mToken;
+        private TvInputEventSender mSender;
+        private InputChannel mChannel;
 
         /** @hide */
-        private Session(ComponentName name, IBinder token, ITvInputManager service, int userId) {
+        private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId) {
             mToken = token;
+            mChannel = channel;
             mService = service;
             mUserId = userId;
         }
@@ -346,6 +371,18 @@ public final class TvInputManager {
                 mToken = null;
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
+            }
+
+            synchronized (mHandler) {
+                if (mChannel != null) {
+                    if (mSender != null) {
+                        flushPendingEventsLocked();
+                        mSender.dispose();
+                        mSender = null;
+                    }
+                    mChannel.dispose();
+                    mChannel = null;
+                }
             }
         }
 
@@ -476,6 +513,229 @@ public final class TvInputManager {
                 mService.removeOverlayView(mToken, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Dispatches an input event to this session.
+         *
+         * @param event {@link InputEvent} to dispatch.
+         * @param token A token used to identify the input event later in the callback.
+         * @param callback A callback used to receive the dispatch result.
+         * @param handler {@link Handler} that the dispatch result will be delivered to.
+         * @return Returns {@link #DISPATCH_HANDLED} if the event was handled. Returns
+         *         {@link #DISPATCH_NOT_HANDLED} if the event was not handled. Returns
+         *         {@link #DISPATCH_IN_PROGRESS} if the event is in progress and the callback will
+         *         be invoked later.
+         * @throws IllegalArgumentException if any of the necessary arguments is {@code null}.
+         * @hide
+         */
+        public int dispatchInputEvent(InputEvent event, Object token,
+                FinishedInputEventCallback callback, Handler handler) {
+            if (event == null) {
+                throw new IllegalArgumentException("event cannot be null");
+            }
+            if (callback != null && handler == null) {
+                throw new IllegalArgumentException("handler cannot be null");
+            }
+            synchronized (mHandler) {
+                if (mChannel == null) {
+                    return DISPATCH_NOT_HANDLED;
+                }
+                PendingEvent p = obtainPendingEventLocked(event, token, callback, handler);
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    // Already running on the main thread so we can send the event immediately.
+                    return sendInputEventOnMainLooperLocked(p);
+                }
+
+                // Post the event to the main thread.
+                Message msg = mHandler.obtainMessage(InputEventHandler.MSG_SEND_INPUT_EVENT, p);
+                msg.setAsynchronous(true);
+                mHandler.sendMessage(msg);
+                return DISPATCH_IN_PROGRESS;
+            }
+        }
+
+        /**
+         * Callback that is invoked when an input event that was dispatched to this session has been
+         * finished.
+         *
+         * @hide
+         */
+        public interface FinishedInputEventCallback {
+            /**
+             * Called when the dispatched input event is finished.
+             *
+             * @param token a token passed to {@link #dispatchInputEvent}.
+             * @param handled {@code true} if the dispatched input event was handled properly.
+             *            {@code false} otherwise.
+             */
+            public void onFinishedInputEvent(Object token, boolean handled);
+        }
+
+        // Must be called on the main looper
+        private void sendInputEventAndReportResultOnMainLooper(PendingEvent p) {
+            synchronized (mHandler) {
+                int result = sendInputEventOnMainLooperLocked(p);
+                if (result == DISPATCH_IN_PROGRESS) {
+                    return;
+                }
+            }
+
+            invokeFinishedInputEventCallback(p, false);
+        }
+
+        private int sendInputEventOnMainLooperLocked(PendingEvent p) {
+            if (mChannel != null) {
+                if (mSender == null) {
+                    mSender = new TvInputEventSender(mChannel, mHandler.getLooper());
+                }
+
+                final InputEvent event = p.mEvent;
+                final int seq = event.getSequenceNumber();
+                if (mSender.sendInputEvent(seq, event)) {
+                    mPendingEvents.put(seq, p);
+                    Message msg = mHandler.obtainMessage(InputEventHandler.MSG_TIMEOUT_INPUT_EVENT, p);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(msg, INPUT_SESSION_NOT_RESPONDING_TIMEOUT);
+                    return DISPATCH_IN_PROGRESS;
+                }
+
+                Log.w(TAG, "Unable to send input event to session: " + mToken + " dropping:"
+                        + event);
+            }
+            return DISPATCH_NOT_HANDLED;
+        }
+
+        void finishedInputEvent(int seq, boolean handled, boolean timeout) {
+            final PendingEvent p;
+            synchronized (mHandler) {
+                int index = mPendingEvents.indexOfKey(seq);
+                if (index < 0) {
+                    return; // spurious, event already finished or timed out
+                }
+
+                p = mPendingEvents.valueAt(index);
+                mPendingEvents.removeAt(index);
+
+                if (timeout) {
+                    Log.w(TAG, "Timeout waiting for seesion to handle input event after "
+                            + INPUT_SESSION_NOT_RESPONDING_TIMEOUT + " ms: " + mToken);
+                } else {
+                    mHandler.removeMessages(InputEventHandler.MSG_TIMEOUT_INPUT_EVENT, p);
+                }
+            }
+
+            invokeFinishedInputEventCallback(p, handled);
+        }
+
+        // Assumes the event has already been removed from the queue.
+        void invokeFinishedInputEventCallback(PendingEvent p, boolean handled) {
+            p.mHandled = handled;
+            if (p.mHandler.getLooper().isCurrentThread()) {
+                // Already running on the callback handler thread so we can send the callback
+                // immediately.
+                p.run();
+            } else {
+                // Post the event to the callback handler thread.
+                // In this case, the callback will be responsible for recycling the event.
+                Message msg = Message.obtain(p.mHandler, p);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
+        }
+
+        private void flushPendingEventsLocked() {
+            mHandler.removeMessages(InputEventHandler.MSG_FLUSH_INPUT_EVENT);
+
+            final int count = mPendingEvents.size();
+            for (int i = 0; i < count; i++) {
+                int seq = mPendingEvents.keyAt(i);
+                Message msg = mHandler.obtainMessage(InputEventHandler.MSG_FLUSH_INPUT_EVENT, seq, 0);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
+        }
+
+        private PendingEvent obtainPendingEventLocked(InputEvent event, Object token,
+                FinishedInputEventCallback callback, Handler handler) {
+            PendingEvent p = mPendingEventPool.acquire();
+            if (p == null) {
+                p = new PendingEvent();
+            }
+            p.mEvent = event;
+            p.mToken = token;
+            p.mCallback = callback;
+            p.mHandler = handler;
+            return p;
+        }
+
+        private void recyclePendingEventLocked(PendingEvent p) {
+            p.recycle();
+            mPendingEventPool.release(p);
+        }
+
+        private final class InputEventHandler extends Handler {
+            public static final int MSG_SEND_INPUT_EVENT = 1;
+            public static final int MSG_TIMEOUT_INPUT_EVENT = 2;
+            public static final int MSG_FLUSH_INPUT_EVENT = 3;
+
+            InputEventHandler(Looper looper) {
+                super(looper, null, true);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_SEND_INPUT_EVENT: {
+                        sendInputEventAndReportResultOnMainLooper((PendingEvent) msg.obj);
+                        return;
+                    }
+                    case MSG_TIMEOUT_INPUT_EVENT: {
+                        finishedInputEvent(msg.arg1, false, true);
+                        return;
+                    }
+                    case MSG_FLUSH_INPUT_EVENT: {
+                        finishedInputEvent(msg.arg1, false, false);
+                        return;
+                    }
+                }
+            }
+        }
+
+        private final class TvInputEventSender extends InputEventSender {
+            public TvInputEventSender(InputChannel inputChannel, Looper looper) {
+                super(inputChannel, looper);
+            }
+
+            @Override
+            public void onInputEventFinished(int seq, boolean handled) {
+                finishedInputEvent(seq, handled, false);
+            }
+        }
+
+        private final class PendingEvent implements Runnable {
+            public InputEvent mEvent;
+            public Object mToken;
+            public FinishedInputEventCallback mCallback;
+            public Handler mHandler;
+            public boolean mHandled;
+
+            public void recycle() {
+                mEvent = null;
+                mToken = null;
+                mCallback = null;
+                mHandler = null;
+                mHandled = false;
+            }
+
+            @Override
+            public void run() {
+                mCallback.onFinishedInputEvent(mToken, mHandled);
+
+                synchronized (mHandler) {
+                    recyclePendingEventLocked(this);
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ package android.tv;
 
 import android.tv.ITvInputServiceCallback;
 import android.tv.ITvInputSessionCallback;
+import android.view.InputChannel;
 
 /**
  * Top-level interface to a TV input component (implemented in a Service).
@@ -26,5 +27,5 @@ import android.tv.ITvInputSessionCallback;
 oneway interface ITvInputService {
     void registerCallback(ITvInputServiceCallback callback);
     void unregisterCallback(in ITvInputServiceCallback callback);
-    void createSession(ITvInputSessionCallback callback);
+    void createSession(in InputChannel channel, ITvInputSessionCallback callback);
 }
