@@ -18,8 +18,8 @@ package com.android.internal.os;
 
 
 import dalvik.system.ZygoteHooks;
-import libcore.io.ErrnoException;
-import libcore.io.Libcore;
+import android.system.ErrnoException;
+import android.system.Os;
 
 /** @hide */
 public final class Zygote {
@@ -141,7 +141,7 @@ public final class Zygote {
     public static void execShell(String command) {
         String[] args = { "/system/bin/sh", "-c", command };
         try {
-            Libcore.os.execv(args[0], args);
+            Os.execv(args[0], args);
         } catch (ErrnoException e) {
             throw new RuntimeException(e);
         }
