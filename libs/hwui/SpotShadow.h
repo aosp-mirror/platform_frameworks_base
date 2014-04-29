@@ -56,7 +56,6 @@ private:
 
     static bool testPointInsidePolygon(const Vector2 testPoint, const Vector2* poly, int len);
     static void makeClockwise(Vector2* polygon, int len);
-    static bool isClockwise(const Vector2* polygon, int len);
     static void reverse(Vector2* polygon, int len);
     static inline bool lineIntersection(double x1, double y1, double x2, double y2,
             double x3, double y3, double x4, double y4, Vector2& ret);

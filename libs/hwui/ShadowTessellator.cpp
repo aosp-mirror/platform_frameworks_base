@@ -169,5 +169,67 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
     return centroid;
 }
 
+/**
+ * Test whether the polygon is order in clockwise.
+ *
+ * @param polygon the polygon as a Vector2 array
+ * @param len the number of points of the polygon
+ */
+bool ShadowTessellator::isClockwise(const Vector2* polygon, int len) {
+    double sum = 0;
+    double p1x = polygon[len - 1].x;
+    double p1y = polygon[len - 1].y;
+    for (int i = 0; i < len; i++) {
+
+        double p2x = polygon[i].x;
+        double p2y = polygon[i].y;
+        sum += p1x * p2y - p2x * p1y;
+        p1x = p2x;
+        p1y = p2y;
+    }
+    return sum < 0;
+}
+
+bool ShadowTessellator::isClockwisePath(const SkPath& path) {
+    SkPath::Iter iter(path, false);
+    SkPoint pts[4];
+    SkPath::Verb v;
+
+    Vector<Vector2> arrayForDirection;
+    while (SkPath::kDone_Verb != (v = iter.next(pts))) {
+            switch (v) {
+            case SkPath::kMove_Verb:
+                arrayForDirection.add(Vector2(pts[0].x(), pts[0].y()));
+                break;
+            case SkPath::kLine_Verb:
+                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
+                break;
+            case SkPath::kQuad_Verb:
+                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
+                arrayForDirection.add(Vector2(pts[2].x(), pts[2].y()));
+                break;
+            case SkPath::kCubic_Verb:
+                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
+                arrayForDirection.add(Vector2(pts[2].x(), pts[2].y()));
+                arrayForDirection.add(Vector2(pts[3].x(), pts[3].y()));
+                break;
+            default:
+                break;
+            }
+    }
+
+    return isClockwise(arrayForDirection.array(), arrayForDirection.size());
+}
+
+void ShadowTessellator::reverseVertexArray(Vertex* polygon, int len) {
+    int n = len / 2;
+    for (int i = 0; i < n; i++) {
+        Vertex tmp = polygon[i];
+        int k = len - 1 - i;
+        polygon[i] = polygon[k];
+        polygon[k] = tmp;
+    }
+}
+
 }; // namespace uirenderer
 }; // namespace android

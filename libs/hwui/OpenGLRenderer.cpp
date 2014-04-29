@@ -3230,6 +3230,10 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     const float casterRefinementThresholdSquared = 20.0f; // TODO: experiment with this value
     PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
             casterRefinementThresholdSquared, casterVertices2d);
+    if (!ShadowTessellator::isClockwisePath(*casterPerimeter)) {
+        ShadowTessellator::reverseVertexArray(casterVertices2d.editArray(),
+                casterVertices2d.size());
+    }
 
     if (casterVertices2d.size() == 0) {
         // empty caster polygon computed from path
