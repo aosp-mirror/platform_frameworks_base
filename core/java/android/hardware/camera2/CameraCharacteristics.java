@@ -455,22 +455,25 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The maximum numbers of different types of output streams
      * that can be configured and used simultaneously by a camera device.</p>
      * <p>This is a 3 element tuple that contains the max number of output simultaneous
-     * streams for raw sensor, processed (and uncompressed), and JPEG formats respectively.
-     * For example, if max raw sensor format output stream number is 1, max YUV streams
+     * streams for raw sensor, processed (but not stalling), and processed (and stalling)
+     * formats respectively. For example, assuming that JPEG is typically a processed and
+     * stalling stream, if max raw sensor format output stream number is 1, max YUV streams
      * number is 3, and max JPEG stream number is 2, then this tuple should be <code>(1, 3, 2)</code>.</p>
      * <p>This lists the upper bound of the number of output streams supported by
      * the camera device. Using more streams simultaneously may require more hardware and
      * CPU resources that will consume more power. The image format for a output stream can
-     * be any supported format provided by {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS android.scaler.availableFormats}. The formats
-     * defined in {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS android.scaler.availableFormats} can be catergorized into the 3 stream types
-     * as below:</p>
+     * be any supported format provided by {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations}.
+     * The formats defined in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations} can be catergorized
+     * into the 3 stream types as below:</p>
      * <ul>
-     * <li>JPEG-compressed format: BLOB.</li>
-     * <li>Raw formats: RAW_SENSOR and RAW_OPAQUE.</li>
-     * <li>processed, uncompressed formats: YCbCr_420_888, YCrCb_420_SP, YV12.</li>
+     * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
+     * Typically JPEG format (ImageFormat#JPEG).</li>
+     * <li>Raw formats: ImageFormat#RAW_SENSOR and ImageFormat#RAW_OPAQUE.</li>
+     * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
+     * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
      *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_FORMATS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
