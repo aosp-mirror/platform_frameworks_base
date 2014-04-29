@@ -1078,6 +1078,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
+                if (entry.row.getVisibility() == View.GONE) {
+                    // notify the scroller of a child addition
+                    mStackScroller.generateAddAnimation(entry.row);
+                }
                 entry.row.setVisibility(View.VISIBLE);
                 visibleNotifications++;
             }
