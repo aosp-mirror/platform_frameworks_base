@@ -208,7 +208,7 @@ public class DeviceOwner {
                     int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
                     mProfileOwners.put(userId,
                             new OwnerInfo(
-                                    profileOwnerPackageName, profileOwnerName, profileEnabled));
+                                    profileOwnerName, profileOwnerPackageName, profileEnabled));
                 } else {
                     throw new XmlPullParserException(
                             "Unexpected tag in device owner file: " + tag);
