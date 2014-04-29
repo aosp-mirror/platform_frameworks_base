@@ -31,6 +31,14 @@ interface IBatteryStats {
     // Remaining methods are only used in Java.
     byte[] getStatistics();
 
+    // Return the computed amount of time remaining on battery, in milliseconds.
+    // Returns -1 if nothing could be computed.
+    long computeBatteryTimeRemaining();
+
+    // Return the computed amount of time remaining to fully charge, in milliseconds.
+    // Returns -1 if nothing could be computed.
+    long computeChargeTimeRemaining();
+
     void addIsolatedUid(int isolatedUid, int appUid);
     void removeIsolatedUid(int isolatedUid, int appUid);
 
