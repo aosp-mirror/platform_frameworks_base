@@ -17,9 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -45,6 +43,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * user expansion.
      */
     private boolean mIsSystemExpanded;
+
+    /**
+     * Whether the notification expansion is disabled. This is the case on Keyguard.
+     */
+    private boolean mExpansionDisabled;
+
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
@@ -133,15 +137,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setSystemExpanded(boolean expand) {
         mIsSystemExpanded = expand;
-        applyExpansionToLayout(expand);
+        applyExpansionToLayout();
+    }
+
+    /**
+     * @param expansionDisabled whether to prevent notification expansion
+     */
+    public void setExpansionDisabled(boolean expansionDisabled) {
+        mExpansionDisabled = expansionDisabled;
+        applyExpansionToLayout();
     }
 
     /**
      * Apply an expansion state to the layout.
-     *
-     * @param expand should the layout be in the expanded state
      */
-    public void applyExpansionToLayout(boolean expand) {
+    public void applyExpansionToLayout() {
+        boolean expand = isExpanded();
         if (expand && mExpandable) {
             setActualHeight(mMaxExpandHeight);
         } else {
@@ -177,7 +188,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return whether the view state is currently expanded.
      */
     private boolean isExpanded() {
-        return !hasUserChangedExpansion() && isSystemExpanded() || isUserExpanded();
+        return !mExpansionDisabled
+                && (!hasUserChangedExpansion() && isSystemExpanded() || isUserExpanded());
     }
 
     @Override
@@ -186,7 +198,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean updateExpandHeight = mMaxExpandHeight == 0;
         mMaxExpandHeight = mPrivateLayout.getMaxHeight();
         if (updateExpandHeight) {
-            applyExpansionToLayout(isExpanded());
+            applyExpansionToLayout();
         }
     }
 
