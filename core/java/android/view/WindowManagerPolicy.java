@@ -76,14 +76,7 @@ import java.lang.annotation.RetentionPolicy;
 public interface WindowManagerPolicy {
     // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h.
     public final static int FLAG_WAKE = 0x00000001;
-    public final static int FLAG_WAKE_DROPPED = 0x00000002;
-    public final static int FLAG_SHIFT = 0x00000004;
-    public final static int FLAG_CAPS_LOCK = 0x00000008;
-    public final static int FLAG_ALT = 0x00000010;
-    public final static int FLAG_ALT_GR = 0x00000020;
-    public final static int FLAG_MENU = 0x00000040;
-    public final static int FLAG_LAUNCHER = 0x00000080;
-    public final static int FLAG_VIRTUAL = 0x00000100;
+    public final static int FLAG_VIRTUAL = 0x00000002;
 
     public final static int FLAG_INJECTED = 0x01000000;
     public final static int FLAG_TRUSTED = 0x02000000;
