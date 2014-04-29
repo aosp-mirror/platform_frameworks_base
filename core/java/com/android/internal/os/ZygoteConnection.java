@@ -21,6 +21,8 @@ import android.net.LocalSocket;
 import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemProperties;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import dalvik.system.PathClassLoader;
 import java.io.BufferedReader;
@@ -34,9 +36,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 /**
  * A connection that can make spawn requests.
@@ -186,7 +186,7 @@ class ZygoteConnection {
             }
 
             if (parsedArgs.runtimeInit && parsedArgs.invokeWith != null) {
-                FileDescriptor[] pipeFds = Libcore.os.pipe();
+                FileDescriptor[] pipeFds = Os.pipe();
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
                 ZygoteInit.setCloseOnExec(serverPipeFd, true);
