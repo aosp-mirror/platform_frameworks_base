@@ -14467,7 +14467,7 @@ package android.media {
     method public java.util.List<byte[]> getSecureStops();
     method public static final boolean isCryptoSchemeSupported(java.util.UUID);
     method public static final boolean isCryptoSchemeSupported(java.util.UUID, java.lang.String);
-    method public byte[] openSession() throws android.media.NotProvisionedException;
+    method public byte[] openSession() throws android.media.NotProvisionedException, android.media.ResourceBusyException;
     method public byte[] provideKeyResponse(byte[], byte[]) throws android.media.DeniedByServerException, android.media.NotProvisionedException;
     method public void provideProvisionResponse(byte[]) throws android.media.DeniedByServerException;
     method public java.util.HashMap<java.lang.String, java.lang.String> queryKeyStatus(byte[]);

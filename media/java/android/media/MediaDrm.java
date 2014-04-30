@@ -325,7 +325,8 @@ public final class MediaDrm {
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
      */
-    public native byte[] openSession() throws NotProvisionedException;
+    public native byte[] openSession() throws NotProvisionedException,
+            ResourceBusyException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
