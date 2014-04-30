@@ -87,7 +87,7 @@ public class StatusBarNotification implements Parcelable {
     }
 
     private String key() {
-        return pkg + '|' + id + '|' + tag + '|' + uid;
+        return user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
     }
 
     public void writeToParcel(Parcel out, int flags) {
