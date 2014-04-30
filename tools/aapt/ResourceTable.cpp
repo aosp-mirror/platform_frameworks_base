@@ -1340,7 +1340,6 @@ status_t compileResourceFile(Bundle* bundle,
                                 name,
                                 locale,
                                 SourcePos(in->getPrintableSource(), block.getLineNumber()));
-                        curIsPseudolocalizable = fileIsTranslatable;
                     }
 
                     if (formatted == false16) {
@@ -1352,7 +1351,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = string16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsStyled = true;
-                curIsPseudolocalizable = (translatable != false16);
+                curIsPseudolocalizable = fileIsTranslatable && (translatable != false16);
             } else if (strcmp16(block.getElementName(&len), drawable16.string()) == 0) {
                 curTag = &drawable16;
                 curType = drawable16;
