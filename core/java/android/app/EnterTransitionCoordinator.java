@@ -23,8 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.transition.Transition;
-import android.util.ArrayMap;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -223,6 +221,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
 
     @Override
     protected void startExitTransition(ArrayList<String> sharedElements) {
+        mMakeOpaque = false;
         notifyPrepareRestore();
 
         if (getDecor().getBackground() == null) {
