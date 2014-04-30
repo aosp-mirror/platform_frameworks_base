@@ -122,7 +122,7 @@ key Q {
     base:                               'q'
     shift, capslock:                    'Q'
     ralt:                               '\u00e4'
-    shift+ralt:                         '\u00c4'
+    shift+ralt, capslock+ralt:          '\u00c4'
 }
 
 key W {
@@ -130,7 +130,7 @@ key W {
     base:                               'w'
     shift, capslock:                    'W'
     ralt:                               '\u00e5'
-    shift+ralt:                         '\u00c5'
+    shift+ralt, capslock+ralt:          '\u00c5'
 }
 
 key E {
@@ -138,7 +138,7 @@ key E {
     base:                               'e'
     shift, capslock:                    'E'
     ralt:                               '\u00e9'
-    shift+ralt:                         '\u00c9'
+    shift+ralt, capslock+ralt:          '\u00c9'
 }
 
 key R {
@@ -153,7 +153,7 @@ key T {
     base:                               't'
     shift, capslock:                    'T'
     ralt:                               '\u00fe'
-    shift+ralt:                         '\u00de'
+    shift+ralt, capslock+ralt:          '\u00de'
 }
 
 key Y {
@@ -161,7 +161,7 @@ key Y {
     base:                               'y'
     shift, capslock:                    'Y'
     ralt:                               '\u00fc'
-    shift+ralt:                         '\u00dc'
+    shift+ralt, capslock+ralt:          '\u00dc'
 }
 
 key U {
@@ -169,7 +169,7 @@ key U {
     base:                               'u'
     shift, capslock:                    'U'
     ralt:                               '\u00fa'
-    shift+ralt:                         '\u00da'
+    shift+ralt, capslock+ralt:          '\u00da'
 }
 
 key I {
@@ -177,7 +177,7 @@ key I {
     base:                               'i'
     shift, capslock:                    'I'
     ralt:                               '\u00ed'
-    shift+ralt:                         '\u00cd'
+    shift+ralt, capslock+ralt:          '\u00cd'
 }
 
 key O {
@@ -185,7 +185,7 @@ key O {
     base:                               'o'
     shift, capslock:                    'O'
     ralt:                               '\u00f3'
-    shift+ralt:                         '\u00d3'
+    shift+ralt, capslock+ralt:          '\u00d3'
 }
 
 key P {
@@ -193,7 +193,7 @@ key P {
     base:                               'p'
     shift, capslock:                    'P'
     ralt:                               '\u00f6'
-    shift+ralt:                         '\u00d6'
+    shift+ralt, capslock+ralt:          '\u00d6'
 }
 
 key LEFT_BRACKET {
@@ -225,7 +225,7 @@ key A {
     base:                               'a'
     shift, capslock:                    'A'
     ralt:                               '\u00e1'
-    shift+ralt:                         '\u00c1'
+    shift+ralt, ralt+capslock:          '\u00c1'
 }
 
 key S {
@@ -241,7 +241,7 @@ key D {
     base:                               'd'
     shift, capslock:                    'D'
     ralt:                               '\u00f0'
-    shift+ralt:                         '\u00d0'
+    shift+ralt, capslock+ralt:          '\u00d0'
 }
 
 key F {
@@ -279,7 +279,7 @@ key L {
     base:                               'l'
     shift, capslock:                    'L'
     ralt:                               '\u00f8'
-    shift+ralt:                         '\u00d8'
+    shift+ralt, capslock+ralt:          '\u00d8'
 }
 
 key SEMICOLON {
@@ -313,7 +313,7 @@ key Z {
     base:                               'z'
     shift, capslock:                    'Z'
     ralt:                               '\u00e6'
-    shift+ralt:                         '\u00c6'
+    shift+ralt, capslock+ralt:          '\u00c6'
 }
 
 key X {
@@ -347,7 +347,7 @@ key N {
     base:                               'n'
     shift, capslock:                    'N'
     ralt:                               '\u00f1'
-    shift+ralt:                         '\u00d1'
+    shift+ralt, capslock+ralt:          '\u00d1'
 }
 
 key M {
@@ -362,7 +362,7 @@ key COMMA {
     base:                               ','
     shift:                              '<'
     ralt:                               '\u00e7'
-    shift+ralt:                         '\u00c7'
+    shift+ralt, capslock+ralt:          '\u00c7'
 }
 
 key PERIOD {
