@@ -7762,6 +7762,8 @@ package android.content.pm {
   public class LauncherApps {
     method public synchronized void addOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
+    method public boolean isActivityEnabledForProfile(android.content.ComponentName, android.os.UserHandle);
+    method public boolean isPackageEnabledForProfile(java.lang.String, android.os.UserHandle);
     method public synchronized void removeOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void startActivityForProfile(android.content.ComponentName, android.graphics.Rect, android.os.Bundle, android.os.UserHandle);

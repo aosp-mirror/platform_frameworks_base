@@ -187,6 +187,39 @@ public class LauncherApps {
     }
 
     /**
+     * Checks if the package is installed and enabled for a profile.
+     *
+     * @param packageName The package to check.
+     * @param user The UserHandle of the profile.
+     *
+     * @return true if the package exists and is enabled.
+     */
+    public boolean isPackageEnabledForProfile(String packageName, UserHandle user) {
+        try {
+            return mService.isPackageEnabled(packageName, user);
+        } catch (RemoteException re) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the activity exists and it enabled for a profile.
+     *
+     * @param component The activity to check.
+     * @param user The UserHandle of the profile.
+     *
+     * @return true if the activity exists and is enabled.
+     */
+    public boolean isActivityEnabledForProfile(ComponentName component, UserHandle user) {
+        try {
+            return mService.isActivityEnabled(component, user);
+        } catch (RemoteException re) {
+            return false;
+        }
+    }
+
+
+    /**
      * Adds a listener for changes to packages in current and managed profiles.
      *
      * @param listener The listener to add.

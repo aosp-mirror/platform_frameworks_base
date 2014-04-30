@@ -16,14 +16,18 @@
 
 package com.android.server.pm;
 
+import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
@@ -164,6 +168,34 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         try {
             ResolveInfo app = mPm.resolveActivityAsUser(intent, 0, user.getIdentifier());
             return app;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean isPackageEnabled(String packageName, UserHandle user)
+            throws RemoteException {
+        ensureInUserProfiles(user, "Cannot check package for unrelated profile " + user);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            PackageInfo info = pm.getPackageInfo(packageName, 0, user.getIdentifier());
+            return info != null && info.applicationInfo.enabled;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean isActivityEnabled(ComponentName component, UserHandle user)
+            throws RemoteException {
+        ensureInUserProfiles(user, "Cannot check component for unrelated profile " + user);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            ActivityInfo info = pm.getActivityInfo(component, 0, user.getIdentifier());
+            return info != null && info.isEnabled();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
