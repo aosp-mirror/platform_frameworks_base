@@ -5633,12 +5633,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageSetting ps : packagesForUser) {
                 if (ps.requiredCpuAbiString == null) {
                     ps.requiredCpuAbiString = requirer.requiredCpuAbiString;
-                    ps.pkg.applicationInfo.requiredCpuAbi = requirer.requiredCpuAbiString;
-
-                    Slog.i(TAG, "Adjusting ABI for : " + ps.pkg.packageName + " to " + ps.requiredCpuAbiString);
-                    if (doDexOpt) {
-                        performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true);
-                        mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                    if (ps.pkg != null) {
+                        ps.pkg.applicationInfo.requiredCpuAbi = requirer.requiredCpuAbiString;
+                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + ps.requiredCpuAbiString);
+                        if (doDexOpt) {
+                            performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true);
+                            mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                        }
                     }
                 }
             }
