@@ -30,12 +30,12 @@ import android.view.Surface;
 interface ITvInputManager {
     List<TvInputInfo> getTvInputList(int userId);
 
-    boolean getAvailability(in ITvInputClient client, in ComponentName name, int userId);
+    boolean getAvailability(in ITvInputClient client, in String inputId, int userId);
 
-    void registerCallback(in ITvInputClient client, in ComponentName name, int userId);
-    void unregisterCallback(in ITvInputClient client, in ComponentName name, int userId);
+    void registerCallback(in ITvInputClient client, in String inputId, int userId);
+    void unregisterCallback(in ITvInputClient client, in String inputId, int userId);
 
-    void createSession(in ITvInputClient client, in ComponentName name, int seq, int userId);
+    void createSession(in ITvInputClient client, in String inputId, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
 
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
