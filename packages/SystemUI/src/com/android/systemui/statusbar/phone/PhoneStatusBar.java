@@ -379,7 +379,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private boolean mSettingsStarted;
     private boolean mSettingsCancelled;
     private boolean mSettingsClosing;
-    private int mNotificationPadding;
+    private boolean mVisible;
 
     private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
             new OnChildLocationsChangedListener() {
@@ -719,8 +719,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         // Quick Settings (where available, some restrictions apply)
-        mNotificationPadding = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.notification_side_padding);
         if (mHasQuickSettings) {
             // Quick Settings needs a container to survive
             mSettingsContainer = (QuickSettingsContainerView)
@@ -2551,12 +2549,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 notifyNavigationBarScreenOn(false);
                 notifyHeadsUpScreenOn(false);
                 finishBarAnimations();
+                stopNotificationLogging();
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
+                startNotificationLoggingIfScreenOnAndVisible();
             }
             else if (ACTION_DEMO.equals(action)) {
                 Bundle bundle = intent.getExtras();
@@ -2730,20 +2730,38 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     @Override
     protected void visibilityChanged(boolean visible) {
+        mVisible = visible;
         if (visible) {
-            mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+            startNotificationLoggingIfScreenOnAndVisible();
         } else {
-            // Report all notifications as invisible and turn down the
-            // reporter.
-            if (!mCurrentlyVisibleNotifications.isEmpty()) {
-                logNotificationVisibilityChanges(
-                        Collections.<String>emptyList(), mCurrentlyVisibleNotifications);
-                mCurrentlyVisibleNotifications.clear();
-            }
-            mHandler.removeCallbacks(mVisibilityReporter);
-            mStackScroller.setChildLocationsChangedListener(null);
+            stopNotificationLogging();
         }
         super.visibilityChanged(visible);
+    }
+
+    private void stopNotificationLogging() {
+        // Report all notifications as invisible and turn down the
+        // reporter.
+        if (!mCurrentlyVisibleNotifications.isEmpty()) {
+            logNotificationVisibilityChanges(
+                    Collections.<String>emptyList(), mCurrentlyVisibleNotifications);
+            mCurrentlyVisibleNotifications.clear();
+        }
+        mHandler.removeCallbacks(mVisibilityReporter);
+        mStackScroller.setChildLocationsChangedListener(null);
+    }
+
+    private void startNotificationLoggingIfScreenOnAndVisible() {
+        if (mVisible && mScreenOn) {
+            mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+            // Some transitions like mScreenOn=false -> mScreenOn=true don't
+            // cause the scroller to emit child location events. Hence generate
+            // one ourselves to guarantee that we're reporting visible
+            // notifications.
+            // (Note that in cases where the scroller does emit events, this
+            // additional event doesn't break anything.)
+            mNotificationLocationsChangedListener.onChildLocationsChanged(mStackScroller);
+        }
     }
 
     private void logNotificationVisibilityChanges(
