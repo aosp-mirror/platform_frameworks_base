@@ -66,8 +66,8 @@ public class StackStateAnimator {
         }
         initializeAddedViewStates(mAnimationEvents, finalState);
         int childCount = mHostLayout.getChildCount();
+        boolean isFirstAnimatingView = true;
         for (int i = 0; i < childCount; i++) {
-            final boolean isFirstView = i == 0;
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
             StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null) {
@@ -80,7 +80,7 @@ public class StackStateAnimator {
                 child.setVisibility(View.VISIBLE);
             }
 
-            startPropertyAnimation(newDuration, isFirstView, child, viewState, alpha);
+            startPropertyAnimation(newDuration, isFirstAnimatingView, child, viewState, alpha);
 
             // TODO: animate clipBounds
             child.setClipBounds(null);
@@ -88,11 +88,12 @@ public class StackStateAnimator {
             if (viewState.height != currentHeigth) {
                 startHeightAnimation(newDuration, child, viewState, currentHeigth);
             }
+            isFirstAnimatingView = false;
         }
         mAnimationIsRunning = true;
     }
 
-    private void startPropertyAnimation(long newDuration, final boolean isFirstView,
+    private void startPropertyAnimation(long newDuration, final boolean hasFinishAction,
             final ExpandableView child, StackScrollState.ViewState viewState, final float alpha) {
         child.animate().setInterpolator(mFastOutSlowInInterpolator)
                 .alpha(alpha)
@@ -103,7 +104,7 @@ public class StackStateAnimator {
                     @Override
                     public void run() {
                         mAnimationIsRunning = false;
-                        if (isFirstView) {
+                        if (hasFinishAction) {
                             mHandledEvents.clear();
                             mHostLayout.onChildAnimationFinished();
                         }
@@ -128,16 +129,26 @@ public class StackStateAnimator {
         heightAnimator.start();
     }
 
+    /**
+     * Initialize the viewStates for the added children
+     *
+     * @param animationEvents the animation events who contain the added children
+     * @param finalState the final state to animate to
+     */
     private void initializeAddedViewStates(
-            ArrayList<NotificationStackScrollLayout.ChildHierarchyChangeEvent> mAnimationEvents,
+            ArrayList<NotificationStackScrollLayout.ChildHierarchyChangeEvent> animationEvents,
             StackScrollState finalState) {
-        for (NotificationStackScrollLayout.ChildHierarchyChangeEvent event: mAnimationEvents) {
+        for (NotificationStackScrollLayout.ChildHierarchyChangeEvent event: animationEvents) {
             View changingView = event.changingView;
             if (event.animationType == NotificationStackScrollLayout.ChildHierarchyChangeEvent
                     .ANIMATION_TYPE_ADD && !mHandledEvents.contains(event)) {
 
                 // This item is added, initialize it's properties.
                 StackScrollState.ViewState viewState = finalState.getViewStateForView(changingView);
+                if (viewState == null) {
+                    // The position for this child was never generated, let's continue.
+                    continue;
+                }
                 changingView.setAlpha(0);
                 changingView.setTranslationY(viewState.yTranslation);
                 changingView.setTranslationZ(viewState.zTranslation);
