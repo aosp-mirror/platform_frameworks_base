@@ -22,7 +22,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -45,6 +47,8 @@ import android.util.Log;
 public abstract class ConditionProviderService extends Service {
     private final String TAG = ConditionProviderService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";
+
+    private final H mHandler = new H();
 
     private Provider mProvider;
     private INotificationManager mNoMan;
@@ -100,41 +104,57 @@ public abstract class ConditionProviderService extends Service {
     }
 
     private final class Provider extends IConditionProvider.Stub {
-        private final ConditionProviderService mService = ConditionProviderService.this;
-
         @Override
         public void onConnected() {
-            try {
-                mService.onConnected();
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onConnected", t);
-            }
+            mHandler.obtainMessage(H.ON_CONNECTED).sendToTarget();
         }
 
         @Override
         public void onRequestConditions(int relevance) {
-            try {
-                mService.onRequestConditions(relevance);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onRequestConditions", t);
-            }
+            mHandler.obtainMessage(H.ON_REQUEST_CONDITIONS, relevance, 0).sendToTarget();
         }
 
         @Override
         public void onSubscribe(Uri conditionId) {
-            try {
-                mService.onSubscribe(conditionId);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onSubscribe", t);
-            }
+            mHandler.obtainMessage(H.ON_SUBSCRIBE, conditionId).sendToTarget();
         }
 
         @Override
         public void onUnsubscribe(Uri conditionId) {
+            mHandler.obtainMessage(H.ON_UNSUBSCRIBE, conditionId).sendToTarget();
+        }
+    }
+
+    private final class H extends Handler {
+        private static final int ON_CONNECTED = 1;
+        private static final int ON_REQUEST_CONDITIONS = 2;
+        private static final int ON_SUBSCRIBE = 3;
+        private static final int ON_UNSUBSCRIBE = 4;
+
+        @Override
+        public void handleMessage(Message msg) {
+            String name = null;
             try {
-                mService.onUnsubscribe(conditionId);
+                switch(msg.what) {
+                    case ON_CONNECTED:
+                        name = "onConnected";
+                        onConnected();
+                        break;
+                    case ON_REQUEST_CONDITIONS:
+                        name = "onRequestConditions";
+                        onRequestConditions(msg.arg1);
+                        break;
+                    case ON_SUBSCRIBE:
+                        name = "onSubscribe";
+                        onSubscribe((Uri)msg.obj);
+                        break;
+                    case ON_UNSUBSCRIBE:
+                        name = "onUnsubscribe";
+                        onUnsubscribe((Uri)msg.obj);
+                        break;
+                }
             } catch (Throwable t) {
-                Log.w(TAG, "Error running onUnsubscribe", t);
+                Log.w(TAG, "Error running " + name, t);
             }
         }
     }
