@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
@@ -80,6 +81,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private RouteConnectionRecord mConnection;
     // TODO define a RouteState class with relevant info
     private int mRouteState;
+    private long mFlags;
 
     // TransportPerformer fields
 
@@ -145,6 +147,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public SessionInfo getSessionInfo() {
         return mSessionInfo;
+    }
+
+    /**
+     * Get this session's flags.
+     *
+     * @return The flags for this session.
+     */
+    public long getFlags() {
+        return mFlags;
+    }
+
+    /**
+     * Check if this session has system priorty and should receive media buttons
+     * before any other sessions.
+     *
+     * @return True if this is a system priority session, false otherwise
+     */
+    public boolean isSystemPriority() {
+        return (mFlags & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
     }
 
     /**
@@ -394,11 +415,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void publish() {
-            mIsPublished = true; // TODO push update to service
+            mIsPublished = true;
+            mService.publishSession(MediaSessionRecord.this);
         }
         @Override
         public void setTransportPerformerEnabled() {
             mTransportPerformerEnabled = true;
+        }
+
+        @Override
+        public void setFlags(long flags) {
+            if ((flags & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+                int pid = getCallingPid();
+                int uid = getCallingUid();
+                mService.enforcePhoneStatePermission(pid, uid);
+            }
+            if (mIsPublished) {
+                throw new IllegalStateException("Cannot set flags after publishing session.");
+            }
+            mFlags = flags;
         }
 
         @Override

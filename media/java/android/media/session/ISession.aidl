@@ -32,6 +32,7 @@ interface ISession {
     void sendEvent(String event, in Bundle data);
     ISessionController getController();
     void setTransportPerformerEnabled();
+    void setFlags(long flags);
     void publish();
     void destroy();
 

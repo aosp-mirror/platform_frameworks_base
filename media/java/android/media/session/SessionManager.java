@@ -16,11 +16,13 @@
 
 package android.media.session;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.media.session.ISessionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -79,12 +81,27 @@ public final class SessionManager {
     /**
      * Get a list of controllers for all ongoing sessions. This requires the
      * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
-     * the calling app.
+     * the calling app. You may also retrieve this list if your app is an
+     * enabled notification listener using the
+     * {@link NotificationListenerService} APIs, in which case you must pass the
+     * {@link ComponentName} of your enabled listener.
      *
-     * @return a list of controllers for ongoing sessions
+     * @param notificationListener The enabled notification listener component.
+     *            May be null.
+     * @return A list of controllers for ongoing sessions
      */
-    public List<SessionController> getActiveSessions() {
-        // TODO
-        return new ArrayList<SessionController>();
+    public List<SessionController> getActiveSessions(ComponentName notificationListener) {
+        ArrayList<SessionController> controllers = new ArrayList<SessionController>();
+        try {
+            List<IBinder> binders = mService.getSessions(notificationListener);
+            for (int i = binders.size() - 1; i >= 0; i--) {
+                SessionController controller = SessionController.fromBinder(ISessionController.Stub
+                        .asInterface(binders.get(i)));
+                controllers.add(controller);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get active sessions: ", e);
+        }
+        return controllers;
     }
 }

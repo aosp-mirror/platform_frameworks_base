@@ -15,6 +15,7 @@
 
 package android.media.session;
 
+import android.content.ComponentName;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
@@ -25,4 +26,5 @@ import android.os.Bundle;
  */
 interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag);
+    List<IBinder> getSessions(in ComponentName compName);
 }

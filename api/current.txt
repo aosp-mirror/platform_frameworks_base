@@ -15492,7 +15492,7 @@ package android.media.session {
 
   public final class SessionManager {
     method public android.media.session.Session createSession(java.lang.String);
-    method public java.util.List<android.media.session.SessionController> getActiveSessions();
+    method public java.util.List<android.media.session.SessionController> getActiveSessions(android.content.ComponentName);
   }
 
   public class SessionToken implements android.os.Parcelable {
