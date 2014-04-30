@@ -18,6 +18,8 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiCecMessage;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Slog;
@@ -76,5 +78,42 @@ public final class HdmiControlService extends SystemService {
      */
     Looper getServiceLooper() {
         return Looper.myLooper();
+    }
+
+    /**
+     * Add a new {@link FeatureAction} to the action queue.
+     *
+     * @param action {@link FeatureAction} to add
+     */
+    void addAction(FeatureAction action) {
+        // TODO: Implement this.
+    }
+
+
+    /**
+     * Remove the given {@link FeatureAction} object from the action queue.
+     *
+     * @param action {@link FeatureAction} to add
+     */
+    void removeAction(FeatureAction action) {
+        // TODO: Implement this.
+    }
+
+    /**
+     * Transmit a CEC command to CEC bus.
+     *
+     * @param command CEC command to send out
+     */
+    void sendCecCommand(HdmiCecMessage command) {
+        // TODO: Implement this.
+    }
+
+    /**
+     * Add a new {@link HdmiCecDeviceInfo} to controller.
+     *
+     * @param deviceInfo new device information object to add
+     */
+    void addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
+        // TODO: Implement this.
     }
 }
