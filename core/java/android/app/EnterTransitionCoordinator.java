@@ -135,11 +135,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
     }
 
     @Override
-    protected void onRemoteSceneExitComplete() {
-        super.onRemoteSceneExitComplete();
-    }
-
-    @Override
     protected void onTakeSharedElements(ArrayList<String> sharedElementNames, Bundle state) {
         mEnteringSharedElementNames = new ArrayList<String>();
         mEnteringSharedElementNames.addAll(sharedElementNames);
@@ -149,6 +144,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
     @Override
     protected void sharedElementTransitionComplete(Bundle bundle) {
         notifySharedElementTransitionComplete(bundle);
+        exitAfterSharedElementTransition();
     }
 
     @Override
@@ -280,7 +276,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
     }
 
     private void exitAfterSharedElementTransition() {
-        if (mSharedElementTransitionComplete && mExitTransitionComplete) {
+        if (mSharedElementTransitionComplete && mExitTransitionComplete && mBackgroundFadedOut) {
             mActivity.finish();
             if (mSupportsTransition) {
                 mActivity.overridePendingTransition(0, 0);
