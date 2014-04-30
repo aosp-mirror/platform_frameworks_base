@@ -664,6 +664,10 @@ public class WallpaperManager {
      *         not "image/*"
      */
     public Intent getCropAndSetWallpaperIntent(Uri imageUri) {
+        if (imageUri == null) {
+            throw new IllegalArgumentException("Image URI must not be null");
+        }
+
         if (!ContentResolver.SCHEME_CONTENT.equals(imageUri.getScheme())) {
             throw new IllegalArgumentException("Image URI must be of the "
                     + ContentResolver.SCHEME_CONTENT + " scheme type");
