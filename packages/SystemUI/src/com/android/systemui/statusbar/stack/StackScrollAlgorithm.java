@@ -50,6 +50,10 @@ public class StackScrollAlgorithm {
     private StackIndentationFunctor mBottomStackIndentationFunctor;
 
     private int mLayoutHeight;
+
+    /** mLayoutHeight - mTopPadding */
+    private int mInnerHeight;
+    private int mTopPadding;
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpansionChanging;
     private int mFirstChildMaxHeight;
@@ -144,7 +148,7 @@ public class StackScrollAlgorithm {
             StackScrollAlgorithmState algorithmState) {
 
         // The starting position of the bottom stack peek
-        float bottomPeekStart = mLayoutHeight - mBottomStackPeekSize;
+        float bottomPeekStart = mInnerHeight - mBottomStackPeekSize;
 
         // The position where the bottom stack starts.
         float bottomStackStart = bottomPeekStart - mCollapsedSize;
@@ -226,6 +230,8 @@ public class StackScrollAlgorithm {
             }
             currentYPosition = childViewState.yTranslation + childHeight + mPaddingBetweenElements;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
+
+            childViewState.yTranslation += mTopPadding;
         }
     }
 
@@ -250,7 +256,7 @@ public class StackScrollAlgorithm {
     private void clampPositionToBottomStackStart(StackScrollState.ViewState childViewState,
             int childHeight) {
         childViewState.yTranslation = Math.min(childViewState.yTranslation,
-                mLayoutHeight - mBottomStackPeekSize - childHeight);
+                mInnerHeight - mBottomStackPeekSize - childHeight);
     }
 
     /**
@@ -318,7 +324,7 @@ public class StackScrollAlgorithm {
                 childViewState.alpha = 1.0f - algorithmState.partialInBottom;
             }
             childViewState.location = StackScrollState.ViewState.LOCATION_BOTTOM_STACK_HIDDEN;
-            currentYPosition = mLayoutHeight;
+            currentYPosition = mInnerHeight;
         }
         childViewState.yTranslation = currentYPosition - childHeight;
         clampPositionToTopStackEnd(childViewState, childHeight);
@@ -396,7 +402,7 @@ public class StackScrollAlgorithm {
                 if (i == 0 && algorithmState.scrollY == mCollapsedSize) {
 
                     // The starting position of the bottom stack peek
-                    int bottomPeekStart = mLayoutHeight - mBottomStackPeekSize;
+                    int bottomPeekStart = mInnerHeight - mBottomStackPeekSize;
                     // Collapse and expand the first child while the shade is being expanded
                     float maxHeight = mIsExpansionChanging && child == mFirstChildWhileExpanding
                             ? mFirstChildMaxHeight
@@ -475,12 +481,18 @@ public class StackScrollAlgorithm {
         }
     }
 
-    public int getLayoutHeight() {
-        return mLayoutHeight;
-    }
-
     public void setLayoutHeight(int layoutHeight) {
         this.mLayoutHeight = layoutHeight;
+        updateInnerHeight();
+    }
+
+    public void setTopPadding(int topPadding) {
+        mTopPadding = topPadding;
+        updateInnerHeight();
+    }
+
+    private void updateInnerHeight() {
+        mInnerHeight = mLayoutHeight - mTopPadding;
     }
 
     public void onExpansionStarted(StackScrollState currentState) {

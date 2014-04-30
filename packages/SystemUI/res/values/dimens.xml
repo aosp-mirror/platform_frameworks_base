@@ -266,4 +266,6 @@
 
     <dimen name="quick_settings_tmp_scrim_stroke_width">8dp</dimen>
     <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>
+
+    <dimen name="notifications_top_padding">8dp</dimen>
 </resources>

@@ -83,6 +83,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBottomStackPeekSize;
     private int mEmptyMarginBottom;
     private int mPaddingBetweenElements;
+    private int mTopPadding;
     private boolean mListenForHeightChanges = true;
 
     /**
@@ -228,11 +229,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void setMaxLayoutHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
-        updateAlgorithmHeight();
+        updateAlgorithmHeightAndPadding();
     }
 
-    private void updateAlgorithmHeight() {
+    private void updateAlgorithmHeightAndPadding() {
         mStackScrollAlgorithm.setLayoutHeight(getLayoutHeight());
+        mStackScrollAlgorithm.setTopPadding(mTopPadding);
     }
 
     /**
@@ -263,10 +265,52 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void setCurrentStackHeight(int currentStackHeight) {
-        this.mCurrentStackHeight = currentStackHeight;
-        updateAlgorithmHeight();
-        updateChildren();
+    public int getTopPadding() {
+        return mTopPadding;
+    }
+
+    public void setTopPadding(int topPadding) {
+        if (mTopPadding != topPadding) {
+            mTopPadding = topPadding;
+            updateAlgorithmHeightAndPadding();
+            updateContentHeight();
+            updateChildren();
+        }
+    }
+
+    /**
+     * Update the height of the stack to a new height.
+     *
+     * @param height the new height of the stack
+     */
+    public void setStackHeight(float height) {
+        setIsExpanded(height > 0.0f);
+        int newStackHeight = (int) height;
+        int itemHeight = getItemHeight();
+        int bottomStackPeekSize = mBottomStackPeekSize;
+        int minStackHeight = itemHeight + bottomStackPeekSize;
+        int stackHeight;
+        if (newStackHeight - mTopPadding >= minStackHeight) {
+            setTranslationY(0);
+            stackHeight = newStackHeight;
+        } else {
+
+            // We did not reach the position yet where we actually start growing,
+            // so we translate the stack upwards.
+            int translationY = (newStackHeight - minStackHeight);
+            // A slight parallax effect is introduced in order for the stack to catch up with
+            // the top card.
+            float partiallyThere = (float) (newStackHeight - mTopPadding) / minStackHeight;
+            partiallyThere = Math.max(0, partiallyThere);
+            translationY += (1 - partiallyThere) * bottomStackPeekSize;
+            setTranslationY(translationY - mTopPadding);
+            stackHeight = (int) (height - (translationY - mTopPadding));
+        }
+        if (stackHeight != mCurrentStackHeight) {
+            mCurrentStackHeight = stackHeight;
+            updateAlgorithmHeightAndPadding();
+            updateChildren();
+        }
     }
 
     /**
@@ -691,7 +735,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             }
         }
-        mContentHeight = height;
+        mContentHeight = height + mTopPadding;
     }
 
     /**
@@ -1007,7 +1051,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.onExpansionStopped();
     }
 
-    public void setIsExpanded(boolean isExpanded) {
+    private void setIsExpanded(boolean isExpanded) {
         mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (!isExpanded) {

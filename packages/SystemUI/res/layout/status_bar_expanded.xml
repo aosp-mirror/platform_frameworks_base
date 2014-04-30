@@ -54,51 +54,45 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <LinearLayout
+    <include layout="@layout/status_bar_expanded_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_panel_header_height"
+        />
+
+    <include
+        layout="@layout/keyguard_status_view"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/emergency_calls_only"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="4dp"
+        android:gravity="center"
+        android:visibility="gone"
+        />
+
+    <FrameLayout
+        android:id="@+id/notification_container_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
-        android:orientation="vertical"
-        android:animateLayoutChanges="false"
         >
-
-        <include layout="@layout/status_bar_expanded_header"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_panel_header_height"
-            />
-
         <include
-            layout="@layout/keyguard_status_view"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/emergency_calls_only"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
-            android:layout_height="wrap_content"
+            layout="@layout/flip_settings"
+            android:layout_marginTop="@dimen/notification_panel_header_height"
             android:layout_width="match_parent"
-            android:padding="4dp"
-            android:gravity="center"
-            android:visibility="gone"
+            android:layout_height="wrap_content"
             />
 
-        <FrameLayout
-            android:id="@+id/notification_container_parent"
+        <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
+            android:id="@+id/notification_stack_scroller"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
-            <include
-                layout="@layout/flip_settings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-
-            <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
-                    android:id="@+id/notification_stack_scroller"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-        </FrameLayout>
-    </LinearLayout>
+            />
+    </FrameLayout>
 
     <include
         layout="@layout/keyguard_bottom_area"
