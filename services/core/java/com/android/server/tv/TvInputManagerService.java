@@ -554,6 +554,10 @@ public final class TvInputManagerService extends SystemService {
                     }
                 }
             } finally {
+                if (surface != null) {
+                    // surface is not used in TvInputManagerService.
+                    surface.release();
+                }
                 Binder.restoreCallingIdentity(identity);
             }
         }
