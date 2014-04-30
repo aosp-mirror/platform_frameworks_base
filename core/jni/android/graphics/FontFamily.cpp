@@ -49,6 +49,10 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
     ScopedUtfChars str(env, path);
     ALOGD("addFont %s", str.c_str());
     SkTypeface* face = SkTypeface::CreateFromFile(str.c_str());
+    if (face == NULL) {
+        ALOGE("addFont failed to create font %s", str.c_str());
+        return false;
+    }
     MinikinFont* minikinFont = new MinikinFontSkia(face);
     FontFamily* fontFamily = (FontFamily*)familyPtr;
     return fontFamily->addFont(minikinFont);

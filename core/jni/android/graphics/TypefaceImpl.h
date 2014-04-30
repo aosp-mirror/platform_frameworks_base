@@ -61,6 +61,8 @@ void TypefaceImpl_unref(TypefaceImpl* face);
 
 int TypefaceImpl_getStyle(TypefaceImpl* face);
 
+void TypefaceImpl_setDefault(TypefaceImpl* face);
+
 }
 
 #endif  // ANDROID_TYPEFACE_IMPL_H
