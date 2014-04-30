@@ -42,7 +42,7 @@ interface IStatusBarService
             out int[] switches, out List<IBinder> binders);
     void onPanelRevealed();
     void onPanelHidden();
-    void onNotificationClick(String pkg, String tag, int id, int userId);
+    void onNotificationClick(String key);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
