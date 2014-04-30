@@ -821,10 +821,6 @@ public final class ActivityThread {
             sendMessage(H.SUICIDE, null);
         }
 
-        public void requestThumbnail(IBinder token) {
-            sendMessage(H.REQUEST_THUMBNAIL, token);
-        }
-
         public void scheduleConfigurationChanged(Configuration config) {
             updatePendingConfiguration(config);
             sendMessage(H.CONFIGURATION_CHANGED, config);
@@ -1168,7 +1164,7 @@ public final class ActivityThread {
         public static final int CREATE_SERVICE          = 114;
         public static final int SERVICE_ARGS            = 115;
         public static final int STOP_SERVICE            = 116;
-        public static final int REQUEST_THUMBNAIL       = 117;
+
         public static final int CONFIGURATION_CHANGED   = 118;
         public static final int CLEAN_UP_CONTEXT        = 119;
         public static final int GC_WHEN_IDLE            = 120;
@@ -1218,7 +1214,6 @@ public final class ActivityThread {
                     case CREATE_SERVICE: return "CREATE_SERVICE";
                     case SERVICE_ARGS: return "SERVICE_ARGS";
                     case STOP_SERVICE: return "STOP_SERVICE";
-                    case REQUEST_THUMBNAIL: return "REQUEST_THUMBNAIL";
                     case CONFIGURATION_CHANGED: return "CONFIGURATION_CHANGED";
                     case CLEAN_UP_CONTEXT: return "CLEAN_UP_CONTEXT";
                     case GC_WHEN_IDLE: return "GC_WHEN_IDLE";
@@ -1365,11 +1360,6 @@ public final class ActivityThread {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
                     handleStopService((IBinder)msg.obj);
                     maybeSnapshot();
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case REQUEST_THUMBNAIL:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "requestThumbnail");
-                    handleRequestThumbnail((IBinder)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
@@ -3815,28 +3805,6 @@ public final class ActivityThread {
         r.activityOptions = null;
 
         handleLaunchActivity(r, currentIntent);
-    }
-
-    private void handleRequestThumbnail(IBinder token) {
-        ActivityClientRecord r = mActivities.get(token);
-        Bitmap thumbnail = createThumbnailBitmap(r);
-        CharSequence description = null;
-        try {
-            description = r.activity.onCreateDescription();
-        } catch (Exception e) {
-            if (!mInstrumentation.onException(r.activity, e)) {
-                throw new RuntimeException(
-                        "Unable to create description of activity "
-                        + r.intent.getComponent().toShortString()
-                        + ": " + e.toString(), e);
-            }
-        }
-        //System.out.println("Reporting top thumbnail " + thumbnail);
-        try {
-            ActivityManagerNative.getDefault().reportThumbnail(
-                token, thumbnail, description);
-        } catch (RemoteException ex) {
-        }
     }
 
     ArrayList<ComponentCallbacks2> collectComponentCallbacks(

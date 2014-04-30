@@ -52,6 +52,7 @@ final class TaskRecord extends ThumbnailHolder {
 
     String stringName;      // caching of toString() result.
     int userId;             // user for which this task was created
+    int creatorUid;         // The app uid that originally created the task
 
     int numFullscreen;      // Number of fullscreen activities.
 
@@ -131,9 +132,8 @@ final class TaskRecord extends ThumbnailHolder {
             rootWasReset = true;
         }
 
-        if (info.applicationInfo != null) {
-            userId = UserHandle.getUserId(info.applicationInfo.uid);
-        }
+        userId = UserHandle.getUserId(info.applicationInfo.uid);
+        creatorUid = info.applicationInfo.uid;
     }
 
     void disposeThumbnail() {
