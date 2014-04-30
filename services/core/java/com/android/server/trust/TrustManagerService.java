@@ -192,7 +192,7 @@ public class TrustManagerService extends SystemService {
                 trustMayHaveChanged = true;
             }
             info.agent.unbind();
-            mObsoleteAgents.remove(info);
+            mActiveAgents.remove(info);
         }
 
         if (trustMayHaveChanged) {
