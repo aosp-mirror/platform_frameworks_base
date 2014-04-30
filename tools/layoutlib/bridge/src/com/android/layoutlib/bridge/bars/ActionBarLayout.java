@@ -181,8 +181,8 @@ public class ActionBarLayout extends LinearLayout {
             Predicate<View> overflowMenuButtonTest = new Predicate<View>() {
                 @Override
                 public boolean apply(View view) {
-                    return view.getClass().getName()
-                            .equals("android.widget.ActionMenuPresenter$OverflowMenuButton");
+                    return view.getClass().getName().equals("com.android.internal.view.menu." +
+                            "ActionMenuPresenter$OverflowMenuButton");
                 }
             };
             View overflowMenu = null;
