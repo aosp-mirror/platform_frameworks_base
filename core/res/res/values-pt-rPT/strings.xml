@@ -27,6 +27,28 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for durationDays (6652371460511178259) -->
+    <skip />
+    <!-- no translation found for durationDayHours (2713107458736744435) -->
+    <skip />
+    <!-- no translation found for durationDayHour (7293789639090958917) -->
+    <skip />
+    <!-- no translation found for durationHours (4266858287167358988) -->
+    <skip />
+    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
+    <skip />
+    <!-- no translation found for durationHourMinute (2741677355177402539) -->
+    <skip />
+    <!-- no translation found for durationMinutes (3134226679883579347) -->
+    <skip />
+    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
+    <skip />
+    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
+    <skip />
+    <!-- no translation found for durationSeconds (8050088505238241405) -->
+    <skip />
+    <!-- no translation found for durationSecond (985669622276420331) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;Sem nome&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -387,10 +409,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite que o titular se vincule à interface de nível superior de um serviço de VPN. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a uma imagem de fundo"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite ao titular vincular-se à interface de nível superior de uma imagem de fundo. Nunca deverá ser necessário para aplicações normais."</string>
-    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
-    <skip />
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"vincular a um interlocutor de voz"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite que o titular vincule a interface de nível superior de um serviço de interação de voz. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"associar a um ecrã remoto"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite ao detentor associar a interface de nível superior a um ecrã remoto. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a um serviço de widget"</string>
@@ -703,10 +723,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que a aplicação obtenha, examine e limpe notificações, incluindo as que foram publicadas por outras aplicações."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular a um serviço de escuta de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o titular vincule a interface de nível superior de um serviço de escuta de notificações. Nunca deverá ser necessário para aplicações normais."</string>
-    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
-    <skip />
-    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
-    <skip />
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular a um serviço de fornecedor de condição"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite que o titular vincule a interface de nível superior de um serviço de fornecedor de condição. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar a aplicação de configuração fornecida pela operadora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o titular invoque a aplicação de configuração fornecida pela operadora. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ouvir observações sobre as condições da rede"</string>
@@ -1131,7 +1149,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Meia-noite"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Seleccionar tudo"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Selecionar tudo"</string>
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Colar"</string>
@@ -1377,8 +1395,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagem de fundo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar imagem de fundo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviço de escuta de notificações"</string>
-    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
-    <skip />
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Fornecedor de condição"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ativada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"A VPN foi ativada pelo <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toque para gerir a rede."</string>

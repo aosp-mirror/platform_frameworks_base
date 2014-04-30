@@ -27,6 +27,28 @@
     <string name="terabyteShort" msgid="231613018159186962">"ترابایت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for durationDays (6652371460511178259) -->
+    <skip />
+    <!-- no translation found for durationDayHours (2713107458736744435) -->
+    <skip />
+    <!-- no translation found for durationDayHour (7293789639090958917) -->
+    <skip />
+    <!-- no translation found for durationHours (4266858287167358988) -->
+    <skip />
+    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
+    <skip />
+    <!-- no translation found for durationHourMinute (2741677355177402539) -->
+    <skip />
+    <!-- no translation found for durationMinutes (3134226679883579347) -->
+    <skip />
+    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
+    <skip />
+    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
+    <skip />
+    <!-- no translation found for durationSeconds (8050088505238241405) -->
+    <skip />
+    <!-- no translation found for durationSecond (985669622276420331) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بدون عنوان&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -387,10 +409,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"‏به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس Vpn متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"پیوند شده به تصویر زمینه"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"‏به دارنده اجازه می‎دهد تا به رابط سطح بالای تصویر زمینه متصل شود. برنامه‎های معمولی هرگز به این ویژگی نیاز ندارند."</string>
-    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
-    <skip />
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"مقید بودن به سرویس تعامل صوتی"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"به دارنده امکان می‌دهد به واسط سطح بالای سرویس تعامل صوتی مقید باشد. برای برنامه‌های عادی هرگز نباید لازم باشد."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"اتصال به نمایشگر راه دور"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"به دارنده ام‍ک‍ان می‌دهد تا به رابط سطح بالای نمایشگر راه دور وصل شود. نباید هرگز برای برنامه‌های عادی لازم باشد."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
@@ -703,10 +723,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اتصال به یک سرویس شنونده اعلان"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. هرگز نباید برای برنامه‌های عادی لازم شود."</string>
-    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
-    <skip />
-    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
-    <skip />
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"مقید بودن به سرویس ارائه‌دهنده وضعیت"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"به دارنده امکان می‌دهد تا به واسط سطح بالای سرویس ارائه‌دهنده وضعیت مقید باشد. برای برنامه‌های عادی هرگز نباید لازم باشد."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"لغو برنامه پیکربندی ارائه شده توسط شرکت مخابراتی"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"به دارنده اجازه می‌دهد که تنظیمات برنامه شرکت مخابراتی را لغو کند. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"گوش دادن برای بررسی شرایط شبکه"</string>
@@ -1377,8 +1395,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"تصویر زمینه"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر تصویر زمینه"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"شنونده اعلان"</string>
-    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
-    <skip />
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ارائه‌دهنده وضعیت"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏VPN توسط <xliff:g id="APP">%s</xliff:g> فعال شده است"</string>
     <string name="vpn_text" msgid="3011306607126450322">"برای مدیریت شبکه لمس کنید."</string>

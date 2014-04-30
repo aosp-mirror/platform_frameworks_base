@@ -27,6 +27,28 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for durationDays (6652371460511178259) -->
+    <skip />
+    <!-- no translation found for durationDayHours (2713107458736744435) -->
+    <skip />
+    <!-- no translation found for durationDayHour (7293789639090958917) -->
+    <skip />
+    <!-- no translation found for durationHours (4266858287167358988) -->
+    <skip />
+    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
+    <skip />
+    <!-- no translation found for durationHourMinute (2741677355177402539) -->
+    <skip />
+    <!-- no translation found for durationMinutes (3134226679883579347) -->
+    <skip />
+    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
+    <skip />
+    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
+    <skip />
+    <!-- no translation found for durationSeconds (8050088505238241405) -->
+    <skip />
+    <!-- no translation found for durationSecond (985669622276420331) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;Sense títol&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -387,10 +409,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de VPN. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enllaça amb un fons de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
-    <skip />
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"vinculació amb una eina d\'interacció de veu"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet que el titular es vinculi amb la interfície de nivell superior d\'un servei d\'interacció de veu. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincula a una pantalla remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
@@ -703,10 +723,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei oient de notificacions"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
-    <skip />
-    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
-    <skip />
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vinculació amb el servei d\'un proveïdor de condicions"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet que el titular es vinculi amb la interfície de nivell superior del servei d\'un proveïdor de condicions. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
@@ -717,14 +735,14 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats de gestió de drets digitals (DRM, Digital Rights Management). No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar intents de desbloqueig de pantalla"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Canvia la contrasenya de desbloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Canvia la contrasenya de desbloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueig de pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborra totes les dades"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense avisar, restablint les dades de fàbrica."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Defineix el servidor intermediari global del dispositiu"</string>
@@ -734,7 +752,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar les càmeres"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de les càmeres del dispositiu."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Des. funcions en bloq. tecles"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedeix l\'ús d\'algunes funcions en bloqueig de tecles."</string>
   <string-array name="phoneTypes">
@@ -1377,8 +1395,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
-    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
-    <skip />
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveïdor de condicions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ha activat VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca per gestionar la xarxa."</string>
