@@ -1627,13 +1627,6 @@ public class ActivityManager {
         public int lastTrimLevel;
 
         /**
-         * Constant for {@link #importance}: this is a persistent process.
-         * Only used when reporting to process observers.
-         * @hide
-         */
-        public static final int IMPORTANCE_PERSISTENT = 50;
-
-        /**
          * Constant for {@link #importance}: this process is running the
          * foreground UI.
          */
@@ -1748,9 +1741,16 @@ public class ActivityManager {
          */
         public int importanceReasonImportance;
 
+        /**
+         * Current process state, as per PROCESS_STATE_* constants.
+         * @hide
+         */
+        public int processState;
+
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
             importanceReasonCode = REASON_UNKNOWN;
+            processState = PROCESS_STATE_IMPORTANT_FOREGROUND;
         }
         
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
@@ -1776,6 +1776,7 @@ public class ActivityManager {
             dest.writeInt(importanceReasonPid);
             ComponentName.writeToParcel(importanceReasonComponent, dest);
             dest.writeInt(importanceReasonImportance);
+            dest.writeInt(processState);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1791,6 +1792,7 @@ public class ActivityManager {
             importanceReasonPid = source.readInt();
             importanceReasonComponent = ComponentName.readFromParcel(source);
             importanceReasonImportance = source.readInt();
+            processState = source.readInt();
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 

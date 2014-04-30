@@ -410,7 +410,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onImportanceChanged(int pid, int uid, int importance) {
+        public void onProcessStateChanged(int pid, int uid, int procState) {
         }
 
         @Override
