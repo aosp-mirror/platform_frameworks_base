@@ -2907,7 +2907,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
 
-            String requiredAbi = app.info.requiredCpuAbi;
+            String requiredAbi = app.info.cpuAbi;
             if (requiredAbi == null) {
                 requiredAbi = Build.SUPPORTED_ABIS[0];
             }

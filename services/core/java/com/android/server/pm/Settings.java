@@ -260,10 +260,10 @@ final class Settings {
 
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-            String nativeLibraryPathString, String requiredCpuAbiString, int pkgFlags, UserHandle user, boolean add) {
+            String nativeLibraryPathString, String cpuAbiString, int pkgFlags, UserHandle user, boolean add) {
         final String name = pkg.packageName;
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
-                resourcePath, nativeLibraryPathString, requiredCpuAbiString, pkg.mVersionCode, pkgFlags,
+                resourcePath, nativeLibraryPathString, cpuAbiString, pkg.mVersionCode, pkgFlags,
                 user, add, true /* allowInstall */);
         return p;
     }
@@ -350,7 +350,7 @@ final class Settings {
             p.pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
-                p.nativeLibraryPathString, p.requiredCpuAbiString, p.appId, p.versionCode, p.pkgFlags);
+                p.nativeLibraryPathString, p.cpuAbiString, p.appId, p.versionCode, p.pkgFlags);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -364,7 +364,7 @@ final class Settings {
     }
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, String requiredCpuAbiString, int uid, int vc, int pkgFlags) {
+            String nativeLibraryPathString, String cpuAbiString, int uid, int vc, int pkgFlags) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -374,7 +374,7 @@ final class Settings {
                     "Adding duplicate package, keeping first: " + name);
             return null;
         }
-        p = new PackageSetting(name, realName, codePath, resourcePath, nativeLibraryPathString, requiredCpuAbiString,
+        p = new PackageSetting(name, realName, codePath, resourcePath, nativeLibraryPathString, cpuAbiString,
                 vc, pkgFlags);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
@@ -443,11 +443,11 @@ final class Settings {
 
     private PackageSetting getPackageLPw(String name, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-            String nativeLibraryPathString, String requiredCpuAbiString, int vc, int pkgFlags,
+            String nativeLibraryPathString, String cpuAbiString, int vc, int pkgFlags,
             UserHandle installUser, boolean add, boolean allowInstall) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
-            p.requiredCpuAbiString = requiredCpuAbiString;
+            p.cpuAbiString = cpuAbiString;
             if (!p.codePath.equals(codePath)) {
                 // Check to see if its a disabled system app
                 if ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
@@ -491,7 +491,7 @@ final class Settings {
             if (origPackage != null) {
                 // We are consuming the data from an existing package.
                 p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
-                        nativeLibraryPathString, requiredCpuAbiString, vc, pkgFlags);
+                        nativeLibraryPathString, cpuAbiString, vc, pkgFlags);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                         + name + " is adopting original package " + origPackage.name);
                 // Note that we will retain the new package's signature so
@@ -508,7 +508,7 @@ final class Settings {
                 p.setTimeStamp(codePath.lastModified());
             } else {
                 p = new PackageSetting(name, realName, codePath, resourcePath,
-                        nativeLibraryPathString, requiredCpuAbiString, vc, pkgFlags);
+                        nativeLibraryPathString, cpuAbiString, vc, pkgFlags);
                 p.setTimeStamp(codePath.lastModified());
                 p.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
@@ -635,7 +635,7 @@ final class Settings {
             p.nativeLibraryPathString = nativeLibraryPath;
         }
         // Update the required Cpu Abi
-        p.requiredCpuAbiString = pkg.applicationInfo.requiredCpuAbi;
+        p.cpuAbiString = pkg.applicationInfo.cpuAbi;
         // Update version code if needed
         if (pkg.mVersionCode != p.versionCode) {
             p.versionCode = pkg.mVersionCode;
@@ -1690,8 +1690,8 @@ final class Settings {
         if (pkg.nativeLibraryPathString != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
         }
-        if (pkg.requiredCpuAbiString != null) {
-           serializer.attribute(null, "requiredCpuAbi", pkg.requiredCpuAbiString);
+        if (pkg.cpuAbiString != null) {
+           serializer.attribute(null, "requiredCpuAbi", pkg.cpuAbiString);
         }
         if (pkg.sharedUser == null) {
             serializer.attribute(null, "userId", Integer.toString(pkg.appId));
@@ -1735,8 +1735,8 @@ final class Settings {
         if (pkg.nativeLibraryPathString != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
         }
-        if (pkg.requiredCpuAbiString != null) {
-           serializer.attribute(null, "requiredCpuAbi", pkg.requiredCpuAbiString);
+        if (pkg.cpuAbiString != null) {
+           serializer.attribute(null, "requiredCpuAbi", pkg.cpuAbiString);
         }
         serializer.attribute(null, "flags", Integer.toString(pkg.pkgFlags));
         serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
@@ -2023,7 +2023,7 @@ final class Settings {
             if (idObj != null && idObj instanceof SharedUserSetting) {
                 PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
                         (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
-                        pp.nativeLibraryPathString, pp.requiredCpuAbiString, pp.versionCode, pp.pkgFlags,
+                        pp.nativeLibraryPathString, pp.cpuAbiString, pp.versionCode, pp.pkgFlags,
                         null, true /* add */, false /* allowInstall */);
                 if (p == null) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -2443,7 +2443,7 @@ final class Settings {
         String codePathStr = parser.getAttributeValue(null, "codePath");
         String resourcePathStr = parser.getAttributeValue(null, "resourcePath");
         String nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
-        String requiredCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
+        String cpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
 
         if (resourcePathStr == null) {
             resourcePathStr = codePathStr;
@@ -2464,7 +2464,7 @@ final class Settings {
             pkgFlags |= ApplicationInfo.FLAG_PRIVILEGED;
         }
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
-                new File(resourcePathStr), nativeLibraryPathStr, requiredCpuAbiString, versionCode, pkgFlags);
+                new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, versionCode, pkgFlags);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -2531,7 +2531,7 @@ final class Settings {
         String codePathStr = null;
         String resourcePathStr = null;
         String nativeLibraryPathStr = null;
-        String requiredCpuAbiString = null;
+        String cpuAbiString = null;
         String systemStr = null;
         String installerPackageName = null;
         String uidError = null;
@@ -2551,7 +2551,7 @@ final class Settings {
             codePathStr = parser.getAttributeValue(null, "codePath");
             resourcePathStr = parser.getAttributeValue(null, "resourcePath");
             nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
-            requiredCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
+            cpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
 
             version = parser.getAttributeValue(null, "version");
             if (version != null) {
@@ -2629,7 +2629,7 @@ final class Settings {
                                 + parser.getPositionDescription());
             } else if (userId > 0) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
-                        new File(resourcePathStr), nativeLibraryPathStr, requiredCpuAbiString, userId, versionCode,
+                        new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, userId, versionCode,
                         pkgFlags);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
@@ -2647,7 +2647,7 @@ final class Settings {
                 userId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
                 if (userId > 0) {
                     packageSetting = new PendingPackage(name.intern(), realName, new File(
-                            codePathStr), new File(resourcePathStr), nativeLibraryPathStr, requiredCpuAbiString, userId,
+                            codePathStr), new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, userId,
                             versionCode, pkgFlags);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
@@ -2676,7 +2676,7 @@ final class Settings {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installerPackageName = installerPackageName;
             packageSetting.nativeLibraryPathString = nativeLibraryPathStr;
-            packageSetting.requiredCpuAbiString = requiredCpuAbiString;
+            packageSetting.cpuAbiString = cpuAbiString;
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -3176,7 +3176,7 @@ final class Settings {
         pw.print(prefix); pw.print("  codePath="); pw.println(ps.codePathString);
         pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.resourcePathString);
         pw.print(prefix); pw.print("  nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
-        pw.print(prefix); pw.print("  requiredCpuAbi="); pw.println(ps.requiredCpuAbiString);
+        pw.print(prefix); pw.print("  requiredCpuAbi="); pw.println(ps.cpuAbiString);
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (ps.pkg != null) {
             pw.print(" targetSdk="); pw.print(ps.pkg.applicationInfo.targetSdkVersion);
