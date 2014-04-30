@@ -1682,13 +1682,15 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Preauthorize the given origin to access resources.
-     * This authorization only valid for this WebView instance life cycle and
+     * The authorization only valid for this WebView instance's life cycle and
      * will not retained.
+     *
+     * In the case that an origin has had resources preauthorized, calls to
+     * {@link WebChromeClient#onPermissionRequest(PermissionRequest)} will not be
+     * made for those resources from that origin.
      *
      * @param origin the origin authorized to access resources
      * @param resources the resource authorized to be accessed by origin.
-     *
-     * @hide
      */
     public void preauthorizePermission(Uri origin, long resources) {
         checkThread();

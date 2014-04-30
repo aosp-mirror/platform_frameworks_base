@@ -19,14 +19,11 @@ package android.webkit;
 import android.net.Uri;
 
 /**
- * This class wraps a permission request, and is used to request permission for
- * the web content to access the resources.
+ * This interface defines a permission request and is used when web content
+ * requests access to protected resources.
  *
- * Either {@link #grant(long) grant()} or {@link #deny()} must be called to response the
- * request, otherwise, {@link WebChromeClient#onPermissionRequest(PermissionRequest)} will
- * not be invoked again if there is other permission request in this WebView.
- *
- * @hide
+ * Either {@link #grant(long) grant()} or {@link #deny()} must be called in UI
+ * thread to respond to the request.
  */
 public interface PermissionRequest {
     /**
@@ -62,8 +59,6 @@ public interface PermissionRequest {
      *        must be equals or a subset of granted resources.
      *        This parameter is designed to avoid granting permission by accident
      *        especially when new resources are requested by web content.
-     *        Calling grant(getResources()) has security issue, the new permission
-     *        will be granted without being noticed.
      */
     public void grant(long resources);
 
