@@ -69,6 +69,7 @@ public class FlpHardwareProvider {
             sSingletonInstance = new FlpHardwareProvider(context);
         }
 
+        nativeInit();
         return sSingletonInstance;
     }
 
@@ -96,6 +97,7 @@ public class FlpHardwareProvider {
     }
 
     public static boolean isSupported() {
+        nativeInit();
         return nativeIsSupported();
     }
 
@@ -216,9 +218,9 @@ public class FlpHardwareProvider {
     // Core members
     private static native void nativeClassInit();
     private static native boolean nativeIsSupported();
+    private static native void nativeInit();
 
     // FlpLocationInterface members
-    private native void nativeInit();
     private native int nativeGetBatchSize();
     private native void nativeStartBatching(int requestId, FusedBatchOptions options);
     private native void nativeUpdateBatchingOptions(int requestId, FusedBatchOptions optionsObject);
@@ -258,12 +260,10 @@ public class FlpHardwareProvider {
     public static final String GEOFENCING = "Geofencing";
 
     public IFusedLocationHardware getLocationHardware() {
-        nativeInit();
         return mLocationHardware;
     }
 
     public IFusedGeofenceHardware getGeofenceHardware() {
-        nativeInit();
         return mGeofenceHardwareService;
     }
 
