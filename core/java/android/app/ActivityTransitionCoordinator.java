@@ -206,6 +206,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private ResultReceiver mRemoteResultReceiver;
     private boolean mNotifiedSharedElementTransitionComplete;
     private boolean mNotifiedExitTransitionComplete;
+    private boolean mSharedElementTransitionStarted;
 
     private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
 
@@ -250,7 +251,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 onPrepareRestore();
                 break;
             case MSG_EXIT_TRANSITION_COMPLETE:
-                onRemoteSceneExitComplete();
+                if (!mSharedElementTransitionStarted) {
+                    send(resultCode, resultData);
+                } else {
+                    onRemoteSceneExitComplete();
+                }
                 break;
             case MSG_TAKE_SHARED_ELEMENTS:
                 ArrayList<String> sharedElementNames
@@ -456,9 +461,13 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mTargetSharedNames.clear();
         if (sharedElements == null) {
             ArrayMap<String, View> map = new ArrayMap<String, View>();
-            setViewVisibility(mEnteringViews, View.VISIBLE);
+            if (getViewsTransition() != null) {
+                setViewVisibility(mEnteringViews, View.VISIBLE);
+            }
             getDecor().findSharedElements(map);
-            setViewVisibility(mEnteringViews, View.INVISIBLE);
+            if (getViewsTransition() != null) {
+                setViewVisibility(mEnteringViews, View.INVISIBLE);
+            }
             for (int i = 0; i < map.size(); i++) {
                 View view = map.valueAt(i);
                 String name = map.keyAt(i);
@@ -582,6 +591,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                         getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
                         mListener.onCaptureSharedElementEnd(mTargetSharedNames, mSharedElements,
                                 acceptedOverlayViews);
+                        mSharedElementTransitionStarted = true;
                         return true;
                     }
                 }
