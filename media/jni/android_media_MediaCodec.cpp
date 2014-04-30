@@ -192,7 +192,7 @@ status_t JMediaCodec::dequeueOutputBuffer(
             env, env->FindClass("android/media/MediaCodec$BufferInfo"));
 
     jmethodID method = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
-    env->CallVoidMethod(bufferInfo, method, offset, size, timeUs, flags);
+    env->CallVoidMethod(bufferInfo, method, (jint)offset, (jint)size, timeUs, flags);
 
     return OK;
 }
