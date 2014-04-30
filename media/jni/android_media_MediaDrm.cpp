@@ -966,6 +966,22 @@ static jobject android_media_MediaDrm_provideProvisionResponseNative(
     return certificateObj;
 }
 
+static void android_media_MediaDrm_unprovisionDeviceNative(
+    JNIEnv *env, jobject thiz) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (drm == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
+        return;
+    }
+
+    status_t err = drm->unprovisionDevice();
+
+    throwExceptionAsNecessary(env, err, "Failed to handle provision response");
+    return;
+}
+
 static jobject android_media_MediaDrm_getSecureStops(
     JNIEnv *env, jobject thiz) {
     sp<IDrm> drm = GetDrm(env, thiz);
@@ -1362,6 +1378,9 @@ static JNINativeMethod gMethods[] = {
     { "provideProvisionResponseNative", "([B)Landroid/media/MediaDrm$Certificate;",
       (void *)android_media_MediaDrm_provideProvisionResponseNative },
 
+    { "unprovisionDevice", "()V",
+      (void *)android_media_MediaDrm_unprovisionDeviceNative },
+
     { "getSecureStops", "()Ljava/util/List;",
       (void *)android_media_MediaDrm_getSecureStops },
 
@@ -1408,4 +1427,3 @@ int register_android_media_Drm(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaDrm", gMethods, NELEM(gMethods));
 }
-

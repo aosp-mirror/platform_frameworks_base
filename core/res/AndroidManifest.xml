@@ -2811,7 +2811,13 @@
          @hide This is not a third-party API (intended for system apps). -->
     <permission android:name="android.permission.READ_INSTALL_SESSIONS"
         android:label="@string/permlab_readInstallSessions"
-        android:description="@string/permdesc_readInstallSessions"
+        android:description="@string/permdesc_readInstallSessions" />
+
+    <!-- @SystemApi Allows an application to remove DRM certificates
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.REMOVE_DRM_CERTIFICATES"
+        android:label="@string/permlab_removeDrmCertificates"
+        android:description="@string/permdesc_removeDrmCertificates"
         android:protectionLevel="signature|system" />
 
     <!-- The system process is explicitly the only one allowed to launch the
