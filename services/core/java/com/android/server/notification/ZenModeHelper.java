@@ -84,6 +84,9 @@ public class ZenModeHelper {
             "com.google.android.talk",
             "com.android.mms"
             ));
+    private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
+            "com.google.android.deskclock"
+            ));
 
     public ZenModeHelper(Context context, Handler handler) {
         mContext = context;
@@ -122,6 +125,9 @@ public class ZenModeHelper {
 
     public boolean shouldIntercept(String pkg, Notification n) {
         if (mZenMode != Global.ZEN_MODE_OFF) {
+            if (isAlarm(pkg, n)) {
+                return false;
+            }
             if (isCall(pkg, n)) {
                 return !mConfig.allowCalls;
             }
@@ -221,6 +227,10 @@ public class ZenModeHelper {
         for (Callback callback : mCallbacks) {
             callback.onZenModeChanged();
         }
+    }
+
+    private boolean isAlarm(String pkg, Notification n) {
+        return ALARM_PACKAGES.contains(pkg);
     }
 
     private boolean isCall(String pkg, Notification n) {

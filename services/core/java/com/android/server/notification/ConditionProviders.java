@@ -108,6 +108,12 @@ public class ConditionProviders extends ManagedServices {
     @Override
     protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
         if (removed == null) return;
+        if (mCurrentConditionId != null) {
+            if (removed.equals(mConditions.get(mCurrentConditionId))) {
+                mCurrentConditionId = null;
+                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF);
+            }
+        }
         for (int i = mConditions.size() - 1; i >= 0; i--) {
             if (removed.equals(mConditions.valueAt(i))) {
                 mConditions.removeAt(i);
