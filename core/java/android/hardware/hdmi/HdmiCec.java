@@ -85,7 +85,7 @@ public final class HdmiCec {
     public static final int ADDR_RESERVED_2 = 13;
 
     /** Logical address for TV other than the one assigned with {@link #ADDR_TV} */
-    public static final int ADDR_FREE_USE = 14;
+    public static final int ADDR_SPECIFIC_USE = 14;
 
     /** Logical address for devices to which address cannot be allocated */
     public static final int ADDR_UNREGISTERED = 15;
@@ -179,6 +179,7 @@ public final class HdmiCec {
         DEVICE_RECORDER,  // ADDR_RECORDER_3
         DEVICE_TUNER,  // ADDR_TUNER_4
         DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
+        DEVICE_TV,  // ADDR_SPECIFIC_USE
     };
 
     private static final String[] DEFAULT_NAMES = {
@@ -194,6 +195,7 @@ public final class HdmiCec {
         "Recorder_3",
         "Tuner_4",
         "Playback_3",
+        "Secondary_TV",
     };
 
     private HdmiCec() { }  // Prevents instantiation.
@@ -221,9 +223,7 @@ public final class HdmiCec {
      * @return true if the given address is valid
      */
     public static boolean isValidAddress(int address) {
-        // TODO: We leave out the address 'free use(14)' for now. Check this later
-        //       again to make sure it is a valid address for communication.
-        return (ADDR_TV <= address && address <= ADDR_PLAYBACK_3);
+        return (ADDR_TV <= address && address <= ADDR_SPECIFIC_USE);
     }
 
     /**
