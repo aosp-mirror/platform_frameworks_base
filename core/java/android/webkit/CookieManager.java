@@ -70,8 +70,7 @@ public class CookieManager {
      /**
      * Sets a cookie for the given URL. Any existing cookie with the same host,
      * path and name will be replaced with the new cookie. The cookie being set
-     * must not have expired and must not be a session cookie, otherwise it
-     * will be ignored.
+     * will be ignored if it is expired.
      *
      * @param url the URL for which the cookie is set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'
