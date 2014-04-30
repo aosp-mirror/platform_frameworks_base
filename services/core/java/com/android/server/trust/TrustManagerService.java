@@ -187,12 +187,12 @@ public class TrustManagerService extends SystemService {
 
         boolean trustMayHaveChanged = false;
         for (int i = 0; i < mObsoleteAgents.size(); i++) {
-            AgentInfo info = mActiveAgents.valueAt(i);
+            AgentInfo info = mObsoleteAgents.valueAt(i);
             if (info.agent.isTrusted()) {
                 trustMayHaveChanged = true;
             }
             info.agent.unbind();
-            mActiveAgents.remove(info);
+            mObsoleteAgents.remove(info);
         }
 
         if (trustMayHaveChanged) {
