@@ -707,16 +707,6 @@ public class Process {
             return primaryZygoteState;
         }
 
-        // TODO: Get rid of this. This is a temporary workaround until all the
-        // compilation related pieces for the dual zygote stack are ready.
-        // b/3647418.
-        if (System.getenv("ANDROID_SOCKET_" + SECONDARY_ZYGOTE_SOCKET) == null) {
-            Log.e(LOG_TAG, "Forcing app to primary zygote, secondary unavailable (ABI= " + abi + ")");
-            // Should be :
-            // throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
-            return primaryZygoteState;
-        }
-
         // The primary zygote didn't match. Try the secondary.
         if (secondaryZygoteState == null || secondaryZygoteState.isClosed()) {
             secondaryZygoteState = ZygoteState.connect(SECONDARY_ZYGOTE_SOCKET,
