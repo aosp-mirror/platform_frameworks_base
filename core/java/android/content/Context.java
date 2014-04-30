@@ -2377,6 +2377,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.service.fingerprint.FingerprintManager} for handling management
+     * of fingerprints.
+     *
+     * @see #getSystemService
+     * @see android.app.FingerprintManager
+     */
+    public static final String FINGERPRINT_SERVICE = "fingerprint";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
      *

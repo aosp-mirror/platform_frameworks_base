@@ -199,6 +199,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/dreams/IDozeHardware.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
+	core/java/android/service/fingerprint/IFingerprintService.aidl \
+	core/java/android/service/fingerprint/IFingerprintServiceReceiver.aidl \
 	core/java/android/service/trust/ITrustAgentService.aidl \
 	core/java/android/service/trust/ITrustAgentServiceCallback.aidl \
 	core/java/android/service/voice/IVoiceInteractionService.aidl \

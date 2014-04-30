@@ -106,6 +106,9 @@ import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.service.fingerprint.FingerprintManager;
+import android.service.fingerprint.FingerprintManagerReceiver;
+import android.service.fingerprint.FingerprintService;
 import android.telephony.TelephonyManager;
 import android.tv.ITvInputManager;
 import android.tv.TvInputManager;
@@ -450,6 +453,11 @@ class ContextImpl extends Context {
                     // which would do the caching.
                     return new KeyguardManager();
                 }});
+
+        registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new FingerprintManager(ctx);
+            }});
 
         registerService(LAYOUT_INFLATER_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {

@@ -3480,6 +3480,12 @@ public final class Settings {
             "lock_screen_appwidget_ids";
 
         /**
+         * List of enrolled fingerprint identifiers (comma-delimited).
+         * @hide
+         */
+        public static final String USER_FINGERPRINT_IDS = "user_fingerprint_ids";
+
+        /**
          * Id of the appwidget shown on the lock screen when appwidgets are disabled.
          * @hide
          */
