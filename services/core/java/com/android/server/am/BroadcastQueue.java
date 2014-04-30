@@ -503,7 +503,7 @@ public final class BroadcastQueue {
                     // are already core system stuff so don't matter for this.
                     r.curApp = filter.receiverList.app;
                     filter.receiverList.app.curReceiver = r;
-                    mService.updateOomAdjLocked(r.curApp, true);
+                    mService.updateOomAdjLocked(r.curApp);
                 }
             }
             try {
