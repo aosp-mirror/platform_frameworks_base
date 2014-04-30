@@ -150,6 +150,7 @@ public abstract class TvInputService extends Service {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         private WindowManager.LayoutParams mWindowParams;
+        private Surface mSurface;
         private View mOverlayView;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
@@ -346,6 +347,10 @@ public abstract class TvInputService extends Service {
          */
         void release() {
             onRelease();
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
             removeOverlayView(true);
         }
 
@@ -354,6 +359,10 @@ public abstract class TvInputService extends Service {
          */
         void setSurface(Surface surface) {
             onSetSurface(surface);
+            if (mSurface != null) {
+                mSurface.release();
+            }
+            mSurface = surface;
             // TODO: Handle failure.
         }
 
