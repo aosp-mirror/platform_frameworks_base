@@ -119,7 +119,7 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
         mProperties = mStagingProperties;
     }
     if (mNeedsAnimatorsSync) {
-        mAnimators.reserve(mStagingAnimators.size());
+        mAnimators.resize(mStagingAnimators.size());
         std::vector< sp<RenderPropertyAnimator> >::iterator it;
         // hint: this means copy_if_not()
         it = std::remove_copy_if(mStagingAnimators.begin(), mStagingAnimators.end(),
