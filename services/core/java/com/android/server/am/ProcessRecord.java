@@ -77,7 +77,6 @@ final class ProcessRecord {
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
-    int memImportance;          // Importance constant computed from curAdj
     int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
     int repProcState = -1;      // Last reported process state
     int setProcState = -1;      // Last set process state in process tracker
@@ -91,6 +90,7 @@ final class ProcessRecord {
     boolean hasStartedServices; // Are there any started services running in this process?
     boolean foregroundServices; // Running any services that are foreground?
     boolean foregroundActivities; // Running any activities that are foreground?
+    boolean repForegroundActivities; // Last reported foreground activities.
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
     boolean hasShownUi;         // Has UI been shown in this process since it was started?
     boolean pendingUiClean;     // Want to clean up resources from showing UI?
@@ -267,9 +267,10 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("persistent="); pw.print(persistent);
                     pw.print(" removed="); pw.println(removed);
         }
-        if (hasClientActivities || foregroundActivities) {
+        if (hasClientActivities || foregroundActivities || repForegroundActivities) {
             pw.print(prefix); pw.print("hasClientActivities="); pw.print(hasClientActivities);
-                    pw.print(" foregroundActivities="); pw.println(foregroundActivities);
+                    pw.print(" foregroundActivities="); pw.print(foregroundActivities);
+                    pw.print(" (rep="); pw.print(repForegroundActivities); pw.println(")");
         }
         if (hasStartedServices) {
             pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);

@@ -1017,11 +1017,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     static class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
-        static final int CHANGE_IMPORTANCE= 1<<1;
+        static final int CHANGE_PROCESS_STATE = 1<<1;
         int changes;
         int uid;
         int pid;
-        int importance;
+        int processState;
         boolean foregroundActivities;
     }
 
@@ -3200,11 +3200,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                             observer.onForegroundActivitiesChanged(item.pid, item.uid,
                                     item.foregroundActivities);
                         }
-                        if ((item.changes&ProcessChangeItem.CHANGE_IMPORTANCE) != 0) {
-                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "IMPORTANCE CHANGED pid="
-                                    + item.pid + " uid=" + item.uid + ": " + item.importance);
-                            observer.onImportanceChanged(item.pid, item.uid,
-                                    item.importance);
+                        if ((item.changes&ProcessChangeItem.CHANGE_PROCESS_STATE) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "PROCSTATE CHANGED pid="
+                                    + item.pid + " uid=" + item.uid + ": " + item.processState);
+                            observer.onProcessStateChanged(item.pid, item.uid, item.processState);
                         }
                     }
                 } catch (RemoteException e) {
@@ -10635,6 +10634,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int adj = app.curAdj;
         outInfo.importance = oomAdjToImportance(adj, outInfo);
         outInfo.importanceReasonCode = app.adjTypeCode;
+        outInfo.processState = app.curProcState;
     }
 
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
@@ -14690,7 +14690,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
             app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT;
-            // System process can do UI, and when they do we want to have
+            // System processes can do UI, and when they do we want to have
             // them trim their memory after the user leaves the UI.  To
             // facilitate this, here we need to determine whether or not it
             // is currently showing UI.
@@ -15308,86 +15308,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         adj = app.modifyRawOomAdj(adj);
 
         app.curProcState = procState;
-
-        int importance = app.memImportance;
-        if (importance == 0 || adj != app.curAdj || schedGroup != app.curSchedGroup) {
-            app.curAdj = adj;
-            app.curSchedGroup = schedGroup;
-            if (!interesting) {
-                // For this reporting, if there is not something explicitly
-                // interesting in this process then we will push it to the
-                // background importance.
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-            } else if (adj >= ProcessList.CACHED_APP_MIN_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-            } else if (adj >= ProcessList.SERVICE_B_ADJ) {
-                importance =  ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-            } else if (adj >= ProcessList.HOME_APP_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-            } else if (adj >= ProcessList.SERVICE_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-            } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
-            } else if (adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
-            } else if (adj >= ProcessList.VISIBLE_APP_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
-            } else if (adj >= ProcessList.FOREGROUND_APP_ADJ) {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-            } else {
-                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERSISTENT;
-            }
-        }
-
-        int changes = importance != app.memImportance ? ProcessChangeItem.CHANGE_IMPORTANCE : 0;
-        if (foregroundActivities != app.foregroundActivities) {
-            changes |= ProcessChangeItem.CHANGE_ACTIVITIES;
-        }
-        if (changes != 0) {
-            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Changes in " + app + ": " + changes);
-            app.memImportance = importance;
-            app.foregroundActivities = foregroundActivities;
-            int i = mPendingProcessChanges.size()-1;
-            ProcessChangeItem item = null;
-            while (i >= 0) {
-                item = mPendingProcessChanges.get(i);
-                if (item.pid == app.pid) {
-                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Re-using existing item: " + item);
-                    break;
-                }
-                i--;
-            }
-            if (i < 0) {
-                // No existing item in pending changes; need a new one.
-                final int NA = mAvailProcessChanges.size();
-                if (NA > 0) {
-                    item = mAvailProcessChanges.remove(NA-1);
-                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Retreiving available item: " + item);
-                } else {
-                    item = new ProcessChangeItem();
-                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Allocating new item: " + item);
-                }
-                item.changes = 0;
-                item.pid = app.pid;
-                item.uid = app.info.uid;
-                if (mPendingProcessChanges.size() == 0) {
-                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG,
-                            "*** Enqueueing dispatch processes changed!");
-                    mHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED).sendToTarget();
-                }
-                mPendingProcessChanges.add(item);
-            }
-            item.changes |= changes;
-            item.importance = importance;
-            item.foregroundActivities = foregroundActivities;
-            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Item "
-                    + Integer.toHexString(System.identityHashCode(item))
-                    + " " + app.toShortString() + ": changes=" + item.changes
-                    + " importance=" + item.importance
-                    + " foreground=" + item.foregroundActivities
-                    + " type=" + app.adjType + " source=" + app.adjSource
-                    + " target=" + app.adjTarget);
-        }
+        app.foregroundActivities = foregroundActivities;
 
         return app.curRawAdj;
     }
@@ -15660,7 +15581,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean applyOomAdjLocked(ProcessRecord app, boolean wasKeeping,
-            ProcessRecord TOP_APP, boolean doingAll, boolean reportingProcessState, long now) {
+            ProcessRecord TOP_APP, boolean doingAll, long now) {
         boolean success = true;
 
         if (app.curRawAdj != app.setRawAdj) {
@@ -15678,6 +15599,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             app.setRawAdj = app.curRawAdj;
         }
+
+        int changes = 0;
 
         if (app.curAdj != app.setAdj) {
             ProcessList.setOomAdj(app.pid, app.curAdj);
@@ -15720,9 +15643,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         app.curSchedGroup <= Process.THREAD_GROUP_BG_NONINTERACTIVE);
             }
         }
+        if (app.repForegroundActivities != app.foregroundActivities) {
+            app.repForegroundActivities = app.foregroundActivities;
+            changes |= ProcessChangeItem.CHANGE_ACTIVITIES;
+        }
         if (app.repProcState != app.curProcState) {
             app.repProcState = app.curProcState;
-            if (!reportingProcessState && app.thread != null) {
+            changes |= ProcessChangeItem.CHANGE_PROCESS_STATE;
+            if (app.thread != null) {
                 try {
                     if (false) {
                         //RuntimeException h = new RuntimeException("here");
@@ -15767,6 +15695,51 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.procStateChanged = true;
             }
         }
+
+        if (changes != 0) {
+            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Changes in " + app + ": " + changes);
+            int i = mPendingProcessChanges.size()-1;
+            ProcessChangeItem item = null;
+            while (i >= 0) {
+                item = mPendingProcessChanges.get(i);
+                if (item.pid == app.pid) {
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Re-using existing item: " + item);
+                    break;
+                }
+                i--;
+            }
+            if (i < 0) {
+                // No existing item in pending changes; need a new one.
+                final int NA = mAvailProcessChanges.size();
+                if (NA > 0) {
+                    item = mAvailProcessChanges.remove(NA-1);
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Retreiving available item: " + item);
+                } else {
+                    item = new ProcessChangeItem();
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Allocating new item: " + item);
+                }
+                item.changes = 0;
+                item.pid = app.pid;
+                item.uid = app.info.uid;
+                if (mPendingProcessChanges.size() == 0) {
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG,
+                            "*** Enqueueing dispatch processes changed!");
+                    mHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED).sendToTarget();
+                }
+                mPendingProcessChanges.add(item);
+            }
+            item.changes |= changes;
+            item.processState = app.repProcState;
+            item.foregroundActivities = app.repForegroundActivities;
+            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Item "
+                    + Integer.toHexString(System.identityHashCode(item))
+                    + " " + app.toShortString() + ": changes=" + item.changes
+                    + " procState=" + item.processState
+                    + " foreground=" + item.foregroundActivities
+                    + " type=" + app.adjType + " source=" + app.adjSource
+                    + " target=" + app.adjTarget);
+        }
+
         return success;
     }
 
@@ -15777,7 +15750,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean updateOomAdjLocked(ProcessRecord app, int cachedAdj,
-            ProcessRecord TOP_APP, boolean doingAll, boolean reportingProcessState, long now) {
+            ProcessRecord TOP_APP, boolean doingAll, long now) {
         if (app.thread == null) {
             return false;
         }
@@ -15786,8 +15759,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now);
 
-        return applyOomAdjLocked(app, wasKeeping, TOP_APP, doingAll,
-                reportingProcessState, now);
+        return applyOomAdjLocked(app, wasKeeping, TOP_APP, doingAll, now);
     }
 
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
@@ -15853,10 +15825,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final boolean updateOomAdjLocked(ProcessRecord app) {
-        return updateOomAdjLocked(app, false);
-    }
-
-    final boolean updateOomAdjLocked(ProcessRecord app, boolean doingProcessState) {
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         final boolean wasCached = app.cached;
@@ -15869,7 +15837,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // need to do a complete oom adj.
         final int cachedAdj = app.curRawAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 ? app.curRawAdj : ProcessList.UNKNOWN_ADJ;
-        boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false, doingProcessState,
+        boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false,
                 SystemClock.uptimeMillis());
         if (wasCached != app.cached || app.curRawAdj == ProcessList.UNKNOWN_ADJ) {
             // Changed to/from cached state, so apps after it in the LRU
@@ -16002,7 +15970,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                applyOomAdjLocked(app, wasKeeping, TOP_APP, true, false, now);
+                applyOomAdjLocked(app, wasKeeping, TOP_APP, true, now);
 
                 // Count the number of process types.
                 switch (app.curProcState) {
