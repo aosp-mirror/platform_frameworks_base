@@ -260,6 +260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
     private static final String LIB_DIR_NAME = "lib";
+    private static final String LIB64_DIR_NAME = "lib64";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
 
@@ -4180,6 +4181,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean updateSharedLibrariesLPw(PackageParser.Package pkg,
             PackageParser.Package changingLib) {
+        // We might be upgrading from a version of the platform that did not
+        // provide per-package native library directories for system apps.
+        // Fix that up here.
+        if (isSystemApp(pkg)) {
+            PackageSetting ps = mSettings.mPackages.get(pkg.applicationInfo.packageName);
+            setInternalAppNativeLibraryPath(pkg, ps);
+        }
+
         if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
             if (mTmpSharedLibraries == null ||
                     mTmpSharedLibraries.length < mSharedLibraries.size()) {
@@ -5272,10 +5281,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    // This is the initial scan-time determination of how to handle a given
+    // package for purposes of native library location.
     private void setInternalAppNativeLibraryPath(PackageParser.Package pkg,
             PackageSetting pkgSetting) {
-        final String apkLibPath = getApkName(pkgSetting.codePathString);
-        final String nativeLibraryPath = new File(mAppLibInstallDir, apkLibPath).getPath();
+        // "bundled" here means system-installed with no overriding update
+        final boolean bundledApk = isSystemApp(pkg) && !isUpdatedSystemApp(pkg);
+        final String apkName = getApkName(pkgSetting.codePathString);
+        final File libDir;
+        if (bundledApk) {
+            // If "/system/lib64/apkname" exists, assume that is the per-package
+            // native library directory to use; otherwise use "/system/lib/apkname".
+            File lib64 = new File(Environment.getRootDirectory(), LIB64_DIR_NAME);
+            File packLib64 = new File(lib64, apkName);
+            libDir = (packLib64.exists())
+                    ? lib64
+                    : new File(Environment.getRootDirectory(), LIB_DIR_NAME);
+        } else {
+            libDir = mAppLibInstallDir;
+        }
+        final String nativeLibraryPath = (new File(libDir, apkName)).getPath();
         pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
         pkgSetting.nativeLibraryPathString = nativeLibraryPath;
     }
@@ -9685,13 +9710,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         // writer
         synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
+            setInternalAppNativeLibraryPath(newPkg, ps);
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
             if (applyUserRestrictions) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Propagating install state across reinstall");
                 }
-                PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
                 for (int i = 0; i < allUserHandles.length; i++) {
                     if (DEBUG_REMOVE) {
                         Slog.d(TAG, "    user " + allUserHandles[i]
