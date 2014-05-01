@@ -15192,6 +15192,7 @@ package android.media.session {
     method public long getLong(java.lang.String);
     method public android.media.Rating getRating(java.lang.String);
     method public java.lang.String getString(java.lang.String);
+    method public int size();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";

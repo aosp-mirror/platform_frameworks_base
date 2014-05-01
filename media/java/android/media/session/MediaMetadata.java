@@ -295,6 +295,15 @@ public final class MediaMetadata implements Parcelable {
     }
 
     /**
+     * Get the number of fields in this metadata.
+     *
+     * @return The number of fields in the metadata.
+     */
+    public int size() {
+        return mBundle.size();
+    }
+
+    /**
      * Helper for getting the String key used by {@link MediaMetadata} from the
      * integer key that {@link MediaMetadataEditor} uses.
      *

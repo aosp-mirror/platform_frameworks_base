@@ -238,6 +238,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "transport controls enabled=" + mTransportPerformerEnabled);
         pw.println(indent + "rating type=" + mRatingType);
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
+        pw.println(indent + "state=" + mPlaybackState.toString());
+        pw.println(indent + "metadata:" + getShortMetadataString());
         pw.println(indent + "route requests {");
         int size = mRequests.size();
         for (int i = 0; i < size; i++) {
@@ -247,6 +249,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "route=" + (mRoute == null ? null : mRoute.toString()));
         pw.println(indent + "connection=" + (mConnection == null ? null : mConnection.toString()));
         pw.println(indent + "params=" + (mRequest == null ? null : mRequest.toString()));
+    }
+
+    private String getShortMetadataString() {
+        int fields = mMetadata == null ? 0 : mMetadata.size();
+        String title = mMetadata == null ? null : mMetadata
+                .getString(MediaMetadata.METADATA_KEY_TITLE);
+        return "size=" + fields + ", title=" + title;
     }
 
     private void onDestroy() {
