@@ -22,6 +22,7 @@
 #include <utils/Trace.h>
 
 #include "AmbientShadow.h"
+#include "Caches.h"
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
 
@@ -41,8 +42,13 @@ VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
-    const float heightFactor = 1.0f / 128;
+    float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
+
+    Caches& caches = Caches::getInstance();
+    if (CC_UNLIKELY(caches.propertyAmbientRatio > 0.0f)) {
+        heightFactor *= caches.propertyAmbientRatio;
+    }
 
     Rect ambientShadowBounds(casterBounds);
     ambientShadowBounds.outset(maxZ * geomFactor * heightFactor);
@@ -62,16 +68,26 @@ VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 
 VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
-        const Vector3& lightPosScale, const mat4& receiverTransform,
+        const mat4& receiverTransform,
         int screenWidth, int screenHeight, const Rect& casterBounds,
         const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
+    Caches& caches = Caches::getInstance();
+
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     int maximal = max(screenWidth, screenHeight);
-    Vector3 lightCenter(screenWidth * lightPosScale.x, screenHeight * lightPosScale.y,
-            maximal * lightPosScale.z);
+    Vector3 lightCenter(screenWidth * 0.5f, 0, maximal);
+
+    if (CC_UNLIKELY(caches.propertyLightPosY > 0)) {
+        lightCenter.y = - caches.propertyLightPosY; // negated since this shifts up
+    }
+    if (CC_UNLIKELY(caches.propertyLightPosZ > 0)) {
+        lightCenter.z = caches.propertyLightPosZ;
+    }
+
+
 #if DEBUG_SHADOW
     ALOGD("light center %f %f %f", lightCenter.x, lightCenter.y, lightCenter.z);
 #endif
@@ -82,8 +98,12 @@ VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     reverseReceiverTransform.loadInverse(receiverTransform);
     reverseReceiverTransform.mapPoint3d(lightCenter);
 
-    const float lightSize = maximal / 4;
+    float lightSize = maximal / 4;
     const int lightVertexCount = 8;
+
+    if (CC_UNLIKELY(caches.propertyLightDiameter > 0)) {
+        lightSize = caches.propertyLightDiameter;
+    }
 
     // Now light and caster are both in local space, we will check whether
     // the shadow is within the clip area.

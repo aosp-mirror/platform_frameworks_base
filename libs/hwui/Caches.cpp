@@ -691,9 +691,10 @@ void Caches::initTempProperties() {
     propertyAmbientShadowStrength = 25;
     propertySpotShadowStrength = 25;
 
-    propertyLightPosXScale = 0.5f;
-    propertyLightPosYScale = 0.0f;
-    propertyLightPosZScale = 1.0f;
+    propertyLightDiameter = -1.0f;
+    propertyLightPosY = -1.0f;
+    propertyLightPosZ = -1.0f;
+    propertyAmbientRatio = -1.0f;
 }
 
 void Caches::setTempProperty(const char* name, const char* value) {
@@ -706,17 +707,21 @@ void Caches::setTempProperty(const char* name, const char* value) {
         propertySpotShadowStrength = atoi(value);
         ALOGD("spot shadow strength = 0x%x out of 0xff", propertySpotShadowStrength);
         return;
-    } else if (!strcmp(name, "lightPosXScale")) {
-        propertyLightPosXScale = fmin(fmax(atof(value), 0.0), 1.0);
-        ALOGD("lightPos X Scale = %.2f", propertyLightPosXScale);
+    } else if (!strcmp(name, "ambientRatio")) {
+        propertyAmbientRatio = fmin(fmax(atof(value), 0.0), 10.0);
+        ALOGD("ambientRatio = %.2f", propertyAmbientRatio);
         return;
-    }  else if (!strcmp(name, "lightPosYScale")) {
-        propertyLightPosYScale = fmin(fmax(atof(value), 0.0), 1.0);
-        ALOGD("lightPos Y Scale = %.2f", propertyLightPosXScale);
+    } else if (!strcmp(name, "lightDiameter")) {
+        propertyLightDiameter = fmin(fmax(atof(value), 0.0), 3000.0);
+        ALOGD("lightDiameter = %.2f", propertyLightDiameter);
         return;
-    }  else if (!strcmp(name, "lightPosZScale")) {
-        propertyLightPosZScale = fmin(fmax(atof(value), 0.0), 1.0);
-        ALOGD("lightPos Z Scale = %.2f", propertyLightPosXScale);
+    }  else if (!strcmp(name, "lightPosY")) {
+        propertyLightPosY = fmin(fmax(atof(value), 0.0), 3000.0);
+        ALOGD("lightPos Y = %.2f", propertyLightPosY);
+        return;
+    }  else if (!strcmp(name, "lightPosZ")) {
+        propertyLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
+        ALOGD("lightPos Z = %.2f", propertyLightPosZ);
         return;
     }
     ALOGD("    failed");

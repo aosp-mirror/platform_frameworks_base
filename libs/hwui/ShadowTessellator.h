@@ -73,7 +73,7 @@ public:
 
     static VertexBufferMode tessellateSpotShadow(bool isCasterOpaque,
             const Vector3* casterPolygon, int casterVertexCount,
-            const Vector3& lightPosScale, const mat4& receiverTransform,
+            const mat4& receiverTransform,
             int screenWidth, int screenHeight, const Rect& casterBounds,
             const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
