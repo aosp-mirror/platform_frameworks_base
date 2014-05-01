@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.PrivateApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @hide
  */
+@PrivateApi
 public class ContainerEncryptionParams implements Parcelable {
     protected static final String TAG = "ContainerEncryptionParams";
 
