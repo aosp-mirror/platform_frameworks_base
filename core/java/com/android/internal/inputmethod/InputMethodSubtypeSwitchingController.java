@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import android.content.Context;
@@ -119,14 +120,14 @@ public class InputMethodSubtypeSwitchingController {
         }
     }
 
-    private static class InputMethodAndSubtypeCircularList {
+    private static class InputMethodAndSubtypeList {
         private final Context mContext;
         // Used to load label
         private final PackageManager mPm;
         private final String mSystemLocaleStr;
         private final InputMethodSettings mSettings;
 
-        public InputMethodAndSubtypeCircularList(Context context, InputMethodSettings settings) {
+        public InputMethodAndSubtypeList(Context context, InputMethodSettings settings) {
             mContext = context;
             mSettings = settings;
             mPm = context.getPackageManager();
@@ -151,38 +152,6 @@ public class InputMethodSubtypeSwitchingController {
                                 return imiId1.toString().compareTo(imiId2.toString());
                             }
                         });
-
-        public ImeSubtypeListItem getNextInputMethod(
-                boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
-            if (imi == null) {
-                return null;
-            }
-            final List<ImeSubtypeListItem> imList =
-                    getSortedInputMethodAndSubtypeList();
-            if (imList.size() <= 1) {
-                return null;
-            }
-            final int N = imList.size();
-            final int currentSubtypeId =
-                    subtype != null ? InputMethodUtils.getSubtypeIdFromHashCode(imi,
-                            subtype.hashCode()) : NOT_A_SUBTYPE_ID;
-            for (int i = 0; i < N; ++i) {
-                final ImeSubtypeListItem isli = imList.get(i);
-                if (isli.mImi.equals(imi) && isli.mSubtypeId == currentSubtypeId) {
-                    if (!onlyCurrentIme) {
-                        return imList.get((i + 1) % N);
-                    }
-                    for (int j = 0; j < N - 1; ++j) {
-                        final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
-                        if (candidate.mImi.equals(imi)) {
-                            return candidate;
-                        }
-                    }
-                    return null;
-                }
-            }
-            return null;
-        }
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
             return getSortedInputMethodAndSubtypeList(true, false, false);
@@ -247,7 +216,38 @@ public class InputMethodSubtypeSwitchingController {
     private final ArrayDeque<SubtypeParams> mTypedSubtypeHistory = new ArrayDeque<SubtypeParams>();
     private final Object mLock = new Object();
     private final InputMethodSettings mSettings;
-    private InputMethodAndSubtypeCircularList mSubtypeList;
+    private InputMethodAndSubtypeList mSubtypeList;
+
+    @VisibleForTesting
+    public static ImeSubtypeListItem getNextInputMethodImpl(List<ImeSubtypeListItem> imList,
+            boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
+        if (imi == null) {
+            return null;
+        }
+        if (imList.size() <= 1) {
+            return null;
+        }
+        final int N = imList.size();
+        final int currentSubtypeId =
+                subtype != null ? InputMethodUtils.getSubtypeIdFromHashCode(imi,
+                        subtype.hashCode()) : NOT_A_SUBTYPE_ID;
+        for (int i = 0; i < N; ++i) {
+            final ImeSubtypeListItem isli = imList.get(i);
+            if (isli.mImi.equals(imi) && isli.mSubtypeId == currentSubtypeId) {
+                if (!onlyCurrentIme) {
+                    return imList.get((i + 1) % N);
+                }
+                for (int j = 0; j < N - 1; ++j) {
+                    final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
+                    if (candidate.mImi.equals(imi)) {
+                        return candidate;
+                    }
+                }
+                return null;
+            }
+        }
+        return null;
+    }
 
     public InputMethodSubtypeSwitchingController(InputMethodSettings settings) {
         mSettings = settings;
@@ -278,14 +278,15 @@ public class InputMethodSubtypeSwitchingController {
 
     public void resetCircularListLocked(Context context) {
         synchronized(mLock) {
-            mSubtypeList = new InputMethodAndSubtypeCircularList(context, mSettings);
+            mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         }
     }
 
     public ImeSubtypeListItem getNextInputMethod(
             boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
         synchronized(mLock) {
-            return mSubtypeList.getNextInputMethod(onlyCurrentIme, imi, subtype);
+            return getNextInputMethodImpl(mSubtypeList.getSortedInputMethodAndSubtypeList(),
+                    onlyCurrentIme, imi, subtype);
         }
     }
 

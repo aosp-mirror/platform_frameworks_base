@@ -259,7 +259,7 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(String packageName, String className,
             CharSequence label, String settingsActivity) {
         this(buildDummyResolveInfo(packageName, className, label), false, settingsActivity, null,
-                0, false);
+                0, false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */);
     }
 
     /**
@@ -269,6 +269,17 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
             String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
             boolean forceDefault) {
+        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId,
+                forceDefault, true /* supportsSwitchingToNextInputMethod */);
+    }
+
+    /**
+     * Temporary API for creating a built-in input method for test.
+     * @hide
+     */
+    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
+            String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
+            boolean forceDefault, boolean supportsSwitchingToNextInputMethod) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
@@ -277,7 +288,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsAuxIme = isAuxIme;
         mSubtypes = new InputMethodSubtypeArray(subtypes);
         mForceDefault = forceDefault;
-        mSupportsSwitchingToNextInputMethod = true;
+        mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
     }
 
     private static ResolveInfo buildDummyResolveInfo(String packageName, String className,
