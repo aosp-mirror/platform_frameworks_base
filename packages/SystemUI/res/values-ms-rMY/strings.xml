@@ -220,8 +220,6 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d lagi"</item>
   </plurals>
-    <!-- no translation found for notification_tap_again (7590196980943943842) -->
-    <skip />
-    <!-- no translation found for keyguard_unlock (8043466894212841998) -->
-    <skip />
+    <string name="notification_tap_again" msgid="7590196980943943842">"Ketik lagi untuk membuka"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Leret ke atas untuk membuka kunci"</string>
 </resources>
