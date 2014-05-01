@@ -4776,7 +4776,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
-                    mBootMsgDialog = new ProgressDialog(mContext) {
+                    int theme =  mContext.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WATCH) ?
+                            com.android.internal.R.style.Theme_Micro_Dialog_Alert : 0;
+
+                    mBootMsgDialog = new ProgressDialog(mContext, theme) {
                         // This dialog will consume all events coming in to
                         // it, to avoid it trying to do things too early in boot.
                         @Override public boolean dispatchKeyEvent(KeyEvent event) {
