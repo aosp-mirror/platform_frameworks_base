@@ -2162,6 +2162,7 @@
   <public type="attr" name="windowAllowExitTransitionOverlap" />
   <public type="attr" name="windowAllowEnterTransitionOverlap" />
   <public type="attr" name="sessionService" />
+  <public type="attr" name="stackViewStyle" />
   <public type="attr" name="switchStyle" />
   <public type="attr" name="elevation" />
   <public type="attr" name="excludeId" />
@@ -2181,15 +2182,25 @@
 
   <public-padding type="style" name="l_resource_pad" end="0x01030200" />
 
-  <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
-  <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
-  <public type="style" name="Widget.DeviceDefault.FragmentBreadCrumbs" />
-  <public type="style" name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" />
   <public type="style" name="Widget.FastScroll" />
+  <public type="style" name="Widget.StackView" />
+
   <public type="style" name="Widget.Holo.FastScroll" />
+  <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.Holo.StackView" />
+
+  <public type="style" name="Widget.Holo.Light.Button.Borderless" />
   <public type="style" name="Widget.Holo.Light.FastScroll" />
+  <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.Holo.Light.StackView" />
+
   <public type="style" name="Widget.DeviceDefault.FastScroll" />
+  <public type="style" name="Widget.DeviceDefault.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.DeviceDefault.StackView" />
+
   <public type="style" name="Widget.DeviceDefault.Light.FastScroll" />
+  <public type="style" name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.DeviceDefault.Light.StackView" />
 
   <public type="style" name="TextAppearance.Quantum" />
   <public type="style" name="TextAppearance.Quantum.DialogWindowTitle" />
@@ -2266,7 +2277,6 @@
   <public type="style" name="Widget.Quantum.ActionButton" />
   <public type="style" name="Widget.Quantum.ActionButton.CloseMode" />
   <public type="style" name="Widget.Quantum.ActionButton.Overflow" />
-  <public type="style" name="Widget.Quantum.ActionButton.TextButton" />
   <public type="style" name="Widget.Quantum.ActionMode" />
   <public type="style" name="Widget.Quantum.AutoCompleteTextView" />
   <public type="style" name="Widget.Quantum.Button" />
@@ -2275,6 +2285,8 @@
   <public type="style" name="Widget.Quantum.Button.Inset" />
   <public type="style" name="Widget.Quantum.Button.Small" />
   <public type="style" name="Widget.Quantum.Button.Toggle" />
+  <public type="style" name="Widget.Quantum.Button.Paper" />
+  <public type="style" name="Widget.Quantum.Button.Paper.Color" />
   <public type="style" name="Widget.Quantum.ButtonBar" />
   <public type="style" name="Widget.Quantum.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.CalendarView" />
@@ -2309,6 +2321,7 @@
   <public type="style" name="Widget.Quantum.ScrollView" />
   <public type="style" name="Widget.Quantum.SeekBar" />
   <public type="style" name="Widget.Quantum.SegmentedButton" />
+  <public type="style" name="Widget.Quantum.StackView" />
   <public type="style" name="Widget.Quantum.Spinner" />
   <public type="style" name="Widget.Quantum.Tab" />
   <public type="style" name="Widget.Quantum.TabWidget" />
@@ -2329,10 +2342,13 @@
   <public type="style" name="Widget.Quantum.Light.ActionMode" />
   <public type="style" name="Widget.Quantum.Light.AutoCompleteTextView" />
   <public type="style" name="Widget.Quantum.Light.Button" />
+  <public type="style" name="Widget.Quantum.Light.Button.Borderless" />
   <public type="style" name="Widget.Quantum.Light.Button.Borderless.Small" />
   <public type="style" name="Widget.Quantum.Light.Button.Inset" />
   <public type="style" name="Widget.Quantum.Light.Button.Small" />
   <public type="style" name="Widget.Quantum.Light.Button.Toggle" />
+  <public type="style" name="Widget.Quantum.Light.Button.Paper" />
+  <public type="style" name="Widget.Quantum.Light.Button.Paper.Color" />
   <public type="style" name="Widget.Quantum.Light.ButtonBar" />
   <public type="style" name="Widget.Quantum.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.Light.CalendarView" />
@@ -2369,6 +2385,7 @@
   <public type="style" name="Widget.Quantum.Light.ScrollView" />
   <public type="style" name="Widget.Quantum.Light.SeekBar" />
   <public type="style" name="Widget.Quantum.Light.SegmentedButton" />
+  <public type="style" name="Widget.Quantum.Light.StackView" />
   <public type="style" name="Widget.Quantum.Light.Spinner" />
   <public type="style" name="Widget.Quantum.Light.Tab" />
   <public type="style" name="Widget.Quantum.Light.TabWidget" />
@@ -2376,12 +2393,6 @@
   <public type="style" name="Widget.Quantum.Light.TextView.SpinnerItem" />
   <public type="style" name="Widget.Quantum.Light.WebTextView" />
   <public type="style" name="Widget.Quantum.Light.WebView" />
-
-  <public type="style" name="Widget.Quantum.Button.Paper" />
-  <public type="style" name="Widget.Quantum.Button.Paper.Color" />
-
-  <public type="style" name="Widget.Quantum.Light.Button.Paper" />
-  <public type="style" name="Widget.Quantum.Light.Button.Paper.Color" />
 
   <public type="style" name="TextAppearance.Quantum.Display4" />
   <public type="style" name="TextAppearance.Quantum.Display3" />
@@ -2395,8 +2406,6 @@
   <public type="style" name="TextAppearance.Quantum.Caption" />
   <public type="style" name="TextAppearance.Quantum.Menu" />
   <public type="style" name="TextAppearance.Quantum.Button" />
-
-  <public type="style" name="Widget.Holo.Light.Button.Borderless" />
 
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
 

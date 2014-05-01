@@ -397,6 +397,11 @@ please see styles_device_defaults.xml.
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
     </style>
 
+    <style name="Widget.StackView">
+        <item name="android:resOutColor">@android:color/holo_blue_light</item>
+        <item name="android:clickColor">@android:color/holo_blue_light</item>
+    </style>
+
     <style name="Widget.ProgressBar">
         <item name="android:indeterminateOnly">true</item>
         <item name="android:indeterminateDrawable">@android:drawable/progress_medium_white</item>
@@ -1609,11 +1614,6 @@ please see styles_device_defaults.xml.
         <item name="android:minWidth">64dip</item>
     </style>
 
-    <style name="Widget.Holo.StackView">
-        <item name="android:resOutColor">@android:color/holo_blue_light</item>
-        <item name="android:clickColor">@android:color/holo_blue_light</item>
-    </style>
-
     <style name="Widget.Holo.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:paddingStart">4dip</item>
@@ -1643,6 +1643,11 @@ please see styles_device_defaults.xml.
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minHeight">48dip</item>
+    </style>
+
+    <style name="Widget.Holo.StackView">
+        <item name="android:resOutColor">@android:color/holo_blue_light</item>
+        <item name="android:clickColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="Holo.ButtonBar" parent="ButtonBar">
@@ -2097,6 +2102,11 @@ please see styles_device_defaults.xml.
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minHeight">48dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.StackView">
+        <item name="android:resOutColor">@android:color/holo_blue_light</item>
+        <item name="android:clickColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="Holo.Light.ButtonBar" parent="Holo.ButtonBar">

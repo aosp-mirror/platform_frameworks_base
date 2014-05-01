@@ -348,4 +348,43 @@
         <item>中文 (繁體)</item>
     </string-array>
 
+    <!-- Used by callers to Resources.selectSystemTheme(). Defines the minimum
+         targetSdkVersion required for the theme style at a given index.
+         NOTE: Must be sorted in ascending order. -->
+    <integer-array name="system_theme_sdks">
+        <item>0</item>
+        <item>11</item>
+        <item>14</item>
+        <item>21</item>
+    </integer-array>
+
+    <!-- Used by Resources.selectDefaultTheme(). Defines the default theme style
+         for the targetSdkVersion at a given index (see system_theme_sdks).
+         NOTE: Must match number of entries in system_theme_sdks. -->
+    <array name="system_theme_styles">
+        <item>@style/Theme</item>
+        <item>@style/Theme.Holo</item>
+        <item>@style/Theme.DeviceDefault</item>
+        <item>@style/Theme.DeviceDefault.Light.DarkActionBar</item>
+    </array>
+
+    <!-- Used by ContextImpl for notifications. Defines the default dialog theme
+         style for the targetSdkVersion at a given index (see system_theme_sdks).
+         NOTE: Must match number of entries in system_theme_sdks. -->
+    <array name="system_theme_dialog_styles">
+        <item>@style/Theme</item>
+        <item>@style/Theme.Holo.Dialog</item>
+        <item>@style/Theme.DeviceDefault.Dialog</item>
+        <item>@style/Theme.DeviceDefault.Light.Dialog</item>
+    </array>
+
+    <!-- Used by InputMethodService.onCreate(). Defines the default IME theme
+         style for the targetSdkVersion at a given index (see system_theme_sdks).
+         NOTE: Must match number of entries in system_theme_sdks. -->
+    <array name="system_theme_ime_styles">
+        <item>@style/Theme.InputMethod</item>
+        <item>@style/Theme.Holo.InputMethod</item>
+        <item>@style/Theme.DeviceDefault.InputMethod</item>
+        <item>@style/Theme.DeviceDefault.InputMethod</item>
+    </array>
 </resources>
