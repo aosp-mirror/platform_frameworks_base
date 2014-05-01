@@ -1355,15 +1355,27 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void requestZenModeConditions(IConditionListener callback, boolean requested) {
+        public void requestZenModeConditions(IConditionListener callback, int relevance) {
             enforceSystemOrSystemUI("INotificationManager.requestZenModeConditions");
-            mConditionProviders.requestZenModeConditions(callback, requested);
+            mConditionProviders.requestZenModeConditions(callback, relevance);
         }
 
         @Override
         public void setZenModeCondition(Uri conditionId) {
             enforceSystemOrSystemUI("INotificationManager.setZenModeCondition");
             mConditionProviders.setZenModeCondition(conditionId);
+        }
+
+        @Override
+        public void setAutomaticZenModeConditions(Uri[] conditionIds) {
+            enforceSystemOrSystemUI("INotificationManager.setAutomaticZenModeConditions");
+            mConditionProviders.setAutomaticZenModeConditions(conditionIds);
+        }
+
+        @Override
+        public Condition[] getAutomaticZenModeConditions() {
+            enforceSystemOrSystemUI("INotificationManager.getAutomaticZenModeConditions");
+            return mConditionProviders.getAutomaticZenModeConditions();
         }
 
         private void enforceSystemOrSystemUI(String message) {
@@ -2320,8 +2332,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onServiceAdded(IInterface service) {
-            final INotificationListener listener = (INotificationListener) service;
+        public void onServiceAdded(ManagedServiceInfo info) {
+            final INotificationListener listener = (INotificationListener) info.service;
             final String[] keys = getActiveNotificationKeysFromListener(listener);
             try {
                 listener.onListenerConnected(keys);

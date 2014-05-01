@@ -58,7 +58,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
         mNoMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         try {
-            mNoMan.requestZenModeConditions(mListener, true /*requested*/);
+            mNoMan.requestZenModeConditions(mListener, Condition.FLAG_RELEVANT_NOW);
         } catch (RemoteException e) {
             // noop
         }
@@ -98,7 +98,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
     @Override
     public void dispose() {
         try {
-            mNoMan.requestZenModeConditions(mListener, false /*requested*/);
+            mNoMan.requestZenModeConditions(mListener, 0 /*none*/);
         } catch (RemoteException e) {
             // noop
         }
