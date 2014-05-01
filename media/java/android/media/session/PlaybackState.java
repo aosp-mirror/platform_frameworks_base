@@ -178,8 +178,7 @@ public final class PlaybackState implements Parcelable {
     public final static int PLAYSTATE_SKIPPING_FORWARDS = 10;
 
     /**
-     * Set this value on {@link #setPosition(long)} to indicate the position is
-     * not known for this item.
+     * Use this value for the position to indicate the position is not known.
      */
     public final static long PLAYBACK_POSITION_UNKNOWN = -1;
 
