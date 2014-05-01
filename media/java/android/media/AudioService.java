@@ -1787,6 +1787,11 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#playSoundEffect(int, float) */
     public void playSoundEffectVolume(int effectType, float volume) {
+        if (effectType >= AudioManager.NUM_SOUND_EFFECTS || effectType < 0) {
+            Log.w(TAG, "AudioService effectType value " + effectType + " out of range");
+            return;
+        }
+
         sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SENDMSG_QUEUE,
                 effectType, (int) (volume * 1000), null, 0);
     }
