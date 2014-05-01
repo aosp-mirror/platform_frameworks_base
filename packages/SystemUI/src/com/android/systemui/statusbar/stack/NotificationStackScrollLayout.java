@@ -106,13 +106,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private boolean mChildHierarchyDirty;
     private boolean mIsExpanded = true;
-    private ViewTreeObserver.OnPreDrawListener mAfterLayoutPreDrawListener
+    private boolean mChildrenNeedUpdate;
+    private ViewTreeObserver.OnPreDrawListener mPreDrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            updateScrollPositionIfNecessary();
-            updateChildren();
-            getViewTreeObserver().removeOnPreDrawListener(this);
+            if (mChildrenNeedUpdate) {
+                updateChildren();
+                mChildrenNeedUpdate = false;
+            }
             return true;
         }
     };
@@ -179,6 +181,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mPaddingBetweenElements = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
+        getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
     }
 
     @Override
@@ -206,7 +209,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         setMaxLayoutHeight(getHeight() - mEmptyMarginBottom);
         updateContentHeight();
-        getViewTreeObserver().addOnPreDrawListener(mAfterLayoutPreDrawListener);
+        updateScrollPositionIfNecessary();
+        requestChildrenUpdate();
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -270,6 +274,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    private void requestChildrenUpdate() {
+        mChildrenNeedUpdate = true;
+        invalidate();
+    }
+
     private boolean isCurrentlyAnimating() {
         return mStateAnimator.isRunning();
     }
@@ -290,7 +299,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
-            updateChildren();
+            requestChildrenUpdate();
         }
     }
 
@@ -325,7 +334,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (stackHeight != mCurrentStackHeight) {
             mCurrentStackHeight = stackHeight;
             updateAlgorithmHeightAndPadding();
-            updateChildren();
+            requestChildrenUpdate();
         }
     }
 
@@ -376,7 +385,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public View getChildAtRawPosition(float touchX, float touchY) {
         int[] location = new int[2];
         getLocationOnScreen(location);
-        return getChildAtPosition(touchX - location[0],touchY - location[1]);
+        return getChildAtPosition(touchX - location[0], touchY - location[1]);
     }
 
     public View getChildAtPosition(float touchX, float touchY) {
@@ -659,19 +668,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void customScrollBy(int y) {
-        mOwnScrollY += y;
-        updateChildren();
-    }
-
-    public void customScrollTo(int y) {
+    private void customScrollTo(int y) {
         mOwnScrollY = y;
         updateChildren();
     }
 
     @Override
-    protected void onOverScrolled(int scrollX, int scrollY,
-                                  boolean clampedX, boolean clampedY) {
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
             final int oldX = mScrollX;
@@ -1115,7 +1118,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mOnHeightChangedListener != null) {
                 mOnHeightChangedListener.onHeightChanged(view);
             }
-            updateChildren();
+            requestChildrenUpdate();
         }
     }
 
@@ -1125,7 +1128,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildAnimationFinished() {
-        updateChildren();
+        requestChildrenUpdate();
         mAnimationEvents.clear();
     }
 
