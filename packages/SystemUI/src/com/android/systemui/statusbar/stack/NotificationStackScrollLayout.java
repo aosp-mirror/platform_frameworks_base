@@ -265,11 +265,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
         if (!isCurrentlyAnimating() && !mChildHierarchyDirty) {
             applyCurrentState();
-            if (mListener != null) {
-                mListener.onChildLocationsChanged(this);
-            }
         } else {
-            startAnimationToState(mCurrentStackScrollState);
+            startAnimationToState();
         }
     }
 
@@ -831,9 +828,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateScrollStateForRemovedChild(child);
         if (mIsExpanded) {
 
-            // Generate Animations
-            mChildrenToRemoveAnimated.add(child);
-            mChildHierarchyDirty = true;
+            if (!mChildrenToAddAnimated.contains(child)) {
+                // Generate Animations
+                mChildrenToRemoveAnimated.add(child);
+                mChildHierarchyDirty = true;
+            } else {
+                mChildrenToAddAnimated.remove(child);
+            }
         }
     }
 
@@ -905,12 +906,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private void startAnimationToState(StackScrollState finalState) {
+    private void startAnimationToState() {
         if (mChildHierarchyDirty) {
             generateChildHierarchyEvents();
             mChildHierarchyDirty = false;
         }
-        mStateAnimator.startAnimationForEvents(mAnimationEvents, finalState);
+        if (!mAnimationEvents.isEmpty()) {
+            mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState);
+        } else {
+            applyCurrentState();
+        }
     }
 
     private void generateChildHierarchyEvents() {
@@ -1128,6 +1133,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mListenForHeightChanges = false;
         mCurrentStackScrollState.apply();
         mListenForHeightChanges = true;
+        if (mListener != null) {
+            mListener.onChildLocationsChanged(this);
+        }
     }
 
     /**
