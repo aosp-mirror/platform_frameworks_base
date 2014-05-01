@@ -42,6 +42,20 @@ public class Task implements Parcelable {
         public final int EXPONENTIAL = 1;
     }
 
+    private final int taskId;
+    // TODO: Change this to use PersistableBundle when that lands in master.
+    private final Bundle extras;
+    private final ComponentName service;
+    private final boolean requireCharging;
+    private final boolean requireDeviceIdle;
+    private final int networkCapabilities;
+    private final long minLatencyMillis;
+    private final long maxExecutionDelayMillis;
+    private final boolean isPeriodic;
+    private final long intervalMillis;
+    private final long initialBackoffMillis;
+    private final int backoffPolicy;
+
     /**
      * Unique task id associated with this class. This is assigned to your task by the scheduler.
      */
@@ -59,8 +73,8 @@ public class Task implements Parcelable {
     /**
      * Name of the service endpoint that will be called back into by the TaskManager.
      */
-    public String getServiceClassName() {
-        return serviceClassName;
+    public ComponentName getService() {
+        return service;
     }
 
     /**
@@ -132,24 +146,10 @@ public class Task implements Parcelable {
         return backoffPolicy;
     }
 
-    private final int taskId;
-    // TODO: Change this to use PersistableBundle when that lands in master.
-    private final Bundle extras;
-    private final String serviceClassName;
-    private final boolean requireCharging;
-    private final boolean requireDeviceIdle;
-    private final int networkCapabilities;
-    private final long minLatencyMillis;
-    private final long maxExecutionDelayMillis;
-    private final boolean isPeriodic;
-    private final long intervalMillis;
-    private final long initialBackoffMillis;
-    private final int backoffPolicy;
-
     private Task(Parcel in) {
         taskId = in.readInt();
         extras = in.readBundle();
-        serviceClassName = in.readString();
+        service = ComponentName.readFromParcel(in);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
         networkCapabilities = in.readInt();
@@ -164,7 +164,7 @@ public class Task implements Parcelable {
     private Task(Task.Builder b) {
         taskId = b.mTaskId;
         extras = new Bundle(b.mExtras);
-        serviceClassName = b.mTaskServiceClassName;
+        service = b.mTaskService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
         networkCapabilities = b.mNetworkCapabilities;
@@ -185,7 +185,7 @@ public class Task implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(taskId);
         out.writeBundle(extras);
-        out.writeString(serviceClassName);
+        ComponentName.writeToParcel(service, out);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
         out.writeInt(networkCapabilities);
@@ -215,7 +215,7 @@ public class Task implements Parcelable {
     public final class Builder {
         private int mTaskId;
         private Bundle mExtras;
-        private String mTaskServiceClassName;
+        private ComponentName mTaskService;
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
@@ -236,11 +236,11 @@ public class Task implements Parcelable {
          * @param taskId Application-provided id for this task. Subsequent calls to cancel, or
          *               tasks created with the same taskId, will update the pre-existing task with
          *               the same id.
-         * @param cls The endpoint that you implement that will receive the callback from the
+         * @param taskService The endpoint that you implement that will receive the callback from the
          *            TaskManager.
          */
-        public Builder(int taskId, Class<TaskService> cls) {
-            mTaskServiceClassName = cls.getClass().getName();
+        public Builder(int taskId, ComponentName taskService) {
+            mTaskService = taskService;
             mTaskId = taskId;
         }
 
@@ -296,7 +296,7 @@ public class Task implements Parcelable {
          * period. You have no control over when within this interval this task will be executed,
          * only the guarantee that it will be executed at most once within this interval.
          * A periodic task will be repeated until the phone is turned off, however it will only be
-         * persisted if the client app has declared the
+         * persisted beyond boot if the client app has declared the
          * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission. You can schedule
          * periodic tasks without this permission, they simply will cease to exist after the phone
          * restarts.
