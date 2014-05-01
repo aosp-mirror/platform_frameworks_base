@@ -307,6 +307,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mNeedsAnimation =  true;
             }
             requestChildrenUpdate();
+            if (mOnHeightChangedListener != null) {
+                mOnHeightChangedListener.onHeightChanged(null);
+            }
         }
     }
 
