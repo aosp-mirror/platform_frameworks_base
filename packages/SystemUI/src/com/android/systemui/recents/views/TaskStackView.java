@@ -976,8 +976,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             } else {
                 mStack.filterTasks(tv.getTask());
             }
-        } else {
-            Console.logError(getContext(), "Task Filtering TBD");
         }
     }
 

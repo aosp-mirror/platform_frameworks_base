@@ -26,7 +26,7 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
-            public static final boolean EnableTaskFiltering = true;
+            public static final boolean EnableTaskFiltering = false;
             public static final boolean EnableTaskStackClipping = false;
             public static final boolean EnableInfoPane = true;
             public static final boolean EnableSearchButton = false;
