@@ -3291,10 +3291,8 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     if (mCaches.propertySpotShadowStrength > 0) {
         paint.setARGB(casterAlpha * mCaches.propertySpotShadowStrength, 0, 0, 0);
         VertexBuffer spotShadowVertexBuffer;
-        Vector3 lightPosScale(mCaches.propertyLightPosXScale,
-                mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
         VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateSpotShadow(
-                isCasterOpaque, casterPolygon, casterVertexCount, lightPosScale,
+                isCasterOpaque, casterPolygon, casterVertexCount,
                 *currentTransform(), getWidth(), getHeight(), casterBounds, localClip,
                 spotShadowVertexBuffer);
         drawVertexBuffer(vertexBufferMode, spotShadowVertexBuffer, &paint);
