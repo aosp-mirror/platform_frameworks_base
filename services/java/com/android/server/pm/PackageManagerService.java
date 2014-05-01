@@ -5253,7 +5253,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (FileUtils.contains(Environment.getRootDirectory(), codePath)) {
             codeRoot = Environment.getRootDirectory();
         } else if (FileUtils.contains(Environment.getOemDirectory(), codePath)) {
-            codeRoot = Environment.getRootDirectory();
+            codeRoot = Environment.getOemDirectory();
         } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
             codeRoot = Environment.getVendorDirectory();
         } else {
