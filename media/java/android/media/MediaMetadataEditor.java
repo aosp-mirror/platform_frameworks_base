@@ -17,6 +17,7 @@
 package android.media;
 
 import android.graphics.Bitmap;
+import android.media.session.MediaMetadata;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -106,6 +107,10 @@ public abstract class MediaMetadataEditor {
      */
     protected Bundle mEditorMetadata;
 
+    /**
+     * @hide
+     */
+    protected MediaMetadata.Builder mMetadataBuilder;
 
     /**
      * Clears all the pending metadata changes set since the MediaMetadataEditor instance was
@@ -120,6 +125,7 @@ public abstract class MediaMetadataEditor {
         }
         mEditorMetadata.clear();
         mEditorArtwork = null;
+        mMetadataBuilder = new MediaMetadata.Builder();
     }
 
     /**

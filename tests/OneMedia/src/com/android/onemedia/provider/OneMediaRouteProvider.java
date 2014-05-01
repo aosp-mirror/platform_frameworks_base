@@ -158,30 +158,33 @@ public class OneMediaRouteProvider extends RouteProviderService {
             if (newState != Renderer.STATE_ERROR) {
                 mPlaybackState.setErrorMessage(null);
             }
+            long position = -1;
+            if (mRenderer != null) {
+                position = mRenderer.getSeekPosition();
+            }
             switch (newState) {
                 case Renderer.STATE_ENDED:
                 case Renderer.STATE_STOPPED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_STOPPED);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_STOPPED, position, 0);
                     break;
                 case Renderer.STATE_INIT:
                 case Renderer.STATE_PREPARING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_BUFFERING);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_BUFFERING, position, 0);
                     break;
                 case Renderer.STATE_ERROR:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
                     break;
                 case Renderer.STATE_PAUSED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, position, 0);
                     break;
                 case Renderer.STATE_PLAYING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PLAYING);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PLAYING, position, 1);
                     break;
                 default:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
                     mPlaybackState.setErrorMessage("unkown state");
                     break;
             }
-            mPlaybackState.setPosition(mRenderer.getSeekPosition());
 
             mControls.sendPlaybackChangeEvent(mPlaybackState.getState());
         }
@@ -193,8 +196,8 @@ public class OneMediaRouteProvider extends RouteProviderService {
         @Override
         public void onFocusLost() {
             Log.d(TAG, "Focus lost, changing state to " + Renderer.STATE_PAUSED);
-            mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED);
-            mPlaybackState.setPosition(mRenderer.getSeekPosition());
+            mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, mRenderer.getSeekPosition(), 0);
+            mRenderer.onPause();
         }
 
         @Override
