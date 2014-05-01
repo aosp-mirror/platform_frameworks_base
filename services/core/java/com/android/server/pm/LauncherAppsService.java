@@ -38,6 +38,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.content.PackageMonitor;
@@ -50,7 +51,7 @@ import java.util.List;
  * managed profiles. 
  */
 public class LauncherAppsService extends ILauncherApps.Stub {
-
+    private static final boolean DEBUG = false;
     private static final String TAG = "LauncherAppsService";
     private final Context mContext;
     private final PackageManager mPm;
@@ -73,11 +74,17 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     @Override
     public void addOnAppsChangedListener(IOnAppsChangedListener listener) throws RemoteException {
         synchronized (mListeners) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding listener from " + Binder.getCallingUserHandle());
+            }
             if (mListeners.getRegisteredCallbackCount() == 0) {
+                if (DEBUG) {
+                    Log.d(TAG, "Starting package monitoring");
+                }
                 startWatchingPackageBroadcasts();
             }
             mListeners.unregister(listener);
-            mListeners.register(listener);
+            mListeners.register(listener, Binder.getCallingUserHandle());
         }
     }
 
@@ -89,6 +96,9 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     public void removeOnAppsChangedListener(IOnAppsChangedListener listener)
             throws RemoteException {
         synchronized (mListeners) {
+            if (DEBUG) {
+                Log.d(TAG, "Removing listener from " + Binder.getCallingUserHandle());
+            }
             mListeners.unregister(listener);
             if (mListeners.getRegisteredCallbackCount() == 0) {
                 stopWatchingPackageBroadcasts();
@@ -107,11 +117,17 @@ public class LauncherAppsService extends ILauncherApps.Stub {
      * Unregister package broadcast receiver
      */
     private void stopWatchingPackageBroadcasts() {
+        if (DEBUG) {
+            Log.d(TAG, "Stopped watching for packages");
+        }
         mPackageMonitor.unregister();
     }
 
     void checkCallbackCount() {
-        synchronized (LauncherAppsService.this) {
+        synchronized (mListeners) {
+            if (DEBUG) {
+                Log.d(TAG, "Callback count = " + mListeners.getRegisteredCallbackCount());
+            }
             if (mListeners.getRegisteredCallbackCount() == 0) {
                 stopWatchingPackageBroadcasts();
             }
@@ -223,13 +239,44 @@ public class LauncherAppsService extends ILauncherApps.Stub {
 
     private class MyPackageMonitor extends PackageMonitor {
 
+        /** Checks if user is a profile of or same as listeningUser. */
+        private boolean isProfileOf(UserHandle user, UserHandle listeningUser, String debugMsg) {
+            if (user.getIdentifier() == listeningUser.getIdentifier()) {
+                if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
+                return true;
+            }
+            long ident = Binder.clearCallingIdentity();
+            try {
+                UserInfo userInfo = mUm.getUserInfo(user.getIdentifier());
+                UserInfo listeningUserInfo = mUm.getUserInfo(listeningUser.getIdentifier());
+                if (userInfo == null || listeningUserInfo == null
+                        || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
+                        || userInfo.profileGroupId != listeningUserInfo.profileGroupId) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Not delivering msg from " + user + " to " + listeningUser + ":"
+                                + debugMsg);
+                    }
+                    return false;
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Delivering msg from " + user + " to " + listeningUser + ":"
+                                + debugMsg);
+                    }
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         @Override
         public void onPackageAdded(String packageName, int uid) {
             UserHandle user = new UserHandle(getChangingUserId());
-            // TODO: if (!isProfile(user)) return;
             final int n = mListeners.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                if (!isProfileOf(user, listeningUser, "onPackageAdded")) continue;
                 try {
                     listener.onPackageAdded(user, packageName);
                 } catch (RemoteException re) {
@@ -244,10 +291,11 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         @Override
         public void onPackageRemoved(String packageName, int uid) {
             UserHandle user = new UserHandle(getChangingUserId());
-            // TODO: if (!isCurrentProfile(user)) return;
             final int n = mListeners.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                if (!isProfileOf(user, listeningUser, "onPackageRemoved")) continue;
                 try {
                     listener.onPackageRemoved(user, packageName);
                 } catch (RemoteException re) {
@@ -262,10 +310,11 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         @Override
         public void onPackageModified(String packageName) {
             UserHandle user = new UserHandle(getChangingUserId());
-            // TODO: if (!isProfile(user)) return;
             final int n = mListeners.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                if (!isProfileOf(user, listeningUser, "onPackageModified")) continue;
                 try {
                     listener.onPackageChanged(user, packageName);
                 } catch (RemoteException re) {
@@ -280,10 +329,11 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         @Override
         public void onPackagesAvailable(String[] packages) {
             UserHandle user = new UserHandle(getChangingUserId());
-            // TODO: if (!isProfile(user)) return;
             final int n = mListeners.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                if (!isProfileOf(user, listeningUser, "onPackagesAvailable")) continue;
                 try {
                     listener.onPackagesAvailable(user, packages, isReplacing());
                 } catch (RemoteException re) {
@@ -298,10 +348,11 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         @Override
         public void onPackagesUnavailable(String[] packages) {
             UserHandle user = new UserHandle(getChangingUserId());
-            // TODO: if (!isProfile(user)) return;
             final int n = mListeners.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                if (!isProfileOf(user, listeningUser, "onPackagesUnavailable")) continue;
                 try {
                     listener.onPackagesUnavailable(user, packages, isReplacing());
                 } catch (RemoteException re) {
@@ -316,7 +367,6 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     }
 
     class PackageCallbackList<T extends IInterface> extends RemoteCallbackList<T> {
-
         @Override
         public void onCallbackDied(T callback, Object cookie) {
             checkCallbackCount();
