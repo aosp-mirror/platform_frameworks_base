@@ -16,6 +16,8 @@
 
 #include "jni.h"
 
+#ifdef USE_OPENGL_RENDERER
+
 #include <Animator.h>
 
 namespace android {
@@ -34,3 +36,5 @@ private:
 };
 
 }
+
+#endif
