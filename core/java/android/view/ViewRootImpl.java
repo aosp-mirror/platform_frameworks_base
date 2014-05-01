@@ -2588,10 +2588,6 @@ public final class ViewRootImpl implements ViewParent,
      * @param canvas The canvas on which to draw.
      */
     private void drawAccessibilityFocusedDrawableIfNeeded(Canvas canvas) {
-        if (!mAttachInfo.mHasWindowFocus) {
-            return;
-        }
-
         final AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
         if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
             return;
