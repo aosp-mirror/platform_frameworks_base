@@ -1077,7 +1077,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildAnimationFinished() {
-        applyCurrentState();
+        updateChildren();
         mAnimationEvents.clear();
     }
 
