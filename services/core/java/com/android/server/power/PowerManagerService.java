@@ -1634,6 +1634,8 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
+            mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
+
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
