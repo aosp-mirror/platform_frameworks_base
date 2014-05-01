@@ -192,7 +192,7 @@ public class StackScrollAlgorithm {
                 clampYTranslation(childViewState, childHeight);
                 // check if we are overlapping with the bottom stack
                 if (childViewState.yTranslation + childHeight + mPaddingBetweenElements
-                        >= bottomStackStart && !mIsExpansionChanging) {
+                        >= bottomStackStart && !mIsExpansionChanging && i != 0) {
                     // TODO: handle overlapping sizes with end stack better
                     // we just collapse this element
                     childViewState.height = mCollapsedSize;
