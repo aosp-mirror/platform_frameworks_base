@@ -47,6 +47,7 @@ interface ITaskCallback {
      * the next one and stop attributing wakelock time to us etc.
      *
      * @param taskId Unique integer used to identify this task.
+     * @param reschedule Whether or not to reschedule this task.
      */
-    void taskFinished(int taskId, boolean taskFailed);
+    void taskFinished(int taskId, boolean reschedule);
 }
