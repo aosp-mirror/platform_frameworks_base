@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,13 +56,12 @@ public class MediaRouteProviderProxy {
     private final String mId;
     private final ComponentName mComponentName;
     private final int mUserId;
+    // Interfaces declared in the manifest
+    private final ArrayList<String> mInterfaces = new ArrayList<String>();
+    private final ArrayList<RouteConnectionRecord> mConnections = new ArrayList<RouteConnectionRecord>();
+    private final Handler mHandler = new Handler();
 
     private Intent mBindIntent;
-    // Interfaces declared in the manifest
-    private ArrayList<String> mInterfaces;
-    private ArrayList<RouteConnectionRecord> mConnections = new ArrayList<RouteConnectionRecord>();
-    private Handler mHandler = new Handler();
-
     private IRouteProvider mBinder;
     private boolean mRunning;
     private boolean mInterested;
@@ -76,7 +76,9 @@ public class MediaRouteProviderProxy {
         mId = id;
         mComponentName = component;
         mUserId = uid;
-        mInterfaces = interfaces;
+        if (interfaces != null) {
+            mInterfaces.addAll(interfaces);
+        }
         mBindIntent = new Intent(RouteProviderService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mComponentName);
     }
@@ -202,7 +204,7 @@ public class MediaRouteProviderProxy {
 
                     if (connection != null) {
                         RouteConnectionRecord record = new RouteConnectionRecord(
-                                connection);
+                                connection, mComponentName.getPackageName(), mUserId);
                         mConnections.add(record);
                         if (mRouteListener != null) {
                             mRouteListener.onRouteConnected(sessionId, route, request, record);
@@ -232,6 +234,19 @@ public class MediaRouteProviderProxy {
      */
     public String getId() {
         return mId;
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + mId + " " + this);
+        String indent = prefix + "  ";
+
+        pw.println(indent + "component=" + mComponentName.toString());
+        pw.println(indent + "user id=" + mUserId);
+        pw.println(indent + "interfaces=" + mInterfaces.toString());
+        pw.println(indent + "connections=" + mConnections.toString());
+        pw.println(indent + "running=" + mRunning);
+        pw.println(indent + "interested=" + mInterested);
+        pw.println(indent + "bound=" + mBound);
     }
 
     private void updateBinding() {
