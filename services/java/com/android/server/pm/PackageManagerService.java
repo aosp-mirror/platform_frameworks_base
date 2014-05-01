@@ -4322,17 +4322,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
-            if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                // Check all shared libraries and map to their actual file path.
-                // We only do this here for apps not on a system dir, because those
-                // are the only ones that can fail an install due to this.  We
-                // will take care of the system apps by updating all of their
-                // library paths after the scan is done.
-                if (!updateSharedLibrariesLPw(pkg, null)) {
-                    return null;
-                }
-            }
-
             if (pkg.mSharedUserId != null) {
                 suid = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, true);
                 if (suid == null) {
@@ -4441,6 +4430,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             
             if (mSettings.isDisabledSystemPackageLPr(pkg.packageName)) {
                 pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+            }
+
+            if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                // Check all shared libraries and map to their actual file path.
+                // We only do this here for apps not on a system dir, because those
+                // are the only ones that can fail an install due to this.  We
+                // will take care of the system apps by updating all of their
+                // library paths after the scan is done.
+                if (!updateSharedLibrariesLPw(pkg, null)) {
+                    return null;
+                }
             }
 
             if (mFoundPolicyFile) {
@@ -5241,6 +5241,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private String calculateApkRoot(final File codePath) {
+        final File codeRoot;
+        if (FileUtils.contains(Environment.getRootDirectory(), codePath)) {
+            codeRoot = Environment.getRootDirectory();
+        } else if (FileUtils.contains(Environment.getOemDirectory(), codePath)) {
+            codeRoot = Environment.getRootDirectory();
+        } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
+            codeRoot = Environment.getVendorDirectory();
+        } else {
+            // Unrecognized code path; take its top real segment as the apk root:
+            // e.g. /something/app/blah.apk => /something
+            try {
+                File f = codePath.getCanonicalFile();
+                File parent = f.getParentFile();    // non-null because codePath is a file
+                File tmp;
+                while ((tmp = parent.getParentFile()) != null) {
+                    f = parent;
+                    parent = tmp;
+                }
+                codeRoot = f;
+                Slog.w(TAG, "Unrecognized code path "
+                        + codePath + " - using " + codeRoot);
+            } catch (IOException e) {
+                // Can't canonicalize the lib path -- shenanigans?
+                Slog.w(TAG, "Can't canonicalize code path " + codePath);
+                return Environment.getRootDirectory().getPath();
+            }
+        }
+        return codeRoot.getPath();
+    }
+
     // This is the initial scan-time determination of how to handle a given
     // package for purposes of native library location.
     private void setInternalAppNativeLibraryPath(PackageParser.Package pkg,
@@ -5252,11 +5283,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (bundledApk) {
             // If "/system/lib64/apkname" exists, assume that is the per-package
             // native library directory to use; otherwise use "/system/lib/apkname".
-            File lib64 = new File(Environment.getRootDirectory(), LIB64_DIR_NAME);
+            String apkRoot = calculateApkRoot(pkgSetting.codePath);
+            File lib64 = new File(apkRoot, LIB64_DIR_NAME);
             File packLib64 = new File(lib64, apkName);
-            libDir = (packLib64.exists())
-                    ? lib64
-                    : new File(Environment.getRootDirectory(), LIB_DIR_NAME);
+            libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
         } else {
             libDir = mAppLibInstallDir;
         }
