@@ -3195,6 +3195,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    public boolean isExpandedVisible() {
+        return mExpandedVisible;
+    }
+
     public static boolean inBounds(View view, MotionEvent event, boolean orAbove) {
         final int[] location = new int[2];
         view.getLocationInWindow(location);
