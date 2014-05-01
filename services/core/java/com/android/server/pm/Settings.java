@@ -36,6 +36,7 @@ import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.PackageManagerService.DumpState;
 
+import java.util.Collection;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -261,6 +262,11 @@ final class Settings {
 
         return s;
     }
+
+    Collection<SharedUserSetting> getAllSharedUsersLPw() {
+        return mSharedUsers.values();
+    }
+
 
     boolean disableSystemPackageLPw(String name) {
         final PackageSetting p = mPackages.get(name);
