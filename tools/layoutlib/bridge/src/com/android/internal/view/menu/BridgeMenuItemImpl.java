@@ -16,6 +16,12 @@
 
 package com.android.internal.view.menu;
 
+import com.android.layoutlib.bridge.android.BridgeContext;
+
+import android.content.Context;
+import android.view.ContextThemeWrapper;
+import android.view.View;
+
 /**
  * An extension of the {@link MenuItemImpl} to store the view cookie also.
  */
@@ -27,6 +33,7 @@ public class BridgeMenuItemImpl extends MenuItemImpl {
      * at the time of rendering.
      */
     private Object viewCookie;
+    private BridgeContext mContext;
 
     /**
      * Instantiates this menu item.
@@ -34,14 +41,28 @@ public class BridgeMenuItemImpl extends MenuItemImpl {
     BridgeMenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
             CharSequence title, int showAsAction) {
         super(menu, group, id, categoryOrder, ordering, title, showAsAction);
+        Context context = menu.getContext();
+        if (context instanceof ContextThemeWrapper) {
+            context = ((ContextThemeWrapper) context).getBaseContext();
+        }
+        if (context instanceof BridgeContext) {
+            mContext = ((BridgeContext) context);
+        }
     }
-
 
     public Object getViewCookie() {
         return viewCookie;
     }
 
     public void setViewCookie(Object viewCookie) {
+        // If the menu item has an associated action provider view,
+        // directly set the cookie in the view to cookie map stored in BridgeContext.
+        View actionView = getActionView();
+        if (actionView != null && mContext != null) {
+            mContext.addViewKey(actionView, viewCookie);
+            // We don't need to add the view cookie to the this item now. But there's no harm in
+            // storing it, in case we need it in the future.
+        }
         this.viewCookie = viewCookie;
     }
 }
