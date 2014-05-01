@@ -4701,7 +4701,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
                 }
             }
-
             pkgSetting.uidError = uidError;
         }
 
@@ -5281,7 +5280,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private String calculateApkRoot(final File codePath) {
+    private String calculateApkRoot(final String codePathString) {
+        final File codePath = new File(codePathString);
         final File codeRoot;
         if (FileUtils.contains(Environment.getRootDirectory(), codePath)) {
             codeRoot = Environment.getRootDirectory();
@@ -5318,12 +5318,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageSetting pkgSetting) {
         // "bundled" here means system-installed with no overriding update
         final boolean bundledApk = isSystemApp(pkg) && !isUpdatedSystemApp(pkg);
-        final String apkName = getApkName(pkgSetting.codePathString);
+        final String apkName = getApkName(pkg.applicationInfo.sourceDir);
         final File libDir;
         if (bundledApk) {
             // If "/system/lib64/apkname" exists, assume that is the per-package
             // native library directory to use; otherwise use "/system/lib/apkname".
-            String apkRoot = calculateApkRoot(pkgSetting.codePath);
+            String apkRoot = calculateApkRoot(pkg.applicationInfo.sourceDir);
             File lib64 = new File(apkRoot, LIB64_DIR_NAME);
             File packLib64 = new File(lib64, apkName);
             libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
