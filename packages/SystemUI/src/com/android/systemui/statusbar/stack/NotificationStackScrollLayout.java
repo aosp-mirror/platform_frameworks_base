@@ -238,6 +238,25 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @return whether the height of the layout needs to be adapted, in order to ensure that the
+     *         last child is not in the bottom stack.
+     */
+    private boolean needsHeightAdaption() {
+        View lastChild = getLastChildNotGone();
+        View firstChild = getFirstChildNotGone();
+        boolean isLastChildExpanded = isViewExpanded(lastChild);
+        return isLastChildExpanded && lastChild != firstChild;
+    }
+
+    private boolean isViewExpanded(View view) {
+        if (view != null) {
+            ExpandableView expandView = (ExpandableView) view;
+            return expandView.getActualHeight() > mCollapsedSize;
+        }
+        return false;
+    }
+
+    /**
      * Updates the children views according to the stack scroll algorithm. Call this whenever
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
@@ -682,7 +701,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
 
             scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
-            if (scrollRange > 0 && getChildCount() > 0) {
+            if (scrollRange > 0) {
+                View lastChild = getLastChildNotGone();
+                if (isViewExpanded(lastChild)) {
+                    // last child is expanded, so we have to ensure that it can exit the
+                    // bottom stack
+                    scrollRange += mCollapsedSize + mPaddingBetweenElements;
+                }
                 // We want to at least be able collapse the first item and not ending in a weird
                 // end state.
                 scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight - mCollapsedSize);
@@ -697,6 +722,20 @@ public class NotificationStackScrollLayout extends ViewGroup
     private View getFirstChildNotGone() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return the last child which has visibility unequal to GONE
+     */
+    private View getLastChildNotGone() {
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE) {
                 return child;
@@ -1040,7 +1079,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getEmptyBottomMargin() {
-        return Math.max(getHeight() - mContentHeight, 0);
+        int emptyMargin = mMaxLayoutHeight - mContentHeight;
+        if (needsHeightAdaption()) {
+            emptyMargin = emptyMargin - mCollapsedSize - mBottomStackPeekSize;
+        }
+        return Math.max(emptyMargin, 0);
     }
 
     public void onExpansionStarted() {
