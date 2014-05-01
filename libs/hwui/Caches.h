@@ -352,13 +352,10 @@ public:
     void initTempProperties();
     void setTempProperty(const char* name, const char* value);
 
-    // These scaling factors range from 0 to 1, to scale the light position
-    // within the bound of (screenwidth, screenheight, max(screenwidth, screenheight));
-    // The default scale is (0.5, 0, 1) which put the light at
-    // (screenwidth / 2, 0, max(screenwidth, screenheight)).
-    float propertyLightPosXScale;
-    float propertyLightPosYScale;
-    float propertyLightPosZScale;
+    float propertyLightDiameter;
+    float propertyLightPosY;
+    float propertyLightPosZ;
+    float propertyAmbientRatio;
     int propertyAmbientShadowStrength;
     int propertySpotShadowStrength;
 
