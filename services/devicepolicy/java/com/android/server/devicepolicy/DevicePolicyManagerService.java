@@ -3099,6 +3099,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    public void forwardMatchingIntents(ComponentName who, IntentFilter filter, int flags) {
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            IPackageManager pm = AppGlobals.getPackageManager();
+            long id = Binder.clearCallingIdentity();
+            try {
+                if ((flags & DevicePolicyManager.FLAG_TO_PRIMARY_USER) != 0) {
+                    pm.addForwardingIntentFilter(filter, callingUserId, UserHandle.USER_OWNER);
+                }
+                if ((flags & DevicePolicyManager.FLAG_TO_MANAGED_PROFILE) != 0) {
+                    pm.addForwardingIntentFilter(filter, UserHandle.USER_OWNER, callingUserId);
+                }
+            } catch (RemoteException re) {
+                // Shouldn't happen
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    public void clearForwardingIntentFilters(ComponentName who) {
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            IPackageManager pm = AppGlobals.getPackageManager();
+            long id = Binder.clearCallingIdentity();
+            try {
+                pm.clearForwardingIntentFilters(callingUserId);
+                pm.clearForwardingIntentFilters(UserHandle.USER_OWNER);
+            } catch (RemoteException re) {
+                // Shouldn't happen
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
     @Override
     public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());

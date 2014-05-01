@@ -131,6 +131,8 @@ final class Settings {
     private static final String TAG_PACKAGE = "pkg";
     private static final String TAG_PERSISTENT_PREFERRED_ACTIVITIES =
             "persistent-preferred-activities";
+    static final String TAG_FORWARDING_INTENT_FILTERS =
+            "forwarding-intent-filters";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -184,6 +186,10 @@ final class Settings {
     // associated with particular intent filters.
     final SparseArray<PersistentPreferredIntentResolver> mPersistentPreferredActivities =
             new SparseArray<PersistentPreferredIntentResolver>();
+
+    // For every user, it is used to find to which other users the intent can be forwarded.
+    final SparseArray<ForwardingIntentResolver> mForwardingIntentResolvers =
+            new SparseArray<ForwardingIntentResolver>();
 
     final HashMap<String, SharedUserSetting> mSharedUsers =
             new HashMap<String, SharedUserSetting>();
@@ -837,6 +843,15 @@ final class Settings {
         return ppir;
     }
 
+    ForwardingIntentResolver editForwardingIntentResolverLPw(int userId) {
+        ForwardingIntentResolver fir = mForwardingIntentResolvers.get(userId);
+        if (fir == null) {
+            fir = new ForwardingIntentResolver();
+            mForwardingIntentResolvers.put(userId, fir);
+        }
+        return fir;
+    }
+
     private File getUserPackagesStateFile(int userId) {
         return new File(Environment.getUserSystemDirectory(userId), "package-restrictions.xml");
     }
@@ -947,6 +962,28 @@ final class Settings {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <" + TAG_PERSISTENT_PREFERRED_ACTIVITIES + ">: "
                         + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+
+    private void readForwardingIntentFiltersLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_ITEM)) {
+                ForwardingIntentFilter fif = new ForwardingIntentFilter(parser);
+                editForwardingIntentResolverLPw(userId).addFilter(fif);
+            } else {
+                String msg = "Unknown element under " +  TAG_FORWARDING_INTENT_FILTERS + ": " +
+                        parser.getName();
+                PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                 XmlUtils.skipCurrentTag(parser);
             }
         }
@@ -1080,6 +1117,8 @@ final class Settings {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
                     readPersistentPreferredActivitiesLPw(parser, userId);
+                } else if (tagName.equals(TAG_FORWARDING_INTENT_FILTERS)) {
+                    readForwardingIntentFiltersLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -1155,6 +1194,20 @@ final class Settings {
             }
         }
         serializer.endTag(null, TAG_PERSISTENT_PREFERRED_ACTIVITIES);
+    }
+
+    void writeForwardingIntentFiltersLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, TAG_FORWARDING_INTENT_FILTERS);
+        ForwardingIntentResolver fir = mForwardingIntentResolvers.get(userId);
+        if (fir != null) {
+            for (final ForwardingIntentFilter fif : fir.filterSet()) {
+                serializer.startTag(null, TAG_ITEM);
+                fif.writeToXml(serializer);
+                serializer.endTag(null, TAG_ITEM);
+            }
+        }
+        serializer.endTag(null, TAG_FORWARDING_INTENT_FILTERS);
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1254,6 +1307,8 @@ final class Settings {
             writePreferredActivitiesLPr(serializer, userId, true);
 
             writePersistentPreferredActivitiesLPr(serializer, userId);
+
+            writeForwardingIntentFiltersLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
@@ -1872,6 +1927,10 @@ final class Settings {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readPersistentPreferredActivitiesLPw(parser, 0);
+                } else if (tagName.equals(TAG_FORWARDING_INTENT_FILTERS)) {
+                    // TODO: check whether this is okay! as it is very
+                    // similar to how preferred-activities are treated
+                    readForwardingIntentFiltersLPw(parser, 0);
                 } else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
                 } else if (tagName.equals("cleaning-package")) {
