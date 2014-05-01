@@ -512,14 +512,21 @@ public interface ViewParent {
     /**
      * Request a fling from a nested scroll.
      *
+     * <p>This method signifies that a nested scrolling child has detected suitable conditions
+     * for a fling. Generally this means that a touch scroll has ended with a
+     * {@link VelocityTracker velocity} in the direction of scrolling that meets or exceeds
+     * the {@link ViewConfiguration#getScaledMinimumFlingVelocity() minimum fling velocity}
+     * along a scrollable axis.</p>
+     *
      * <p>If a nested scrolling child view would normally fling but it is at the edge of
-     * its own content, it can delegate the fling to its nested scrolling parent instead.
-     * This method allows the parent to optionally consume the fling.</p>
+     * its own content, it can use this method to delegate the fling to its nested scrolling
+     * parent instead. The parent may optionally consume the fling or observe a child fling.</p>
      *
      * @param target View that initiated the nested scroll
      * @param velocityX Horizontal velocity in pixels per second.
      * @param velocityY Vertical velocity in pixels per second
-     * @return true if this parent consumed the fling
+     * @param consumed true if the child consumed the fling, false otherwise
+     * @return true if this parent consumed or otherwise reacted to the fling
      */
-    public boolean onNestedFling(View target, float velocityX, float velocityY);
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed);
 }

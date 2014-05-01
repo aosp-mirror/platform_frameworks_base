@@ -1565,10 +1565,10 @@ public class ScrollView extends FrameLayout {
     }
 
     private void flingWithNestedDispatch(int velocityY) {
-        if (mScrollY == 0 && velocityY < 0 ||
-                mScrollY == getScrollRange() && velocityY > 0) {
-            dispatchNestedFling(0, velocityY);
-        } else {
+        final boolean canFling = (mScrollY > 0 || velocityY > 0) &&
+                (mScrollY < getScrollRange() || velocityY < 0);
+        dispatchNestedFling(0, velocityY, canFling);
+        if (canFling) {
             fling(velocityY);
         }
     }
@@ -1627,6 +1627,12 @@ public class ScrollView extends FrameLayout {
         return (nestedScrollAxes & SCROLL_AXIS_VERTICAL) != 0;
     }
 
+    @Override
+    public void onNestedScrollAccepted(View child, View target, int axes) {
+        super.onNestedScrollAccepted(child, target, axes);
+        startNestedScroll(SCROLL_AXIS_VERTICAL);
+    }
+
     /**
      * @inheritDoc
      */
@@ -1638,16 +1644,23 @@ public class ScrollView extends FrameLayout {
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
             int dxUnconsumed, int dyUnconsumed) {
+        final int oldScrollY = mScrollY;
         scrollBy(0, dyUnconsumed);
+        final int myConsumed = mScrollY - oldScrollY;
+        final int myUnconsumed = dyUnconsumed - myConsumed;
+        dispatchNestedScroll(0, myConsumed, 0, myUnconsumed, null);
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public boolean onNestedFling(View target, float velocityX, float velocityY) {
-        flingWithNestedDispatch((int) velocityY);
-        return true;
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        if (!consumed) {
+            flingWithNestedDispatch((int) velocityY);
+            return true;
+        }
+        return false;
     }
 
     @Override

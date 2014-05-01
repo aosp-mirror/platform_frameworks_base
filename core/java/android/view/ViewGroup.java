@@ -2342,7 +2342,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (disallowIntercept) {
             mGroupFlags |= FLAG_DISALLOW_INTERCEPT;
-            stopNestedScroll();
         } else {
             mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
         }
@@ -5914,7 +5913,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @inheritDoc
      */
     @Override
-    public boolean onNestedFling(View target, float velocityX, float velocityY) {
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         return false;
     }
 

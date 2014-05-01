@@ -17,7 +17,9 @@
 package com.android.internal.app;
 
 import android.animation.ValueAnimator;
+import android.content.res.TypedArray;
 import android.view.ViewParent;
+import com.android.internal.R;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
@@ -41,7 +43,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
@@ -57,7 +58,6 @@ import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * WindowDecorActionBar is the ActionBar implementation used
@@ -66,7 +66,8 @@ import java.util.Map;
  * across both the ActionBarView at the top of the screen and
  * a horizontal LinearLayout at the bottom which is normally hidden.
  */
-public class WindowDecorActionBar extends ActionBar {
+public class WindowDecorActionBar extends ActionBar implements
+        ActionBarOverlayLayout.ActionBarVisibilityCallback {
     private static final String TAG = "WindowDecorActionBar";
 
     private Context mContext;
@@ -116,6 +117,7 @@ public class WindowDecorActionBar extends ActionBar {
 
     private Animator mCurrentShowAnim;
     private boolean mShowHideAnimationEnabled;
+    boolean mHideOnContentScroll;
 
     final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
@@ -132,7 +134,7 @@ public class WindowDecorActionBar extends ActionBar {
             mCurrentShowAnim = null;
             completeDeferredDestroyActionMode();
             if (mOverlayLayout != null) {
-                mOverlayLayout.requestFitSystemWindows();
+                mOverlayLayout.requestApplyInsets();
             }
         }
     };
@@ -183,7 +185,7 @@ public class WindowDecorActionBar extends ActionBar {
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
                 com.android.internal.R.id.action_bar_overlay_layout);
         if (mOverlayLayout != null) {
-            mOverlayLayout.setActionBar(this);
+            mOverlayLayout.setActionBarVisibilityCallback(this);
         }
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mContextView = (ActionBarContextView) decor.findViewById(
@@ -213,6 +215,14 @@ public class WindowDecorActionBar extends ActionBar {
         ActionBarPolicy abp = ActionBarPolicy.get(mContext);
         setHomeButtonEnabled(abp.enableHomeButtonByDefault() || homeAsUp);
         setHasEmbeddedTabs(abp.hasEmbeddedTabs());
+
+        final TypedArray a = mContext.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
+        if (a.getBoolean(R.styleable.ActionBar_hideOnContentScroll, false)) {
+            setHideOnContentScrollEnabled(true);
+        }
+        a.recycle();
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -234,17 +244,14 @@ public class WindowDecorActionBar extends ActionBar {
             if (isInTabMode) {
                 mTabScrollView.setVisibility(View.VISIBLE);
                 if (mOverlayLayout != null) {
-                    mOverlayLayout.requestFitSystemWindows();
+                    mOverlayLayout.requestApplyInsets();
                 }
             } else {
                 mTabScrollView.setVisibility(View.GONE);
             }
         }
         mActionView.setCollapsable(!mHasEmbeddedTabs && isInTabMode);
-    }
-
-    public boolean hasNonEmbeddedTabs() {
-        return !mHasEmbeddedTabs && getNavigationMode() == NAVIGATION_MODE_TABS;
+        mOverlayLayout.setHasNonEmbeddedTabs(!mHasEmbeddedTabs && isInTabMode);
     }
 
     private void ensureTabsExist() {
@@ -279,7 +286,7 @@ public class WindowDecorActionBar extends ActionBar {
         }
     }
 
-    public void setWindowVisibility(int visibility) {
+    public void onWindowVisibilityChanged(int visibility) {
         mCurWindowVisibility = visibility;
     }
 
@@ -453,6 +460,7 @@ public class WindowDecorActionBar extends ActionBar {
             mActionMode.finish();
         }
 
+        mOverlayLayout.setHideOnContentScrollEnabled(false);
         mContextView.killMode();
         ActionModeImpl mode = new ActionModeImpl(callback);
         if (mode.dispatchOnCreate()) {
@@ -464,7 +472,7 @@ public class WindowDecorActionBar extends ActionBar {
                 if (mSplitView.getVisibility() != View.VISIBLE) {
                     mSplitView.setVisibility(View.VISIBLE);
                     if (mOverlayLayout != null) {
-                        mOverlayLayout.requestFitSystemWindows();
+                        mOverlayLayout.requestApplyInsets();
                     }
                 }
             }
@@ -652,6 +660,35 @@ public class WindowDecorActionBar extends ActionBar {
         }
     }
 
+    @Override
+    public void setHideOnContentScrollEnabled(boolean hideOnContentScroll) {
+        if (hideOnContentScroll && !mOverlayLayout.isInOverlayMode()) {
+            throw new IllegalStateException("Action bar must be in overlay mode " +
+                    "(Window.FEATURE_OVERLAY_ACTION_BAR) to enable hide on content scroll");
+        }
+        mHideOnContentScroll = hideOnContentScroll;
+        mOverlayLayout.setHideOnContentScrollEnabled(hideOnContentScroll);
+    }
+
+    @Override
+    public boolean isHideOnContentScrollEnabled() {
+        return mOverlayLayout.isHideOnContentScrollEnabled();
+    }
+
+    @Override
+    public int getHideOffset() {
+        return mOverlayLayout.getActionBarHideOffset();
+    }
+
+    @Override
+    public void setHideOffset(int offset) {
+        if (offset != 0 && !mOverlayLayout.isInOverlayMode()) {
+            throw new IllegalStateException("Action bar must be in overlay mode " +
+                    "(Window.FEATURE_OVERLAY_ACTION_BAR) to set a non-zero hide offset");
+        }
+        mOverlayLayout.setActionBarHideOffset(offset);
+    }
+
     private static boolean checkShowingFlags(boolean hiddenByApp, boolean hiddenBySystem,
             boolean showingForMode) {
         if (showingForMode) {
@@ -737,7 +774,7 @@ public class WindowDecorActionBar extends ActionBar {
             mShowListener.onAnimationEnd(null);
         }
         if (mOverlayLayout != null) {
-            mOverlayLayout.requestFitSystemWindows();
+            mOverlayLayout.requestApplyInsets();
         }
     }
 
@@ -781,11 +818,7 @@ public class WindowDecorActionBar extends ActionBar {
     }
 
     public boolean isShowing() {
-        return mNowShowing;
-    }
-
-    public boolean isSystemShowing() {
-        return !mHiddenBySystem;
+        return mNowShowing && getHideOffset() < getHeight();
     }
 
     void animateToMode(boolean toActionMode) {
@@ -844,6 +877,18 @@ public class WindowDecorActionBar extends ActionBar {
         mActionView.setHomeActionContentDescription(resId);
     }
 
+    @Override
+    public void onContentScrollStarted() {
+        if (mCurrentShowAnim != null) {
+            mCurrentShowAnim.cancel();
+            mCurrentShowAnim = null;
+        }
+    }
+
+    @Override
+    public void onContentScrollStopped() {
+    }
+
     /**
      * @hide 
      */
@@ -894,6 +939,7 @@ public class WindowDecorActionBar extends ActionBar {
             // Clear out the context mode views after the animation finishes
             mContextView.closeMode();
             mActionView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            mOverlayLayout.setHideOnContentScrollEnabled(mHideOnContentScroll);
 
             mActionMode = null;
         }
@@ -1204,6 +1250,7 @@ public class WindowDecorActionBar extends ActionBar {
                 break;
         }
         mActionView.setCollapsable(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
+        mOverlayLayout.setHasNonEmbeddedTabs(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
     }
 
     @Override

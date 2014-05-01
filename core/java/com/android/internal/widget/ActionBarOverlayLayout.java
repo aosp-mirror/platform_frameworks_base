@@ -16,18 +16,22 @@
 
 package com.android.internal.widget;
 
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.view.ViewGroup;
-import android.view.WindowInsets;
-import com.android.internal.app.WindowDecorActionBar;
-
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.util.IntProperty;
+import android.util.Property;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
+import android.view.WindowInsets;
+import android.widget.OverScroller;
 
 /**
  * Special layout for the containing of an overlay action bar (and its
@@ -38,7 +42,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
     private static final String TAG = "ActionBarOverlayLayout";
 
     private int mActionBarHeight;
-    private WindowDecorActionBar mActionBar;
+    //private WindowDecorActionBar mActionBar;
     private int mWindowVisibility = View.VISIBLE;
 
     // The main UI elements that we handle the layout of.
@@ -54,6 +58,10 @@ public class ActionBarOverlayLayout extends ViewGroup {
     private boolean mIgnoreWindowContentOverlay;
 
     private boolean mOverlayMode;
+    private boolean mHasNonEmbeddedTabs;
+    private boolean mHideOnContentScroll;
+    private boolean mAnimatingForFling;
+    private int mHideOnContentScrollReference;
     private int mLastSystemUiVisibility;
     private final Rect mBaseContentInsets = new Rect();
     private final Rect mLastBaseContentInsets = new Rect();
@@ -61,6 +69,84 @@ public class ActionBarOverlayLayout extends ViewGroup {
     private final Rect mBaseInnerInsets = new Rect();
     private final Rect mInnerInsets = new Rect();
     private final Rect mLastInnerInsets = new Rect();
+
+    private ActionBarVisibilityCallback mActionBarVisibilityCallback;
+
+    private final int ACTION_BAR_ANIMATE_DELAY = 600; // ms
+
+    private OverScroller mFlingEstimator;
+
+    private ViewPropertyAnimator mCurrentActionBarTopAnimator;
+    private ViewPropertyAnimator mCurrentActionBarBottomAnimator;
+
+    private final Animator.AnimatorListener mTopAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mCurrentActionBarTopAnimator = null;
+            mAnimatingForFling = false;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mCurrentActionBarTopAnimator = null;
+            mAnimatingForFling = false;
+        }
+    };
+
+    private final Animator.AnimatorListener mBottomAnimatorListener =
+            new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mCurrentActionBarBottomAnimator = null;
+            mAnimatingForFling = false;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mCurrentActionBarBottomAnimator = null;
+            mAnimatingForFling = false;
+        }
+    };
+
+    private final Runnable mRemoveActionBarHideOffset = new Runnable() {
+        public void run() {
+            haltActionBarHideOffsetAnimations();
+            mCurrentActionBarTopAnimator = mActionBarTop.animate().translationY(0)
+                    .setListener(mTopAnimatorListener);
+            if (mActionBarBottom != null && mActionBarBottom.getVisibility() != GONE) {
+                mCurrentActionBarBottomAnimator = mActionBarBottom.animate().translationY(0)
+                        .setListener(mBottomAnimatorListener);
+            }
+        }
+    };
+
+    private final Runnable mAddActionBarHideOffset = new Runnable() {
+        public void run() {
+            haltActionBarHideOffsetAnimations();
+            mCurrentActionBarTopAnimator = mActionBarTop.animate()
+                    .translationY(-mActionBarTop.getHeight())
+                    .setListener(mTopAnimatorListener);
+            if (mActionBarBottom != null && mActionBarBottom.getVisibility() != GONE) {
+                mCurrentActionBarBottomAnimator = mActionBarBottom.animate()
+                        .translationY(mActionBarBottom.getHeight())
+                        .setListener(mBottomAnimatorListener);
+            }
+        }
+    };
+
+    public static final Property<ActionBarOverlayLayout, Integer> ACTION_BAR_HIDE_OFFSET =
+            new IntProperty<ActionBarOverlayLayout>("actionBarHideOffset") {
+
+                @Override
+                public void setValue(ActionBarOverlayLayout object, int value) {
+                    object.setActionBarHideOffset(value);
+                }
+
+                @Override
+                public Integer get(ActionBarOverlayLayout object) {
+                    return object.getActionBarHideOffset();
+                }
+            };
 
     static final int[] ATTRS = new int [] {
             com.android.internal.R.attr.actionBarSize,
@@ -86,14 +172,22 @@ public class ActionBarOverlayLayout extends ViewGroup {
 
         mIgnoreWindowContentOverlay = context.getApplicationInfo().targetSdkVersion <
                 Build.VERSION_CODES.KITKAT;
+
+        mFlingEstimator = new OverScroller(context);
     }
 
-    public void setActionBar(WindowDecorActionBar impl) {
-        mActionBar = impl;
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        haltActionBarHideOffsetAnimations();
+    }
+
+    public void setActionBarVisibilityCallback(ActionBarVisibilityCallback cb) {
+        mActionBarVisibilityCallback = cb;
         if (getWindowToken() != null) {
             // This is being initialized after being added to a window;
             // make sure to update all state now.
-            mActionBar.setWindowVisibility(mWindowVisibility);
+            mActionBarVisibilityCallback.onWindowVisibilityChanged(mWindowVisibility);
             if (mLastSystemUiVisibility != 0) {
                 int newVis = mLastSystemUiVisibility;
                 onWindowSystemUiVisibilityChanged(newVis);
@@ -112,6 +206,14 @@ public class ActionBarOverlayLayout extends ViewGroup {
         mIgnoreWindowContentOverlay = overlayMode &&
                 getContext().getApplicationInfo().targetSdkVersion <
                         Build.VERSION_CODES.KITKAT;
+    }
+
+    public boolean isInOverlayMode() {
+        return mOverlayMode;
+    }
+
+    public void setHasNonEmbeddedTabs(boolean hasNonEmbeddedTabs) {
+        mHasNonEmbeddedTabs = hasNonEmbeddedTabs;
     }
 
     public void setShowingForActionMode(boolean showing) {
@@ -140,19 +242,18 @@ public class ActionBarOverlayLayout extends ViewGroup {
         pullChildren();
         final int diff = mLastSystemUiVisibility ^ visible;
         mLastSystemUiVisibility = visible;
-        final boolean barVisible = (visible&SYSTEM_UI_FLAG_FULLSCREEN) == 0;
-        final boolean wasVisible = mActionBar != null ? mActionBar.isSystemShowing() : true;
-        final boolean stable = (visible&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
-        if (mActionBar != null) {
+        final boolean barVisible = (visible & SYSTEM_UI_FLAG_FULLSCREEN) == 0;
+        final boolean stable = (visible & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
+        if (mActionBarVisibilityCallback != null) {
             // We want the bar to be visible if it is not being hidden,
             // or the app has not turned on a stable UI mode (meaning they
             // are performing explicit layout around the action bar).
-            mActionBar.enableContentAnimations(!stable);
-            if (barVisible || !stable) mActionBar.showForSystem();
-            else mActionBar.hideForSystem();
+            mActionBarVisibilityCallback.enableContentAnimations(!stable);
+            if (barVisible || !stable) mActionBarVisibilityCallback.showForSystem();
+            else mActionBarVisibilityCallback.hideForSystem();
         }
-        if ((diff&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
-            if (mActionBar != null) {
+        if ((diff & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+            if (mActionBarVisibilityCallback != null) {
                 requestApplyInsets();
             }
         }
@@ -162,8 +263,8 @@ public class ActionBarOverlayLayout extends ViewGroup {
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         mWindowVisibility = visibility;
-        if (mActionBar != null) {
-            mActionBar.setWindowVisibility(visibility);
+        if (mActionBarVisibilityCallback != null) {
+            mActionBarVisibilityCallback.onWindowVisibilityChanged(visibility);
         }
     }
 
@@ -279,8 +380,8 @@ public class ActionBarOverlayLayout extends ViewGroup {
             // This is the standard space needed for the action bar.  For stable measurement,
             // we can't depend on the size currently reported by it -- this must remain constant.
             topInset = mActionBarHeight;
-            if (mActionBar != null && mActionBar.hasNonEmbeddedTabs()) {
-                View tabs = mActionBarTop.getTabContainer();
+            if (mHasNonEmbeddedTabs) {
+                final View tabs = mActionBarTop.getTabContainer();
                 if (tabs != null) {
                     // If tabs are not embedded, increase space on top to account for them.
                     topInset += mActionBarHeight;
@@ -395,16 +496,138 @@ public class ActionBarOverlayLayout extends ViewGroup {
         return false;
     }
 
+    @Override
+    public boolean onStartNestedScroll(View child, View target, int axes) {
+        if ((axes & SCROLL_AXIS_VERTICAL) == 0 || mActionBarTop.getVisibility() != VISIBLE) {
+            return false;
+        }
+        return mHideOnContentScroll;
+    }
+
+    @Override
+    public void onNestedScrollAccepted(View child, View target, int axes) {
+        super.onNestedScrollAccepted(child, target, axes);
+        mHideOnContentScrollReference = getActionBarHideOffset();
+        haltActionBarHideOffsetAnimations();
+        if (mActionBarVisibilityCallback != null) {
+            mActionBarVisibilityCallback.onContentScrollStarted();
+        }
+    }
+
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
+            int dxUnconsumed, int dyUnconsumed) {
+        mHideOnContentScrollReference += dyConsumed;
+        setActionBarHideOffset(mHideOnContentScrollReference);
+    }
+
+    @Override
+    public void onStopNestedScroll(View target) {
+        super.onStopNestedScroll(target);
+        if (mHideOnContentScroll && !mAnimatingForFling) {
+            if (mHideOnContentScrollReference <= mActionBarTop.getHeight()) {
+                postRemoveActionBarHideOffset();
+            } else {
+                postAddActionBarHideOffset();
+            }
+        }
+        if (mActionBarVisibilityCallback != null) {
+            mActionBarVisibilityCallback.onContentScrollStopped();
+        }
+    }
+
+    @Override
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        if (!mHideOnContentScroll || !consumed) {
+            return false;
+        }
+        if (shouldHideActionBarOnFling(velocityX, velocityY)) {
+            addActionBarHideOffset();
+        } else {
+            removeActionBarHideOffset();
+        }
+        mAnimatingForFling = true;
+        return true;
+    }
+
     void pullChildren() {
         if (mContent == null) {
             mContent = findViewById(com.android.internal.R.id.content);
-            mActionBarTop = (ActionBarContainer)findViewById(
+            mActionBarTop = (ActionBarContainer) findViewById(
                     com.android.internal.R.id.action_bar_container);
             mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
             mActionBarBottom = findViewById(com.android.internal.R.id.split_action_bar);
         }
     }
 
+    public void setHideOnContentScrollEnabled(boolean hideOnContentScroll) {
+        if (hideOnContentScroll != mHideOnContentScroll) {
+            mHideOnContentScroll = hideOnContentScroll;
+            if (!hideOnContentScroll) {
+                stopNestedScroll();
+                haltActionBarHideOffsetAnimations();
+                setActionBarHideOffset(0);
+            }
+        }
+    }
+
+    public boolean isHideOnContentScrollEnabled() {
+        return mHideOnContentScroll;
+    }
+
+    public int getActionBarHideOffset() {
+        return -((int) mActionBarTop.getTranslationY());
+    }
+
+    public void setActionBarHideOffset(int offset) {
+        haltActionBarHideOffsetAnimations();
+        final int topHeight = mActionBarTop.getHeight();
+        offset = Math.max(0, Math.min(offset, topHeight));
+        mActionBarTop.setTranslationY(-offset);
+        if (mActionBarBottom != null && mActionBarBottom.getVisibility() != GONE) {
+            // Match the hide offset proportionally for a split bar
+            final float fOffset = (float) offset / topHeight;
+            final int bOffset = (int) (mActionBarBottom.getHeight() * fOffset);
+            mActionBarBottom.setTranslationY(bOffset);
+        }
+    }
+
+    private void haltActionBarHideOffsetAnimations() {
+        removeCallbacks(mRemoveActionBarHideOffset);
+        removeCallbacks(mAddActionBarHideOffset);
+        if (mCurrentActionBarTopAnimator != null) {
+            mCurrentActionBarTopAnimator.cancel();
+        }
+        if (mCurrentActionBarBottomAnimator != null) {
+            mCurrentActionBarBottomAnimator.cancel();
+        }
+    }
+
+    private void postRemoveActionBarHideOffset() {
+        haltActionBarHideOffsetAnimations();
+        postDelayed(mRemoveActionBarHideOffset, ACTION_BAR_ANIMATE_DELAY);
+    }
+
+    private void postAddActionBarHideOffset() {
+        haltActionBarHideOffsetAnimations();
+        postDelayed(mAddActionBarHideOffset, ACTION_BAR_ANIMATE_DELAY);
+    }
+
+    private void removeActionBarHideOffset() {
+        haltActionBarHideOffsetAnimations();
+        mRemoveActionBarHideOffset.run();
+    }
+
+    private void addActionBarHideOffset() {
+        haltActionBarHideOffsetAnimations();
+        mAddActionBarHideOffset.run();
+    }
+
+    private boolean shouldHideActionBarOnFling(float velocityX, float velocityY) {
+        mFlingEstimator.fling(0, 0, 0, (int) velocityY, 0, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        final int finalY = mFlingEstimator.getFinalY();
+        return finalY > mActionBarTop.getHeight();
+    }
 
     public static class LayoutParams extends MarginLayoutParams {
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -422,5 +645,14 @@ public class ActionBarOverlayLayout extends ViewGroup {
         public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
         }
+    }
+
+    public interface ActionBarVisibilityCallback {
+        void onWindowVisibilityChanged(int visibility);
+        void showForSystem();
+        void hideForSystem();
+        void enableContentAnimations(boolean enable);
+        void onContentScrollStarted();
+        void onContentScrollStopped();
     }
 }
