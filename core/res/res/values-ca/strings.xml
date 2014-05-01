@@ -690,14 +690,14 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats de gestió de drets digitals (DRM, Digital Rights Management). No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar intents de desbloqueig de pantalla"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Canvia la contrasenya de desbloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Canvia la contrasenya de desbloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueig de pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborra totes les dades"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense avisar, restablint les dades de fàbrica."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Defineix el servidor intermediari global del dispositiu"</string>
@@ -707,7 +707,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar les càmeres"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de les càmeres del dispositiu."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Des. funcions en bloq. tecles"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedeix l\'ús d\'algunes funcions en bloqueig de tecles."</string>
   <string-array name="phoneTypes">
