@@ -3573,14 +3573,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         });
         swipeDismiss.setOnSwipeProgressChangedListener(
                 new SwipeDismissLayout.OnSwipeProgressChangedListener() {
+                    private static final float ALPHA_DECREASE = 0.5f;
                     private boolean mIsTranslucent = false;
-
                     @Override
                     public void onSwipeProgressChanged(
                             SwipeDismissLayout layout, float progress, float translate) {
                         WindowManager.LayoutParams newParams = getAttributes();
                         newParams.x = (int) translate;
-                        newParams.alpha = 1 - progress;
+                        newParams.alpha = 1 - (progress * ALPHA_DECREASE);
                         setAttributes(newParams);
 
                         int flags = 0;
