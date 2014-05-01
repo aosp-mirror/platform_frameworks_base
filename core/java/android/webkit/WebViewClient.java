@@ -19,6 +19,7 @@ package android.webkit;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
+import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.ViewRootImpl;
 
@@ -272,11 +273,42 @@ public class WebViewClient {
      *
      * @param view The WebView that is initiating the callback.
      * @param event The key event.
+     * @deprecated This method is subsumed by the more generic onUnhandledInputEvent.
      */
+    @Deprecated
     public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
+        onUnhandledInputEventInternal(view, event);
+    }
+
+    /**
+     * Notify the host application that a input event was not handled by the WebView.
+     * Except system keys, WebView always consumes input events in the normal flow
+     * or if shouldOverrideKeyEvent returns true. This is called asynchronously
+     * from where the event is dispatched. It gives the host application a chance
+     * to handle the unhandled input events.
+     *
+     * Note that if the event is a {@link MotionEvent}, then it's lifetime is only that of the
+     * function call. If the WebViewClient wishes to use the event beyond that, then it <i>must</i>
+     * create a copy of the event.
+     *
+     * It is the responsibility of overriders of this method to call {@link onUnhandledKeyEvent}
+     * when appropriate if they wish to continue receiving events through it.
+     *
+     * @param view The WebView that is initiating the callback.
+     * @param event The input event.
+     */
+    public void onUnhandledInputEvent(WebView view, InputEvent event) {
+        if (event instanceof KeyEvent) {
+            onUnhandledKeyEvent(view, (KeyEvent) event);
+            return;
+        }
+        onUnhandledInputEventInternal(view, event);
+    }
+
+    private void onUnhandledInputEventInternal(WebView view, InputEvent event) {
         ViewRootImpl root = view.getViewRootImpl();
         if (root != null) {
-            root.dispatchUnhandledKey(event);
+            root.dispatchUnhandledInputEvent(event);
         }
     }
 
