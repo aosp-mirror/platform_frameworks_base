@@ -52,7 +52,7 @@ public class SidePropagation extends VisibilityPropagation {
      */
     public static final int BOTTOM = Slide.BOTTOM;
 
-    private float mPropagationSpeed = 4.0f;
+    private float mPropagationSpeed = 3.0f;
     private int mSide = BOTTOM;
 
     /**
@@ -129,8 +129,12 @@ public class SidePropagation extends VisibilityPropagation {
         float maxDistance = getMaxDistance(sceneRoot);
         float distanceFraction = distance/maxDistance;
 
-        return Math.round(transition.getDuration() * directionMultiplier / mPropagationSpeed
-                * distanceFraction);
+        long duration = transition.getDuration();
+        if (duration < 0) {
+            duration = 300;
+        }
+
+        return Math.round(duration * directionMultiplier / mPropagationSpeed * distanceFraction);
     }
 
     private int distance(int viewX, int viewY, int epicenterX, int epicenterY,
