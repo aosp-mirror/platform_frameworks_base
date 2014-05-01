@@ -37,6 +37,8 @@ static struct {
     jmethodID callOnFinished;
 } gRenderNodeAnimatorClassInfo;
 
+#ifdef USE_OPENGL_RENDERER
+
 static JNIEnv* getEnv(JavaVM* vm) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -93,6 +95,8 @@ static void unref(JNIEnv* env, jobject clazz, jlong objPtr) {
     obj->decStrong(0);
 }
 
+#endif
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -100,9 +104,11 @@ static void unref(JNIEnv* env, jobject clazz, jlong objPtr) {
 const char* const kClassPathName = "android/view/RenderNodeAnimator";
 
 static JNINativeMethod gMethods[] = {
+#ifdef USE_OPENGL_RENDERER
     { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IIF)J", (void*) createAnimator },
     { "nSetDuration", "(JI)V", (void*) setDuration },
     { "nUnref", "(J)V", (void*) unref },
+#endif
 };
 
 #define FIND_CLASS(var, className) \
