@@ -2,7 +2,8 @@ page.title=Stacking Notifications
 
 @jd:body
 
-<img src="{@docRoot}wear/images/11_bundles_B.png" height="200" width="169" style="float:right;margin:0 0 20px 40px" />
+<img src="{@docRoot}wear/images/11_bundles_C.png" height="154" width="273" style="float:right;margin:0 0 20px 40px"/>
+<img src="{@docRoot}wear/images/11_bundles_B.png" height="200" width="169" style="clear:both;float:right;margin:0 0 20px 40px" />
 <img src="{@docRoot}wear/images/11_bundles_A.png" height="200" width="169" style="float:right;margin:0 0 20px 40px" />
 
 <p>When creating notifications for a handheld device, you should always aggregate similar
@@ -10,7 +11,7 @@ notifications into a single summary notification. For example, if your app creat
 for received messages, you should not show more than one notification
 on a handheld device&mdash;when more than one is message is received, use a single notification
 to provide a summary such as "2 new messages."</p>
-
+<br />
 <p>However, a summary notification is less useful on an Android wearable because users
 are not able to read details from each message on the wearable (they must open your app on the
 handheld to view more information). So for the wearable device, you should
@@ -25,25 +26,50 @@ only one summary notification on the handheld device.</p>
 Wear</a>.</p>
 
 
-<h2 id="AddGroup">Add Each Notification to a Group</h2>
+<h2 id="AddGroup">Create notifications in stacks</h2>
+
+<div style="float:right">
+  <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+  <div style="width:440;height:246; padding-left:20px">
+    <object type="application/x-shockwave-flash" id="ytapiplayer" data="//www.youtube.com/v/L4LvKOTkZ7Q?enablejsapi=1&amp;playerapiid=ytplayer&amp;version=3&amp;HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1" width="440" height="246" style="visibility: visible;"><param name="allowScriptAccess" value="always"></object>
+    <script type="text/javascript">
+        var params = { allowScriptAccess: "always" };
+        var atts = { id: "ytapiplayer" };
+        swfobject.embedSWF("//www.youtube.com/v/L4LvKOTkZ7Q?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+          "ytapiplayer", "440", "246", "8", null, null, params, atts);
+
+        // Callback used to pause/resume carousel based on video state
+        function onytplayerStateChange(newState) {
+           var isPaused = $("#pauseButton").hasClass("paused");
+           if ((newState == 1) || (newState == 3)) {
+           // if playing or buffering, pause the carousel
+             if (!isPaused) {
+                $("#pauseButton").click();
+             }
+           } else {
+           // otherwise, make sure carousel is running
+             if (isPaused) {
+                $("#pauseButton").click();
+             }
+           }
+        }
+
+        // Callback received when YouTube player loads to setup callback (above)
+        function onYouTubePlayerReady(playerId) {
+          var ytplayer = document.getElementById("ytapiplayer");
+          ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
+        }
+
+    </script>
+  </div>
+</div>
+
 
 <p>To create a stack, call <a
 href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
 <code>setGroup()</code></a> for each notification you want in the stack, passing the same
-group key. For example:</p>
+group key.</p>
 
-<pre style="clear:right">
-final static String GROUP_KEY_EMAILS = "group_key_emails";
-
-NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
-         .setContentTitle("New mail from " + sender)
-         .setContentText(subject)
-         .setSmallIcon(R.drawable.new_mail);
-
-Notification notif = new WearableNotifications.Builder(builder)
-         .setGroup(GROUP_KEY_EMAILS)
-         .build();
-</pre>
 
 <p>By default, notifications appear in the order in which you added them, with the most recent
   notification visible at the top.  You can define a specific position in the group
@@ -52,21 +78,82 @@ href="{@docRoot}reference/android/preview/support/wearable/notifications/Wearabl
 <code>setGroup()</code></a>.</p>
 
 
-<h2 id="AddSummary">Add a Summary Notification</h2>
-
-<p>It's important that you still provide a summary notification that appears on handheld devices.
+<p>It's also important that you still provide a summary notification that appears on handheld devices.
 So in addition to adding each unique notification to the same stack group, also add a summary
 notification, but set its order position to be <a
 href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY"><code>GROUP_ORDER_SUMMARY</code></a>.</p>
 
-<pre>
-Notification summaryNotification = new WearableNotifications.Builder(builder)
-         .setGroup(GROUP_KEY_EMAILS, WearableNotifications.GROUP_ORDER_SUMMARY)
-         .build();
-</pre>
-
 <p>This notification will not appear in your stack of notifications on the wearable, but
 appears as the only notification on the handheld device.
+</p>
+
+
+<p>Here's an example that creates a stack notification for a wearable and
+a summary notification for a handset device:</p>
+
+<pre style="clear:right">
+public void onClick_button_groups () {
+    Bitmap bitmapMila = BitmapFactory.decodeResource(getResources(),
+    		R.drawable.mila128);
+
+    // Nuke all previous notifications and generate unique ids
+    NotificationManagerCompat.from(this).cancelAll();
+    int notificationId = 0;
+
+    // String to represent the group all the notifications will be a part of
+    final String GROUP_KEY_EMAILS = "group_key_messages";
+
+    // Group notification that will be visible on the phone
+    NotificationCompat.Builder builderG = new NotificationCompat.Builder(this)
+            .setContentTitle("2 Pet Notifications")
+            .setContentText("Mila and Dylan both sent messages")
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setLargeIcon(bitmapMila);
+    Notification summaryNotification = new WearableNotifications
+    		.Builder(builderG)
+            .setGroup(GROUP_KEY_EMAILS, 
+            		WearableNotifications.GROUP_ORDER_SUMMARY)
+            .build();
+
+    // Separate notifications that will be visible on the watch
+    Intent viewIntent1 = new Intent(this, MainActivity.class);
+    PendingIntent viewPendingIntent1 =
+          PendingIntent.getActivity(this, notificationId+1, viewIntent1, 0);
+    NotificationCompat.Builder builder1 = new NotificationCompat.Builder(this)
+            .addAction(R.drawable.ic_action_done, "Treat Fed",
+            		viewPendingIntent1)
+            .setContentTitle("Message from Mila")
+            .setContentText("What's for dinner? "
+                            + "Can we have steak?")
+            .setSmallIcon(R.drawable.ic_launcher);
+    Notification notification1 = new WearableNotifications.Builder(builder1)
+            .setGroup(GROUP_KEY_EMAILS)
+            .build();
+
+    Intent viewIntent2 = new Intent(this, MainActivity.class);
+    PendingIntent viewPendingIntent2 =
+          PendingIntent.getActivity(this, notificationId+2, viewIntent2, 0);
+    NotificationCompat.Builder builder2 = new NotificationCompat.Builder(this)
+            .addAction(R.drawable.ic_action_done, "Water Filled",
+            		viewPendingIntent2)
+            .setContentTitle("Message from Dylan")
+            .setContentText("Can you refill our water bowl?")
+            .setSmallIcon(R.drawable.ic_launcher);
+    Notification notification2 = new WearableNotifications.Builder(builder2)
+            .setGroup(GROUP_KEY_EMAILS)
+            .build();
+
+    // Issue the group notification
+    NotificationManagerCompat notificationManager =
+    		NotificationManagerCompat.from(this);
+    notificationManager.notify(notificationId+0, summaryNotification);
+
+    // Issue the separate wear notifications
+    notificationManager.notify(notificationId+2, notification2);
+    notificationManager.notify(notificationId+1, notification1);
+}
+</pre>
+
 
 </body>
 </html>
