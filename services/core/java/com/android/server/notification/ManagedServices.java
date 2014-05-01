@@ -101,7 +101,7 @@ abstract public class ManagedServices {
 
     abstract protected IInterface asInterface(IBinder binder);
 
-    abstract protected void onServiceAdded(IInterface service);
+    abstract protected void onServiceAdded(ManagedServiceInfo info);
 
     protected void onServiceRemovedLocked(ManagedServiceInfo removed) { }
 
@@ -368,11 +368,12 @@ abstract public class ManagedServices {
                             @Override
                             public void onServiceConnected(ComponentName name, IBinder binder) {
                                 boolean added = false;
+                                ManagedServiceInfo info = null;
                                 synchronized (mMutex) {
                                     mServicesBinding.remove(servicesBindingTag);
                                     try {
                                         mService = asInterface(binder);
-                                        ManagedServiceInfo info = newServiceInfo(mService, name,
+                                        info = newServiceInfo(mService, name,
                                                 userid, false /*isSystem*/, this, targetSdkVersion);
                                         binder.linkToDeath(info, 0);
                                         added = mServices.add(info);
@@ -381,7 +382,7 @@ abstract public class ManagedServices {
                                     }
                                 }
                                 if (added) {
-                                    onServiceAdded(mService);
+                                    onServiceAdded(info);
                                 }
                             }
 

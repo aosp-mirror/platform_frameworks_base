@@ -71,7 +71,7 @@ public class Condition implements Parcelable {
         dest.writeParcelable(id, 0);
         dest.writeString(caption);
         dest.writeInt(state);
-        dest.writeInt(flags);
+        dest.writeInt(this.flags);
     }
 
     @Override
@@ -90,6 +90,14 @@ public class Condition implements Parcelable {
         if (state == STATE_UNKNOWN) return "STATE_UNKNOWN";
         if (state == STATE_ERROR) return "STATE_ERROR";
         throw new IllegalArgumentException("state is invalid: " + state);
+    }
+
+    public static String relevanceToString(int flags) {
+        final boolean now = (flags & FLAG_RELEVANT_NOW) != 0;
+        final boolean always = (flags & FLAG_RELEVANT_ALWAYS) != 0;
+        if (!now && !always) return "NONE";
+        if (now && always) return "NOW, ALWAYS";
+        return now ? "NOW" : "ALWAYS";
     }
 
     @Override

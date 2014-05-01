@@ -16,6 +16,8 @@
 
 package android.service.notification;
 
+import android.content.ComponentName;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -25,6 +27,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -51,6 +55,10 @@ public class ZenModeConfig implements Parcelable {
     private static final String SLEEP_ATT_END_HR = "endHour";
     private static final String SLEEP_ATT_END_MIN = "endMin";
 
+    private static final String CONDITION_TAG = "condition";
+    private static final String CONDITION_ATT_COMPONENT = "component";
+    private static final String CONDITION_ATT_ID = "id";
+
     public boolean allowCalls;
     public boolean allowMessages;
 
@@ -59,6 +67,8 @@ public class ZenModeConfig implements Parcelable {
     public int sleepStartMinute;
     public int sleepEndHour;
     public int sleepEndMinute;
+    public ComponentName[] conditionComponents;
+    public Uri[] conditionIds;
 
     public ZenModeConfig() { }
 
@@ -72,6 +82,16 @@ public class ZenModeConfig implements Parcelable {
         sleepStartMinute = source.readInt();
         sleepEndHour = source.readInt();
         sleepEndMinute = source.readInt();
+        int len = source.readInt();
+        if (len > 0) {
+            conditionComponents = new ComponentName[len];
+            source.readTypedArray(conditionComponents, ComponentName.CREATOR);
+        }
+        len = source.readInt();
+        if (len > 0) {
+            conditionIds = new Uri[len];
+            source.readTypedArray(conditionIds, Uri.CREATOR);
+        }
     }
 
     @Override
@@ -88,6 +108,18 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(sleepStartMinute);
         dest.writeInt(sleepEndHour);
         dest.writeInt(sleepEndMinute);
+        if (conditionComponents != null && conditionComponents.length > 0) {
+            dest.writeInt(conditionComponents.length);
+            dest.writeTypedArray(conditionComponents, 0);
+        } else {
+            dest.writeInt(0);
+        }
+        if (conditionIds != null && conditionIds.length > 0) {
+            dest.writeInt(conditionIds.length);
+            dest.writeTypedArray(conditionIds, 0);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     @Override
@@ -98,6 +130,10 @@ public class ZenModeConfig implements Parcelable {
             .append(",sleepMode=").append(sleepMode)
             .append(",sleepStart=").append(sleepStartHour).append('.').append(sleepStartMinute)
             .append(",sleepEnd=").append(sleepEndHour).append('.').append(sleepEndMinute)
+            .append(",conditionComponents=")
+            .append(conditionComponents == null ? null : TextUtils.join(",", conditionComponents))
+            .append(",conditionIds=")
+            .append(conditionIds == null ? null : TextUtils.join(",", conditionIds))
             .append(']').toString();
     }
 
@@ -112,13 +148,16 @@ public class ZenModeConfig implements Parcelable {
                 && other.sleepStartHour == sleepStartHour
                 && other.sleepStartMinute == sleepStartMinute
                 && other.sleepEndHour == sleepEndHour
-                && other.sleepEndMinute == sleepEndMinute;
+                && other.sleepEndMinute == sleepEndMinute
+                && Objects.deepEquals(other.conditionComponents, conditionComponents)
+                && Objects.deepEquals(other.conditionIds, conditionIds);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(allowCalls, allowMessages, sleepMode, sleepStartHour,
-                sleepStartMinute, sleepEndHour, sleepEndMinute);
+                sleepStartMinute, sleepEndHour, sleepEndMinute,
+                Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds));
     }
 
     public boolean isValid() {
@@ -136,9 +175,18 @@ public class ZenModeConfig implements Parcelable {
         if (!ZEN_TAG.equals(tag)) return null;
         final ZenModeConfig rt = new ZenModeConfig();
         final int version = Integer.parseInt(parser.getAttributeValue(null, ZEN_ATT_VERSION));
+        final ArrayList<ComponentName> conditionComponents = new ArrayList<ComponentName>();
+        final ArrayList<Uri> conditionIds = new ArrayList<Uri>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
-            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) return rt;
+            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
+                if (!conditionComponents.isEmpty()) {
+                    rt.conditionComponents = conditionComponents
+                            .toArray(new ComponentName[conditionComponents.size()]);
+                    rt.conditionIds = conditionIds.toArray(new Uri[conditionIds.size()]);
+                }
+                return rt;
+            }
             if (type == XmlPullParser.START_TAG) {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS, false);
@@ -155,10 +203,18 @@ public class ZenModeConfig implements Parcelable {
                     rt.sleepStartMinute = isValidMinute(startMinute) ? startMinute : 0;
                     rt.sleepEndHour = isValidHour(endHour) ? endHour : 0;
                     rt.sleepEndMinute = isValidMinute(endMinute) ? endMinute : 0;
+                } else if (CONDITION_TAG.equals(tag)) {
+                    final ComponentName component =
+                            safeComponentName(parser, CONDITION_ATT_COMPONENT);
+                    final Uri conditionId = safeUri(parser, CONDITION_ATT_ID);
+                    if (component != null && conditionId != null) {
+                        conditionComponents.add(component);
+                        conditionIds.add(conditionId);
+                    }
                 }
             }
         }
-        return rt;
+        throw new IllegalStateException("Failed to reach END_DOCUMENT");
     }
 
     public void writeXml(XmlSerializer out) throws IOException {
@@ -180,6 +236,16 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, SLEEP_ATT_END_MIN, Integer.toString(sleepEndMinute));
         out.endTag(null, SLEEP_TAG);
 
+        if (conditionComponents != null && conditionIds != null
+                && conditionComponents.length == conditionIds.length) {
+            for (int i = 0; i < conditionComponents.length; i++) {
+                out.startTag(null, CONDITION_TAG);
+                out.attribute(null, CONDITION_ATT_COMPONENT,
+                        conditionComponents[i].flattenToString());
+                out.attribute(null, CONDITION_ATT_ID, conditionIds[i].toString());
+                out.endTag(null, CONDITION_TAG);
+            }
+        }
         out.endTag(null, ZEN_TAG);
     }
 
@@ -201,6 +267,18 @@ public class ZenModeConfig implements Parcelable {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return defValue;
         return Integer.valueOf(val);
+    }
+
+    private static ComponentName safeComponentName(XmlPullParser parser, String att) {
+        final String val = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(val)) return null;
+        return ComponentName.unflattenFromString(val);
+    }
+
+    private static Uri safeUri(XmlPullParser parser, String att) {
+        final String val = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(val)) return null;
+        return Uri.parse(val);
     }
 
     @Override

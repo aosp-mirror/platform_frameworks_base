@@ -58,6 +58,8 @@ interface INotificationManager
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
-    oneway void requestZenModeConditions(in IConditionListener callback, boolean requested);
+    oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
     oneway void setZenModeCondition(in Uri conditionId);
+    oneway void setAutomaticZenModeConditions(in Uri[] conditionIds);
+    Condition[] getAutomaticZenModeConditions();
 }
