@@ -16,26 +16,30 @@
 
 package android.graphics.drawable;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
-import android.util.MathUtils;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
 /**
  * Draws a Quantum Paper ripple.
  */
 class Ripple {
-    private static final TimeInterpolator INTERPOLATOR = new DecelerateInterpolator(2.0f);
+    private static final TimeInterpolator INTERPOLATOR = new DecelerateInterpolator();
 
     /** Starting radius for a ripple. */
     private static final int STARTING_RADIUS_DP = 16;
 
     /** Radius when finger is outside view bounds. */
     private static final int OUTSIDE_RADIUS_DP = 16;
+
+    /** Radius when finger is inside view bounds. */
+    private static final int INSIDE_RADIUS_DP = 96;
 
     /** Margin when constraining outside touches (fraction of outer radius). */
     private static final float OUTSIDE_MARGIN = 0.8f;
@@ -44,15 +48,52 @@ class Ripple {
     private static final float OUTSIDE_RESISTANCE = 0.7f;
 
     /** Minimum alpha value during a pulse animation. */
-    private static final int PULSE_MIN_ALPHA = 128;
+    private static final float PULSE_MIN_ALPHA = 0.5f;
 
+    /** Duration for animating the trailing edge of the ripple. */
+    private static final int EXIT_DURATION = 600;
+
+    /** Duration for animating the leading edge of the ripple. */
+    private static final int ENTER_DURATION = 400;
+
+    /** Duration for animating the ripple alpha in and out. */
+    private static final int FADE_DURATION = 50;
+
+    /** Minimum elapsed time between start of enter and exit animations. */
+    private static final int EXIT_MIN_DELAY = 200;
+
+    /** Duration for animating between inside and outside touch. */
+    private static final int OUTSIDE_DURATION = 300;
+
+    /** Duration for animating pulses. */
+    private static final int PULSE_DURATION = 400;
+
+    /** Interval between pulses while inside and fully entered. */
+    private static final int PULSE_INTERVAL = 400;
+
+    /** Delay before pulses start. */
+    private static final int PULSE_DELAY = 500;
+
+    private final Drawable mOwner;
+
+    /** Bounds used for computing max radius and containment. */
     private final Rect mBounds;
-    private final Rect mPadding;
 
-    private RippleAnimator mAnimator;
+    /** Configured maximum ripple radius when the center is outside the bounds. */
+    private final int mMaxOutsideRadius;
 
-    private int mMinRadius;
-    private int mOutsideRadius;
+    /** Configured maximum ripple radius. */
+    private final int mMaxInsideRadius;
+
+    private ObjectAnimator mEnter;
+    private ObjectAnimator mExit;
+
+    /** Maximum ripple radius. */
+    private int mMaxRadius;
+
+    private float mOuterRadius;
+    private float mInnerRadius;
+    private float mAlphaMultiplier;
 
     /** Center x-coordinate. */
     private float mX;
@@ -61,46 +102,151 @@ class Ripple {
     private float mY;
 
     /** Whether the center is within the parent bounds. */
-    private boolean mInside;
+    private boolean mInsideBounds;
 
     /** Whether to pulse this ripple. */
-    boolean mPulse;
-    
-    /** Enter state. A value in [0...1] or -1 if not set. */
-    float mEnterState = -1;
+    private boolean mPulseEnabled;
 
-    /** Exit state. A value in [0...1] or -1 if not set. */
-    float mExitState = -1;
+    /** Temporary hack since we can't check finished state of animator. */
+    private boolean mExitFinished;
 
-    /** Outside state. A value in [0...1] or -1 if not set. */
-    float mOutsideState = -1;
-
-    /** Pulse state. A value in [0...1] or -1 if not set. */
-    float mPulseState = -1;
+    /** Whether this ripple has ever moved. */
+    private boolean mHasMoved;
 
     /**
-     * Creates a new ripple with the specified parent bounds, padding, initial
-     * position, and screen density.
+     * Creates a new ripple.
      */
-    public Ripple(Rect bounds, Rect padding, float x, float y, float density, boolean pulse) {
+    public Ripple(Drawable owner, Rect bounds, float density, boolean pulseEnabled) {
+        mOwner = owner;
         mBounds = bounds;
-        mPadding = padding;
-        mInside = mBounds.contains((int) x, (int) y);
-        mPulse = pulse;
+        mPulseEnabled = pulseEnabled;
 
-        mX = x;
-        mY = y;
+        mOuterRadius = (int) (density * STARTING_RADIUS_DP + 0.5f);
+        mMaxOutsideRadius = (int) (density * OUTSIDE_RADIUS_DP + 0.5f);
+        mMaxInsideRadius = (int) (density * INSIDE_RADIUS_DP + 0.5f);
+        mMaxRadius = Math.min(mMaxInsideRadius, Math.max(bounds.width(), bounds.height()));
+    }
 
-        mMinRadius = (int) (density * STARTING_RADIUS_DP + 0.5f);
-        mOutsideRadius = (int) (density * OUTSIDE_RADIUS_DP + 0.5f);
+    public void setOuterRadius(float r) {
+        mOuterRadius = r;
+        invalidateSelf();
     }
-    
-    public void setMinRadius(int minRadius) {
-        mMinRadius = minRadius;
+
+    public float getOuterRadius() {
+        return mOuterRadius;
     }
-    
-    public void setOutsideRadius(int outsideRadius) {
-        mOutsideRadius = outsideRadius;
+
+    public void setInnerRadius(float r) {
+        mInnerRadius = r;
+        invalidateSelf();
+    }
+
+    public float getInnerRadius() {
+        return mInnerRadius;
+    }
+
+    public void setAlphaMultiplier(float a) {
+        mAlphaMultiplier = a;
+        invalidateSelf();
+    }
+
+    public float getAlphaMultiplier() {
+        return mAlphaMultiplier;
+    }
+
+    /**
+     * Returns whether this ripple has finished exiting.
+     */
+    public boolean isFinished() {
+        return mExitFinished;
+    }
+
+    /**
+     * Called when the bounds change.
+     */
+    public void onBoundsChanged() {
+        mMaxRadius = Math.min(mMaxInsideRadius, Math.max(mBounds.width(), mBounds.height()));
+
+        updateInsideBounds();
+    }
+
+    private void updateInsideBounds() {
+        final boolean insideBounds = mBounds.contains((int) (mX + 0.5f), (int) (mY + 0.5f));
+        if (mInsideBounds != insideBounds || !mHasMoved) {
+            mInsideBounds = insideBounds;
+            mHasMoved = true;
+
+            if (insideBounds) {
+                enter();
+            } else {
+                outside();
+            }
+        }
+    }
+
+    /**
+     * Draws the ripple using the specified paint.
+     */
+    public boolean draw(Canvas c, Paint p) {
+        final Rect bounds = mBounds;
+        final float outerRadius = mOuterRadius;
+        final float innerRadius = mInnerRadius;
+        final float alphaMultiplier = mAlphaMultiplier;
+
+        // Cache the paint alpha so we can restore it later.
+        final int paintAlpha = p.getAlpha();
+        final int alpha = (int) (paintAlpha * alphaMultiplier + 0.5f);
+
+        // Apply resistance effect when outside bounds.
+        final float x;
+        final float y;
+        if (mInsideBounds) {
+            x = mX;
+            y = mY;
+        } else {
+            // TODO: We need to do this outside of draw() so that our dirty
+            // bounds accurately reflect resistance.
+            x = looseConstrain(mX, bounds.left, bounds.right,
+                    mOuterRadius * OUTSIDE_MARGIN, OUTSIDE_RESISTANCE);
+            y = looseConstrain(mY, bounds.top, bounds.bottom,
+                    mOuterRadius * OUTSIDE_MARGIN, OUTSIDE_RESISTANCE);
+        }
+
+        final boolean hasContent;
+        if (alphaMultiplier <= 0 || innerRadius >= outerRadius) {
+            // Nothing to draw.
+            hasContent = false;
+        } else if (innerRadius > 0) {
+            // Draw a ring.
+            final float strokeWidth = outerRadius - innerRadius;
+            final float strokeRadius = innerRadius + strokeWidth / 2.0f;
+            p.setAlpha(alpha);
+            p.setStyle(Style.STROKE);
+            p.setStrokeWidth(strokeWidth);
+            c.drawCircle(x, y, strokeRadius, p);
+            hasContent = true;
+        } else if (outerRadius > 0) {
+            // Draw a circle.
+            p.setAlpha(alpha);
+            p.setStyle(Style.FILL);
+            c.drawCircle(x, y, outerRadius, p);
+            hasContent = true;
+        } else {
+            hasContent = false;
+        }
+
+        p.setAlpha(paintAlpha);
+        return hasContent;
+    }
+
+    /**
+     * Returns the maximum bounds for this ripple.
+     */
+    public void getBounds(Rect bounds) {
+        final int x = (int) mX;
+        final int y = (int) mY;
+        final int maxRadius = mMaxRadius;
+        bounds.set(x - maxRadius, y - maxRadius, x + maxRadius, y + maxRadius);
     }
 
     /**
@@ -110,117 +256,90 @@ class Ripple {
         mX = x;
         mY = y;
 
-        final boolean inside = mBounds.contains((int) x, (int) y);
-        if (mInside != inside) {
-            if (mAnimator != null) {
-                mAnimator.outside();
-            }
-            mInside = inside;
-        }
+        updateInsideBounds();
+        invalidateSelf();
     }
 
-    public void onBoundsChanged() {
-        final boolean inside = mBounds.contains((int) mX, (int) mY);
-        if (mInside != inside) {
-            if (mAnimator != null) {
-                mAnimator.outside();
-            }
-            mInside = inside;
+    /**
+     * Starts the exit animation. If {@link #enter()} was called recently, the
+     * animation may be postponed.
+     */
+    public void exit() {
+        mExitFinished = false;
+
+        final ObjectAnimator exit = ObjectAnimator.ofFloat(this, "innerRadius", 0, mMaxRadius);
+        exit.setAutoCancel(true);
+        exit.setDuration(EXIT_DURATION);
+        exit.setInterpolator(INTERPOLATOR);
+        exit.addListener(mAnimationListener);
+
+        if (mEnter != null && mEnter.isStarted()) {
+            // If we haven't been running the enter animation for long enough,
+            // delay the exit animator.
+            final int elapsed = (int) (mEnter.getAnimatedFraction() * mEnter.getDuration());
+            final int delay = Math.max(0, EXIT_MIN_DELAY - elapsed);
+            exit.setStartDelay(delay);
         }
+
+        exit.start();
+
+        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 0);
+        fade.setAutoCancel(true);
+        fade.setDuration(EXIT_DURATION);
+        fade.start();
+
+        mExit = exit;
     }
 
-    public RippleAnimator animate() {
-        if (mAnimator == null) {
-            mAnimator = new RippleAnimator(this);
-        }
-        return mAnimator;
+    private void invalidateSelf() {
+        mOwner.invalidateSelf();
     }
 
-    public boolean draw(Canvas c, Paint p) {
-        final Rect bounds = mBounds;
-        final Rect padding = mPadding;
-        final float dX = Math.max(mX - bounds.left, bounds.right - mX);
-        final float dY = Math.max(mY - bounds.top, bounds.bottom - mY);
-        final int maxRadius = (int) Math.ceil(Math.sqrt(dX * dX + dY * dY));
+    /**
+     * Starts the enter animation.
+     */
+    private void enter() {
+        final ObjectAnimator enter = ObjectAnimator.ofFloat(this, "outerRadius", mMaxRadius);
+        enter.setAutoCancel(true);
+        enter.setDuration(ENTER_DURATION);
+        enter.setInterpolator(INTERPOLATOR);
+        enter.start();
 
-        final float enterState = mEnterState;
-        final float exitState = mExitState;
-        final float outsideState = mOutsideState;
-        final float pulseState = mPulseState;
-        final float insideRadius = MathUtils.lerp(mMinRadius, maxRadius, enterState);
-        final float outerRadius = MathUtils.lerp(mOutsideRadius, insideRadius,
-                mInside ? outsideState : 1 - outsideState);
+        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
+        fade.setAutoCancel(true);
+        fade.setDuration(FADE_DURATION);
+        fade.start();
 
-        // Apply resistance effect when outside bounds.
-        final float x = looseConstrain(mX, bounds.left + padding.left, bounds.right - padding.right,
-                outerRadius * OUTSIDE_MARGIN, OUTSIDE_RESISTANCE);
-        final float y = looseConstrain(mY, bounds.top + padding.top, bounds.bottom - padding.bottom,
-                outerRadius * OUTSIDE_MARGIN, OUTSIDE_RESISTANCE);
-
-        // Compute maximum alpha, taking pulse into account when active.
-        final int maxAlpha;
-        if (pulseState < 0 || pulseState >= 1) {
-            maxAlpha = 255;
-        } else {
-            final float pulseAlpha;
-            if (pulseState > 0.5) {
-                // Pulsing in to max alpha.
-                pulseAlpha = MathUtils.lerp(PULSE_MIN_ALPHA, 255, (pulseState - .5f) * 2);
-            } else {
-                // Pulsing out to min alpha.
-                pulseAlpha = MathUtils.lerp(255, PULSE_MIN_ALPHA, pulseState * 2f);
-            }
-
-            if (exitState > 0) {
-                // Animating exit, interpolate pulse with exit state.
-                maxAlpha = (int) (MathUtils.lerp(255, pulseAlpha, exitState) + 0.5f);
-            } else if (mInside) {
-                // No animation, no need to interpolate.
-                maxAlpha = (int) (pulseAlpha + 0.5f);
-            } else {
-                // Animating inside, interpolate pulse with inside state.
-                maxAlpha = (int) (MathUtils.lerp(pulseAlpha, 255, outsideState) + 0.5f);
-            }
+        // TODO: Starting with a delay will still cancel the fade in.
+        if (false && mPulseEnabled) {
+            final ObjectAnimator pulse = ObjectAnimator.ofFloat(
+                    this, "alphaMultiplier", 1, PULSE_MIN_ALPHA);
+            pulse.setAutoCancel(true);
+            pulse.setDuration(PULSE_DURATION + PULSE_INTERVAL);
+            pulse.setRepeatCount(ObjectAnimator.INFINITE);
+            pulse.setRepeatMode(ObjectAnimator.REVERSE);
+            pulse.setStartDelay(PULSE_DELAY);
+            pulse.start();
         }
 
-        if (maxAlpha > 0) {
-            if (exitState <= 0) {
-                // Exit state isn't showing, so we can simplify to a solid
-                // circle.
-                if (outerRadius > 0) {
-                    p.setAlpha(maxAlpha);
-                    p.setStyle(Style.FILL);
-                    c.drawCircle(x, y, outerRadius, p);
-                    return true;
-                }
-            } else {
-                // Both states are showing, so we need a circular stroke.
-                final float innerRadius = MathUtils.lerp(0, outerRadius, exitState);
-                final float strokeWidth = outerRadius - innerRadius;
-                if (strokeWidth > 0) {
-                    final float strokeRadius = innerRadius + strokeWidth / 2f;
-                    final int alpha = (int) (MathUtils.lerp(maxAlpha, 0, exitState) + 0.5f);
-                    if (alpha > 0) {
-                        p.setAlpha(alpha);
-                        p.setStyle(Style.STROKE);
-                        p.setStrokeWidth(strokeWidth);
-                        c.drawCircle(x, y, strokeRadius, p);
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        mEnter = enter;
     }
 
-    public void getBounds(Rect bounds) {
-        final int x = (int) mX;
-        final int y = (int) mY;
-        final int dX = Math.max(x, mBounds.right - x);
-        final int dY = Math.max(x, mBounds.bottom - y);
-        final int maxRadius = (int) Math.ceil(Math.sqrt(dX * dX + dY * dY));
-        bounds.set(x - maxRadius, y - maxRadius, x + maxRadius, y + maxRadius);
+    /**
+     * Starts the outside transition animation.
+     */
+    private void outside() {
+        final float targetRadius = mMaxOutsideRadius;
+        final ObjectAnimator outside = ObjectAnimator.ofFloat(this, "outerRadius", targetRadius);
+        outside.setAutoCancel(true);
+        outside.setDuration(OUTSIDE_DURATION);
+        outside.setInterpolator(INTERPOLATOR);
+        outside.start();
+
+        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
+        fade.setAutoCancel(true);
+        fade.setDuration(FADE_DURATION);
+        fade.start();
     }
 
     /**
@@ -229,6 +348,7 @@ class Ripple {
      */
     private static float looseConstrain(float value, float min, float max, float margin,
             float factor) {
+        // TODO: Can we use actual spring physics here?
         if (value < min) {
             return min - Math.min(margin, (float) Math.pow(min - value, factor));
         } else if (value > max) {
@@ -237,96 +357,28 @@ class Ripple {
             return value;
         }
     }
-    
-    public static class RippleAnimator {
-        /** Duration for animating the trailing edge of the ripple. */
-        private static final int EXIT_DURATION = 600;
 
-        /** Duration for animating the leading edge of the ripple. */
-        private static final int ENTER_DURATION = 400;
-
-        /** Minimum elapsed time between start of enter and exit animations. */
-        private static final int EXIT_MIN_DELAY = 200;
-
-        /** Duration for animating between inside and outside touch. */
-        private static final int OUTSIDE_DURATION = 300;
-
-        /** Duration for animating pulses. */
-        private static final int PULSE_DURATION = 400;
-
-        /** Interval between pulses while inside and fully entered. */
-        private static final int PULSE_INTERVAL = 400;
-
-        /** Delay before pulses start. */
-        private static final int PULSE_DELAY = 500;
-
-        /** The target ripple being animated. */
-        private final Ripple mTarget;
-
-        /** When the ripple started appearing. */
-        private long mEnterTime = -1;
-
-        /** When the ripple started vanishing. */
-        private long mExitTime = -1;
-
-        /** When the ripple last transitioned between inside and outside touch. */
-        private long mOutsideTime = -1;
-
-        public RippleAnimator(Ripple target) {
-            mTarget = target;
+    private final AnimatorListener mAnimationListener = new AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
         }
 
-        /**
-         * Starts the enter animation.
-         */
-        public void enter() {
-            mEnterTime = AnimationUtils.currentAnimationTimeMillis();
+        @Override
+        public void onAnimationRepeat(Animator animation) {
         }
 
-        /**
-         * Starts the exit animation. If {@link #enter()} was called recently, the
-         * animation may be postponed.
-         */
-        public void exit() {
-            final long minTime = mEnterTime + EXIT_MIN_DELAY;
-            mExitTime = Math.max(minTime, AnimationUtils.currentAnimationTimeMillis());
-        }
-
-        /**
-         * Starts the outside transition animation.
-         */
-        public void outside() {
-            mOutsideTime = AnimationUtils.currentAnimationTimeMillis();
-        }
-
-        /**
-         * Returns whether this ripple is currently animating.
-         */
-        public boolean isRunning() {
-            final long currentTime = AnimationUtils.currentAnimationTimeMillis();
-            return mEnterTime >= 0 && mEnterTime <= currentTime
-                    && (mExitTime < 0 || currentTime <= mExitTime + EXIT_DURATION);
-        }
-
-        public void update() {
-            // Track three states:
-            // - Enter: touch begins, affects outer radius
-            // - Outside: touch moves outside bounds, affects maximum outer radius
-            // - Exit: touch ends, affects inner radius
-            final long currentTime = AnimationUtils.currentAnimationTimeMillis();
-            mTarget.mEnterState = mEnterTime < 0 ? 0 : INTERPOLATOR.getInterpolation(
-                    MathUtils.constrain((currentTime - mEnterTime) / (float) ENTER_DURATION, 0, 1));
-            mTarget.mExitState = mExitTime < 0 ? 0 : INTERPOLATOR.getInterpolation(
-                    MathUtils.constrain((currentTime - mExitTime) / (float) EXIT_DURATION, 0, 1));
-            mTarget.mOutsideState = mOutsideTime < 0 ? 1 : INTERPOLATOR.getInterpolation(
-                    MathUtils.constrain((currentTime - mOutsideTime) / (float) OUTSIDE_DURATION, 0, 1));
-
-            // Pulse is a little more complicated.
-            if (mTarget.mPulse) {
-                final long pulseTime = (currentTime - mEnterTime - ENTER_DURATION - PULSE_DELAY);
-                mTarget.mPulseState = pulseTime < 0 ? -1
-                        : (pulseTime % (PULSE_INTERVAL + PULSE_DURATION)) / (float) PULSE_DURATION;
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (animation == mExit) {
+                mExitFinished = true;
+                mOuterRadius = 0;
+                mInnerRadius = 0;
+                mAlphaMultiplier = 1;
             }
         }
-    }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+        }
+    };
 }

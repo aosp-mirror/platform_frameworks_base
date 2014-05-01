@@ -27,8 +27,6 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.Ripple.RippleAnimator;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -40,7 +38,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Documentation pending.
@@ -54,7 +51,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     private static final int MAX_RIPPLES = 10;
 
     private final Rect mTempRect = new Rect();
-    private final Rect mPaddingRect = new Rect();
 
     /** Current ripple effect bounds, used to constrain ripple effects. */
     private final Rect mHotspotBounds = new Rect();
@@ -68,14 +64,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     private final TouchFeedbackState mState;
 
     /** Lazily-created map of touch hotspot IDs to ripples. */
-    private SparseArray<Ripple> mTouchedRipples;
+    private SparseArray<Ripple> mRipples;
 
     /** Lazily-created array of actively animating ripples. */
-    private Ripple[] mActiveRipples;
-    private int mActiveRipplesCount = 0;
-
-    /** Lazily-created runnable for scheduling invalidation. */
-    private Runnable mAnimationRunnable;
+    private Ripple[] mAnimatingRipples;
+    private int mAnimatingRipplesCount = 0;
 
     /** Paint used to control appearance of ripples. */
     private Paint mRipplePaint;
@@ -85,9 +78,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     /** Target density of the display into which ripples are drawn. */
     private float mDensity = 1.0f;
-
-    /** Whether the animation runnable has been posted. */
-    private boolean mAnimating;
 
     /** Whether bounds are being overridden. */
     private boolean mOverrideBounds;
@@ -154,28 +144,19 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     private void onHotspotBoundsChange() {
         final int x = mHotspotBounds.centerX();
         final int y = mHotspotBounds.centerY();
-        final int N = mActiveRipplesCount;
+        final int N = mAnimatingRipplesCount;
         for (int i = 0; i < N; i++) {
             if (mState.mPinned) {
-                mActiveRipples[i].move(x, y);
+                mAnimatingRipples[i].move(x, y);
             }
-            mActiveRipples[i].onBoundsChanged();
+            mAnimatingRipples[i].onBoundsChanged();
         }
     }
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         if (!visible) {
-            if (mTouchedRipples != null) {
-                mTouchedRipples.clear();
-            }
-
-            if (mActiveRipplesCount > 0) {
-                Arrays.fill(mActiveRipples, null);
-                mActiveRipplesCount = 0;
-                mAnimating = false;
-                unscheduleSelf(mAnimationRunnable);
-            }
+            clearHotspots();
         }
 
         return super.setVisible(visible, restart);
@@ -348,21 +329,18 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public void setHotspot(int id, float x, float y) {
-        if (mTouchedRipples == null) {
-            mTouchedRipples = new SparseArray<Ripple>();
-            mActiveRipples = new Ripple[MAX_RIPPLES];
+        if (mRipples == null) {
+            mRipples = new SparseArray<Ripple>();
+            mAnimatingRipples = new Ripple[MAX_RIPPLES];
         }
 
-        if (mActiveRipplesCount >= MAX_RIPPLES) {
+        if (mAnimatingRipplesCount >= MAX_RIPPLES) {
             Log.e(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
             return;
         }
 
-        final Ripple ripple = mTouchedRipples.get(id);
+        final Ripple ripple = mRipples.get(id);
         if (ripple == null) {
-            final Rect padding = mPaddingRect;
-            getPadding(padding);
-
             final Rect bounds = mHotspotBounds;
             if (mState.mPinned) {
                 x = bounds.exactCenterX();
@@ -371,11 +349,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
             // TODO: Clean this up in the API.
             final boolean pulse = (id != R.attr.state_focused);
-            final Ripple newRipple = new Ripple(bounds, padding, x, y, mDensity, pulse);
-            newRipple.animate().enter();
+            final Ripple newRipple = new Ripple(this, bounds, mDensity, pulse);
+            newRipple.move(x, y);
 
-            mActiveRipples[mActiveRipplesCount++] = newRipple;
-            mTouchedRipples.put(id, newRipple);
+            mAnimatingRipples[mAnimatingRipplesCount++] = newRipple;
+            mRipples.put(id, newRipple);
         } else if (mState.mPinned) {
             final Rect bounds = mHotspotBounds;
             x = bounds.exactCenterX();
@@ -384,41 +362,30 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         } else {
             ripple.move(x, y);
         }
-
-        scheduleAnimation();
     }
 
     @Override
     public void removeHotspot(int id) {
-        if (mTouchedRipples == null) {
+        if (mRipples == null) {
             return;
         }
 
-        final Ripple ripple = mTouchedRipples.get(id);
+        final Ripple ripple = mRipples.get(id);
         if (ripple != null) {
-            ripple.animate().exit();
+            ripple.exit();
 
-            mTouchedRipples.remove(id);
-            scheduleAnimation();
+            mRipples.remove(id);
         }
     }
 
     @Override
     public void clearHotspots() {
-        if (mTouchedRipples == null) {
+        if (mRipples == null) {
             return;
         }
 
-        final int n = mTouchedRipples.size();
-        for (int i = 0; i < n; i++) {
-            // TODO: Use a fast exit, maybe just fade out?
-            mTouchedRipples.valueAt(i).animate().exit();
-        }
-
-        if (n > 0) {
-            mTouchedRipples.clear();
-            scheduleAnimation();
-        }
+        mRipples.clear();
+        invalidateSelf();
     }
 
     /**
@@ -429,30 +396,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         mOverrideBounds = true;
         mHotspotBounds.set(left, top, right, bottom);
         onHotspotBoundsChange();
-    }
-
-    /**
-     * Schedules the next animation, if necessary.
-     */
-    private void scheduleAnimation() {
-        if (mActiveRipplesCount == 0) {
-            mAnimating = false;
-        } else if (!mAnimating) {
-            mAnimating = true;
-
-            if (mAnimationRunnable == null) {
-                mAnimationRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        mAnimating = false;
-                        scheduleAnimation();
-                        invalidateSelf();
-                    }
-                };
-            }
-
-            scheduleSelf(mAnimationRunnable, SystemClock.uptimeMillis() + 1000 / 60);
-        }
     }
 
     @Override
@@ -501,12 +444,12 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     }
 
     private int drawRippleLayer(Canvas canvas, Rect bounds, boolean maskOnly) {
-        final int ripplesCount = mActiveRipplesCount;
-        if (ripplesCount == 0) {
+        final int count = mAnimatingRipplesCount;
+        if (count == 0) {
             return -1;
         }
 
-        final Ripple[] activeRipples = mActiveRipples;
+        final Ripple[] ripples = mAnimatingRipples;
         final boolean projected = isProjected();
         final Rect layerBounds = projected ? getDirtyBounds() : bounds;
 
@@ -529,17 +472,15 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
         boolean drewRipples = false;
         int restoreToCount = -1;
-        int activeRipplesCount = 0;
+        int animatingCount = 0;
 
-        // Draw ripples.
-        for (int i = 0; i < ripplesCount; i++) {
-            final Ripple ripple = activeRipples[i];
-            final RippleAnimator animator = ripple.animate();
-            animator.update();
+        // Draw ripples and update the animating ripples array.
+        for (int i = 0; i < count; i++) {
+            final Ripple ripple = ripples[i];
 
-            // Mark and skip inactive ripples.
-            if (!animator.isRunning()) {
-                activeRipples[i] = null;
+            // Mark and skip finished ripples.
+            if (ripple.isFinished()) {
+                ripples[i] = null;
                 continue;
             }
 
@@ -565,11 +506,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
             drewRipples |= ripple.draw(canvas, ripplePaint);
 
-            activeRipples[activeRipplesCount] = activeRipples[i];
-            activeRipplesCount++;
+            ripples[animatingCount] = ripples[i];
+            animatingCount++;
         }
 
-        mActiveRipplesCount = activeRipplesCount;
+        mAnimatingRipplesCount = animatingCount;
 
         // If we created a layer with no content, merge it immediately.
         if (restoreToCount >= 0 && !drewRipples) {
@@ -596,8 +537,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         drawingBounds.setEmpty();
 
         final Rect rippleBounds = mTempRect;
-        final Ripple[] activeRipples = mActiveRipples;
-        final int N = mActiveRipplesCount;
+        final Ripple[] activeRipples = mAnimatingRipples;
+        final int N = mAnimatingRipplesCount;
         for (int i = 0; i < N; i++) {
             activeRipples[i].getBounds(rippleBounds);
             drawingBounds.union(rippleBounds);
