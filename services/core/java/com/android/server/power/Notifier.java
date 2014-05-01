@@ -371,7 +371,7 @@ final class Notifier {
 
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
 
-        mPolicy.screenTurningOn(mScreenOnListener);
+        mPolicy.wakingUp(mScreenOnListener);
         mActivityManagerInternal.wakingUp();
 
         if (ActivityManagerNative.isSystemReady()) {
@@ -422,7 +422,7 @@ final class Notifier {
 
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
 
-        mPolicy.screenTurnedOff(why);
+        mPolicy.goingToSleep(why);
         mActivityManagerInternal.goingToSleep();
 
         if (ActivityManagerNative.isSystemReady()) {

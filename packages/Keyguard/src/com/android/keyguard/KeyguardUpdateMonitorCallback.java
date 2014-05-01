@@ -167,9 +167,9 @@ class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the screen turns off
-     * @param why {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER},
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
+     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
+     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
+     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onScreenTurnedOff(int why) { }
 }
