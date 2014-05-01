@@ -145,7 +145,7 @@ static void maybeCreateDalvikCache() {
     static const char kInstructionSet[] = "x86_64";
 #elif defined(__arm__)
     static const char kInstructionSet[] = "arm";
-#elif defined(__x86__)
+#elif defined(__i386__)
     static const char kInstructionSet[] = "x86";
 #elif defined (__mips__)
     static const char kInstructionSet[] = "mips";
