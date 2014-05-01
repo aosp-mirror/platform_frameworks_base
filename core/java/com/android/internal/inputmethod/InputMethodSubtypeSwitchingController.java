@@ -227,25 +227,39 @@ public class InputMethodSubtypeSwitchingController {
         if (imList.size() <= 1) {
             return null;
         }
+        // Here we have two rotation groups, depending on the returned boolean value of
+        // {@link InputMethodInfo#supportsSwitchingToNextInputMethod()}.
+        final boolean expectedValueOfSupportsSwitchingToNextInputMethod =
+                imi.supportsSwitchingToNextInputMethod();
         final int N = imList.size();
         final int currentSubtypeId =
                 subtype != null ? InputMethodUtils.getSubtypeIdFromHashCode(imi,
                         subtype.hashCode()) : NOT_A_SUBTYPE_ID;
         for (int i = 0; i < N; ++i) {
             final ImeSubtypeListItem isli = imList.get(i);
-            if (isli.mImi.equals(imi) && isli.mSubtypeId == currentSubtypeId) {
-                if (!onlyCurrentIme) {
-                    return imList.get((i + 1) % N);
-                }
-                for (int j = 0; j < N - 1; ++j) {
-                    final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
-                    if (candidate.mImi.equals(imi)) {
-                        return candidate;
-                    }
-                }
-                return null;
+            // Skip until the current IME/subtype is found.
+            if (!isli.mImi.equals(imi) || isli.mSubtypeId != currentSubtypeId) {
+                continue;
             }
+            // Found the current IME/subtype. Start searching the next IME/subtype from here.
+            for (int j = 0; j < N - 1; ++j) {
+                final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
+                // Skip if the candidate doesn't belong to the expected rotation group.
+                if (expectedValueOfSupportsSwitchingToNextInputMethod !=
+                        candidate.mImi.supportsSwitchingToNextInputMethod()) {
+                    continue;
+                }
+                // Skip if searching inside the current IME only, but the candidate is not
+                // the current IME.
+                if (onlyCurrentIme && !candidate.mImi.equals(imi)) {
+                    continue;
+                }
+                return candidate;
+            }
+            // No appropriate IME/subtype is found in the list. Give up.
+            return null;
         }
+        // The current IME/subtype is not found in the list. Give up.
         return null;
     }
 
