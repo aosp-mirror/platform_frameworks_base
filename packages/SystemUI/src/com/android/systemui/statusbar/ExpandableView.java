@@ -55,15 +55,13 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public void setActualHeight(int actualHeight) {
         mActualHeight = actualHeight;
-        if (mOnHeightChangedListener != null) {
-            mOnHeightChangedListener.onHeightChanged(this);
-        }
+        notifyHeightChanged();
     }
 
     /**
      * See {@link #setActualHeight}.
      *
-     * @return The actual height of this notification.
+     * @return The current actual height of this notification.
      */
     public int getActualHeight() {
         return mActualHeight;
@@ -81,6 +79,13 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public int getMinHeight() {
         return getHeight();
+    }
+
+    /**
+     * @return The desired notification height.
+     */
+    public int getIntrinsicHeight() {
+        return mActualHeight;
     }
 
     /**
@@ -102,6 +107,12 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public boolean isContentExpandable() {
         return false;
+    }
+
+    public void notifyHeightChanged() {
+        if (mOnHeightChangedListener != null) {
+            mOnHeightChangedListener.onHeightChanged(this);
+        }
     }
 
     /**

@@ -275,7 +275,7 @@ public class StackScrollAlgorithm {
     private int getMaxAllowedChildHeight(View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            return row.getMaximumAllowedExpandHeight();
+            return row.getIntrinsicHeight();
         } else if (child instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) child;
             return expandableView.getActualHeight();

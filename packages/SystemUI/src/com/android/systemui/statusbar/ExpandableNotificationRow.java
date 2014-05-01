@@ -137,7 +137,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setSystemExpanded(boolean expand) {
         mIsSystemExpanded = expand;
-        applyExpansionToLayout();
+        notifyHeightChanged();
     }
 
     /**
@@ -145,7 +145,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setExpansionDisabled(boolean expansionDisabled) {
         mExpansionDisabled = expansionDisabled;
-        applyExpansionToLayout();
+        notifyHeightChanged();
     }
 
     /**
@@ -160,13 +160,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    /**
-     * If {@link #isExpanded()} then this is the greatest possible height this view can
-     * get and otherwise it is {@link #mRowMinHeight}.
-     *
-     * @return the maximum allowed expansion height of this view.
-     */
-    public int getMaximumAllowedExpandHeight() {
+    @Override
+    public int getIntrinsicHeight() {
         if (isUserLocked()) {
             return getActualHeight();
         }
@@ -234,7 +229,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return the potential height this view could expand in addition.
      */
     public int getExpandPotential() {
-        return getMaximumAllowedExpandHeight() - getActualHeight();
+        return getIntrinsicHeight() - getActualHeight();
     }
 
     @Override

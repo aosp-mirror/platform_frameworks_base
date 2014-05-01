@@ -1289,7 +1289,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (userChangedExpansion) {
                 boolean userExpanded = oldEntry.row.isUserExpanded();
                 newEntry.row.setUserExpanded(userExpanded);
-                newEntry.row.applyExpansionToLayout();
+                newEntry.row.notifyHeightChanged();
             }
         }
 
