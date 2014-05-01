@@ -20,6 +20,9 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.SearchManager;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +37,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,7 @@ import java.util.Random;
  */
 public class SystemServicesProxy {
     ActivityManager mAm;
+    AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
     UserManager mUm;
@@ -56,6 +61,7 @@ public class SystemServicesProxy {
     /** Private constructor */
     public SystemServicesProxy(Context context) {
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mIpm = AppGlobals.getPackageManager();
@@ -103,7 +109,7 @@ public class SystemServicesProxy {
 
         return mAm.getRecentTasksForUser(numTasks,
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES, userId);
+                        ActivityManager.RECENT_INCLUDE_PROFILES, userId);
     }
 
     /** Returns a list of the running tasks */
@@ -162,7 +168,7 @@ public class SystemServicesProxy {
     /**
      * Returns the activity info for a given component name.
      * 
-     * @param ComponentName The component name of the activity.
+     * @param cn The component name of the activity.
      * @param userId The userId of the user that this is for.
      */
     public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
@@ -172,6 +178,23 @@ public class SystemServicesProxy {
         try {
             return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
         } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns the activity info for a given component name.
+     *
+     * @param cn The component name of the activity.
+     */
+    public ActivityInfo getActivityInfo(ComponentName cn) {
+        if (mPm == null) return null;
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
+
+        try {
+            return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             return null;
         }
@@ -208,27 +231,70 @@ public class SystemServicesProxy {
         return icon;
     }
 
-
     /**
-     * Composes an intent to launch the global search activity.
+     * Resolves and binds the search app widget that is to appear in the recents.
      */
-    public Intent getGlobalSearchIntent(Rect sourceBounds) {
-        if (mSm == null) return null;
+    public Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host) {
+        if (mAwm == null) return null;
 
-        // Try and get the global search activity
+        // Ensure we have a global search activity
         ComponentName globalSearchActivity = mSm.getGlobalSearchActivity();
         if (globalSearchActivity == null) return null;
 
-        // Bundle the source of the search
-        Bundle appSearchData = new Bundle();
-        appSearchData.putString("source", mPackage);
+        // Resolve the search widget provider from the search activity
+        ActivityInfo searchActivityInfo = getActivityInfo(globalSearchActivity);
+        if (searchActivityInfo == null) return null;
 
-        // Compose the intent and Start the search activity
-        Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setComponent(globalSearchActivity);
-        intent.putExtra(SearchManager.APP_DATA, appSearchData);
-        intent.setSourceBounds(sourceBounds);
-        return intent;
+        String key = "com.android.recents.search_widget_provider";
+        ComponentName searchWidgetCn = null;
+        Bundle searchMetaData = searchActivityInfo.metaData;
+        String searchWidgetProvider = searchMetaData.getString(key, "");
+        if (searchWidgetProvider.length() != 0) {
+            searchWidgetCn = ComponentName.unflattenFromString(searchWidgetProvider);
+        } else {
+            return null;
+        }
+
+        // Find the first Recents widget from the same package as the global search activity
+        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders();
+        AppWidgetProviderInfo searchWidgetInfo = null;
+        for (AppWidgetProviderInfo info : widgets) {
+            if (info.provider.equals(searchWidgetCn)) {
+                searchWidgetInfo = info;
+                break;
+            }
+        }
+
+        // Return early if there is no search widget
+        if (searchWidgetInfo == null) return null;
+
+        // Allocate a new widget id and try and bind the app widget (if that fails, then just skip)
+        int searchWidgetId = host.allocateAppWidgetId();
+        Bundle opts = new Bundle();
+        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
+            return null;
+        }
+        return new Pair<Integer, AppWidgetProviderInfo>(searchWidgetId, searchWidgetInfo);
+    }
+
+    /**
+     * Returns the app widget info for the specified app widget id.
+     */
+    public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
+        if (mAwm == null) return null;
+
+        return mAwm.getAppWidgetInfo(appWidgetId);
+    }
+
+    /**
+     * Destroys the specified app widget.
+     */
+    public void unbindSearchAppWidget(AppWidgetHost host, int appWidgetId) {
+        if (mAwm == null) return;
+
+        // Delete the app widget
+        host.deleteAppWidgetId(appWidgetId);
     }
 }

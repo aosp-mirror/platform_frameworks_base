@@ -54,6 +54,12 @@ public class AppWidgetProviderInfo implements Parcelable {
     public static final int WIDGET_CATEGORY_KEYGUARD = 2;
 
     /**
+     * Indicates that the widget can be displayed within recents.
+     * @hide
+     */
+    public static final int WIDGET_CATEGORY_RECENTS = 4;
+
+    /**
      * Identity of this AppWidget component.  This component should be a {@link
      * android.content.BroadcastReceiver}, and it will be sent the AppWidget intents
      * {@link android.appwidget as described in the AppWidget package documentation}.

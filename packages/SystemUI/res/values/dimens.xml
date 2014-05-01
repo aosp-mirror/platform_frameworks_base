@@ -231,10 +231,7 @@
     <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
 
     <!-- The height of the search bar space. -->
-    <dimen name="recents_search_bar_space_height">40dp</dimen>
-
-    <!-- The search bar edge margins. -->
-    <dimen name="recents_search_bar_space_edge_margins">12dp</dimen>
+    <dimen name="recents_search_bar_space_height">64dp</dimen>
 
     <!-- Used to calculate the translation animation duration, the expected amount of movement 
          in dps over one second of time. -->
