@@ -3094,10 +3094,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 if ((flags & DevicePolicyManager.FLAG_TO_PRIMARY_USER) != 0) {
-                    pm.addForwardingIntentFilter(filter, callingUserId, UserHandle.USER_OWNER);
+                    pm.addForwardingIntentFilter(filter, true /*removable*/, callingUserId,
+                            UserHandle.USER_OWNER);
                 }
                 if ((flags & DevicePolicyManager.FLAG_TO_MANAGED_PROFILE) != 0) {
-                    pm.addForwardingIntentFilter(filter, UserHandle.USER_OWNER, callingUserId);
+                    pm.addForwardingIntentFilter(filter, true /*removable*/, UserHandle.USER_OWNER,
+                            callingUserId);
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen
