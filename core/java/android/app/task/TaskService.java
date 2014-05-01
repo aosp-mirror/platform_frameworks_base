@@ -31,7 +31,7 @@ import com.android.internal.annotations.GuardedBy;
 /**
  * <p>Entry point for the callback from the {@link android.content.TaskManager}.</p>
  * <p>This is the base class that handles asynchronous requests that were previously scheduled. You
- * are responsible for overriding {@Link AbstracTaskService#onPerformTask(Bundle)}, which is where
+ * are responsible for overriding {@link TaskService#onStartTask(TaskParams)}, which is where
  * you will implement your task logic.</p>
  * <p>This service executes each incoming task on a {@link android.os.Handler} running on your
  * application's main thread. This means that you <b>must</b> offload your execution logic to
@@ -61,7 +61,7 @@ public abstract class TaskService extends Service {
 
     /**
      * Identifier for a message that will result in a call to
-     * {@link #onStartTask(android.app.task.TaskParams, android.os.Bundle)}.
+     * {@link #onStartTask(android.app.task.TaskParams)}.
      */
     private final int MSG_EXECUTE_TASK = 0;
     /**

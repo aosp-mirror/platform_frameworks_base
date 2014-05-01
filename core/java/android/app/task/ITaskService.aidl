@@ -22,9 +22,9 @@ import android.app.task.TaskParams;
 import android.os.Bundle;
 
 /**
- * Interface that the framework uses to communicate with application code
- * that implements a TaskService.  End user code does not implement this interface directly;
- * instead, the app's idle service implementation will extend android.app.maintenance.IdleService.
+ * Interface that the framework uses to communicate with application code that implements a
+ * TaskService.  End user code does not implement this interface directly; instead, the app's
+ * service implementation will extend android.app.task.TaskService.
  * {@hide}
  */
 oneway interface ITaskService {
