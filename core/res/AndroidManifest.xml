@@ -2681,6 +2681,26 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.IntentForwarderActivity"
+                android:finishOnCloseSystemDialogs="true"
+                android:theme="@style/Theme.NoDisplay"
+                android:excludeFromRecents="true"
+                android:label="@string/user_owner_label"
+                android:exported="true"
+                >
+        </activity>
+        <activity-alias android:name="com.android.internal.app.ForwardIntentToUserOwner"
+                android:targetActivity="com.android.internal.app.IntentForwarderActivity"
+                android:icon="@drawable/personal_icon"
+                android:exported="true"
+                android:label="@string/user_owner_label">
+        </activity-alias>
+        <activity-alias android:name="com.android.internal.app.ForwardIntentToManagedProfile"
+                android:targetActivity="com.android.internal.app.IntentForwarderActivity"
+                android:icon="@drawable/work_icon"
+                android:exported="true"
+                android:label="@string/managed_profile_label">
+        </activity-alias>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
                 android:theme="@style/Theme.Holo.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
