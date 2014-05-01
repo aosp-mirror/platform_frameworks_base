@@ -274,48 +274,6 @@ public final class Proxy {
         return PROXY_VALID;
     }
 
-    static class AndroidProxySelectorRoutePlanner
-            extends org.apache.http.impl.conn.ProxySelectorRoutePlanner {
-
-        private Context mContext;
-
-        public AndroidProxySelectorRoutePlanner(SchemeRegistry schreg, ProxySelector prosel,
-                Context context) {
-            super(schreg, prosel);
-            mContext = context;
-        }
-
-        @Override
-        protected java.net.Proxy chooseProxy(List<java.net.Proxy> proxies, HttpHost target,
-                HttpRequest request, HttpContext context) {
-            return getProxy(mContext, target.getHostName());
-        }
-
-        @Override
-        protected HttpHost determineProxy(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            return getPreferredHttpHost(mContext, target.getHostName());
-        }
-
-        @Override
-        public HttpRoute determineRoute(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            HttpHost proxy = getPreferredHttpHost(mContext, target.getHostName());
-            if (proxy == null) {
-                return new HttpRoute(target);
-            } else {
-                return new HttpRoute(target, null, proxy, false);
-            }
-        }
-    }
-
-    /** @hide */
-    public static final HttpRoutePlanner getAndroidProxySelectorRoutePlanner(Context context) {
-        AndroidProxySelectorRoutePlanner ret = new AndroidProxySelectorRoutePlanner(
-                new SchemeRegistry(), ProxySelector.getDefault(), context);
-        return ret;
-    }
-
     /** @hide */
     public static final void setHttpProxySystemProperty(ProxyProperties p) {
         String host = null;
