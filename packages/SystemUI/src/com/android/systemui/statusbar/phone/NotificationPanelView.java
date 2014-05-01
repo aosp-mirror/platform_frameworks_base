@@ -39,6 +39,7 @@ public class NotificationPanelView extends PanelView implements
     private NotificationStackScrollLayout mNotificationStackScroller;
     private boolean mTrackingSettings;
     private int mNotificationTopPadding;
+    private boolean mAnimateNextTopPaddingChange;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,7 +81,13 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setTopPadding(mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 ? mKeyguardStatusView.getBottom() + keyguardBottomMargin
                 : mHeader.getBottom() + mNotificationTopPadding,
-                mStatusBar.isScreenTurnedOn() && mStatusBar.isExpandedVisible());
+                mAnimateNextTopPaddingChange);
+        mAnimateNextTopPaddingChange = false;
+    }
+
+    public void animateNextTopPaddingChange() {
+        mAnimateNextTopPaddingChange = true;
+        requestLayout();
     }
 
     @Override

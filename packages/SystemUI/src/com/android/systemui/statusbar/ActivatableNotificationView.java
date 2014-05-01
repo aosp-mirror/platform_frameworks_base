@@ -230,10 +230,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         // Check whether there is already a background animation running.
         if (mBackgroundAnimator != null) {
             startAlpha = (Integer) mBackgroundAnimator.getAnimatedValue();
-            duration = (int) (NotificationActivator.ANIMATION_LENGTH_MS
-                                - mBackgroundAnimator.getCurrentPlayTime());
+            duration = (int) mBackgroundAnimator.getCurrentPlayTime();
             mBackgroundAnimator.removeAllListeners();
             mBackgroundAnimator.cancel();
+            if (duration <= 0) {
+                updateBackgroundResource();
+                return;
+            }
         }
         mBackgroundNormal.setAlpha(startAlpha);
         mBackgroundAnimator =
@@ -257,10 +260,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void updateBackgroundResource() {
         if (mDimmed) {
             setBackgroundDimmed(mDimmedBgResId);
+            mBackgroundDimmed.setAlpha(255);
             setBackgroundNormal(null);
         } else {
             setBackgroundDimmed(null);
             setBackgroundNormal(mBgResId);
+            mBackgroundNormal.setAlpha(255);
         }
     }
 

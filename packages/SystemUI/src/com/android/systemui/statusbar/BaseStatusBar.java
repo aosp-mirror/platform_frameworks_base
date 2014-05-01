@@ -1415,13 +1415,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mBouncerShowing;
     }
 
-    /**
-     * See {@link PowerManager#isInteractive()} for the meaning of this method.
-     */
-    public boolean isScreenTurnedOn() {
-        return mPowerManager.isInteractive();
-    }
-
     public void destroy() {
         if (mSearchPanelView != null) {
             mWindowManager.removeViewImmediate(mSearchPanelView);

@@ -631,7 +631,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
         mKeyguardCarrierLabel = mStatusBarWindow.findViewById(R.id.keyguard_carrier_text);
-        mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
+        // TODO: Comment in when transition is ready.
+        //mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
         mExpandedContents = mStackScroller;
@@ -2990,6 +2991,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setBarState(StatusBarState.SHADE);
         if (mLeaveOpenOnKeyguardHide) {
             mLeaveOpenOnKeyguardHide = false;
+            mNotificationPanel.animateNextTopPaddingChange();
         } else {
             instantCollapseNotificationPanel();
         }
@@ -3176,6 +3178,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
         } else if (mStatusBarKeyguardViewManager.isSecure()) {
+            mNotificationPanel.animateNextTopPaddingChange();
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState();
         } else {
@@ -3193,10 +3196,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             return null;
         }
-    }
-
-    public boolean isExpandedVisible() {
-        return mExpandedVisible;
     }
 
     public static boolean inBounds(View view, MotionEvent event, boolean orAbove) {
