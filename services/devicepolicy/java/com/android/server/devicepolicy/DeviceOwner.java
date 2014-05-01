@@ -53,7 +53,6 @@ public class DeviceOwner {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_USERID = "userId";
-    private static final String ATTR_ENABLED = "profileEnabled";
 
     private AtomicFile fileForWriting;
 
@@ -104,8 +103,7 @@ public class DeviceOwner {
      */
     static DeviceOwner createWithProfileOwner(String packageName, String ownerName, int userId) {
         DeviceOwner owner = new DeviceOwner();
-        owner.mProfileOwners.put(
-                userId, new OwnerInfo(ownerName, packageName, false /* disabled */));
+        owner.mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
         return owner;
     }
 
@@ -122,7 +120,7 @@ public class DeviceOwner {
     }
 
     void setProfileOwner(String packageName, String ownerName, int userId) {
-        mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName, false /* disabled */));
+        mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
     }
 
     void removeProfileOwner(int userId) {
@@ -137,19 +135,6 @@ public class DeviceOwner {
     String getProfileOwnerName(int userId) {
         OwnerInfo profileOwner = mProfileOwners.get(userId);
         return profileOwner != null ? profileOwner.name : null;
-    }
-
-    boolean isProfileEnabled(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null ? profileOwner.enabled : true;
-    }
-
-    void setProfileEnabled(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        if (profileOwner == null) {
-            throw new IllegalArgumentException("No profile owner exists.");
-        }
-        profileOwner.enabled = true;
     }
 
     boolean hasDeviceOwner() {
@@ -203,12 +188,9 @@ public class DeviceOwner {
                 } else if (tag.equals(TAG_PROFILE_OWNER)) {
                     String profileOwnerPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
-                    Boolean profileEnabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_ENABLED));
                     int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
                     mProfileOwners.put(userId,
-                            new OwnerInfo(
-                                    profileOwnerName, profileOwnerPackageName, profileEnabled));
+                            new OwnerInfo(profileOwnerName, profileOwnerPackageName));
                 } else {
                     throw new XmlPullParserException(
                             "Unexpected tag in device owner file: " + tag);
@@ -251,7 +233,6 @@ public class DeviceOwner {
                     out.startTag(null, TAG_PROFILE_OWNER);
                     out.attribute(null, ATTR_PACKAGE, owner.getValue().packageName);
                     out.attribute(null, ATTR_NAME, owner.getValue().name);
-                    out.attribute(null, ATTR_ENABLED, String.valueOf(owner.getValue().enabled));
                     out.attribute(null, ATTR_USERID, Integer.toString(owner.getKey()));
                     out.endTag(null, TAG_PROFILE_OWNER);
                 }
@@ -292,12 +273,6 @@ public class DeviceOwner {
     static class OwnerInfo {
         public String name;
         public String packageName;
-        public boolean enabled = true; // only makes sense for managed profiles
-
-        public OwnerInfo(String name, String packageName, boolean enabled) {
-            this(name, packageName);
-            this.enabled = enabled;
-        }
 
         public OwnerInfo(String name, String packageName) {
             this.name = name;
