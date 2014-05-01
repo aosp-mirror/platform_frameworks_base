@@ -76,11 +76,37 @@ public class Build {
     public static final String SERIAL = getString("ro.serialno");
 
     /**
-     * A list of ABIs (in priority) order supported by this device.
+     * An ordered list of ABIs supported by this device. The most preferred ABI is the first
+     * element in the list.
+     *
+     * See {@link #SUPPORTED_32_BIT_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
      *
      * @hide
      */
     public static final String[] SUPPORTED_ABIS = getString("ro.product.cpu.abilist").split(",");
+
+    /**
+     * An ordered list of <b>32 bit</b> ABIs supported by this device. The most preferred ABI
+     * is the first element in the list.
+     *
+     * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
+     *
+     * @hide
+     */
+    public static final String[] SUPPORTED_32_BIT_ABIS = getString("ro.product.cpu.abilist32")
+            .split(",");
+
+    /**
+     * An ordered list of <b>64 bit</b> ABIs supported by this device. The most preferred ABI
+     * is the first element in the list.
+     *
+     * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_32_BIT_ABIS}.
+     *
+     * @hide
+     */
+    public static final String[] SUPPORTED_64_BIT_ABIS = getString("ro.product.cpu.abilist64")
+            .split(",");
+
 
     /** Various version strings. */
     public static class VERSION {
