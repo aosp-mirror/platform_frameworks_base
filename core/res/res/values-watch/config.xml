@@ -32,7 +32,7 @@
     <dimen name="config_viewConfigurationTouchSlop">4dp</dimen>
 
     <!-- Minimum velocity to initiate a fling, as measured in dips per second. -->
-    <dimen name="config_viewMinFlingVelocity">50dp</dimen>
+    <dimen name="config_viewMinFlingVelocity">500dp</dimen>
 
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
