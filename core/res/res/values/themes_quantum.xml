@@ -391,8 +391,8 @@ please see themes_device_defaults.xml.
         <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
-        <item name="textAppearance">@style/TextAppearance.Quantum.Light</item>
-        <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Light.Inverse</item>
+        <item name="textAppearance">@style/TextAppearance.Quantum</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Inverse</item>
 
         <item name="textColorPrimary">@color/primary_text_quantum_light</item>
         <item name="textColorPrimaryInverse">@color/primary_text_quantum_dark</item>
@@ -411,16 +411,16 @@ please see themes_device_defaults.xml.
         <item name="textColorSearchUrl">@color/search_url_text_quantum_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_quantum_light</item>
 
-        <item name="textAppearanceLarge">@style/TextAppearance.Quantum.Light.Large</item>
-        <item name="textAppearanceLargeInverse">@style/TextAppearance.Quantum.Light.Large.Inverse</item>
-        <item name="textAppearanceMedium">@style/TextAppearance.Quantum.Light.Medium</item>
-        <item name="textAppearanceMediumInverse">@style/TextAppearance.Quantum.Light.Medium.Inverse</item>
-        <item name="textAppearanceSmall">@style/TextAppearance.Quantum.Light.Small</item>
-        <item name="textAppearanceSmallInverse">@style/TextAppearance.Quantum.Light.Small.Inverse</item>
-        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.Quantum.Light.SearchResult.Title</item>
-        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.Quantum.Light.SearchResult.Subtitle</item>
+        <item name="textAppearanceLarge">@style/TextAppearance.Quantum.Large</item>
+        <item name="textAppearanceLargeInverse">@style/TextAppearance.Quantum.Large.Inverse</item>
+        <item name="textAppearanceMedium">@style/TextAppearance.Quantum.Medium</item>
+        <item name="textAppearanceMediumInverse">@style/TextAppearance.Quantum.Medium.Inverse</item>
+        <item name="textAppearanceSmall">@style/TextAppearance.Quantum.Small</item>
+        <item name="textAppearanceSmallInverse">@style/TextAppearance.Quantum.Small.Inverse</item>
+        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.Quantum.SearchResult.Title</item>
+        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.Quantum.SearchResult.Subtitle</item>
 
-        <item name="textAppearanceButton">@style/TextAppearance.Quantum.Light.Widget.Button</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Quantum.Widget.Button</item>
 
         <item name="editTextColor">?attr/textColorPrimary</item>
         <item name="editTextBackground">@drawable/edit_text_quantum</item>
@@ -430,8 +430,8 @@ please see themes_device_defaults.xml.
         <item name="textCheckMark">@drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_dark</item>
 
-        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Quantum.Light.Widget.PopupMenu.Large</item>
-        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Quantum.Light.Widget.PopupMenu.Small</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Quantum.Widget.PopupMenu.Large</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Quantum.Widget.PopupMenu.Small</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Quantum.Light.Button</item>
@@ -606,7 +606,7 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Quantum.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Quantum.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Quantum.Light.PopupMenu</item>
-        <item name="stackViewStyle">@style/Widget.Quantum.StackView</item>
+        <item name="stackViewStyle">@style/Widget.Quantum.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Quantum.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Quantum.Light.FragmentBreadCrumbs</item>
 
@@ -690,10 +690,10 @@ please see themes_device_defaults.xml.
         <item name="timePickerHeaderBackgroundColor">?attr/colorBackground</item>
 
         <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Quantum.Light.TimePicker.TimeLabel</item>
+        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Quantum.TimePicker.TimeLabel</item>
 
         <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Quantum.Light.TimePicker.AmPmLabel</item>
+        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Quantum.TimePicker.AmPmLabel</item>
 
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.Quantum.Light.Dialog.TimePicker</item>
@@ -1031,8 +1031,8 @@ please see themes_device_defaults.xml.
         <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar.AlertDialog</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless.Small</item>
 
-        <item name="textAppearance">@style/TextAppearance.Quantum.Light</item>
-        <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Light.Inverse</item>
+        <item name="textAppearance">@style/TextAppearance.Quantum</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Inverse</item>
 
         <item name="listPreferredItemPaddingLeft">16dip</item>
         <item name="listPreferredItemPaddingRight">16dip</item>

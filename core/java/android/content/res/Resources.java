@@ -137,42 +137,45 @@ public class Resources {
 
     /**
      * Returns the most appropriate default theme for the specified target SDK version.
-     * <ul>
-     * <li>Below API 11: Gingerbread
-     * <li>APIs 11 thru 14: Holo
-     * <li>APIs 14 thru XX: Device default dark
-     * <li>API XX and above: Device default light with dark action bar
-     * </ul>
      *
      * @param curTheme The current theme, or 0 if not specified.
      * @param targetSdkVersion The target SDK version.
      * @return A theme resource identifier
      * @hide
      */
-    public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
+    public int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
-                com.android.internal.R.style.Theme,
-                com.android.internal.R.style.Theme_Holo,
-                com.android.internal.R.style.Theme_DeviceDefault,
-                com.android.internal.R.style.Theme_DeviceDefault_Light_DarkActionBar);
+                com.android.internal.R.array.system_theme_sdks,
+                com.android.internal.R.array.system_theme_styles);
     }
 
-    /** @hide */
-    public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo,
-            int dark, int deviceDefault) {
+    /**
+     * Returns the most appropriate default theme for the specified target SDK version.
+     *
+     * @param curTheme The current theme, or 0 if not specified.
+     * @param targetSdkVersion The target SDK version.
+     * @param sdkArrayId Identifier for integer array resource containing
+     *        sorted minimum SDK versions. First entry must be 0.
+     * @param themeArrayId Identifier for array resource containing the
+     *        default themes that map to SDK versions.
+     * @return A theme resource identifier
+     * @hide
+     */
+    public int selectSystemTheme(
+            int curTheme, int targetSdkVersion, int sdkArrayId, int themeArrayId) {
         if (curTheme != 0) {
             return curTheme;
         }
-        if (targetSdkVersion < Build.VERSION_CODES.HONEYCOMB) {
-            return orig;
+
+        final int[] targetSdks = getIntArray(sdkArrayId);
+        final TypedArray defaultThemes = obtainTypedArray(themeArrayId);
+        for (int i = targetSdks.length - 1; i > 0; i--) {
+            if (targetSdkVersion >= targetSdks[i]) {
+                return defaultThemes.getResourceId(i, 0);
+            }
         }
-        if (targetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            return holo;
-        }
-        if (targetSdkVersion < Build.VERSION_CODES.CUR_DEVELOPMENT) {
-            return dark;
-        }
-        return deviceDefault;
+
+        return defaultThemes.getResourceId(0, 0);
     }
 
     /**
@@ -2308,8 +2311,8 @@ public class Resources {
      */
     private Drawable loadDrawableForCookie(TypedValue value, int id, Theme theme) {
         if (value.string == null) {
-            throw new NotFoundException(
-                    "Resource is not a Drawable (color or path): " + value);
+            throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
+                    + Integer.toHexString(id) + ")  is not a Drawable (color or path): " + value);
         }
 
         final String file = value.string.toString();
