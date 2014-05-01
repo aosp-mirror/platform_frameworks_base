@@ -109,7 +109,6 @@ interface IDevicePolicyManager {
     String getProfileOwner(int userHandle);
     String getProfileOwnerName(int userHandle);
     void setProfileEnabled(in ComponentName who);
-    boolean isProfileEnabled(int userHandle);
 
     boolean installCaCert(in byte[] certBuffer);
     void uninstallCaCert(in byte[] certBuffer);

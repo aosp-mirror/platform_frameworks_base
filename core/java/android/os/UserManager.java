@@ -437,6 +437,22 @@ public class UserManager {
     }
 
     /**
+     * Sets the user as enabled, if such an user exists.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Note that the default is true, it's only that managed profiles might not be enabled.
+     *
+     * @param userHandle the id of the profile to enable
+     * @hide
+     */
+    public void setUserEnabled(int userHandle) {
+        try {
+            mService.setUserEnabled(userHandle);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not enable the profile", e);
+        }
+    }
+
+    /**
      * Return the number of users currently created on the device.
      */
     public int getUserCount() {
