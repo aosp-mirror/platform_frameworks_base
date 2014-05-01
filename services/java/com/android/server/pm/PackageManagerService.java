@@ -1476,6 +1476,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             // the correct library paths.
             updateAllSharedLibrariesLPw();
 
+
+            for (SharedUserSetting setting : mSettings.getAllSharedUsersLPw()) {
+                adjustCpuAbisForSharedUserLPw(setting.packages, true /* do dexopt */,
+                        false /* force dexopt */, false /* defer dexopt */);
+            }
+
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
             Slog.i(TAG, "Time to scan packages: "
@@ -4968,6 +4974,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
+            if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
+                // We don't do this here during boot because we can do it all
+                // at once after scanning all existing packages.
+                adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
+                        true, forceDex, (scanMode & SCAN_DEFER_DEX) != 0);
+            }
             // We don't expect installation to fail beyond this point,
             if ((scanMode&SCAN_MONITOR) != 0) {
                 mAppDirs.put(pkg.mPath, pkg);
@@ -5309,6 +5321,54 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return pkg;
+    }
+
+    public void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
+            boolean doDexOpt, boolean forceDexOpt, boolean deferDexOpt) {
+        String requiredInstructionSet = null;
+        PackageSetting requirer = null;
+        for (PackageSetting ps : packagesForUser) {
+            if (ps.requiredCpuAbiString != null) {
+                final String instructionSet = VMRuntime.getInstructionSet(ps.requiredCpuAbiString);
+                if (requiredInstructionSet != null) {
+                    if (!instructionSet.equals(requiredInstructionSet)) {
+                        // We have a mismatch between instruction sets (say arm vs arm64).
+                        //
+                        // TODO: We should rescan all the packages in a shared UID to check if
+                        // they do contain shared libs for other ABIs in addition to the ones we've
+                        // already extracted. For example, the package might contain both arm64-v8a
+                        // and armeabi-v7a shared libs, and we'd have chosen arm64-v8a on 64 bit
+                        // devices.
+                        String errorMessage = "Instruction set mismatch, " + requirer.pkg.packageName
+                                + " requires " + requiredInstructionSet + " whereas " + ps.pkg.packageName
+                                + " requires " + instructionSet;
+                        Slog.e(TAG, errorMessage);
+
+                        reportSettingsProblem(Log.WARN, errorMessage);
+                        // Give up, don't bother making any other changes to the package settings.
+                        return;
+                    }
+                } else {
+                    requiredInstructionSet = instructionSet;
+                    requirer = ps;
+                }
+            }
+        }
+
+        if (requiredInstructionSet != null) {
+            for (PackageSetting ps : packagesForUser) {
+                if (ps.requiredCpuAbiString == null) {
+                    ps.requiredCpuAbiString = requirer.requiredCpuAbiString;
+                    ps.pkg.applicationInfo.requiredCpuAbi = requirer.requiredCpuAbiString;
+
+                    Slog.i(TAG, "Adjusting ABI for : " + ps.pkg.packageName + " to " + ps.requiredCpuAbiString);
+                    if (doDexOpt) {
+                        performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true);
+                        mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                    }
+                }
+            }
+        }
     }
 
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
