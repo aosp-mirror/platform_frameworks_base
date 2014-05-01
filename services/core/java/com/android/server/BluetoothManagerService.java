@@ -307,6 +307,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public IBluetooth registerAdapter(IBluetoothManagerCallback callback){
+        if (callback == null) {
+            Log.w(TAG, "Callback is null in registerAdapter");
+            return null;
+        }
         Message msg = mHandler.obtainMessage(MESSAGE_REGISTER_ADAPTER);
         msg.obj = callback;
         mHandler.sendMessage(msg);
@@ -316,6 +320,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public void unregisterAdapter(IBluetoothManagerCallback callback) {
+        if (callback == null) {
+            Log.w(TAG, "Callback is null in unregisterAdapter");
+            return;
+        }
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                                                 "Need BLUETOOTH permission");
         Message msg = mHandler.obtainMessage(MESSAGE_UNREGISTER_ADAPTER);
