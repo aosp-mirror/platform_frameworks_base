@@ -287,11 +287,12 @@ public class WebViewClient {
      * from where the event is dispatched. It gives the host application a chance
      * to handle the unhandled input events.
      *
-     * Note that if the event is a {@link MotionEvent}, then it's lifetime is only that of the
-     * function call. If the WebViewClient wishes to use the event beyond that, then it <i>must</i>
-     * create a copy of the event.
+     * Note that if the event is a {@link android.view.MotionEvent}, then it's lifetime is only
+     * that of the function call. If the WebViewClient wishes to use the event beyond that, then it
+     * <i>must</i> create a copy of the event.
      *
-     * It is the responsibility of overriders of this method to call {@link onUnhandledKeyEvent}
+     * It is the responsibility of overriders of this method to call
+     * {@link #onUnhandledKeyEvent(WebView, KeyEvent)}
      * when appropriate if they wish to continue receiving events through it.
      *
      * @param view The WebView that is initiating the callback.
