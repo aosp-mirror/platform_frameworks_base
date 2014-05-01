@@ -966,7 +966,6 @@
         <attr name="colorButtonPressed" format="color" />
         <attr name="colorButtonNormalColored" format="color" />
         <attr name="colorButtonPressedColored" format="color" />
-
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -6348,6 +6347,8 @@
         <!-- Specifies padding that should be applied to the left and right sides of
              system-provided items in the bar. -->
         <attr name="itemPadding" format="dimension" />
+        <!-- Set true to hide the action bar on a vertical nested scroll of content. -->
+        <attr name="hideOnContentScroll" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">

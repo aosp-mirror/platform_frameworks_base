@@ -932,6 +932,66 @@ public abstract class ActionBar {
      */
     public void setHomeActionContentDescription(int resId) { }
 
+    /**
+     * Enable hiding the action bar on content scroll.
+     *
+     * <p>If enabled, the action bar will scroll out of sight along with a
+     * {@link View#setNestedScrollingEnabled(boolean) nested scrolling child} view's content.
+     * The action bar must be in {@link Window#FEATURE_ACTION_BAR_OVERLAY overlay mode}
+     * to enable hiding on content scroll.</p>
+     *
+     * <p>When partially scrolled off screen the action bar is considered
+     * {@link #hide() hidden}. A call to {@link #show() show} will cause it to return to full view.
+     * </p>
+     * @param hideOnContentScroll true to enable hiding on content scroll.
+     */
+    public void setHideOnContentScrollEnabled(boolean hideOnContentScroll) {
+        if (hideOnContentScroll) {
+            throw new UnsupportedOperationException("Hide on content scroll is not supported in " +
+                    "this action bar configuration.");
+        }
+    }
+
+    /**
+     * Return whether the action bar is configured to scroll out of sight along with
+     * a {@link View#setNestedScrollingEnabled(boolean) nested scrolling child}.
+     *
+     * @return true if hide-on-content-scroll is enabled
+     * @see #setHideOnContentScrollEnabled(boolean)
+     */
+    public boolean isHideOnContentScrollEnabled() {
+        return false;
+    }
+
+    /**
+     * Return the current vertical offset of the action bar.
+     *
+     * <p>The action bar's current hide offset is the distance that the action bar is currently
+     * scrolled offscreen in pixels. The valid range is 0 (fully visible) to the action bar's
+     * current measured {@link #getHeight() height} (fully invisible).</p>
+     *
+     * @return The action bar's offset toward its fully hidden state in pixels
+     */
+    public int getHideOffset() {
+        return 0;
+    }
+
+    /**
+     * Set the current hide offset of the action bar.
+     *
+     * <p>The action bar's current hide offset is the distance that the action bar is currently
+     * scrolled offscreen in pixels. The valid range is 0 (fully visible) to the action bar's
+     * current measured {@link #getHeight() height} (fully invisible).</p>
+     *
+     * @param offset The action bar's offset toward its fully hidden state in pixels.
+     */
+    public void setHideOffset(int offset) {
+        if (offset != 0) {
+            throw new UnsupportedOperationException("Setting an explicit action bar hide offset " +
+                    "is not supported in this action bar configuration.");
+        }
+    }
+
     /** @hide */
     public void setDefaultDisplayHomeAsUpEnabled(boolean enabled) {
     }

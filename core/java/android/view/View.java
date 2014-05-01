@@ -17989,7 +17989,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>If this property is set to true the view will be permitted to initiate nested
      * scrolling operations with a compatible parent view in the current hierarchy. If this
-     * view does not implement nested scrolling this will have no effect.</p>
+     * view does not implement nested scrolling this will have no effect. Disabling nested scrolling
+     * while a nested scroll is in progress has the effect of {@link #stopNestedScroll() stopping}
+     * the nested scroll.</p>
      *
      * @param enabled true to enable nested scrolling, false to disable
      *
@@ -17999,6 +18001,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (enabled) {
             mPrivateFlags3 |= PFLAG3_NESTED_SCROLLING_ENABLED;
         } else {
+            stopNestedScroll();
             mPrivateFlags3 &= ~PFLAG3_NESTED_SCROLLING_ENABLED;
         }
     }
@@ -18138,23 +18141,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed,
             int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow) {
         if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
-            int startX = 0;
-            int startY = 0;
-            if (offsetInWindow != null) {
-                getLocationInWindow(offsetInWindow);
-                startX = offsetInWindow[0];
-                startY = offsetInWindow[1];
-            }
+            if (dxConsumed != 0 || dyConsumed != 0 || dxUnconsumed != 0 || dyUnconsumed != 0) {
+                int startX = 0;
+                int startY = 0;
+                if (offsetInWindow != null) {
+                    getLocationInWindow(offsetInWindow);
+                    startX = offsetInWindow[0];
+                    startY = offsetInWindow[1];
+                }
 
-            mNestedScrollingParent.onNestedScroll(this, dxConsumed, dyConsumed,
-                    dxUnconsumed, dyUnconsumed);
+                mNestedScrollingParent.onNestedScroll(this, dxConsumed, dyConsumed,
+                        dxUnconsumed, dyUnconsumed);
 
-            if (offsetInWindow != null) {
-                getLocationInWindow(offsetInWindow);
-                offsetInWindow[0] -= startX;
-                offsetInWindow[1] -= startY;
+                if (offsetInWindow != null) {
+                    getLocationInWindow(offsetInWindow);
+                    offsetInWindow[0] -= startX;
+                    offsetInWindow[1] -= startY;
+                }
+                return true;
+            } else if (offsetInWindow != null) {
+                // No motion, no dispatch. Keep offsetInWindow up to date.
+                offsetInWindow[0] = 0;
+                offsetInWindow[1] = 0;
             }
-            return true;
         }
         return false;
     }
@@ -18180,30 +18189,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
         if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
-            int startX = 0;
-            int startY = 0;
-            if (offsetInWindow != null) {
-                getLocationInWindow(offsetInWindow);
-                startX = offsetInWindow[0];
-                startY = offsetInWindow[1];
-            }
-
-            if (consumed == null) {
-                if (mTempNestedScrollConsumed == null) {
-                    mTempNestedScrollConsumed = new int[2];
+            if (dx != 0 || dy != 0) {
+                int startX = 0;
+                int startY = 0;
+                if (offsetInWindow != null) {
+                    getLocationInWindow(offsetInWindow);
+                    startX = offsetInWindow[0];
+                    startY = offsetInWindow[1];
                 }
-                consumed = mTempNestedScrollConsumed;
-            }
-            consumed[0] = 0;
-            consumed[1] = 0;
-            mNestedScrollingParent.onNestedPreScroll(this, dx, dy, consumed);
 
-            if (offsetInWindow != null) {
-                getLocationInWindow(offsetInWindow);
-                offsetInWindow[0] -= startX;
-                offsetInWindow[1] -= startY;
+                if (consumed == null) {
+                    if (mTempNestedScrollConsumed == null) {
+                        mTempNestedScrollConsumed = new int[2];
+                    }
+                    consumed = mTempNestedScrollConsumed;
+                }
+                consumed[0] = 0;
+                consumed[1] = 0;
+                mNestedScrollingParent.onNestedPreScroll(this, dx, dy, consumed);
+
+                if (offsetInWindow != null) {
+                    getLocationInWindow(offsetInWindow);
+                    offsetInWindow[0] -= startX;
+                    offsetInWindow[1] -= startY;
+                }
+                return consumed[0] != 0 || consumed[1] != 0;
+            } else if (offsetInWindow != null) {
+                offsetInWindow[0] = 0;
+                offsetInWindow[1] = 0;
             }
-            return consumed[0] != 0 || consumed[1] != 0;
         }
         return false;
     }
@@ -18211,18 +18225,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Dispatch a fling to a nested scrolling parent.
      *
-     * <p>If a nested scrolling child view would normally fling but it is at the edge of its
-     * own content it should use this method to delegate the fling to its nested scrolling parent.
-     * The view implementation can use a {@link VelocityTracker} to obtain the velocity values
-     * to pass.</p>
+     * <p>This method should be used to indicate that a nested scrolling child has detected
+     * suitable conditions for a fling. Generally this means that a touch scroll has ended with a
+     * {@link VelocityTracker velocity} in the direction of scrolling that meets or exceeds
+     * the {@link ViewConfiguration#getScaledMinimumFlingVelocity() minimum fling velocity}
+     * along a scrollable axis.</p>
+     *
+     * <p>If a nested scrolling child view would normally fling but it is at the edge of
+     * its own content, it can use this method to delegate the fling to its nested scrolling
+     * parent instead. The parent may optionally consume the fling or observe a child fling.</p>
      *
      * @param velocityX Horizontal fling velocity in pixels per second
      * @param velocityY Vertical fling velocity in pixels per second
-     * @return true if the nested scrolling parent consumed the fling
+     * @param consumed true if the child consumed the fling, false otherwise
+     * @return true if the nested scrolling parent consumed or otherwise reacted to the fling
      */
-    public boolean dispatchNestedFling(float velocityX, float velocityY) {
+    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
         if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
-            return mNestedScrollingParent.onNestedFling(this, velocityX, velocityY);
+            return mNestedScrollingParent.onNestedFling(this, velocityX, velocityY, consumed);
         }
         return false;
     }

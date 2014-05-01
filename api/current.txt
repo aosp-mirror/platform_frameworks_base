@@ -598,6 +598,7 @@ package android {
     field public static final int headerBackground = 16843055; // 0x101012f
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
     field public static final int height = 16843093; // 0x1010155
+    field public static final int hideOnContentScroll = 16843855; // 0x101044f
     field public static final int hint = 16843088; // 0x1010150
     field public static final int homeAsUpIndicator = 16843531; // 0x101030b
     field public static final int homeLayout = 16843549; // 0x101031d
@@ -3064,6 +3065,7 @@ package android.app {
     method public abstract android.view.View getCustomView();
     method public abstract int getDisplayOptions();
     method public abstract int getHeight();
+    method public int getHideOffset();
     method public abstract deprecated int getNavigationItemCount();
     method public abstract deprecated int getNavigationMode();
     method public abstract deprecated int getSelectedNavigationIndex();
@@ -3074,6 +3076,7 @@ package android.app {
     method public android.content.Context getThemedContext();
     method public abstract java.lang.CharSequence getTitle();
     method public abstract void hide();
+    method public boolean isHideOnContentScrollEnabled();
     method public abstract boolean isShowing();
     method public abstract deprecated android.app.ActionBar.Tab newTab();
     method public abstract deprecated void removeAllTabs();
@@ -3092,6 +3095,8 @@ package android.app {
     method public abstract void setDisplayShowHomeEnabled(boolean);
     method public abstract void setDisplayShowTitleEnabled(boolean);
     method public abstract void setDisplayUseLogoEnabled(boolean);
+    method public void setHideOffset(int);
+    method public void setHideOnContentScrollEnabled(boolean);
     method public void setHomeActionContentDescription(java.lang.CharSequence);
     method public void setHomeActionContentDescription(int);
     method public void setHomeAsUpIndicator(android.graphics.drawable.Drawable);
@@ -30474,7 +30479,7 @@ package android.view {
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
     method public boolean dispatchKeyEventPreIme(android.view.KeyEvent);
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
-    method public boolean dispatchNestedFling(float, float);
+    method public boolean dispatchNestedFling(float, float, boolean);
     method public boolean dispatchNestedPreScroll(int, int, int[], int[]);
     method public boolean dispatchNestedScroll(int, int, int, int, int[]);
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
@@ -31267,7 +31272,7 @@ package android.view {
     method public boolean onInterceptHoverEvent(android.view.MotionEvent);
     method public boolean onInterceptTouchEvent(android.view.MotionEvent);
     method protected abstract void onLayout(boolean, int, int, int, int);
-    method public boolean onNestedFling(android.view.View, float, float);
+    method public boolean onNestedFling(android.view.View, float, float, boolean);
     method public void onNestedPreScroll(android.view.View, int, int, int[]);
     method public void onNestedScroll(android.view.View, int, int, int, int);
     method public void onNestedScrollAccepted(android.view.View, android.view.View, int);
@@ -31405,7 +31410,7 @@ package android.view {
     method public abstract boolean isTextAlignmentResolved();
     method public abstract boolean isTextDirectionResolved();
     method public abstract void notifySubtreeAccessibilityStateChanged(android.view.View, android.view.View, int);
-    method public abstract boolean onNestedFling(android.view.View, float, float);
+    method public abstract boolean onNestedFling(android.view.View, float, float, boolean);
     method public abstract void onNestedPreScroll(android.view.View, int, int, int[]);
     method public abstract void onNestedScroll(android.view.View, int, int, int, int);
     method public abstract void onNestedScrollAccepted(android.view.View, android.view.View, int);

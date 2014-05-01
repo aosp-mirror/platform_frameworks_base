@@ -2166,6 +2166,7 @@
   <public type="attr" name="elevation" />
   <public type="attr" name="excludeId" />
   <public type="attr" name="excludeClass" />
+  <public type="attr" name="hideOnContentScroll" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
