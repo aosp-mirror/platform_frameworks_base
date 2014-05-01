@@ -34,7 +34,7 @@ import android.view.ViewGroup;
 public class CircularPropagation extends VisibilityPropagation {
     private static final String TAG = "CircularPropagation";
 
-    private float mPropagationSpeed = 4.0f;
+    private float mPropagationSpeed = 3.0f;
 
     /**
      * Sets the speed at which transition propagation happens, relative to the duration of the
@@ -91,8 +91,12 @@ public class CircularPropagation extends VisibilityPropagation {
         float maxDistance = distance(0, 0, sceneRoot.getWidth(), sceneRoot.getHeight());
         float distanceFraction = distance/maxDistance;
 
-        return Math.round(transition.getDuration() * directionMultiplier / mPropagationSpeed
-                * distanceFraction);
+        long duration = transition.getDuration();
+        if (duration < 0) {
+            duration = 300;
+        }
+
+        return Math.round(duration * directionMultiplier / mPropagationSpeed * distanceFraction);
     }
 
     private static float distance(float x1, float y1, float x2, float y2) {
