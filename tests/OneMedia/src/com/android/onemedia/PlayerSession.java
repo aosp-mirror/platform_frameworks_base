@@ -119,7 +119,9 @@ public class PlayerSession {
     }
 
     private void updateState(int newState) {
-        mPlaybackState.setState(newState);
+        float rate = newState == PlaybackState.PLAYSTATE_PLAYING ? 1 : 0;
+        long position = mRenderer == null ? -1 : mRenderer.getSeekPosition();
+        mPlaybackState.setState(newState, position, rate);
         mPerformer.setPlaybackState(mPlaybackState);
     }
 
@@ -132,7 +134,7 @@ public class PlayerSession {
         @Override
         public void onError(int type, int extra, Bundle extras, Throwable error) {
             Log.d(TAG, "Sending onError with type " + type + " and extra " + extra);
-            mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR);
+            mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, -1, 0);
             if (error != null) {
                 mPlaybackState.setErrorMessage(error.getLocalizedMessage());
             }
@@ -147,33 +149,32 @@ public class PlayerSession {
             if (newState != Renderer.STATE_ERROR) {
                 mPlaybackState.setErrorMessage(null);
             }
+            long position = -1;
+            if (mRenderer != null) {
+                position = mRenderer.getSeekPosition();
+            }
             switch (newState) {
                 case Renderer.STATE_ENDED:
                 case Renderer.STATE_STOPPED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_STOPPED);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_STOPPED, position, 0);
                     break;
                 case Renderer.STATE_INIT:
                 case Renderer.STATE_PREPARING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_BUFFERING);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_BUFFERING, position, 0);
                     break;
                 case Renderer.STATE_ERROR:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
                     break;
                 case Renderer.STATE_PAUSED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, position, 0);
                     break;
                 case Renderer.STATE_PLAYING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PLAYING);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PLAYING, position, 1);
                     break;
                 default:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR);
+                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
                     mPlaybackState.setErrorMessage("unkown state");
                     break;
-            }
-            if (mRenderer != null) {
-                mPlaybackState.setPosition(mRenderer.getSeekPosition());
-            } else {
-                mPlaybackState.setPosition(-1);
             }
             mPerformer.setPlaybackState(mPlaybackState);
             if (mListener != null) {
@@ -188,8 +189,8 @@ public class PlayerSession {
         @Override
         public void onFocusLost() {
             Log.d(TAG, "Focus lost, changing state to " + Renderer.STATE_PAUSED);
-            mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED);
-            mPlaybackState.setPosition(mRenderer.getSeekPosition());
+            long position = mRenderer == null ? -1 : mRenderer.getSeekPosition();
+            mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, position, 0);
             mPerformer.setPlaybackState(mPlaybackState);
             if (mListener != null) {
                 mListener.onPlayStateChanged(mPlaybackState);

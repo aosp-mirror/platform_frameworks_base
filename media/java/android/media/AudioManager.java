@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RemoteController.OnClientUpdateListener;
+import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -47,6 +48,12 @@ import java.util.HashMap;
  * an instance of this class.
  */
 public class AudioManager {
+
+    // If we should use the new sessions APIs.
+    private final static boolean USE_SESSIONS = true;
+    // If we should use the legacy APIs. If both are true information will be
+    // duplicated through both paths. Currently this flag isn't used.
+    private final static boolean USE_LEGACY = true;
 
     private final Context mContext;
     private long mVolumeKeyUpTime;
@@ -421,6 +428,7 @@ public class AudioManager {
     public static final int USE_DEFAULT_STREAM_TYPE = Integer.MIN_VALUE;
 
     private static IAudioService sService;
+    private MediaSessionLegacyHelper mSessionHelper;
 
     /**
      * @hide
@@ -431,6 +439,9 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
+        if (USE_SESSIONS) {
+            mSessionHelper = MediaSessionLegacyHelper.getHelper(context);
+        }
     }
 
     private static IAudioService getService()
@@ -2166,6 +2177,9 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerMediaButtonIntent"+e);
         }
+        if (USE_SESSIONS) {
+            mSessionHelper.addMediaButtonListener(pi, mContext);
+        }
     }
 
     /**
@@ -2239,6 +2253,9 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterMediaButtonIntent"+e);
         }
+        if (USE_SESSIONS) {
+            mSessionHelper.removeMediaButtonListener(pi);
+        }
     }
 
     /**
@@ -2263,6 +2280,9 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
         }
+        if (USE_SESSIONS) {
+            rcClient.registerWithSession(mSessionHelper);
+        }
     }
 
     /**
@@ -2281,6 +2301,9 @@ public class AudioManager {
                     rcClient.getIRemoteControlClient());                       /* rcClient      */
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
+        }
+        if (USE_SESSIONS) {
+            rcClient.unregisterWithSession(mSessionHelper);
         }
     }
 

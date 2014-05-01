@@ -40,6 +40,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -321,6 +322,34 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 cb.send(RouteInterface.RESULT_NOT_CONNECTED, null);
             }
         }
+    }
+
+    private PlaybackState getStateWithUpdatedPosition() {
+        PlaybackState state = mPlaybackState;
+        long duration = -1;
+        if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
+            duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        }
+        PlaybackState result = null;
+        if (state != null) {
+            if (state.getState() == PlaybackState.PLAYSTATE_PLAYING
+                    || state.getState() == PlaybackState.PLAYSTATE_FAST_FORWARDING
+                    || state.getState() == PlaybackState.PLAYSTATE_REWINDING) {
+                long updateTime = state.getLastPositionUpdateTime();
+                if (updateTime > 0) {
+                    long position = (long) (state.getRate()
+                            * (SystemClock.elapsedRealtime() - updateTime)) + state.getPosition();
+                    if (duration >= 0 && position > duration) {
+                        position = duration;
+                    } else if (position < 0) {
+                        position = 0;
+                    }
+                    result = new PlaybackState(state);
+                    result.setState(state.getState(), position, state.getRate());
+                }
+            }
+        }
+        return result == null ? state : result;
     }
 
     private final RouteConnectionRecord.Listener mConnectionListener
@@ -625,7 +654,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public PlaybackState getPlaybackState() {
-            return mPlaybackState;
+            return getStateWithUpdatedPosition();
         }
 
         @Override
