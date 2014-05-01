@@ -27,6 +27,28 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for durationDays (6652371460511178259) -->
+    <skip />
+    <!-- no translation found for durationDayHours (2713107458736744435) -->
+    <skip />
+    <!-- no translation found for durationDayHour (7293789639090958917) -->
+    <skip />
+    <!-- no translation found for durationHours (4266858287167358988) -->
+    <skip />
+    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
+    <skip />
+    <!-- no translation found for durationHourMinute (2741677355177402539) -->
+    <skip />
+    <!-- no translation found for durationMinutes (3134226679883579347) -->
+    <skip />
+    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
+    <skip />
+    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
+    <skip />
+    <!-- no translation found for durationSeconds (8050088505238241405) -->
+    <skip />
+    <!-- no translation found for durationSecond (985669622276420331) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;Walang pamagat&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -387,10 +409,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng serbisyo ng Vpn. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sumailalim sa wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng isang wallpaper. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
-    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
-    <skip />
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"i-bind sa isang voice interactor"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Nagbibigay-daan sa may-hawak na i-bind ang top-level na interface ng isang serbisyo sa pakikipag-ugnayan gamit ang boses. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"magpasaklaw sa isang remote na display"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Binibigyang-daan ang may-hawak na masaklaw ang pinakamataas na antas ng interface ng isang remote na display. Hindi dapat kailanman kailanganin ng normal na apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"itali sa serbisyo ng widget"</string>
@@ -703,10 +723,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
-    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
-    <skip />
-    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
-    <skip />
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"i-bind sa isang serbisyo sa pagbibigay ng kundisyon"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Nagbibigay-daan sa naghahawak na i-bind ang top-level na interface ng isang serbisyo sa pagbibigay ng kundisyon. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"makinig sa mga obserbasyon sa mga kundisyon ng network"</string>
@@ -1377,8 +1395,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Notification listener"</string>
-    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
-    <skip />
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Nagbibigay ng kundisyon"</string>
     <string name="vpn_title" msgid="19615213552042827">"Naka-activate ang VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Isinaaktibo ang VPN ng <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Pindutin upang pamahalaan ang network."</string>
