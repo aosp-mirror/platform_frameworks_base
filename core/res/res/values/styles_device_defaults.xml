@@ -72,7 +72,7 @@ easier.
     <style name="Widget.DeviceDefault.PopupMenu" parent="Widget.Quantum.PopupMenu"/>
     <style name="Widget.DeviceDefault.ActionButton" parent="Widget.Quantum.ActionButton"/>
     <style name="Widget.DeviceDefault.ActionButton.Overflow" parent="Widget.Quantum.ActionButton.Overflow"/>
-    <style name="Widget.DeviceDefault.ActionButton.TextButton" parent="Widget.Quantum.ActionButton.TextButton"/>
+    <style name="Widget.DeviceDefault.ActionButton.TextButton" parent="Widget.Quantum.ActionButton"/>
     <style name="Widget.DeviceDefault.ActionMode" parent="Widget.Quantum.ActionMode"/>
     <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Quantum.ActionButton.CloseMode"/>
     <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Quantum.ActionBar"/>
@@ -97,6 +97,7 @@ easier.
     <style name="Widget.DeviceDefault.ImageWell" parent="Widget.Quantum.ImageWell"/>
     <style name="Widget.DeviceDefault.KeyboardView" parent="Widget.Quantum.KeyboardView"/>
     <style name="Widget.DeviceDefault.ListView.White" parent="Widget.Quantum.ListView.White"/>
+    <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton" />
     <style name="Widget.DeviceDefault.NumberPicker" parent="Widget.Quantum.NumberPicker"/>
     <style name="Widget.DeviceDefault.PreferenceFrameLayout" parent="Widget.Quantum.PreferenceFrameLayout"/>
     <style name="Widget.DeviceDefault.ProgressBar.Inverse" parent="Widget.Quantum.ProgressBar.Inverse"/>
@@ -114,11 +115,13 @@ easier.
     <style name="Widget.DeviceDefault.TextSuggestionsPopupWindow" parent="Widget.Quantum.TextSuggestionsPopupWindow"/>
     <style name="Widget.DeviceDefault.TextView.ListSeparator" parent="Widget.Quantum.TextView.ListSeparator"/>
     <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Quantum.TimePicker"/>
+
     <style name="Widget.DeviceDefault.Light" parent="Widget.Quantum.Light"/>
     <style name="Widget.DeviceDefault.Light.Button" parent="Widget.Quantum.Light.Button"/>
     <style name="Widget.DeviceDefault.Light.Button.Small" parent="Widget.Quantum.Light.Button.Small"/>
     <style name="Widget.DeviceDefault.Light.Button.Inset" parent="Widget.Quantum.Light.Button.Inset"/>
     <style name="Widget.DeviceDefault.Light.Button.Toggle" parent="Widget.Quantum.Light.Button.Toggle"/>
+    <style name="Widget.DeviceDefault.Light.StackView" parent="Widget.Quantum.Light.StackView"/>
     <style name="Widget.DeviceDefault.Light.TextView" parent="Widget.Quantum.Light.TextView"/>
     <style name="Widget.DeviceDefault.Light.CheckedTextView" parent="Widget.Quantum.Light.CheckedTextView"/>
     <style name="Widget.DeviceDefault.Light.AutoCompleteTextView" parent="Widget.Quantum.Light.AutoCompleteTextView"/>
@@ -131,6 +134,7 @@ easier.
     <style name="Widget.DeviceDefault.Light.GridView" parent="Widget.Quantum.Light.GridView"/>
     <style name="Widget.DeviceDefault.Light.ImageButton" parent="Widget.Quantum.Light.ImageButton"/>
     <style name="Widget.DeviceDefault.Light.ListView" parent="Widget.Quantum.Light.ListView"/>
+    <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Quantum.Light.MediaRouteButton" />
     <style name="Widget.DeviceDefault.Light.PopupWindow" parent="Widget.Quantum.Light.PopupWindow"/>
     <style name="Widget.DeviceDefault.Light.ProgressBar" parent="Widget.Quantum.Light.ProgressBar"/>
     <style name="Widget.DeviceDefault.Light.ProgressBar.Horizontal" parent="Widget.Quantum.Light.ProgressBar.Horizontal"/>
@@ -195,7 +199,6 @@ easier.
     <style name="Widget.DeviceDefault.Light.TimePicker" parent="Widget.Quantum.Light.TimePicker"/>
     <style name="Widget.DeviceDefault.Light.TextSuggestionsPopupWindow" parent="Widget.Quantum.Light.TextSuggestionsPopupWindow"/>
 
-
     <!-- Text Appearance Styles -->
     <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Quantum"/>
     <style name="TextAppearance.DeviceDefault.Inverse" parent="TextAppearance.Quantum.Inverse"/>
@@ -207,6 +210,8 @@ easier.
     <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Quantum.Small.Inverse"/>
     <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Quantum.SearchResult.Title"/>
     <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Quantum.SearchResult.Subtitle"/>
+    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Quantum.TimePicker.TimeLabel"/>
+    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.TimePicker.AmPmLabel"/>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Quantum.Widget"/>
     <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Quantum.Widget.Button"/>
     <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Quantum.Widget.IconMenu.Item"/>
@@ -235,20 +240,6 @@ easier.
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Widget.ActionBar.Menu"/>
-    <style name="TextAppearance.DeviceDefault.Light" parent="TextAppearance.Quantum.Light"/>
-    <style name="TextAppearance.DeviceDefault.Light.Inverse" parent="TextAppearance.Quantum.Light.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Large" parent="TextAppearance.Quantum.Light.Large"/>
-    <style name="TextAppearance.DeviceDefault.Light.Large.Inverse" parent="TextAppearance.Quantum.Light.Large.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Medium" parent="TextAppearance.Quantum.Light.Medium"/>
-    <style name="TextAppearance.DeviceDefault.Light.Medium.Inverse" parent="TextAppearance.Quantum.Light.Medium.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Subtitle" parent="TextAppearance.Quantum.Light.SearchResult.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Title" parent="TextAppearance.Quantum.Light.SearchResult.Title"/>
-    <style name="TextAppearance.DeviceDefault.Light.Small" parent="TextAppearance.Quantum.Light.Small"/>
-    <style name="TextAppearance.DeviceDefault.Light.Small.Inverse" parent="TextAppearance.Quantum.Light.Small.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.Button" parent="TextAppearance.Quantum.Light.Widget.Button"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Large" parent="TextAppearance.Quantum.Light.Widget.PopupMenu.Large"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Small" parent="TextAppearance.Quantum.Light.Widget.PopupMenu.Small"/>
-
 
     <!-- Preference Styles -->
     <style name="Preference.DeviceDefault" parent="Preference.Quantum"/>
@@ -262,7 +253,6 @@ easier.
     <style name="Preference.DeviceDefault.RingtonePreference" parent="Preference.Quantum.RingtonePreference"/>
     <style name="Preference.DeviceDefault.SwitchPreference" parent="Preference.Quantum.SwitchPreference"/>
 
-
     <!-- AlertDialog Styles -->
     <style name="AlertDialog.DeviceDefault" parent="AlertDialog.Quantum"/>
     <style name="AlertDialog.DeviceDefault.Light" parent="AlertDialog.Quantum.Light"/>
@@ -271,32 +261,20 @@ easier.
     <style name="Animation.DeviceDefault.Activity" parent="Animation.Quantum.Activity"/>
     <style name="Animation.DeviceDefault.Dialog" parent="Animation.Quantum.Dialog"/>
 
-
     <!-- DialogWindowTitle Styles -->
     <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Quantum"/>
     <style name="DialogWindowTitle.DeviceDefault.Light" parent="DialogWindowTitle.Quantum.Light"/>
-
 
     <!-- WindowTitle Styles -->
     <style name="WindowTitle.DeviceDefault" parent="WindowTitle.Quantum"/>
     <style name="WindowTitleBackground.DeviceDefault" parent="WindowTitleBackground.Quantum"/>
 
-
     <!-- Other Styles -->
     <style name="DeviceDefault.ButtonBar" parent="Widget.Quantum.ButtonBar"/>
     <style name="DeviceDefault.ButtonBar.AlertDialog" parent="Widget.Quantum.ButtonBar.AlertDialog"/>
     <style name="DeviceDefault.SegmentedButton" parent="Widget.Quantum.SegmentedButton"/>
+
     <style name="DeviceDefault.Light.ButtonBar" parent="Widget.Quantum.Light.ButtonBar"/>
     <style name="DeviceDefault.Light.ButtonBar.AlertDialog" parent="Widget.Quantum.Light.ButtonBar.AlertDialog"/>
     <style name="DeviceDefault.Light.SegmentedButton" parent="Widget.Quantum.Light.SegmentedButton"/>
-
-    <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton" />
-    <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Quantum.Light.MediaRouteButton" />
-
-    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Quantum.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Quantum.Light.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.TimePicker.AmPmLabel"/>
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.Light.TimePicker.AmPmLabel"/>
-    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Quantum.Dialog.TimePicker"/>
-    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Quantum.Light.Dialog.TimePicker"/>
 </resources>

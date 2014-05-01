@@ -21,13 +21,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Trace;
 import android.widget.FrameLayout;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Xml;
 
 import java.io.IOException;
@@ -61,7 +64,8 @@ import java.util.HashMap;
  * @see Context#getSystemService
  */
 public abstract class LayoutInflater {
-    private final boolean DEBUG = false;
+    private static final String TAG = LayoutInflater.class.getSimpleName();
+    private static final boolean DEBUG = false;
 
     /**
      * This field should be made private, so it is hidden from the SDK.
@@ -395,8 +399,13 @@ public abstract class LayoutInflater {
      *         the inflated XML file.
      */
     public View inflate(int resource, ViewGroup root, boolean attachToRoot) {
-        if (DEBUG) System.out.println("INFLATING from resource: " + resource);
-        XmlResourceParser parser = getContext().getResources().getLayout(resource);
+        final Resources res = getContext().getResources();
+        if (DEBUG) {
+            Log.d(TAG, "INFLATING from resource: \"" + res.getResourceName(resource) + "\" ("
+                    + Integer.toHexString(resource) + ")");
+        }
+
+        final XmlResourceParser parser = res.getLayout(resource);
         try {
             return inflate(parser, root, attachToRoot);
         } finally {

@@ -351,40 +351,6 @@ please see styles_device_defaults.xml.
         <item name="textStyle">bold</item>
     </style>
 
-    <!-- Light text styles -->
-    <style name="TextAppearance.Quantum.Light" parent="TextAppearance.Quantum"/>
-    <style name="TextAppearance.Quantum.Light.Inverse" parent="TextAppearance.Quantum.Inverse"/>
-    <style name="TextAppearance.Quantum.Light.Large" parent="TextAppearance.Quantum.Large"/>
-    <style name="TextAppearance.Quantum.Light.Large.Inverse" parent="TextAppearance.Quantum.Large.Inverse"/>
-    <style name="TextAppearance.Quantum.Light.Medium" parent="TextAppearance.Quantum.Medium"/>
-    <style name="TextAppearance.Quantum.Light.Medium.Inverse" parent="TextAppearance.Quantum.Medium.Inverse"/>
-    <style name="TextAppearance.Quantum.Light.Small" parent="TextAppearance.Quantum.Small"/>
-    <style name="TextAppearance.Quantum.Light.Small.Inverse" parent="TextAppearance.Quantum.Small.Inverse"/>
-    <style name="TextAppearance.Quantum.Light.SearchResult" parent="TextAppearance.Quantum.SearchResult"/>
-    <style name="TextAppearance.Quantum.Light.SearchResult.Title" parent="TextAppearance.Quantum.SearchResult.Title"/>
-    <style name="TextAppearance.Quantum.Light.SearchResult.Subtitle" parent="TextAppearance.Quantum.SearchResult.Subtitle"/>
-    <style name="TextAppearance.Quantum.Light.Widget" parent="TextAppearance.Quantum.Widget"/>
-    <style name="TextAppearance.Quantum.Light.Widget.Button" parent="TextAppearance.Quantum.Widget.Button"/>
-    <style name="TextAppearance.Quantum.Light.Widget.EditText" parent="TextAppearance.Quantum.Widget.EditText"/>
-    <style name="TextAppearance.Quantum.Light.Widget.Switch" parent="TextAppearance.Quantum.Widget.Switch"/>
-    <style name="TextAppearance.Quantum.Light.Widget.PopupMenu" parent="TextAppearance.Quantum.Widget.PopupMenu"/>
-    <style name="TextAppearance.Quantum.Light.Widget.PopupMenu.Large" parent="TextAppearance.Quantum.Widget.PopupMenu.Large"/>
-    <style name="TextAppearance.Quantum.Light.Widget.PopupMenu.Small" parent="TextAppearance.Quantum.Widget.PopupMenu.Small"/>
-    <style name="TextAppearance.Quantum.Light.Widget.DropDownHint" parent="TextAppearance.Quantum.Widget.DropDownHint"/>
-    <style name="TextAppearance.Quantum.Light.Widget.ActionMode.Title" parent="TextAppearance.Quantum.Widget.ActionMode.Title"/>
-    <style name="TextAppearance.Quantum.Light.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Widget.ActionMode.Subtitle"/>
-    <style name="TextAppearance.Quantum.Light.WindowTitle" parent="TextAppearance.Quantum.WindowTitle"/>
-    <style name="TextAppearance.Quantum.Light.DialogWindowTitle" parent="TextAppearance.Quantum.DialogWindowTitle"/>
-    <style name="TextAppearance.Quantum.Light.CalendarViewWeekDayView" parent="TextAppearance.Quantum.CalendarViewWeekDayView"/>
-
-    <style name="TextAppearance.Quantum.Light.TimePicker.TimeLabel" parent="TextAppearance.Quantum.TimePicker.TimeLabel">
-        <item name="textColor">?attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Light.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.TimePicker.AmPmLabel">
-        <item name="textColor">?attr/textColorSecondary</item>
-    </style>
-
     <!-- Widget Styles -->
 
     <style name="Quantum"/>
@@ -743,8 +709,6 @@ please see styles_device_defaults.xml.
         <item name="scaleType">center</item>
     </style>
 
-    <style name="Widget.Quantum.ActionButton.TextButton" parent="Widget.Quantum.ButtonBar"/>
-
     <style name="Widget.Quantum.ActionBar.TabView" parent="Widget.ActionBar.TabView">
         <item name="background">@drawable/tab_indicator_quantum</item>
         <item name="paddingStart">16dip</item>
@@ -842,6 +806,7 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/btn_group_holo_light</item>
     </style>
 
+    <style name="Widget.Quantum.Light.StackView" parent="Widget.Quantum.StackView"/>
     <style name="Widget.Quantum.Light.TextView" parent="Widget.Quantum.TextView"/>
     <style name="Widget.Quantum.Light.TextView.ListSeparator" parent="Widget.Quantum.TextView.ListSeparator"/>
     <style name="Widget.Quantum.Light.TextView.SpinnerItem" parent="Widget.Quantum.TextView.SpinnerItem"/>
@@ -861,7 +826,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.CompoundButton.Star" parent="Widget.Quantum.CompoundButton.Star"/>
 
     <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch">
-        <item name="switchTextAppearance">@style/TextAppearance.Quantum.Light.Widget.Switch</item>
+        <item name="switchTextAppearance">@style/TextAppearance.Quantum.Widget.Switch</item>
     </style>
 
     <style name="Widget.Quantum.Light.ListView.DropDown" parent="Widget.Quantum.ListView.DropDown"/>
@@ -880,7 +845,7 @@ please see styles_device_defaults.xml.
         <item name="unfocusedMonthDateColor">#7F08002B</item>
         <item name="weekNumberColor">#7F080021</item>
         <item name="weekSeparatorLineColor">#7F08002A</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Quantum.Light.CalendarViewWeekDayView</item>
+        <item name="weekDayTextAppearance">@style/TextAppearance.Quantum.CalendarViewWeekDayView</item>
     </style>
 
     <style name="Widget.Quantum.Light.NumberPicker" parent="Widget.Quantum.NumberPicker"/>
@@ -1058,7 +1023,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="DialogWindowTitle.Quantum.Light">
-        <item name="textAppearance">@style/TextAppearance.Quantum.Light.DialogWindowTitle</item>
+        <item name="textAppearance">@style/TextAppearance.Quantum.DialogWindowTitle</item>
     </style>
 
 </resources>
