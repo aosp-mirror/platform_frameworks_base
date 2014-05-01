@@ -33183,7 +33183,8 @@ package android.webkit {
     method public void onReceivedSslError(android.webkit.WebView, android.webkit.SslErrorHandler, android.net.http.SslError);
     method public void onScaleChanged(android.webkit.WebView, float, float);
     method public deprecated void onTooManyRedirects(android.webkit.WebView, android.os.Message, android.os.Message);
-    method public void onUnhandledKeyEvent(android.webkit.WebView, android.view.KeyEvent);
+    method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);
+    method public deprecated void onUnhandledKeyEvent(android.webkit.WebView, android.view.KeyEvent);
     method public android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, java.lang.String);
     method public boolean shouldOverrideKeyEvent(android.webkit.WebView, android.view.KeyEvent);
     method public boolean shouldOverrideUrlLoading(android.webkit.WebView, java.lang.String);
