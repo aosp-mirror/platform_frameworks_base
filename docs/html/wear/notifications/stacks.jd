@@ -92,7 +92,7 @@ appears as the only notification on the handheld device.
 a summary notification for a handset device:</p>
 
 <pre style="clear:right">
-public void sendNotifications() {
+public void onClick_button_groups () {
     Bitmap bitmapMila = BitmapFactory.decodeResource(getResources(),
     		R.drawable.mila128);
 
