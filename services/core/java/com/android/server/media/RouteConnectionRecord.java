@@ -29,10 +29,14 @@ import android.util.Log;
 public class RouteConnectionRecord {
     private static final String TAG = "RouteConnRecord";
     private final IRouteConnection mBinder;
+    private final String mPackageName;
+    private final int mUid;
     private Listener mListener;
 
-    public RouteConnectionRecord(IRouteConnection binder) {
+    public RouteConnectionRecord(IRouteConnection binder, String packageName, int uid) {
         mBinder = binder;
+        mPackageName = packageName;
+        mUid = uid;
     }
 
     /**
@@ -87,6 +91,12 @@ public class RouteConnectionRecord {
         if (mListener != null) {
             mListener.disconnect();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "RouteConnection { binder=" + mBinder.toString() + ", package=" + mPackageName
+                + ", uid=" + mUid + "}";
     }
 
     /**
