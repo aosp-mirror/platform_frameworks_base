@@ -805,6 +805,14 @@ please see themes_device_defaults.xml.
         <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
     </style>
 
+    <!-- Default theme for voice interaction, which is used by the
+         {@link android.service.voice.VoiceInteractionSession} class.
+         this inherits from Theme.Panel, but sets up appropriate animations
+         and a few custom attributes. -->
+    <style name="Theme.VoiceInteractionSession" parent="Theme.Panel">
+        <item name="android:windowAnimationStyle">@android:style/Animation.VoiceInteractionSession</item>
+    </style>
+
     <!-- Default theme for holo style input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations

@@ -17,6 +17,7 @@
 package com.android.test.voiceinteraction;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
@@ -31,7 +32,9 @@ public class MainInteractionService extends VoiceInteractionService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startVoiceActivity(new Intent(this, TestInteractionActivity.class), null);
+        Bundle args = new Bundle();
+        args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
+        startSession(args);
         stopSelf(startId);
         return START_NOT_STICKY;
     }

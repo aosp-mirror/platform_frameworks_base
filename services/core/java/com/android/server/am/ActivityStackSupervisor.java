@@ -2237,8 +2237,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
             return;
         }
-        task.stack.removeTask(task);
-        stack.addTask(task, toTop);
+        task.stack.removeTask(task, true);
+        stack.addTask(task, toTop, true);
         mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();
     }

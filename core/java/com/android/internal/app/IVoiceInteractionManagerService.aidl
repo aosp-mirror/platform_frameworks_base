@@ -24,8 +24,9 @@ import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 
 interface IVoiceInteractionManagerService {
-    void startVoiceActivity(in Intent intent, String resolvedType, IVoiceInteractionService service,
-            in Bundle sessionArgs);
-    int deliverNewSession(IBinder token, IVoiceInteractionSession session,
+    void startSession(IVoiceInteractionService service, in Bundle sessionArgs);
+    boolean deliverNewSession(IBinder token, IVoiceInteractionSession session,
             IVoiceInteractor interactor);
+    int startVoiceActivity(IBinder token, in Intent intent, String resolvedType);
+    void finish(IBinder token);
 }

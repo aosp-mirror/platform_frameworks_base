@@ -16,7 +16,14 @@
 
 package android.service.voice;
 
+import android.app.Dialog;
+import android.app.Instrumentation;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Region;
+import android.inputmethodservice.SoftInputWindow;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,15 +32,52 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
-public abstract class VoiceInteractionSession {
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
+public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final String TAG = "VoiceInteractionSession";
     static final boolean DEBUG = true;
+
+    final Context mContext;
+    final HandlerCaller mHandlerCaller;
+
+    final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
+
+    IVoiceInteractionManagerService mSystemService;
+    IBinder mToken;
+
+    int mTheme = 0;
+    LayoutInflater mInflater;
+    TypedArray mThemeAttrs;
+    View mRootView;
+    FrameLayout mContentFrame;
+    SoftInputWindow mWindow;
+
+    boolean mInitialized;
+    boolean mWindowAdded;
+    boolean mWindowVisible;
+    boolean mWindowWasVisible;
+    boolean mInShowWindow;
+
+    final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
+
+    final Insets mTmpInsets = new Insets();
+    final int[] mTmpLocation = new int[2];
 
     final IVoiceInteractor mInteractor = new IVoiceInteractor.Stub() {
         @Override
@@ -71,6 +115,27 @@ public abstract class VoiceInteractionSession {
     };
 
     final IVoiceInteractionSession mSession = new IVoiceInteractionSession.Stub() {
+        @Override
+        public void taskStarted(Intent intent, int taskId) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_TASK_STARTED,
+                    taskId, intent));
+        }
+
+        @Override
+        public void taskFinished(Intent intent, int taskId) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_TASK_FINISHED,
+                    taskId, intent));
+        }
+
+        @Override
+        public void closeSystemDialogs() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_CLOSE_SYSTEM_DIALOGS));
+        }
+
+        @Override
+        public void destroy() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_DESTROY));
+        }
     };
 
     public static class Request {
@@ -129,38 +194,128 @@ public abstract class VoiceInteractionSession {
     static final int MSG_SUPPORTS_COMMANDS = 3;
     static final int MSG_CANCEL = 4;
 
-    final Context mContext;
-    final HandlerCaller mHandlerCaller;
-    final HandlerCaller.Callback mHandlerCallerCallback = new HandlerCaller.Callback() {
+    static final int MSG_TASK_STARTED = 100;
+    static final int MSG_TASK_FINISHED = 101;
+    static final int MSG_CLOSE_SYSTEM_DIALOGS = 102;
+    static final int MSG_DESTROY = 103;
+
+    class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
         public void executeMessage(Message msg) {
-            SomeArgs args = (SomeArgs)msg.obj;
+            SomeArgs args;
             switch (msg.what) {
                 case MSG_START_CONFIRMATION:
+                    args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onConfirm: req=" + ((Request) args.arg2).mInterface
                             + " prompt=" + args.arg3 + " extras=" + args.arg4);
                     onConfirm((Caller)args.arg1, (Request)args.arg2, (String)args.arg3,
                             (Bundle)args.arg4);
                     break;
                 case MSG_START_COMMAND:
+                    args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onCommand: req=" + ((Request) args.arg2).mInterface
                             + " command=" + args.arg3 + " extras=" + args.arg4);
                     onCommand((Caller) args.arg1, (Request) args.arg2, (String) args.arg3,
                             (Bundle) args.arg4);
                     break;
                 case MSG_SUPPORTS_COMMANDS:
+                    args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onGetSupportedCommands: cmds=" + args.arg2);
                     args.arg1 = onGetSupportedCommands((Caller) args.arg1, (String[]) args.arg2);
                     break;
                 case MSG_CANCEL:
+                    args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onCancel: req=" + ((Request) args.arg1).mInterface);
                     onCancel((Request)args.arg1);
                     break;
+                case MSG_TASK_STARTED:
+                    if (DEBUG) Log.d(TAG, "onTaskStarted: intent=" + msg.obj
+                            + " taskId=" + msg.arg1);
+                    onTaskStarted((Intent) msg.obj, msg.arg1);
+                    break;
+                case MSG_TASK_FINISHED:
+                    if (DEBUG) Log.d(TAG, "onTaskFinished: intent=" + msg.obj
+                            + " taskId=" + msg.arg1);
+                    onTaskFinished((Intent) msg.obj, msg.arg1);
+                    break;
+                case MSG_CLOSE_SYSTEM_DIALOGS:
+                    if (DEBUG) Log.d(TAG, "onCloseSystemDialogs");
+                    onCloseSystemDialogs();
+                    break;
+                case MSG_DESTROY:
+                    if (DEBUG) Log.d(TAG, "doDestroy");
+                    doDestroy();
+                    break;
             }
         }
-    };
 
-    final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
+        @Override
+        public void onBackPressed() {
+            VoiceInteractionSession.this.onBackPressed();
+        }
+    }
+
+    final MyCallbacks mCallbacks = new MyCallbacks();
+
+    /**
+     * Information about where interesting parts of the input method UI appear.
+     */
+    public static final class Insets {
+        /**
+         * This is the top part of the UI that is the main content.  It is
+         * used to determine the basic space needed, to resize/pan the
+         * application behind.  It is assumed that this inset does not
+         * change very much, since any change will cause a full resize/pan
+         * of the application behind.  This value is relative to the top edge
+         * of the input method window.
+         */
+        public int contentTopInsets;
+
+        /**
+         * This is the region of the UI that is touchable.  It is used when
+         * {@link #touchableInsets} is set to {@link #TOUCHABLE_INSETS_REGION}.
+         * The region should be specified relative to the origin of the window frame.
+         */
+        public final Region touchableRegion = new Region();
+
+        /**
+         * Option for {@link #touchableInsets}: the entire window frame
+         * can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_FRAME
+                = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
+
+        /**
+         * Option for {@link #touchableInsets}: the area inside of
+         * the content insets can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_CONTENT
+                = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
+
+        /**
+         * Option for {@link #touchableInsets}: the region specified by
+         * {@link #touchableRegion} can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_REGION
+                = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+
+        /**
+         * Determine which area of the window is touchable by the user.  May
+         * be one of: {@link #TOUCHABLE_INSETS_FRAME},
+         * {@link #TOUCHABLE_INSETS_CONTENT}, or {@link #TOUCHABLE_INSETS_REGION}.
+         */
+        public int touchableInsets;
+    }
+
+    final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
+            new ViewTreeObserver.OnComputeInternalInsetsListener() {
+        public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
+            onComputeInsets(mTmpInsets);
+            info.contentInsets.top = info.visibleInsets.top = mTmpInsets.contentTopInsets;
+            info.touchableRegion.set(mTmpInsets.touchableRegion);
+            info.setTouchableInsets(mTmpInsets.touchableInsets);
+        }
+    };
 
     public VoiceInteractionSession(Context context) {
         this(context, new Handler());
@@ -169,7 +324,7 @@ public abstract class VoiceInteractionSession {
     public VoiceInteractionSession(Context context, Handler handler) {
         mContext = context;
         mHandlerCaller = new HandlerCaller(context, handler.getLooper(),
-                mHandlerCallerCallback, true);
+                mCallbacks, true);
     }
 
     Request findRequest(IVoiceInteractorCallback callback, boolean newRequest) {
@@ -186,6 +341,192 @@ public abstract class VoiceInteractionSession {
             mActiveRequests.put(callback.asBinder(), req);
             return req;
         }
+    }
+
+    void doCreate(IVoiceInteractionManagerService service, IBinder token, Bundle args) {
+        mSystemService = service;
+        mToken = token;
+        onCreate(args);
+    }
+
+    void doDestroy() {
+        if (mInitialized) {
+            mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
+                    mInsetsComputer);
+            if (mWindowAdded) {
+                mWindow.dismiss();
+                mWindowAdded = false;
+            }
+            mInitialized = false;
+        }
+    }
+
+    void initViews() {
+        mInitialized = true;
+
+        mThemeAttrs = mContext.obtainStyledAttributes(android.R.styleable.VoiceInteractionSession);
+        mRootView = mInflater.inflate(
+                com.android.internal.R.layout.voice_interaction_session, null);
+        mRootView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        mWindow.setContentView(mRootView);
+        mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
+
+        mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
+    }
+
+    public void showWindow() {
+        if (DEBUG) Log.v(TAG, "Showing window: mWindowAdded=" + mWindowAdded
+                + " mWindowVisible=" + mWindowVisible);
+
+        if (mInShowWindow) {
+            Log.w(TAG, "Re-entrance in to showWindow");
+            return;
+        }
+
+        try {
+            mInShowWindow = true;
+            if (!mWindowVisible) {
+                mWindowVisible = true;
+                if (!mWindowAdded) {
+                    mWindowAdded = true;
+                    View v = onCreateContentView();
+                    if (v != null) {
+                        setContentView(v);
+                    }
+                }
+                mWindow.show();
+            }
+        } finally {
+            mWindowWasVisible = true;
+            mInShowWindow = false;
+        }
+    }
+
+    public void hideWindow() {
+        if (mWindowVisible) {
+            mWindow.hide();
+            mWindowVisible = false;
+        }
+    }
+
+    /**
+     * You can call this to customize the theme used by your IME's window.
+     * This must be set before {@link #onCreate}, so you
+     * will typically call it in your constructor with the resource ID
+     * of your custom theme.
+     */
+    public void setTheme(int theme) {
+        if (mWindow != null) {
+            throw new IllegalStateException("Must be called before onCreate()");
+        }
+        mTheme = theme;
+    }
+
+    public void startVoiceActivity(Intent intent) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        try {
+            int res = mSystemService.startVoiceActivity(mToken, intent,
+                    intent.resolveType(mContext.getContentResolver()));
+            Instrumentation.checkStartActivityResult(res, intent);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public LayoutInflater getLayoutInflater() {
+        return mInflater;
+    }
+
+    public Dialog getWindow() {
+        return mWindow;
+    }
+
+    public void finish() {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        hideWindow();
+        try {
+            mSystemService.finish(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void onCreate(Bundle args) {
+        mTheme = mTheme != 0 ? mTheme
+                : com.android.internal.R.style.Theme_DeviceDefault_VoiceInteractionSession;
+        mInflater = (LayoutInflater)mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
+                mCallbacks, this, mDispatcherState, true);
+        mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        initViews();
+        mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
+        mWindow.setToken(mToken);
+    }
+
+    public void onDestroy() {
+    }
+
+    public View onCreateContentView() {
+        return null;
+    }
+
+    public void setContentView(View view) {
+        mContentFrame.removeAllViews();
+        mContentFrame.addView(view, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+        return false;
+    }
+
+    public void onBackPressed() {
+        finish();
+    }
+
+    public void onCloseSystemDialogs() {
+        finish();
+    }
+
+    /**
+     * Compute the interesting insets into your UI.  The default implementation
+     * uses the entire window frame as the insets.  The default touchable
+     * insets are {@link Insets#TOUCHABLE_INSETS_FRAME}.
+     *
+     * @param outInsets Fill in with the current UI insets.
+     */
+    public void onComputeInsets(Insets outInsets) {
+        int[] loc = mTmpLocation;
+        View decor = getWindow().getWindow().getDecorView();
+        decor.getLocationInWindow(loc);
+        outInsets.contentTopInsets = loc[1];
+        outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_FRAME;
+        outInsets.touchableRegion.setEmpty();
+    }
+
+    public void onTaskStarted(Intent intent, int taskId) {
+    }
+
+    public void onTaskFinished(Intent intent, int taskId) {
+        finish();
     }
 
     public abstract boolean[] onGetSupportedCommands(Caller caller, String[] commands);

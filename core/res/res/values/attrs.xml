@@ -5810,6 +5810,9 @@
         <attr name="imeExtractExitAnimation" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="VoiceInteractionSession">
+    </declare-styleable>
+
     <declare-styleable name="KeyboardView">
         <!-- Default KeyboardView style. -->
         <attr name="keyboardViewStyle" format="reference" />

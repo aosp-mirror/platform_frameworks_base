@@ -23,6 +23,6 @@ import android.service.voice.VoiceInteractionSessionService;
 public class MainInteractionSessionService extends VoiceInteractionSessionService {
     @Override
     public VoiceInteractionSession onNewSession(Bundle args) {
-        return new MainInteractionSession(this, args);
+        return new MainInteractionSession(this);
     }
 }

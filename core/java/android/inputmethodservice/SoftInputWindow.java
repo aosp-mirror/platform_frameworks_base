@@ -30,11 +30,20 @@ import android.view.WindowManager;
  * method window.  It will be displayed along the edge of the screen, moving
  * the application user interface away from it so that the focused item is
  * always visible.
+ * @hide
  */
-class SoftInputWindow extends Dialog {
+public class SoftInputWindow extends Dialog {
+    final String mName;
+    final Callback mCallback;
+    final KeyEvent.Callback mKeyEventCallback;
     final KeyEvent.DispatcherState mDispatcherState;
+    final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
-    
+
+    public interface Callback {
+        public void onBackPressed();
+    }
+
     public void setToken(IBinder token) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.token = token;
@@ -53,10 +62,15 @@ class SoftInputWindow extends Dialog {
      *        using styles. This theme is applied on top of the current theme in
      *        <var>context</var>. If 0, the default dialog theme will be used.
      */
-    public SoftInputWindow(Context context, int theme,
-            KeyEvent.DispatcherState dispatcherState) {
+    public SoftInputWindow(Context context, String name, int theme, Callback callback,
+            KeyEvent.Callback keyEventCallback, KeyEvent.DispatcherState dispatcherState,
+            boolean takesFocus) {
         super(context, theme);
+        mName = name;
+        mCallback = callback;
+        mKeyEventCallback = keyEventCallback;
         mDispatcherState = dispatcherState;
+        mTakesFocus = takesFocus;
         initDockWindow();
     }
 
@@ -148,11 +162,47 @@ class SoftInputWindow extends Dialog {
         }
     }
 
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyDown(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyLongPress(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyUp(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyMultiple(keyCode, count, event)) {
+            return true;
+        }
+        return super.onKeyMultiple(keyCode, count, event);
+    }
+
+    public void onBackPressed() {
+        if (mCallback != null) {
+            mCallback.onBackPressed();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void initDockWindow() {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
 
         lp.type = WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-        lp.setTitle("InputMethod");
+        lp.setTitle(mName);
 
         lp.gravity = Gravity.BOTTOM;
         lp.width = -1;
@@ -161,11 +211,19 @@ class SoftInputWindow extends Dialog {
         //lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
 
         getWindow().setAttributes(lp);
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+
+        int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+
+        if (!mTakesFocus) {
+            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        } else {
+            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            windowModFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        }
+
+        getWindow().setFlags(windowSetFlags, windowModFlags);
     }
 }

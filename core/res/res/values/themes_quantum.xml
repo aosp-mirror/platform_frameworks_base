@@ -853,6 +853,14 @@ please see themes_device_defaults.xml.
         <item name="imeExtractExitAnimation">@anim/input_method_extract_exit</item>
     </style>
 
+    <!-- Default theme for quantum style voice interaction, which is used by the
+         {@link android.service.voice.VoiceInteractionSession} class.
+         this inherits from Theme.Panel, but sets up appropriate animations
+         and a few custom attributes. -->
+    <style name="Theme.Quantum.VoiceInteractionSession" parent="Theme.Quantum.Light.Panel">
+        <item name="android:windowAnimationStyle">@android:style/Animation.VoiceInteractionSession</item>
+    </style>
+
     <!-- Theme for the search input bar. -->
 
     <style name="Theme.Quantum.SearchBar" parent="Theme.Quantum.Panel">
