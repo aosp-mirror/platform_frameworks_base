@@ -43,6 +43,16 @@ public:
 
     // Send message to other device. Note that it runs in IO thread.
     int sendMessage(const cec_message_t& message);
+    // Add a logical address to device.
+    int addLogicalAddress(cec_logical_address_t address);
+    // Clear all logical address registered to the device.
+    void clearLogicaladdress();
+    // Get physical address of device.
+    int getPhysicalAddress();
+    // Get CEC version from driver.
+    int getVersion();
+    // Get vendor id used for vendor command.
+    uint32_t getVendorId();
 
 private:
     // Propagate the message up to Java layer.
@@ -92,6 +102,34 @@ void HdmiCecController::propagateHotplugEvent(const hotplug_event_t& event) {
 int HdmiCecController::sendMessage(const cec_message_t& message) {
     // TODO: propagate send_message's return value.
     return mDevice->send_message(mDevice, &message);
+}
+
+int HdmiCecController::addLogicalAddress(cec_logical_address_t address) {
+    return mDevice->add_logical_address(mDevice, address);
+}
+
+void HdmiCecController::clearLogicaladdress() {
+    mDevice->clear_logical_address(mDevice);
+}
+
+int HdmiCecController::getPhysicalAddress() {
+    uint16_t physicalAddress = 0xFFFF;
+    if (mDevice->get_physical_address(mDevice, &physicalAddress) == 0) {
+        return physicalAddress;
+    }
+    return -1;
+}
+
+int HdmiCecController::getVersion() {
+    int version = 0;
+    mDevice->get_version(mDevice, &version);
+    return version;
+}
+
+uint32_t HdmiCecController::getVendorId() {
+    uint32_t vendorId = 0;
+    mDevice->get_vendor_id(mDevice, &vendorId);
+    return vendorId;
 }
 
 // static
@@ -180,12 +218,51 @@ static jint nativeSendCecCommand(JNIEnv* env, jclass clazz, jlong controllerPtr,
     return controller->sendMessage(message);
 }
 
+static jint nativeAddLogicalAddress(JNIEnv* env, jclass clazz,
+        jlong controllerPtr, jint logicalAddress) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->addLogicalAddress(
+            static_cast<cec_logical_address_t>(logicalAddress));
+}
+
+static void nativeClearLogicalAddress(JNIEnv* env, jclass clazz,
+        jlong controllerPtr) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->clearLogicaladdress();
+}
+
+static jint nativeGetPhysicalAddress(JNIEnv* env, jclass clazz,
+        jlong controllerPtr) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getPhysicalAddress();
+}
+
+static jint nativeGetVersion(JNIEnv* env, jclass clazz,
+        jlong controllerPtr) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getVersion();
+}
+
+static jint nativeGetVendorId(JNIEnv* env, jclass clazz, jlong controllerPtr) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getVendorId();
+}
+
 static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "(Lcom/android/server/hdmi/HdmiCecController;)J",
             (void *) nativeInit },
-    { "nativeSendCecCommand", "(JII[B)I",
-            (void *) nativeSendCecCommand },
+    { "nativeSendCecCommand", "(JII[B)I", (void *) nativeSendCecCommand },
+    { "nativeAddLogicalAddress", "(JI)I", (void *) nativeAddLogicalAddress },
+    { "nativeClearLogicalAddress", "(J)V", (void *) nativeClearLogicalAddress },
+    { "nativeGetPhysicalAddress", "(J)I", (void *) nativeGetPhysicalAddress },
+    { "nativeGetVersion", "(J)I", (void *) nativeGetVersion },
+    { "nativeGetVendorId", "(J)I", (void *) nativeGetVendorId },
 };
 
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecController"
