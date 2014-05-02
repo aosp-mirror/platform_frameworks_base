@@ -1092,6 +1092,9 @@ public class UserManagerService extends IUserManager.Stub {
             // on next startup, in case the runtime stops now before stopping and
             // removing the user completely.
             user.partial = true;
+            // Mark it as disabled, so that it isn't returned any more when
+            // profiles are queried.
+            user.flags |= UserInfo.FLAG_DISABLED;
             writeUserLocked(user);
         }
         if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
@@ -1120,6 +1123,7 @@ public class UserManagerService extends IUserManager.Stub {
         // wiping the user's system directory and removing from the user list
         long ident = Binder.clearCallingIdentity();
         try {
+            final boolean isManaged = getUserInfo(userHandle).isManagedProfile();
             Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
             mContext.sendOrderedBroadcastAsUser(addedIntent, UserHandle.ALL,
@@ -1139,6 +1143,11 @@ public class UserManagerService extends IUserManager.Stub {
                                         synchronized (mPackagesLock) {
                                             removeUserStateLocked(userHandle);
                                         }
+                                    }
+                                    // Send broadcast to notify system that the user removed was a
+                                    // managed user.
+                                    if (isManaged) {
+                                        sendProfileRemovedBroadcast(userHandle);
                                     }
                                 }
                             }.start();
@@ -1189,6 +1198,13 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         parent.delete();
+    }
+
+    private void sendProfileRemovedBroadcast(int userHandle) {
+        Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(userHandle));
+        // Note: This makes an assumption that the parent owner is user 0.
+        mContext.sendBroadcastAsUser(managedProfileIntent, UserHandle.OWNER, null);
     }
 
     @Override
