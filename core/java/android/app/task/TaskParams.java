@@ -32,8 +32,7 @@ public class TaskParams implements Parcelable {
     private final IBinder mCallback;
 
     /**
-     * @return The unique id of this task, specified at creation time using
-     * {@link android.content.Task.Builder#Builder(int, Class)}.
+     * @return The unique id of this task, specified at creation time.
      */
     public int getTaskId() {
         return taskId;
