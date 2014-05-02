@@ -544,6 +544,14 @@ final class DisplayPowerController {
 
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
+
+        // Initialize screen state for battery stats.
+        try {
+            mBatteryStats.noteScreenState(mPowerState.getScreenState());
+            mBatteryStats.noteScreenBrightness(mPowerState.getScreenBrightness());
+        } catch (RemoteException ex) {
+            // same process
+        }
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
@@ -783,11 +791,7 @@ final class DisplayPowerController {
         if (mPowerState.getScreenState() != state) {
             mPowerState.setScreenState(state);
             try {
-                if (state != Display.STATE_OFF) {
-                    mBatteryStats.noteScreenOn();
-                } else {
-                    mBatteryStats.noteScreenOff();
-                }
+                mBatteryStats.noteScreenState(state);
             } catch (RemoteException ex) {
                 // same process
             }
