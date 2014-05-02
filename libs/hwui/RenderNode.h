@@ -128,6 +128,10 @@ public:
         return mProperties;
     }
 
+    RenderProperties& animatorProperties() {
+        return mProperties;
+    }
+
     const RenderProperties& stagingProperties() {
         return mStagingProperties;
     }
@@ -148,13 +152,13 @@ public:
     ANDROID_API virtual void prepareTree(TreeInfo& info);
 
     // UI thread only!
-    ANDROID_API void addAnimator(const sp<RenderPropertyAnimator>& animator) {
+    ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
         mStagingAnimators.insert(animator);
         mNeedsAnimatorsSync = true;
     }
 
     // UI thread only!
-    ANDROID_API void removeAnimator(const sp<RenderPropertyAnimator>& animator) {
+    ANDROID_API void removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
         mStagingAnimators.erase(animator);
         mNeedsAnimatorsSync = true;
     }
@@ -233,8 +237,8 @@ private:
     DisplayListData* mStagingDisplayListData;
 
     bool mNeedsAnimatorsSync;
-    std::set< sp<RenderPropertyAnimator> > mStagingAnimators;
-    std::vector< sp<RenderPropertyAnimator> > mAnimators;
+    std::set< sp<BaseRenderNodeAnimator> > mStagingAnimators;
+    std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
 
     /**
      * Draw time state - these properties are only set and used during rendering

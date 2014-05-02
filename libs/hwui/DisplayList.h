@@ -140,6 +140,14 @@ public:
     void addChild(DrawDisplayListOp* childOp);
     const Vector<DrawDisplayListOp*>& children() { return mChildren; }
 
+    void refProperty(CanvasPropertyPrimitive* prop) {
+        mReferenceHolders.push(prop);
+    }
+
+    void refProperty(CanvasPropertyPaint* prop) {
+        mReferenceHolders.push(prop);
+    }
+
 private:
     Vector< sp<VirtualLightRefBase> > mReferenceHolders;
 

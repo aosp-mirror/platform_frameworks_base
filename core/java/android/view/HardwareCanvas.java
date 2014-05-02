@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
@@ -189,4 +190,7 @@ public abstract class HardwareCanvas extends Canvas {
      * @hide
      */
     abstract void clearLayerUpdates();
+
+    public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
+            CanvasProperty<Float> radius, CanvasProperty<Paint> paint);
 }

@@ -57,7 +57,7 @@ public class SmallCircleActivity extends Activity {
             
             mPaint = new Paint();
             mPaint.setAntiAlias(true);
-            mPaint.setColor(0xffffffff);
+            mPaint.setColor(0xff00ffff);
         }
 
         @Override

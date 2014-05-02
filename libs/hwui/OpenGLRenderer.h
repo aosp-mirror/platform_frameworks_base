@@ -49,6 +49,7 @@
 #include "UvMapper.h"
 #include "Vertex.h"
 #include "Caches.h"
+#include "CanvasProperty.h"
 
 namespace android {
 namespace uirenderer {
@@ -200,6 +201,12 @@ public:
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint* paint);
     virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual status_t drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
+        // TODO: Remove once android_view_GLES20Canvas uses DisplayListRenderer
+        // directly
+        return drawCircle(x->value, y->value, radius->value, &paint->value);
+    }
     virtual status_t drawOval(float left, float top, float right, float bottom,
             const SkPaint* paint);
     virtual status_t drawArc(float left, float top, float right, float bottom,

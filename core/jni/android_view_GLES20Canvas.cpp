@@ -49,6 +49,7 @@
 #include <Stencil.h>
 #include <Rect.h>
 #include <RenderNode.h>
+#include <CanvasProperty.h>
 
 #include <TextLayout.h>
 #include <TextLayoutCache.h>
@@ -542,6 +543,16 @@ static void android_view_GLES20Canvas_drawCircle(JNIEnv* env, jobject clazz,
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
     renderer->drawCircle(x, y, radius, paint);
+}
+
+static void android_view_GLES20Canvas_drawCircleProps(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
+    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
+    CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
+    CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
+    CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
+    CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
+    renderer->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
 static void android_view_GLES20Canvas_drawOval(JNIEnv* env, jobject clazz,
@@ -1041,6 +1052,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawRects",         "(J[FIJ)V",        (void*) android_view_GLES20Canvas_drawRects },
     { "nDrawRoundRect",     "(JFFFFFFJ)V",     (void*) android_view_GLES20Canvas_drawRoundRect },
     { "nDrawCircle",        "(JFFFJ)V",        (void*) android_view_GLES20Canvas_drawCircle },
+    { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_GLES20Canvas_drawCircleProps },
     { "nDrawOval",          "(JFFFFJ)V",       (void*) android_view_GLES20Canvas_drawOval },
     { "nDrawArc",           "(JFFFFFFZJ)V",    (void*) android_view_GLES20Canvas_drawArc },
     { "nDrawPoints",        "(J[FIIJ)V",       (void*) android_view_GLES20Canvas_drawPoints },

@@ -92,6 +92,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/BitmapFactory.cpp \
 	android/graphics/Camera.cpp \
 	android/graphics/Canvas.cpp \
+	android/graphics/CanvasProperty.cpp \
 	android/graphics/ColorFilter.cpp \
 	android/graphics/DrawFilter.cpp \
 	android/graphics/CreateJavaOutputStreamAdaptor.cpp \
