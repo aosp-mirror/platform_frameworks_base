@@ -34,32 +34,10 @@ public abstract class ExpandableView extends FrameLayout {
     private OnHeightChangedListener mOnHeightChangedListener;
     protected int mActualHeight;
     protected int mClipTopAmount;
-    protected Drawable mCustomBackground;
     private boolean mActualHeightInitialized;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if (mCustomBackground != null) {
-            mCustomBackground.setBounds(0, mClipTopAmount, getWidth(), mActualHeight);
-            mCustomBackground.draw(canvas);
-        }
-    }
-
-    @Override
-    protected boolean verifyDrawable(Drawable who) {
-        return super.verifyDrawable(who) || who == mCustomBackground;
-    }
-
-    @Override
-    protected void drawableStateChanged() {
-        final Drawable d = mCustomBackground;
-        if (d != null && d.isStateful()) {
-            d.setState(getDrawableState());
-        }
     }
 
     @Override
@@ -77,7 +55,6 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public void setActualHeight(int actualHeight) {
         mActualHeight = actualHeight;
-        invalidate();
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(this);
         }
@@ -95,7 +72,16 @@ public abstract class ExpandableView extends FrameLayout {
     /**
      * @return The maximum height of this notification.
      */
-    public abstract int getMaxHeight();
+    public int getMaxHeight() {
+        return getHeight();
+    }
+
+    /**
+     * @return The minimum height of this notification.
+     */
+    public int getMinHeight() {
+        return getHeight();
+    }
 
     /**
      * Sets the amount this view should be clipped from the top. This is used when an expanded
@@ -105,7 +91,6 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
-        invalidate();
     }
 
     public void setOnHeightChangedListener(OnHeightChangedListener listener) {
@@ -113,22 +98,10 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
-     * Sets a custom background drawable. As we need to change our bounds independently of layout,
-     * we need the notition of a custom background.
+     * @return Whether we can expand this views content.
      */
-    public void setCustomBackground(Drawable customBackground) {
-        if (mCustomBackground != null) {
-            mCustomBackground.setCallback(null);
-            unscheduleDrawable(mCustomBackground);
-        }
-        mCustomBackground = customBackground;
-        mCustomBackground.setCallback(this);
-        setWillNotDraw(customBackground == null);
-        invalidate();
-    }
-
-    public void setCustomBackgroundResource(int drawableResId) {
-        setCustomBackground(getResources().getDrawable(drawableResId));
+    public boolean isContentExpandable() {
+        return false;
     }
 
     /**

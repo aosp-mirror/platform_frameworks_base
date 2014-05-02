@@ -112,7 +112,8 @@ public class StatusBarWindowView extends FrameLayout {
             intercept = mExpandHelper.onInterceptTouchEvent(ev);
         } else if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
-                && mService.getBarState() == StatusBarState.KEYGUARD) {
+                && mService.getBarState() == StatusBarState.KEYGUARD
+                && !mService.isBouncerShowing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
         }
         if (!intercept) {

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -188,7 +187,8 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()
                 && mBar.mStatusBarWindow != null) {
             if (mShouldFade) {
-                int scrimColor = mBar.getBarState() == StatusBarState.KEYGUARD
+                int scrimColor = (mBar.getBarState() == StatusBarState.KEYGUARD
+                        || mBar.getBarState() == StatusBarState.SHADE_LOCKED)
                         ? mScrimColorKeyguard
                         : mScrimColor;
                 frac = mPanelExpandedFractionSum; // don't judge me

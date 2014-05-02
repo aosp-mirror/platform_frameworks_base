@@ -23,8 +23,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.R;
 
-public class ExpandableNotificationRow extends ActivatableNotificationView implements
-        NotificationActivatable {
+public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mRowMinHeight;
     private int mRowMaxHeight;
 
@@ -114,7 +113,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView imple
     public void setUserExpanded(boolean userExpanded) {
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
-        applyExpansionToLayout();
     }
 
     public boolean isUserLocked() {
@@ -218,16 +216,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView imple
     /**
      * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
      */
-    public void setDimmed(boolean dimmed) {
-        super.setDimmed(dimmed);
-        mActivator.setDimmed(dimmed);
+    @Override
+    public void setDimmed(boolean dimmed, boolean fade) {
+        super.setDimmed(dimmed, fade);
+        mActivator.setDimmed(dimmed, fade);
     }
 
     public int getMaxExpandHeight() {
         return mMaxExpandHeight;
     }
 
-    @Override
     public NotificationActivator getActivator() {
         return mActivator;
     }
@@ -240,6 +238,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView imple
     }
 
     @Override
+    public boolean isContentExpandable() {
+        return mPrivateLayout.isContentExpandable();
+    }
+
+    @Override
     public void setActualHeight(int height) {
         mPrivateLayout.setActualHeight(height);
         invalidate();
@@ -249,6 +252,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView imple
     @Override
     public int getMaxHeight() {
         return mPrivateLayout.getMaxHeight();
+    }
+
+    @Override
+    public int getMinHeight() {
+        return mPrivateLayout.getMinHeight();
     }
 
     @Override

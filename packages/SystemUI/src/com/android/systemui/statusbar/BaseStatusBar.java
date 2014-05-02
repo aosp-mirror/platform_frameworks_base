@@ -171,6 +171,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      * The {@link StatusBarState} of the status bar.
      */
     protected int mState;
+    protected boolean mBouncerShowing;
 
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
 
@@ -1073,8 +1074,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setSystemExpanded(top);
                 }
             }
-            entry.row.setDimmed(onKeyguard);
-            entry.row.setLocked(onKeyguard);
+            entry.row.setDimmed(onKeyguard, false /* fade */);
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
                     || !showOnKeyguard)) {
@@ -1094,6 +1094,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
             mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
+            mKeyguardIconOverflowContainer.setDimmed(true /* dimmed */, false /* fade */);
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
@@ -1401,6 +1402,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void setInteracting(int barWindow, boolean interacting) {
         // hook for subclasses
+    }
+
+    public void setBouncerShowing(boolean bouncerShowing) {
+        mBouncerShowing = bouncerShowing;
+    }
+
+    /**
+     * @return Whether the security bouncer from Keyguard is showing.
+     */
+    public boolean isBouncerShowing() {
+        return mBouncerShowing;
     }
 
     public void destroy() {

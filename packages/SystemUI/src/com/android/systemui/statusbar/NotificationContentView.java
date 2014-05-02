@@ -84,6 +84,11 @@ public class NotificationContentView extends ExpandableView {
     }
 
     @Override
+    public int getMinHeight() {
+        return mSmallHeight;
+    }
+
+    @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
         updateClipping();
@@ -124,5 +129,10 @@ public class NotificationContentView extends ExpandableView {
 
     public void notifyContentUpdated() {
         selectLayout();
+    }
+
+    @Override
+    public boolean isContentExpandable() {
+        return mExpandedChild != null;
     }
 }
