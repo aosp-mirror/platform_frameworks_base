@@ -129,6 +129,15 @@ public class TestDelegates extends TestCase {
                                 originalClass.getName()),
                         delegateMethod.getAnnotation(LayoutlibDelegate.class));
 
+                // check the return type of the methods match.
+                assertTrue(
+                        String.format("Delegate method %1$s.%2$s does not match the corresponding " +
+                                "framework method which returns %3$s",
+                                delegateClass.getName(),
+                                getMethodName(delegateMethod),
+                                originalMethod.getReturnType().getName()),
+                        delegateMethod.getReturnType() == originalMethod.getReturnType());
+
                 // check that the method is static
                 assertTrue(
                         String.format(
