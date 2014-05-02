@@ -1565,7 +1565,7 @@ public class ListPopupWindow {
 
             // Ensure that keyboard focus starts from the last touched position.
             setSelectedPositionInt(position);
-            positionSelector(position, child);
+            positionSelectorLikeFocus(position, child);
 
             // Refresh the drawable state to reflect the new pressed state,
             // which will also update the selector state.

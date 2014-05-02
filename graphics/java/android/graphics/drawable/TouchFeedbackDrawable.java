@@ -380,11 +380,18 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public void clearHotspots() {
-        if (mRipples == null) {
-            return;
+        if (mRipples != null) {
+            mRipples.clear();
         }
 
-        mRipples.clear();
+        final int count = mAnimatingRipplesCount;
+        final Ripple[] ripples = mAnimatingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].cancel();
+            ripples[i] = null;
+        }
+
+        mAnimatingRipplesCount = 0;
         invalidateSelf();
     }
 
