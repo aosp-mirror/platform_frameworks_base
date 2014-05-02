@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -32,19 +33,25 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     private static final SynchronizedPool<GLES20RecordingCanvas> sPool =
             new SynchronizedPool<GLES20RecordingCanvas>(POOL_LIMIT);
 
+    RenderNode mNode;
+
     private GLES20RecordingCanvas() {
         super(true, true);
     }
 
-    static GLES20RecordingCanvas obtain() {
+    static GLES20RecordingCanvas obtain(@NonNull RenderNode node) {
+        if (node == null) throw new IllegalArgumentException("node cannot be null");
+
         GLES20RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
             canvas = new GLES20RecordingCanvas();
         }
+        canvas.mNode = node;
         return canvas;
     }
 
     void recycle() {
+        mNode = null;
         sPool.release(this);
     }
 
