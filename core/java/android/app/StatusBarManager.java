@@ -60,6 +60,7 @@ public class StatusBarManager {
             | DISABLE_SEARCH;
 
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
+    public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
 
     public static final int WINDOW_STATUS_BAR = 1;
     public static final int WINDOW_NAVIGATION_BAR = 2;
