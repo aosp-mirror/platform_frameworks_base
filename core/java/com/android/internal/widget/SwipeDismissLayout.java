@@ -35,7 +35,7 @@ import android.widget.FrameLayout;
 public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
-    private static final float TRANSLATION_MIN_ALPHA = 0.5f;
+    private static final float DISMISS_MIN_PROGRESS = 0.6f;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
@@ -77,6 +77,8 @@ public class SwipeDismissLayout extends FrameLayout {
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
 
+    private float mLastX;
+
     public SwipeDismissLayout(Context context) {
         super(context);
         init(context);
@@ -95,7 +97,7 @@ public class SwipeDismissLayout extends FrameLayout {
     private void init(Context context) {
         ViewConfiguration vc = ViewConfiguration.get(getContext());
         mSlop = vc.getScaledTouchSlop();
-        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity() * 16;
+        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
         mAnimationTime = getContext().getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
@@ -193,8 +195,8 @@ public class SwipeDismissLayout extends FrameLayout {
 
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(ev);
+                mLastX = ev.getRawX();
                 updateSwiping(ev);
-                updateDismiss(ev);
                 if (mSwiping) {
                     setProgress(ev.getRawX() - mDownX);
                     break;
@@ -256,20 +258,16 @@ public class SwipeDismissLayout extends FrameLayout {
             float absVelocityX = Math.abs(velocityX);
             float absVelocityY = Math.abs(mVelocityTracker.getYVelocity());
 
-            if (deltaX > getWidth() / 2) {
-                mDismissed = true;
-            } else if (absVelocityX >= mMinFlingVelocity
-                    && absVelocityX <= mMaxFlingVelocity
-                    && absVelocityY < absVelocityX / 2
-                    && velocityX > 0
-                    && deltaX > 0) {
+            if (deltaX > (getWidth() * DISMISS_MIN_PROGRESS) &&
+                    absVelocityX < mMinFlingVelocity && 
+                    ev.getRawX() >= mLastX) {
                 mDismissed = true;
             }
         }
         // Check if the user tried to undo this.
         if (mDismissed && mSwiping) {
             // Check if the user's finger is actually back
-            if (deltaX < getWidth() / 2) {
+            if (deltaX < (getWidth() * DISMISS_MIN_PROGRESS)) {
                 mDismissed = false;
             }
         }
