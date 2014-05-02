@@ -298,7 +298,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
 
-        int[] switches = new int[7];
+        int[] switches = new int[8];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
             mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
@@ -313,7 +313,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         setSystemUiVisibility(switches[1], 0xffffffff);
         topAppWindowChanged(switches[2] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
-        setImeWindowStatus(binders.get(0), switches[3], switches[4]);
+        setImeWindowStatus(binders.get(0), switches[3], switches[4], switches[7] != 0);
         setHardKeyboardStatus(switches[5] != 0, switches[6] != 0);
 
         // Set up the initial icon state

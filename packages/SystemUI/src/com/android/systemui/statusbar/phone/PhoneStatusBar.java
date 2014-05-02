@@ -2211,7 +2211,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
         boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
         int flags = mNavigationIconHints;
         if ((backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS) || imeShown) {
@@ -2219,7 +2220,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         } else {
             flags &= ~NAVIGATION_HINT_BACK_ALT;
         }
-        if (imeShown) {
+        if (showImeSwitcher) {
             flags |= NAVIGATION_HINT_IME_SHOWN;
         } else {
             flags &= ~NAVIGATION_HINT_IME_SHOWN;
