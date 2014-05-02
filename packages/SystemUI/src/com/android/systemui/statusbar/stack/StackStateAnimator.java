@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.stack;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -35,7 +34,7 @@ public class StackStateAnimator {
     private final Interpolator mFastOutSlowInInterpolator;
     public NotificationStackScrollLayout mHostLayout;
     private boolean mAnimationIsRunning;
-    private ArrayList<NotificationStackScrollLayout.ChildHierarchyChangeEvent> mHandledEvents =
+    private ArrayList<NotificationStackScrollLayout.AnimationEvent> mHandledEvents =
             new ArrayList<>();
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
@@ -49,7 +48,7 @@ public class StackStateAnimator {
     }
 
     public void startAnimationForEvents(
-            ArrayList<NotificationStackScrollLayout.ChildHierarchyChangeEvent> mAnimationEvents,
+            ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
             StackScrollState finalState) {
         int numEvents = mAnimationEvents.size();
         if (numEvents == 0) {
@@ -136,11 +135,11 @@ public class StackStateAnimator {
      * @param finalState the final state to animate to
      */
     private void initializeAddedViewStates(
-            ArrayList<NotificationStackScrollLayout.ChildHierarchyChangeEvent> animationEvents,
+            ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents,
             StackScrollState finalState) {
-        for (NotificationStackScrollLayout.ChildHierarchyChangeEvent event: animationEvents) {
+        for (NotificationStackScrollLayout.AnimationEvent event: animationEvents) {
             View changingView = event.changingView;
-            if (event.animationType == NotificationStackScrollLayout.ChildHierarchyChangeEvent
+            if (event.animationType == NotificationStackScrollLayout.AnimationEvent
                     .ANIMATION_TYPE_ADD && !mHandledEvents.contains(event)) {
 
                 // This item is added, initialize it's properties.

@@ -79,7 +79,8 @@ public class NotificationPanelView extends PanelView implements
                 ((MarginLayoutParams) mKeyguardStatusView.getLayoutParams()).bottomMargin;
         mNotificationStackScroller.setTopPadding(mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 ? mKeyguardStatusView.getBottom() + keyguardBottomMargin
-                : mHeader.getBottom() + mNotificationTopPadding);
+                : mHeader.getBottom() + mNotificationTopPadding,
+                mStatusBar.isScreenTurnedOn() && mStatusBar.isExpandedVisible());
     }
 
     @Override

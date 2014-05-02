@@ -97,14 +97,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     private StackScrollState mCurrentStackScrollState = new StackScrollState(this);
     private ArrayList<View> mChildrenToAddAnimated = new ArrayList<View>();
     private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<View>();
-    private ArrayList<ChildHierarchyChangeEvent> mAnimationEvents
-            = new ArrayList<ChildHierarchyChangeEvent>();
+    private ArrayList<AnimationEvent> mAnimationEvents
+            = new ArrayList<AnimationEvent>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
 
     private OnChildLocationsChangedListener mListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
-    private boolean mChildHierarchyDirty;
+    private boolean mNeedsAnimation;
+    private boolean mTopPaddingNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
@@ -266,7 +267,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void updateChildren() {
         mCurrentStackScrollState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
-        if (!isCurrentlyAnimating() && !mChildHierarchyDirty) {
+        if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
         } else {
             startAnimationToState();
@@ -296,11 +297,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mTopPadding;
     }
 
-    public void setTopPadding(int topPadding) {
+    public void setTopPadding(int topPadding, boolean animate) {
         if (mTopPadding != topPadding) {
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
+            if (animate) {
+                mTopPaddingNeedsAnimation = true;
+                mNeedsAnimation =  true;
+            }
             requestChildrenUpdate();
         }
     }
@@ -836,7 +841,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (!mChildrenToAddAnimated.contains(child)) {
                 // Generate Animations
                 mChildrenToRemoveAnimated.add(child);
-                mChildHierarchyDirty = true;
+                mNeedsAnimation = true;
             } else {
                 mChildrenToAddAnimated.remove(child);
             }
@@ -895,7 +900,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             // Generate Animations
             mChildrenToAddAnimated.add(child);
-            mChildHierarchyDirty = true;
+            mNeedsAnimation = true;
         }
     }
 
@@ -912,9 +917,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void startAnimationToState() {
-        if (mChildHierarchyDirty) {
+        if (mNeedsAnimation) {
             generateChildHierarchyEvents();
-            mChildHierarchyDirty = false;
+            mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty()) {
             mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState);
@@ -926,16 +931,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void generateChildHierarchyEvents() {
         generateChildAdditionEvents();
         generateChildRemovalEvents();
-        mChildHierarchyDirty = false;
+        generateTopPaddingEvent();
+        mNeedsAnimation = false;
     }
 
     private void generateChildRemovalEvents() {
         for (View  child : mChildrenToRemoveAnimated) {
             boolean childWasSwipedOut = mSwipedOutViews.contains(child);
             int animationType = childWasSwipedOut
-                    ? ChildHierarchyChangeEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
-                    : ChildHierarchyChangeEvent.ANIMATION_TYPE_REMOVE;
-            mAnimationEvents.add(new ChildHierarchyChangeEvent(child, animationType));
+                    ? AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
+                    : AnimationEvent.ANIMATION_TYPE_REMOVE;
+            mAnimationEvents.add(new AnimationEvent(child, animationType));
         }
         mSwipedOutViews.clear();
         mChildrenToRemoveAnimated.clear();
@@ -943,10 +949,16 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateChildAdditionEvents() {
         for (View  child : mChildrenToAddAnimated) {
-            mAnimationEvents.add(new ChildHierarchyChangeEvent(child,
-                    ChildHierarchyChangeEvent.ANIMATION_TYPE_ADD));
+            mAnimationEvents.add(new AnimationEvent(child,
+                    AnimationEvent.ANIMATION_TYPE_ADD));
         }
         mChildrenToAddAnimated.clear();
+    }
+
+    private void generateTopPaddingEvent() {
+        mAnimationEvents.add(
+                new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED));
+        mTopPaddingNeedsAnimation = false;
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -1150,16 +1162,18 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
 
-    static class ChildHierarchyChangeEvent {
+    static class AnimationEvent {
 
         static int ANIMATION_TYPE_ADD = 1;
         static int ANIMATION_TYPE_REMOVE = 2;
         static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 3;
+        static int ANIMATION_TYPE_TOP_PADDING_CHANGED = 4;
+
         final long eventStartTime;
         final View changingView;
         final int animationType;
 
-        ChildHierarchyChangeEvent(View view, int type) {
+        AnimationEvent(View view, int type) {
             eventStartTime = AnimationUtils.currentAnimationTimeMillis();
             changingView = view;
             animationType = type;
