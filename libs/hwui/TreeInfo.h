@@ -16,20 +16,19 @@
 #ifndef TREEINFO_H
 #define TREEINFO_H
 
-#include <cutils/compiler.h>
 #include <utils/Timers.h>
-#include <utils/StrongPointer.h>
 
 namespace android {
 namespace uirenderer {
 
-class RenderPropertyAnimator;
+class BaseAnimator;
+class AnimationListener;
 
-class AnimationListener {
+class AnimationHook {
 public:
-    ANDROID_API virtual void onAnimationFinished(const sp<RenderPropertyAnimator>&) = 0;
+    virtual void callOnFinished(BaseAnimator* animator, AnimationListener* listener) = 0;
 protected:
-    ANDROID_API virtual ~AnimationListener() {}
+    ~AnimationHook() {}
 };
 
 struct TreeInfo {
@@ -41,7 +40,7 @@ struct TreeInfo {
             , frameTimeMs(0)
             , evaluateAnimations(false)
             , hasAnimations(false)
-            , animationListener(0)
+            , animationHook(0)
     {}
 
     bool hasFunctors;
@@ -53,7 +52,7 @@ struct TreeInfo {
     bool evaluateAnimations;
     // This is only updated if evaluateAnimations is true
     bool hasAnimations;
-    AnimationListener* animationListener;
+    AnimationHook* animationHook;
 
     // TODO: Damage calculations
 };

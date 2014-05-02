@@ -1198,6 +1198,27 @@ private:
     float mRadius;
 };
 
+class DrawCirclePropsOp : public DrawOp {
+public:
+    DrawCirclePropsOp(float* x, float* y, float* radius, const SkPaint* paint)
+            : DrawOp(paint), mX(x), mY(y), mRadius(radius) {}
+
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
+        return renderer.drawCircle(*mX, *mY, *mRadius, getPaint(renderer));
+    }
+
+    virtual void output(int level, uint32_t logFlags) const {
+        OP_LOG("Draw Circle Props x %p, y %p, r %p", mX, mY, mRadius);
+    }
+
+    virtual const char* name() { return "DrawCircleProps"; }
+
+private:
+    float* mX;
+    float* mY;
+    float* mRadius;
+};
+
 class DrawOvalOp : public DrawStrokableOp {
 public:
     DrawOvalOp(float left, float top, float right, float bottom, const SkPaint* paint)

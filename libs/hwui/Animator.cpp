@@ -20,128 +20,11 @@
 
 #include <set>
 
+#include "RenderNode.h"
 #include "RenderProperties.h"
 
 namespace android {
 namespace uirenderer {
-
-/************************************************************
- *  Private header
- ************************************************************/
-
-typedef void (RenderProperties::*SetFloatProperty)(float value);
-typedef float (RenderProperties::*GetFloatProperty)() const;
-
-struct PropertyAccessors {
-    GetFloatProperty getter;
-    SetFloatProperty setter;
-};
-
-// Maps RenderProperty enum to accessors
-static const PropertyAccessors PROPERTY_ACCESSOR_LUT[] = {
-    {&RenderProperties::getTranslationX, &RenderProperties::setTranslationX },
-    {&RenderProperties::getTranslationY, &RenderProperties::setTranslationY },
-    {&RenderProperties::getTranslationZ, &RenderProperties::setTranslationZ },
-    {&RenderProperties::getScaleX, &RenderProperties::setScaleX },
-    {&RenderProperties::getScaleY, &RenderProperties::setScaleY },
-    {&RenderProperties::getRotation, &RenderProperties::setRotation },
-    {&RenderProperties::getRotationX, &RenderProperties::setRotationX },
-    {&RenderProperties::getRotationY, &RenderProperties::setRotationY },
-    {&RenderProperties::getX, &RenderProperties::setX },
-    {&RenderProperties::getY, &RenderProperties::setY },
-    {&RenderProperties::getZ, &RenderProperties::setZ },
-    {&RenderProperties::getAlpha, &RenderProperties::setAlpha },
-};
-
-// Helper class to contain generic animator helpers
-class BaseAnimator {
-public:
-    BaseAnimator();
-    virtual ~BaseAnimator();
-
-    void setInterpolator(Interpolator* interpolator);
-    void setDuration(nsecs_t durationInMs);
-
-    bool isFinished() { return mPlayState == FINISHED; }
-
-protected:
-    // This is the main animation entrypoint that subclasses should call
-    // to generate the onAnimation* lifecycle events
-    // Returns true if the animation has finished, false otherwise
-    bool animateFrame(nsecs_t frameTime);
-
-    // Called when PlayState switches from PENDING to RUNNING
-    virtual void onAnimationStarted() {}
-    virtual void onAnimationUpdated(float fraction) = 0;
-    virtual void onAnimationFinished() {}
-
-private:
-    enum PlayState {
-        PENDING,
-        RUNNING,
-        FINISHED,
-    };
-
-    Interpolator* mInterpolator;
-    PlayState mPlayState;
-    long mStartTime;
-    long mDuration;
-};
-
-// Hide the base classes & private bits from the exported RenderPropertyAnimator
-// in this Impl class so that subclasses of RenderPropertyAnimator don't require
-// knowledge of the inner guts but only the public virtual methods.
-// Animates a single property
-class RenderPropertyAnimatorImpl : public BaseAnimator {
-public:
-    RenderPropertyAnimatorImpl(GetFloatProperty getter, SetFloatProperty setter,
-            RenderPropertyAnimator::DeltaValueType deltaType, float delta);
-    ~RenderPropertyAnimatorImpl();
-
-    bool animate(RenderProperties* target, TreeInfo& info);
-
-protected:
-    virtual void onAnimationStarted();
-    virtual void onAnimationUpdated(float fraction);
-
-private:
-    // mTarget is only valid inside animate()
-    RenderProperties* mTarget;
-    GetFloatProperty mGetter;
-    SetFloatProperty mSetter;
-
-    RenderPropertyAnimator::DeltaValueType mDeltaValueType;
-    float mDeltaValue;
-    float mFromValue;
-};
-
-RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property,
-        DeltaValueType deltaType, float deltaValue) {
-    PropertyAccessors pa = PROPERTY_ACCESSOR_LUT[property];
-    mImpl = new RenderPropertyAnimatorImpl(pa.getter, pa.setter, deltaType, deltaValue);
-}
-
-RenderPropertyAnimator::~RenderPropertyAnimator() {
-    delete mImpl;
-    mImpl = NULL;
-}
-
-void RenderPropertyAnimator::setInterpolator(Interpolator* interpolator) {
-    mImpl->setInterpolator(interpolator);
-}
-
-void RenderPropertyAnimator::setDuration(nsecs_t durationInMs) {
-    mImpl->setDuration(durationInMs);
-}
-
-bool RenderPropertyAnimator::isFinished() {
-    return mImpl->isFinished();
-}
-
-bool RenderPropertyAnimator::animate(RenderProperties* target, TreeInfo& info) {
-    return mImpl->animate(target, info);
-}
-
 
 /************************************************************
  *  Base animator
@@ -168,10 +51,10 @@ void BaseAnimator::setDuration(nsecs_t duration) {
     mDuration = duration;
 }
 
-bool BaseAnimator::animateFrame(nsecs_t frameTime) {
+bool BaseAnimator::animateFrame(TreeInfo& info) {
     if (mPlayState == PENDING) {
         mPlayState = RUNNING;
-        mStartTime = frameTime;
+        mStartTime = info.frameTimeMs;
         // No interpolator was set, use the default
         if (!mInterpolator) {
             setInterpolator(Interpolator::createDefaultInterpolator());
@@ -181,7 +64,7 @@ bool BaseAnimator::animateFrame(nsecs_t frameTime) {
 
     float fraction = 1.0f;
     if (mPlayState == RUNNING) {
-        fraction = mDuration > 0 ? (float)(frameTime - mStartTime) / mDuration : 1.0f;
+        fraction = mDuration > 0 ? (float)(info.frameTimeMs - mStartTime) / mDuration : 1.0f;
         if (fraction >= 1.0f) {
             fraction = 1.0f;
             mPlayState = FINISHED;
@@ -192,48 +75,140 @@ bool BaseAnimator::animateFrame(nsecs_t frameTime) {
 
     if (mPlayState == FINISHED) {
         onAnimationFinished();
+        callOnFinishedListener(info);
         return true;
     }
     return false;
+}
+
+void BaseAnimator::callOnFinishedListener(TreeInfo& info) {
+    if (mListener.get()) {
+        if (!info.animationHook) {
+            mListener->onAnimationFinished(this);
+        } else {
+            info.animationHook->callOnFinished(this, mListener.get());
+        }
+    }
+}
+
+/************************************************************
+ *  BaseRenderNodeAnimator
+ ************************************************************/
+
+BaseRenderNodeAnimator::BaseRenderNodeAnimator(
+                BaseRenderNodeAnimator::DeltaValueType deltaType, float delta)
+        : mTarget(0)
+        , mDeltaValueType(deltaType)
+        , mDeltaValue(delta)
+        , mFromValue(-1) {
+}
+
+bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
+    mTarget = target;
+    bool finished = animateFrame(info);
+    mTarget = NULL;
+    return finished;
+}
+
+void BaseRenderNodeAnimator::onAnimationStarted() {
+    mFromValue = getValue();
+
+    if (mDeltaValueType == BaseRenderNodeAnimator::ABSOLUTE) {
+        mDeltaValue = (mDeltaValue - mFromValue);
+        mDeltaValueType = BaseRenderNodeAnimator::DELTA;
+    }
+}
+
+void BaseRenderNodeAnimator::onAnimationUpdated(float fraction) {
+    float value = mFromValue + (mDeltaValue * fraction);
+    setValue(value);
 }
 
 /************************************************************
  *  RenderPropertyAnimator
  ************************************************************/
 
-RenderPropertyAnimatorImpl::RenderPropertyAnimatorImpl(
-                GetFloatProperty getter, SetFloatProperty setter,
-                RenderPropertyAnimator::DeltaValueType deltaType, float delta)
-        : mTarget(0)
-        , mGetter(getter)
-        , mSetter(setter)
-        , mDeltaValueType(deltaType)
-        , mDeltaValue(delta)
-        , mFromValue(-1) {
+// Maps RenderProperty enum to accessors
+const RenderPropertyAnimator::PropertyAccessors RenderPropertyAnimator::PROPERTY_ACCESSOR_LUT[] = {
+    {&RenderProperties::getTranslationX, &RenderProperties::setTranslationX },
+    {&RenderProperties::getTranslationY, &RenderProperties::setTranslationY },
+    {&RenderProperties::getTranslationZ, &RenderProperties::setTranslationZ },
+    {&RenderProperties::getScaleX, &RenderProperties::setScaleX },
+    {&RenderProperties::getScaleY, &RenderProperties::setScaleY },
+    {&RenderProperties::getRotation, &RenderProperties::setRotation },
+    {&RenderProperties::getRotationX, &RenderProperties::setRotationX },
+    {&RenderProperties::getRotationY, &RenderProperties::setRotationY },
+    {&RenderProperties::getX, &RenderProperties::setX },
+    {&RenderProperties::getY, &RenderProperties::setY },
+    {&RenderProperties::getZ, &RenderProperties::setZ },
+    {&RenderProperties::getAlpha, &RenderProperties::setAlpha },
+};
+
+RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property,
+                DeltaValueType deltaType, float deltaValue)
+        : BaseRenderNodeAnimator(deltaType, deltaValue)
+        , mPropertyAccess(PROPERTY_ACCESSOR_LUT[property]) {
 }
 
-RenderPropertyAnimatorImpl::~RenderPropertyAnimatorImpl() {
+float RenderPropertyAnimator::getValue() const {
+    return (target()->animatorProperties().*mPropertyAccess.getter)();
 }
 
-bool RenderPropertyAnimatorImpl::animate(RenderProperties* target, TreeInfo& info) {
-    mTarget = target;
-    bool finished = animateFrame(info.frameTimeMs);
-    mTarget = NULL;
-    return finished;
+void RenderPropertyAnimator::setValue(float value) {
+    (target()->animatorProperties().*mPropertyAccess.setter)(value);
 }
 
-void RenderPropertyAnimatorImpl::onAnimationStarted() {
-    mFromValue = (mTarget->*mGetter)();
+/************************************************************
+ *  CanvasPropertyPrimitiveAnimator
+ ************************************************************/
 
-    if (mDeltaValueType == RenderPropertyAnimator::ABSOLUTE) {
-        mDeltaValue = (mDeltaValue - mFromValue);
-        mDeltaValueType = RenderPropertyAnimator::DELTA;
+CanvasPropertyPrimitiveAnimator::CanvasPropertyPrimitiveAnimator(
+                CanvasPropertyPrimitive* property, DeltaValueType deltaType, float deltaValue)
+        : BaseRenderNodeAnimator(deltaType, deltaValue)
+        , mProperty(property) {
+}
+
+float CanvasPropertyPrimitiveAnimator::getValue() const {
+    return mProperty->value;
+}
+
+void CanvasPropertyPrimitiveAnimator::setValue(float value) {
+    mProperty->value = value;
+}
+
+/************************************************************
+ *  CanvasPropertySkPaintAnimator
+ ************************************************************/
+
+CanvasPropertyPaintAnimator::CanvasPropertyPaintAnimator(
+                CanvasPropertyPaint* property, PaintField field,
+                DeltaValueType deltaType, float deltaValue)
+        : BaseRenderNodeAnimator(deltaType, deltaValue)
+        , mProperty(property)
+        , mField(field) {
+}
+
+float CanvasPropertyPaintAnimator::getValue() const {
+    switch (mField) {
+    case STROKE_WIDTH:
+        return mProperty->value.getStrokeWidth();
+    case ALPHA:
+        return mProperty->value.getAlpha();
     }
+    LOG_ALWAYS_FATAL("Unknown field %d", (int) mField);
+    return -1;
 }
 
-void RenderPropertyAnimatorImpl::onAnimationUpdated(float fraction) {
-    float value = mFromValue + (mDeltaValue * fraction);
-    (mTarget->*mSetter)(value);
+void CanvasPropertyPaintAnimator::setValue(float value) {
+    switch (mField) {
+    case STROKE_WIDTH:
+        mProperty->value.setStrokeWidth(value);
+        return;
+    case ALPHA:
+        mProperty->value.setAlpha(value);
+        return;
+    }
+    LOG_ALWAYS_FATAL("Unknown field %d", (int) mField);
 }
 
 } /* namespace uirenderer */

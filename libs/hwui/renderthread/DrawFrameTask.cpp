@@ -112,6 +112,10 @@ bool DrawFrameTask::syncFrameState() {
     initTreeInfo(info);
     mContext->processLayerUpdates(&mLayers, info);
     mContext->prepareTree(info);
+    if (info.hasAnimations) {
+        // TODO: dirty calculations, for now just do a full-screen inval
+        mDirty.setEmpty();
+    }
     // If prepareTextures is false, we ran out of texture cache space
     return !info.hasFunctors && info.prepareTextures;
 }
