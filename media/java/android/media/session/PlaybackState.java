@@ -225,6 +225,20 @@ public final class PlaybackState implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        StringBuilder bob = new StringBuilder("PlaybackState {");
+        bob.append("state=").append(mState);
+        bob.append(", position=").append(mPosition);
+        bob.append(", buffered position=").append(mBufferPosition);
+        bob.append(", rate=").append(mRate);
+        bob.append(", updated=").append(mUpdateTime);
+        bob.append(", actions=").append(mActions);
+        bob.append(", error=").append(mErrorMessage);
+        bob.append("}");
+        return bob.toString();
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
