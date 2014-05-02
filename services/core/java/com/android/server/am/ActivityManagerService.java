@@ -95,7 +95,6 @@ import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
-import android.app.IThumbnailReceiver;
 import android.app.IUiAutomationConnection;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
@@ -702,13 +701,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     String mBackupAppName = null;
     BackupRecord mBackupTarget = null;
-
-    /**
-     * List of PendingThumbnailsRecord objects of clients who are still
-     * waiting to receive all of the thumbnails for a task.
-     */
-    final ArrayList<PendingThumbnailsRecord> mPendingThumbnails =
-            new ArrayList<PendingThumbnailsRecord>();
 
     final ProviderMap mProviderMap;
 
@@ -5452,19 +5444,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("File descriptors passed in Bundle");
         }
 
-        ActivityRecord r = null;
-
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            r = ActivityRecord.isInStackLocked(token);
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
                 r.task.stack.activityStoppedLocked(r, icicle, thumbnail, description);
             }
-        }
-
-        if (r != null) {
-            sendPendingThumbnail(r, null, null, null, false);
         }
 
         trimApplications();
@@ -6982,66 +6968,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     @Override
-    public List<RunningTaskInfo> getTasks(int maxNum, int flags,
-                         IThumbnailReceiver receiver) {
+    public List<RunningTaskInfo> getTasks(int maxNum, int flags) {
+        final int callingUid = Binder.getCallingUid();
         ArrayList<RunningTaskInfo> list = new ArrayList<RunningTaskInfo>();
-
-        PendingThumbnailsRecord pending = new PendingThumbnailsRecord(receiver);
-        ActivityRecord topRecord = null;
 
         synchronized(this) {
             if (localLOGV) Slog.v(
-                TAG, "getTasks: max=" + maxNum + ", flags=" + flags
-                + ", receiver=" + receiver);
+                TAG, "getTasks: max=" + maxNum + ", flags=" + flags);
 
-            if (checkCallingPermission(android.Manifest.permission.GET_TASKS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (receiver != null) {
-                    // If the caller wants to wait for pending thumbnails,
-                    // it ain't gonna get them.
-                    try {
-                        receiver.finished();
-                    } catch (RemoteException ex) {
-                    }
-                }
-                String msg = "Permission Denial: getTasks() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " requires " + android.Manifest.permission.GET_TASKS;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
+            final boolean allowed = checkCallingPermission(
+                    android.Manifest.permission.GET_TASKS)
+                    == PackageManager.PERMISSION_GRANTED;
+            if (!allowed) {
+                Slog.w(TAG, "getTasks: caller " + callingUid
+                        + " does not hold GET_TASKS; limiting output");
             }
 
             // TODO: Improve with MRU list from all ActivityStacks.
-            topRecord = mStackSupervisor.getTasksLocked(maxNum, receiver, pending, list);
-
-            if (!pending.pendingRecords.isEmpty()) {
-                mPendingThumbnails.add(pending);
-            }
-        }
-
-        if (localLOGV) Slog.v(TAG, "We have pending thumbnails: " + pending);
-
-        if (topRecord != null) {
-            if (localLOGV) Slog.v(TAG, "Requesting top thumbnail");
-            try {
-                IApplicationThread topThumbnail = topRecord.app.thread;
-                topThumbnail.requestThumbnail(topRecord.appToken);
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception thrown when requesting thumbnail", e);
-                sendPendingThumbnail(null, topRecord.appToken, null, null, true);
-            }
-        }
-
-        if (pending.pendingRecords.isEmpty() && receiver != null) {
-            // In this case all thumbnails were available and the client
-            // is being asked to be told when the remaining ones come in...
-            // which is unusually, since the top-most currently running
-            // activity should never have a canned thumbnail!  Oh well.
-            try {
-                receiver.finished();
-            } catch (RemoteException ex) {
-            }
+            mStackSupervisor.getTasksLocked(maxNum, list, callingUid, allowed);
         }
 
         return list;
@@ -7054,12 +6998,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) {
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        final int callingUid = Binder.getCallingUid();
+        userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
                 false, true, "getRecentTasks", null);
 
         synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.GET_TASKS,
-                    "getRecentTasks()");
+            final boolean allowed = checkCallingPermission(
+                    android.Manifest.permission.GET_TASKS)
+                    == PackageManager.PERMISSION_GRANTED;
+            if (!allowed) {
+                Slog.w(TAG, "getRecentTasks: caller " + callingUid
+                        + " does not hold GET_TASKS; limiting output");
+            }
             final boolean detailed = checkCallingPermission(
                     android.Manifest.permission.GET_DETAILED_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -7094,6 +7044,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         || (tr.intent == null)
                         || ((tr.intent.getFlags()
                                 &Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0)) {
+                    if (!allowed) {
+                        // If the caller doesn't have the GET_TASKS permission, then only
+                        // allow them to see a small subset of tasks -- their own and home.
+                        if (!tr.isHomeTask() && tr.creatorUid != callingUid) {
+                            continue;
+                        }
+                    }
                     ActivityManager.RecentTaskInfo rti
                             = new ActivityManager.RecentTaskInfo();
                     rti.id = tr.numActivities > 0 ? tr.taskId : -1;
@@ -7631,82 +7588,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean isInLockTaskMode() {
         synchronized (this) {
             return mStackSupervisor.isInLockTaskMode();
-        }
-    }
-
-    // =========================================================
-    // THUMBNAILS
-    // =========================================================
-
-    public void reportThumbnail(IBinder token,
-            Bitmap thumbnail, CharSequence description) {
-        //System.out.println("Report thumbnail for " + token + ": " + thumbnail);
-        final long origId = Binder.clearCallingIdentity();
-        sendPendingThumbnail(null, token, thumbnail, description, true);
-        Binder.restoreCallingIdentity(origId);
-    }
-
-    final void sendPendingThumbnail(ActivityRecord r, IBinder token,
-            Bitmap thumbnail, CharSequence description, boolean always) {
-        TaskRecord task;
-        ArrayList<PendingThumbnailsRecord> receivers = null;
-
-        //System.out.println("Send pending thumbnail: " + r);
-
-        synchronized(this) {
-            if (r == null) {
-                r = ActivityRecord.isInStackLocked(token);
-                if (r == null) {
-                    return;
-                }
-            }
-            if (thumbnail == null && r.thumbHolder != null) {
-                thumbnail = r.thumbHolder.lastThumbnail;
-                description = r.thumbHolder.lastDescription;
-            }
-            if (thumbnail == null && !always) {
-                // If there is no thumbnail, and this entry is not actually
-                // going away, then abort for now and pick up the next
-                // thumbnail we get.
-                return;
-            }
-            task = r.task;
-
-            int N = mPendingThumbnails.size();
-            int i=0;
-            while (i<N) {
-                PendingThumbnailsRecord pr = mPendingThumbnails.get(i);
-                //System.out.println("Looking in " + pr.pendingRecords);
-                if (pr.pendingRecords.remove(r)) {
-                    if (receivers == null) {
-                        receivers = new ArrayList<PendingThumbnailsRecord>();
-                    }
-                    receivers.add(pr);
-                    if (pr.pendingRecords.size() == 0) {
-                        pr.finished = true;
-                        mPendingThumbnails.remove(i);
-                        N--;
-                        continue;
-                    }
-                }
-                i++;
-            }
-        }
-
-        if (receivers != null) {
-            final int N = receivers.size();
-            for (int i=0; i<N; i++) {
-                try {
-                    PendingThumbnailsRecord pr = receivers.get(i);
-                    pr.receiver.newThumbnail(
-                        task != null ? task.taskId : -1, thumbnail, description);
-                    if (pr.finished) {
-                        pr.receiver.finished();
-                    }
-                } catch (Exception e) {
-                    Slog.w(TAG, "Exception thrown when sending thumbnail", e);
-                }
-            }
         }
     }
 

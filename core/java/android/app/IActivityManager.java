@@ -111,8 +111,7 @@ public interface IActivityManager extends IInterface {
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
-    public List<RunningTaskInfo> getTasks(int maxNum, int flags,
-                         IThumbnailReceiver receiver) throws RemoteException;
+    public List<RunningTaskInfo> getTasks(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
     public ActivityManager.TaskThumbnails getTaskThumbnails(int taskId) throws RemoteException;
@@ -131,9 +130,6 @@ public interface IActivityManager extends IInterface {
     public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
-    /* oneway */
-    public void reportThumbnail(IBinder token,
-            Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
             String name, int userId, boolean stable) throws RemoteException;
     public ContentProviderHolder getContentProviderExternal(String name, int userId, IBinder token)
@@ -571,7 +567,7 @@ public interface IActivityManager extends IInterface {
     int MOVE_TASK_TO_BACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+24;
     int MOVE_TASK_BACKWARDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+25;
     int GET_TASK_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+26;
-    int REPORT_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+27;
+
     int GET_CONTENT_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int REF_CONTENT_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;

@@ -53,7 +53,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
-import android.app.IThumbnailReceiver;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
@@ -73,7 +72,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
@@ -2537,13 +2535,6 @@ final class ActivityStack {
 
         finishActivityResultsLocked(r, resultCode, resultData);
 
-        if (!mService.mPendingThumbnails.isEmpty()) {
-            // There are clients waiting to receive thumbnails so, in case
-            // this is an activity that someone is waiting for, add it
-            // to the pending list so we can correctly update the clients.
-            mStackSupervisor.mCancelledThumbnails.add(r);
-        }
-
         if (mResumedActivity == r) {
             boolean endTask = index <= 0;
             if (DEBUG_VISBILITY || DEBUG_TRANSITION) Slog.v(TAG,
@@ -2780,13 +2771,6 @@ final class ActivityStack {
 
         if (cleanServices) {
             cleanUpActivityServicesLocked(r);
-        }
-
-        if (!mService.mPendingThumbnails.isEmpty()) {
-            // There are clients waiting to receive thumbnails so, in case
-            // this is an activity that someone is waiting for, add it
-            // to the pending list so we can correctly update the clients.
-            mStackSupervisor.mCancelledThumbnails.add(r);
         }
 
         // Get rid of any pending idle timeouts.
@@ -3535,9 +3519,7 @@ final class ActivityStack {
         return didSomething;
     }
 
-    ActivityRecord getTasksLocked(IThumbnailReceiver receiver,
-            PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
-        ActivityRecord topRecord = null;
+    void getTasksLocked(List<RunningTaskInfo> list, int callingUid, boolean allowed) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             ActivityRecord r = null;
@@ -3546,6 +3528,9 @@ final class ActivityStack {
             int numRunning = 0;
             final ArrayList<ActivityRecord> activities = task.mActivities;
             if (activities.isEmpty()) {
+                continue;
+            }
+            if (!allowed && !task.isHomeTask() && task.creatorUid != callingUid) {
                 continue;
             }
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -3581,23 +3566,8 @@ final class ActivityStack {
             ci.numRunning = numRunning;
             //System.out.println(
             //    "#" + maxNum + ": " + " descr=" + ci.description);
-            if (receiver != null) {
-                if (localLOGV) Slog.v(
-                    TAG, "State=" + top.state + "Idle=" + top.idle
-                    + " app=" + top.app
-                    + " thr=" + (top.app != null ? top.app.thread : null));
-                if (top.state == ActivityState.RESUMED || top.state == ActivityState.PAUSING) {
-                    if (top.idle && top.app != null && top.app.thread != null) {
-                        topRecord = top;
-                    } else {
-                        top.thumbnailNeeded = true;
-                    }
-                }
-                pending.pendingRecords.add(top);
-            }
             list.add(ci);
         }
-        return topRecord;
     }
 
     public void unhandledBackLocked() {

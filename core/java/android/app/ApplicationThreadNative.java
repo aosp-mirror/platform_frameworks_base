@@ -312,14 +312,6 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case REQUEST_THUMBNAIL_TRANSACTION:
-        {
-            data.enforceInterface(IApplicationThread.descriptor);
-            IBinder b = data.readStrongBinder();
-            requestThumbnail(b);
-            return true;
-        }
-
         case SCHEDULE_CONFIGURATION_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -982,16 +974,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         mRemote.transact(SCHEDULE_SUICIDE_TRANSACTION, data, null,
-                IBinder.FLAG_ONEWAY);
-        data.recycle();
-    }
-
-    public final void requestThumbnail(IBinder token)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        data.writeInterfaceToken(IApplicationThread.descriptor);
-        data.writeStrongBinder(token);
-        mRemote.transact(REQUEST_THUMBNAIL_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

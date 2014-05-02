@@ -1279,7 +1279,7 @@
          or recently running tasks. -->
     <permission android:name="android.permission.GET_TASKS"
         android:permissionGroup="android.permission-group.APP_INFO"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system"
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
     <!-- @hide Allows an application to call APIs that allow it to do interactions

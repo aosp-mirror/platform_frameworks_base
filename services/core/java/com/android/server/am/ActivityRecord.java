@@ -131,7 +131,6 @@ final class ActivityRecord {
     boolean sleeping;       // have we told the activity to sleep?
     boolean waitingVisible; // true if waiting for a new act to become vis
     boolean nowVisible;     // is this activity's window visible?
-    boolean thumbnailNeeded;// has someone requested a thumbnail?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
@@ -239,7 +238,6 @@ final class ActivityRecord {
                 pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
-                pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(mActivityType));
@@ -375,7 +373,6 @@ final class ActivityRecord {
         visible = true;
         waitingVisible = false;
         nowVisible = false;
-        thumbnailNeeded = false;
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
