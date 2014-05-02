@@ -175,6 +175,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String POWER_USE_ITEM_DATA = "pwi";
     private static final String DISCHARGE_STEP_DATA = "dsd";
     private static final String CHARGE_STEP_DATA = "csd";
+    private static final String DISCHARGE_TIME_REMAIN_DATA = "dtr";
+    private static final String CHARGE_TIME_REMAIN_DATA = "ctr";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -3076,7 +3078,7 @@ public abstract class BatteryStats implements Parcelable {
                         HISTORY_STATE2_DESCRIPTIONS, !checkin);
                 if (rec.wakeReasonTag != null) {
                     if (checkin) {
-                        pw.print(",Wr=");
+                        pw.print(",wr=");
                         pw.print(rec.wakeReasonTag.poolIdx);
                     } else {
                         pw.print(" wake_reason=");
@@ -3423,8 +3425,21 @@ public abstract class BatteryStats implements Parcelable {
         if (!filtering) {
             dumpDurationSteps(pw, DISCHARGE_STEP_DATA, getDischargeStepDurationsArray(),
                     getNumDischargeStepDurations(), true);
+            String[] lineArgs = new String[1];
+            long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
+            if (timeRemaining >= 0) {
+                lineArgs[0] = Long.toString(timeRemaining);
+                dumpLine(pw, 0 /* uid */, "i" /* category */, DISCHARGE_TIME_REMAIN_DATA,
+                        (Object[])lineArgs);
+            }
             dumpDurationSteps(pw, CHARGE_STEP_DATA, getChargeStepDurationsArray(),
                     getNumChargeStepDurations(), true);
+            timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
+            if (timeRemaining >= 0) {
+                lineArgs[0] = Long.toString(timeRemaining);
+                dumpLine(pw, 0 /* uid */, "i" /* category */, CHARGE_TIME_REMAIN_DATA,
+                        (Object[])lineArgs);
+            }
         }
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);
