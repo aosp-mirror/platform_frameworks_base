@@ -509,11 +509,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int maxNum = data.readInt();
             int fl = data.readInt();
-            IBinder receiverBinder = data.readStrongBinder();
-            IThumbnailReceiver receiver = receiverBinder != null
-                ? IThumbnailReceiver.Stub.asInterface(receiverBinder)
-                : null;
-            List<ActivityManager.RunningTaskInfo> list = getTasks(maxNum, fl, receiver);
+            List<ActivityManager.RunningTaskInfo> list = getTasks(maxNum, fl);
             reply.writeNoException();
             int N = list != null ? list.size() : -1;
             reply.writeInt(N);
@@ -709,17 +705,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                 ? getTaskForActivity(token, onlyRoot) : -1;
                 reply.writeNoException();
             reply.writeInt(res);
-            return true;
-        }
-
-        case REPORT_THUMBNAIL_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            Bitmap thumbnail = data.readInt() != 0
-                ? Bitmap.CREATOR.createFromParcel(data) : null;
-            CharSequence description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
-            reportThumbnail(token, thumbnail, description);
-            reply.writeNoException();
             return true;
         }
 
@@ -2678,14 +2663,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
-    public List getTasks(int maxNum, int flags,
-            IThumbnailReceiver receiver) throws RemoteException {
+    public List getTasks(int maxNum, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(maxNum);
         data.writeInt(flags);
-        data.writeStrongBinder(receiver != null ? receiver.asBinder() : null);
         mRemote.transact(GET_TASKS_TRANSACTION, data, reply, 0);
         reply.readException();
         ArrayList list = null;
@@ -2963,25 +2946,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
-    }
-    public void reportThumbnail(IBinder token,
-                                Bitmap thumbnail, CharSequence description) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        if (thumbnail != null) {
-            data.writeInt(1);
-            thumbnail.writeToParcel(data, 0);
-        } else {
-            data.writeInt(0);
-        }
-        TextUtils.writeToParcel(description, data, 0);
-        mRemote.transact(REPORT_THUMBNAIL_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
     }
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
             String name, int userId, boolean stable) throws RemoteException {

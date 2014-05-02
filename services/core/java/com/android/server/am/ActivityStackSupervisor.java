@@ -41,7 +41,6 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
-import android.app.IThumbnailReceiver;
 import android.app.PendingIntent;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
@@ -190,10 +189,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** List of activities that are in the process of going to sleep. */
     final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<ActivityRecord>();
-
-    /** List of ActivityRecord objects that have been finished and must still report back to a
-     * pending thumbnail receiver. */
-    final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
 
     /** Used on user changes */
     final ArrayList<UserStartedState> mStartingUsers = new ArrayList<UserStartedState>();
@@ -591,10 +586,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
-    ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
-            PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
-        ActivityRecord r = null;
-
+    void getTasksLocked(int maxNum, List<RunningTaskInfo> list, int callingUid, boolean allowed) {
         // Gather all of the running tasks for each stack into runningTaskLists.
         ArrayList<ArrayList<RunningTaskInfo>> runningTaskLists =
                 new ArrayList<ArrayList<RunningTaskInfo>>();
@@ -605,10 +597,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ActivityStack stack = stacks.get(stackNdx);
                 ArrayList<RunningTaskInfo> stackTaskList = new ArrayList<RunningTaskInfo>();
                 runningTaskLists.add(stackTaskList);
-                final ActivityRecord ar = stack.getTasksLocked(receiver, pending, stackTaskList);
-                if (r == null && isFrontStack(stack)) {
-                    r = ar;
-                }
+                stack.getTasksLocked(stackTaskList, callingUid, allowed);
             }
         }
 
@@ -635,8 +624,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 break;
             }
         }
-
-        return r;
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
@@ -1912,7 +1899,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ArrayList<UserStartedState> startingUsers = null;
         int NS = 0;
         int NF = 0;
-        IApplicationThread sendThumbnail = null;
         boolean booting = false;
         boolean enableScreen = false;
         boolean activityRemoved = false;
@@ -1939,11 +1925,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // We are now idle.  If someone is waiting for a thumbnail from
             // us, we can now deliver.
             r.idle = true;
-
-            if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
-                sendThumbnail = r.app.thread;
-                r.thumbnailNeeded = false;
-            }
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
             if (!mService.mBooted && isFrontStack(r.task.stack)) {
@@ -1976,15 +1957,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mFinishingActivities.clear();
         }
 
-        final ArrayList<ActivityRecord> thumbnails;
-        final int NT = mCancelledThumbnails.size();
-        if (NT > 0) {
-            thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
-            mCancelledThumbnails.clear();
-        } else {
-            thumbnails = null;
-        }
-
         if (isFrontStack(mHomeStack)) {
             booting = mService.mBooting;
             mService.mBooting = false;
@@ -1994,28 +1966,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
             mStartingUsers.clear();
         }
-
-        // Perform the following actions from unsynchronized state.
-        final IApplicationThread thumbnailThread = sendThumbnail;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (thumbnailThread != null) {
-                    try {
-                        thumbnailThread.requestThumbnail(token);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Exception thrown when requesting thumbnail", e);
-                        mService.sendPendingThumbnail(null, token, null, null, true);
-                    }
-                }
-
-                // Report back to any thumbnail receivers.
-                for (int i = 0; i < NT; i++) {
-                    ActivityRecord r = thumbnails.get(i);
-                    mService.sendPendingThumbnail(r, null, null, null, true);
-                }
-            }
-        });
 
         // Stop any activities that are scheduled to do so but have been
         // waiting for the next one to start.

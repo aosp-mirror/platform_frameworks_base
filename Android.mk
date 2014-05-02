@@ -78,7 +78,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IStopUserCallback.aidl \
         core/java/android/app/task/ITaskCallback.aidl \
         core/java/android/app/task/ITaskService.aidl \
-	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/IThumbnailRetriever.aidl \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IUiAutomationConnection.aidl \
