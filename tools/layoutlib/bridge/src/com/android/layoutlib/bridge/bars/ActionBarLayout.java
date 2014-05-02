@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ActionMenuView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -179,8 +180,9 @@ public class ActionBarLayout extends LinearLayout {
             Predicate<View> overflowMenuButtonTest = new Predicate<View>() {
                 @Override
                 public boolean apply(View view) {
-                    return view.getClass().getName()
-                            .equals("android.widget.ActionMenuPresenter$OverflowMenuButton");
+                    ViewGroup.LayoutParams lp = view.getLayoutParams();
+                    return lp instanceof ActionMenuView.LayoutParams &&
+                            ((ActionMenuView.LayoutParams) lp).isOverflowButton;
                 }
             };
             View overflowMenu = null;
