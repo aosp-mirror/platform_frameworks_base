@@ -57,7 +57,9 @@ public final class FontLoader {
     private static final String FONT_SUFFIX_NONE = ".ttf";
     private static final String FONT_SUFFIX_REGULAR = "-Regular.ttf";
     private static final String FONT_SUFFIX_BOLD = "-Bold.ttf";
-    private static final String FONT_SUFFIX_ITALIC = "-Italic.ttf";
+    // FONT_SUFFIX_ITALIC will always match FONT_SUFFIX_BOLDITALIC and hence it must be checked
+    // separately.
+    private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
     private static final String FONT_SUFFIX_BOLDITALIC = "-BoldItalic.ttf";
 
     // This must match the values of Typeface styles so that we can use them for indices in this
@@ -285,10 +287,10 @@ public final class FontLoader {
                             mFontInfo.font[Typeface.NORMAL] = font;
                         } else if (fileName.endsWith(FONT_SUFFIX_BOLD)) {
                             mFontInfo.font[Typeface.BOLD] = font;
-                        } else if (fileName.endsWith(FONT_SUFFIX_ITALIC)) {
-                            mFontInfo.font[Typeface.ITALIC] = font;
                         } else if (fileName.endsWith(FONT_SUFFIX_BOLDITALIC)) {
                             mFontInfo.font[Typeface.BOLD_ITALIC] = font;
+                        } else if (fileName.endsWith(FONT_SUFFIX_ITALIC)) {
+                            mFontInfo.font[Typeface.ITALIC] = font;
                         } else if (fileName.endsWith(FONT_SUFFIX_NONE)) {
                             mFontInfo.font[Typeface.NORMAL] = font;
                         }
