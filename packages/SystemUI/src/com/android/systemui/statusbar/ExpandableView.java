@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -47,6 +48,19 @@ public abstract class ExpandableView extends FrameLayout {
             mActualHeight = getHeight();
         }
         mActualHeightInitialized = true;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (filterMotionEvent(ev)) {
+            return super.dispatchTouchEvent(ev);
+        }
+        return false;
+    }
+
+    private boolean filterMotionEvent(MotionEvent event) {
+        return event.getActionMasked() != MotionEvent.ACTION_DOWN
+                || event.getY() > mClipTopAmount && event.getY() < mActualHeight;
     }
 
     /**
