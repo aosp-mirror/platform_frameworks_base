@@ -192,6 +192,10 @@ above.</p>
     <td><code>12d1</code></td>
   </tr>
   <tr>
+    <td>Intel</td>
+    <td><code>8087</code></td>
+  </tr>
+  <tr>
     <td>K-Touch</td>
     <td><code>24e3</code></td>
   </tr>
