@@ -20,6 +20,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import com.ibm.icu.lang.UScript;
 import com.ibm.icu.lang.UScriptRun;
 
 import android.graphics.Paint_Delegate.FontInfo;
+import android.graphics.RectF;;
 
 /**
  * Render the text by breaking it into various scripts and using the right font for each script.
@@ -50,9 +52,11 @@ public class BidiRenderer {
         }
     }
 
-    /* package */ Graphics2D graphics;
-    /* package */ Paint_Delegate paint;
-    /* package */ char[] text;
+    private Graphics2D graphics;
+    private Paint_Delegate paint;
+    private char[] text;
+    // Bounds of the text drawn so far.
+    private RectF bounds;
 
     /**
      * @param graphics May be null.
@@ -82,56 +86,54 @@ public class BidiRenderer {
      * @param x The x-coordinate of the left edge of where the text should be drawn on the given
      *            graphics.
      * @param y The y-coordinate at which to draw the text on the given graphics.
-     * @return The x-coordinate of the right edge of the drawn text. In other words,
-     *            x + the width of the text.
+     * @return A rectangle specifying the bounds of the text drawn.
      */
-    /* package */ float renderText(int start, int limit, boolean isRtl, float advances[],
+    /* package */ RectF renderText(int start, int limit, boolean isRtl, float advances[],
             int advancesIndex, boolean draw, float x, float y) {
         // We break the text into scripts and then select font based on it and then render each of
         // the script runs.
+        bounds = new RectF(x, y, x, y);
         for (ScriptRun run : getScriptRuns(text, start, limit, isRtl, paint.getFonts())) {
             int flag = Font.LAYOUT_NO_LIMIT_CONTEXT | Font.LAYOUT_NO_START_CONTEXT;
             flag |= isRtl ? Font.LAYOUT_RIGHT_TO_LEFT : Font.LAYOUT_LEFT_TO_RIGHT;
-            x = renderScript(run.start, run.limit, run.font, flag, advances, advancesIndex, draw,
-                    x, y);
+            renderScript(run.start, run.limit, run.font, flag, advances, advancesIndex, draw);
             advancesIndex += run.limit - run.start;
         }
-        return x;
+        return bounds;
     }
 
     /**
-     * Render a script run. Use the preferred font to render as much as possible. This also
-     * implements a fallback mechanism to render characters that cannot be drawn using the
-     * preferred font.
-     *
-     * @return x + width of the text drawn.
+     * Render a script run to the right of the bounds passed. Use the preferred font to render as
+     * much as possible. This also implements a fallback mechanism to render characters that cannot
+     * be drawn using the preferred font.
      */
-    private float renderScript(int start, int limit, FontInfo preferredFont, int flag,
-            float advances[], int advancesIndex, boolean draw, float x, float y) {
+    private void renderScript(int start, int limit, FontInfo preferredFont, int flag,
+            float advances[], int advancesIndex, boolean draw) {
         List<FontInfo> fonts = paint.getFonts();
         if (fonts == null || preferredFont == null) {
-            return x;
+            return;
         }
 
         while (start < limit) {
             boolean foundFont = false;
             int canDisplayUpTo = preferredFont.mFont.canDisplayUpTo(text, start, limit);
             if (canDisplayUpTo == -1) {
-                return render(start, limit, preferredFont, flag, advances, advancesIndex, draw,
-                        x, y);
+                // We can draw all characters in the text.
+                render(start, limit, preferredFont, flag, advances, advancesIndex, draw);
+                return;
             } else if (canDisplayUpTo > start) { // can draw something
-                x = render(start, canDisplayUpTo, preferredFont, flag, advances, advancesIndex,
-                        draw, x, y);
+                render(start, canDisplayUpTo, preferredFont, flag, advances, advancesIndex, draw);
                 advancesIndex += canDisplayUpTo - start;
                 start = canDisplayUpTo;
             }
 
+            // The current character cannot be drawn with the preferred font. Cycle through all the
+            // fonts to check which one can draw it.
             int charCount = Character.isHighSurrogate(text[start]) ? 2 : 1;
             for (FontInfo font : fonts) {
                 canDisplayUpTo = font.mFont.canDisplayUpTo(text, start, start + charCount);
                 if (canDisplayUpTo == -1) {
-                    x = render(start, start+charCount, font, flag, advances, advancesIndex, draw,
-                            x, y);
+                    render(start, start+charCount, font, flag, advances, advancesIndex, draw);
                     start += charCount;
                     advancesIndex += charCount;
                     foundFont = true;
@@ -143,22 +145,20 @@ public class BidiRenderer {
                 // probably appear as a box or a blank space. We could, probably, use some
                 // heuristics and break the character into the base character and diacritics and
                 // then draw it, but it's probably not worth the effort.
-                x = render(start, start + charCount, preferredFont, flag, advances, advancesIndex,
-                        draw, x, y);
+                render(start, start + charCount, preferredFont, flag, advances, advancesIndex,
+                        draw);
                 start += charCount;
                 advancesIndex += charCount;
             }
         }
-        return x;
     }
 
     /**
-     * Render the text with the given font.
+     * Render the text with the given font to the right of the bounds passed.
      */
-    private float render(int start, int limit, FontInfo font, int flag, float advances[],
-            int advancesIndex, boolean draw, float x, float y) {
+    private void render(int start, int limit, FontInfo font, int flag, float advances[],
+            int advancesIndex, boolean draw) {
 
-        float totalAdvance = 0;
         // Since the metrics don't have anti-aliasing set, we create a new FontRenderContext with
         // the anti-aliasing set.
         FontRenderContext f = font.mMetrics.getFontRenderContext();
@@ -173,12 +173,29 @@ public class BidiRenderer {
                 int adv_idx = advancesIndex + ci[i];
                 advances[adv_idx] += adv;
             }
-            totalAdvance += adv;
         }
         if (draw && graphics != null) {
-            graphics.drawGlyphVector(gv, x, y);
+            graphics.drawGlyphVector(gv, bounds.right, bounds.bottom);
         }
-        return x + totalAdvance;
+        Rectangle2D awtBounds = gv.getVisualBounds();
+        RectF visualBounds = awtRectToAndroidRect(awtBounds, bounds.right, bounds.bottom);
+        // If the width of the bounds is zero, no text has been drawn yet. Hence, use the
+        // coordinates from the bounds as an offset only.
+        if (Math.abs(bounds.right - bounds.left) == 0) {
+            bounds = visualBounds;
+        } else {
+            bounds.union(visualBounds);
+        }
+    }
+
+    private RectF awtRectToAndroidRect(Rectangle2D awtRec, float offsetX, float offsetY) {
+        float left = (float) awtRec.getX();
+        float top = (float) awtRec.getY();
+        float right = (float) (left + awtRec.getWidth());
+        float bottom = (float) (top + awtRec.getHeight());
+        RectF androidRect = new RectF(left, top, right, bottom);
+        androidRect.offset(offsetX, offsetY);
+        return androidRect;
     }
 
     // --- Static helper methods ---
