@@ -32693,6 +32693,16 @@ package android.view.textservice {
 
 package android.webkit {
 
+  public abstract interface ClientCertRequest {
+    method public abstract void cancel();
+    method public abstract java.lang.String getHost();
+    method public abstract java.lang.String[] getKeyTypes();
+    method public abstract int getPort();
+    method public abstract java.security.Principal[] getPrincipals();
+    method public abstract void ignore();
+    method public abstract void proceed(java.security.PrivateKey, java.security.cert.X509Certificate[]);
+  }
+
   public class ConsoleMessage {
     ctor public ConsoleMessage(java.lang.String, java.lang.String, int, android.webkit.ConsoleMessage.MessageLevel);
     method public int lineNumber();
@@ -33083,6 +33093,7 @@ package android.webkit {
     method public deprecated boolean canZoomOut();
     method public deprecated android.graphics.Picture capturePicture();
     method public void clearCache(boolean);
+    method public static void clearClientCertPreferences(java.lang.Runnable);
     method public void clearFormData();
     method public void clearHistory();
     method public void clearMatches();
@@ -33199,6 +33210,7 @@ package android.webkit {
     method public void onLoadResource(android.webkit.WebView, java.lang.String);
     method public void onPageFinished(android.webkit.WebView, java.lang.String);
     method public void onPageStarted(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
+    method public void onReceivedClientCertRequest(android.webkit.WebView, android.webkit.ClientCertRequest);
     method public void onReceivedError(android.webkit.WebView, int, java.lang.String, java.lang.String);
     method public void onReceivedHttpAuthRequest(android.webkit.WebView, android.webkit.HttpAuthHandler, java.lang.String, java.lang.String);
     method public void onReceivedLoginRequest(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String);

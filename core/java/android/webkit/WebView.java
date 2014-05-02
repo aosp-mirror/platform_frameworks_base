@@ -1485,9 +1485,6 @@ public class WebView extends AbsoluteLayout
      * @param onCleared  A runnable to be invoked when client certs are cleared.
      *                   The embedder can pass null if not interested in the
      *                   callback. The runnable will be called in UI thread.
-     *
-     * TODO(sgurun) unhide
-     * @hide
      */
     public static void clearClientCertPreferences(Runnable onCleared) {
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearClientCertPreferences");
