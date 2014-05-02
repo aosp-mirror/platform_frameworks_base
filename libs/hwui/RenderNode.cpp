@@ -109,7 +109,7 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     prepareSubTree(info, mDisplayListData);
 }
 
-static bool is_finished(const sp<RenderPropertyAnimator>& animator) {
+static bool is_finished(const sp<BaseRenderNodeAnimator>& animator) {
     return animator->isFinished();
 }
 
@@ -120,7 +120,7 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
     }
     if (mNeedsAnimatorsSync) {
         mAnimators.resize(mStagingAnimators.size());
-        std::vector< sp<RenderPropertyAnimator> >::iterator it;
+        std::vector< sp<BaseRenderNodeAnimator> >::iterator it;
         // hint: this means copy_if_not()
         it = std::remove_copy_if(mStagingAnimators.begin(), mStagingAnimators.end(),
                 mAnimators.begin(), is_finished);
@@ -141,26 +141,22 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
 
 class AnimateFunctor {
 public:
-    AnimateFunctor(RenderProperties* target, TreeInfo& info)
+    AnimateFunctor(RenderNode* target, TreeInfo& info)
             : mTarget(target), mInfo(info) {}
 
-    bool operator() (sp<RenderPropertyAnimator>& animator) {
-        bool finished = animator->animate(mTarget, mInfo);
-        if (finished && mInfo.animationListener) {
-            mInfo.animationListener->onAnimationFinished(animator);
-        }
-        return finished;
+    bool operator() (sp<BaseRenderNodeAnimator>& animator) {
+        return animator->animate(mTarget, mInfo);
     }
 private:
-    RenderProperties* mTarget;
+    RenderNode* mTarget;
     TreeInfo& mInfo;
 };
 
 void RenderNode::evaluateAnimations(TreeInfo& info) {
     if (!mAnimators.size()) return;
 
-    AnimateFunctor functor(&mProperties, info);
-    std::vector< sp<RenderPropertyAnimator> >::iterator newEnd;
+    AnimateFunctor functor(this, info);
+    std::vector< sp<BaseRenderNodeAnimator> >::iterator newEnd;
     newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mProperties.updateMatrix();

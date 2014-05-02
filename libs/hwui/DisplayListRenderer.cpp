@@ -299,6 +299,17 @@ status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const S
     return DrawGlInfo::kStatusDone;
 }
 
+status_t DisplayListRenderer::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+        CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
+    mDisplayListData->refProperty(x);
+    mDisplayListData->refProperty(y);
+    mDisplayListData->refProperty(radius);
+    mDisplayListData->refProperty(paint);
+    addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
+            &radius->value, &paint->value));
+    return DrawGlInfo::kStatusDone;
+}
+
 status_t DisplayListRenderer::drawOval(float left, float top, float right, float bottom,
         const SkPaint* paint) {
     paint = refPaint(paint);

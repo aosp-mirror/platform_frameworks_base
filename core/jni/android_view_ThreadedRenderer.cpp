@@ -26,7 +26,7 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
-#include "android_view_RenderNodeAnimator.h"
+#include <Animator.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -67,26 +67,34 @@ private:
     jobject mRunnable;
 };
 
+class OnFinishedEvent {
+public:
+    OnFinishedEvent(BaseAnimator* animator, AnimationListener* listener)
+            : animator(animator), listener(listener) {}
+    sp<BaseAnimator> animator;
+    sp<AnimationListener> listener;
+};
+
 class InvokeAnimationListeners : public MessageHandler {
 public:
-    InvokeAnimationListeners(std::vector< sp<RenderNodeAnimator> >& animators) {
-        mAnimators.swap(animators);
+    InvokeAnimationListeners(std::vector<OnFinishedEvent>& events) {
+        mOnFinishedEvents.swap(events);
     }
 
-    static void callOnFinished(const sp<RenderNodeAnimator>& animator) {
-        animator->callOnFinished();
+    static void callOnFinished(OnFinishedEvent& event) {
+        event.listener->onAnimationFinished(event.animator.get());
     }
 
     virtual void handleMessage(const Message& message) {
-        std::for_each(mAnimators.begin(), mAnimators.end(), callOnFinished);
-        mAnimators.clear();
+        std::for_each(mOnFinishedEvents.begin(), mOnFinishedEvents.end(), callOnFinished);
+        mOnFinishedEvents.clear();
     }
 
 private:
-    std::vector< sp<RenderNodeAnimator> > mAnimators;
+    std::vector<OnFinishedEvent> mOnFinishedEvents;
 };
 
-class RootRenderNode : public RenderNode, public AnimationListener {
+class RootRenderNode : public RenderNode, public AnimationHook {
 public:
     RootRenderNode() : RenderNode() {
         mLooper = Looper::getForThread();
@@ -96,27 +104,27 @@ public:
 
     virtual ~RootRenderNode() {}
 
-    void onAnimationFinished(const sp<RenderPropertyAnimator>& animator) {
-        mFinishedAnimators.push_back(
-                reinterpret_cast<RenderNodeAnimator*>(animator.get()));
+    virtual void callOnFinished(BaseAnimator* animator, AnimationListener* listener) {
+        OnFinishedEvent event(animator, listener);
+        mOnFinishedEvents.push_back(event);
     }
 
     virtual void prepareTree(TreeInfo& info) {
-        info.animationListener = this;
+        info.animationHook = this;
         RenderNode::prepareTree(info);
-        info.animationListener = NULL;
+        info.animationHook = NULL;
 
         // post all the finished stuff
-        if (mFinishedAnimators.size()) {
+        if (mOnFinishedEvents.size()) {
             sp<InvokeAnimationListeners> message
-                    = new InvokeAnimationListeners(mFinishedAnimators);
+                    = new InvokeAnimationListeners(mOnFinishedEvents);
             mLooper->sendMessage(message, 0);
         }
     }
 
 private:
     sp<Looper> mLooper;
-    std::vector< sp<RenderNodeAnimator> > mFinishedAnimators;
+    std::vector<OnFinishedEvent> mOnFinishedEvents;
 };
 
 static void android_view_ThreadedRenderer_postToRenderThread(JNIEnv* env, jobject clazz,

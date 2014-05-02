@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.CanvasProperty;
 import android.graphics.DrawFilter;
 import android.graphics.Matrix;
 import android.graphics.NinePatch;
@@ -887,6 +888,16 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nDrawCircle(long renderer, float cx, float cy,
             float radius, long paint);
+
+    @Override
+    public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
+            CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
+        nDrawCircle(mRenderer, cx.getNativeContainer(), cy.getNativeContainer(),
+                radius.getNativeContainer(), paint.getNativeContainer());
+    }
+
+    private static native void nDrawCircle(long renderer, long propCx,
+            long propCy, long propRadius, long propPaint);
 
     @Override
     public void drawColor(int color) {

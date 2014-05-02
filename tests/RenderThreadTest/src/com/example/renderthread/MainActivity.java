@@ -19,8 +19,6 @@ import java.util.Map;
 
 public class MainActivity extends Activity implements OnItemClickListener {
 
-    static final int TRANSLATION_Y = 1;
-    static final int DELTA_TYPE_DELTA = 1;
     static final int DURATION = 400;
 
     static final String KEY_NAME = "name";
@@ -75,7 +73,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
             float delta = (pos - clickedPosition) * 1.1f;
             if (delta == 0) delta = -1;
             RenderNodeAnimator animator = new RenderNodeAnimator(
-                    TRANSLATION_Y, DELTA_TYPE_DELTA, dy * delta);
+                    RenderNodeAnimator.TRANSLATION_Y, RenderNodeAnimator.DELTA_TYPE_DELTA, dy * delta);
             animator.setDuration(DURATION);
             animator.start(child);
         }

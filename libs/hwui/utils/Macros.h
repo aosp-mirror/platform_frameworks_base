@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MACROS_H
+#define MACROS_H
 
-#include "jni.h"
+#define PREVENT_COPY_AND_ASSIGN(Type) \
+    private: \
+        Type(const Type&); \
+        void operator=(const Type&)
 
-#ifdef USE_OPENGL_RENDERER
 
-#include <Animator.h>
-
-namespace android {
-
-class RenderNodeAnimator : public uirenderer::RenderPropertyAnimator {
-public:
-    RenderNodeAnimator(JNIEnv* env, jobject callbackObject,
-            RenderProperty property, DeltaValueType deltaType, float delta);
-    virtual ~RenderNodeAnimator();
-
-    void callOnFinished();
-
-private:
-    JavaVM* mJvm;
-    jobject mWeakThis;
-};
-
-}
-
-#endif
+#endif /* MACROS_H */

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.graphics.CanvasProperty;
+import android.graphics.Paint;
 import android.util.SparseIntArray;
 
 import java.lang.ref.WeakReference;
@@ -26,18 +28,22 @@ import java.lang.ref.WeakReference;
 public final class RenderNodeAnimator {
 
     // Keep in sync with enum RenderProperty in Animator.h
-    private static final int TRANSLATION_X = 0;
-    private static final int TRANSLATION_Y = 1;
-    private static final int TRANSLATION_Z = 2;
-    private static final int SCALE_X = 3;
-    private static final int SCALE_Y = 4;
-    private static final int ROTATION = 5;
-    private static final int ROTATION_X = 6;
-    private static final int ROTATION_Y = 7;
-    private static final int X = 8;
-    private static final int Y = 9;
-    private static final int Z = 10;
-    private static final int ALPHA = 11;
+    public static final int TRANSLATION_X = 0;
+    public static final int TRANSLATION_Y = 1;
+    public static final int TRANSLATION_Z = 2;
+    public static final int SCALE_X = 3;
+    public static final int SCALE_Y = 4;
+    public static final int ROTATION = 5;
+    public static final int ROTATION_X = 6;
+    public static final int ROTATION_Y = 7;
+    public static final int X = 8;
+    public static final int Y = 9;
+    public static final int Z = 10;
+    public static final int ALPHA = 11;
+
+    // Keep in sync with enum PaintFields in Animator.h
+    public static final int PAINT_STROKE_WIDTH = 0;
+    public static final int PAINT_ALPHA = 1;
 
     // ViewPropertyAnimator uses a mask for its values, we need to remap them
     // to the enum values here. RenderPropertyAnimator can't use the mask values
@@ -59,8 +65,8 @@ public final class RenderNodeAnimator {
     }};
 
     // Keep in sync DeltaValueType in Animator.h
-    private static final int DELTA_TYPE_ABSOLUTE = 0;
-    private static final int DELTA_TYPE_DELTA = 1;
+    public static final int DELTA_TYPE_ABSOLUTE = 0;
+    public static final int DELTA_TYPE_DELTA = 1;
 
     private RenderNode mTarget;
     private long mNativePtr;
@@ -72,6 +78,19 @@ public final class RenderNodeAnimator {
     public RenderNodeAnimator(int property, int deltaType, float deltaValue) {
         mNativePtr = nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
                 property, deltaType, deltaValue);
+    }
+
+    public RenderNodeAnimator(CanvasProperty<Float> property, int deltaType, float deltaValue) {
+        mNativePtr = nCreateCanvasPropertyFloatAnimator(
+                new WeakReference<RenderNodeAnimator>(this),
+                property.getNativeContainer(), deltaType, deltaValue);
+    }
+
+    public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField,
+            int deltaType, float deltaValue) {
+        mNativePtr = nCreateCanvasPropertyPaintAnimator(
+                new WeakReference<RenderNodeAnimator>(this),
+                property.getNativeContainer(), paintField, deltaType, deltaValue);
     }
 
     public void start(View target) {
@@ -117,6 +136,10 @@ public final class RenderNodeAnimator {
 
     private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
             int property, int deltaValueType, float deltaValue);
+    private static native long nCreateCanvasPropertyFloatAnimator(WeakReference<RenderNodeAnimator> weakThis,
+            long canvasProperty, int deltaValueType, float deltaValue);
+    private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
+            long canvasProperty, int paintField, int deltaValueType, float deltaValue);
     private static native void nSetDuration(long nativePtr, int duration);
     private static native void nUnref(long nativePtr);
 }
