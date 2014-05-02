@@ -20,19 +20,24 @@ import android.Manifest.permission;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
-import android.net.NetworkKey;
 import android.net.NetworkScorerAppManager;
-import android.net.RssiCurve;
 import android.net.ScoredNetwork;
+import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Backing service for {@link android.net.NetworkScoreManager}.
@@ -46,12 +51,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private final Context mContext;
 
-    // TODO: Delete this temporary class once we have a real place for scores.
-    private final Map<NetworkKey, RssiCurve> mScoredNetworks;
+    private final Map<Integer, INetworkScoreCache> mScoreCaches;
 
     public NetworkScoreService(Context context) {
         mContext = context;
-        mScoredNetworks = new HashMap<>();
+        mScoreCaches = new HashMap<>();
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -76,10 +80,31 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     " is not the active scorer.");
         }
 
-        // TODO: Propagate these scores down to the network subsystem layer instead of just holding
-        // them in memory.
+        // Separate networks by type.
+        Map<Integer, List<ScoredNetwork>> networksByType = new HashMap<>();
         for (ScoredNetwork network : networks) {
-            mScoredNetworks.put(network.networkKey, network.rssiCurve);
+            List<ScoredNetwork> networkList = networksByType.get(network.networkKey.type);
+            if (networkList == null) {
+                networkList = new ArrayList<>();
+                networksByType.put(network.networkKey.type, networkList);
+            }
+            networkList.add(network);
+        }
+
+        // Pass the scores of each type down to the appropriate network scorer.
+        for (Map.Entry<Integer, List<ScoredNetwork>> entry : networksByType.entrySet()) {
+            INetworkScoreCache scoreCache = mScoreCaches.get(entry.getKey());
+            if (scoreCache != null) {
+                try {
+                    scoreCache.updateScores(entry.getValue());
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Unable to update scores of type " + entry.getKey(), e);
+                    }
+                }
+            } else if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "No scorer registered for type " + entry.getKey() + ", discarding");
+            }
         }
 
         return true;
@@ -112,8 +137,29 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */
     private void clearInternal() {
-        // TODO: Propagate the flush down to the network subsystem layer.
-        mScoredNetworks.clear();
+        Set<INetworkScoreCache> cachesToClear = getScoreCaches();
+
+        for (INetworkScoreCache scoreCache : cachesToClear) {
+            try {
+                scoreCache.clearScores();
+            } catch (RemoteException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Unable to clear scores", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS, TAG);
+        synchronized (mScoreCaches) {
+            if (mScoreCaches.containsKey(networkType)) {
+                throw new IllegalArgumentException(
+                        "Score cache already registered for type " + networkType);
+            }
+            mScoreCaches.put(networkType, scoreCache);
+        }
     }
 
     @Override
@@ -125,12 +171,28 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             return;
         }
         writer.println("Current scorer: " + currentScorer);
-        if (mScoredNetworks.isEmpty()) {
-            writer.println("No networks scored.");
-        } else {
-            for (Map.Entry<NetworkKey, RssiCurve> entry : mScoredNetworks.entrySet()) {
-                writer.println(entry.getKey() + ": " + entry.getValue());
+
+        for (INetworkScoreCache scoreCache : getScoreCaches()) {
+            try {
+                scoreCache.asBinder().dump(fd, args);
+            } catch (RemoteException e) {
+                writer.println("Unable to dump score cache");
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Unable to dump score cache", e);
+                }
             }
+        }
+    }
+
+    /**
+     * Returns a set of all score caches that are currently active.
+     *
+     * <p>May be used to perform an action on all score caches without potentially strange behavior
+     * if a new scorer is registered during that action's execution.
+     */
+    private Set<INetworkScoreCache> getScoreCaches() {
+        synchronized (mScoreCaches) {
+            return new HashSet<>(mScoreCaches.values());
         }
     }
 }

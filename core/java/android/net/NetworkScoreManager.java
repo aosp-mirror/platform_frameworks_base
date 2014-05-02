@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -101,7 +102,7 @@ public class NetworkScoreManager {
      * determine the current scorer and offer the user the ability to select a different scorer via
      * the {@link #ACTION_CHANGE_ACTIVE} intent.
      * @return the full package name of the current active scorer, or null if there is no active
-     *     scorer.
+     *         scorer.
      */
     public String getActiveScorerPackage() {
         return NetworkScorerAppManager.getActiveScorer(mContext);
@@ -151,8 +152,8 @@ public class NetworkScoreManager {
      *
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
      * @throws SecurityException if the caller does not hold the
-     *      {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission indicating that
-     *      it can manage scorer applications.
+     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission indicating
+     *         that it can manage scorer applications.
      * @hide
      */
     public boolean setActiveScorer(String packageName) throws SecurityException {
@@ -160,6 +161,46 @@ public class NetworkScoreManager {
             return mService.setActiveScorer(packageName);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Request scoring for networks.
+     *
+     * <p>Note that this is just a helper method to assemble the broadcast, and will run in the
+     * calling process.
+     *
+     * @return true if the broadcast was sent, or false if there is no active scorer.
+     * @throws SecurityException if the caller does not hold the
+     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission.
+     * @hide
+     */
+    public boolean requestScores(NetworkKey[] networks) throws SecurityException {
+        String activeScorer = getActiveScorerPackage();
+        if (activeScorer == null) {
+            return false;
+        }
+        Intent intent = new Intent(ACTION_SCORE_NETWORKS);
+        intent.setPackage(activeScorer);
+        intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
+        mContext.sendBroadcast(intent);
+        return true;
+    }
+
+    /**
+     * Register a network score cache.
+     *
+     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
+     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
+     * @throws SecurityException if the caller does not hold the
+     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission.
+     * @throws IllegalArgumentException if a score cache is already registered for this type.
+     * @hide
+     */
+    public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
+        try {
+            mService.registerNetworkScoreCache(networkType, scoreCache);
+        } catch (RemoteException e) {
         }
     }
 }

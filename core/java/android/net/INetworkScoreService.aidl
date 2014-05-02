@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.INetworkScoreCache;
 import android.net.ScoredNetwork;
 
 /**
@@ -34,8 +35,7 @@ interface INetworkScoreService
     /**
      * Clear all scores.
      * @return whether the clear was successful.
-     * @throws SecurityException if the caller is neither the current active scorer nor the scorer
-     * manager.
+     * @throws SecurityException if the caller is neither the current active scorer nor the system.
      */
     boolean clearScores();
 
@@ -43,7 +43,19 @@ interface INetworkScoreService
      * Set the active scorer and clear existing scores.
      * @param packageName the package name of the new scorer to use.
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
-     * @throws SecurityException if the caller is not the scorer manager.
+     * @throws SecurityException if the caller is not the system.
      */
     boolean setActiveScorer(in String packageName);
+
+    /**
+     * Register a network subsystem for scoring.
+     *
+     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
+     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
+     * @throws SecurityException if the caller is not the system.
+     * @throws IllegalArgumentException if a score cache is already registed for this type.
+     * @hide
+     */
+    void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
+
 }
