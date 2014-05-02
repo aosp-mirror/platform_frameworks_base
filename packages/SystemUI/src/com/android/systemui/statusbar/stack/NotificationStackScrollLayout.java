@@ -959,8 +959,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void generateTopPaddingEvent() {
-        mAnimationEvents.add(
-                new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED));
+        if (mTopPaddingNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED));
+        }
         mTopPaddingNeedsAnimation = false;
     }
 

@@ -127,6 +127,7 @@ public class DragDownHelper implements Gefingerpoken {
                         mCallback.setUserLockedChild(mStartingChild, false);
                     }
                     mOnDragDownListener.onDraggedDown(mStartingChild);
+                    mDraggingDown = false;
                 } else {
                     stopDragging();
                     return false;
