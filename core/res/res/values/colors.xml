@@ -71,11 +71,7 @@
     <drawable name="editbox_dropdown_dark_frame">@drawable/editbox_dropdown_background_dark</drawable>
     <drawable name="editbox_dropdown_light_frame">@drawable/editbox_dropdown_background</drawable>
 
-    <drawable name="dialog_holo_dark_frame">@drawable/dialog_full_holo_dark</drawable>
-    <drawable name="dialog_holo_light_frame">@drawable/dialog_full_holo_light</drawable>
-
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
-    <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
     <color name="input_method_navigation_guard">#ff000000</color>
 
     <!-- For date picker widget -->
@@ -122,75 +118,7 @@
     <!-- FaceLock -->
     <color name="facelock_spotlight_mask">#CC000000</color>
 
-    <!-- For holo theme -->
-    <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
-    <drawable name="screen_background_holo_dark">#ff000000</drawable>
-    <color name="background_holo_dark">#ff000000</color>
-    <color name="background_holo_light">#fff3f3f3</color>
-    <color name="bright_foreground_holo_dark">@android:color/background_holo_light</color>
-    <color name="bright_foreground_holo_light">@android:color/background_holo_dark</color>
-    <color name="bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
-    <color name="bright_foreground_disabled_holo_light">#ffb2b2b2</color>
-    <color name="bright_foreground_inverse_holo_dark">@android:color/bright_foreground_holo_light</color>
-    <color name="bright_foreground_inverse_holo_light">@android:color/bright_foreground_holo_dark</color>
-    <color name="dim_foreground_holo_dark">#bebebe</color>
-    <color name="dim_foreground_disabled_holo_dark">#80bebebe</color>
-    <color name="dim_foreground_inverse_holo_dark">#323232</color>
-    <color name="dim_foreground_inverse_disabled_holo_dark">#80323232</color>
-    <color name="hint_foreground_holo_dark">#808080</color>
-    <color name="dim_foreground_holo_light">#323232</color>
-    <color name="dim_foreground_disabled_holo_light">#80323232</color>
-    <color name="dim_foreground_inverse_holo_light">#bebebe</color>
-    <color name="dim_foreground_inverse_disabled_holo_light">#80bebebe</color>
-    <color name="hint_foreground_holo_light">#808080</color>
-    <color name="highlighted_text_holo_dark">#6633b5e5</color>
-    <color name="highlighted_text_holo_light">#6633b5e5</color>
-    <color name="link_text_holo_dark">#5c5cff</color>
-    <color name="link_text_holo_light">#0000ee</color>
-
     <color name="micro_text_light">#434343</color>
-
-    <!-- Group buttons -->
-    <eat-comment />
-    <color name="group_button_dialog_pressed_holo_dark">#46c5c1ff</color>
-    <color name="group_button_dialog_focused_holo_dark">#2699cc00</color>
-
-    <color name="group_button_dialog_pressed_holo_light">#ffffffff</color>
-    <color name="group_button_dialog_focused_holo_light">#4699cc00</color>
-
-    <!-- Highlight colors for the legacy themes -->
-    <eat-comment />
-    <color name="legacy_pressed_highlight">#fffeaa0c</color>
-    <color name="legacy_selected_highlight">#fff17a0a</color>
-    <color name="legacy_long_pressed_highlight">#ffffffff</color>
-
-    <!-- General purpose colors for Holo-themed elements -->
-    <eat-comment />
-
-    <!-- A light Holo shade of blue -->
-    <color name="holo_blue_light">#ff33b5e5</color>
-    <!-- A light Holo shade of gray -->
-    <color name="holo_gray_light">#33999999</color>
-    <!-- A light Holo shade of green -->
-    <color name="holo_green_light">#ff99cc00</color>
-    <!-- A light Holo shade of red -->
-    <color name="holo_red_light">#ffff4444</color>
-    <!-- A dark Holo shade of blue -->
-    <color name="holo_blue_dark">#ff0099cc</color>
-    <!-- A dark Holo shade of green -->
-    <color name="holo_green_dark">#ff669900</color>
-    <!-- A dark Holo shade of red -->
-    <color name="holo_red_dark">#ffcc0000</color>
-    <!-- A Holo shade of purple -->
-    <color name="holo_purple">#ffaa66cc</color>
-    <!-- A light Holo shade of orange -->
-    <color name="holo_orange_light">#ffffbb33</color>
-    <!-- A dark Holo shade of orange -->
-    <color name="holo_orange_dark">#ffff8800</color>
-    <!-- A really bright Holo shade of blue -->
-    <color name="holo_blue_bright">#ff00ddff</color>
-    <!-- A really bright Holo shade of gray -->
-    <color name="holo_gray_bright">#33CCCCCC</color>
 
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
@@ -205,22 +133,6 @@
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
     <color name="accessibility_focus_highlight">#80ffff00</color>
-
-    <!-- New TimePicker colors -->
-    <color name="timepicker_default_background_holo_light">@android:color/white</color>
-    <color name="timepicker_default_background_holo_dark">#ff303030</color>
-
-    <color name="timepicker_default_text_color_holo_light">#8c8c8c</color>
-    <color name="timepicker_default_text_color_holo_dark">@android:color/white</color>
-
-    <color name="timepicker_default_disabled_color_holo_light">#7f000000</color>
-    <color name="timepicker_default_disabled_color_holo_dark">#7f08c8c8</color>
-
-    <color name="timepicker_default_ampm_selected_background_color_holo_light">@android:color/holo_blue_light</color>
-    <color name="timepicker_default_ampm_selected_background_color_holo_dark">@android:color/holo_blue_light</color>
-
-    <color name="timepicker_default_ampm_unselected_background_color_holo_light">@android:color/white</color>
-    <color name="timepicker_default_ampm_unselected_background_color_holo_dark">@android:color/transparent</color>
 
 </resources>
 
