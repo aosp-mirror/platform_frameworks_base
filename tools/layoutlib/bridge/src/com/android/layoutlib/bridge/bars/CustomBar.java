@@ -25,6 +25,7 @@ import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.Density;
+import com.android.resources.LayoutDirection;
 import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -86,24 +87,34 @@ abstract class CustomBar extends LinearLayout {
         }
     }
 
-    private InputStream getIcon(String iconName, Density[] densityInOut, String[] pathOut,
-            boolean tryOtherDensities) {
+    private InputStream getIcon(String iconName, Density[] densityInOut, LayoutDirection direction, 
+            String[] pathOut, boolean tryOtherDensities) {
         // current density
         Density density = densityInOut[0];
 
         // bitmap url relative to this class
-        pathOut[0] = "/bars/" + density.getResourceValue() + "/" + iconName;
+        if (direction != null) {
+            pathOut[0] = "/bars/" + direction.getResourceValue() + "-" + density.getResourceValue()
+                    + "/" + iconName;
+        } else {
+            pathOut[0] = "/bars/" + density.getResourceValue() + "/" + iconName;
+        }
 
         InputStream stream = getClass().getResourceAsStream(pathOut[0]);
         if (stream == null && tryOtherDensities) {
             for (Density d : Density.values()) {
                 if (d != density) {
                     densityInOut[0] = d;
-                    stream = getIcon(iconName, densityInOut, pathOut, false /*tryOtherDensities*/);
+                    stream = getIcon(iconName, densityInOut, direction, pathOut,
+                            false /*tryOtherDensities*/);
                     if (stream != null) {
                         return stream;
                     }
                 }
+            }
+            // couldn't find resource with direction qualifier. try without.
+            if (direction != null) {
+                return getIcon(iconName, densityInOut, null, pathOut, true);
             }
         }
 
@@ -111,13 +122,18 @@ abstract class CustomBar extends LinearLayout {
     }
 
     protected void loadIcon(int index, String iconName, Density density) {
+        loadIcon(index, iconName, density, false);
+    }
+
+    protected void loadIcon(int index, String iconName, Density density, boolean isRtl) {
         View child = getChildAt(index);
         if (child instanceof ImageView) {
             ImageView imageView = (ImageView) child;
 
             String[] pathOut = new String[1];
             Density[] densityInOut = new Density[] { density };
-            InputStream stream = getIcon(iconName, densityInOut, pathOut,
+            LayoutDirection dir = isRtl ? LayoutDirection.RTL : LayoutDirection.LTR;
+            InputStream stream = getIcon(iconName, densityInOut, dir, pathOut,
                     true /*tryOtherDensities*/);
             density = densityInOut[0];
 
