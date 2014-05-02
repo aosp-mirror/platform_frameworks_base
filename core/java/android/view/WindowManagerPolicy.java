@@ -443,8 +443,6 @@ public interface WindowManagerPolicy {
     public final int OFF_BECAUSE_OF_USER = 2;
     /** Screen turned off because of timeout */
     public final int OFF_BECAUSE_OF_TIMEOUT = 3;
-    /** Screen turned off because of proximity sensor */
-    public final int OFF_BECAUSE_OF_PROX_SENSOR = 4;
 
     /** @hide */
     @IntDef({USER_ROTATION_FREE, USER_ROTATION_LOCKED})
@@ -900,23 +898,23 @@ public interface WindowManagerPolicy {
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus);
     
     /**
-     * Called after the screen turns off.
+     * Called when the device is going to sleep.
      *
      * @param why {@link #OFF_BECAUSE_OF_USER} or
      * {@link #OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void screenTurnedOff(int why);
+    public void goingToSleep(int why);
 
     public interface ScreenOnListener {
         void onScreenOn();
     }
 
     /**
-     * Called when the power manager would like to turn the screen on.
+     * Called when the device is waking up.
      * Must call back on the listener to tell it when the higher-level system
      * is ready for the screen to go on (i.e. the lock screen is shown).
      */
-    public void screenTurningOn(ScreenOnListener screenOnListener);
+    public void wakingUp(ScreenOnListener screenOnListener);
 
     /**
      * Return whether the screen is about to turn on or is currently on.

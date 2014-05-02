@@ -542,9 +542,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER},
-     *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
-     *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
+     * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
+     *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onScreenTurnedOff(int why) {
         synchronized (this) {
@@ -576,8 +575,6 @@ public class KeyguardViewMediator extends SystemUI {
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 doKeyguardLaterLocked();
-            } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
-                // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
                 doKeyguardLocked(null);
             }
