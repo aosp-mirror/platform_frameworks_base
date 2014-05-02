@@ -20,7 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -39,9 +38,14 @@ public class TrustAgentWrapper {
     private static final boolean DEBUG = false;
     private static final String TAG = "TrustAgentWrapper";
 
-    private static final int MSG_ENABLE_TRUST = 1;
+    private static final int MSG_GRANT_TRUST = 1;
     private static final int MSG_REVOKE_TRUST = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
+
+    /**
+     * Long extra for {@link #MSG_GRANT_TRUST}
+     */
+    private static final String DATA_DURATION = "duration";
 
     private final TrustManagerService mTrustManagerService;
     private final int mUserId;
@@ -58,19 +62,32 @@ public class TrustAgentWrapper {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ENABLE_TRUST:
+                case MSG_GRANT_TRUST:
                     mTrusted = true;
                     mMessage = (CharSequence) msg.obj;
                     boolean initiatedByUser = msg.arg1 != 0;
-                    // TODO: Handle handle user initiated trust changes.
+                    // TODO: Handle initiatedByUser.
+                    long durationMs = msg.getData().getLong(DATA_DURATION);
+                    if (durationMs > 0) {
+                        mHandler.removeMessages(MSG_TRUST_TIMEOUT);
+                        mHandler.sendEmptyMessageDelayed(MSG_TRUST_TIMEOUT, durationMs);
+                    }
+                    mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
+                            (mMessage != null ? mMessage.toString() : null),
+                            durationMs, initiatedByUser);
                     mTrustManagerService.updateTrust(mUserId);
                     break;
                 case MSG_TRUST_TIMEOUT:
                     if (DEBUG) Slog.v(TAG, "Trust timed out : " + mName.flattenToShortString());
+                    mTrustManagerService.mArchive.logTrustTimeout(mUserId, mName);
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
                     mMessage = null;
+                    mHandler.removeMessages(MSG_TRUST_TIMEOUT);
+                    if (msg.what == MSG_REVOKE_TRUST) {
+                        mTrustManagerService.mArchive.logRevokeTrust(mUserId, mName);
+                    }
                     mTrustManagerService.updateTrust(mUserId);
                     break;
             }
@@ -84,12 +101,10 @@ public class TrustAgentWrapper {
             if (DEBUG) Slog.v(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
                         + ", initiatedByUser = " + initiatedByUser + ")");
 
-            mHandler.obtainMessage(MSG_ENABLE_TRUST, initiatedByUser ? 1 : 0, 0, userMessage)
-                    .sendToTarget();
-            if (durationMs > 0) {
-                mHandler.removeMessages(MSG_TRUST_TIMEOUT);
-                mHandler.sendEmptyMessageDelayed(MSG_TRUST_TIMEOUT, durationMs);
-            }
+            Message msg = mHandler.obtainMessage(
+                    MSG_GRANT_TRUST, initiatedByUser ? 1 : 0, 0, userMessage);
+            msg.getData().putLong(DATA_DURATION, durationMs);
+            msg.sendToTarget();
         }
 
         @Override
@@ -111,6 +126,7 @@ public class TrustAgentWrapper {
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.v(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
             mTrustAgentService = null;
+            mTrustManagerService.mArchive.logAgentDied(mUserId, name);
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
         }
     };
@@ -164,5 +180,9 @@ public class TrustAgentWrapper {
     public void unbind() {
         if (DEBUG) Log.v(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
         mContext.unbindService(mConnection);
+    }
+
+    public boolean isConnected() {
+        return mTrustAgentService != null;
     }
 }
