@@ -192,8 +192,9 @@ public interface CameraDevice extends AutoCloseable {
      *
      * <p>The camera device will query each Surface's size and formats upon this
      * call, so they must be set to a valid setting at this time (in particular:
-     * if the format is user-visible, it must be one of android.scaler.availableFormats;
-     * and the size must be one of android.scaler.available[Processed|Jpeg]Sizes).</p>
+     * if the format is user-visible, it must be one of
+     * {@link StreamConfigurationMap#getOutputFormats}; and the size must be one of
+     * {@link StreamConfigurationMap#getOutputSizes(int)}).</p>
      *
      * <p>When this method is called with valid Surfaces, the device will transition to the {@link
      * StateListener#onBusy busy state}. Once configuration is complete, the device will transition
@@ -239,6 +240,9 @@ public interface CameraDevice extends AutoCloseable {
      * @see StateListener#onUnconfigured
      * @see #stopRepeating
      * @see #flush
+     * @see StreamConfigurationMap#getOutputFormats()
+     * @see StreamConfigurationMap#getOutputSizes(int)
+     * @see StreamConfigurationMap#getOutputSizes(Class)
      */
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
 
