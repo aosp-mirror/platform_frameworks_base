@@ -576,7 +576,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
     }
 
     public int getActionBarHideOffset() {
-        return -((int) mActionBarTop.getTranslationY());
+        return mActionBarTop != null ? -((int) mActionBarTop.getTranslationY()) : 0;
     }
 
     public void setActionBarHideOffset(int offset) {
