@@ -239,7 +239,7 @@ public class RenderNode {
      * @see #isValid()
      */
     public HardwareCanvas start(int width, int height) {
-        HardwareCanvas canvas = GLES20RecordingCanvas.obtain();
+        HardwareCanvas canvas = GLES20RecordingCanvas.obtain(this);
         canvas.setViewport(width, height);
         // The dirty rect should always be null for a display list
         canvas.onPreDraw(null);

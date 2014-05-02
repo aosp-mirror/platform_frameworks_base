@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.SparseIntArray;
@@ -98,6 +99,15 @@ public final class RenderNodeAnimator {
         mTarget.addAnimator(this);
         // Kick off a frame to start the process
         target.invalidateViewProperty(true, false);
+    }
+
+    public void start(Canvas canvas) {
+        if (!(canvas instanceof GLES20RecordingCanvas)) {
+            throw new IllegalArgumentException("Not a GLES20RecordingCanvas");
+        }
+        GLES20RecordingCanvas recordingCanvas = (GLES20RecordingCanvas) canvas;
+        mTarget = recordingCanvas.mNode;
+        mTarget.addAnimator(this);
     }
 
     public void cancel() {
