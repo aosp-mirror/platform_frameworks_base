@@ -33,6 +33,10 @@
         <item name="android:paddingLeft">20dp</item>
         <item name="android:paddingRight">6dp</item>
     </style>
+    <style name="Widget.Button.NumPadKey.Sim" >
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
     <style name="TextAppearance.NumPadKey"
             parent="@android:style/TextAppearance">
         <item name="android:textSize">34dp</item>
