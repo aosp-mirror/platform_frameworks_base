@@ -53,6 +53,7 @@ include $(BUILD_SYSTEM)/base_rules.mk
 $(LOCAL_BUILT_MODULE): $(built_core_dep) \
                        $(built_framework_dep) \
                        $(built_ext_dep) \
+                       $(built_ext_data) \
                        $(built_layoutlib_create_jar)
 	$(hide) echo "host layoutlib_create: $@"
 	$(hide) mkdir -p $(dir $@)
