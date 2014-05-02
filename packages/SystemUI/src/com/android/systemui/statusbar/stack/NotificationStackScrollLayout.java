@@ -757,7 +757,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int getMaxExpandHeight(View view) {
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            return row.getMaximumAllowedExpandHeight();
+            return row.getIntrinsicHeight();
         }
         return view.getHeight();
     }
@@ -777,7 +777,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 if (child instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                    height += row.getMaximumAllowedExpandHeight();
+                    height += row.getIntrinsicHeight();
                 } else if (child instanceof ExpandableView) {
                     ExpandableView expandableView = (ExpandableView) child;
                     height += expandableView.getActualHeight();
