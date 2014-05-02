@@ -59,7 +59,7 @@ public:
     void destroyCanvasAndSurface();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
-    virtual void doFrame(nsecs_t frameTimeNanos);
+    virtual void doFrame();
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 

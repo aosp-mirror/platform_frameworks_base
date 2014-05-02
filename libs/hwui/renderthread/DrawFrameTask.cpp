@@ -30,13 +30,17 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-DrawFrameTask::DrawFrameTask() : mContext(0) {
+DrawFrameTask::DrawFrameTask()
+        : mRenderThread(NULL)
+        , mContext(NULL)
+        , mFrameTimeNanos(NULL) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
 }
 
-void DrawFrameTask::setContext(CanvasContext* context) {
+void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context) {
+    mRenderThread = thread;
     mContext = context;
 }
 
@@ -59,18 +63,20 @@ void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
     mDirty.set(left, top, right, bottom);
 }
 
-void DrawFrameTask::drawFrame(RenderThread* renderThread) {
+void DrawFrameTask::drawFrame(nsecs_t frameTimeNanos) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
-    postAndWait(renderThread);
+    mFrameTimeNanos = frameTimeNanos;
+    postAndWait();
 
     // Reset the single-frame data
+    mFrameTimeNanos = 0;
     mDirty.setEmpty();
 }
 
-void DrawFrameTask::postAndWait(RenderThread* renderThread) {
+void DrawFrameTask::postAndWait() {
     AutoMutex _lock(mLock);
-    renderThread->queue(this);
+    mRenderThread->queue(this);
     mSignal.wait(mLock);
 }
 
@@ -99,13 +105,11 @@ static void initTreeInfo(TreeInfo& info) {
     info.prepareTextures = true;
     info.performStagingPush = true;
     info.evaluateAnimations = true;
-    // TODO: Get this from Choreographer
-    nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
-    info.frameTimeMs = nanoseconds_to_milliseconds(frameTimeNs);
 }
 
 bool DrawFrameTask::syncFrameState() {
     ATRACE_CALL();
+    mRenderThread->timeLord().vsyncReceived(mFrameTimeNanos);
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
     TreeInfo info;

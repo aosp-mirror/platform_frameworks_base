@@ -59,7 +59,8 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		renderthread/DrawFrameTask.cpp \
 		renderthread/RenderProxy.cpp \
 		renderthread/RenderTask.cpp \
-		renderthread/RenderThread.cpp
+		renderthread/RenderThread.cpp \
+		renderthread/TimeLord.cpp
 
 	intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 

@@ -129,8 +129,7 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
         , mDisplayEventReceiver(0)
         , mVsyncRequested(false)
         , mFrameCallbackTaskPending(false)
-        , mFrameCallbackTask(0)
-        , mFrameTime(0) {
+        , mFrameCallbackTask(0) {
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");
@@ -193,7 +192,7 @@ void RenderThread::drainDisplayEventQueue() {
     nsecs_t vsyncEvent = latestVsyncEvent(mDisplayEventReceiver);
     if (vsyncEvent > 0) {
         mVsyncRequested = false;
-        mFrameTime = vsyncEvent;
+        mTimeLord.vsyncReceived(vsyncEvent);
         if (!mFrameCallbackTaskPending) {
             mFrameCallbackTaskPending = true;
             //queueDelayed(mFrameCallbackTask, DISPATCH_FRAME_CALLBACKS_DELAY);
@@ -209,7 +208,7 @@ void RenderThread::dispatchFrameCallbacks() {
     mFrameCallbacks.swap(callbacks);
 
     for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
-        (*it)->doFrame(mFrameTime);
+        (*it)->doFrame();
     }
 }
 

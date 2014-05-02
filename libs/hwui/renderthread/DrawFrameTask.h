@@ -48,30 +48,32 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(CanvasContext* context);
+    void setContext(RenderThread* thread, CanvasContext* context);
 
     void addLayer(DeferredLayerUpdater* layer);
     void removeLayer(DeferredLayerUpdater* layer);
 
     void setDirty(int left, int top, int right, int bottom);
-    void drawFrame(RenderThread* renderThread);
+    void drawFrame(nsecs_t frameTimeNanos);
 
     virtual void run();
 
 private:
-    void postAndWait(RenderThread* renderThread);
+    void postAndWait();
     bool syncFrameState();
     void unblockUiThread();
 
     Mutex mLock;
     Condition mSignal;
 
+    RenderThread* mRenderThread;
     CanvasContext* mContext;
 
     /*********************************************
      *  Single frame data
      *********************************************/
     Rect mDirty;
+    nsecs_t mFrameTimeNanos;
 
     /*********************************************
      *  Multi frame data
