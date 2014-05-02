@@ -7070,8 +7070,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     final ArrayList<ActivityRecord> activities = tr.mActivities;
                     int activityNdx;
                     final int numActivities = activities.size();
-                    for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
-                            ++activityNdx) {
+                    for (activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
                         final ActivityRecord r = activities.get(activityNdx);
                         if (r.intent != null &&
                                 (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
@@ -7079,14 +7078,34 @@ public final class ActivityManagerService extends ActivityManagerNative
                             break;
                         }
                     }
-                    // Traverse downwards starting below break looking for set label and icon.
-                    for (--activityNdx; activityNdx >= 0; --activityNdx) {
-                        final ActivityRecord r = activities.get(activityNdx);
-                        if (r.activityLabel != null || r.activityIcon != null) {
-                            rti.activityLabel = r.activityLabel;
-                            rti.activityIcon = r.activityIcon;
-                            break;
+                    if (activityNdx > 0) {
+                        // Traverse downwards starting below break looking for set label, icon.
+                        // Note that if there are activities in the task but none of them set the
+                        // recent activity values, then we do not fall back to the last set
+                        // values in the TaskRecord.
+                        rti.activityValues = new ActivityManager.RecentsActivityValues();
+                        for (--activityNdx; activityNdx >= 0; --activityNdx) {
+                            final ActivityRecord r = activities.get(activityNdx);
+                            if (r.activityValues != null) {
+                                if (rti.activityValues.label == null) {
+                                    rti.activityValues.label = r.activityValues.label;
+                                    tr.lastActivityValues.label = r.activityValues.label;
+                                }
+                                if (rti.activityValues.icon == null) {
+                                    rti.activityValues.icon = r.activityValues.icon;
+                                    tr.lastActivityValues.icon = r.activityValues.icon;
+                                }
+                                if (rti.activityValues.colorPrimary == 0) {
+                                    rti.activityValues.colorPrimary = r.activityValues.colorPrimary;
+                                    tr.lastActivityValues.colorPrimary = r.activityValues.colorPrimary;
+                                }
+                            }
                         }
+                    } else {
+                        // If there are no activity records in this task, then we use the last
+                        // resolved values
+                        rti.activityValues =
+                                new ActivityManager.RecentsActivityValues(tr.lastActivityValues);
                     }
 
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
@@ -7154,13 +7173,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setActivityLabelAndIcon(IBinder token, CharSequence activityLabel,
-            Bitmap activityIcon) {
+    public void setRecentsActivityValues(IBinder token, ActivityManager.RecentsActivityValues rav) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.activityLabel = activityLabel.toString();
-                r.activityIcon = activityIcon;
+                r.activityValues = rav;
             }
         }
     }

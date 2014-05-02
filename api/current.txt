@@ -3316,7 +3316,6 @@ package android.app {
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setActionBar(android.widget.Toolbar);
-    method public void setActivityLabelAndIcon(java.lang.CharSequence, android.graphics.Bitmap);
     method public void setActivityTransitionListener(android.app.ActivityOptions.ActivityTransitionListener);
     method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
@@ -3334,6 +3333,7 @@ package android.app {
     method public final void setProgressBarIndeterminate(boolean);
     method public final void setProgressBarIndeterminateVisibility(boolean);
     method public final void setProgressBarVisibility(boolean);
+    method public void setRecentsActivityValues(android.app.ActivityManager.RecentsActivityValues);
     method public void setRequestedOrientation(int);
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
@@ -3454,13 +3454,27 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public android.graphics.Bitmap activityIcon;
-    field public java.lang.CharSequence activityLabel;
+    field public android.app.ActivityManager.RecentsActivityValues activityValues;
     field public android.content.Intent baseIntent;
     field public java.lang.CharSequence description;
     field public int id;
     field public android.content.ComponentName origActivity;
     field public int persistentId;
+  }
+
+  public static class ActivityManager.RecentsActivityValues implements android.os.Parcelable {
+    ctor public ActivityManager.RecentsActivityValues(android.app.ActivityManager.RecentsActivityValues);
+    ctor public ActivityManager.RecentsActivityValues(java.lang.CharSequence, android.graphics.Bitmap, int);
+    ctor public ActivityManager.RecentsActivityValues(java.lang.CharSequence, android.graphics.Bitmap);
+    ctor public ActivityManager.RecentsActivityValues(java.lang.CharSequence);
+    ctor public ActivityManager.RecentsActivityValues();
+    method public int describeContents();
+    method public void readFromParcel(android.os.Parcel);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public int colorPrimary;
+    field public android.graphics.Bitmap icon;
+    field public java.lang.CharSequence label;
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {

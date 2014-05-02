@@ -3493,6 +3493,16 @@ public class Activity extends ContextThemeWrapper
             }
             theme.applyStyle(resid, false);
         }
+
+        // Get the primary color and update the RecentsActivityValues for this activity
+        TypedArray a = getTheme().obtainStyledAttributes(com.android.internal.R.styleable.Theme);
+        int colorPrimary = a.getColor(com.android.internal.R.styleable.Theme_colorPrimary, 0);
+        a.recycle();
+        if (colorPrimary != 0) {
+            ActivityManager.RecentsActivityValues v = new ActivityManager.RecentsActivityValues();
+            v.colorPrimary = colorPrimary;
+            setRecentsActivityValues(v);
+        }
     }
 
     /**
@@ -4779,31 +4789,26 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Set a label and icon to be used in the Recents task display. When {@link
-     * ActivityManager#getRecentTasks} is called, the activities of each task are
-     * traversed in order from the topmost activity to the bottommost. As soon as one activity is
-     * found with either a non-null label or a non-null icon set by this call the traversal is
-     * ended. For each task those values will be returned in {@link
-     * ActivityManager.RecentTaskInfo#activityLabel} and {@link
-     * ActivityManager.RecentTaskInfo#activityIcon}.
+     * Sets information describing this Activity for presentation inside the Recents System UI. When
+     * {@link ActivityManager#getRecentTasks} is called, the activities of each task are
+     * traversed in order from the topmost activity to the bottommost. The traversal continues for
+     * each property until a suitable value is found. For each task those values will be returned in
+     * {@link android.app.ActivityManager.RecentsActivityValues}.
      *
      * @see ActivityManager#getRecentTasks
-     * @see ActivityManager.RecentTaskInfo
+     * @see android.app.ActivityManager.RecentsActivityValues
      *
-     * @param activityLabel The label to use in the RecentTaskInfo.
-     * @param activityIcon The Bitmap to use in the RecentTaskInfo.
+     * @param values The Recents values that describe this activity.
      */
-    public void setActivityLabelAndIcon(CharSequence activityLabel, Bitmap activityIcon) {
-        final Bitmap scaledIcon;
-        if (activityIcon != null) {
+    public void setRecentsActivityValues(ActivityManager.RecentsActivityValues values) {
+        ActivityManager.RecentsActivityValues activityValues =
+                new ActivityManager.RecentsActivityValues(values);
+        if (values.icon != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-            scaledIcon = Bitmap.createScaledBitmap(activityIcon, size, size, true);
-        } else {
-            scaledIcon = null;
+            activityValues.icon = Bitmap.createScaledBitmap(values.icon, size, size, true);
         }
         try {
-            ActivityManagerNative.getDefault().setActivityLabelAndIcon(mToken, activityLabel,
-                    scaledIcon);
+            ActivityManagerNative.getDefault().setRecentsActivityValues(mToken, activityValues);
         } catch (RemoteException e) {
         }
     }

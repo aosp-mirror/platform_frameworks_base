@@ -435,8 +435,8 @@ public interface IActivityManager extends IInterface {
     public boolean isInLockTaskMode() throws RemoteException;
 
     /** @hide */
-    public void setActivityLabelAndIcon(IBinder token, CharSequence activityLabel,
-            Bitmap activityBitmap) throws RemoteException;
+    public void setRecentsActivityValues(IBinder token, ActivityManager.RecentsActivityValues values)
+            throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -734,6 +734,6 @@ public interface IActivityManager extends IInterface {
     int START_LOCK_TASK_BY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+214;
     int STOP_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+215;
     int IS_IN_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+216;
-    int SET_ACTIVITY_LABEL_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
+    int SET_RECENTS_ACTIVITY_VALUES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
     int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
 }
