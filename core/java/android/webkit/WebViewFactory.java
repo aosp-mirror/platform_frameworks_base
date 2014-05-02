@@ -37,17 +37,6 @@ public final class WebViewFactory {
 
     private static final boolean DEBUG = false;
 
-    private static class Preloader {
-        static WebViewFactoryProvider sPreloadedProvider;
-        static {
-            try {
-                sPreloadedProvider = getFactoryClass().newInstance();
-            } catch (Exception e) {
-                Log.w(LOGTAG, "error preloading provider", e);
-            }
-        }
-    }
-
     // Cache the factory both for efficiency, and ensure any one process gets all webviews from the
     // same provider.
     private static WebViewFactoryProvider sProviderInstance;
@@ -67,15 +56,6 @@ public final class WebViewFactory {
                 throw new AndroidRuntimeException(e);
             }
 
-            // This implicitly loads Preloader even if it wasn't preloaded at boot.
-            if (Preloader.sPreloadedProvider != null &&
-                Preloader.sPreloadedProvider.getClass() == providerClass) {
-                sProviderInstance = Preloader.sPreloadedProvider;
-                if (DEBUG) Log.v(LOGTAG, "Using preloaded provider: " + sProviderInstance);
-                return sProviderInstance;
-            }
-
-            // The preloaded provider isn't the one we wanted; construct our own.
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             try {
                 sProviderInstance = providerClass.newInstance();
