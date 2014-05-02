@@ -15186,8 +15186,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // it when computing the final cached adj later.  Note that we don't need to
         // worry about this for max adj above, since max adj will always be used to
         // keep it out of the cached vaues.
-        adj = app.modifyRawOomAdj(adj);
-
+        app.curAdj = app.modifyRawOomAdj(adj);
+        app.curSchedGroup = schedGroup;
         app.curProcState = procState;
         app.foregroundActivities = foregroundActivities;
 
