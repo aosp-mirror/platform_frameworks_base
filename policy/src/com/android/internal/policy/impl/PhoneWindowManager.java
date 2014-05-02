@@ -668,7 +668,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void interceptPowerKeyDown(boolean handled) {
         mPowerKeyHandled = handled;
         if (!handled) {
-            mHandler.postDelayed(mPowerLongPress, ViewConfiguration.getGlobalActionKeyTimeout());
+            mHandler.postDelayed(mPowerLongPress,
+                    ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
         }
     }
 
@@ -707,9 +708,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate.isShowing()) {
             // Double the time it takes to take a screenshot from the keyguard
             return (long) (KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER *
-                    ViewConfiguration.getGlobalActionKeyTimeout());
+                    ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
         }
-        return ViewConfiguration.getGlobalActionKeyTimeout();
+        return ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout();
     }
 
     private void cancelPendingScreenshotChordAction() {

@@ -234,6 +234,7 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
+    private final long mGlobalActionsKeyTimeout;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -261,6 +262,7 @@ public class ViewConfiguration {
         mOverscrollDistance = OVERSCROLL_DISTANCE;
         mOverflingDistance = OVERFLING_DISTANCE;
         mFadingMarqueeEnabled = true;
+        mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
     }
 
     /**
@@ -342,6 +344,8 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_viewMinFlingVelocity);
         mMaximumFlingVelocity = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewMaxFlingVelocity);
+        mGlobalActionsKeyTimeout = res.getInteger(
+                com.android.internal.R.integer.config_globalActionsKeyTimeout);
     }
 
     /**
@@ -698,9 +702,21 @@ public class ViewConfiguration {
      *
      * @return how long a user needs to press the relevant key to bring up
      *   the global actions dialog.
+     * @deprecated use getDeviceGlobalActionKeyTimeout
      */
     public static long getGlobalActionKeyTimeout() {
         return GLOBAL_ACTIONS_KEY_TIMEOUT;
+    }
+
+    /**
+     * The amount of time a user needs to press the relevant key to bring up
+     * the global actions dialog.
+     *
+     * @return how long a user needs to press the relevant key to bring up
+     *   the global actions dialog.
+     */
+    public long getDeviceGlobalActionKeyTimeout() {
+        return mGlobalActionsKeyTimeout;
     }
 
     /**
