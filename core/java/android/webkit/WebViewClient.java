@@ -224,8 +224,6 @@ public class WebViewClient {
      * @param view The WebView that is initiating the callback
      * @param request An instance of a {@link ClientCertRequest}
      *
-     * TODO(sgurun) unhide
-     * @hide
      */
     public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
         request.cancel();
