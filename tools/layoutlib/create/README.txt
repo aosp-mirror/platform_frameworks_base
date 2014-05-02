@@ -169,9 +169,9 @@ This is the easiest: we currently inject the following classes:
   their return value.
 - CreateInfo class, which configured the generator. Not used yet, but could
   in theory help us track what the generator changed.
-- AutoCloseable is part of Java 7. To enable us to still run on Java 6, a new class is
-  injected. The implementation for the class has been taken from Android's libcore
-  (platform/libcore/luni/src/main/java/java/lang/AutoCloseable.java).
+- AutoCloseable and Objects are part of Java 7. To enable us to still run on Java 6, new
+  classes are injected. The implementation for these classes has been taken from
+  Android's libcore (platform/libcore/luni/src/main/java/java/...).
 - Charsets, IntegralToString and UnsafeByteSequence are not part of the standard JAVA VM.
   They are added to the Dalvik VM for performance reasons. An implementation that is very
   close to the original (which is at platform/libcore/luni/src/main/java/...) is injected.
