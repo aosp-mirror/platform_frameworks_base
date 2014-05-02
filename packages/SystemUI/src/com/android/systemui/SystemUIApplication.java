@@ -65,6 +65,8 @@ public class SystemUIApplication extends Application {
         // the theme set there.
         setTheme(R.style.systemui_theme);
 
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -80,7 +82,7 @@ public class SystemUIApplication extends Application {
                     }
                 }
             }
-        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        }, filter);
     }
 
     /**
