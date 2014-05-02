@@ -59,11 +59,10 @@ interface IBatteryStats {
     void noteVibratorOff(int uid);
     void noteStartGps(int uid);
     void noteStopGps(int uid);
-    void noteScreenOn();
+    void noteScreenState(int state);
     void noteScreenBrightness(int brightness);
-    void noteScreenOff();
-    void noteInputEvent();
     void noteUserActivity(int uid, int event);
+    void noteInteractive(boolean interactive);
     void noteMobileRadioPowerState(int powerState, long timestampNs);
     void notePhoneOn();
     void notePhoneOff();

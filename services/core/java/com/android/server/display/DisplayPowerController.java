@@ -393,11 +393,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Initialize screen state for battery stats.
         try {
-            if (mPowerState.getScreenState() != Display.STATE_OFF) {
-                mBatteryStats.noteScreenOn();
-            } else {
-                mBatteryStats.noteScreenOff();
-            }
+            mBatteryStats.noteScreenState(mPowerState.getScreenState());
             mBatteryStats.noteScreenBrightness(mPowerState.getScreenBrightness());
         } catch (RemoteException ex) {
             // same process
@@ -641,11 +637,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPowerState.getScreenState() != state) {
             mPowerState.setScreenState(state);
             try {
-                if (state != Display.STATE_OFF) {
-                    mBatteryStats.noteScreenOn();
-                } else {
-                    mBatteryStats.noteScreenOff();
-                }
+                mBatteryStats.noteScreenState(state);
             } catch (RemoteException ex) {
                 // same process
             }
