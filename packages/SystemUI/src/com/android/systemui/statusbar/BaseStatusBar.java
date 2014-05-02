@@ -167,7 +167,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mZenMode;
 
-    protected boolean mOnKeyguard;
+    /**
+     * The {@link StatusBarState} of the status bar.
+     */
+    protected int mState;
+
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
 
     public boolean isDeviceProvisioned() {
@@ -1057,9 +1061,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
         int n = mNotificationData.size();
         int visibleNotifications = 0;
+        boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (mOnKeyguard) {
+            if (onKeyguard) {
                 entry.row.setExpansionDisabled(true);
             } else {
                 entry.row.setExpansionDisabled(false);
@@ -1068,10 +1073,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setSystemExpanded(top);
                 }
             }
-            entry.row.setDimmed(mOnKeyguard);
-            entry.row.setLocked(mOnKeyguard);
+            entry.row.setDimmed(onKeyguard);
+            entry.row.setLocked(onKeyguard);
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
-            if (mOnKeyguard && (visibleNotifications >= maxKeyguardNotifications
+            if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
                     || !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
                 if (showOnKeyguard) {
@@ -1087,7 +1092,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        if (mOnKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
+        if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
             mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);

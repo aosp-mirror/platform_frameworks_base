@@ -268,4 +268,7 @@
     <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>
 
     <dimen name="notifications_top_padding">8dp</dimen>
+    
+    <!-- Minimum distance the user has to drag down to go to the full shade. -->
+    <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 </resources>

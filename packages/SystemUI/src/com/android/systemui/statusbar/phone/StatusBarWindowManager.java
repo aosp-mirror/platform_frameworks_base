@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -28,6 +27,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.keyguard.R;
+import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.StatusBarState;
 
 /**
  * Encapsulates all logic for the status bar window state management.
@@ -137,7 +138,8 @@ public class StatusBarWindowManager {
     }
 
     private void applyUserActivityTimeout(State state) {
-        if (state.isKeyguardShowingAndNotOccluded()) {
+        if (state.isKeyguardShowingAndNotOccluded()
+                && state.statusBarState == StatusBarState.KEYGUARD) {
             mLp.userActivityTimeout = state.keyguardUserActivityTimeout;
         } else {
             mLp.userActivityTimeout = -1;
@@ -194,6 +196,14 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    /**
+     * @param state The {@link StatusBarState} of the status bar.
+     */
+    public void setStatusBarState(int state) {
+        mCurrentState.statusBarState = state;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -201,6 +211,11 @@ public class StatusBarWindowManager {
         boolean statusBarExpanded;
         boolean statusBarFocusable;
         long keyguardUserActivityTimeout;
+
+        /**
+         * The {@link BaseStatusBar} state from the status bar.
+         */
+        int statusBarState;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;

@@ -23,7 +23,8 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.R;
 
-public class ExpandableNotificationRow extends ActivatableNotificationView {
+public class ExpandableNotificationRow extends ActivatableNotificationView implements
+        NotificationActivatable {
     private int mRowMinHeight;
     private int mRowMaxHeight;
 
@@ -64,7 +65,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
 
-        mActivator = new NotificationActivator(this);
+        mActivator = new NotificationActivator(this, this);
     }
 
     @Override
@@ -113,6 +114,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setUserExpanded(boolean userExpanded) {
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
+        applyExpansionToLayout();
     }
 
     public boolean isUserLocked() {
@@ -225,6 +227,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mMaxExpandHeight;
     }
 
+    @Override
     public NotificationActivator getActivator() {
         return mActivator;
     }

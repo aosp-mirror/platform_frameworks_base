@@ -34,14 +34,40 @@ public class NotificationActivator {
     private static final float INVERSE_ALPHA = 0.9f;
     private static final float DIMMED_SCALE = 0.95f;
 
-    private final View mTargetView;
+    /**
+     * Normal state. Notification is fully interactable.
+     */
+    private static final int STATE_NORMAL = 0;
 
+    /**
+     * Dimmed state. Neutral state when on the lockscreen, with slight transparency and scaled down
+     * a bit.
+     */
+    private static final int STATE_DIMMED = 1;
+
+    /**
+     * Activated state. Used after tapping a notification on the lockscreen. Normal transparency and
+     * normal scale.
+     */
+    private static final int STATE_ACTIVATED = 2;
+
+    /**
+     * Inverse activated state. Used for the other notifications on the lockscreen when tapping on
+     * one.
+     */
+    private static final int STATE_ACTIVATED_INVERSE = 3;
+
+    private final View mTargetView;
+    private final View mHotspotView;
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
     private final int mTranslationZ;
 
-    public NotificationActivator(View targetView) {
+    private int mState;
+
+    public NotificationActivator(View targetView, View hotspotView) {
         mTargetView = targetView;
+        mHotspotView = hotspotView;
         Context ctx = targetView.getContext();
         mFastOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_slow_in);
@@ -53,18 +79,37 @@ public class NotificationActivator {
     }
 
     public void activateInverse() {
+        if (mState == STATE_ACTIVATED_INVERSE) {
+            return;
+        }
+        mTargetView.animate().cancel();
         mTargetView.animate().withLayer().alpha(INVERSE_ALPHA);
+        mState = STATE_ACTIVATED_INVERSE;
+    }
+
+    public void addHotspot() {
+        mHotspotView.getBackground().setHotspot(
+                0, mHotspotView.getWidth()/2, mHotspotView.getHeight()/2);
     }
 
     public void activate() {
+        if (mState == STATE_ACTIVATED) {
+            return;
+        }
+        mTargetView.animate().cancel();
         mTargetView.animate()
                 .setInterpolator(mLinearOutSlowInInterpolator)
                 .scaleX(1)
                 .scaleY(1)
                 .translationZBy(mTranslationZ);
+        mState = STATE_ACTIVATED;
     }
 
     public void reset() {
+        if (mState == STATE_DIMMED) {
+            return;
+        }
+        mTargetView.animate().cancel();
         mTargetView.animate()
                 .setInterpolator(mFastOutSlowInInterpolator)
                 .scaleX(DIMMED_SCALE)
@@ -73,15 +118,21 @@ public class NotificationActivator {
         if (mTargetView.getAlpha() != 1.0f) {
             mTargetView.animate().withLayer().alpha(1);
         }
+        mHotspotView.getBackground().removeHotspot(0);
+        mState = STATE_DIMMED;
     }
 
     public void setDimmed(boolean dimmed) {
         if (dimmed) {
+            mTargetView.animate().cancel();
             mTargetView.setScaleX(DIMMED_SCALE);
             mTargetView.setScaleY(DIMMED_SCALE);
+            mState = STATE_DIMMED;
         } else {
+            mTargetView.animate().cancel();
             mTargetView.setScaleX(1);
             mTargetView.setScaleY(1);
+            mState = STATE_NORMAL;
         }
     }
 }
