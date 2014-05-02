@@ -95,7 +95,6 @@ public class StackStateAnimator {
     private void startPropertyAnimation(long newDuration, final boolean hasFinishAction,
             final ExpandableView child, StackScrollState.ViewState viewState, final float alpha) {
         child.animate().setInterpolator(mFastOutSlowInInterpolator)
-                .alpha(alpha)
                 .translationY(viewState.yTranslation)
                 .translationZ(viewState.zTranslation)
                 .setDuration(newDuration)
@@ -112,6 +111,9 @@ public class StackStateAnimator {
                         }
                     }
                 });
+        if (alpha != child.getAlpha()) {
+            child.animate().withLayer().alpha(alpha);
+        }
     }
 
     private void startHeightAnimation(long newDuration, final ExpandableView child,
