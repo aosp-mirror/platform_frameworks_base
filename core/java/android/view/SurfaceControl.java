@@ -74,8 +74,10 @@ public class SurfaceControl {
             IBinder displayToken, int orientation,
             int l, int t, int r, int b,
             int L, int T, int R, int B);
-    private static native boolean nativeGetDisplayInfo(
-            IBinder displayToken, SurfaceControl.PhysicalDisplayInfo outInfo);
+    private static native SurfaceControl.PhysicalDisplayInfo[] nativeGetDisplayConfigs(
+            IBinder displayToken);
+    private static native int nativeGetActiveConfig(IBinder displayToken);
+    private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native void nativeBlankDisplay(IBinder displayToken);
     private static native void nativeUnblankDisplay(IBinder displayToken);
 
@@ -499,14 +501,25 @@ public class SurfaceControl {
         nativeBlankDisplay(displayToken);
     }
 
-    public static boolean getDisplayInfo(IBinder displayToken, SurfaceControl.PhysicalDisplayInfo outInfo) {
+    public static SurfaceControl.PhysicalDisplayInfo[] getDisplayConfigs(IBinder displayToken) {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
-        if (outInfo == null) {
-            throw new IllegalArgumentException("outInfo must not be null");
+        return nativeGetDisplayConfigs(displayToken);
+    }
+
+    public static int getActiveConfig(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
         }
-        return nativeGetDisplayInfo(displayToken, outInfo);
+        return nativeGetActiveConfig(displayToken);
+    }
+
+    public static boolean setActiveConfig(IBinder displayToken, int id) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeSetActiveConfig(displayToken, id);
     }
 
     public static void setDisplayProjection(IBinder displayToken,

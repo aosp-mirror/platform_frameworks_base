@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemProperties;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
@@ -47,8 +48,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             new SparseArray<LocalDisplayDevice>();
     private HotplugDisplayEventReceiver mHotplugReceiver;
 
-    private final SurfaceControl.PhysicalDisplayInfo mTempPhys = new SurfaceControl.PhysicalDisplayInfo();
-
     // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
@@ -68,14 +67,31 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private void tryConnectDisplayLocked(int builtInDisplayId) {
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(builtInDisplayId);
-        if (displayToken != null && SurfaceControl.getDisplayInfo(displayToken, mTempPhys)) {
+        if (displayToken != null) {
+            SurfaceControl.PhysicalDisplayInfo[] configs =
+                    SurfaceControl.getDisplayConfigs(displayToken);
+            if (configs == null) {
+                // There are no valid configs for this device, so we can't use it
+                Slog.w(TAG, "No valid configs found for display device " +
+                        builtInDisplayId);
+                return;
+            }
+            int activeConfig = SurfaceControl.getActiveConfig(displayToken);
+            if (activeConfig < 0) {
+                // There is no active config, and for now we don't have the
+                // policy to set one.
+                Slog.w(TAG, "No active config found for display device " +
+                        builtInDisplayId);
+                return;
+            }
             LocalDisplayDevice device = mDevices.get(builtInDisplayId);
             if (device == null) {
                 // Display was added.
-                device = new LocalDisplayDevice(displayToken, builtInDisplayId, mTempPhys);
+                device = new LocalDisplayDevice(displayToken, builtInDisplayId,
+                        configs[activeConfig]);
                 mDevices.put(builtInDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else if (device.updatePhysicalDisplayInfoLocked(mTempPhys)) {
+            } else if (device.updatePhysicalDisplayInfoLocked(configs[activeConfig])) {
                 // Display properties changed.
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
