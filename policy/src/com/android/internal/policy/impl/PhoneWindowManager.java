@@ -990,9 +990,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Match current screen state.
         if (mPowerManager.isInteractive()) {
-            screenTurningOn(null);
+            wakingUp(null);
         } else {
-            screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+            goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
     }
 
@@ -4314,7 +4314,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void screenTurnedOff(int why) {
+    public void goingToSleep(int why) {
         EventLog.writeEvent(70000, 0);
         synchronized (mLock) {
             mScreenOnEarly = false;
@@ -4330,7 +4330,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void screenTurningOn(final ScreenOnListener screenOnListener) {
+    public void wakingUp(final ScreenOnListener screenOnListener) {
         EventLog.writeEvent(70000, 1);
         if (false) {
             RuntimeException here = new RuntimeException("here");
