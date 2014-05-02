@@ -36,8 +36,6 @@ import java.security.cert.X509Certificate;
  * host/port pair. The user can clear the cached data using
  * {@link WebView#clearClientCertPreferences}.
  *
- * TODO(sgurun) unhide
- * @hide
  */
 public interface ClientCertRequest {
     /**
