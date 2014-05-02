@@ -184,7 +184,7 @@ static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "(Lcom/android/server/hdmi/HdmiCecController;)J",
             (void *) nativeInit },
-    { "nativeSendCommand", "(JII[B)I",
+    { "nativeSendCecCommand", "(JII[B)I",
             (void *) nativeSendCecCommand },
 };
 
