@@ -964,7 +964,8 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, String text, int start,
             int end, float[] widths) {
-        return native_getTextWidths(native_object, text.toCharArray(), start, end - start, widths);
+        return native_getTextWidths(native_object, text.toCharArray(), start, end - start,
+                widths);
     }
 
     @LayoutlibDelegate
@@ -1068,7 +1069,8 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void nativeGetStringBounds(int nativePaint, String text, int start,
             int end, Rect bounds) {
-        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start, bounds);
+        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start,
+                bounds);
     }
 
     @LayoutlibDelegate
