@@ -31133,10 +31133,11 @@ package android.view {
   public class ViewConfiguration {
     ctor public deprecated ViewConfiguration();
     method public static android.view.ViewConfiguration get(android.content.Context);
+    method public long getDeviceGlobalActionKeyTimeout();
     method public static int getDoubleTapTimeout();
     method public static deprecated int getEdgeSlop();
     method public static deprecated int getFadingEdgeLength();
-    method public static long getGlobalActionKeyTimeout();
+    method public static deprecated long getGlobalActionKeyTimeout();
     method public static int getJumpTapTimeout();
     method public static int getKeyRepeatDelay();
     method public static int getKeyRepeatTimeout();

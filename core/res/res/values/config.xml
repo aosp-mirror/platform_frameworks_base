@@ -1212,6 +1212,9 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
+    <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
+    <integer name="config_globalActionsKeyTimeout">500</integer>
+
     <!-- Maximum number of grid columns permitted in the ResolverActivity
          used for picking activities to handle an intent. -->
     <integer name="config_maxResolverActivityColumns">2</integer>
