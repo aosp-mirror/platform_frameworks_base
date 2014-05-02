@@ -106,15 +106,14 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private boolean mChildHierarchyDirty;
     private boolean mIsExpanded = true;
-    private boolean mChildrenNeedUpdate;
-    private ViewTreeObserver.OnPreDrawListener mPreDrawListener
+    private boolean mChildrenUpdateRequested;
+    private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            if (mChildrenNeedUpdate) {
-                updateChildren();
-                mChildrenNeedUpdate = false;
-            }
+            updateChildren();
+            mChildrenUpdateRequested = false;
+            getViewTreeObserver().removeOnPreDrawListener(this);
             return true;
         }
     };
@@ -181,7 +180,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mPaddingBetweenElements = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
-        getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
     }
 
     @Override
@@ -275,8 +273,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void requestChildrenUpdate() {
-        mChildrenNeedUpdate = true;
-        invalidate();
+        if (!mChildrenUpdateRequested) {
+            getViewTreeObserver().addOnPreDrawListener(mChildrenUpdater);
+            mChildrenUpdateRequested = true;
+            invalidate();
+        }
     }
 
     private boolean isCurrentlyAnimating() {
