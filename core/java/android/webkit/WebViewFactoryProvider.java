@@ -59,6 +59,13 @@ public interface WebViewFactoryProvider {
          * {@link android.webkit.WebView#setWebContentsDebuggingEnabled(boolean) }
          */
         void setWebContentsDebuggingEnabled(boolean enable);
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#clearClientCertPreferences(Runnable) }
+         */
+        void clearClientCertPreferences(Runnable onCleared);
+
     }
 
     Statics getStatics();
