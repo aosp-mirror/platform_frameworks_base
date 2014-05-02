@@ -213,10 +213,12 @@ public class StatusBarKeyguardViewManager {
         } else {
             mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
         }
-        if (!(mShowing && !mOccluded) || mBouncer.isShowing()) {
-            mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
-        } else {
-            mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
+        if (mPhoneStatusBar.getNavigationBarView() != null) {
+            if (!(mShowing && !mOccluded) || mBouncer.isShowing()) {
+                mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+            } else {
+                mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
+            }
         }
     }
 
