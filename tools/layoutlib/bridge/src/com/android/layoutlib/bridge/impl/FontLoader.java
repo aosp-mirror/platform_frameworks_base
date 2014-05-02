@@ -52,6 +52,8 @@ public final class FontLoader {
     private static final String NODE_NAME = "name";
     private static final String NODE_FILE = "file";
 
+    private static final String ATTRIBUTE_VARIANT = "variant";
+    private static final String ATTRIBUTE_VALUE_ELEGANT = "elegant";
     private static final String FONT_SUFFIX_NONE = ".ttf";
     private static final String FONT_SUFFIX_REGULAR = "-Regular.ttf";
     private static final String FONT_SUFFIX_BOLD = "-Bold.ttf";
@@ -189,6 +191,7 @@ public final class FontLoader {
         private FontInfo mFontInfo = null;
         private final StringBuilder mBuilder = new StringBuilder();
         private List<FontInfo> mFontList = new ArrayList<FontInfo>();
+        private boolean isCompactFont = true;
 
         private FontHandler(String osFontsLocation) {
             super();
@@ -209,7 +212,20 @@ public final class FontLoader {
                 mFontList = new ArrayList<FontInfo>();
             } else if (NODE_FAMILY.equals(localName)) {
                 if (mFontList != null) {
+                    mFontInfo = null;
+                }
+            } else if (NODE_NAME.equals(localName)) {
+                if (mFontList != null && mFontInfo == null) {
                     mFontInfo = new FontInfo();
+                }
+            } else if (NODE_FILE.equals(localName)) {
+                if (mFontList != null && mFontInfo == null) {
+                    mFontInfo = new FontInfo();
+                }
+                if (ATTRIBUTE_VALUE_ELEGANT.equals(attributes.getValue(ATTRIBUTE_VARIANT))) {
+                    isCompactFont = false;
+                } else {
+                    isCompactFont = true;
                 }
             }
 
@@ -223,7 +239,9 @@ public final class FontLoader {
          */
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            mBuilder.append(ch, start, length);
+            if (isCompactFont) {
+              mBuilder.append(ch, start, length);
+            }
         }
 
         /* (non-Javadoc)
@@ -259,7 +277,7 @@ public final class FontLoader {
                 }
             } else if (NODE_FILE.equals(localName)) {
                 // handle a new file for an existing Font Info
-                if (mFontInfo != null) {
+                if (isCompactFont && mFontInfo != null) {
                     String fileName = trimXmlWhitespaces(mBuilder.toString());
                     Font font = getFont(fileName);
                     if (font != null) {
