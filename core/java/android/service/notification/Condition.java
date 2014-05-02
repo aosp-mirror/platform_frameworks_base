@@ -41,16 +41,25 @@ public class Condition implements Parcelable {
     public static final int FLAG_RELEVANT_ALWAYS = 1 << 1;
 
     public final Uri id;
-    public String caption;
-    public int state;
-    public int flags;
+    public final String summary;
+    public final String line1;
+    public final String line2;
+    public final int icon;
+    public final int state;
+    public final int flags;
 
-    public Condition(Uri id, String caption, int state, int flags) {
+    public Condition(Uri id, String summary, String line1, String line2, int icon,
+            int state, int flags) {
         if (id == null) throw new IllegalArgumentException("id is required");
-        if (caption == null) throw new IllegalArgumentException("caption is required");
+        if (summary == null) throw new IllegalArgumentException("summary is required");
+        if (line1 == null) throw new IllegalArgumentException("line1 is required");
+        if (line2 == null) throw new IllegalArgumentException("line2 is required");
         if (!isValidState(state)) throw new IllegalArgumentException("state is invalid: " + state);
         this.id = id;
-        this.caption = caption;
+        this.summary = summary;
+        this.line1 = line1;
+        this.line2 = line2;
+        this.icon = icon;
         this.state = state;
         this.flags = flags;
     }
@@ -58,6 +67,9 @@ public class Condition implements Parcelable {
     private Condition(Parcel source) {
         this((Uri)source.readParcelable(Condition.class.getClassLoader()),
                 source.readString(),
+                source.readString(),
+                source.readString(),
+                source.readInt(),
                 source.readInt(),
                 source.readInt());
     }
@@ -69,7 +81,10 @@ public class Condition implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(id, 0);
-        dest.writeString(caption);
+        dest.writeString(summary);
+        dest.writeString(line1);
+        dest.writeString(line2);
+        dest.writeInt(icon);
         dest.writeInt(state);
         dest.writeInt(this.flags);
     }
@@ -78,7 +93,10 @@ public class Condition implements Parcelable {
     public String toString() {
         return new StringBuilder(Condition.class.getSimpleName()).append('[')
             .append("id=").append(id)
-            .append(",caption=").append(caption)
+            .append(",summary=").append(summary)
+            .append(",line1=").append(line1)
+            .append(",line2=").append(line2)
+            .append(",icon=").append(icon)
             .append(",state=").append(stateToString(state))
             .append(",flags=").append(flags)
             .append(']').toString();
@@ -106,14 +124,17 @@ public class Condition implements Parcelable {
         if (o == this) return true;
         final Condition other = (Condition) o;
         return Objects.equals(other.id, id)
-                && Objects.equals(other.caption, caption)
+                && Objects.equals(other.summary, summary)
+                && Objects.equals(other.line1, line1)
+                && Objects.equals(other.line2, line2)
+                && other.icon == icon
                 && other.state == state
                 && other.flags == flags;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, caption, state, flags);
+        return Objects.hash(id, summary, line1, line2, icon, state, flags);
     }
 
     @Override

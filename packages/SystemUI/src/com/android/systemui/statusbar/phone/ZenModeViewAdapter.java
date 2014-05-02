@@ -222,7 +222,7 @@ public abstract class ZenModeViewAdapter implements ZenModeView.Adapter {
                 mExits.remove(i);
             }
             for (Condition c : mConditions.values()) {
-                mExits.add(newExit(c.caption, "", "", c.id));
+                mExits.add(newExit(c.summary, c.line1, c.line2, c.id));
             }
             dispatchChanged();
         }
