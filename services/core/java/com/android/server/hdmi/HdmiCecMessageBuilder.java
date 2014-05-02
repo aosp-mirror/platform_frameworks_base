@@ -319,10 +319,19 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildUserControlPressed(int src, int dest, int uiCommand) {
-        byte[] params = new byte[] {
-                (byte) uiCommand
-        };
-        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_PRESSED, params);
+        return buildUserControlPressed(src, dest, new byte[] { (byte) uiCommand });
+    }
+
+    /**
+     * Build &lt;User Control Pressed&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param commandParam uiCommand and the additional parameter
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildUserControlPressed(int src, int dest, byte[] commandParam) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_PRESSED, commandParam);
     }
 
     /**
