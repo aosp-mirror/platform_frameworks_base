@@ -372,16 +372,6 @@ please see styles_device_defaults.xml.
         <item name="minWidth">48dip</item>
     </style>
 
-    <!-- Bordered paper button -->
-    <style name="Widget.Quantum.Button.Paper">
-        <!-- TODO: Specify pressed state animation. -->
-    </style>
-
-    <!-- Bordered paper button with color -->
-    <style name="Widget.Quantum.Button.Paper.Color">
-        <item name="background">@drawable/btn_color_quantum</item>
-    </style>
-
     <!-- Borderless ink button -->
     <style name="Widget.Quantum.Button.Borderless">
         <item name="background">@drawable/btn_borderless_quantum</item>
@@ -391,11 +381,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Button.Borderless.Small">
         <item name="minHeight">48dip</item>
         <item name="minWidth">48dip</item>
-    </style>
-
-    <!-- Borderless paper button -->
-    <style name="Widget.Quantum.Button.Borderless.Paper">
-        <!-- TODO: Specify pressed state animation. -->
     </style>
 
     <style name="Widget.Quantum.Button.Inset">
@@ -784,11 +769,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light" parent="Widget.Quantum"/>
     <style name="Widget.Quantum.Light.Button" parent="Widget.Quantum.Button"/>
     <style name="Widget.Quantum.Light.Button.Small" parent="Widget.Quantum.Button.Small"/>
-    <style name="Widget.Quantum.Light.Button.Paper" parent="Widget.Quantum.Button.Paper"/>
-    <style name="Widget.Quantum.Light.Button.Paper.Color" parent="Widget.Quantum.Button.Paper.Color"/>
     <style name="Widget.Quantum.Light.Button.Borderless" parent="Widget.Quantum.Button.Borderless"/>
     <style name="Widget.Quantum.Light.Button.Borderless.Small" parent="Widget.Quantum.Button.Borderless.Small"/>
-    <style name="Widget.Quantum.Light.Button.Borderless.Paper" parent="Widget.Quantum.Button.Borderless.Paper"/>
     <style name="Widget.Quantum.Light.Button.Inset" parent="Widget.Quantum.Button.Inset"/>
 
     <style name="Widget.Quantum.Light.Button.Toggle">

@@ -2285,8 +2285,6 @@
   <public type="style" name="Widget.Quantum.Button.Inset" />
   <public type="style" name="Widget.Quantum.Button.Small" />
   <public type="style" name="Widget.Quantum.Button.Toggle" />
-  <public type="style" name="Widget.Quantum.Button.Paper" />
-  <public type="style" name="Widget.Quantum.Button.Paper.Color" />
   <public type="style" name="Widget.Quantum.ButtonBar" />
   <public type="style" name="Widget.Quantum.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.CalendarView" />
@@ -2347,8 +2345,6 @@
   <public type="style" name="Widget.Quantum.Light.Button.Inset" />
   <public type="style" name="Widget.Quantum.Light.Button.Small" />
   <public type="style" name="Widget.Quantum.Light.Button.Toggle" />
-  <public type="style" name="Widget.Quantum.Light.Button.Paper" />
-  <public type="style" name="Widget.Quantum.Light.Button.Paper.Color" />
   <public type="style" name="Widget.Quantum.Light.ButtonBar" />
   <public type="style" name="Widget.Quantum.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Widget.Quantum.Light.CalendarView" />

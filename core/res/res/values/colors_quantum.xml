@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 
+<!-- Colors specific to Quantum themes. -->
 <resources>
     <color name="background_quantum_dark">@color/black</color>
     <color name="background_quantum_light">@color/white</color>
@@ -40,6 +41,7 @@
     <color name="highlighted_text_quantum_light">#660097a7</color>
 
     <!-- Primary & accent colors -->
+    <eat-comment />
 
     <color name="quantum_red_100">#fff4c7c3</color>
     <color name="quantum_red_300">#ffe67c73</color>
@@ -98,6 +100,7 @@
     <color name="quantum_deep_orange_A400">#ffff1744</color>
 
     <!-- Neutral colors -->
+    <eat-comment />
 
     <color name="quantum_grey_50">#fffafafa</color>
     <color name="quantum_grey_100">#fff5f5f5</color>
@@ -117,6 +120,7 @@
     <color name="quantum_brown_700">#ff5d4037</color>
 
     <!-- Text & foreground colors -->
+    <eat-comment />
 
     <color name="primary_text_default_quantum_light">#de000000</color>
     <color name="secondary_text_quantum_light">#8a000000</color>
