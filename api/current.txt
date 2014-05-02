@@ -12287,7 +12287,6 @@ package android.hardware.hdmi {
     method public static boolean isValidType(int);
     field public static final int ADDR_AUDIO_SYSTEM = 5; // 0x5
     field public static final int ADDR_BROADCAST = 15; // 0xf
-    field public static final int ADDR_FREE_USE = 14; // 0xe
     field public static final int ADDR_INVALID = -1; // 0xffffffff
     field public static final int ADDR_PLAYBACK_1 = 4; // 0x4
     field public static final int ADDR_PLAYBACK_2 = 8; // 0x8
@@ -12297,6 +12296,7 @@ package android.hardware.hdmi {
     field public static final int ADDR_RECORDER_3 = 9; // 0x9
     field public static final int ADDR_RESERVED_1 = 12; // 0xc
     field public static final int ADDR_RESERVED_2 = 13; // 0xd
+    field public static final int ADDR_SPECIFIC_USE = 14; // 0xe
     field public static final int ADDR_TUNER_1 = 3; // 0x3
     field public static final int ADDR_TUNER_2 = 6; // 0x6
     field public static final int ADDR_TUNER_3 = 7; // 0x7

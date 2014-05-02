@@ -25,6 +25,8 @@ import android.os.Message;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import libcore.util.EmptyArray;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,11 +43,17 @@ import java.util.List;
 class HdmiCecController {
     private static final String TAG = "HdmiCecController";
 
+    private static final byte[] EMPTY_BODY = EmptyArray.BYTE;
+
     // A message to pass cec send command to IO looper.
     private static final int MSG_SEND_CEC_COMMAND = 1;
+    // A message to delegate logical allocation to IO looper.
+    private static final int MSG_ALLOCATE_LOGICAL_ADDRESS = 2;
 
     // Message types to handle incoming message in main service looper.
     private final static int MSG_RECEIVE_CEC_COMMAND = 1;
+    // A message to report allocated logical address to main control looper.
+    private final static int MSG_REPORT_LOGICAL_ADDRESS = 2;
 
     // TODO: move these values to HdmiCec.java once make it internal constant class.
     // CEC's ABORT reason values.
@@ -55,6 +63,11 @@ class HdmiCecController {
     private static final int ABORT_INVALID_OPERAND = 3;
     private static final int ABORT_REFUSED = 4;
     private static final int ABORT_UNABLE_TO_DETERMINE = 5;
+
+    private static final int NUM_LOGICAL_ADDRESS = 16;
+
+    // TODO: define other constants for errors.
+    private static final int ERROR_SUCCESS = 0;
 
     // Handler instance to process synchronous I/O (mainly send) message.
     private Handler mIoHandler;
@@ -98,6 +111,43 @@ class HdmiCecController {
         return handler;
     }
 
+    /**
+     * Interface to report allocated logical address.
+     */
+    interface AllocateLogicalAddressCallback {
+        /**
+         * Called when a new logical address is allocated.
+         *
+         * @param deviceType requested device type to allocate logical address
+         * @param logicalAddress allocated logical address. If it is
+         *                       {@link HdmiCec#ADDR_UNREGISTERED}, it means that
+         *                       it failed to allocate logical address for the given device type
+         */
+        void onAllocated(int deviceType, int logicalAddress);
+    }
+
+    /**
+     * Allocate a new logical address of the given device type. Allocated
+     * address will be reported through {@link AllocateLogicalAddressCallback}.
+     *
+     * <p> Declared as package-private, accessed by {@link HdmiControlService} only.
+     *
+     * @param deviceType type of device to used to determine logical address
+     * @param preferredAddress a logical address preferred to be allocated.
+     *                         If sets {@link HdmiCec#ADDR_UNREGISTERED}, scans
+     *                         the smallest logical address matched with the given device type.
+     *                         Otherwise, scan address will start from {@code preferredAddress}
+     * @param callback callback interface to report allocated logical address to caller
+     */
+    void allocateLogicalAddress(int deviceType, int preferredAddress,
+            AllocateLogicalAddressCallback callback) {
+        Message msg = mIoHandler.obtainMessage(MSG_ALLOCATE_LOGICAL_ADDRESS);
+        msg.arg1 = deviceType;
+        msg.arg2 = preferredAddress;
+        msg.obj = callback;
+        mIoHandler.sendMessage(msg);
+    }
+
     private static byte[] buildBody(int opcode, byte[] params) {
         byte[] body = new byte[params.length + 1];
         body[0] = (byte) opcode;
@@ -119,10 +169,58 @@ class HdmiCecController {
                     nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
                             cecMessage.getDestination(), body);
                     break;
+                case MSG_ALLOCATE_LOGICAL_ADDRESS:
+                    int deviceType = msg.arg1;
+                    int preferredAddress = msg.arg2;
+                    AllocateLogicalAddressCallback callback =
+                            (AllocateLogicalAddressCallback) msg.obj;
+                    handleAllocateLogicalAddress(deviceType, preferredAddress, callback);
+                    break;
                 default:
                     Slog.w(TAG, "Unsupported CEC Io request:" + msg.what);
                     break;
             }
+        }
+
+        private void handleAllocateLogicalAddress(int deviceType, int preferredAddress,
+                AllocateLogicalAddressCallback callback) {
+            int startAddress = preferredAddress;
+            // If preferred address is "unregistered", start_index will be the smallest
+            // address matched with the given device type.
+            if (preferredAddress == HdmiCec.ADDR_UNREGISTERED) {
+                for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
+                    if (deviceType == HdmiCec.getTypeFromAddress(i)) {
+                        startAddress = i;
+                        break;
+                    }
+                }
+            }
+
+            int logcialAddress = HdmiCec.ADDR_UNREGISTERED;
+            // Iterates all possible addresses which has the same device type.
+            for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
+                int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
+                if (curAddress != HdmiCec.ADDR_UNREGISTERED
+                        && deviceType == HdmiCec.getTypeFromAddress(i)) {
+                    // <Polling Message> is a message which has empty body and
+                    // uses same address for both source and destination address.
+                    // If sending <Polling Message> failed (NAK), it becomes
+                    // new logical address for the device because no device uses
+                    // it as logical address of the device.
+                    int error = nativeSendCecCommand(mNativePtr, curAddress, curAddress,
+                            EMPTY_BODY);
+                    if (error != ERROR_SUCCESS) {
+                        logcialAddress = curAddress;
+                        break;
+                    }
+                }
+            }
+
+            Message msg = mControlHandler.obtainMessage(MSG_REPORT_LOGICAL_ADDRESS);
+            msg.arg1 = deviceType;
+            msg.arg2 = logcialAddress;
+            msg.obj = callback;
+            mControlHandler.sendMessage(msg);
         }
     }
 
@@ -137,6 +235,13 @@ class HdmiCecController {
                 case MSG_RECEIVE_CEC_COMMAND:
                     // TODO: delegate it to HdmiControl service.
                     onReceiveCommand((HdmiCecMessage) msg.obj);
+                    break;
+                case MSG_REPORT_LOGICAL_ADDRESS:
+                    int deviceType = msg.arg1;
+                    int logicalAddress = msg.arg2;
+                    AllocateLogicalAddressCallback callback =
+                            (AllocateLogicalAddressCallback) msg.obj;
+                    callback.onAllocated(deviceType, logicalAddress);
                     break;
                 default:
                     Slog.i(TAG, "Unsupported message type:" + msg.what);
