@@ -17,11 +17,6 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Outline;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -96,6 +91,10 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
+    }
+
+    public int getClipTopAmount() {
+        return mClipTopAmount;
     }
 
     public void setOnHeightChangedListener(OnHeightChangedListener listener) {

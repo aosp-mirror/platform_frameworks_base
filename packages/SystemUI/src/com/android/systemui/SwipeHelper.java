@@ -322,6 +322,7 @@ public class SwipeHelper implements Gefingerpoken {
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animator) {
                 updateAlphaFromOffset(animView, canAnimViewBeDismissed);
+                mCallback.onChildSnappedBack(animView);
             }
         });
         anim.start();
@@ -407,5 +408,7 @@ public class SwipeHelper implements Gefingerpoken {
         void onChildDismissed(View v);
 
         void onDragCancelled(View v);
+
+        void onChildSnappedBack(View animView);
     }
 }

@@ -16,13 +16,21 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  * An stack state animator which handles animations to new StackScrollStates
@@ -30,130 +38,360 @@ import java.util.ArrayList;
 public class StackStateAnimator {
 
     private static final int ANIMATION_DURATION = 360;
+    private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
+    private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
+    private static final int TAG_ANIMATOR_ALPHA = R.id.alpha_animator_tag;
+    private static final int TAG_ANIMATOR_HEIGHT = R.id.height_animator_tag;
+    private static final int TAG_ANIMATOR_TOP_INSET = R.id.top_inset_animator_tag;
+    private static final int TAG_END_TRANSLATION_Y = R.id.translation_y_animator_end_value_tag;
+    private static final int TAG_END_TRANSLATION_Z = R.id.translation_z_animator_end_value_tag;
+    private static final int TAG_END_ALPHA = R.id.alpha_animator_end_value_tag;
+    private static final int TAG_END_HEIGHT = R.id.height_animator_end_value_tag;
+    private static final int TAG_END_TOP_INSET = R.id.top_inset_animator_end_value_tag;
 
     private final Interpolator mFastOutSlowInInterpolator;
     public NotificationStackScrollLayout mHostLayout;
-    private boolean mAnimationIsRunning;
     private ArrayList<NotificationStackScrollLayout.AnimationEvent> mHandledEvents =
             new ArrayList<>();
+    private ArrayList<NotificationStackScrollLayout.AnimationEvent> mNewEvents =
+            new ArrayList<>();
+    private Set<Animator> mAnimatorSet = new HashSet<Animator>();
+    private Stack<AnimatorListenerAdapter> mAnimationListenerPool
+            = new Stack<AnimatorListenerAdapter>();
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(hostLayout.getContext(),
-                        android.R.interpolator.fast_out_slow_in);
+                android.R.interpolator.fast_out_slow_in);
     }
 
     public boolean isRunning() {
-        return mAnimationIsRunning;
+        return !mAnimatorSet.isEmpty();
     }
 
     public void startAnimationForEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
             StackScrollState finalState) {
-        int numEvents = mAnimationEvents.size();
-        if (numEvents == 0) {
-            // No events, so we don't perform any animation
-            return;
-        }
-        long lastEventStartTime = mAnimationEvents.get(numEvents - 1).eventStartTime;
-        long eventEnd = lastEventStartTime + ANIMATION_DURATION;
-        long currentTime = AnimationUtils.currentAnimationTimeMillis();
-        long newDuration = eventEnd - currentTime;
-        if (newDuration <= 0) {
-            // last event is long before this, so we don't do anything
-            return;
-        }
-        initializeAddedViewStates(mAnimationEvents, finalState);
+
+        processAnimationEvents(mAnimationEvents, finalState);
+
+        boolean hasNewEvents = !mNewEvents.isEmpty();
         int childCount = mHostLayout.getChildCount();
-        boolean isFirstAnimatingView = true;
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
             StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null) {
                 continue;
             }
-            int childVisibility = child.getVisibility();
-            boolean wasVisible = childVisibility == View.VISIBLE;
-            final float alpha = viewState.alpha;
-            if (!wasVisible && alpha != 0 && !viewState.gone) {
-                child.setVisibility(View.VISIBLE);
-            }
 
-            startPropertyAnimation(newDuration, isFirstAnimatingView, child, viewState, alpha);
+            startAnimations(child, viewState, hasNewEvents);
 
-            // TODO: animate clipBounds
             child.setClipBounds(null);
-            int currentHeigth = child.getActualHeight();
-            if (viewState.height != currentHeigth) {
-                startHeightAnimation(newDuration, child, viewState, currentHeigth);
-            }
-            isFirstAnimatingView = false;
         }
-        mAnimationIsRunning = true;
+        if (!isRunning()) {
+            // no child has preformed any animation, lets finish
+            onAnimationFinished();
+        }
     }
 
-    private void startPropertyAnimation(long newDuration, final boolean hasFinishAction,
-            final ExpandableView child, StackScrollState.ViewState viewState, final float alpha) {
-        child.animate().setInterpolator(mFastOutSlowInInterpolator)
-                .translationY(viewState.yTranslation)
-                .translationZ(viewState.zTranslation)
-                .setDuration(newDuration)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAnimationIsRunning = false;
-                        if (hasFinishAction) {
-                            mHandledEvents.clear();
-                            mHostLayout.onChildAnimationFinished();
-                        }
-                        if (alpha == 0) {
-                            child.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                });
+    /**
+     * Start an animation to the given viewState
+     */
+    private void startAnimations(final ExpandableView child, StackScrollState.ViewState viewState,
+            boolean hasNewEvents) {
+        int childVisibility = child.getVisibility();
+        boolean wasVisible = childVisibility == View.VISIBLE;
+        final float alpha = viewState.alpha;
+        if (!wasVisible && alpha != 0 && !viewState.gone) {
+            child.setVisibility(View.VISIBLE);
+        }
+        // start translationY animation
+        if (child.getTranslationY() != viewState.yTranslation) {
+            startYTranslationAnimation(child, viewState, hasNewEvents);
+        }
+        // start translationZ animation
+        if (child.getTranslationZ() != viewState.zTranslation) {
+            startZTranslationAnimation(child, viewState, hasNewEvents);
+        }
+        // start alpha animation
         if (alpha != child.getAlpha()) {
-            child.animate().withLayer().alpha(alpha);
+            startAlphaAnimation(child, viewState, hasNewEvents);
+        }
+        // start height animation
+        if (viewState.height != child.getActualHeight()) {
+            startHeightAnimation(child, viewState, hasNewEvents);
         }
     }
 
-    private void startHeightAnimation(long newDuration, final ExpandableView child,
-            StackScrollState.ViewState viewState, int currentHeigth) {
-        ValueAnimator heightAnimator = ValueAnimator.ofInt(currentHeigth, viewState.height);
-        heightAnimator.setInterpolator(mFastOutSlowInInterpolator);
-        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private void startHeightAnimation(final ExpandableView child,
+            StackScrollState.ViewState viewState, boolean hasNewEvents) {
+        Integer previousEndValue = getChildTag(child,TAG_END_HEIGHT);
+        if (previousEndValue != null && previousEndValue == viewState.height) {
+            return;
+        }
+        ValueAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_HEIGHT);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        if (newDuration <= 0) {
+            if (previousAnimator == null) {
+                // no animation was running, but also no new animation should be performed,
+                // lets just apply the value
+                child.setActualHeight(viewState.height);
+            }
+            return;
+        }
+
+        ValueAnimator animator = ValueAnimator.ofInt(child.getActualHeight(), viewState.height);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 child.setActualHeight((int) animation.getAnimatedValue());
             }
         });
-        heightAnimator.setDuration(newDuration);
-        heightAnimator.start();
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setDuration(newDuration);
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_HEIGHT, null);
+                child.setTag(TAG_END_HEIGHT, null);
+            }
+        });
+        animator.start();
+        child.setTag(TAG_ANIMATOR_HEIGHT, animator);
+        child.setTag(TAG_END_HEIGHT, viewState.height);
+    }
+
+    private void startAlphaAnimation(final ExpandableView child,
+            final StackScrollState.ViewState viewState, boolean hasNewEvents) {
+        final float endAlpha = viewState.alpha;
+        Float previousEndValue = getChildTag(child,TAG_END_ALPHA);
+        if (previousEndValue != null && previousEndValue == endAlpha) {
+            return;
+        }
+        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_ALPHA);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        if (newDuration <= 0) {
+            if (previousAnimator == null) {
+                // no animation was running, but also no new animation should be performed,
+                // lets just apply the value
+                child.setAlpha(endAlpha);
+                if (endAlpha == 0) {
+                    child.setVisibility(View.INVISIBLE);
+                }
+            }
+            return;
+        }
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.ALPHA,
+                child.getAlpha(), endAlpha);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        // Handle layer type
+        final int currentLayerType = child.getLayerType();
+        child.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        animator.addListener(new AnimatorListenerAdapter() {
+            public boolean mWasCancelled;
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setLayerType(currentLayerType, null);
+                if (endAlpha == 0 && !mWasCancelled) {
+                    child.setVisibility(View.INVISIBLE);
+                }
+                child.setTag(TAG_ANIMATOR_ALPHA, null);
+                child.setTag(TAG_END_ALPHA, null);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mWasCancelled = true;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWasCancelled = false;
+            }
+        });
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+            }
+        });
+        animator.start();
+        child.setTag(TAG_ANIMATOR_ALPHA, animator);
+        child.setTag(TAG_END_ALPHA, endAlpha);
     }
 
     /**
-     * Initialize the viewStates for the added children
+     * @return an adapter which ensures that onAnimationFinished is called once no animation is
+     *         running anymore
+     */
+    private AnimatorListenerAdapter getGlobalAnimationFinishedListener() {
+        if (!mAnimationListenerPool.empty()) {
+            return mAnimationListenerPool.pop();
+        }
+
+        // We need to create a new one, no reusable ones found
+        return new AnimatorListenerAdapter() {
+            private boolean mWasCancelled;
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAnimatorSet.remove(animation);
+                if (mAnimatorSet.isEmpty() && !mWasCancelled) {
+                    onAnimationFinished();
+                }
+                mAnimationListenerPool.push(this);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mWasCancelled = true;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mAnimatorSet.add(animation);
+                mWasCancelled = false;
+            }
+        };
+
+    }
+
+    private void startZTranslationAnimation(final ExpandableView child,
+            final StackScrollState.ViewState viewState, boolean hasNewEvents) {
+        Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Z);
+        if (previousEndValue != null && previousEndValue == viewState.zTranslation) {
+            return;
+        }
+        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Z);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        if (newDuration <= 0) {
+            if (previousAnimator == null) {
+                // no animation was running, but also no new animation should be performed,
+                // lets just apply the value
+                child.setTranslationZ(viewState.zTranslation);
+            }
+            return;
+        }
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.TRANSLATION_Z,
+                child.getTranslationZ(), viewState.zTranslation);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_TRANSLATION_Z, null);
+                child.setTag(TAG_END_TRANSLATION_Z, null);
+            }
+        });
+        animator.start();
+        child.setTag(TAG_ANIMATOR_TRANSLATION_Z, animator);
+        child.setTag(TAG_END_TRANSLATION_Z, viewState.zTranslation);
+    }
+
+    private void startYTranslationAnimation(final ExpandableView child,
+            StackScrollState.ViewState viewState, boolean hasNewEvents) {
+        Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Y);
+        if (previousEndValue != null && previousEndValue == viewState.yTranslation) {
+            return;
+        }
+        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        if (newDuration <= 0) {
+            if (previousAnimator == null) {
+                // no animation was running, but also no new animation should be performed,
+                // lets just apply the value
+                child.setTranslationY(viewState.yTranslation);
+            }
+            return;
+        }
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.TRANSLATION_Y,
+                child.getTranslationY(), viewState.yTranslation);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
+                child.setTag(TAG_END_TRANSLATION_Y, null);
+            }
+        });
+        animator.start();
+        child.setTag(TAG_ANIMATOR_TRANSLATION_Y, animator);
+        child.setTag(TAG_END_TRANSLATION_Y, viewState.yTranslation);
+    }
+
+    private <T> T getChildTag(View child, int tag) {
+        return (T) child.getTag(tag);
+    }
+
+    /**
+     * Cancel the previous animator and get the duration of the new animation.
      *
-     * @param animationEvents the animation events who contain the added children
+     * @param previousAnimator the animator which was running before
+     * @param hasNewEvents indicating whether new events came in in this animation
+     * @return the new duration
+     */
+    private long cancelAnimatorAndGetNewDuration(ValueAnimator previousAnimator,
+            boolean hasNewEvents) {
+        if (previousAnimator != null) {
+            previousAnimator.cancel();
+            if (!hasNewEvents) {
+                // This is only an update, no new event came in. lets just take the remaining
+                // duration as the new duration
+                return (long) ((1.0f - previousAnimator.getAnimatedFraction()) *
+                        previousAnimator.getDuration());
+            }
+        } else if (!hasNewEvents){
+            return 0;
+        }
+        return ANIMATION_DURATION;
+    }
+
+    private void onAnimationFinished() {
+        mHandledEvents.clear();
+        mNewEvents.clear();
+        mHostLayout.onChildAnimationFinished();
+    }
+
+    /**
+     * Process the animationEvents for a new animation
+     *
+     * @param animationEvents the animation events for the animation to perform
      * @param finalState the final state to animate to
      */
-    private void initializeAddedViewStates(
+    private void processAnimationEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents,
             StackScrollState finalState) {
+        mNewEvents.clear();
         for (NotificationStackScrollLayout.AnimationEvent event: animationEvents) {
             View changingView = event.changingView;
-            if (event.animationType == NotificationStackScrollLayout.AnimationEvent
-                    .ANIMATION_TYPE_ADD && !mHandledEvents.contains(event)) {
+            if (!mHandledEvents.contains(event)) {
+                if (event.animationType == NotificationStackScrollLayout.AnimationEvent
+                        .ANIMATION_TYPE_ADD) {
 
-                // This item is added, initialize it's properties.
-                StackScrollState.ViewState viewState = finalState.getViewStateForView(changingView);
-                if (viewState == null) {
-                    // The position for this child was never generated, let's continue.
-                    continue;
+                    // This item is added, initialize it's properties.
+                    StackScrollState.ViewState viewState = finalState
+                            .getViewStateForView(changingView);
+                    if (viewState == null) {
+                        // The position for this child was never generated, let's continue.
+                        continue;
+                    }
+                    changingView.setAlpha(0);
+                    changingView.setTranslationY(viewState.yTranslation);
+                    changingView.setTranslationZ(viewState.zTranslation);
                 }
-                changingView.setAlpha(0);
-                changingView.setTranslationY(viewState.yTranslation);
-                changingView.setTranslationZ(viewState.zTranslation);
                 mHandledEvents.add(event);
+                mNewEvents.add(event);
             }
         }
     }
