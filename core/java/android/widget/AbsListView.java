@@ -110,6 +110,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setTranscriptMode(int)
      */
     public static final int TRANSCRIPT_MODE_DISABLED = 0;
+
     /**
      * The list will automatically scroll to the bottom when a data set change
      * notification is received and only if the last item is already visible
@@ -118,6 +119,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setTranscriptMode(int)
      */
     public static final int TRANSCRIPT_MODE_NORMAL = 1;
+
     /**
      * The list will automatically scroll to the bottom, no matter what items
      * are currently visible.
@@ -2489,8 +2491,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /**
+     * Positions the selector in a way that mimics keyboard focus. If the
+     * selector drawable supports hotspots, this manages the focus hotspot.
+     */
+    void positionSelectorLikeFocus(int position, View sel) {
+        positionSelector(position, sel);
+
+        final Drawable selector = mSelector;
+        if (selector != null && selector.supportsHotspots() && position != INVALID_POSITION) {
+            final Rect bounds = mSelectorRect;
+            final float x = bounds.exactCenterX();
+            final float y = bounds.exactCenterY();
+            selector.setHotspot(R.attr.state_focused, x, y);
+        }
+    }
+
     void positionSelector(int position, View sel) {
         if (position != INVALID_POSITION) {
+            if (mSelectorPosition != position) {
+                final Drawable selector = mSelector;
+                if (selector != null && selector.supportsHotspots()) {
+                    selector.clearHotspots();
+                }
+            }
             mSelectorPosition = position;
         }
 

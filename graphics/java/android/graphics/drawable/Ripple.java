@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
@@ -85,8 +86,9 @@ class Ripple {
     /** Configured maximum ripple radius. */
     private final int mMaxInsideRadius;
 
-    private ObjectAnimator mEnter;
-    private ObjectAnimator mExit;
+    private ObjectAnimator mOuter;
+    private ObjectAnimator mInner;
+    private ObjectAnimator mAlpha;
 
     /** Maximum ripple radius. */
     private int mMaxRadius;
@@ -267,28 +269,46 @@ class Ripple {
     public void exit() {
         mExitFinished = false;
 
-        final ObjectAnimator exit = ObjectAnimator.ofFloat(this, "innerRadius", 0, mMaxRadius);
-        exit.setAutoCancel(true);
-        exit.setDuration(EXIT_DURATION);
-        exit.setInterpolator(INTERPOLATOR);
-        exit.addListener(mAnimationListener);
+        final ObjectAnimator inner = ObjectAnimator.ofFloat(this, "innerRadius", 0, mMaxRadius);
+        inner.setAutoCancel(true);
+        inner.setDuration(EXIT_DURATION);
+        inner.setInterpolator(INTERPOLATOR);
+        inner.addListener(mAnimationListener);
 
-        if (mEnter != null && mEnter.isStarted()) {
+        if (mOuter != null && mOuter.isStarted()) {
             // If we haven't been running the enter animation for long enough,
             // delay the exit animator.
-            final int elapsed = (int) (mEnter.getAnimatedFraction() * mEnter.getDuration());
+            final int elapsed = (int) (mOuter.getAnimatedFraction() * mOuter.getDuration());
             final int delay = Math.max(0, EXIT_MIN_DELAY - elapsed);
-            exit.setStartDelay(delay);
+            inner.setStartDelay(delay);
         }
 
-        exit.start();
+        inner.start();
 
-        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 0);
-        fade.setAutoCancel(true);
-        fade.setDuration(EXIT_DURATION);
-        fade.start();
+        final ObjectAnimator alpha = ObjectAnimator.ofFloat(this, "alphaMultiplier", 0);
+        alpha.setAutoCancel(true);
+        alpha.setDuration(EXIT_DURATION);
+        alpha.start();
 
-        mExit = exit;
+        mInner = inner;
+        mAlpha = alpha;
+    }
+
+    /**
+     * Cancel all animations.
+     */
+    public void cancel() {
+        if (mInner != null) {
+            mInner.end();
+        }
+
+        if (mOuter != null) {
+            mOuter.cancel();
+        }
+
+        if (mAlpha != null) {
+            mAlpha.end();
+        }
     }
 
     private void invalidateSelf() {
@@ -299,47 +319,55 @@ class Ripple {
      * Starts the enter animation.
      */
     private void enter() {
-        final ObjectAnimator enter = ObjectAnimator.ofFloat(this, "outerRadius", mMaxRadius);
-        enter.setAutoCancel(true);
-        enter.setDuration(ENTER_DURATION);
-        enter.setInterpolator(INTERPOLATOR);
-        enter.start();
+        final ObjectAnimator outer = ObjectAnimator.ofFloat(this, "outerRadius", mMaxRadius);
+        outer.setAutoCancel(true);
+        outer.setDuration(ENTER_DURATION);
+        outer.setInterpolator(INTERPOLATOR);
+        outer.start();
 
-        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
-        fade.setAutoCancel(true);
-        fade.setDuration(FADE_DURATION);
-        fade.start();
+        final ObjectAnimator alpha = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
+        if (mPulseEnabled) {
+            alpha.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    final ObjectAnimator pulse = ObjectAnimator.ofFloat(
+                            this, "alphaMultiplier", 1, PULSE_MIN_ALPHA);
+                    pulse.setAutoCancel(true);
+                    pulse.setDuration(PULSE_DURATION + PULSE_INTERVAL);
+                    pulse.setRepeatCount(ObjectAnimator.INFINITE);
+                    pulse.setRepeatMode(ObjectAnimator.REVERSE);
+                    pulse.setStartDelay(PULSE_DELAY);
+                    pulse.start();
 
-        // TODO: Starting with a delay will still cancel the fade in.
-        if (false && mPulseEnabled) {
-            final ObjectAnimator pulse = ObjectAnimator.ofFloat(
-                    this, "alphaMultiplier", 1, PULSE_MIN_ALPHA);
-            pulse.setAutoCancel(true);
-            pulse.setDuration(PULSE_DURATION + PULSE_INTERVAL);
-            pulse.setRepeatCount(ObjectAnimator.INFINITE);
-            pulse.setRepeatMode(ObjectAnimator.REVERSE);
-            pulse.setStartDelay(PULSE_DELAY);
-            pulse.start();
+                    mAlpha = pulse;
+                }
+            });
         }
+        alpha.setAutoCancel(true);
+        alpha.setDuration(FADE_DURATION);
+        alpha.start();
 
-        mEnter = enter;
+        mOuter = outer;
+        mAlpha = alpha;
     }
 
     /**
      * Starts the outside transition animation.
      */
     private void outside() {
-        final float targetRadius = mMaxOutsideRadius;
-        final ObjectAnimator outside = ObjectAnimator.ofFloat(this, "outerRadius", targetRadius);
-        outside.setAutoCancel(true);
-        outside.setDuration(OUTSIDE_DURATION);
-        outside.setInterpolator(INTERPOLATOR);
-        outside.start();
+        final ObjectAnimator outer = ObjectAnimator.ofFloat(this, "outerRadius", mMaxOutsideRadius);
+        outer.setAutoCancel(true);
+        outer.setDuration(OUTSIDE_DURATION);
+        outer.setInterpolator(INTERPOLATOR);
+        outer.start();
 
-        final ObjectAnimator fade = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
-        fade.setAutoCancel(true);
-        fade.setDuration(FADE_DURATION);
-        fade.start();
+        final ObjectAnimator alpha = ObjectAnimator.ofFloat(this, "alphaMultiplier", 1);
+        alpha.setAutoCancel(true);
+        alpha.setDuration(FADE_DURATION);
+        alpha.start();
+
+        mOuter = outer;
+        mAlpha = alpha;
     }
 
     /**
@@ -358,27 +386,15 @@ class Ripple {
         }
     }
 
-    private final AnimatorListener mAnimationListener = new AnimatorListener() {
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-        }
-
+    private final AnimatorListener mAnimationListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            if (animation == mExit) {
+            if (animation == mInner) {
                 mExitFinished = true;
                 mOuterRadius = 0;
                 mInnerRadius = 0;
                 mAlphaMultiplier = 1;
             }
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
         }
     };
 }
