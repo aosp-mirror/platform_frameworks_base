@@ -92,7 +92,7 @@
            >
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key1"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -101,7 +101,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key2"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -110,7 +110,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key3"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -126,7 +126,7 @@
            >
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key4"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -135,7 +135,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key5"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -144,7 +144,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key6"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -160,7 +160,7 @@
            >
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key7"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -169,7 +169,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key8"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -178,7 +178,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key9"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -199,7 +199,7 @@
                />
            <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key0"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
@@ -208,7 +208,7 @@
                />
            <ImageButton
                android:id="@+id/key_enter"
-               style="@style/Widget.Button.NumPadKey"
+               style="@style/Widget.Button.NumPadKey.Sim"
                android:layout_width="0px"
                android:layout_height="match_parent"
                android:layout_weight="1"
