@@ -647,7 +647,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                  * should have arrived. The following line checks whether this holds.
                  */
                 if (frameNumber != mCompletedFrameNumber + 1) {
-                    throw new AssertionError(String.format(
+                    Log.e(TAG, String.format(
                             "result frame number %d comes out of order, should be %d + 1",
                             frameNumber, mCompletedFrameNumber));
                 }
