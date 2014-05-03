@@ -33,7 +33,8 @@ namespace renderthread {
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(NULL)
         , mContext(NULL)
-        , mFrameTimeNanos(NULL) {
+        , mFrameTimeNanos(0)
+        , mSyncResult(kSync_OK) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
@@ -63,15 +64,18 @@ void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
     mDirty.set(left, top, right, bottom);
 }
 
-void DrawFrameTask::drawFrame(nsecs_t frameTimeNanos) {
+int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
+    mSyncResult = kSync_OK;
     mFrameTimeNanos = frameTimeNanos;
     postAndWait();
 
     // Reset the single-frame data
     mFrameTimeNanos = 0;
     mDirty.setEmpty();
+
+    return mSyncResult;
 }
 
 void DrawFrameTask::postAndWait() {
@@ -114,14 +118,16 @@ bool DrawFrameTask::syncFrameState() {
     Caches::getInstance().textureCache.resetMarkInUse();
     TreeInfo info;
     initTreeInfo(info);
-    mContext->processLayerUpdates(&mLayers, info);
-    mContext->prepareTree(info);
-    if (info.hasAnimations) {
+    mContext->prepareDraw(&mLayers, info);
+    if (info.out.hasAnimations) {
         // TODO: dirty calculations, for now just do a full-screen inval
         mDirty.setEmpty();
+        if (info.out.requiresUiRedraw) {
+            mSyncResult |= kSync_UIRedrawRequired;
+        }
     }
     // If prepareTextures is false, we ran out of texture cache space
-    return !info.hasFunctors && info.prepareTextures;
+    return !info.out.hasFunctors && info.prepareTextures;
 }
 
 void DrawFrameTask::unblockUiThread() {

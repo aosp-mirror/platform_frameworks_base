@@ -391,10 +391,20 @@ void CanvasContext::makeCurrent() {
     mHaveNewSurface |= mGlobalContext->makeCurrent(mEglSurface);
 }
 
+void CanvasContext::prepareDraw(const Vector<DeferredLayerUpdater*>* layerUpdaters,
+        TreeInfo& info) {
+    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot prepareDraw without a canvas!");
+    makeCurrent();
+
+    processLayerUpdates(layerUpdaters, info);
+    if (info.out.hasAnimations) {
+        // TODO: Uh... crap?
+    }
+    prepareTree(info);
+}
+
 void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
         TreeInfo& info) {
-    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot process layer updates without a canvas!");
-    makeCurrent();
     for (size_t i = 0; i < layerUpdaters->size(); i++) {
         DeferredLayerUpdater* update = layerUpdaters->itemAt(i);
         bool success = update->apply(info);
@@ -406,13 +416,19 @@ void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* lay
 }
 
 void CanvasContext::prepareTree(TreeInfo& info) {
-    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
+    mRenderThread.removeFrameCallback(this);
 
+    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     mRootRenderNode->prepareTree(info);
 
-    if (info.hasAnimations && !info.hasFunctors) {
-        // TODO: Functors
-        mRenderThread.postFrameCallback(this);
+    if (info.out.hasAnimations) {
+        if (info.out.hasFunctors) {
+            info.out.requiresUiRedraw = true;
+        } else if (!info.out.requiresUiRedraw) {
+            // If animationsNeedsRedraw is set don't bother posting for an RT anim
+            // as we will just end up fighting the UI thread.
+            mRenderThread.postFrameCallback(this);
+        }
     }
 }
 

@@ -146,10 +146,10 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-void RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos,
+int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
-    mDrawFrameTask.drawFrame(frameTimeNanos);
+    return mDrawFrameTask.drawFrame(frameTimeNanos);
 }
 
 CREATE_BRIDGE1(destroyCanvasAndSurface, CanvasContext* context) {

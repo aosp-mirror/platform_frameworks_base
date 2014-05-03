@@ -27,6 +27,9 @@ import android.os.Trace;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
@@ -43,6 +46,12 @@ public class CirclePropActivity extends Activity {
 
         ProgressBar spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         layout.addView(spinner, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        // For testing with a functor in the tree
+//        WebView wv = new WebView(this);
+//        wv.setWebViewClient(new WebViewClient());
+//        wv.setWebChromeClient(new WebChromeClient());
+//        wv.loadUrl("http://theverge.com");
+//        layout.addView(wv, new LayoutParams(LayoutParams.MATCH_PARENT, 100));
 
         layout.addView(new CircleView(this),
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));

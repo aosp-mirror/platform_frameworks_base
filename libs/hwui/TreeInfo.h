@@ -34,25 +34,33 @@ protected:
 struct TreeInfo {
     // The defaults here should be safe for everyone but DrawFrameTask to use as-is.
     TreeInfo()
-            : hasFunctors(false)
-            , prepareTextures(false)
-            , performStagingPush(true)
-            , frameTimeMs(0)
-            , evaluateAnimations(false)
-            , hasAnimations(false)
-            , animationHook(0)
+        : frameTimeMs(0)
+        , animationHook(NULL)
+        , prepareTextures(false)
+        , performStagingPush(true)
+        , evaluateAnimations(false)
     {}
 
-    bool hasFunctors;
+    nsecs_t frameTimeMs;
+    AnimationHook* animationHook;
     bool prepareTextures;
     bool performStagingPush;
-
-    // Animations
-    nsecs_t frameTimeMs;
     bool evaluateAnimations;
-    // This is only updated if evaluateAnimations is true
-    bool hasAnimations;
-    AnimationHook* animationHook;
+
+    struct Out {
+        Out()
+            : hasFunctors(false)
+            , hasAnimations(false)
+            , requiresUiRedraw(false)
+        {}
+        bool hasFunctors;
+        // This is only updated if evaluateAnimations is true
+        bool hasAnimations;
+        // This is set to true if there is an animation that RenderThread cannot
+        // animate itself, such as if hasFunctors is true
+        // This is only set if hasAnimations is true
+        bool requiresUiRedraw;
+    } out;
 
     // TODO: Damage calculations
 };
