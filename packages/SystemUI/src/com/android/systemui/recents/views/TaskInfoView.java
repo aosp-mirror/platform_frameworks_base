@@ -29,7 +29,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.BakedBezierInterpolator;
+import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.model.Task;
 
 
 /* The task info view */
@@ -141,6 +144,16 @@ class TaskInfoView extends FrameLayout {
                 .setInterpolator(BakedBezierInterpolator.INSTANCE)
                 .withLayer()
                 .start();
+    }
+
+    /** Binds the info view to the task */
+    void rebindToTask(Task t, boolean animate) {
+        RecentsConfiguration configuration = RecentsConfiguration.getInstance();
+        if (Constants.DebugFlags.App.EnableTaskBarThemeColors && t.colorPrimary != 0) {
+            setBackgroundColor(t.colorPrimary);
+        } else {
+            setBackgroundColor(configuration.taskBarViewDefaultBackgroundColor);
+        }
     }
 
     @Override

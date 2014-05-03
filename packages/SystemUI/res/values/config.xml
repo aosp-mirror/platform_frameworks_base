@@ -115,8 +115,10 @@
     <integer name="recents_filter_animate_current_views_min_duration">175</integer>
     <!-- The min animation duration for animating views that are newly visible. -->
     <integer name="recents_filter_animate_new_views_min_duration">125</integer>
-    <!-- The min animation duration for animating views that are newly visible. -->
+    <!-- The min animation duration for animating the task bar in. -->
     <integer name="recents_animate_task_bar_enter_duration">200</integer>
+    <!-- The min animation duration for animating the task bar out. -->
+    <integer name="recents_animate_task_bar_exit_duration">150</integer>
     <!-- The animation duration for animating in the info pane. -->
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->

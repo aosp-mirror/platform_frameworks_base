@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.SearchManager;
-import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +34,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,10 +88,13 @@ public class SystemServicesProxy {
                 rti.id = rti.persistentId = i;
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
-                rti.description = rti.activityLabel = "" + i + " - " +
+                rti.activityValues = new ActivityManager.RecentsActivityValues();
+                rti.description = "" + i + " - " +
                         Long.toString(Math.abs(new Random().nextLong()), 36);
                 if (i % 2 == 0) {
-                    rti.activityIcon = Bitmap.createBitmap(mDummyIcon);
+                    rti.activityValues.label = rti.description;
+                    rti.activityValues.icon = Bitmap.createBitmap(mDummyIcon);
+                    rti.activityValues.colorPrimary = new Random().nextInt();
                 }
                 tasks.add(rti);
             }

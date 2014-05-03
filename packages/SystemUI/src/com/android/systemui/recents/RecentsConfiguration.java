@@ -40,12 +40,18 @@ public class RecentsConfiguration {
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
     public int taskBarEnterAnimDuration;
+    public int taskBarExitAnimDuration;
     public int taskStackScrollDismissInfoPaneDistance;
     public int taskStackMaxDim;
     public int taskViewInfoPaneAnimDuration;
     public int taskViewRoundedCornerRadiusPx;
     public int searchBarSpaceHeightPx;
     public int searchBarSpaceEdgeMarginsPx;
+
+    public int taskBarViewDefaultBackgroundColor;
+    public int taskBarViewDefaultTextColor;
+    public int taskBarViewLightTextColor;
+    public int taskBarViewDarkTextColor;
 
     public boolean launchedWithThumbnailAnimation;
 
@@ -87,6 +93,8 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
         taskBarEnterAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
+        taskBarExitAnimDuration =
+                res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
         taskStackScrollDismissInfoPaneDistance = res.getDimensionPixelSize(
                 R.dimen.recents_task_stack_scroll_dismiss_info_pane_distance);
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
@@ -97,6 +105,15 @@ public class RecentsConfiguration {
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
         searchBarSpaceEdgeMarginsPx =
                 res.getDimensionPixelSize(R.dimen.recents_search_bar_space_edge_margins);
+
+        taskBarViewDefaultBackgroundColor =
+                res.getColor(R.color.recents_task_bar_default_background_color);
+        taskBarViewDefaultTextColor =
+                res.getColor(R.color.recents_task_bar_default_text_color);
+        taskBarViewLightTextColor =
+                res.getColor(R.color.recents_task_bar_light_text_color);
+        taskBarViewDarkTextColor =
+                res.getColor(R.color.recents_task_bar_dark_text_color);
     }
 
     /** Updates the system insets */
