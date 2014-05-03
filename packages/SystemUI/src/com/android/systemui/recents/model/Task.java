@@ -72,6 +72,7 @@ public class Task {
     public Drawable applicationIcon;
     public Drawable activityIcon;
     public String activityLabel;
+    public int colorPrimary;
     public Bitmap thumbnail;
     public boolean isActive;
     public int userId;
@@ -83,10 +84,11 @@ public class Task {
     }
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                BitmapDrawable activityIcon, int userId) {
+                BitmapDrawable activityIcon, int colorPrimary, int userId) {
         this.key = new TaskKey(id, intent, userId);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
+        this.colorPrimary = colorPrimary;
         this.isActive = isActive;
         this.userId = userId;
     }

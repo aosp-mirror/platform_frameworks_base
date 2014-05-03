@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import android.graphics.Color;
 import android.graphics.Rect;
 
 /* Common code */
@@ -45,5 +46,20 @@ public class Utilities {
             r.bottom = (int) (r.bottom * scale + 0.5f);
             r.offset(cx, cy);
         }
+    }
+
+    /** Calculates the luminance-preserved greyscale of a given color. */
+    private static int colorToGreyscale(int color) {
+        return Math.round(0.2126f * Color.red(color) + 0.7152f * Color.green(color) +
+                0.0722f * Color.blue(color));
+    }
+
+    /** Returns the ideal text color to draw on top of a specified background color. */
+    public static int getIdealTextColorForBackgroundColor(int color) {
+        RecentsConfiguration configuration = RecentsConfiguration.getInstance();
+        int greyscale = colorToGreyscale(color);
+        return (greyscale < 128) ? configuration.taskBarViewLightTextColor :
+                configuration.taskBarViewDarkTextColor;
+
     }
 }

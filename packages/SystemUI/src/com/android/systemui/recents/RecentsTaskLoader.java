@@ -415,17 +415,23 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             if (info == null) continue;
 
-            String activityLabel = (t.activityLabel == null ? ssp.getActivityLabel(info) :
-                    t.activityLabel.toString());
+            ActivityManager.RecentsActivityValues av = t.activityValues;
+            String activityLabel = null;
             BitmapDrawable activityIcon = null;
-            if (t.activityIcon != null) {
-                activityIcon = new BitmapDrawable(res, t.activityIcon);
+            int activityColor = 0;
+            if (av != null) {
+                activityLabel = (av.label != null ? av.label.toString() :
+                        ssp.getActivityLabel(info));
+                activityIcon = (av.icon != null) ? new BitmapDrawable(res, av.icon) : null;
+                activityColor = av.colorPrimary;
+            } else {
+                activityLabel = ssp.getActivityLabel(info);
             }
             boolean isForemostTask = (i == (taskCount - 1));
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
-                    activityIcon, t.userId);
+                    activityIcon, activityColor, t.userId);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
