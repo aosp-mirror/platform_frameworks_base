@@ -125,8 +125,10 @@ public class AppWidgetService extends SystemService implements WidgetBackupProvi
             // Register for the boot completed broadcast, so we can send the
             // ENABLE broacasts. If we try to send them now, they time out,
             // because the system isn't ready to handle them yet.
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                    new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+                    filter, null, null);
 
             // Register for configuration changes so we can update the names
             // of the widgets when the locale changes.
@@ -135,7 +137,6 @@ public class AppWidgetService extends SystemService implements WidgetBackupProvi
 
             // Register for broadcasts about package install, etc., so we can
             // update the provider list.
-            IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_ADDED);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);

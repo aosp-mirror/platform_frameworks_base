@@ -97,13 +97,15 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
 
         mObserver = new WiredAccessoryObserver();
 
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         context.registerReceiver(new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context ctx, Intent intent) {
                         bootCompleted();
                     }
                 },
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+                filter, null, null);
     }
 
     private void bootCompleted() {

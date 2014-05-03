@@ -78,8 +78,10 @@ public class RecognitionManagerService extends Binder {
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, UserHandle.ALL, true);
         mIPm = AppGlobals.getPackageManager();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+                filter, null, null);
     }
 
     public void systemReady() {

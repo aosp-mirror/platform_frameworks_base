@@ -2793,7 +2793,7 @@
 
         <receiver android:name="com.android.server.BootReceiver"
                 android:primaryUserOnly="true">
-            <intent-filter>
+            <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
