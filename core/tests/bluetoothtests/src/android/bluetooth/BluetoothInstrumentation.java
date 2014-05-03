@@ -64,6 +64,8 @@ public class BluetoothInstrumentation extends Instrumentation {
             unpairAll();
         } else if ("getName".equals(command)) {
             getName();
+        } else if ("getAddress".equals(command)) {
+            getAddress();
         } else {
             finish(null);
         }
@@ -87,6 +89,12 @@ public class BluetoothInstrumentation extends Instrumentation {
     public void getName() {
         String name = getBluetoothAdapter().getName();
         mSuccessResult.putString("name", name);
+        finish(mSuccessResult);
+    }
+
+    public void getAddress() {
+        String name = getBluetoothAdapter().getAddress();
+        mSuccessResult.putString("address", name);
         finish(mSuccessResult);
     }
 
