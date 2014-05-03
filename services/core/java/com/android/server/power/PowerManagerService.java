@@ -496,6 +496,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             filter = new IntentFilter();
             filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             mContext.registerReceiver(new BootCompletedReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();

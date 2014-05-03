@@ -70,8 +70,9 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public SearchManagerService(Context context)  {
         mContext = context;
-        mContext.registerReceiver(new BootCompletedReceiver(),
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(new BootCompletedReceiver(), filter);
         mContext.registerReceiver(new UserReceiver(),
                 new IntentFilter(Intent.ACTION_USER_REMOVED));
         new MyPackageMonitor().register(context, null, UserHandle.ALL, true);

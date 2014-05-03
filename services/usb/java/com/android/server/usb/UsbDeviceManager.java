@@ -373,8 +373,9 @@ public class UsbDeviceManager {
                 mUEventObserver.startObserving(USB_STATE_MATCH);
                 mUEventObserver.startObserving(ACCESSORY_START_MATCH);
 
-                mContext.registerReceiver(
-                        mBootCompletedReceiver, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+                IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                mContext.registerReceiver(mBootCompletedReceiver, filter);
                 mContext.registerReceiver(
                         mUserSwitchedReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
             } catch (Exception e) {

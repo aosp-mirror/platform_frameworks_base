@@ -411,6 +411,7 @@ public class SyncManager {
 
         if (!factoryTest) {
             intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             context.registerReceiver(mBootCompletedReceiver, intentFilter);
         }
 
