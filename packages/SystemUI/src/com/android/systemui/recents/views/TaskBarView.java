@@ -18,11 +18,13 @@ package com.android.systemui.recents.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.R;
+import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -58,6 +60,7 @@ class TaskBarView extends FrameLayout {
 
     /** Binds the bar view to the task */
     void rebindToTask(Task t, boolean animate) {
+        RecentsConfiguration configuration = RecentsConfiguration.getInstance();
         mTask = t;
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
@@ -67,6 +70,15 @@ class TaskBarView extends FrameLayout {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
         }
         mActivityDescription.setText(t.activityLabel);
+        // Try and apply the system ui tint
+        int tint = t.colorPrimary;
+        if (Constants.DebugFlags.App.EnableTaskBarThemeColors && tint != 0) {
+            setBackgroundColor(tint);
+            mActivityDescription.setTextColor(Utilities.getIdealTextColorForBackgroundColor(tint));
+        } else {
+            setBackgroundColor(configuration.taskBarViewDefaultBackgroundColor);
+            mActivityDescription.setTextColor(configuration.taskBarViewDefaultTextColor);
+        }
         if (animate) {
             // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
         }

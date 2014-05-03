@@ -197,18 +197,9 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     /** Animates this task view as it enters recents */
     public void animateOnEnterRecents() {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        int translate = config.pxFromDp(10);
-        mBarView.setScaleX(1.25f);
-        mBarView.setScaleY(1.25f);
         mBarView.setAlpha(0f);
-        mBarView.setTranslationX(translate / 2);
-        mBarView.setTranslationY(-translate);
         mBarView.animate()
                 .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .translationX(0)
-                .translationY(0)
                 .setStartDelay(235)
                 .setInterpolator(BakedBezierInterpolator.INSTANCE)
                 .setDuration(config.taskBarEnterAnimDuration)
@@ -219,16 +210,11 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     /** Animates this task view as it exits recents */
     public void animateOnLeavingRecents(final Runnable r) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        int translate = config.pxFromDp(10);
         mBarView.animate()
             .alpha(0f)
-            .scaleX(1.1f)
-            .scaleY(1.1f)
-            .translationX(translate / 2)
-            .translationY(-translate)
             .setStartDelay(0)
             .setInterpolator(BakedBezierInterpolator.INSTANCE)
-            .setDuration(Utilities.calculateTranslationAnimationDuration(translate))
+            .setDuration(config.taskBarExitAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {
                 @Override
@@ -352,6 +338,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask, reloadingTaskData);
             mBarView.rebindToTask(mTask, reloadingTaskData);
+            mInfoView.rebindToTask(mTask, reloadingTaskData);
             // Rebind any listeners
             mBarView.mApplicationIcon.setOnClickListener(this);
             mInfoView.mAppInfoButton.setOnClickListener(this);

@@ -58,7 +58,7 @@
             android:textSize="22sp"
             android:textColor="#ffffffff"
             android:text="@string/recents_empty_message"
-            android:fontFamily="sans-serif-thin"
+            android:fontFamily="sans-serif-light"
             android:singleLine="true"
             android:maxLines="2"
             android:ellipsize="marquee"
