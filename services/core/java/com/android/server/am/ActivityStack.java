@@ -1096,6 +1096,36 @@ final class ActivityStack {
                 ensureActivitiesVisibleLocked(r, starting, null, configChanges, forceHomeShown);
     }
 
+    // Checks if any of the stacks above this one has a fullscreen activity behind it.
+    // If so, this stack is hidden, otherwise it is visible.
+    private boolean isStackVisible() {
+        if (!isAttached()) {
+            return false;
+        }
+
+        if (mStackSupervisor.isFrontStack(this)) {
+            return true;
+        }
+
+        // Start at the task above this one and go up, looking for a visible
+        // fullscreen activity, or a translucent activity that requested the
+        // wallpaper to be shown behind it.
+        for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
+            final ArrayList<TaskRecord> tasks = mStacks.get(i).getAllTasks();
+            for (int taskNdx = 0; taskNdx < tasks.size(); taskNdx++) {
+                final ArrayList<ActivityRecord> activities = tasks.get(taskNdx).mActivities;
+                for (int activityNdx = 0; activityNdx < activities.size(); activityNdx++) {
+                    final ActivityRecord r = activities.get(activityNdx);
+                    if (!r.finishing && r.visible && r.fullscreen) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
@@ -1120,8 +1150,8 @@ final class ActivityStack {
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
         boolean showHomeBehindStack = false;
-        boolean behindFullscreen = !mStackSupervisor.isFrontStack(this) &&
-                !(forceHomeShown && isHomeStack());
+        boolean behindFullscreen = !isStackVisible();
+
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
