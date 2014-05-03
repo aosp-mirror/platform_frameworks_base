@@ -475,6 +475,111 @@ public class ActivityManager {
     }
 
     /**
+     * Information you can set and retrieve about the current activity within Recents.
+     */
+    public static class RecentsActivityValues implements Parcelable {
+        public CharSequence label;
+        public Bitmap icon;
+        public int colorPrimary;
+
+        public RecentsActivityValues(RecentsActivityValues values) {
+            copyFrom(values);
+        }
+
+        /**
+         * Creates the RecentsActivityValues to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         * @param icon An icon that represents the current state of this activity.
+         * @param color A color to override the theme's primary color.
+         */
+        public RecentsActivityValues(CharSequence label, Bitmap icon, int color) {
+            this.label = label;
+            this.icon = icon;
+            this.colorPrimary = color;
+        }
+
+        /**
+         * Creates the RecentsActivityValues to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         * @param icon An icon that represents the current state of this activity.
+         */
+        public RecentsActivityValues(CharSequence label, Bitmap icon) {
+            this(label, icon, 0);
+        }
+
+        /**
+         * Creates the RecentsActivityValues to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         */
+        public RecentsActivityValues(CharSequence label) {
+            this(label, null, 0);
+        }
+
+        public RecentsActivityValues() {
+            this(null, null, 0);
+        }
+
+        private RecentsActivityValues(Parcel source) {
+            readFromParcel(source);
+        }
+
+        /**
+         * Do a shallow copy of another set of activity values.
+         * @hide
+         */
+        public void copyFrom(RecentsActivityValues v) {
+            if (v != null) {
+                label = v.label;
+                icon = v.icon;
+                colorPrimary = v.colorPrimary;
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            TextUtils.writeToParcel(label, dest,
+                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            if (icon == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                icon.writeToParcel(dest, 0);
+            }
+            dest.writeInt(colorPrimary);
+        }
+
+        public void readFromParcel(Parcel source) {
+            label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            icon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
+            colorPrimary = source.readInt();
+        }
+
+        public static final Creator<RecentsActivityValues> CREATOR
+                = new Creator<RecentsActivityValues>() {
+            public RecentsActivityValues createFromParcel(Parcel source) {
+                return new RecentsActivityValues(source);
+            }
+            public RecentsActivityValues[] newArray(int size) {
+                return new RecentsActivityValues[size];
+            }
+        };
+
+        @Override
+        public String toString() {
+            return "RecentsActivityValues Label: " + label + " Icon: " + icon +
+                    " colorPrimary: " + colorPrimary;
+        }
+    }
+
+    /**
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
      */
@@ -523,16 +628,10 @@ public class ActivityManager {
         public int userId;
 
         /**
-         * The label of the highest activity in the task stack to have set a label using
-         * {@link Activity#setActivityLabelAndIcon(CharSequence, android.graphics.Bitmap)}.
+         * The recent activity values for the highest activity in the stack to have set the values.
+         * {@link Activity#setRecentsActivityValues(android.app.ActivityManager.RecentsActivityValues)}.
          */
-        public CharSequence activityLabel;
-
-        /**
-         * The Bitmap icon of the highest activity in the task stack to set a Bitmap using
-         * {@link Activity#setActivityLabelAndIcon(CharSequence, android.graphics.Bitmap)}.
-         */
-        public Bitmap activityIcon;
+        public RecentsActivityValues activityValues;
 
         public RecentTaskInfo() {
         }
@@ -555,13 +654,11 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            TextUtils.writeToParcel(activityLabel, dest,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            if (activityIcon == null) {
-                dest.writeInt(0);
-            } else {
+            if (activityValues != null) {
                 dest.writeInt(1);
-                activityIcon.writeToParcel(dest, 0);
+                activityValues.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
             }
             dest.writeInt(stackId);
             dest.writeInt(userId);
@@ -573,8 +670,8 @@ public class ActivityManager {
             baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            activityLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            activityIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
+            activityValues = source.readInt() > 0 ?
+                    RecentsActivityValues.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
         }

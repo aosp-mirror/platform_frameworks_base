@@ -2119,13 +2119,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SET_ACTIVITY_LABEL_ICON_TRANSACTION: {
+        case SET_RECENTS_ACTIVITY_VALUES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            CharSequence activityLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
-            Bitmap activityIcon = data.readInt() > 0
-                    ? Bitmap.CREATOR.createFromParcel(data) : null;
-            setActivityLabelAndIcon(token, activityLabel, activityIcon);
+            ActivityManager.RecentsActivityValues values =
+                    ActivityManager.RecentsActivityValues.CREATOR.createFromParcel(data);
+            setRecentsActivityValues(token, values);
             reply.writeNoException();
             return true;
         }
@@ -4883,21 +4882,14 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void setActivityLabelAndIcon(IBinder token, CharSequence activityLabel,
-            Bitmap activityIcon) throws RemoteException
-    {
+    public void setRecentsActivityValues(IBinder token, ActivityManager.RecentsActivityValues values)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        TextUtils.writeToParcel(activityLabel, data, 0);
-        if (activityIcon != null) {
-            data.writeInt(1);
-            activityIcon.writeToParcel(data, 0);
-        } else {
-            data.writeInt(0);
-        }
-        mRemote.transact(SET_ACTIVITY_LABEL_ICON_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        values.writeToParcel(data, 0);
+        mRemote.transact(SET_RECENTS_ACTIVITY_VALUES_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();
