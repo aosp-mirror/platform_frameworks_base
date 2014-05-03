@@ -56,6 +56,11 @@ final class TaskRecord extends ThumbnailHolder {
 
     int numFullscreen;      // Number of fullscreen activities.
 
+    // This represents the last resolved activity values for this task
+    // NOTE: This value needs to be persisted with each task
+    ActivityManager.RecentsActivityValues lastActivityValues =
+            new ActivityManager.RecentsActivityValues();
+
     /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities = new ArrayList<ActivityRecord>();
 

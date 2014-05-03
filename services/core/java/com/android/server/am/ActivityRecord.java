@@ -23,6 +23,7 @@ import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ResultInfo;
 import android.content.ComponentName;
@@ -147,8 +148,7 @@ final class ActivityRecord {
     boolean mStartingWindowShown = false;
     ActivityContainer mInitialActivityContainer;
 
-    String activityLabel;
-    Bitmap activityIcon;
+    ActivityManager.RecentsActivityValues activityValues; // the recents information for this activity
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
