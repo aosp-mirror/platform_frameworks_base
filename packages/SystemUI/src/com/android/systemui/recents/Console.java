@@ -37,7 +37,7 @@ public class Console {
     public static final String AnsiRed = "\u001B[31m";      // SystemUIHandshake
     public static final String AnsiGreen = "\u001B[32m";    // MeasureAndLayout
     public static final String AnsiYellow = "\u001B[33m";   // SynchronizeViewsWithModel
-    public static final String AnsiBlue = "\u001B[34m";     // TouchEvents
+    public static final String AnsiBlue = "\u001B[34m";     // TouchEvents, Search
     public static final String AnsiPurple = "\u001B[35m";   // Draw
     public static final String AnsiCyan = "\u001B[36m";     // ClickEvents
     public static final String AnsiWhite = "\u001B[37m";

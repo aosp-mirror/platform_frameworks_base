@@ -17,11 +17,17 @@
 package com.android.systemui.recents;
 
 import android.app.Activity;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,12 +39,36 @@ import com.android.systemui.recents.views.RecentsView;
 
 import java.util.ArrayList;
 
+/** Our special app widget host */
+class RecentsAppWidgetHost extends AppWidgetHost {
+    /* Callbacks to notify when an app package changes */
+    interface RecentsAppWidgetHostCallbacks {
+        public void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo);
+    }
+
+    RecentsAppWidgetHostCallbacks mCb;
+
+    public RecentsAppWidgetHost(Context context, int hostId, RecentsAppWidgetHostCallbacks cb) {
+        super(context, hostId);
+        mCb = cb;
+    }
+
+    @Override
+    protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+        mCb.onProviderChanged(appWidgetId, appWidget);
+    }
+}
 
 /* Activity */
-public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks {
+public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
+        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks{
     FrameLayout mContainerView;
     RecentsView mRecentsView;
     View mEmptyView;
+
+    AppWidgetHost mAppWidgetHost;
+    AppWidgetProviderInfo mSearchAppWidgetInfo;
+    AppWidgetHostView mSearchAppWidgetHostView;
 
     boolean mVisible;
     boolean mTaskLaunched;
@@ -102,6 +132,75 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
+    /** Attempts to allocate and bind the search bar app widget */
+    void bindSearchBarAppWidget() {
+        if (Constants.DebugFlags.App.EnableSearchButton) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+
+            // Reset the host view and widget info
+            mSearchAppWidgetHostView = null;
+            mSearchAppWidgetInfo = null;
+
+            // Try and load the app widget id from the settings
+            int appWidgetId = config.searchBarAppWidgetId;
+            if (appWidgetId >= 0) {
+                mSearchAppWidgetInfo = ssp.getAppWidgetInfo(appWidgetId);
+                if (mSearchAppWidgetInfo == null) {
+                    // If there is no actual widget associated with that id, then delete it and
+                    // prepare to bind another app widget in its place
+                    ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
+                    appWidgetId = -1;
+                }
+                Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                        "[RecentsActivity|onCreate|settings|appWidgetId]",
+                        "Id: " + appWidgetId,
+                        Console.AnsiBlue);
+            }
+
+            // If there is no id, then bind a new search app widget
+            if (appWidgetId < 0) {
+                Pair<Integer, AppWidgetProviderInfo> widgetInfo =
+                        ssp.bindSearchAppWidget(mAppWidgetHost);
+                if (widgetInfo != null) {
+                    Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                            "[RecentsActivity|onCreate|searchWidget]",
+                            "Id: " + widgetInfo.first + " Info: " + widgetInfo.second,
+                            Console.AnsiBlue);
+
+                    // Save the app widget id into the settings
+                    config.updateSearchBarAppWidgetId(this, widgetInfo.first);
+                    mSearchAppWidgetInfo = widgetInfo.second;
+                }
+            }
+        }
+    }
+
+    /** Creates the search bar app widget view */
+    void addSearchBarAppWidgetView() {
+        if (Constants.DebugFlags.App.EnableSearchButton) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            int appWidgetId = config.searchBarAppWidgetId;
+            if (appWidgetId >= 0) {
+                Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+                        "[RecentsActivity|onCreate|addSearchAppWidgetView]",
+                        "Id: " + appWidgetId,
+                        Console.AnsiBlue);
+                mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
+                        mSearchAppWidgetInfo);
+                Bundle opts = new Bundle();
+                opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+                mSearchAppWidgetHostView.updateAppWidgetOptions(opts);
+                // Set the padding to 0 for this search widget
+                mSearchAppWidgetHostView.setPadding(0, 0, 0, 0);
+                mRecentsView.setSearchBar(mSearchAppWidgetHostView);
+            } else {
+                mRecentsView.setSearchBar(null);
+            }
+        }
+    }
+
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
     boolean dismissRecentsIfVisible() {
         if (mVisible) {
@@ -127,6 +226,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsTaskLoader.initialize(this);
         RecentsConfiguration.reinitialize(this);
 
+        // Initialize the widget host (the host id is static and does not change)
+        mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId, this);
+
         // Create the view hierarchy
         mRecentsView = new RecentsView(this);
         mRecentsView.setCallbacks(this);
@@ -145,6 +247,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Update the recent tasks
         updateRecentsTasks(getIntent());
+
+        // Bind the search app widget when we first start up
+        bindSearchBarAppWidget();
+        // Add the search bar layout
+        addSearchBarAppWidgetView();
     }
 
     @Override
@@ -165,6 +272,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Update the recent tasks
         updateRecentsTasks(intent);
+
+        // Don't attempt to rebind the search bar widget, but just add the search bar layout
+        addSearchBarAppWidgetView();
     }
 
     @Override
@@ -172,6 +282,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsActivity|onStart]", "",
                 Console.AnsiRed);
         super.onStart();
+        mAppWidgetHost.startListening();
         mVisible = true;
     }
 
@@ -225,6 +336,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Console.AnsiRed);
         super.onStop();
 
+        mAppWidgetHost.stopListening();
         mVisible = false;
         mTaskLaunched = false;
     }
@@ -264,5 +376,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onTaskLaunching() {
         mTaskLaunched = true;
+    }
+
+    @Override
+    public void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+        if (appWidgetId > -1 && appWidgetId == config.searchBarAppWidgetId) {
+            // The search provider may have changed, so just delete the old widget and bind it again
+            ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
+            config.updateSearchBarAppWidgetId(this, -1);
+            // Load the widget again
+            bindSearchBarAppWidget();
+            addSearchBarAppWidgetView();
+        }
     }
 }

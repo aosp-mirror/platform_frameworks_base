@@ -547,7 +547,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(int width, int height, int insetBottom) {
+    public void computeRects(int width, int height, int insetLeft, int insetBottom) {
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
@@ -555,6 +555,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Compute the stack rects
         mRect.set(0, 0, width, height);
         mStackRect.set(mRect);
+        mStackRect.left += insetLeft;
         mStackRect.bottom -= insetBottom;
 
         int smallestDimension = Math.min(width, height);
@@ -582,6 +583,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         updateMinMaxScroll(false);
     }
 
+    /**
+     * This is called with the size of the space not including the top or right insets, or the
+     * search bar height in portrait (but including the search bar width in landscape, since we want
+     * to draw under it.
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -592,7 +598,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Compute our stack/task rects
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        computeRects(width, height, config.systemInsets.bottom);
+        Rect taskStackBounds = new Rect();
+        config.getTaskStackBounds(width, height, taskStackBounds);
+        computeRects(width, height, taskStackBounds.left, config.systemInsets.bottom);
 
         // Debug logging
         if (Constants.DebugFlags.UI.MeasureAndLayout) {
@@ -630,6 +638,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         setMeasuredDimension(width, height);
     }
 
+    /**
+     * This is called with the size of the space not including the top or right insets, or the
+     * search bar height in portrait (but including the search bar width in landscape, since we want
+     * to draw under it.
+     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[TaskStackView|layout]",
