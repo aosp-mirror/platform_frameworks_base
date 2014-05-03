@@ -299,7 +299,7 @@ class Ripple {
      */
     public void cancel() {
         if (mInner != null) {
-            mInner.end();
+            mInner.cancel();
         }
 
         if (mOuter != null) {
@@ -307,7 +307,7 @@ class Ripple {
         }
 
         if (mAlpha != null) {
-            mAlpha.end();
+            mAlpha.cancel();
         }
     }
 
