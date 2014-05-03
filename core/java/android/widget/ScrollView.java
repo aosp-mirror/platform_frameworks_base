@@ -583,7 +583,8 @@ public class ScrollView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         initVelocityTrackerIfNotExists();
-        mVelocityTracker.addMovement(ev);
+
+        MotionEvent vtev = MotionEvent.obtain(ev);
 
         final int action = ev.getAction();
 
@@ -628,6 +629,7 @@ public class ScrollView extends FrameLayout {
                 int deltaY = mLastMotionY - y;
                 if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
                     deltaY -= mScrollConsumed[1] + mScrollOffset[1];
+                    vtev.offsetLocation(0, mScrollOffset[1]);
                 }
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
                     final ViewParent parent = getParent();
@@ -663,6 +665,7 @@ public class ScrollView extends FrameLayout {
                     final int unconsumedY = deltaY - scrolledDeltaY;
                     if (dispatchNestedScroll(0, scrolledDeltaY, 0, unconsumedY, mScrollOffset)) {
                         mLastMotionY -= mScrollOffset[1];
+                        vtev.offsetLocation(0, mScrollOffset[1]);
                     } else if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
@@ -720,6 +723,11 @@ public class ScrollView extends FrameLayout {
                 mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
+
+        if (mVelocityTracker != null) {
+            mVelocityTracker.addMovement(vtev);
+        }
+        vtev.recycle();
         return true;
     }
 
