@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -35,6 +36,9 @@ public class RecentsConfiguration {
     public Rect systemInsets = new Rect();
     public Rect displayRect = new Rect();
 
+    boolean isLandscape;
+    int searchBarAppWidgetId = -1;
+
     public float animationPxMovementPerSecond;
 
     public int filteringCurrentViewsMinAnimDuration;
@@ -46,7 +50,6 @@ public class RecentsConfiguration {
     public int taskViewInfoPaneAnimDuration;
     public int taskViewRoundedCornerRadiusPx;
     public int searchBarSpaceHeightPx;
-    public int searchBarSpaceEdgeMarginsPx;
 
     public int taskBarViewDefaultBackgroundColor;
     public int taskBarViewDefaultTextColor;
@@ -78,7 +81,7 @@ public class RecentsConfiguration {
         DisplayMetrics dm = res.getDisplayMetrics();
         mDisplayMetrics = dm;
 
-        boolean isLandscape = res.getConfiguration().orientation ==
+        isLandscape = res.getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
         Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
                 "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
@@ -103,8 +106,7 @@ public class RecentsConfiguration {
         taskViewRoundedCornerRadiusPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-        searchBarSpaceEdgeMarginsPx =
-                res.getDimensionPixelSize(R.dimen.recents_search_bar_space_edge_margins);
+
 
         taskBarViewDefaultBackgroundColor =
                 res.getColor(R.color.recents_task_bar_default_background_color);
@@ -114,6 +116,10 @@ public class RecentsConfiguration {
                 res.getColor(R.color.recents_task_bar_light_text_color);
         taskBarViewDarkTextColor =
                 res.getColor(R.color.recents_task_bar_dark_text_color);
+
+        // Update the search widget id
+        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
+        searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
     }
 
     /** Updates the system insets */
@@ -121,24 +127,57 @@ public class RecentsConfiguration {
         systemInsets.set(insets);
     }
 
-    /** Returns the search bar bounds in the specified orientation */
-    public void getSearchBarBounds(int width, int height,
-                                   Rect searchBarSpaceBounds, Rect searchBarBounds) {
+    /** Updates the search bar app widget */
+    public void updateSearchBarAppWidgetId(Context context, int appWidgetId) {
+        searchBarAppWidgetId = appWidgetId;
+        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
+        settings.edit().putInt(Constants.Values.App.Key_SearchAppWidgetId,
+                appWidgetId).apply();
+    }
+
+    /** Returns whether the search bar app widget exists */
+    public boolean hasSearchBarAppWidget() {
+        return searchBarAppWidgetId >= 0;
+    }
+
+    /**
+     * Returns the task stack bounds in the current orientation. These bounds do not account for
+     * the system insets.
+     */
+    public void getTaskStackBounds(int width, int height, Rect taskStackBounds) {
+        if (hasSearchBarAppWidget()) {
+            Rect searchBarBounds = new Rect();
+            getSearchBarBounds(width, height, searchBarBounds);
+            if (isLandscape) {
+                // In landscape, the search bar appears on the left, so shift the task rect right
+                taskStackBounds.set(searchBarBounds.width(), 0, width, height);
+            } else {
+                // In portrait, the search bar appears on the top, so shift the task rect below
+                taskStackBounds.set(0, searchBarBounds.height(), width, height);
+            }
+        } else {
+            taskStackBounds.set(0, 0, width, height);
+        }
+    }
+
+    /**
+     * Returns the search bar bounds in the current orientation.  These bounds do not account for
+     * the system insets.
+     */
+    public void getSearchBarBounds(int width, int height, Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
         if (!Constants.DebugFlags.App.EnableSearchButton) {
             searchBarSpaceBounds.set(0, 0, 0, 0);
-            searchBarBounds.set(0, 0, 0, 0);
             return;
         }
 
-        // Calculate the search bar bounds, and account for the system insets
-        int edgeMarginPx = searchBarSpaceEdgeMarginsPx;
-        int availableWidth = width - systemInsets.left - systemInsets.right;
-        searchBarSpaceBounds.set(0, 0, availableWidth, 2 * edgeMarginPx + searchBarSpaceHeightPx);
-
-        // Inset from the search bar space to get the search bar bounds
-        searchBarBounds.set(searchBarSpaceBounds);
-        searchBarBounds.inset(edgeMarginPx, edgeMarginPx);
+        if (isLandscape) {
+            // In landscape, the search bar appears on the left
+            searchBarSpaceBounds.set(0, 0, searchBarSpaceHeightPx, height);
+        } else {
+            // In portrait, the search bar appears on the top
+            searchBarSpaceBounds.set(0, 0, width, searchBarSpaceHeightPx);
+        }
     }
 
     /** Converts from DPs to PXs */

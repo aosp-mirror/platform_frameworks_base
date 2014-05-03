@@ -30,7 +30,7 @@ public class Constants {
             public static final boolean EnableTaskStackClipping = false;
             public static final boolean EnableTaskBarThemeColors = true;
             public static final boolean EnableInfoPane = true;
-            public static final boolean EnableSearchButton = false;
+            public static final boolean EnableSearchButton = true;
 
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
@@ -52,6 +52,7 @@ public class Constants {
             public static final boolean SystemUIHandshake = false;
             public static final boolean TimeSystemCalls = false;
             public static final boolean Memory = false;
+            public static final boolean Search = false;
         }
 
         public static class UI {
@@ -72,6 +73,10 @@ public class Constants {
     }
 
     public static class Values {
+        public static class App {
+            public static int AppWidgetHostId = 1024;
+            public static String Key_SearchAppWidgetId = "searchAppWidgetId";
+        }
         public static class Window {
             // The dark background dim is set behind the empty recents view
             public static final float DarkBackgroundDim = 0.5f;

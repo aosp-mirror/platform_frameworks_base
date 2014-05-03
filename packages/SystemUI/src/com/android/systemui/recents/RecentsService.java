@@ -60,39 +60,41 @@ class SystemUIMessageHandler extends Handler {
                 Rect windowRect = data.getParcelable(AlternateRecentsComponent.KEY_WINDOW_RECT);
                 Rect systemInsets = data.getParcelable(AlternateRecentsComponent.KEY_SYSTEM_INSETS);
 
+                // NOTE: None of the rects computed below need to be offset for the status bar,
+                // since that is done when we compute the animation itself in the Recents component
+
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
                 TaskStack stack = new TaskStack(context);
                 TaskStackView tsv = new TaskStackView(context, stack);
                 Bundle replyData = new Bundle();
                 TaskViewTransform transform;
 
-                // Get the search bar bounds so that we can account for its height in the children
-                Rect searchBarSpaceBounds = new Rect();
-                Rect searchBarBounds = new Rect();
+                // Get the task stack and search bar bounds
+                Rect taskStackBounds = new Rect();
                 RecentsConfiguration config = RecentsConfiguration.getInstance();
-                config.getSearchBarBounds(windowRect.width(), windowRect.height(),
-                        searchBarSpaceBounds, searchBarBounds);
+                config.getTaskStackBounds(windowRect.width(), windowRect.height(), taskStackBounds);
 
-                // Calculate the target task rect for when there is one task
+                // Calculate the target task rect for when there is one task.
+
                 // NOTE: Since the nav bar height is already accounted for in the windowRect, don't
-                // pass in a bottom inset
+                // pass in a left or bottom inset
                 stack.addTask(new Task());
-                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top -
-                        systemInsets.bottom - searchBarSpaceBounds.height(), 0);
+                tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
+                        systemInsets.top - systemInsets.bottom, 0, 0);
                 tsv.boundScroll();
                 transform = tsv.getStackTransform(0, tsv.getStackScroll());
-                transform.rect.offset(0, searchBarSpaceBounds.height());
+                transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_SINGLE_TASK_STACK_RECT,
                         new Rect(transform.rect));
 
-                // Also calculate the target task rect when there are multiple tasks
+                // Also calculate the target task rect when there are multiple tasks.
                 stack.addTask(new Task());
-                tsv.computeRects(windowRect.width(), windowRect.height() - systemInsets.top -
-                        systemInsets.bottom - searchBarSpaceBounds.height(), 0);
+                tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
+                        systemInsets.top - systemInsets.bottom, 0, 0);
                 tsv.setStackScrollRaw(Integer.MAX_VALUE);
                 tsv.boundScroll();
                 transform = tsv.getStackTransform(1, tsv.getStackScroll());
-                transform.rect.offset(0, searchBarSpaceBounds.height());
+                transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_MULTIPLE_TASK_STACK_RECT,
                         new Rect(transform.rect));
 
