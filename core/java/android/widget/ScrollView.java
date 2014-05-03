@@ -628,7 +628,7 @@ public class ScrollView extends FrameLayout {
                 final int y = (int) ev.getY(activePointerIndex);
                 int deltaY = mLastMotionY - y;
                 if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
-                    deltaY -= mScrollConsumed[1] + mScrollOffset[1];
+                    deltaY -= mScrollConsumed[1];
                     vtev.offsetLocation(0, mScrollOffset[1]);
                 }
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
@@ -645,7 +645,7 @@ public class ScrollView extends FrameLayout {
                 }
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
-                    mLastMotionY = y;
+                    mLastMotionY = y - mScrollOffset[1];
 
                     final int oldY = mScrollY;
                     final int range = getScrollRange();
