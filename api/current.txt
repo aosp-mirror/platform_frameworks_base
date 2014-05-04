@@ -12460,6 +12460,7 @@ package android.hardware.hdmi {
     field public static final int POWER_STATUS_UNKNOWN = -1; // 0xffffffff
     field public static final int POWER_TRANSIENT_TO_ON = 2; // 0x2
     field public static final int POWER_TRANSIENT_TO_STANDBY = 3; // 0x3
+    field public static final int UNKNOWN_VENDOR_ID = 16777215; // 0xffffff
   }
 
   public final class HdmiCecClient {
@@ -12501,6 +12502,7 @@ package android.hardware.hdmi {
     method public int getSource();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final byte[] EMPTY_PARAM;
   }
 
 }
