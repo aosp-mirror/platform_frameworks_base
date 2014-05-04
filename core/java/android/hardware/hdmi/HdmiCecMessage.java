@@ -19,6 +19,8 @@ package android.hardware.hdmi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import libcore.util.EmptyArray;
+
 import java.util.Arrays;
 
 /**
@@ -27,6 +29,8 @@ import java.util.Arrays;
  * source and destination address, command (or opcode), and optional parameters.
  */
 public final class HdmiCecMessage implements Parcelable {
+
+    public static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
 
     private static final int MAX_MESSAGE_LENGTH = 16;
 
