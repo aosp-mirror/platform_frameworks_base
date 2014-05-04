@@ -372,7 +372,6 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Optional. Hyperfocal distance for this lens.</p>
-     * <p>If the lens is fixed focus, the camera device will report 0.</p>
      * <p>If the lens is not fixed focus, the camera device will report this
      * field when {@link CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION android.lens.info.focusDistanceCalibration} is APPROXIMATE or CALIBRATED.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
