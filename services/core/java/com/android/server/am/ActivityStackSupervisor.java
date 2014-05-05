@@ -3068,7 +3068,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
             ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, null, userId);
-            if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
+            if (aInfo != null && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
                 throw new SecurityException(
                         "Attempt to embed activity that has not set allowEmbedded=\"true\"");
             }
