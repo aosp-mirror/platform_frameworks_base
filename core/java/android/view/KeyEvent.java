@@ -1855,6 +1855,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Returns true if the key event should be treated as a confirming action.
      * @return True for a confirmation key, such as {@link #KEYCODE_DPAD_CENTER},
      * {@link #KEYCODE_ENTER}, or {@link #KEYCODE_BUTTON_A}.
+     * @hide
      */
     public final boolean isConfirmKey() {
         switch (mKeyCode) {
@@ -1871,6 +1872,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Returns true if the key event should be treated as a cancelling action.
      * @return True for a cancellation key, such as {@link #KEYCODE_ESCAPE},
      * {@link #KEYCODE_BACK}, or {@link #KEYCODE_BUTTON_B}.
+     * @hide
      */
     public final boolean isCancelKey() {
         switch (mKeyCode) {
