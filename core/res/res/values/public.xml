@@ -2168,6 +2168,7 @@
   <public type="attr" name="excludeId" />
   <public type="attr" name="excludeClass" />
   <public type="attr" name="hideOnContentScroll" />
+  <public type="attr" name="actionOverflowMenuStyle" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2307,6 +2308,7 @@
   <public type="style" name="Widget.Quantum.ListView.DropDown" />
   <public type="style" name="Widget.Quantum.MediaRouteButton" />
   <public type="style" name="Widget.Quantum.PopupMenu" />
+  <public type="style" name="Widget.Quantum.PopupMenu.Overflow" />
   <public type="style" name="Widget.Quantum.PopupWindow" />
   <public type="style" name="Widget.Quantum.ProgressBar" />
   <public type="style" name="Widget.Quantum.ProgressBar.Horizontal" />
@@ -2366,6 +2368,7 @@
   <public type="style" name="Widget.Quantum.Light.ListView.DropDown" />
   <public type="style" name="Widget.Quantum.Light.MediaRouteButton" />
   <public type="style" name="Widget.Quantum.Light.PopupMenu" />
+  <public type="style" name="Widget.Quantum.Light.PopupMenu.Overflow" />
   <public type="style" name="Widget.Quantum.Light.PopupWindow" />
   <public type="style" name="Widget.Quantum.Light.ProgressBar" />
   <public type="style" name="Widget.Quantum.Light.ProgressBar.Horizontal" />

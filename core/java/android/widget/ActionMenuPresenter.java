@@ -649,7 +649,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     private class OverflowPopup extends MenuPopupHelper {
         public OverflowPopup(Context context, MenuBuilder menu, View anchorView,
                 boolean overflowOnly) {
-            super(context, menu, anchorView, overflowOnly);
+            super(context, menu, anchorView, overflowOnly,
+                    com.android.internal.R.attr.actionOverflowMenuStyle);
             setGravity(Gravity.END);
             setCallback(mPopupPresenterCallback);
         }
