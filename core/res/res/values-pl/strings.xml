@@ -692,7 +692,7 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolowanie długości haseł odblokowania ekranu i dozwolonych w nich znaków"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoruj próby odblokowania ekranu"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Zmień hasło odblokowania ekranu"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Zmienianie hasła odblokowania ekranu"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Zablokuj ekran"</string>
