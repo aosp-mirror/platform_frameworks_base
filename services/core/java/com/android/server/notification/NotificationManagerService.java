@@ -1612,7 +1612,8 @@ public class NotificationManagerService extends SystemService {
 
                 // Should this notification make noise, vibe, or use the LED?
                 final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) && !intercept;
-                if (DBG) Slog.v(TAG, "canInterrupt=" + canInterrupt + " intercept=" + intercept);
+                if (DBG || intercept) Slog.v(TAG,
+                        "pkg=" + pkg + " canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
                     final StatusBarNotification n = new StatusBarNotification(
                             pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
