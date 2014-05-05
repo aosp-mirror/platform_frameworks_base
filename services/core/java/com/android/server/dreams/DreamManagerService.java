@@ -642,8 +642,9 @@ public final class DreamManagerService extends SystemService {
             try {
                 synchronized (mMcuHal) {
                     if (mReleased) {
-                        throw new IllegalStateException("This operation cannot be performed "
-                                + "because the dream has ended.");
+                        Slog.w(TAG, "Ignoring message to MCU HAL because the dream "
+                                + "has already ended: " + msg);
+                        return null;
                     }
                     return mMcuHal.sendMessage(msg, arg);
                 }
