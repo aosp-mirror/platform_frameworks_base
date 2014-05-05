@@ -21,6 +21,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +31,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.ArrayMap;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
@@ -138,6 +140,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private static final String KEY_HEIGHT = "shared_element:height";
     private static final String KEY_NAME = "shared_element:name";
     private static final String KEY_BITMAP = "shared_element:bitmap";
+    private static final String KEY_SCALE_TYPE = "shared_element:scaleType";
+    private static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
+
+    private static final ImageView.ScaleType[] SCALE_TYPE_VALUES = ImageView.ScaleType.values();
 
     /**
      * Sent by the exiting coordinator (either EnterTransitionCoordinator
@@ -322,7 +328,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         final ArrayList<View> accepted = new ArrayList<View>();
         final ArrayList<View> rejected = new ArrayList<View>();
         createSharedElementImages(accepted, rejected, sharedElementNames, state);
-        setSharedElementState(state, accepted);
+        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageViewState =
+                setSharedElementState(state, accepted);
         handleRejected(rejected);
 
         if (getViewsTransition() != null) {
@@ -331,6 +338,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         setViewVisibility(mSharedElements, View.VISIBLE);
         Transition transition = beginTransition(mEnteringViews, true, allowOverlappingTransitions(),
                 true);
+        setOriginalImageViewState(originalImageViewState);
 
         if (allowOverlappingTransitions()) {
             onStartEnterTransition(transition, mEnteringViews);
@@ -568,15 +576,22 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mEpicenterCallback.setEpicenter(epicenter);
     }
 
-    private void setSharedElementState(Bundle sharedElementState,
-            final ArrayList<View> acceptedOverlayViews) {
+    private ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> setSharedElementState(
+            Bundle sharedElementState, final ArrayList<View> acceptedOverlayViews) {
+        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageState =
+                new ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>>();
         final int[] tempLoc = new int[2];
         if (sharedElementState != null) {
             for (int i = 0; i < mSharedElements.size(); i++) {
                 View sharedElement = mSharedElements.get(i);
+                String name = mTargetSharedNames.get(i);
+                Pair<ImageView.ScaleType, Matrix> originalState = getOldImageState(sharedElement,
+                        name, sharedElementState);
+                if (originalState != null) {
+                    originalImageState.put((ImageView) sharedElement, originalState);
+                }
                 View parent = (View) sharedElement.getParent();
                 parent.getLocationOnScreen(tempLoc);
-                String name = mTargetSharedNames.get(i);
                 setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
                 sharedElement.requestLayout();
             }
@@ -596,6 +611,29 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                     }
                 }
         );
+        return originalImageState;
+    }
+
+    private static Pair<ImageView.ScaleType, Matrix> getOldImageState(View view, String name,
+            Bundle transitionArgs) {
+        if (!(view instanceof ImageView)) {
+            return null;
+        }
+        Bundle bundle = transitionArgs.getBundle(name);
+        int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
+        if (scaleTypeInt < 0) {
+            return null;
+        }
+
+        ImageView imageView = (ImageView) view;
+        ImageView.ScaleType originalScaleType = imageView.getScaleType();
+
+        Matrix originalMatrix = null;
+        if (originalScaleType == ImageView.ScaleType.MATRIX) {
+            originalMatrix = new Matrix(imageView.getImageMatrix());
+        }
+
+        return Pair.create(originalScaleType, originalMatrix);
     }
 
     /**
@@ -612,6 +650,21 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         Bundle sharedElementBundle = transitionArgs.getBundle(name);
         if (sharedElementBundle == null) {
             return;
+        }
+
+        if (view instanceof ImageView) {
+            int scaleTypeInt = sharedElementBundle.getInt(KEY_SCALE_TYPE, -1);
+            if (scaleTypeInt >= 0) {
+                ImageView imageView = (ImageView) view;
+                ImageView.ScaleType scaleType = SCALE_TYPE_VALUES[scaleTypeInt];
+                imageView.setScaleType(scaleType);
+                if (scaleType == ImageView.ScaleType.MATRIX) {
+                    float[] matrixValues = sharedElementBundle.getFloatArray(KEY_IMAGE_MATRIX);
+                    Matrix matrix = new Matrix();
+                    matrix.setValues(matrixValues);
+                    imageView.setImageMatrix(matrix);
+                }
+            }
         }
 
         float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
@@ -665,6 +718,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
         sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);
+
+        if (view instanceof ImageView) {
+            ImageView imageView = (ImageView) view;
+            int scaleTypeInt = scaleTypeToInt(imageView.getScaleType());
+            sharedElementBundle.putInt(KEY_SCALE_TYPE, scaleTypeInt);
+            if (imageView.getScaleType() == ImageView.ScaleType.MATRIX) {
+                float[] matrix = new float[9];
+                imageView.getImageMatrix().getValues(matrix);
+                sharedElementBundle.putFloatArray(KEY_IMAGE_MATRIX, matrix);
+            }
+        }
 
         transitionArgs.putBundle(name, sharedElementBundle);
     }
@@ -827,6 +891,25 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 }
             }
         }
+    }
+
+    private static void setOriginalImageViewState(
+            ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalState) {
+        for (int i = 0; i < originalState.size(); i++) {
+            ImageView imageView = originalState.keyAt(i);
+            Pair<ImageView.ScaleType, Matrix> state = originalState.valueAt(i);
+            imageView.setScaleType(state.first);
+            imageView.setImageMatrix(state.second);
+        }
+    }
+
+    private static int scaleTypeToInt(ImageView.ScaleType scaleType) {
+        for (int i = 0; i < SCALE_TYPE_VALUES.length; i++) {
+            if (scaleType == SCALE_TYPE_VALUES[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
