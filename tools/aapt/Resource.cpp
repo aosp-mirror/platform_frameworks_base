@@ -1237,12 +1237,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         while ((err=it.next()) == NO_ERROR) {
             String8 src = it.getFile()->getPrintableSource();
             err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
-            if (err != NO_ERROR) {
+            if (err == NO_ERROR) {
+                ResXMLTree block;
+                block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
+                checkForIds(src, block);
+            } else {
                 hasErrors = true;
             }
-            ResXMLTree block;
-            block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
-            checkForIds(src, block);
         }
 
         if (err < NO_ERROR) {
