@@ -123,6 +123,8 @@
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
+    <!-- Transposes the search bar layout in landscape -->
+    <bool name="recents_transpose_search_layout_with_orientation">true</bool>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>

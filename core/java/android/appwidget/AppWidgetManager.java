@@ -181,7 +181,8 @@ public class AppWidgetManager {
      * A bundle extra that hints to the AppWidgetProvider the category of host that owns this
      * this widget. Can have the value {@link
      * AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN} or {@link
-     * AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD}.
+     * AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD} or {@link
+     * AppWidgetProviderInfo#WIDGET_CATEGORY_RECENTS}.
      */
     public static final String OPTION_APPWIDGET_HOST_CATEGORY = "appWidgetCategory";
 
