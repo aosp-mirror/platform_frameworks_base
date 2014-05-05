@@ -702,8 +702,9 @@ public class ViewConfiguration {
      *
      * @return how long a user needs to press the relevant key to bring up
      *   the global actions dialog.
-     * @deprecated use getDeviceGlobalActionKeyTimeout
+     * @deprecated
      */
+    @Deprecated
     public static long getGlobalActionKeyTimeout() {
         return GLOBAL_ACTIONS_KEY_TIMEOUT;
     }
@@ -714,6 +715,7 @@ public class ViewConfiguration {
      *
      * @return how long a user needs to press the relevant key to bring up
      *   the global actions dialog.
+     * @hide
      */
     public long getDeviceGlobalActionKeyTimeout() {
         return mGlobalActionsKeyTimeout;
