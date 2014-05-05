@@ -39,8 +39,11 @@ static jlong FontFamily_create(JNIEnv* env, jobject clazz) {
 #endif
 }
 
-static void FontFamily_destroy(JNIEnv* env, jobject clazz, jlong ptr) {
-    // TODO: work out lifetime issues
+static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
+#ifdef USE_MINIKIN
+    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    fontFamily->Unref();
+#endif
 }
 
 static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jstring path) {
@@ -65,7 +68,7 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
 
 static JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",            "()J", (void*)FontFamily_create },
-    { "nDestroyFamily",           "(J)V", (void*)FontFamily_destroy },
+    { "nUnrefFamily",             "(J)V", (void*)FontFamily_unref },
     { "nAddFont",                 "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },
 };
 
