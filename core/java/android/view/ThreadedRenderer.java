@@ -19,7 +19,6 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -52,16 +51,23 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static final Rect NULL_RECT = new Rect();
 
+    private static final long NANOS_PER_MS = 1000000;
+
     private int mWidth, mHeight;
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
+    private Choreographer mChoreographer;
 
     ThreadedRenderer(boolean translucent) {
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
+
+        // Setup timing
+        mChoreographer = Choreographer.getInstance();
+        nSetFrameInterval(mNativeProxy, mChoreographer.getFrameIntervalNanos());
     }
 
     @Override
@@ -161,15 +167,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         return false;
     }
 
-    /**
-     * TODO: Remove
-     * Temporary hack to allow RenderThreadTest prototype app to trigger
-     * replaying a DisplayList after modifying the displaylist properties
-     *
-     *  @hide */
-    public void repeatLastDraw() {
-    }
-
     private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
         view.mPrivateFlags |= View.PFLAG_DRAWN;
 
@@ -194,7 +191,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
         attachInfo.mIgnoreDirtyState = true;
-        attachInfo.mDrawingTime = SystemClock.uptimeMillis();
+        long frameTimeNanos = mChoreographer.getFrameTimeNanos();
+        attachInfo.mDrawingTime = frameTimeNanos / NANOS_PER_MS;
 
         updateRootDisplayList(view, callbacks);
 
@@ -203,7 +201,8 @@ public class ThreadedRenderer extends HardwareRenderer {
         if (dirty == null) {
             dirty = NULL_RECT;
         }
-        nSyncAndDrawFrame(mNativeProxy, dirty.left, dirty.top, dirty.right, dirty.bottom);
+        nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
+                dirty.left, dirty.top, dirty.right, dirty.bottom);
     }
 
     @Override
@@ -297,13 +296,15 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
     private static native void nDeleteProxy(long nativeProxy);
 
+    private static native void nSetFrameInterval(long nativeProxy, long frameIntervalNanos);
+
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native void nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height);
     private static native void nSetDisplayListData(long nativeProxy, long displayList,
             long newData);
-    private static native void nSyncAndDrawFrame(long nativeProxy,
+    private static native void nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);

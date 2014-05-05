@@ -152,6 +152,12 @@ static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz
     delete proxy;
 }
 
+static void android_view_ThreadedRenderer_setFrameInterval(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong frameIntervalNanos) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setFrameInterval(frameIntervalNanos);
+}
+
 static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -186,10 +192,10 @@ static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jint dirtyLeft, jint dirtyTop,
+        jlong proxyPtr, jlong frameTimeNanos, jint dirtyLeft, jint dirtyTop,
         jint dirtyRight, jint dirtyBottom) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->syncAndDrawFrame(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    proxy->syncAndDrawFrame(frameTimeNanos, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
 }
 
 static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
@@ -261,11 +267,12 @@ static JNINativeMethod gMethods[] = {
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
+    { "nSetFrameInterval", "(JJ)V", (void*) android_view_ThreadedRenderer_setFrameInterval },
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
-    { "nSyncAndDrawFrame", "(JIIII)V", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
+    { "nSyncAndDrawFrame", "(JJIIII)V", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },

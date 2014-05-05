@@ -406,6 +406,8 @@ void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* lay
 }
 
 void CanvasContext::prepareTree(TreeInfo& info) {
+    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
+
     mRootRenderNode->prepareTree(info);
 
     if (info.hasAnimations && !info.hasFunctors) {
@@ -449,12 +451,11 @@ void CanvasContext::draw(Rect* dirty) {
 }
 
 // Called by choreographer to do an RT-driven animation
-void CanvasContext::doFrame(nsecs_t frameTimeNanos) {
+void CanvasContext::doFrame() {
     ATRACE_CALL();
 
     TreeInfo info;
     info.evaluateAnimations = true;
-    info.frameTimeMs = nanoseconds_to_milliseconds(frameTimeNanos);
     info.performStagingPush = false;
     info.prepareTextures = false;
 

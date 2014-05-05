@@ -259,6 +259,14 @@ public final class Choreographer {
         return delayMillis <= frameDelay ? 0 : delayMillis - frameDelay;
     }
 
+    /**
+     * @return The refresh rate as the nanoseconds between frames
+     * @hide
+     */
+    long getFrameIntervalNanos() {
+        return mFrameIntervalNanos;
+    }
+
     void dump(String prefix, PrintWriter writer) {
         String innerPrefix = prefix + "  ";
         writer.print(prefix); writer.println("Choreographer:");
