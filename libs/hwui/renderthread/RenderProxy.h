@@ -61,6 +61,7 @@ public:
     ANDROID_API virtual ~RenderProxy();
 
     ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);
+    ANDROID_API bool loadSystemProperties();
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
