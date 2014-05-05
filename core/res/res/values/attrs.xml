@@ -721,6 +721,7 @@
         <attr name="actionBarTabBarStyle" format="reference" />
         <attr name="actionBarTabTextStyle" format="reference" />
         <attr name="actionOverflowButtonStyle" format="reference" />
+        <attr name="actionOverflowMenuStyle" format="reference" />
         <!-- Reference to a style for the Action Bar -->
         <attr name="actionBarStyle" format="reference" />
         <!-- Reference to a style for the split Action Bar. This style
@@ -3803,6 +3804,7 @@
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
         <attr name="popupAnimationStyle" format="reference" />
+        <attr name="overlapAnchor" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
         <!-- Identifier for the animation to use when a view is shown. -->

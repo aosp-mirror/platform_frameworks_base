@@ -291,6 +291,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@style/Widget.Quantum.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@style/Widget.Quantum.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Quantum.ActionButton.Overflow</item>
+        <item name="actionOverflowMenuStyle">@android:style/Widget.Quantum.PopupMenu.Overflow</item>
         <item name="actionModeBackground">?attr/colorPrimaryDark</item>
         <item name="actionModeSplitBackground">?attr/colorPrimaryDark</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum</item>
@@ -636,6 +637,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@style/Widget.Quantum.Light.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@style/Widget.Quantum.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Quantum.Light.ActionButton.Overflow</item>
+        <item name="actionOverflowMenuStyle">@android:style/Widget.Quantum.Light.PopupMenu.Overflow</item>
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_quantum</item>

@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -116,6 +117,10 @@ public class PopupWindow {
     private Drawable mAboveAnchorBackgroundDrawable;
     private Drawable mBelowAnchorBackgroundDrawable;
 
+    // Temporary animation centers. Should be moved into window params?
+    private int mAnchorRelativeX;
+    private int mAnchorRelativeY;
+
     private boolean mAboveAnchor;
     private int mWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
     
@@ -129,12 +134,14 @@ public class PopupWindow {
     };
 
     private WeakReference<View> mAnchor;
-    private OnScrollChangedListener mOnScrollChangedListener =
+
+    private final OnScrollChangedListener mOnScrollChangedListener =
         new OnScrollChangedListener() {
+            @Override
             public void onScrollChanged() {
-                View anchor = mAnchor != null ? mAnchor.get() : null;
+                final View anchor = mAnchor != null ? mAnchor.get() : null;
                 if (anchor != null && mPopupView != null) {
-                    WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                    final WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                             mPopupView.getLayoutParams();
 
                     updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
@@ -143,7 +150,9 @@ public class PopupWindow {
                 }
             }
         };
+
     private int mAnchorXoff, mAnchorYoff, mAnchoredGravity;
+    private boolean mOverlapAnchor;
 
     private boolean mPopupViewInitialLayoutDirectionInherited;
 
@@ -187,6 +196,7 @@ public class PopupWindow {
                 attrs, com.android.internal.R.styleable.PopupWindow, defStyleAttr, defStyleRes);
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
+        mOverlapAnchor = a.getBoolean(R.styleable.PopupWindow_overlapAnchor, false);
 
         final int animStyle = a.getResourceId(R.styleable.PopupWindow_popupAnimationStyle, -1);
         mAnimationStyle = animStyle == com.android.internal.R.style.Animation_PopupWindow ? -1 :
@@ -934,9 +944,9 @@ public class PopupWindow {
                 // do the job.
                 if (mAboveAnchorBackgroundDrawable != null) {
                     if (mAboveAnchor) {
-                        mPopupView.setBackgroundDrawable(mAboveAnchorBackgroundDrawable);
+                        mPopupView.setBackground(mAboveAnchorBackgroundDrawable);
                     } else {
-                        mPopupView.setBackgroundDrawable(mBelowAnchorBackgroundDrawable);
+                        mPopupView.setBackground(mBelowAnchorBackgroundDrawable);
                     }
                 } else {
                     mPopupView.refreshDrawableState();
@@ -1114,36 +1124,43 @@ public class PopupWindow {
         }
         return mAnimationStyle;
     }
-    
+
     /**
-     * <p>Positions the popup window on screen. When the popup window is too
-     * tall to fit under the anchor, a parent scroll view is seeked and scrolled
-     * up to reclaim space. If scrolling is not possible or not enough, the
-     * popup window gets moved on top of the anchor.</p>
-     *
-     * <p>The height must have been set on the layout parameters prior to
-     * calling this method.</p>
-     *
+     * Positions the popup window on screen. When the popup window is too tall
+     * to fit under the anchor, a parent scroll view is seeked and scrolled up
+     * to reclaim space. If scrolling is not possible or not enough, the popup
+     * window gets moved on top of the anchor.
+     * <p>
+     * The height must have been set on the layout parameters prior to calling
+     * this method.
+     * 
      * @param anchor the view on which the popup window must be anchored
      * @param p the layout parameters used to display the drop down
-     *
+     * @param xoff horizontal offset used to adjust for background padding
+     * @param yoff vertical offset used to adjust for background padding
+     * @param gravity horizontal gravity specifying popup alignment
      * @return true if the popup is translated upwards to fit on screen
      */
-    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
-            int xoff, int yoff, int gravity) {
-
+    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p, int xoff,
+            int yoff, int gravity) {
         final int anchorHeight = anchor.getHeight();
+        final int anchorWidth = anchor.getWidth();
+        if (mOverlapAnchor) {
+            yoff -= anchorHeight;
+        }
+
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
         p.y = mDrawingLocation[1] + anchorHeight + yoff;
 
-        final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection()) &
-                Gravity.HORIZONTAL_GRAVITY_MASK;
+        final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection())
+                & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (hgrav == Gravity.RIGHT) {
-            // Flip the location to align the right sides of the popup and anchor instead of left
-            p.x -= mPopupWidth - anchor.getWidth();
+            // Flip the location to align the right sides of the popup and
+            // anchor instead of left.
+            p.x -= mPopupWidth - anchorWidth;
         }
-        
+
         boolean onTop = false;
 
         p.gravity = Gravity.LEFT | Gravity.TOP;
@@ -1152,60 +1169,58 @@ public class PopupWindow {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
-        int screenY = mScreenLocation[1] + anchorHeight + yoff;
-        
+        final int screenY = mScreenLocation[1] + anchorHeight + yoff;
         final View root = anchor.getRootView();
-        if (screenY + mPopupHeight > displayFrame.bottom ||
-                p.x + mPopupWidth - root.getWidth() > 0) {
-            // if the drop down disappears at the bottom of the screen. we try to
-            // scroll a parent scrollview or move the drop down back up on top of
-            // the edit box
+        if (screenY + mPopupHeight > displayFrame.bottom
+                || p.x + mPopupWidth - root.getWidth() > 0) {
+            // If the drop down disappears at the bottom of the screen, we try
+            // to scroll a parent scrollview or move the drop down back up on
+            // top of the edit box.
             if (mAllowScrollingAnchorParent) {
-                int scrollX = anchor.getScrollX();
-                int scrollY = anchor.getScrollY();
-                Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth + xoff,
-                        scrollY + mPopupHeight + anchor.getHeight() + yoff);
+                final int scrollX = anchor.getScrollX();
+                final int scrollY = anchor.getScrollY();
+                final Rect r = new Rect(scrollX, scrollY, scrollX + mPopupWidth + xoff,
+                        scrollY + mPopupHeight + anchorHeight + yoff);
                 anchor.requestRectangleOnScreen(r, true);
             }
 
-            // now we re-evaluate the space available, and decide from that
+            // Now we re-evaluate the space available, and decide from that
             // whether the pop-up will go above or below the anchor.
             anchor.getLocationInWindow(mDrawingLocation);
             p.x = mDrawingLocation[0] + xoff;
-            p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
+            p.y = mDrawingLocation[1] + anchorHeight + yoff;
 
-            // Preserve the gravity adjustment
+            // Preserve the gravity adjustment.
             if (hgrav == Gravity.RIGHT) {
-                p.x -= mPopupWidth - anchor.getWidth();
+                p.x -= mPopupWidth - anchorWidth;
             }
-            
-            // determine whether there is more space above or below the anchor
+
+            // Determine whether there is more space above or below the anchor.
             anchor.getLocationOnScreen(mScreenLocation);
-            
-            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getHeight() - yoff) <
+            onTop = (displayFrame.bottom - mScreenLocation[1] - anchorHeight - yoff) <
                     (mScreenLocation[1] - yoff - displayFrame.top);
             if (onTop) {
                 p.gravity = Gravity.LEFT | Gravity.BOTTOM;
                 p.y = root.getHeight() - mDrawingLocation[1] + yoff;
             } else {
-                p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
+                p.y = mDrawingLocation[1] + anchorHeight + yoff;
             }
         }
 
         if (mClipToScreen) {
             final int displayFrameWidth = displayFrame.right - displayFrame.left;
-
-            int right = p.x + p.width;
+            final int right = p.x + p.width;
             if (right > displayFrameWidth) {
                 p.x -= right - displayFrameWidth;
             }
+
             if (p.x < displayFrame.left) {
                 p.x = displayFrame.left;
                 p.width = Math.min(p.width, displayFrameWidth);
             }
 
             if (onTop) {
-                int popupTop = mScreenLocation[1] + yoff - mPopupHeight;
+                final int popupTop = mScreenLocation[1] + yoff - mPopupHeight;
                 if (popupTop < 0) {
                     p.y += popupTop;
                 }
@@ -1215,7 +1230,11 @@ public class PopupWindow {
         }
 
         p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
-        
+
+        // Compute the position of the anchor relative to the popup.
+        mAnchorRelativeX = mDrawingLocation[0] - p.x + anchorHeight / 2;
+        mAnchorRelativeY = mDrawingLocation[1] - p.y + anchorWidth / 2;
+
         return onTop;
     }
     
@@ -1503,7 +1522,8 @@ public class PopupWindow {
         }
 
         WeakReference<View> oldAnchor = mAnchor;
-        final boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
+        final boolean needsUpdate = updateLocation
+                && (mAnchorXoff != xoff || mAnchorYoff != yoff);
         if (oldAnchor == null || oldAnchor.get() != anchor || (needsUpdate && !mIsDropdown)) {
             registerForScrollChanged(anchor, xoff, yoff, gravity);
         } else if (needsUpdate) {

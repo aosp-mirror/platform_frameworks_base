@@ -336,6 +336,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
+        <item name="actionOverflowMenuStyle">?android:attr/popupMenuStyle</item>
         <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
         <item name="actionModeSplitBackground">@null</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
@@ -1213,6 +1214,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="actionOverflowMenuStyle">?android:attr/popupMenuStyle</item>
         <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
         <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_cab_done_holo_dark</item>
