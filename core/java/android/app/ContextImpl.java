@@ -473,14 +473,14 @@ class ContextImpl extends Context {
         registerService(NOTIFICATION_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     final Context outerContext = ctx.getOuterContext();
-                    // TODO: Why are we not just using the theme attribute
-                    // that defines the dialog theme?
                     return new NotificationManager(
                         new ContextThemeWrapper(outerContext,
-                                outerContext.getResources().selectSystemTheme(0,
+                                Resources.selectSystemTheme(0,
                                         outerContext.getApplicationInfo().targetSdkVersion,
-                                        com.android.internal.R.array.system_theme_sdks,
-                                        com.android.internal.R.array.system_theme_dialog_styles)),
+                                        com.android.internal.R.style.Theme_Dialog,
+                                        com.android.internal.R.style.Theme_Holo_Dialog,
+                                        com.android.internal.R.style.Theme_DeviceDefault_Dialog,
+                                        com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
                         ctx.mMainThread.getHandler());
                 }});
 
@@ -731,7 +731,7 @@ class ContextImpl extends Context {
     @Override
     public Resources.Theme getTheme() {
         if (mTheme == null) {
-            mThemeResource = mResources.selectDefaultTheme(mThemeResource,
+            mThemeResource = Resources.selectDefaultTheme(mThemeResource,
                     getOuterContext().getApplicationInfo().targetSdkVersion);
             mTheme = mResources.newTheme();
             mTheme.applyStyle(mThemeResource, true);
