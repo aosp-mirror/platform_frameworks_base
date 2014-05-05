@@ -3238,15 +3238,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
             } else {
                 mContainerState = CONTAINER_STATE_NO_SURFACE;
                 ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
-//                if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-//                    mStack.startPausingLocked(false, true);
-//                }
+                if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
+                    mStack.startPausingLocked(false, true);
+                }
             }
 
             setSurfaceIfReady();
 
             if (DEBUG_STACK) Slog.d(TAG, "setSurface: " + this + " to display="
                     + virtualActivityDisplay);
+        }
+
+        @Override
+        boolean isAttached() {
+            return mSurface != null && super.isAttached();
         }
 
         @Override
