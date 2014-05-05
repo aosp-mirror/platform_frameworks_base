@@ -170,7 +170,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
               View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.STATUS_BAR_TRANSLUCENT
-            | View.NAVIGATION_BAR_TRANSLUCENT;
+            | View.NAVIGATION_BAR_TRANSLUCENT
+            | View.SYSTEM_UI_TRANSPARENT;
 
     /**
      * Keyguard stuff
@@ -1367,6 +1368,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (attrs.type != TYPE_STATUS_BAR) {
             // The status bar is the only window allowed to exhibit keyguard behavior.
             attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+        }
+
+        if (ActivityManager.isHighEndGfx()
+                && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         }
     }
     
@@ -2708,7 +2716,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // drive nav being hidden only by whether it is requested.
             final int sysui = mLastSystemUiFlags;
             boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
-            boolean navTranslucent = (sysui & View.NAVIGATION_BAR_TRANSLUCENT) != 0;
+            boolean navTranslucent = (sysui
+                    & (View.NAVIGATION_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
             boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
             boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
             boolean navAllowedHidden = immersive || immersiveSticky;
@@ -2834,7 +2843,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
                 boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
-                boolean statusBarTranslucent = (sysui & View.STATUS_BAR_TRANSLUCENT) != 0;
+                boolean statusBarTranslucent = (sysui
+                        & (View.STATUS_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
                 statusBarTranslucent &= areTranslucentBarsAllowed();
 
                 // If the status bar is hidden, we don't want to cause
@@ -3030,12 +3040,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (isAppWindow && !inheritTranslucentDecor && !topAtRest) {
                 if ((sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
                         && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
-                        && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0) {
+                        && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0
+                        && (fl & WindowManager.LayoutParams.
+                                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
                     // Ensure policy decor includes status bar
                     dcf.top = mStableTop;
                 }
                 if ((fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) == 0
-                        && (sysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+                        && (sysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
+                        && (fl & WindowManager.LayoutParams.
+                                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
                     // Ensure policy decor includes navigation bar
                     dcf.bottom = mStableBottom;
                     dcf.right = mStableRight;
@@ -5232,7 +5246,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (!areTranslucentBarsAllowed()) {
-            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT);
+            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
+                    | View.SYSTEM_UI_TRANSPARENT);
         }
 
         // update status bar

@@ -2774,8 +2774,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @hide
+     *
+     * Makes system ui transparent.
      */
-    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
+    public static final int SYSTEM_UI_TRANSPARENT = 0x00008000;
+
+    /**
+     * @hide
+     */
+    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00007FFF;
 
     /**
      * These are the system UI flags that can be cleared by events outside
