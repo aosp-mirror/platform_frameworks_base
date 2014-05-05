@@ -735,30 +735,34 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
             // a null path is OK because there are no custom kernels used
             // hence nothing gets cached by RS
             if (!mRs->init("", RSC::RS_INIT_LOW_LATENCY | RSC::RS_INIT_SYNCHRONOUS)) {
+                mRs.clear();
                 ALOGE("blur RS failed to init");
+            } else {
+                mRsElement = RSC::Element::A_8(mRs);
+                mRsScript = RSC::ScriptIntrinsicBlur::create(mRs, mRsElement);
             }
-
-            mRsElement = RSC::Element::A_8(mRs);
-            mRsScript = RSC::ScriptIntrinsicBlur::create(mRs, mRsElement);
         }
+        if (mRs != 0) {
+            RSC::sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
+            RSC::sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t,
+                    RS_ALLOCATION_MIPMAP_NONE,
+                    RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
+                    *image);
+            RSC::sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t,
+                    RS_ALLOCATION_MIPMAP_NONE,
+                    RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
+                    outImage);
 
-        RSC::sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
-        RSC::sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t,
-                RS_ALLOCATION_MIPMAP_NONE, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
-                *image);
-        RSC::sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t,
-                RS_ALLOCATION_MIPMAP_NONE, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
-                outImage);
+            mRsScript->setRadius(radius);
+            mRsScript->setInput(ain);
+            mRsScript->forEach(aout);
 
-        mRsScript->setRadius(radius);
-        mRsScript->setInput(ain);
-        mRsScript->forEach(aout);
+            // replace the original image's pointer, avoiding a copy back to the original buffer
+            free(*image);
+            *image = outImage;
 
-        // replace the original image's pointer, avoiding a copy back to the original buffer
-        free(*image);
-        *image = outImage;
-
-        return;
+            return;
+        }
     }
 #endif
 
