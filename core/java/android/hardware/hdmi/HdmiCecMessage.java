@@ -25,6 +25,8 @@ import java.util.Arrays;
  * A class to encapsulate HDMI-CEC message used for the devices connected via
  * HDMI cable to communicate with one another. A message is defined by its
  * source and destination address, command (or opcode), and optional parameters.
+ *
+ * @hide
  */
 public final class HdmiCecMessage implements Parcelable {
 

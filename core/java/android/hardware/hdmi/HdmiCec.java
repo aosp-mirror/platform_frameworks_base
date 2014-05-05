@@ -18,6 +18,8 @@ package android.hardware.hdmi;
 
 /**
  * Defines constants and utility methods related to HDMI-CEC protocol.
+ *
+ * @hide
  */
 public final class HdmiCec {
 
