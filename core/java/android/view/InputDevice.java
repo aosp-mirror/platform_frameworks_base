@@ -585,6 +585,7 @@ public final class InputDevice implements Parcelable {
      * type such as {@link InputDevice#SOURCE_MOUSE}, a more generic device class, such as
      * {@link InputDevice#SOURCE_CLASS_POINTER}, or a combination of sources bitwise ORed together.
      * @return Whether the device can produce all of the given sources.
+     * @hide
      */
     public boolean supportsSource(int source) {
         return (mSources & source) == source;
