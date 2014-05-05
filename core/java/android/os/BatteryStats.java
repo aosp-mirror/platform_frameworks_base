@@ -2899,7 +2899,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         if (!didWake && wakelockTag != null) {
-            pw.print(longNames ? "wake_lock=" : "w=");
+            pw.print(longNames ? " wake_lock=" : ",w=");
             if (longNames) {
                 UserHandle.formatUid(pw, wakelockTag.uid);
                 pw.print(":\"");
