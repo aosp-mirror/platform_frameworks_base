@@ -602,10 +602,20 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationClick(int callingUid, int callingPid,
-                String pkg, String tag, int id, int userId) {
-            cancelNotification(callingUid, callingPid, pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE, false, userId, REASON_DELEGATE_CLICK, null);
+        public void onNotificationClick(int callingUid, int callingPid, String key) {
+            synchronized (mNotificationList) {
+                EventLogTags.writeNotificationClicked(key);
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r == null) {
+                    Log.w(TAG, "No notification with key: " + key);
+                    return;
+                }
+                StatusBarNotification sbn = r.sbn;
+                cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
+                        sbn.getId(), Notification.FLAG_AUTO_CANCEL,
+                        Notification.FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
+                        REASON_DELEGATE_CLICK, null);
+            }
         }
 
         @Override

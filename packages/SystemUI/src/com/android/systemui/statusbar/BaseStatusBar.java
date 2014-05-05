@@ -773,8 +773,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent,
-                    sbn.getPackageName(), sbn.getTag(), sbn.getId(), isHeadsUp, sbn.getUserId());
+            final View.OnClickListener listener = makeClicker(contentIntent, sbn.getKey(),
+                    isHeadsUp);
             row.setOnClickListener(listener);
         } else {
             row.setOnClickListener(null);
@@ -884,27 +884,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
-    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag,
-            int id, boolean forHun, int userId) {
-        return new NotificationClicker(intent, pkg, tag, id, forHun, userId);
+    public NotificationClicker makeClicker(PendingIntent intent, String notificationKey,
+            boolean forHun) {
+        return new NotificationClicker(intent, notificationKey, forHun);
     }
 
     protected class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
-        private String mPkg;
-        private String mTag;
-        private int mId;
+        private final String mNotificationKey;
         private boolean mIsHeadsUp;
-        private int mUserId;
 
-        public NotificationClicker(PendingIntent intent, String pkg, String tag, int id,
-                boolean forHun, int userId) {
+        public NotificationClicker(PendingIntent intent, String notificationKey, boolean forHun) {
             mIntent = intent;
-            mPkg = pkg;
-            mTag = tag;
-            mId = id;
+            mNotificationKey = notificationKey;
             mIsHeadsUp = forHun;
-            mUserId = userId;
         }
 
         public void onClick(View v) {
@@ -940,7 +933,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (mIsHeadsUp) {
                     mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
                 }
-                mBarService.onNotificationClick(mPkg, mTag, mId, mUserId);
+                mBarService.onNotificationClick(mNotificationKey);
             } catch (RemoteException ex) {
                 // system process is dead if we're here.
             }
@@ -1344,9 +1337,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent,
-                    notification.getPackageName(), notification.getTag(), notification.getId(),
-                    isHeadsUp, notification.getUserId());
+            final View.OnClickListener listener = makeClicker(contentIntent, notification.getKey(),
+                    isHeadsUp);
             entry.row.setOnClickListener(listener);
         } else {
             entry.row.setOnClickListener(null);

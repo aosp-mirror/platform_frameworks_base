@@ -21,8 +21,7 @@ import android.os.IBinder;
 public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll(int callingUid, int callingPid, int userId);
-    void onNotificationClick(int callingUid, int callingPid,
-            String pkg, String tag, int id, int userId);
+    void onNotificationClick(int callingUid, int callingPid, String key);
     void onNotificationClear(int callingUid, int callingPid,
             String pkg, String tag, int id, int userId);
     void onNotificationError(int callingUid, int callingPid,
