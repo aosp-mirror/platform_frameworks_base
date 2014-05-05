@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import dalvik.system.CloseGuard;
@@ -51,6 +52,7 @@ public class ActivityView extends ViewGroup {
     private int mWidth;
     private int mHeight;
     private Surface mSurface;
+    private int mLastVisibility;
 
     // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
     IIntentSender mQueuedPendingIntent;
@@ -95,12 +97,34 @@ public class ActivityView extends ViewGroup {
         mMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(mMetrics);
 
+        mLastVisibility = getVisibility();
+
         if (DEBUG) Log.v(TAG, "ctor()");
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         mTextureView.layout(0, 0, r - l, b - t);
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        if (mSurface != null) {
+            try {
+                if (visibility == View.GONE) {
+                    mActivityContainer.setSurface(null, mWidth, mHeight, mMetrics.densityDpi);
+                } else if (mLastVisibility == View.GONE) {
+                    // Don't change surface when going between View.VISIBLE and View.INVISIBLE.
+                    mActivityContainer.setSurface(mSurface, mWidth, mHeight, mMetrics.densityDpi);
+                }
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "ActivityView: Unable to set surface of ActivityContainer. " + e);
+            }
+        }
+        mLastVisibility = visibility;
     }
 
     private boolean injectInputEvent(InputEvent event) {
