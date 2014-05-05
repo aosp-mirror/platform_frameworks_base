@@ -2402,6 +2402,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.hardware.hdmi.HdmiCecManager
+     * @hide
      */
      public static final String HDMI_CEC_SERVICE = "hdmi_cec";
 
