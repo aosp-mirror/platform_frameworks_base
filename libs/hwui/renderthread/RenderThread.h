@@ -28,6 +28,8 @@
 #include <utils/Singleton.h>
 #include <utils/Thread.h>
 
+#include "TimeLord.h"
+
 namespace android {
 class DisplayEventReceiver;
 
@@ -53,7 +55,7 @@ private:
 // Mimics android.view.Choreographer.FrameCallback
 class IFrameCallback {
 public:
-    virtual void doFrame(nsecs_t frameTimeNanos) = 0;
+    virtual void doFrame() = 0;
 
 protected:
     ~IFrameCallback() {}
@@ -70,6 +72,8 @@ public:
     // Mimics android.view.Choreographer
     void postFrameCallback(IFrameCallback* callback);
     void removeFrameCallback(IFrameCallback* callback);
+
+    TimeLord& timeLord() { return mTimeLord; }
 
 protected:
     virtual bool threadLoop();
@@ -102,7 +106,8 @@ private:
     std::set<IFrameCallback*> mFrameCallbacks;
     bool mFrameCallbackTaskPending;
     DispatchFrameCallbacks* mFrameCallbackTask;
-    nsecs_t mFrameTime;
+
+    TimeLord mTimeLord;
 };
 
 } /* namespace renderthread */

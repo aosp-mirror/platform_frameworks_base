@@ -62,7 +62,7 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode)
     args->translucent = translucent;
     args->rootRenderNode = rootRenderNode;
     mContext = (CanvasContext*) postAndWait(task);
-    mDrawFrameTask.setContext(mContext);
+    mDrawFrameTask.setContext(&mRenderThread, mContext);
 }
 
 RenderProxy::~RenderProxy() {
@@ -79,11 +79,23 @@ void RenderProxy::destroyContext() {
         SETUP_TASK(destroyContext);
         args->context = mContext;
         mContext = 0;
-        mDrawFrameTask.setContext(0);
+        mDrawFrameTask.setContext(NULL, NULL);
         // This is also a fence as we need to be certain that there are no
         // outstanding mDrawFrame tasks posted before it is destroyed
         postAndWait(task);
     }
+}
+
+CREATE_BRIDGE2(setFrameInterval, RenderThread* thread, nsecs_t frameIntervalNanos) {
+    args->thread->timeLord().setFrameInterval(args->frameIntervalNanos);
+    return NULL;
+}
+
+void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
+    SETUP_TASK(setFrameInterval);
+    args->thread = &mRenderThread;
+    args->frameIntervalNanos = frameIntervalNanos;
+    post(task);
 }
 
 CREATE_BRIDGE2(initialize, CanvasContext* context, EGLNativeWindowType window) {
@@ -134,10 +146,10 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-void RenderProxy::syncAndDrawFrame(
+void RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
-    mDrawFrameTask.drawFrame(&mRenderThread);
+    mDrawFrameTask.drawFrame(frameTimeNanos);
 }
 
 CREATE_BRIDGE1(destroyCanvasAndSurface, CanvasContext* context) {
