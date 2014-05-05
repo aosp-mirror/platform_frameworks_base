@@ -58,11 +58,6 @@ void DisplayListData::cleanupResources() {
         caches.resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
     }
 
-    for (size_t i = 0; i < shaders.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(shaders.itemAt(i));
-        caches.resourceCache.destructorLocked(shaders.itemAt(i));
-    }
-
     for (size_t i = 0; i < sourcePaths.size(); i++) {
         caches.resourceCache.decrementRefcountLocked(sourcePaths.itemAt(i));
     }
@@ -92,7 +87,6 @@ void DisplayListData::cleanupResources() {
     bitmapResources.clear();
     ownedBitmapResources.clear();
     patchResources.clear();
-    shaders.clear();
     sourcePaths.clear();
     paints.clear();
     regions.clear();

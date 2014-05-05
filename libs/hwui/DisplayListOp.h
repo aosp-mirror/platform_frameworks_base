@@ -208,9 +208,16 @@ protected:
         if (!state.mMatrix.isSimple()) return false;
 
         // check state/paint for transparency
-        if (state.mDrawModifiers.mShader ||
-                state.mAlpha != 1.0f ||
-                (mPaint && mPaint->getAlpha() != 0xFF)) return false;
+        if (mPaint) {
+            if (mPaint->getShader() && !mPaint->getShader()->isOpaque()) {
+                return false;
+            }
+            if (mPaint->getAlpha() != 0xFF) {
+                return false;
+            }
+        }
+
+        if (state.mAlpha != 1.0f) return false;
 
         SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
         return (mode == SkXfermode::kSrcOver_Mode ||
@@ -590,37 +597,6 @@ public:
 
 private:
     const SkRegion* mRegion;
-};
-
-class ResetShaderOp : public StateOp {
-public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.resetShader();
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOGS("ResetShader");
-    }
-
-    virtual const char* name() { return "ResetShader"; }
-};
-
-class SetupShaderOp : public StateOp {
-public:
-    SetupShaderOp(SkiaShader* shader)
-            : mShader(shader) {}
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.setupShader(mShader);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("SetupShader, shader %p", mShader);
-    }
-
-    virtual const char* name() { return "SetupShader"; }
-
-private:
-    SkiaShader* mShader;
 };
 
 class ResetPaintFilterOp : public StateOp {

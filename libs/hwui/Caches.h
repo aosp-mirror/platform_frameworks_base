@@ -33,6 +33,7 @@
 #include "thread/TaskManager.h"
 
 #include "AssetAtlas.h"
+#include "Extensions.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"

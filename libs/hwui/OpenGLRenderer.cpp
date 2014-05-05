@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <SkCanvas.h>
+#include <SkShader.h>
 #include <SkTypeface.h>
 
 #include <utils/Log.h>
@@ -37,6 +38,7 @@
 #include "PathTessellator.h"
 #include "Properties.h"
 #include "ShadowTessellator.h"
+#include "SkiaShader.h"
 #include "utils/GLUtils.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
@@ -1053,6 +1055,45 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
 #define DRAW_DOUBLE_STENCIL(DRAW_COMMAND) DRAW_DOUBLE_STENCIL_IF(true, DRAW_COMMAND)
 
+// This class is purely for inspection. It inherits from SkShader, but Skia does not know how to
+// use it. The OpenGLRenderer will look at it to find its Layer and whether it is opaque.
+class LayerShader : public SkShader {
+public:
+    LayerShader(Layer* layer, const SkMatrix* localMatrix)
+    : INHERITED(localMatrix)
+    , mLayer(layer) {
+    }
+
+    virtual bool asACustomShader(void** data) const {
+        if (data) {
+            *data = static_cast<void*>(mLayer);
+        }
+        return true;
+    }
+
+    virtual bool isOpaque() const {
+        return !mLayer->isBlend();
+    }
+
+protected:
+    virtual void shadeSpan(int x, int y, SkPMColor[], int count) {
+        LOG_ALWAYS_FATAL("LayerShader should never be drawn with raster backend.");
+    }
+
+    virtual void flatten(SkWriteBuffer&) const {
+        LOG_ALWAYS_FATAL("LayerShader should never be flattened.");
+    }
+
+    virtual Factory getFactory() const {
+        LOG_ALWAYS_FATAL("LayerShader should never be created from a stream.");
+        return NULL;
+    }
+private:
+    // Unowned.
+    Layer* mLayer;
+    typedef SkShader INHERITED;
+};
+
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     if (CC_UNLIKELY(layer->region.isEmpty())) return; // nothing to draw
 
@@ -1066,21 +1107,19 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         paint.setAntiAlias(true);
         paint.setColor(SkColorSetARGB(int(getLayerAlpha(layer) * 255), 0, 0, 0));
 
-        SkiaShader* oldShader = mDrawModifiers.mShader;
-
         // create LayerShader to map SaveLayer content into subsequent draw
         SkMatrix shaderMatrix;
         shaderMatrix.setTranslate(rect.left, rect.bottom);
         shaderMatrix.preScale(1, -1);
-        SkiaLayerShader layerShader(layer, &shaderMatrix);
-        mDrawModifiers.mShader = &layerShader;
+        LayerShader layerShader(layer, &shaderMatrix);
+        paint.setShader(&layerShader);
 
         // Since the drawing primitive is defined in local drawing space,
         // we don't need to modify the draw matrix
         const SkPath* maskPath = layer->getConvexMask();
         DRAW_DOUBLE_STENCIL(drawConvexPath(*maskPath, &paint));
 
-        mDrawModifiers.mShader = oldShader;
+        paint.setShader(NULL);
         restore();
 
         return;
@@ -1615,9 +1654,9 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mSetShaderColor = mDescription.setColorModulate(a);
 }
 
-void OpenGLRenderer::setupDrawShader() {
-    if (mDrawModifiers.mShader) {
-        mDrawModifiers.mShader->describe(mDescription, mExtensions);
+void OpenGLRenderer::setupDrawShader(const SkShader* shader) {
+    if (shader != NULL) {
+        SkiaShader::describe(&mCaches, mDescription, mExtensions, *shader);
     }
 }
 
@@ -1643,15 +1682,21 @@ void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
     }
 }
 
+static bool isBlendedColorFilter(const SkColorFilter* filter) {
+    if (filter == NULL) {
+        return false;
+    }
+    return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
+}
+
 void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
     SkXfermode::Mode mode = layer->getMode();
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
+    // TODO: check shader blending, once we have shader drawing support for layers.
     bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f ||
-            (mColorSet && mColorA < 1.0f) ||
-            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend()) ||
-            layer->getColorFilter();
+            (mColorSet && mColorA < 1.0f) || isBlendedColorFilter(layer->getColorFilter());
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
@@ -1661,8 +1706,8 @@ void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool sw
     // argb=1,0,0,0
     accountForClear(mode);
     blend |= (mColorSet && mColorA < 1.0f) ||
-            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend()) ||
-            (paint && paint->getColorFilter());
+            (getShader(paint) && !getShader(paint)->isOpaque()) ||
+            isBlendedColorFilter(getColorFilter(paint));
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
@@ -1693,8 +1738,8 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
     }
 }
 
-void OpenGLRenderer::setupDrawColorUniforms() {
-    if ((mColorSet && !mDrawModifiers.mShader) || (mDrawModifiers.mShader && mSetShaderColor)) {
+void OpenGLRenderer::setupDrawColorUniforms(bool hasShader) {
+    if ((mColorSet && !hasShader) || (hasShader && mSetShaderColor)) {
         mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
@@ -1705,20 +1750,22 @@ void OpenGLRenderer::setupDrawPureColorUniforms() {
     }
 }
 
-void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
-    if (mDrawModifiers.mShader) {
-        if (ignoreTransform) {
-            // if ignoreTransform=true was passed to setupDrawModelView, undo currentTransform()
-            // because it was built into modelView / the geometry, and the SkiaShader needs to
-            // compensate.
-            mat4 modelViewWithoutTransform;
-            modelViewWithoutTransform.loadInverse(*currentTransform());
-            modelViewWithoutTransform.multiply(mModelViewMatrix);
-            mModelViewMatrix.load(modelViewWithoutTransform);
-        }
-        mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
-                mModelViewMatrix, *mSnapshot, &mTextureUnit);
+void OpenGLRenderer::setupDrawShaderUniforms(const SkShader* shader, bool ignoreTransform) {
+    if (shader == NULL) {
+        return;
     }
+
+    if (ignoreTransform) {
+        // if ignoreTransform=true was passed to setupDrawModelView, undo currentTransform()
+        // because it was built into modelView / the geometry, and the description needs to
+        // compensate.
+        mat4 modelViewWithoutTransform;
+        modelViewWithoutTransform.loadInverse(*currentTransform());
+        modelViewWithoutTransform.multiply(mModelViewMatrix);
+        mModelViewMatrix.load(modelViewWithoutTransform);
+    }
+
+    SkiaShader::setupProgram(&mCaches, mModelViewMatrix, &mTextureUnit, mExtensions, *shader);
 }
 
 void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
@@ -2177,7 +2224,7 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
     // Apply a scale transform on the canvas only when a shader is in use
     // Skia handles the ratio between the dst and src rects as a scale factor
     // when a shader is set
-    bool useScaleTransform = mDrawModifiers.mShader && scaled;
+    bool useScaleTransform = getShader(paint) && scaled;
     bool ignoreTransform = false;
 
     if (CC_LIKELY(currentTransform()->isPureTranslate() && !useScaleTransform)) {
@@ -2335,13 +2382,13 @@ status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
     if (isAA) setupDrawAA();
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawBlending(paint, isAA);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_Translate, useOffset, 0, 0, 0, 0);
-    setupDrawColorUniforms();
+    setupDrawColorUniforms(getShader(paint));
     setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms();
+    setupDrawShaderUniforms(getShader(paint));
 
     const void* vertices = vertexBuffer.getBuffer();
     bool force = mCaches.unbindMeshBuffer();
@@ -2646,7 +2693,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     const float sy = y - shadow->top + textShadow.dy;
 
     const int shadowAlpha = ((textShadow.color >> 24) & 0xFF) * mSnapshot->alpha;
-    if (mDrawModifiers.mShader) {
+    if (getShader(paint)) {
         textShadow.color = SK_ColorWHITE;
     }
 
@@ -2654,7 +2701,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(textShadow.color, shadowAlpha < 255 ? shadowAlpha : alpha);
     setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
@@ -2662,7 +2709,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     setupDrawTexture(shadow->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms();
+    setupDrawShaderUniforms(getShader(paint));
     setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -2984,21 +3031,6 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Shaders
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::resetShader() {
-    mDrawModifiers.mShader = NULL;
-}
-
-void OpenGLRenderer::setupShader(SkiaShader* shader) {
-    mDrawModifiers.mShader = shader;
-    if (mDrawModifiers.mShader) {
-        mDrawModifiers.mShader->setCaches(mCaches);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Draw filters
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -3056,7 +3088,7 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(paint->getColor(), alpha);
     setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
@@ -3064,7 +3096,7 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms();
+    setupDrawShaderUniforms(getShader(paint));
     setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -3230,7 +3262,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, const SkP
 
     int color = paint->getColor();
     // If a shader is set, preserve only the alpha
-    if (mDrawModifiers.mShader) {
+    if (getShader(paint)) {
         color |= 0x00ffffff;
     }
 
@@ -3266,15 +3298,15 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, const SkP
     setupDraw();
     setupDrawNoTexture();
     setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawColorFilter(getColorFilter(paint));
     setupDrawBlending(paint);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
     setupDrawModelView(kModelViewMode_Translate, false,
             0.0f, 0.0f, 0.0f, 0.0f, ignoreTransform);
-    setupDrawColorUniforms();
-    setupDrawShaderUniforms();
+    setupDrawColorUniforms(getShader(paint));
+    setupDrawShaderUniforms(getShader(paint));
     setupDrawColorFilterUniforms(getColorFilter(paint));
 
     if (dirty && hasLayer()) {
@@ -3290,21 +3322,21 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
         const SkPaint* paint, bool ignoreTransform) {
     int color = paint->getColor();
     // If a shader is set, preserve only the alpha
-    if (mDrawModifiers.mShader) {
+    if (getShader(paint)) {
         color |= 0x00ffffff;
     }
 
     setupDraw();
     setupDrawNoTexture();
     setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawColorFilter(getColorFilter(paint));
     setupDrawBlending(paint);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
             left, top, right, bottom, ignoreTransform);
-    setupDrawColorUniforms();
-    setupDrawShaderUniforms(ignoreTransform);
+    setupDrawColorUniforms(getShader(paint));
+    setupDrawShaderUniforms(getShader(paint), ignoreTransform);
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawSimpleMesh();
 
@@ -3417,7 +3449,7 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
         setupDrawAlpha8Color(color, alpha);
     }
     setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader();
+    setupDrawShader(getShader(paint));
     setupDrawBlending(paint, true);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
@@ -3425,7 +3457,7 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms(ignoreTransform);
+    setupDrawShaderUniforms(getShader(paint), ignoreTransform);
     setupDrawMesh(vertices, texCoords);
 
     glDrawArrays(drawMode, 0, elementsCount);

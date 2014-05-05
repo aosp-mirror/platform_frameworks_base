@@ -71,11 +71,6 @@ void ResourceCache::incrementRefcount(const SkPath* pathResource) {
     incrementRefcount((void*) pathResource, kPath);
 }
 
-void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
-    SkSafeRef(shaderResource->getSkShader());
-    incrementRefcount((void*) shaderResource, kShader);
-}
-
 void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
     incrementRefcount((void*) patchResource, kNinePatch);
 }
@@ -104,11 +99,6 @@ void ResourceCache::incrementRefcountLocked(const SkPath* pathResource) {
     incrementRefcountLocked((void*) pathResource, kPath);
 }
 
-void ResourceCache::incrementRefcountLocked(SkiaShader* shaderResource) {
-    SkSafeRef(shaderResource->getSkShader());
-    incrementRefcountLocked((void*) shaderResource, kShader);
-}
-
 void ResourceCache::incrementRefcountLocked(const Res_png_9patch* patchResource) {
     incrementRefcountLocked((void*) patchResource, kNinePatch);
 }
@@ -130,11 +120,6 @@ void ResourceCache::decrementRefcount(const SkBitmap* bitmapResource) {
 
 void ResourceCache::decrementRefcount(const SkPath* pathResource) {
     decrementRefcount((void*) pathResource);
-}
-
-void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
-    SkSafeUnref(shaderResource->getSkShader());
-    decrementRefcount((void*) shaderResource);
 }
 
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
@@ -166,11 +151,6 @@ void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
 
 void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
     decrementRefcountLocked((void*) pathResource);
-}
-
-void ResourceCache::decrementRefcountLocked(SkiaShader* shaderResource) {
-    SkSafeUnref(shaderResource->getSkShader());
-    decrementRefcountLocked((void*) shaderResource);
 }
 
 void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
@@ -219,25 +199,6 @@ void ResourceCache::destructorLocked(const SkBitmap* resource) {
         } else {
             delete resource;
         }
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::destructor(SkiaShader* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(SkiaShader* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
         return;
     }
     ref->destroyed = true;
@@ -331,11 +292,6 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
                 } else {
                     delete path;
                 }
-            }
-            break;
-            case kShader: {
-                SkiaShader* shader = (SkiaShader*) resource;
-                delete shader;
             }
             break;
             case kNinePatch: {

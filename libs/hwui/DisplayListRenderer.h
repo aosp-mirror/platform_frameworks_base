@@ -99,9 +99,6 @@ public:
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
     // Misc - should be implemented with SkPaint inspection
-    virtual void resetShader();
-    virtual void setupShader(SkiaShader* shader);
-
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
@@ -273,21 +270,6 @@ private:
         return bitmap;
     }
 
-    inline SkiaShader* refShader(SkiaShader* shader) {
-        if (!shader) return NULL;
-
-        SkiaShader* shaderCopy = mShaderMap.valueFor(shader);
-        // TODO: We also need to handle generation ID changes in compose shaders
-        if (shaderCopy == NULL || shaderCopy->getGenerationId() != shader->getGenerationId()) {
-            shaderCopy = shader->copy();
-            // replaceValueFor() performs an add if the entry doesn't exist
-            mShaderMap.replaceValueFor(shader, shaderCopy);
-            mDisplayListData->shaders.add(shaderCopy);
-            mCaches.resourceCache.incrementRefcount(shaderCopy);
-        }
-        return shaderCopy;
-    }
-
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
         mDisplayListData->patchResources.add(patch);
         mCaches.resourceCache.incrementRefcount(patch);
@@ -297,7 +279,6 @@ private:
     DefaultKeyedVector<const SkPaint*, const SkPaint*> mPaintMap;
     DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
-    DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
 
     Caches& mCaches;
     DisplayListData* mDisplayListData;

@@ -45,7 +45,6 @@
 #include <DisplayListRenderer.h>
 #include <LayerRenderer.h>
 #include <OpenGLRenderer.h>
-#include <SkiaShader.h>
 #include <Stencil.h>
 #include <Rect.h>
 #include <RenderNode.h>
@@ -84,8 +83,6 @@ using namespace uirenderer;
 #else
     #define RENDERER_LOGD(...)
 #endif
-
-#define MODIFIER_SHADER 2
 
 // ----------------------------------------------------------------------------
 
@@ -616,24 +613,6 @@ static void android_view_GLES20Canvas_drawLines(JNIEnv* env, jobject clazz,
 }
 
 // ----------------------------------------------------------------------------
-// Shaders and color filters
-// ----------------------------------------------------------------------------
-
-static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint modifiers) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    if (modifiers & MODIFIER_SHADER) renderer->resetShader();
-}
-
-static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong shaderPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    SkiaShader* shader = reinterpret_cast<SkiaShader*>(shaderPtr);
-    renderer->setupShader(shader);
-}
-
-
-// ----------------------------------------------------------------------------
 // Draw filters
 // ----------------------------------------------------------------------------
 
@@ -1090,9 +1069,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nDrawPath",          "(JJJ)V",          (void*) android_view_GLES20Canvas_drawPath },
     { "nDrawLines",         "(J[FIIJ)V",       (void*) android_view_GLES20Canvas_drawLines },
-
-    { "nResetModifiers",    "(JI)V",           (void*) android_view_GLES20Canvas_resetModifiers },
-    { "nSetupShader",       "(JJ)V",           (void*) android_view_GLES20Canvas_setupShader },
 
     { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
     { "nResetPaintFilter",  "(J)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },

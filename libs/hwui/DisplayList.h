@@ -56,7 +56,6 @@ class DisplayListRenderer;
 class OpenGLRenderer;
 class Rect;
 class Layer;
-class SkiaShader;
 
 class ClipRectOp;
 class SaveLayerOp;
@@ -127,7 +126,6 @@ public:
     SortedVector<const SkPath*> sourcePaths;
     Vector<const SkRegion*> regions;
     Vector<const SkMatrix*> matrices;
-    Vector<SkiaShader*> shaders;
     Vector<Layer*> layers;
     uint32_t functorCount;
     bool hasDrawOps;

@@ -26,7 +26,6 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
-#include <SkShader.h>
 #include <SkXfermode.h>
 
 #include <utils/Blur.h>
@@ -45,12 +44,14 @@
 #include "Program.h"
 #include "Rect.h"
 #include "Renderer.h"
-#include "StatefulBaseRenderer.h"
 #include "Snapshot.h"
+#include "StatefulBaseRenderer.h"
 #include "UvMapper.h"
 #include "Vertex.h"
 #include "Caches.h"
 #include "CanvasProperty.h"
+
+class SkShader;
 
 namespace android {
 namespace uirenderer {
@@ -59,7 +60,6 @@ class DeferredDisplayState;
 class RenderNode;
 class TextSetupFunctor;
 class VertexBuffer;
-class SkiaShader;
 
 struct DrawModifiers {
     DrawModifiers() {
@@ -70,7 +70,6 @@ struct DrawModifiers {
         memset(this, 0, sizeof(DrawModifiers));
     }
 
-    SkiaShader* mShader;
     float mOverrideLayerAlpha;
 
     // Draw filters
@@ -216,9 +215,6 @@ public:
 
     status_t drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
             float casterAlpha, bool casterUnclipped, const SkPath* casterPerimeter);
-
-    virtual void resetShader();
-    virtual void setupShader(SkiaShader* shader);
 
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
@@ -464,6 +460,14 @@ protected:
      */
     static inline SkColorFilter* getColorFilter(const SkPaint* paint) {
         return paint ? paint->getColorFilter() : NULL;
+    }
+
+    /**
+     * Safely retrieves the Shader from the given Paint. If the paint is
+     * null then null is returned.
+     */
+    static inline const SkShader* getShader(const SkPaint* paint) {
+        return paint ? paint->getShader() : NULL;
     }
 
     /**
@@ -838,7 +842,7 @@ private:
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
     void setupDrawTextGamma(const SkPaint* paint);
-    void setupDrawShader();
+    void setupDrawShader(const SkShader* shader);
     void setupDrawColorFilter(const SkColorFilter* filter);
     void setupDrawBlending(const Layer* layer, bool swapSrcDst = false);
     void setupDrawBlending(const SkPaint* paint, bool blend = true, bool swapSrcDst = false);
@@ -862,9 +866,17 @@ private:
      */
     void setupDrawModelView(ModelViewMode mode, bool offset,
             float left, float top, float right, float bottom, bool ignoreTransform = false);
-    void setupDrawColorUniforms();
+    void setupDrawColorUniforms(bool hasShader);
     void setupDrawPureColorUniforms();
-    void setupDrawShaderUniforms(bool ignoreTransform = false);
+
+    /**
+     * Setup uniforms for the current shader.
+     *
+     * @param shader SkShader on the current paint.
+     *
+     * @param ignoreTransform Set to true to ignore the transform in shader.
+     */
+    void setupDrawShaderUniforms(const SkShader* shader, bool ignoreTransform = false);
     void setupDrawColorFilterUniforms(const SkColorFilter* paint);
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);

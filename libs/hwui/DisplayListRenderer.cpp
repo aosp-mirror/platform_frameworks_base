@@ -47,7 +47,6 @@ DisplayListRenderer::~DisplayListRenderer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 DisplayListData* DisplayListRenderer::finishRecording() {
-    mShaderMap.clear();
     mPaintMap.clear();
     mRegionMap.clear();
     mPathMap.clear();
@@ -396,15 +395,6 @@ status_t DisplayListRenderer::drawRects(const float* rects, int count, const SkP
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRectsOp(rects, count, paint));
     return DrawGlInfo::kStatusDone;
-}
-
-void DisplayListRenderer::resetShader() {
-    addStateOp(new (alloc()) ResetShaderOp());
-}
-
-void DisplayListRenderer::setupShader(SkiaShader* shader) {
-    shader = refShader(shader);
-    addStateOp(new (alloc()) SetupShaderOp(shader));
 }
 
 void DisplayListRenderer::resetPaintFilter() {

@@ -35,7 +35,6 @@ class RenderNode;
 class Layer;
 class Matrix4;
 class SkiaColorFilter;
-class SkiaShader;
 class Patch;
 
 enum DrawOpMode {
@@ -175,9 +174,6 @@ public:
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
 
     // Misc - should be implemented with SkPaint inspection
-    virtual void resetShader() = 0;
-    virtual void setupShader(SkiaShader* shader) = 0;
-
     virtual void resetPaintFilter() = 0;
     virtual void setupPaintFilter(int clearBits, int setBits) = 0;
 

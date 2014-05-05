@@ -229,6 +229,11 @@ public:
             return false;
         }
 
+        if (op->mPaint && mOps[0].op->mPaint &&
+            op->mPaint->getShader() != mOps[0].op->mPaint->getShader()) {
+            return false;
+        }
+
         /* Draw Modifiers compatibility check
          *
          * Shadows are ignored, as only text uses them, and in that case they are drawn
@@ -243,7 +248,6 @@ public:
          */
         const DrawModifiers& lhsMod = lhs->mDrawModifiers;
         const DrawModifiers& rhsMod = rhs->mDrawModifiers;
-        if (lhsMod.mShader != rhsMod.mShader) return false;
 
         // Draw filter testing expects bit fields to be clear if filter not set.
         if (lhsMod.mHasDrawFilter != rhsMod.mHasDrawFilter) return false;
