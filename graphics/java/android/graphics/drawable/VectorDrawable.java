@@ -182,145 +182,19 @@ public class VectorDrawable extends Drawable {
 
     public VectorDrawable() {
         mVectorState = new VectorDrawableState(null);
-        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 0);
-
-        setDuration(DEFAULT_DURATION);
     }
 
     private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
         mVectorState = new VectorDrawableState(state);
-        mVectorState.mBasicAnimator = ObjectAnimator.ofFloat(this, "AnimationFraction", 0, 0);
 
         if (theme != null && canApplyTheme()) {
             applyTheme(theme);
         }
-
-        long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
-        if (duration == -1) {
-            // If duration is infinite, set to 1 hour.
-            // TODO: Define correct approach for infinite.
-            duration = DEFAULT_INFINITE_DURATION;
-            mVectorState.mBasicAnimator.setFloatValues(0, duration / 1000);
-            mVectorState.mBasicAnimator.setInterpolator(new LinearInterpolator());
-        }
-        setDuration(duration);
     }
 
     @Override
     public ConstantState getConstantState() {
         return mVectorState;
-    }
-
-    @Override
-    public void jumpToCurrentState() {
-        stop();
-    }
-
-    /**
-     * Starts the animation.
-     */
-    public void start() {
-        mVectorState.mBasicAnimator.start();
-    }
-
-    /**
-     * Stops the animation and moves to the end state.
-     */
-    public void stop() {
-        mVectorState.mBasicAnimator.end();
-    }
-
-    /**
-     * Returns the current completion value for the animation.
-     *
-     * @return the current point on the animation, typically between 0 and 1
-     */
-    public float geAnimationFraction() {
-        return mVectorState.mVAnimatedPath.getValue();
-    }
-
-    /**
-     * Set the current completion value for the animation.
-     *
-     * @param value the point along the animation, typically between 0 and 1
-     */
-    public void setAnimationFraction(float value) {
-        mVectorState.mVAnimatedPath.setAnimationFraction(value);
-        invalidateSelf();
-    }
-
-    /**
-     * set the amount of time the animation will take
-     *
-     * @param duration amount of time in milliseconds
-     */
-    public void setDuration(long duration) {
-        mVectorState.mBasicAnimator.setDuration(duration);
-    }
-
-    /**
-     * Defines what this animation should do when it reaches the end. This
-     * setting is applied only when the repeat count is either greater than 0 or
-     * {@link ValueAnimator#INFINITE}.
-     *
-     * @param mode the animation mode, either {@link ValueAnimator#RESTART} or
-     *            {@link ValueAnimator#REVERSE}
-     */
-    public void setRepeatMode(int mode) {
-        mVectorState.mBasicAnimator.setRepeatMode(mode);
-    }
-
-    /**
-     * Sets animation to repeat
-     *
-     * @param repeat True if this drawable repeats its animation
-     */
-    public void setRepeatCount(int repeat) {
-        mVectorState.mBasicAnimator.setRepeatCount(repeat);
-    }
-
-    /**
-     * @return the animation repeat count, either a value greater than 0 or
-     *         {@link ValueAnimator#INFINITE}
-     */
-    public int getRepeatCount() {
-        return mVectorState.mBasicAnimator.getRepeatCount();
-    }
-
-    @Override
-    public boolean isStateful() {
-        return true;
-    }
-
-    @Override
-    protected boolean onStateChange(int[] state) {
-        super.onStateChange(state);
-
-        mVectorState.mVAnimatedPath.setState(state);
-
-        final int direction = mVectorState.mVAnimatedPath.getTrigger(state);
-        if (direction > 0) {
-            animateForward();
-        } else if (direction < 0) {
-            animateBackward();
-        }
-
-        invalidateSelf();
-        return true;
-    }
-
-    private void animateForward() {
-        if (!mVectorState.mBasicAnimator.isStarted()) {
-            mVectorState.mBasicAnimator.setFloatValues(0, 1);
-            start();
-        }
-    }
-
-    private void animateBackward() {
-        if (!mVectorState.mBasicAnimator.isStarted()) {
-            mVectorState.mBasicAnimator.setFloatValues(1, 0);
-            start();
-        }
     }
 
     @Override
@@ -432,7 +306,6 @@ public class VectorDrawable extends Drawable {
 
             final VectorDrawable drawable = new VectorDrawable();
             drawable.inflate(resources, xpp, attrs);
-            drawable.setAnimationFraction(0);
 
             return drawable;
         } catch (XmlPullParserException e) {
@@ -536,35 +409,10 @@ public class VectorDrawable extends Drawable {
 
     private void setAnimatedPath(VAnimatedPath animatedPath) {
         mVectorState.mVAnimatedPath = animatedPath;
-
-        long duration = mVectorState.mVAnimatedPath.getTotalAnimationDuration();
-        if (duration == -1) { // if it set to infinite set to 1 hour
-            duration = DEFAULT_INFINITE_DURATION; // TODO define correct
-                                                  // approach for infinite
-            mVectorState.mBasicAnimator.setFloatValues(0, duration / 1000);
-            mVectorState.mBasicAnimator.setInterpolator(new LinearInterpolator());
-        }
-
-        setDuration(duration);
-        setAnimationFraction(0);
-    }
-
-    @Override
-    public boolean setVisible(boolean visible, boolean restart) {
-        boolean changed = super.setVisible(visible, restart);
-        if (visible) {
-            if (changed || restart) {
-                setAnimationFraction(0);
-            }
-        } else {
-            stop();
-        }
-        return changed;
     }
 
     private static class VectorDrawableState extends ConstantState {
         int mChangingConfigurations;
-        ValueAnimator mBasicAnimator;
         VAnimatedPath mVAnimatedPath;
         Rect mPadding;
 
