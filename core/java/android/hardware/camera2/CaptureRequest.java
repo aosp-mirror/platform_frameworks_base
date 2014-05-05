@@ -458,7 +458,19 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * brightness</p>
      * <p>For example, if EV step is 0.333, '6' will mean an
      * exposure compensation of +2 EV; -3 will mean an exposure
-     * compensation of -1</p>
+     * compensation of -1 EV. Note that this control will only be effective
+     * if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} <code>!=</code> OFF. This control will take effect even when
+     * {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} <code>== true</code>.</p>
+     * <p>In the event of exposure compensation value being changed, camera device
+     * may take several frames to reach the newly requested exposure target.
+     * During that time, {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} field will be in the SEARCHING
+     * state. Once the new exposure target is reached, {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} will
+     * change from SEARCHING to either CONVERGED, LOCKED (if AE lock is enabled), or
+     * FLASH_REQUIRED (if the scene is too dark for still capture).</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final Key<Integer> CONTROL_AE_EXPOSURE_COMPENSATION =
             new Key<Integer>("android.control.aeExposureCompensation", int.class);
@@ -469,6 +481,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <p>Note that even when AE is locked, the flash may be
      * fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
      * ON_AUTO_FLASH_REDEYE.</p>
+     * <p>When {@link CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION android.control.aeExposureCompensation} is changed, even if the AE lock
+     * is ON, the camera device will still adjust its exposure value.</p>
      * <p>If AE precapture is triggered (see {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger})
      * when AE is already locked, the camera device will not change the exposure time
      * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}) and sensitivity ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
@@ -477,6 +491,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_ALWAYS_FLASH, the scene may become overexposed.</p>
      * <p>See {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE lock related state transition details.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CaptureResult#CONTROL_AE_STATE
