@@ -20,7 +20,6 @@
 #include <cutils/compiler.h>
 
 #include <SkBitmap.h>
-#include <SkiaShader.h>
 
 #include <utils/KeyedVector.h>
 
@@ -36,7 +35,6 @@ namespace uirenderer {
  */
 enum ResourceType {
     kBitmap,
-    kShader,
     kNinePatch,
     kPath,
     kLayer
@@ -70,36 +68,30 @@ public:
 
     void incrementRefcount(const SkPath* resource);
     void incrementRefcount(const SkBitmap* resource);
-    void incrementRefcount(SkiaShader* resource);
     void incrementRefcount(const Res_png_9patch* resource);
     void incrementRefcount(Layer* resource);
 
     void incrementRefcountLocked(const SkPath* resource);
     void incrementRefcountLocked(const SkBitmap* resource);
-    void incrementRefcountLocked(SkiaShader* resource);
     void incrementRefcountLocked(const Res_png_9patch* resource);
     void incrementRefcountLocked(Layer* resource);
 
     void decrementRefcount(const SkBitmap* resource);
     void decrementRefcount(const SkPath* resource);
-    void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(const Res_png_9patch* resource);
     void decrementRefcount(Layer* resource);
 
     void decrementRefcountLocked(const SkBitmap* resource);
     void decrementRefcountLocked(const SkPath* resource);
-    void decrementRefcountLocked(SkiaShader* resource);
     void decrementRefcountLocked(const Res_png_9patch* resource);
     void decrementRefcountLocked(Layer* resource);
 
     void destructor(SkPath* resource);
     void destructor(const SkBitmap* resource);
-    void destructor(SkiaShader* resource);
     void destructor(Res_png_9patch* resource);
 
     void destructorLocked(SkPath* resource);
     void destructorLocked(const SkBitmap* resource);
-    void destructorLocked(SkiaShader* resource);
     void destructorLocked(Res_png_9patch* resource);
 
     bool recycle(SkBitmap* resource);

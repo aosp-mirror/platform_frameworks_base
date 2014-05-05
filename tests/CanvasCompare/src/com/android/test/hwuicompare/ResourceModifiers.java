@@ -23,7 +23,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Color;
+import android.graphics.ComposeShader;
 import android.graphics.LinearGradient;
+import android.graphics.PorterDuff;
+import android.graphics.RadialGradient;
+import android.graphics.SweepGradient;
 import android.graphics.Matrix;
 import android.graphics.Shader;
 
@@ -38,6 +42,11 @@ public class ResourceModifiers {
         public final LinearGradient mHorGradient;
         public final LinearGradient mDiagGradient;
         public final LinearGradient mVertGradient;
+        public final RadialGradient mRadGradient;
+        public final SweepGradient mSweepGradient;
+        public final ComposeShader mComposeShader;
+        public final ComposeShader mBadComposeShader;
+        public final ComposeShader mAnotherBadComposeShader;
         public final Bitmap mBitmap;
         private final Matrix mMtx1;
         private final Matrix mMtx2;
@@ -90,6 +99,12 @@ public class ResourceModifiers {
             mVertGradient = new LinearGradient(0.0f, 0.0f, 0.0f, mDrawHeight / 2.0f,
                     Color.YELLOW, Color.MAGENTA, Shader.TileMode.MIRROR);
 
+            mSweepGradient = new SweepGradient(mDrawWidth / 2.0f, mDrawHeight / 2.0f,
+                    Color.YELLOW, Color.MAGENTA);
+
+            mComposeShader = new ComposeShader(mRepeatShader, mHorGradient,
+                    PorterDuff.Mode.MULTIPLY);
+
             final float width = mBitmap.getWidth() / 8.0f;
             final float height = mBitmap.getHeight() / 8.0f;
 
@@ -106,6 +121,16 @@ public class ResourceModifiers {
                 0xff00ff00, 0xff0000ff, 0xffff0000, 0xff00ff00,
                 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00ff0000,
             };
+
+            // Use a repeating gradient with many colors to test the non simple case.
+            mRadGradient = new RadialGradient(mDrawWidth / 4.0f, mDrawHeight / 4.0f, 4.0f,
+                    mBitmapColors, null, Shader.TileMode.REPEAT);
+
+            mBadComposeShader = new ComposeShader(mRadGradient, mComposeShader,
+                    PorterDuff.Mode.MULTIPLY);
+
+            mAnotherBadComposeShader = new ComposeShader(mRadGradient, mVertGradient,
+                    PorterDuff.Mode.MULTIPLY);
         }
 
 }

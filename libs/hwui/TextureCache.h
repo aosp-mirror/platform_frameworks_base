@@ -49,7 +49,7 @@ namespace uirenderer {
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class TextureCache: public OnEntryRemoved<const SkBitmap*, Texture*> {
+class TextureCache: public OnEntryRemoved<const SkPixelRef*, Texture*> {
 public:
     TextureCache();
     TextureCache(uint32_t maxByteSize);
@@ -59,7 +59,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(const SkBitmap*& bitmap, Texture*& texture);
+    void operator()(const SkPixelRef*& pixelRef, Texture*& texture);
 
     /**
      * Resets all Textures to not be marked as in use
@@ -147,7 +147,7 @@ private:
 
     void init();
 
-    LruCache<const SkBitmap*, Texture*> mCache;
+    LruCache<const SkPixelRef*, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

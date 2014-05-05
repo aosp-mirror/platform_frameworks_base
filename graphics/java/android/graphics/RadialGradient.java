@@ -66,8 +66,6 @@ public class RadialGradient extends Shader {
         mPositions = positions;
         mTileMode = tile;
         native_instance = nativeCreate1(x, y, radius, colors, positions, tile.nativeInt);
-        native_shader = nativePostCreate1(native_instance, x, y, radius, colors, positions,
-                tile.nativeInt);
     }
 
     /** Create a shader that draws a radial gradient given the center and radius.
@@ -91,8 +89,6 @@ public class RadialGradient extends Shader {
         mColor1 = color1;
         mTileMode = tile;
         native_instance = nativeCreate2(x, y, radius, color0, color1, tile.nativeInt);
-        native_shader = nativePostCreate2(native_instance, x, y, radius, color0, color1,
-                tile.nativeInt);
     }
 
     /**
@@ -120,11 +116,6 @@ public class RadialGradient extends Shader {
     private static native long nativeCreate1(float x, float y, float radius,
             int colors[], float positions[], int tileMode);
     private static native long nativeCreate2(float x, float y, float radius,
-            int color0, int color1, int tileMode);
-
-    private static native long nativePostCreate1(long native_shader, float x, float y, float radius,
-            int colors[], float positions[], int tileMode);
-    private static native long nativePostCreate2(long native_shader, float x, float y, float radius,
             int color0, int color1, int tileMode);
 }
 
