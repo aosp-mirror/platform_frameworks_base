@@ -125,7 +125,7 @@ public class MoveImage extends Transition {
         Matrix startMatrix = (Matrix) startValues.values.get(PROPNAME_MATRIX);
         Matrix endMatrix = (Matrix) endValues.values.get(PROPNAME_MATRIX);
 
-        if (!startMatrix.equals(endMatrix)) {
+        if (startMatrix != null && !startMatrix.equals(endMatrix)) {
             changes.add(PropertyValuesHolder.ofObject(MatrixClippedDrawable.MATRIX_PROPERTY,
                     new MatrixEvaluator(), startMatrix, endMatrix));
         }
@@ -230,7 +230,9 @@ public class MoveImage extends Transition {
 
     private static void expandClip(Rect bounds, Matrix matrix, Rect clip, Rect otherClip) {
         RectF boundsF = new RectF(bounds);
-        matrix.mapRect(boundsF);
+        if (matrix != null) {
+            matrix.mapRect(boundsF);
+        }
         clip.left = expandMinDimension(boundsF.left, clip.left, otherClip.left);
         clip.top = expandMinDimension(boundsF.top, clip.top, otherClip.top);
         clip.right = expandMaxDimension(boundsF.right, clip.right, otherClip.right);
@@ -256,10 +258,20 @@ public class MoveImage extends Transition {
         int drawableWidth = drawable.getIntrinsicWidth();
         int drawableHeight = drawable.getIntrinsicHeight();
         ImageView.ScaleType scaleType = imageView.getScaleType();
-        if (drawableWidth <= 0 || drawableHeight <= 0 || scaleType == ImageView.ScaleType.FIT_XY) {
-            return null;
+        Matrix matrix;
+        if (drawableWidth <= 0 || drawableHeight <= 0) {
+            matrix = null;
+        } else if (scaleType == ImageView.ScaleType.FIT_XY) {
+            matrix = new Matrix();
+            float scaleX = imageView.getWidth();
+            scaleX /= drawableWidth;
+            float scaleY = imageView.getHeight();
+            scaleY /= drawableHeight;
+            matrix.setScale(scaleX, scaleY);
+        } else {
+            matrix = new Matrix(imageView.getImageMatrix());
         }
-        return new Matrix(imageView.getImageMatrix());
+        return matrix;
     }
 
     private Rect findClip(ImageView imageView) {
