@@ -91,6 +91,7 @@ public class UsbDevice implements Parcelable {
      * Returns the manufacturer name of the device.
      *
      * @return the manufacturer name
+     * @hide
      */
     public String getManufacturerName() {
         return mManufacturerName;
@@ -100,6 +101,7 @@ public class UsbDevice implements Parcelable {
      * Returns the product name of the device.
      *
      * @return the product name
+     * @hide
      */
     public String getProductName() {
         return mProductName;
@@ -109,6 +111,7 @@ public class UsbDevice implements Parcelable {
      * Returns the serial number of the device.
      *
      * @return the serial number name
+     * @hide
      */
     public String getSerialNumber() {
         return mSerialNumber;
