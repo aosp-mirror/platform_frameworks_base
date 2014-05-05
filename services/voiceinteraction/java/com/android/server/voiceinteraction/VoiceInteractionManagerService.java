@@ -28,6 +28,8 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
@@ -88,6 +90,21 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean mSafeMode;
         private int mCurUser;
 
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                throws RemoteException {
+            try {
+                return super.onTransact(code, data, reply, flags);
+            } catch (RuntimeException e) {
+                // The activity manager only throws security exceptions, so let's
+                // log all others.
+                if (!(e instanceof SecurityException)) {
+                    Slog.wtf(TAG, "VoiceInteractionManagerService Crash", e);
+                }
+                throw e;
+            }
+        }
+
         public void systemRunning(boolean safeMode) {
             mSafeMode = safeMode;
 
@@ -97,18 +114,18 @@ public class VoiceInteractionManagerService extends SystemService {
 
             synchronized (this) {
                 mCurUser = ActivityManager.getCurrentUser();
-                switchImplementationIfNeededLocked();
+                switchImplementationIfNeededLocked(false);
             }
         }
 
         public void switchUser(int userHandle) {
             synchronized (this) {
                 mCurUser = userHandle;
-                switchImplementationIfNeededLocked();
+                switchImplementationIfNeededLocked(false);
             }
         }
 
-        void switchImplementationIfNeededLocked() {
+        void switchImplementationIfNeededLocked(boolean force) {
             if (!mSafeMode) {
                 String curService = Settings.Secure.getStringForUser(
                         mResolver, Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
@@ -121,7 +138,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         serviceComponent = null;
                     }
                 }
-                if (mImpl == null || mImpl.mUser != mCurUser
+                if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
@@ -138,10 +155,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void startVoiceActivity(Intent intent, String resolvedType,
-                IVoiceInteractionService service, Bundle args) {
+        public void startSession(IVoiceInteractionService service, Bundle args) {
             synchronized (this) {
-                if (mImpl == null || service.asBinder() != mImpl.mService.asBinder()) {
+                if (mImpl == null || mImpl.mService == null
+                        || service.asBinder() != mImpl.mService.asBinder()) {
                     throw new SecurityException(
                             "Caller is not the current voice interaction service");
                 }
@@ -149,8 +166,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startVoiceActivityLocked(callingPid, callingUid,
-                            intent, resolvedType, args);
+                    mImpl.startSessionLocked(callingPid, callingUid, args);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -158,12 +174,12 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int deliverNewSession(IBinder token, IVoiceInteractionSession session,
+        public boolean deliverNewSession(IBinder token, IVoiceInteractionSession session,
                 IVoiceInteractor interactor) {
             synchronized (this) {
                 if (mImpl == null) {
-                    Slog.w(TAG, "deliverNewSession without running voice interaction service");
-                    return ActivityManager.START_CANCELED;
+                    throw new SecurityException(
+                            "deliverNewSession without running voice interaction service");
                 }
                 final int callingPid = Binder.getCallingPid();
                 final int callingUid = Binder.getCallingUid();
@@ -175,7 +191,43 @@ public class VoiceInteractionManagerService extends SystemService {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
+        }
 
+        @Override
+        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "startVoiceActivity without running voice interaction service");
+                    return ActivityManager.START_CANCELED;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.startVoiceActivityLocked(callingPid, callingUid, token,
+                            intent, resolvedType);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void finish(IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "finish without running voice interaction service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.finishLocked(callingPid, callingUid, token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
         }
 
         @Override
@@ -207,7 +259,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             @Override public void onChange(boolean selfChange) {
                 synchronized (VoiceInteractionManagerServiceStub.this) {
-                    switchImplementationIfNeededLocked();
+                    switchImplementationIfNeededLocked(false);
                 }
             }
         }
@@ -220,27 +272,25 @@ public class VoiceInteractionManagerService extends SystemService {
 
             @Override
             public void onHandleUserStop(Intent intent, int userHandle) {
-                super.onHandleUserStop(intent, userHandle);
             }
 
             @Override
             public void onPackageDisappeared(String packageName, int reason) {
-                super.onPackageDisappeared(packageName, reason);
             }
 
             @Override
             public void onPackageAppeared(String packageName, int reason) {
-                super.onPackageAppeared(packageName, reason);
+                if (mImpl != null && packageName.equals(mImpl.mComponent.getPackageName())) {
+                    switchImplementationIfNeededLocked(true);
+                }
             }
 
             @Override
             public void onPackageModified(String packageName) {
-                super.onPackageModified(packageName);
             }
 
             @Override
             public void onSomePackagesChanged() {
-                super.onSomePackagesChanged();
             }
         };
     }

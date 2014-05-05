@@ -27,6 +27,19 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+/**
+ * Top-level service of the current global voice interactor, which is providing
+ * support for hotwording, the back-end of a {@link android.app.VoiceInteractor}, etc.
+ * The current VoiceInteractionService that has been selected by the user is kept
+ * always running by the system, to allow it to do things like listen for hotwords
+ * in the background to instigate voice interactions.
+ *
+ * <p>Because this service is always running, it should be kept as lightweight as
+ * possible.  Heavy-weight operations (including showing UI) should be implemented
+ * in the associated {@link android.service.voice.VoiceInteractionSessionService} when
+ * an actual voice interaction is taking place, and that service should run in a
+ * separate process from this one.
+ */
 public class VoiceInteractionService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -51,11 +64,9 @@ public class VoiceInteractionService extends Service {
 
     IVoiceInteractionManagerService mSystemService;
 
-    public void startVoiceActivity(Intent intent, Bundle sessionArgs) {
+    public void startSession(Bundle args) {
         try {
-            mSystemService.startVoiceActivity(intent,
-                    intent.resolveType(getContentResolver()),
-                    mInterface, sessionArgs);
+            mSystemService.startSession(mInterface, args);
         } catch (RemoteException e) {
         }
     }

@@ -16,13 +16,14 @@
 
 package android.service.voice;
 
-import android.os.Bundle;
-
-import com.android.internal.app.IVoiceInteractorCallback;
-import com.android.internal.app.IVoiceInteractorRequest;
+import android.content.Intent;
 
 /**
  * @hide
  */
-interface IVoiceInteractionSession {
+oneway interface IVoiceInteractionSession {
+    void taskStarted(in Intent intent, int taskId);
+    void taskFinished(in Intent intent, int taskId);
+    void closeSystemDialogs();
+    void destroy();
 }
