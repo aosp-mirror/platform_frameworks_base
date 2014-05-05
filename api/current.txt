@@ -15448,12 +15448,15 @@ package android.media.session {
     method public void disconnect(android.media.session.RouteInfo);
     method public android.media.session.SessionToken getSessionToken();
     method public android.media.session.TransportPerformer getTransportPerformer();
-    method public void publish();
+    method public boolean isActive();
     method public void release();
     method public void removeCallback(android.media.session.Session.Callback);
     method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public void setActive(boolean);
+    method public void setFlags(int);
     method public void setRouteOptions(java.util.List<android.media.session.RouteOptions>);
-    method public android.media.session.TransportPerformer setTransportPerformerEnabled();
+    field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
+    field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
   }
 
   public static abstract class Session.Callback {

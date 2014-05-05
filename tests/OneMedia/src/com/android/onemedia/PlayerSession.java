@@ -84,11 +84,12 @@ public class PlayerSession {
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
         mSession = man.createSession("OneMedia");
         mSession.addCallback(mCallback);
-        mPerformer = mSession.setTransportPerformerEnabled();
+        mPerformer = mSession.getTransportPerformer();
         mPerformer.addListener(new TransportListener());
         mPerformer.setPlaybackState(mPlaybackState);
+        mSession.setFlags(Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mSession.setRouteOptions(mRouteOptions);
-        mSession.publish();
+        mSession.setActive(true);
     }
 
     public void onDestroy() {

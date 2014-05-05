@@ -26,6 +26,7 @@ import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
+import android.media.session.PlaybackState;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.os.Binder;
@@ -56,9 +57,9 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private final SessionManagerImpl mSessionManagerImpl;
     private final MediaRouteProviderWatcher mRouteProviderWatcher;
+    private final MediaSessionStack mPriorityStack;
 
-    private final ArrayList<MediaSessionRecord> mSessions
-            = new ArrayList<MediaSessionRecord>();
+    private final ArrayList<MediaSessionRecord> mRecords = new ArrayList<MediaSessionRecord>();
     private final ArrayList<MediaRouteProviderProxy> mProviders
             = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
@@ -79,6 +80,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mSessionManagerImpl = new SessionManagerImpl();
         mRouteProviderWatcher = new MediaRouteProviderWatcher(context, mProviderWatcherCallback,
                 mHandler, context.getUserId());
+        mPriorityStack = new MediaSessionStack();
     }
 
     @Override
@@ -131,14 +133,27 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    public void publishSession(MediaSessionRecord record) {
+    public void updateSession(MediaSessionRecord record) {
         synchronized (mLock) {
+            mPriorityStack.onSessionStateChange(record);
             if (record.isSystemPriority()) {
-                if (mPrioritySession != null) {
-                    Log.w(TAG, "Replacing existing priority session with a new session");
+                if (record.isActive()) {
+                    if (mPrioritySession != null) {
+                        Log.w(TAG, "Replacing existing priority session with a new session");
+                    }
+                    mPrioritySession = record;
+                } else {
+                    if (mPrioritySession == record) {
+                        mPrioritySession = null;
+                    }
                 }
-                mPrioritySession = record;
             }
+        }
+    }
+
+    public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
+        synchronized (mLock) {
+            mPriorityStack.onPlaystateChange(record, oldState, newState);
         }
     }
 
@@ -162,7 +177,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void destroySessionLocked(MediaSessionRecord session) {
-        mSessions.remove(session);
+        mRecords.remove(session);
+        mPriorityStack.removeSession(session);
         if (session == mPrioritySession) {
             mPrioritySession = null;
         }
@@ -254,11 +270,22 @@ public class MediaSessionService extends SystemService implements Monitor {
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
-        mSessions.add(session);
+        mRecords.add(session);
+        mPriorityStack.addSession(session);
         if (DEBUG) {
             Log.d(TAG, "Created session for package " + packageName + " with tag " + tag);
         }
         return session;
+    }
+
+    private int findIndexOfSessionForIdLocked(String sessionId) {
+        for (int i = mRecords.size() - 1; i >= 0; i--) {
+            MediaSessionRecord session = mRecords.get(i);
+            if (TextUtils.equals(session.getSessionInfo().getId(), sessionId)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private MediaRouteProviderProxy getProviderLocked(String providerId) {
@@ -271,19 +298,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         return null;
     }
 
-    private int findIndexOfSessionForIdLocked(String sessionId) {
-        for (int i = mSessions.size() - 1; i >= 0; i--) {
-            MediaSessionRecord session = mSessions.get(i);
-            if (TextUtils.equals(session.getSessionInfo().getId(), sessionId)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private boolean isSessionDiscoverable(MediaSessionRecord record) {
         // TODO probably want to check more than if it's published.
-        return record.isPublished();
+        return record.isActive();
     }
 
     private MediaRouteProviderWatcher.Callback mProviderWatcherCallback
@@ -317,7 +334,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 int index = findIndexOfSessionForIdLocked(sessionId);
                 if (index != -1 && routes != null && routes.size() > 0) {
-                    MediaSessionRecord record = mSessions.get(index);
+                    MediaSessionRecord record = mRecords.get(index);
                     record.selectRoute(routes.get(0));
                 }
             }
@@ -329,7 +346,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 int index = findIndexOfSessionForIdLocked(sessionId);
                 if (index != -1) {
-                    MediaSessionRecord session = mSessions.get(index);
+                    MediaSessionRecord session = mRecords.get(index);
                     session.setRouteConnected(route, options.getConnectionOptions(), connection);
                 }
             }
@@ -359,7 +376,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public List<IBinder> getSessions(ComponentName componentName) {
-
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -375,11 +391,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                 enforceMediaPermissions(componentName, pid, uid);
                 ArrayList<IBinder> binders = new ArrayList<IBinder>();
                 synchronized (mLock) {
-                    for (int i = mSessions.size() - 1; i >= 0; i--) {
-                        MediaSessionRecord record = mSessions.get(i);
-                        if (isSessionDiscoverable(record)) {
-                            binders.add(record.getControllerBinder().asBinder());
-                        }
+                    ArrayList<MediaSessionRecord> records = mPriorityStack
+                            .getActiveSessions();
+                    int size = records.size();
+                    for (int i = 0; i < size; i++) {
+                        binders.add(records.get(i).getControllerBinder().asBinder());
                     }
                 }
                 return binders;
@@ -406,13 +422,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (mPrioritySession != null) {
                     mPrioritySession.dump(pw, "");
                 }
-                int count = mSessions.size();
-                pw.println("Sessions - have " + count + " states:");
+                int count = mRecords.size();
+                pw.println(count + " Sessions:");
                 for (int i = 0; i < count; i++) {
-                    MediaSessionRecord record = mSessions.get(i);
+                    mRecords.get(i).dump(pw, "");
                     pw.println();
-                    record.dump(pw, "");
                 }
+                mPriorityStack.dumpLocked(pw, "");
+
                 pw.println("Providers:");
                 count = mProviders.size();
                 for (int i = 0; i < count; i++) {

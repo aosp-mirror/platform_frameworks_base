@@ -79,6 +79,8 @@ public class MediaSessionLegacyHelper {
         }
         performer.addListener(listener, mHandler);
         holder.mRccListener = listener;
+        holder.mFlags |= Session.FLAG_HANDLES_TRANSPORT_CONTROLS;
+        holder.mSession.setFlags(holder.mFlags);
         holder.update();
     }
 
@@ -87,6 +89,8 @@ public class MediaSessionLegacyHelper {
         if (holder != null && holder.mRccListener != null) {
             holder.mSession.getTransportPerformer().removeListener(holder.mRccListener);
             holder.mRccListener = null;
+            holder.mFlags &= ~Session.FLAG_HANDLES_TRANSPORT_CONTROLS;
+            holder.mSession.setFlags(holder.mFlags);
             holder.update();
         }
     }
@@ -99,6 +103,8 @@ public class MediaSessionLegacyHelper {
             return;
         }
         holder.mMediaButtonListener = new MediaButtonListener(pi, context);
+        holder.mFlags |= Session.FLAG_HANDLES_MEDIA_BUTTONS;
+        holder.mSession.setFlags(holder.mFlags);
         holder.mSession.getTransportPerformer().addListener(holder.mMediaButtonListener, mHandler);
     }
 
@@ -106,6 +112,9 @@ public class MediaSessionLegacyHelper {
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mMediaButtonListener != null) {
             holder.mSession.getTransportPerformer().removeListener(holder.mMediaButtonListener);
+            holder.mFlags &= ~Session.FLAG_HANDLES_MEDIA_BUTTONS;
+            holder.mSession.setFlags(holder.mFlags);
+            holder.mMediaButtonListener = null;
             holder.update();
         }
     }
@@ -114,8 +123,7 @@ public class MediaSessionLegacyHelper {
         SessionHolder holder = mSessions.get(pi);
         if (holder == null && createIfMissing) {
             Session session = mSessionManager.createSession(TAG);
-            session.setTransportPerformerEnabled();
-            session.publish();
+            session.setActive(true);
             holder = new SessionHolder(session, pi);
             mSessions.put(pi, holder);
         }
@@ -194,6 +202,7 @@ public class MediaSessionLegacyHelper {
         public final PendingIntent mPi;
         public MediaButtonListener mMediaButtonListener;
         public TransportPerformer.Listener mRccListener;
+        public int mFlags;
 
         public SessionHolder(Session session, PendingIntent pi) {
             mSession = session;

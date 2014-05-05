@@ -65,13 +65,26 @@ public final class Session {
     private static final String TAG = "Session";
 
     /**
+     * Set this flag on the session to indicate that it can handle media button
+     * events.
+     */
+    public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1 << 0;
+
+    /**
+     * Set this flag on the session to indicate that it handles commands through
+     * the {@link TransportPerformer}. The performer can be retrieved by calling
+     * {@link #getTransportPerformer()}.
+     */
+    public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
+
+    /**
      * System only flag for a session that needs to have priority over all other
      * sessions. This flag ensures this session will receive media button events
      * regardless of the current ordering in the system.
      *
      * @hide
      */
-    public static final long FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 32;
+    public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
 
     private static final int MSG_MEDIA_BUTTON = 1;
     private static final int MSG_COMMAND = 2;
@@ -96,7 +109,7 @@ public final class Session {
     private TransportPerformer mPerformer;
     private Route mRoute;
 
-    private boolean mPublished = false;;
+    private boolean mActive = false;;
 
     /**
      * @hide
@@ -111,6 +124,7 @@ public final class Session {
             throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
         }
         mSessionToken = new SessionToken(controllerBinder);
+        mPerformer = new TransportPerformer(mBinder);
     }
 
     /**
@@ -158,52 +172,23 @@ public final class Session {
     }
 
     /**
-     * Start using a TransportPerformer with this media session. This must be
-     * called before calling publish and cannot be called more than once.
-     * Calling this will allow MediaControllers to retrieve a
-     * TransportController.
+     * Retrieves the {@link TransportPerformer} for this session. To receive
+     * commands through the performer you must also set the
+     * {@link #FLAG_HANDLES_TRANSPORT_CONTROLS} flag using
+     * {@link #setFlags(int)}.
      *
-     * @see TransportController
-     * @return The TransportPerformer created for this session
-     */
-    public TransportPerformer setTransportPerformerEnabled() {
-        if (mPerformer != null) {
-            throw new IllegalStateException("setTransportPerformer can only be called once.");
-        }
-        if (mPublished) {
-            throw new IllegalStateException("setTransportPerformer cannot be called after publish");
-        }
-
-        mPerformer = new TransportPerformer(mBinder);
-        try {
-            mBinder.setTransportPerformerEnabled();
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in setTransportPerformerEnabled.", e);
-        }
-        return mPerformer;
-    }
-
-    /**
-     * Retrieves the TransportPerformer used by this session. If called before
-     * {@link #setTransportPerformerEnabled} null will be returned.
-     *
-     * @return The TransportPerformer associated with this session or null
+     * @return The performer associated with this session.
      */
     public TransportPerformer getTransportPerformer() {
         return mPerformer;
     }
 
     /**
-     * Set any flags for the session. This cannot be called after calling
-     * {@link #publish()}.
+     * Set any flags for the session.
      *
      * @param flags The flags to set for this session.
-     * @hide remove hide once we have non-system flags
      */
-    public void setFlags(long flags) {
-        if (mPublished) {
-            throw new IllegalStateException("setFlags may not be called after publish");
-        }
+    public void setFlags(int flags) {
         try {
             mBinder.setFlags(flags);
         } catch (RemoteException e) {
@@ -212,20 +197,32 @@ public final class Session {
     }
 
     /**
-     * Call after you have finished setting up the session. This will make it
-     * available to listeners and begin pushing updates to MediaControllers.
-     * This can only be called once.
+     * Set if this session is currently active and ready to receive commands. If
+     * set to false your session's controller may not be discoverable. You must
+     * set the session to active before it can start receiving media button
+     * events or transport commands.
+     *
+     * @param active Whether this session is active or not.
      */
-    public void publish() {
-        if (mPublished) {
-            throw new RuntimeException("publish() may only be called once.");
+    public void setActive(boolean active) {
+        if (mActive == active) {
+            return;
         }
         try {
-            mBinder.publish();
+            mBinder.setActive(active);
+            mActive = active;
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in publish.", e);
+            Log.wtf(TAG, "Failure in setActive.", e);
         }
-        mPublished = true;
+    }
+
+    /**
+     * Get the current active state of this session.
+     *
+     * @return True if the session is active, false otherwise.
+     */
+    public boolean isActive() {
+        return mActive;
     }
 
     /**

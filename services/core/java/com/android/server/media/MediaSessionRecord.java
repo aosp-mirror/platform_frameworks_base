@@ -60,6 +60,24 @@ import java.util.UUID;
 public class MediaSessionRecord implements IBinder.DeathRecipient {
     private static final String TAG = "MediaSessionRecord";
 
+    /**
+     * These are the playback states that count as currently active.
+     */
+    private static final int[] ACTIVE_STATES = {
+            PlaybackState.PLAYSTATE_FAST_FORWARDING,
+            PlaybackState.PLAYSTATE_REWINDING,
+            PlaybackState.PLAYSTATE_SKIPPING_BACKWARDS,
+            PlaybackState.PLAYSTATE_SKIPPING_FORWARDS,
+            PlaybackState.PLAYSTATE_BUFFERING,
+            PlaybackState.PLAYSTATE_CONNECTING,
+            PlaybackState.PLAYSTATE_PLAYING };
+
+    /**
+     * The length of time a session will still be considered active after
+     * pausing in ms.
+     */
+    private static final int ACTIVE_BUFFER = 30000;
+
     private final MessageHandler mHandler;
 
     private final int mPid;
@@ -75,7 +93,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             new ArrayList<ISessionControllerCallback>();
     private final ArrayList<RouteRequest> mRequests = new ArrayList<RouteRequest>();
 
-    private boolean mTransportPerformerEnabled = false;
     private RouteInfo mRoute;
     private RouteOptions mRequest;
     private RouteConnectionRecord mConnection;
@@ -88,9 +105,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private MediaMetadata mMetadata;
     private PlaybackState mPlaybackState;
     private int mRatingType;
+    private long mLastActiveTime;
     // End TransportPerformer fields
 
-    private boolean mIsPublished = false;
+    private boolean mIsActive = false;
 
     public MediaSessionRecord(int pid, String packageName, ISessionCallback cb, String tag,
             MediaSessionService service, Handler handler) {
@@ -156,6 +174,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public long getFlags() {
         return mFlags;
+    }
+
+    /**
+     * Check if this session has the specified flag.
+     *
+     * @param flag The flag to check.
+     * @return True if this session has that flag set, false otherwise.
+     */
+    public boolean hasFlag(int flag) {
+        return (mFlags & flag) != 0;
     }
 
     /**
@@ -236,12 +264,36 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Check if this session has been published by the app yet.
+     * Check if this session has been set to active by the app.
      *
-     * @return True if it has been published, false otherwise.
+     * @return True if the session is active, false otherwise.
      */
-    public boolean isPublished() {
-        return mIsPublished;
+    public boolean isActive() {
+        return mIsActive;
+    }
+
+    /**
+     * Check if the session is currently performing playback. This will also
+     * return true if the session was recently paused.
+     *
+     * @return True if the session is performing playback, false otherwise.
+     */
+    public boolean isPlaybackActive() {
+        int state = mPlaybackState == null ? 0 : mPlaybackState.getState();
+        if (isActiveState(state)) {
+            return true;
+        }
+        if (state == mPlaybackState.PLAYSTATE_PAUSED) {
+            long inactiveTime = SystemClock.uptimeMillis() - mLastActiveTime;
+            if (inactiveTime < ACTIVE_BUFFER) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isTransportControlEnabled() {
+        return hasFlag(Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
 
     @Override
@@ -255,11 +307,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         final String indent = prefix + "  ";
         pw.println(indent + "pid=" + mPid);
         pw.println(indent + "info=" + mSessionInfo.toString());
-        pw.println(indent + "published=" + mIsPublished);
-        pw.println(indent + "transport controls enabled=" + mTransportPerformerEnabled);
+        pw.println(indent + "published=" + mIsActive);
+        pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
-        pw.println(indent + "state=" + mPlaybackState.toString());
+        pw.println(indent + "state=" + (mPlaybackState == null ? null : mPlaybackState.toString()));
         pw.println(indent + "metadata:" + getShortMetadataString());
         pw.println(indent + "route requests {");
         int size = mRequests.size();
@@ -270,6 +322,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "route=" + (mRoute == null ? null : mRoute.toString()));
         pw.println(indent + "connection=" + (mConnection == null ? null : mConnection.toString()));
         pw.println(indent + "params=" + (mRequest == null ? null : mRequest.toString()));
+    }
+
+    private boolean isActiveState(int state) {
+        for (int i = 0; i < ACTIVE_STATES.length; i++) {
+            if (ACTIVE_STATES[i] == state) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getShortMetadataString() {
@@ -414,26 +475,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void publish() {
-            mIsPublished = true;
-            mService.publishSession(MediaSessionRecord.this);
-        }
-        @Override
-        public void setTransportPerformerEnabled() {
-            mTransportPerformerEnabled = true;
+        public void setActive(boolean active) {
+            mIsActive = active;
+            mService.updateSession(MediaSessionRecord.this);
+            mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
         @Override
-        public void setFlags(long flags) {
+        public void setFlags(int flags) {
             if ((flags & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
                 int pid = getCallingPid();
                 int uid = getCallingUid();
                 mService.enforcePhoneStatePermission(pid, uid);
             }
-            if (mIsPublished) {
-                throw new IllegalStateException("Cannot set flags after publishing session.");
-            }
             mFlags = flags;
+            mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
         @Override
@@ -444,7 +500,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setPlaybackState(PlaybackState state) {
+            int oldState = mPlaybackState == null ? 0 : mPlaybackState.getState();
+            int newState = state == null ? 0 : state.getState();
+            if (isActiveState(oldState) && newState == PlaybackState.PLAYSTATE_PAUSED) {
+                mLastActiveTime = SystemClock.elapsedRealtime();
+            }
             mPlaybackState = state;
+            mService.onSessionPlaystateChange(MediaSessionRecord.this, oldState, newState);
             mHandler.post(MessageHandler.MSG_UPDATE_PLAYBACK_STATE);
         }
 
@@ -708,7 +770,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public boolean isTransportControlEnabled() {
-            return mTransportPerformerEnabled;
+            return MediaSessionRecord.this.isTransportControlEnabled();
         }
 
         @Override
@@ -724,6 +786,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         private static final int MSG_SEND_EVENT = 4;
         private static final int MSG_UPDATE_ROUTE_FILTERS = 5;
         private static final int MSG_SEND_COMMAND = 6;
+        private static final int MSG_UPDATE_SESSION_STATE = 7;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -747,6 +810,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     Pair<RouteCommand, ResultReceiver> cmd =
                             (Pair<RouteCommand, ResultReceiver>) msg.obj;
                     pushRouteCommand(cmd.first, cmd.second);
+                    break;
+                case MSG_UPDATE_SESSION_STATE:
+                    // TODO add session state
                     break;
             }
         }
