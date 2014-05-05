@@ -23,6 +23,8 @@ import android.os.RemoteException;
  * The HdmiCecManager class is used to provide an HdmiCecClient instance,
  * get various information on HDMI ports configuration. It is connected to actual hardware
  * via HdmiCecService.
+ *
+ * @hide
  */
 public final class HdmiCecManager {
     private final IHdmiCecService mService;

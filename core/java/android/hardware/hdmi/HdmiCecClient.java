@@ -26,6 +26,8 @@ import android.util.Log;
  * It is connected to actual hardware part via HdmiCecService. It provides with methods
  * to send CEC messages to other device on the bus, and listener that allows to receive
  * incoming messages to the device.
+ *
+ * @hide
  */
 public final class HdmiCecClient {
     private static final String TAG = "HdmiCecClient";
