@@ -3380,7 +3380,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 mScrollOffset)) {
                             mMotionCorrection -= mScrollOffset[1];
                             lastYCorrection -= mScrollOffset[1];
-                            vtev.offsetLocation(0, mScrollOffset[1]);
+                            if (vtev != null) {
+                                vtev.offsetLocation(0, mScrollOffset[1]);
+                            }
                         } else {
                             overScrollBy(0, overscroll, 0, mScrollY, 0, 0,
                                     0, mOverscrollDistance, true);
