@@ -664,7 +664,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
+        mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
+                false);
         if (mHardwareAccelerated) {
             mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }

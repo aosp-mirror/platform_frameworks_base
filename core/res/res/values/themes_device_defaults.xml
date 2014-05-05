@@ -299,6 +299,11 @@ easier.
          {@link android.inputmethodservice.InputMethodService} class.-->
     <style name="Theme.DeviceDefault.InputMethod" parent="Theme.Quantum.InputMethod"  />
 
+    <!-- DeviceDefault style for input methods, which is used by the
+         {@link android.service.voice.VoiceInteractionSession} class.-->
+    <style name="Theme.DeviceDefault.VoiceInteractionSession" parent="Theme.Quantum.VoiceInteractionSession" >
+
+    </style>
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Quantum.Dialog.Alert">
         <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
     </style>

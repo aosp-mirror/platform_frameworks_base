@@ -2841,7 +2841,7 @@ final class ActivityStack {
             if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
                 mStackSupervisor.moveHomeToTop();
             }
-            removeTask(task);
+            removeTask(task, false);
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();
@@ -3717,7 +3717,7 @@ final class ActivityStack {
         return starting;
     }
 
-    void removeTask(TaskRecord task) {
+    void removeTask(TaskRecord task, boolean moving) {
         mStackSupervisor.endLockTaskModeIfTaskEnding(task);
         mWindowManager.removeTask(task.taskId);
         final ActivityRecord r = mResumedActivity;
@@ -3731,9 +3731,13 @@ final class ActivityStack {
             mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
         }
         mTaskHistory.remove(task);
-        if (task.voiceInteractor != null) {
+        if (!moving && task.voiceSession != null) {
             // This task was a voice interaction, so it should not remain on the
             // recent tasks list.
+            try {
+                task.voiceSession.taskFinished(task.intent, task.taskId);
+            } catch (RemoteException e) {
+            }
             mService.mRecentTasks.remove(task);
         }
 
@@ -3753,7 +3757,7 @@ final class ActivityStack {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop) {
         TaskRecord task = new TaskRecord(taskId, info, intent, voiceSession, voiceInteractor);
-        addTask(task, toTop);
+        addTask(task, toTop, false);
         return task;
     }
 
@@ -3761,12 +3765,18 @@ final class ActivityStack {
         return new ArrayList<TaskRecord>(mTaskHistory);
     }
 
-    void addTask(final TaskRecord task, final boolean toTop) {
+    void addTask(final TaskRecord task, final boolean toTop, boolean moving) {
         task.stack = this;
         if (toTop) {
             insertTaskAtTop(task);
         } else {
             mTaskHistory.add(0, task);
+        }
+        if (!moving && task.voiceSession != null) {
+            try {
+                task.voiceSession.taskStarted(task.intent, task.taskId);
+            } catch (RemoteException e) {
+            }
         }
     }
 

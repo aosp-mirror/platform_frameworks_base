@@ -17,18 +17,59 @@
 package com.android.test.voiceinteraction;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
-public class MainInteractionSession extends VoiceInteractionSession {
+public class MainInteractionSession extends VoiceInteractionSession
+        implements View.OnClickListener {
     static final String TAG = "MainInteractionSession";
 
-    final Bundle mArgs;
+    Intent mStartIntent;
+    View mContentView;
+    TextView mText;
+    Button mStartButton;
 
-    MainInteractionSession(Context context, Bundle args) {
+    Request mPendingRequest;
+    boolean mPendingConfirm;
+
+    MainInteractionSession(Context context) {
         super(context);
-        mArgs = args;
+    }
+
+    @Override
+    public void onCreate(Bundle args) {
+        super.onCreate(args);
+        showWindow();
+        mStartIntent = args.getParcelable("intent");
+    }
+
+    @Override
+    public View onCreateContentView() {
+        mContentView = getLayoutInflater().inflate(R.layout.voice_interaction_session, null);
+        mText = (TextView)mContentView.findViewById(R.id.text);
+        mStartButton = (Button)mContentView.findViewById(R.id.start);
+        mStartButton.setOnClickListener(this);
+        return mContentView;
+    }
+
+    public void onClick(View v) {
+        if (mPendingRequest == null) {
+            mStartButton.setEnabled(false);
+            startVoiceActivity(mStartIntent);
+        } else {
+            if (mPendingConfirm) {
+                mPendingRequest.sendConfirmResult(true, null);
+            } else {
+                mPendingRequest.sendCommandResult(true, null);
+            }
+            mPendingRequest = null;
+            mStartButton.setText("Start");
+        }
     }
 
     @Override
@@ -38,14 +79,22 @@ public class MainInteractionSession extends VoiceInteractionSession {
 
     @Override
     public void onConfirm(Caller caller, Request request, String prompt, Bundle extras) {
-        Log.i(TAG, "onConform: prompt=" + prompt + " extras=" + extras);
-        request.sendConfirmResult(true, null);
+        Log.i(TAG, "onConfirm: prompt=" + prompt + " extras=" + extras);
+        mText.setText(prompt);
+        mStartButton.setEnabled(true);
+        mStartButton.setText("Confirm");
+        mPendingRequest = request;
+        mPendingConfirm = true;
     }
 
     @Override
     public void onCommand(Caller caller, Request request, String command, Bundle extras) {
         Log.i(TAG, "onCommand: command=" + command + " extras=" + extras);
-        request.sendCommandResult(true, null);
+        mText.setText("Command: " + command);
+        mStartButton.setEnabled(true);
+        mStartButton.setText("Finish Command");
+        mPendingRequest = request;
+        mPendingConfirm = false;
     }
 
     @Override

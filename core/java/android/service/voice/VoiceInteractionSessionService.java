@@ -29,11 +29,15 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+/**
+ * An active voice interaction session, initiated by a {@link VoiceInteractionService}.
+ */
 public abstract class VoiceInteractionSessionService extends Service {
 
     static final int MSG_NEW_SESSION = 1;
 
     IVoiceInteractionManagerService mSystemService;
+    VoiceInteractionSession mSession;
 
     IVoiceInteractionSessionService mInterface = new IVoiceInteractionSessionService.Stub() {
         public void newSession(IBinder token, Bundle args) {
@@ -73,9 +77,14 @@ public abstract class VoiceInteractionSessionService extends Service {
     }
 
     void doNewSession(IBinder token, Bundle args) {
-        VoiceInteractionSession session = onNewSession(args);
+        if (mSession != null) {
+            mSession.doDestroy();
+            mSession = null;
+        }
+        mSession = onNewSession(args);
         try {
-            mSystemService.deliverNewSession(token, session.mSession, session.mInteractor);
+            mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
+            mSession.doCreate(mSystemService, token, args);
         } catch (RemoteException e) {
         }
     }
