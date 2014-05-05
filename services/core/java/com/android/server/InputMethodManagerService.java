@@ -1548,7 +1548,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                     mImeSwitcherNotification.setLatestEventInfo(
                             mContext, title, summary, mImeSwitchPendingIntent);
-                    if (mNotificationManager != null) {
+                    if ((mNotificationManager != null)
+                            && !mWindowManagerService.hasNavigationBar()) {
                         if (DEBUG) {
                             Slog.d(TAG, "--- show notification: label =  " + summary);
                         }
