@@ -622,8 +622,8 @@ public class ListPopupWindow {
             // only set this if the dropdown is not always visible
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(mTouchInterceptor);
-            mPopup.showAsDropDown(getAnchorView(),
-                    mDropDownHorizontalOffset, mDropDownVerticalOffset, mDropDownGravity);
+            mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,
+                    mDropDownVerticalOffset, mDropDownGravity);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
             
             if (!mModal || mDropDownList.isInTouchMode()) {

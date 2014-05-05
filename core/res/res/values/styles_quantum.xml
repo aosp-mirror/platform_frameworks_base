@@ -665,13 +665,18 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
+        <item name="popupBackground">@drawable/popup_background_quantum</item>
+        <item name="popupAnimationStyle">@style/Animation.Quantum.Popup</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
     </style>
 
     <style name="Widget.Quantum.PopupMenu" parent="Widget.Quantum.ListPopupWindow"/>
+
+    <style name="Widget.Quantum.PopupMenu.Overflow">
+        <item name="overlapAnchor">true</item>
+    </style>
 
     <style name="Widget.Quantum.ActionButton" parent="Widget.ActionButton">
         <item name="minWidth">@dimen/action_button_min_width_quantum</item>
@@ -907,17 +912,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowSmall" parent="Widget.Quantum.QuickContactBadgeSmall.WindowSmall"/>
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowMedium" parent="Widget.Quantum.QuickContactBadgeSmall.WindowMedium"/>
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowLarge" parent="Widget.Quantum.QuickContactBadgeSmall.WindowLarge"/>
-
-    <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
-        <item name="dropDownVerticalOffset">0dip</item>
-        <item name="dropDownHorizontalOffset">0dip</item>
-        <item name="dropDownWidth">wrap_content</item>
-    </style>
-
-    <style name="Widget.Quantum.Light.PopupMenu" parent="Widget.Quantum.Light.ListPopupWindow"/>
-
+    <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.Quantum.ListPopupWindow"/>
+    <style name="Widget.Quantum.Light.PopupMenu" parent="Widget.Quantum.ListPopupWindow"/>
+    <style name="Widget.Quantum.Light.PopupMenu.Overflow" parent="Widget.Quantum.PopupMenu.Overflow"/>
     <style name="Widget.Quantum.Light.ActionButton" parent="Widget.Quantum.ActionButton"/>
     <style name="Widget.Quantum.Light.ActionButton.Overflow" parent="Widget.Quantum.ActionButton.Overflow"/>
     <style name="Widget.Quantum.Light.Tab" parent="Widget.Quantum.Tab"/>
@@ -961,7 +958,16 @@ please see styles_device_defaults.xml.
 
     <style name="Animation.Quantum" parent="Animation"/>
     <style name="Animation.Quantum.Activity" parent="Animation.Activity"/>
-    <style name="Animation.Quantum.Dialog" parent="Animation.Dialog"/>
+
+    <style name="Animation.Quantum.Dialog">
+        <item name="windowEnterAnimation">@anim/popup_enter_quantum</item>
+        <item name="windowExitAnimation">@anim/popup_exit_quantum</item>
+    </style>
+
+    <style name="Animation.Quantum.Popup">
+        <item name="windowEnterAnimation">@anim/popup_enter_quantum</item>
+        <item name="windowExitAnimation">@anim/popup_exit_quantum</item>
+    </style>
 
     <!-- Dialog styles -->
 
