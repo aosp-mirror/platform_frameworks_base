@@ -27,28 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TO"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PO"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <!-- no translation found for durationDays (6652371460511178259) -->
-    <skip />
-    <!-- no translation found for durationDayHours (2713107458736744435) -->
-    <skip />
-    <!-- no translation found for durationDayHour (7293789639090958917) -->
-    <skip />
-    <!-- no translation found for durationHours (4266858287167358988) -->
-    <skip />
-    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
-    <skip />
-    <!-- no translation found for durationHourMinute (2741677355177402539) -->
-    <skip />
-    <!-- no translation found for durationMinutes (3134226679883579347) -->
-    <skip />
-    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
-    <skip />
-    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
-    <skip />
-    <!-- no translation found for durationSeconds (8050088505238241405) -->
-    <skip />
-    <!-- no translation found for durationSecond (985669622276420331) -->
-    <skip />
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> (de) zile"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> zile <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> zi <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> h"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> (de) min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sec"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sec"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sec"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sec"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Fără titlu&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -199,6 +188,10 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemul Android"</string>
+    <!-- no translation found for user_owner_label (2804351898001038951) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (6260850669674791528) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicii cu plată"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Efectuează acţiuni care sunt cu plată."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajele dvs."</string>
@@ -409,10 +402,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu VPN. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"conectare la o imagine de fundal"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
-    <skip />
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"conectare la un serviciu de interacțiune vocală"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de interacțiune vocală. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"conectare la un ecran la distanță"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -725,10 +716,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite aplicației să recupereze, să examineze și să șteargă notificări, inclusiv pe cele postate de alte aplicații."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"conectare la un serviciu de citire a notificărilor"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
-    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
-    <skip />
-    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
-    <skip />
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultă observații despre starea rețelei"</string>
@@ -1399,8 +1388,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagine de fundal"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Modificaţi imaginea de fundal"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviciu de citire a notificărilor"</string>
-    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
-    <skip />
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Furnizor de condiții"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activat"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN este activată de <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Atingeţi pentru a gestiona reţeaua."</string>

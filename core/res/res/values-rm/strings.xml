@@ -246,6 +246,10 @@
     <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
+    <!-- no translation found for user_owner_label (2804351898001038951) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (6260850669674791528) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servetschs che custan"</string>
     <!-- no translation found for permgroupdesc_costMoney (3293301903409869495) -->
     <skip />
