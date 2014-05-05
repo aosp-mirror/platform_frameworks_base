@@ -627,9 +627,8 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * in relative terms (e.g. was run #1 faster than run #2).  The times
      * for native methods will not change, so don't try to use this to
      * compare the performance of interpreted and native implementations of the
-     * same method.  As an alternative, consider using sampling-based method
-     * tracing via {@link #startMethodTracingSampling(String, int, int)} or
-     * "native" tracing in the emulator via {@link #startNativeTracing()}.
+     * same method.  As an alternative, consider using "native" tracing in the emulator via
+     * {@link #startNativeTracing()}.
      * </p>
      *
      * @param traceName    Name for the trace log file to create.
