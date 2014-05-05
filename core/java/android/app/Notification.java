@@ -402,61 +402,73 @@ public class Notification implements Parcelable
 
     /**
      * Notification category: incoming call (voice or video) or similar synchronous communication request.
+     * @hide
      */
     public static final String CATEGORY_CALL = "call";
 
     /**
      * Notification category: incoming direct message (SMS, instant message, etc.).
+     * @hide
      */
     public static final String CATEGORY_MESSAGE = "msg";
 
     /**
      * Notification category: asynchronous bulk message (email).
+     * @hide
      */
     public static final String CATEGORY_EMAIL = "email";
 
     /**
      * Notification category: calendar event.
+     * @hide
      */
     public static final String CATEGORY_EVENT = "event";
 
     /**
      * Notification category: promotion or advertisement.
+     * @hide
      */
     public static final String CATEGORY_PROMO = "promo";
 
     /**
      * Notification category: alarm or timer.
+     * @hide
      */
     public static final String CATEGORY_ALARM = "alarm";
 
     /**
      * Notification category: progress of a long-running background operation.
+     * @hide
      */
     public static final String CATEGORY_PROGRESS = "progress";
 
     /**
      * Notification category: social network or sharing update.
+     * @hide
      */
     public static final String CATEGORY_SOCIAL = "social";
 
     /**
      * Notification category: error in background operation or authentication status.
+     * @hide
      */
     public static final String CATEGORY_ERROR = "err";
 
     /**
      * Notification category: media transport control for playback.
+     * @hide
      */
     public static final String CATEGORY_TRANSPORT = "transport";
 
     /**
      * Notification category: system or device status update.  Reserved for system use.
+     * @hide
      */
     public static final String CATEGORY_SYSTEM = "sys";
 
     /**
      * Notification category: indication of running background service.
+     * @hide
      */
     public static final String CATEGORY_SERVICE = "service";
 
@@ -464,17 +476,20 @@ public class Notification implements Parcelable
      * Notification category: a specific, timely recommendation for a single thing.
      * For example, a news app might want to recommend a news story it believes the user will
      * want to read next.
+     * @hide
      */
     public static final String CATEGORY_RECOMMENDATION = "recommendation";
 
     /**
      * Notification category: ongoing information about device or contextual status.
+     * @hide
      */
     public static final String CATEGORY_STATUS = "status";
 
     /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
      * that best describes this Notification.  May be used by the system for ranking and filtering.
+     * @hide
      */
     public String category;
 
@@ -1611,6 +1626,7 @@ public class Notification implements Parcelable
          * Set the notification category.
          *
          * @see Notification#category
+         * @hide
          */
         public Builder setCategory(String category) {
             mCategory = category;
