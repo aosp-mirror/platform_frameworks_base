@@ -356,7 +356,7 @@ public class ZenModeView extends RelativeLayout {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            log("onTouchEvent " + MotionEvent.actionToString(event.getAction()));
+            if (DEBUG) log("onTouchEvent " + MotionEvent.actionToString(event.getAction()));
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mDownX = event.getX();
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
