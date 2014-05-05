@@ -53,6 +53,12 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static final long NANOS_PER_MS = 1000000;
 
+    // Keep in sync with DrawFrameTask.h SYNC_* flags
+    // Nothing interesting to report
+    private static final int SYNC_OK = 0x0;
+    // Needs a ViewRoot invalidate
+    private static final int SYNC_INVALIDATE_REQUIRED = 0x1;
+
     private int mWidth, mHeight;
     private long mNativeProxy;
     private boolean mInitialized = false;
@@ -201,8 +207,11 @@ public class ThreadedRenderer extends HardwareRenderer {
         if (dirty == null) {
             dirty = NULL_RECT;
         }
-        nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
+        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
                 dirty.left, dirty.top, dirty.right, dirty.bottom);
+        if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
+            attachInfo.mViewRootImpl.invalidate();
+        }
     }
 
     @Override
@@ -304,7 +313,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetup(long nativeProxy, int width, int height);
     private static native void nSetDisplayListData(long nativeProxy, long displayList,
             long newData);
-    private static native void nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,
+    private static native int nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);

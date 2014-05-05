@@ -160,13 +160,13 @@ void RenderNode::evaluateAnimations(TreeInfo& info) {
     newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mProperties.updateMatrix();
-    info.hasAnimations |= mAnimators.size();
+    info.out.hasAnimations |= mAnimators.size();
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
-        info.hasFunctors |= subtree->functorCount;
+        info.out.hasFunctors |= subtree->functorCount;
         // TODO: Fix ownedBitmapResources to not require disabling prepareTextures
         // and thus falling out of async drawing path.
         if (subtree->ownedBitmapResources.size()) {

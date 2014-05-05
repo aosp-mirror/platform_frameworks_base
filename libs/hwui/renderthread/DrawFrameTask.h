@@ -37,6 +37,11 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
+enum SyncResult {
+    kSync_OK = 0,
+    kSync_UIRedrawRequired = 1 << 1,
+};
+
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
  * and contains state (such as layer updaters & new DisplayListDatas) that is
@@ -54,7 +59,7 @@ public:
     void removeLayer(DeferredLayerUpdater* layer);
 
     void setDirty(int left, int top, int right, int bottom);
-    void drawFrame(nsecs_t frameTimeNanos);
+    int drawFrame(nsecs_t frameTimeNanos);
 
     virtual void run();
 
@@ -74,6 +79,8 @@ private:
      *********************************************/
     Rect mDirty;
     nsecs_t mFrameTimeNanos;
+
+    int mSyncResult;
 
     /*********************************************
      *  Multi frame data

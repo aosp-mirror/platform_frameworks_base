@@ -66,7 +66,7 @@ public:
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
     ANDROID_API void pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height);
-    ANDROID_API void syncAndDrawFrame(nsecs_t frameTimeNanos,
+    ANDROID_API int syncAndDrawFrame(nsecs_t frameTimeNanos,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     ANDROID_API void destroyCanvasAndSurface();
 

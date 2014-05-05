@@ -53,8 +53,7 @@ public:
     void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
     void makeCurrent();
-    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
-    void prepareTree(TreeInfo& info);
+    void prepareDraw(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
     void draw(Rect* dirty);
     void destroyCanvasAndSurface();
 
@@ -71,6 +70,9 @@ public:
     Layer* createTextureLayer();
 
 private:
+    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
+    void prepareTree(TreeInfo& info);
+
     void setSurface(EGLNativeWindowType window);
     void swapBuffers();
     void requireSurface();
