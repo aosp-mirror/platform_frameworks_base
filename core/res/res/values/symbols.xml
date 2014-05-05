@@ -1864,9 +1864,5 @@
   <java-symbol type="id" name="icon_frame" />
   <java-symbol type="style" name="Animation.VolumePanel" />
   <java-symbol type="transition" name="no_transition" />
-  <java-symbol type="array" name="system_theme_sdks" />
-  <java-symbol type="array" name="system_theme_styles" />
-  <java-symbol type="array" name="system_theme_dialog_styles" />
-  <java-symbol type="array" name="system_theme_ime_styles" />
 
 </resources>

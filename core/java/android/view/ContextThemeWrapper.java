@@ -96,7 +96,7 @@ public class ContextThemeWrapper extends ContextWrapper {
             return mTheme;
         }
 
-        mThemeResource = getResources().selectDefaultTheme(mThemeResource,
+        mThemeResource = Resources.selectDefaultTheme(mThemeResource,
                 getApplicationInfo().targetSdkVersion);
         initializeTheme();
 
