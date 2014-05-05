@@ -657,6 +657,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * If the trace file given does not end in ".trace", it will be appended for you.
      * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
      * @param intervalUs    The amount of time between each sample in microseconds.
+     * @hide
      */
     public static void startMethodTracingSampling(String traceName,
         int bufferSize, int intervalUs) {
