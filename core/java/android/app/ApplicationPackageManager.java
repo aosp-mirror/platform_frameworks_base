@@ -128,6 +128,7 @@ final class ApplicationPackageManager extends PackageManager {
         return intent;
     }
 
+    /** @hide */
     @Override
     public Intent getLeanbackLaunchIntentForPackage(String packageName) {
         // Try to find a main leanback_launcher activity.

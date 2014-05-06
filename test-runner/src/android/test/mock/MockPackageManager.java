@@ -79,6 +79,7 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public Intent getLeanbackLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
