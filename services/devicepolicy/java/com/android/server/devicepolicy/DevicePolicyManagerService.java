@@ -3082,7 +3082,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void forwardMatchingIntents(ComponentName who, IntentFilter filter, int flags) {
+    public void addForwardingIntentFilter(ComponentName who, IntentFilter filter, int flags) {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
             if (who == null) {

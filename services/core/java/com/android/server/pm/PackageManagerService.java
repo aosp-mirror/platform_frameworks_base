@@ -11115,11 +11115,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdOrig,
             int userIdDest) {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "addForwardingIntentFilter can only be run by the system");
-        }
+        mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         if (filter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a forwarding intent filter with no filter actions");
             return;
@@ -11133,11 +11130,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void clearForwardingIntentFilters(int userIdOrig) {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "clearForwardingIntentFilter can only be run by the system");
-        }
+        mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         synchronized (mPackages) {
             ForwardingIntentResolver fir = mSettings.editForwardingIntentResolverLPw(userIdOrig);
             HashSet<ForwardingIntentFilter> set =

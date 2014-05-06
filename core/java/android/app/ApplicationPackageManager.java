@@ -1440,6 +1440,31 @@ final class ApplicationPackageManager extends PackageManager {
         return null;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdOrig,
+            int userIdDest) {
+        try {
+            mPM.addForwardingIntentFilter(filter, removable, userIdOrig, userIdDest);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void clearForwardingIntentFilters(int userIdOrig) {
+        try {
+            mPM.clearForwardingIntentFilters(userIdOrig);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
     private final ContextImpl mContext;
     private final IPackageManager mPM;
 
