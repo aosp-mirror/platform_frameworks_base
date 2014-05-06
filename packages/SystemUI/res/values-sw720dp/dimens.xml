@@ -24,8 +24,6 @@
 
     <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width">360dp</dimen>
-    <!-- Status bar panel bottom offset (height of status bar - overlap) -->
-    <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">1dp</dimen>
     <!-- The width of the notification panel window -->

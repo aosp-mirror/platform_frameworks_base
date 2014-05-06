@@ -22,5 +22,4 @@
     android:layout_height="wrap_content"
     android:background="#5f000000"
     android:animateLayoutChanges="true"
-    android:visibility="gone"
     android:columnCount="@integer/quick_settings_num_columns" />

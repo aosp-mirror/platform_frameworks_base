@@ -23,9 +23,7 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
     android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:paddingTop="@dimen/notification_panel_padding_top"
-    android:layout_marginStart="@dimen/notification_panel_margin_left"
+    android:layout_height="match_parent"
     >
 
     <include
@@ -36,15 +34,6 @@
         android:layout_gravity="bottom"
         />
 
-    <include
-        layout="@layout/status_bar_flip_button"
-        android:id="@+id/keyguard_flipper"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="right|top"
-        android:layout_marginTop="@dimen/status_bar_height"
-        android:visibility="gone" />
-
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="wrap_content"
@@ -53,11 +42,6 @@
         android:layout_marginLeft="8dp"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <include layout="@layout/status_bar_expanded_header"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_panel_header_height"
-        />
 
     <include
         layout="@layout/keyguard_status_view"
@@ -74,27 +58,54 @@
         android:visibility="gone"
         />
 
-    <FrameLayout
+    <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:id="@+id/notification_container_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/close_handle_underlap"
-        >
-        <include
-            layout="@layout/flip_settings"
-            android:layout_marginTop="@dimen/notification_panel_header_height"
+        android:clipToPadding="false"
+        android:clipChildren="false">
+
+        <com.android.systemui.statusbar.phone.ObservableScrollView
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:scrollbars="none"
+            android:fillViewport="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include
+                    layout="@layout/flip_settings"
+                    android:layout_marginTop="@dimen/status_bar_header_height_expanded"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- A view to reserve space for the collapsed stack -->
+                <View
+                    android:layout_height="@dimen/collapsed_stack_height"
+                    android:layout_width="match_parent"/>
+            </LinearLayout>
+        </com.android.systemui.statusbar.phone.ObservableScrollView>
+
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-    </FrameLayout>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/close_handle_underlap"/>
+
+    </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
+
+
+    <include layout="@layout/status_bar_expanded_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/status_bar_header_height"
+        />
 
     <include
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
+
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

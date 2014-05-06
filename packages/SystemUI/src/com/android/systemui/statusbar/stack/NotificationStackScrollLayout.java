@@ -492,6 +492,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            return false;
+        }
         boolean scrollerWantsIt = false;
         if (!mSwipingInProgress) {
             scrollerWantsIt = onScrollTouch(ev);

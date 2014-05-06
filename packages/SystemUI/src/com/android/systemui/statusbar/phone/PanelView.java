@@ -75,7 +75,7 @@ public class PanelView extends FrameLayout {
     private boolean mClosing;
     private boolean mTracking;
     private int mTrackingPointer;
-    private int mTouchSlop;
+    protected int mTouchSlop;
 
     private TimeAnimator mTimeAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -220,9 +220,9 @@ public class PanelView extends FrameLayout {
     private float mVel, mAccel;
     protected int mMaxPanelHeight = 0;
     private String mViewName;
-    protected float mInitialTouchY;
-    protected float mInitialTouchX;
-    protected float mFinalTouchY;
+    private float mInitialTouchY;
+    private float mInitialTouchX;
+    private float mFinalTouchY;
 
     protected void onExpandingFinished() {
     }

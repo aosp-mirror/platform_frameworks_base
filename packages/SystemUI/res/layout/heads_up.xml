@@ -22,6 +22,5 @@
         android:layout_height="wrap_content"
         android:layout_width="@dimen/notification_panel_width"
         android:id="@+id/content_holder"
-        android:layout_marginStart="@dimen/notification_panel_margin_left"
         android:background="@drawable/notification_panel_bg"
         />
