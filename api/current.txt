@@ -4438,6 +4438,7 @@ package android.app {
     field public static final java.lang.String CATEGORY_STATUS = "status";
     field public static final java.lang.String CATEGORY_SYSTEM = "sys";
     field public static final java.lang.String CATEGORY_TRANSPORT = "transport";
+    field public static final int COLOR_DEFAULT = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT_ALL = -1; // 0xffffffff
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
@@ -4483,6 +4484,7 @@ package android.app {
     field public int audioStreamType;
     field public android.widget.RemoteViews bigContentView;
     field public java.lang.String category;
+    field public int color;
     field public android.app.PendingIntent contentIntent;
     field public android.widget.RemoteViews contentView;
     field public int defaults;
@@ -4545,6 +4547,7 @@ package android.app {
     method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
     method public android.app.Notification.Builder setCategory(java.lang.String);
+    method public android.app.Notification.Builder setColor(int);
     method public android.app.Notification.Builder setContent(android.widget.RemoteViews);
     method public android.app.Notification.Builder setContentInfo(java.lang.CharSequence);
     method public android.app.Notification.Builder setContentIntent(android.app.PendingIntent);

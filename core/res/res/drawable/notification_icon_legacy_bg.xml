@@ -18,5 +18,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="oval">
     <solid
-            android:color="@color/notification_icon_legacy_bg_color"/>
+            android:color="@color/notification_icon_bg_color"/>
 </shape>

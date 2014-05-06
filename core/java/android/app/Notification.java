@@ -17,7 +17,7 @@
 package android.app;
 
 import com.android.internal.R;
-import com.android.internal.util.LegacyNotificationUtil;
+import com.android.internal.util.NotificationColorUtil;
 
 import android.annotation.IntDef;
 import android.content.Context;
@@ -28,6 +28,7 @@ import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BadParcelableException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -420,6 +421,21 @@ public class Notification implements Parcelable
     @Priority
     public int priority;
 
+    /**
+     * Accent color (an ARGB integer like the constants in {@link android.graphics.Color})
+     * to be applied by the standard Style templates when presenting this notification.
+     *
+     * The current template design constructs a colorful header image by overlaying the
+     * {@link #icon} image (stenciled in white) atop a field of this color. Alpha components are
+     * ignored.
+     */
+    public int color = COLOR_DEFAULT;
+
+    /**
+     * Special value of {@link #color} telling the system not to decorate this notification with
+     * any special color but instead use default colors when presenting this notification.
+     */
+    public static final int COLOR_DEFAULT = 0; // AKA Color.TRANSPARENT
 
     /**
      * Sphere of visibility of this notification, which affects how and when the SystemUI reveals 
@@ -877,6 +893,8 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             publicVersion = Notification.CREATOR.createFromParcel(parcel);
         }
+
+        color = parcel.readInt();
     }
 
     @Override
@@ -967,6 +985,8 @@ public class Notification implements Parcelable
             that.publicVersion = new Notification();
             this.publicVersion.cloneInto(that.publicVersion, heavy);
         }
+
+        that.color = this.color;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -1110,6 +1130,8 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+
+        parcel.writeInt(color);
     }
 
     /**
@@ -1218,6 +1240,7 @@ public class Notification implements Parcelable
         sb.append(Integer.toHexString(this.defaults));
         sb.append(" flags=0x");
         sb.append(Integer.toHexString(this.flags));
+        sb.append(String.format(" color=0x%08x", this.color));
         sb.append(" category="); sb.append(this.category);
         if (actions != null) {
             sb.append(" ");
@@ -1309,9 +1332,10 @@ public class Notification implements Parcelable
         private boolean mShowWhen = true;
         private int mVisibility = VISIBILITY_PRIVATE;
         private Notification mPublicVersion = null;
-        private boolean mQuantumTheme;
-        private final LegacyNotificationUtil mLegacyNotificationUtil;
+        private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
+        private boolean mPreQuantum;
+        private int mColor = COLOR_DEFAULT;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1341,12 +1365,8 @@ public class Notification implements Parcelable
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
-            // TODO: Decide on targetSdk from calling app whether to use quantum theme.
-            mQuantumTheme = true;
-
-            // TODO: Decide on targetSdk from calling app whether to instantiate the processor at
-            // all.
-            mLegacyNotificationUtil = LegacyNotificationUtil.getInstance();
+            mPreQuantum = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L;
+            mColorUtil = NotificationColorUtil.getInstance();
         }
 
         /**
@@ -1853,29 +1873,38 @@ public class Notification implements Parcelable
             }
         }
 
+        /**
+         * Sets {@link Notification#color}.
+         *
+         * @param argb The accent color to use
+         *
+         * @return The same Builder.
+         */
+        public Builder setColor(int argb) {
+            mColor = argb;
+            return this;
+        }
+
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
             int smallIconImageViewId = R.id.icon;
-            if (!mQuantumTheme && mPriority < PRIORITY_LOW) {
-                contentView.setInt(R.id.icon,
-                        "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
-                contentView.setInt(R.id.status_bar_latest_event_content,
-                        "setBackgroundResource", R.drawable.notification_bg_low);
+            if (mPriority < PRIORITY_LOW) {
+                // TODO: Low priority presentation
             }
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
-                processLegacyLargeIcon(mLargeIcon, contentView);
+                processLargeIcon(mLargeIcon, contentView);
                 smallIconImageViewId = R.id.right_icon;
             }
             if (mSmallIcon != 0) {
                 contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);
                 contentView.setViewVisibility(smallIconImageViewId, View.VISIBLE);
                 if (mLargeIcon != null) {
-                    processLegacySmallIcon(mSmallIcon, smallIconImageViewId, contentView);
+                    processSmallRightIcon(mSmallIcon, smallIconImageViewId, contentView);
                 } else {
-                    processLegacyLargeIcon(mSmallIcon, contentView);
+                    processSmallIconAsLarge(mSmallIcon, contentView);
                 }
 
             } else {
@@ -2035,12 +2064,12 @@ public class Notification implements Parcelable
          *         doesn't create quantum notifications by itself) app.
          */
         private boolean isLegacy() {
-            return mLegacyNotificationUtil != null;
+            return mColorUtil != null;
         }
 
         private void processLegacyAction(Action action, RemoteViews button) {
             if (isLegacy()) {
-                if (mLegacyNotificationUtil.isGrayscale(mContext, action.icon)) {
+                if (mColorUtil.isGrayscale(mContext, action.icon)) {
                     button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
                             mContext.getResources().getColor(
                                     R.color.notification_action_legacy_color_filter),
@@ -2051,45 +2080,68 @@ public class Notification implements Parcelable
 
         private CharSequence processLegacyText(CharSequence charSequence) {
             if (isLegacy()) {
-                return mLegacyNotificationUtil.invertCharSequenceColors(charSequence);
+                return mColorUtil.invertCharSequenceColors(charSequence);
             } else {
                 return charSequence;
             }
         }
 
-        private void processLegacyLargeIcon(int largeIconId, RemoteViews contentView) {
-            if (isLegacy()) {
-                processLegacyLargeIcon(
-                        mLegacyNotificationUtil.isGrayscale(mContext, largeIconId),
-                        contentView);
+        /**
+         * Apply any necessary background to smallIcons being used in the largeIcon spot.
+         */
+        private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
+            if (!isLegacy() || mColorUtil.isGrayscale(mContext, largeIconId)) {
+                applyLargeIconBackground(contentView);
             }
         }
 
-        private void processLegacyLargeIcon(Bitmap largeIcon, RemoteViews contentView) {
-            if (isLegacy()) {
-                processLegacyLargeIcon(
-                        mLegacyNotificationUtil.isGrayscale(largeIcon),
-                        contentView);
+        /**
+         * Apply any necessary background to a largeIcon if it's a fake smallIcon (that is,
+         * if it's grayscale).
+         */
+        // TODO: also check bounds, transparency, that sort of thing.
+        private void processLargeIcon(Bitmap largeIcon, RemoteViews contentView) {
+            if (!isLegacy() || mColorUtil.isGrayscale(largeIcon)) {
+                applyLargeIconBackground(contentView);
             }
         }
 
-        private void processLegacyLargeIcon(boolean isGrayscale, RemoteViews contentView) {
-            if (isLegacy() && isGrayscale) {
-                contentView.setInt(R.id.icon, "setBackgroundResource",
-                        R.drawable.notification_icon_legacy_bg_inset);
-            }
+        /**
+         * Add a colored circle behind the largeIcon slot.
+         */
+        private void applyLargeIconBackground(RemoteViews contentView) {
+            contentView.setInt(R.id.icon, "setBackgroundResource",
+                    R.drawable.notification_icon_legacy_bg_inset);
+
+            contentView.setDrawableParameters(
+                    R.id.icon,
+                    true,
+                    -1,
+                    mColor,
+                    PorterDuff.Mode.SRC_ATOP,
+                    -1);
         }
 
-        private void processLegacySmallIcon(int smallIconDrawableId, int smallIconImageViewId,
+        /**
+         * Recolor small icons when used in the R.id.right_icon slot.
+         */
+        private void processSmallRightIcon(int smallIconDrawableId, int smallIconImageViewId,
                 RemoteViews contentView) {
-            if (isLegacy()) {
-                if (mLegacyNotificationUtil.isGrayscale(mContext, smallIconDrawableId)) {
-                    contentView.setDrawableParameters(smallIconImageViewId, false, -1,
-                            mContext.getResources().getColor(
-                                    R.color.notification_action_legacy_color_filter),
-                            PorterDuff.Mode.MULTIPLY, -1);
-                }
+            if (!isLegacy() || mColorUtil.isGrayscale(mContext, smallIconDrawableId)) {
+                contentView.setDrawableParameters(smallIconImageViewId, false, -1,
+                        mContext.getResources().getColor(
+                                R.color.notification_action_legacy_color_filter),
+                        PorterDuff.Mode.MULTIPLY, -1);
             }
+        }
+
+        private int resolveColor() {
+            if (mColor == COLOR_DEFAULT) {
+                mColor = mContext.getResources().getColor(R.color.notification_icon_bg_color);
+            } else {
+                mColor |= 0xFF000000; // no alpha for custom colors
+            }
+            return mColor;
         }
 
         /**
@@ -2102,6 +2154,9 @@ public class Notification implements Parcelable
             n.icon = mSmallIcon;
             n.iconLevel = mSmallIconLevel;
             n.number = mNumber;
+
+            n.color = resolveColor();
+
             n.contentView = makeContentView();
             n.contentIntent = mContentIntent;
             n.deleteIntent = mDeleteIntent;
@@ -2207,45 +2262,31 @@ public class Notification implements Parcelable
 
 
         private int getBaseLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_template_quantum_base
-                    : R.layout.notification_template_base;
+            return R.layout.notification_template_quantum_base;
         }
 
         private int getBigBaseLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_template_quantum_big_base
-                    : R.layout.notification_template_big_base;
+            return R.layout.notification_template_quantum_big_base;
         }
 
         private int getBigPictureLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_template_quantum_big_picture
-                    : R.layout.notification_template_big_picture;
+            return R.layout.notification_template_quantum_big_picture;
         }
 
         private int getBigTextLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_template_quantum_big_text
-                    : R.layout.notification_template_big_text;
+            return R.layout.notification_template_quantum_big_text;
         }
 
         private int getInboxLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_template_quantum_inbox
-                    : R.layout.notification_template_inbox;
+            return R.layout.notification_template_quantum_inbox;
         }
 
         private int getActionLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_quantum_action
-                    : R.layout.notification_action;
+            return R.layout.notification_quantum_action;
         }
 
         private int getActionTombstoneLayoutResource() {
-            return mQuantumTheme
-                    ? R.layout.notification_quantum_action_tombstone
-                    : R.layout.notification_action_tombstone;
+            return R.layout.notification_quantum_action_tombstone;
         }
     }
 
