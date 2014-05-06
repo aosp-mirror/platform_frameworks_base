@@ -7070,7 +7070,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     final ArrayList<ActivityRecord> activities = tr.mActivities;
                     int activityNdx;
                     final int numActivities = activities.size();
-                    for (activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+                    for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
+                            ++activityNdx) {
                         final ActivityRecord r = activities.get(activityNdx);
                         if (r.intent != null &&
                                 (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
