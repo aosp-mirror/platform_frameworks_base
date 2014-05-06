@@ -27,28 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <!-- no translation found for durationDays (6652371460511178259) -->
-    <skip />
-    <!-- no translation found for durationDayHours (2713107458736744435) -->
-    <skip />
-    <!-- no translation found for durationDayHour (7293789639090958917) -->
-    <skip />
-    <!-- no translation found for durationHours (4266858287167358988) -->
-    <skip />
-    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
-    <skip />
-    <!-- no translation found for durationHourMinute (2741677355177402539) -->
-    <skip />
-    <!-- no translation found for durationMinutes (3134226679883579347) -->
-    <skip />
-    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
-    <skip />
-    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
-    <skip />
-    <!-- no translation found for durationSeconds (8050088505238241405) -->
-    <skip />
-    <!-- no translation found for durationSecond (985669622276420331) -->
-    <skip />
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dies"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> hores"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuts"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sense títol&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -199,6 +188,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Feina"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Dur a terme activitats de pagament."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Missatges"</string>
@@ -409,8 +400,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de VPN. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enllaça amb un fons de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"vinculació amb una eina d\'interacció de veu"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet que el titular es vinculi amb la interfície de nivell superior d\'un servei d\'interacció de veu. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"enllaçar amb una eina d\'interacció de veu"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet enllaçar amb la interfície de nivell superior d\'un servei d\'interacció de veu. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincula a una pantalla remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
@@ -723,8 +714,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei oient de notificacions"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vinculació amb el servei d\'un proveïdor de condicions"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet que el titular es vinculi amb la interfície de nivell superior del servei d\'un proveïdor de condicions. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"enllaçar amb el servei de proveïdor de condicions"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet enllaçar amb la interfície de nivell superior d\'un servei de proveïdor de condicions. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
