@@ -653,6 +653,10 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
+        if (mProperties.getOutline().willClip()) {
+            renderer.setClippingOutline(alloc, &(mProperties.getOutline()));
+        }
+
         Vector<ZDrawDisplayListOpPair> zTranslatedNodes;
         buildZSortedChildList(zTranslatedNodes);
 

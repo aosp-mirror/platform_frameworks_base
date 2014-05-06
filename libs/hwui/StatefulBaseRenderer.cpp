@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include <SkCanvas.h>
 
 #include "StatefulBaseRenderer.h"
@@ -180,6 +182,10 @@ bool StatefulBaseRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return !mSnapshot->clipRect->isEmpty();
 }
 
+void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
+    mSnapshot->setClippingOutline(allocator, outline);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Quick Rejection
 ///////////////////////////////////////////////////////////////////////////////
@@ -195,7 +201,9 @@ bool StatefulBaseRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
  *         See Rect::snapGeometryToPixelBoundaries()
  */
 bool StatefulBaseRenderer::calculateQuickRejectForScissor(float left, float top,
-        float right, float bottom, bool* clipRequired, bool snapOut) const {
+        float right, float bottom,
+        bool* clipRequired, bool* roundRectClipRequired,
+        bool snapOut) const {
     if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
     }
@@ -210,7 +218,15 @@ bool StatefulBaseRenderer::calculateQuickRejectForScissor(float left, float top,
     if (!clipRect.intersects(r)) return true;
 
     // clip is required if geometry intersects clip rect
-    if (clipRequired) *clipRequired = !clipRect.contains(r);
+    if (clipRequired) {
+        *clipRequired = !clipRect.contains(r);
+    }
+
+    // round rect clip is required if RR clip exists, and geometry intersects its corners
+    if (roundRectClipRequired) {
+        *roundRectClipRequired = mSnapshot->roundRectClipState != NULL
+                && mSnapshot->roundRectClipState->areaRequiresRoundRectClip(r);
+    }
     return false;
 }
 

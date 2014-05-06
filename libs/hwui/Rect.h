@@ -234,7 +234,7 @@ public:
         bottom = ceilf(bottom);
     }
 
-    void dump(const char* label) const {
+    void dump(const char* label = NULL) const {
         ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
     }
 

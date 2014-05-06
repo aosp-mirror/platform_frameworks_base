@@ -285,6 +285,12 @@ static jboolean android_view_RenderNode_hasOverlappingRendering(JNIEnv* env,
     return renderNode->stagingProperties().hasOverlappingRendering();
 }
 
+static jboolean android_view_RenderNode_getClipToOutline(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getOutline().getShouldClip();
+}
+
 static jfloat android_view_RenderNode_getAlpha(JNIEnv* env,
         jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -505,6 +511,7 @@ static JNINativeMethod gMethods[] = {
     { "nOffsetTopAndBottom",   "(JF)V",  (void*) android_view_RenderNode_offsetTopAndBottom },
 
     { "nHasOverlappingRendering", "(J)Z",  (void*) android_view_RenderNode_hasOverlappingRendering },
+    { "nGetClipToOutline",        "(J)Z",  (void*) android_view_RenderNode_getClipToOutline },
     { "nGetAlpha",                "(J)F",  (void*) android_view_RenderNode_getAlpha },
     { "nGetLeft",                 "(J)F",  (void*) android_view_RenderNode_getLeft },
     { "nGetTop",                  "(J)F",  (void*) android_view_RenderNode_getTop },

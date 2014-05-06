@@ -387,6 +387,10 @@ public class RenderNode {
         nSetClipToOutline(mNativeRenderNode, clipToOutline);
     }
 
+    public boolean getClipToOutline() {
+        return nGetClipToOutline(mNativeRenderNode);
+    }
+
     /**
      * Controls the RenderNode's circular reveal clip.
      */
@@ -919,6 +923,7 @@ public class RenderNode {
     private static native void nSetAnimationMatrix(long renderNode, long animationMatrix);
 
     private static native boolean nHasOverlappingRendering(long renderNode);
+    private static native boolean nGetClipToOutline(long renderNode);
     private static native float nGetAlpha(long renderNode);
     private static native float nGetLeft(long renderNode);
     private static native float nGetTop(long renderNode);

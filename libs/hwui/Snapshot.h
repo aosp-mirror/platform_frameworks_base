@@ -20,6 +20,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <ui/Region.h>
 
@@ -27,10 +28,38 @@
 
 #include "Layer.h"
 #include "Matrix.h"
+#include "Outline.h"
 #include "Rect.h"
+#include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
+
+/**
+ * Temporary structure holding information for a single outline clip.
+ *
+ * These structures are treated as immutable once created, and only exist for a single frame, which
+ * is why they may only be allocated with a LinearAllocator.
+ */
+class RoundRectClipState {
+public:
+    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
+    bool areaRequiresRoundRectClip(const Rect& rect) const {
+        return rect.intersects(dangerRects[0])
+                || rect.intersects(dangerRects[1])
+                || rect.intersects(dangerRects[2])
+                || rect.intersects(dangerRects[3]);
+    }
+
+    Matrix4 matrix;
+    Rect dangerRects[4];
+    Rect outlineInnerRect;
+    float outlineRadius;
+};
 
 /**
  * A snapshot holds information about the current state of the rendering
@@ -133,6 +162,11 @@ public:
     const Matrix4& getOrthoMatrix() const { return mViewportData.mOrthoMatrix; }
 
     /**
+     * Sets (and replaces) the current clipping outline
+     */
+    void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
+
+    /**
      * Indicates whether this snapshot should be ignored. A snapshot
      * is typicalled ignored if its layer is invisible or empty.
      */
@@ -224,6 +258,14 @@ public:
      * the actual text).
      */
     float alpha;
+
+    /**
+     * Current clipping round rect.
+     *
+     * Points to data not owned by the snapshot, and may only be replaced by subsequent RR clips,
+     * never modified.
+     */
+    const RoundRectClipState* roundRectClipState;
 
     void dump() const;
 

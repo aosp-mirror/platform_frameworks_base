@@ -711,6 +711,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
             mSnapshot->initializeViewport(bounds.getWidth(), bounds.getHeight());
+            mSnapshot->roundRectClipState = NULL;
         }
     }
 
@@ -844,6 +845,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     mSnapshot->initializeViewport(bounds.getWidth(), bounds.getHeight());
+    mSnapshot->roundRectClipState = NULL;
 
     endTiling();
     debugOverdraw(false, false);
@@ -872,8 +874,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
 
     // Change the ortho projection
     glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
-
-
     return true;
 }
 
@@ -892,7 +892,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
 
     bool clipRequired = false;
     calculateQuickRejectForScissor(rect.left, rect.top, rect.right, rect.bottom,
-            &clipRequired, false); // safely ignore return, should never be rejected
+            &clipRequired, NULL, false); // safely ignore return, should never be rejected
     mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
 
     if (fboLayer) {
@@ -1367,6 +1367,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
     state.mMatrix.load(*currentMatrix);
     state.mDrawModifiers = mDrawModifiers;
     state.mAlpha = currentSnapshot()->alpha;
+
+    // always store/restore, since it's just a pointer
+    state.mRoundRectClipState = currentSnapshot()->roundRectClipState;
     return false;
 }
 
@@ -1374,6 +1377,7 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool
     setMatrix(state.mMatrix);
     mSnapshot->alpha = state.mAlpha;
     mDrawModifiers = state.mDrawModifiers;
+    mSnapshot->roundRectClipState = state.mRoundRectClipState;
 
     if (state.mClipValid && !skipClipRestore) {
         mSnapshot->setClip(state.mClip.left, state.mClip.top,
@@ -1449,7 +1453,7 @@ void OpenGLRenderer::setStencilFromClip() {
 
             mCaches.stencil.enableWrite();
 
-            // Clear the stencil but first make sure we restrict drawing
+            // Clear and update the stencil, but first make sure we restrict drawing
             // to the region's bounds
             bool resetScissor = mCaches.enableScissor();
             if (resetScissor) {
@@ -1457,7 +1461,10 @@ void OpenGLRenderer::setStencilFromClip() {
                 setScissorFromClip();
             }
             mCaches.stencil.clear();
-            if (resetScissor) mCaches.disableScissor();
+
+            // stash and disable the outline clip state, since stencil doesn't account for outline
+            bool storedSkipOutlineClip = mSkipOutlineClip;
+            mSkipOutlineClip = true;
 
             SkPaint paint;
             paint.setColor(0xff000000);
@@ -1470,6 +1477,8 @@ void OpenGLRenderer::setStencilFromClip() {
             // The last parameter is important: we are not drawing in the color buffer
             // so we don't want to dirty the current layer, if any
             drawRegionRects(*(currentSnapshot()->clipRegion), paint, false);
+            if (resetScissor) mCaches.disableScissor();
+            mSkipOutlineClip = storedSkipOutlineClip;
 
             mCaches.stencil.enableTest();
 
@@ -1494,7 +1503,6 @@ void OpenGLRenderer::setStencilFromClip() {
  */
 bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right, float bottom,
         const SkPaint* paint) {
-    bool clipRequired = false;
     bool snapOut = paint && paint->isAntiAlias();
 
     if (paint && paint->getStyle() != SkPaint::kFill_Style) {
@@ -1505,13 +1513,17 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
         bottom += outset;
     }
 
-    if (calculateQuickRejectForScissor(left, top, right, bottom, &clipRequired, snapOut)) {
+    bool clipRequired = false;
+    bool roundRectClipRequired = false;
+    if (calculateQuickRejectForScissor(left, top, right, bottom,
+            &clipRequired, &roundRectClipRequired, snapOut)) {
         return true;
     }
 
     if (!isRecording()) {
         // not quick rejected, so enable the scissor if clipRequired
         mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+        mSkipOutlineClip = !roundRectClipRequired;
     }
     return false;
 }
@@ -1668,6 +1680,18 @@ void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool sw
 
 void OpenGLRenderer::setupDrawProgram() {
     useProgram(mCaches.programCache.get(mDescription));
+    if (mDescription.hasRoundRectClip) {
+        // TODO: avoid doing this repeatedly, stashing state pointer in program
+        const RoundRectClipState* state = mSnapshot->roundRectClipState;
+        const Rect& innerRect = state->outlineInnerRect;
+        glUniform4f(mCaches.currentProgram->getUniform("roundRectInnerRectLTRB"),
+                innerRect.left,  innerRect.top,
+                innerRect.right,  innerRect.bottom);
+        glUniform1f(mCaches.currentProgram->getUniform("roundRectRadius"),
+                state->outlineRadius);
+        glUniformMatrix4fv(mCaches.currentProgram->getUniform("roundRectInvTransform"),
+                1, GL_FALSE, &state->matrix.data[0]);
+    }
 }
 
 void OpenGLRenderer::setupDrawDirtyRegionsDisabled() {
@@ -2902,7 +2926,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 
     bool clipRequired = false;
     const bool rejected = calculateQuickRejectForScissor(x, y,
-            x + layer->layer.getWidth(), y + layer->layer.getHeight(), &clipRequired, false);
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), &clipRequired, NULL, false);
 
     if (rejected) {
         if (transform && !transform->isIdentity()) {
@@ -3433,6 +3457,13 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         ProgramDescription& description, bool swapSrcDst) {
+
+    if (mSnapshot->roundRectClipState != NULL /*&& !mSkipOutlineClip*/) {
+        blend = true;
+        mDescription.hasRoundRectClip = true;
+    }
+    mSkipOutlineClip = true;
+
     if (mCountOverdraw) {
         if (!mCaches.blend) glEnable(GL_BLEND);
         if (mCaches.lastSrcMode != GL_ONE || mCaches.lastDstMode != GL_ONE) {

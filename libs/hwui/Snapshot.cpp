@@ -20,6 +20,8 @@
 
 #include <SkCanvas.h>
 
+#include "utils/MathUtils.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -34,7 +36,8 @@ Snapshot::Snapshot()
         , fbo(0)
         , invisible(false)
         , empty(false)
-        , alpha(1.0f) {
+        , alpha(1.0f)
+        , roundRectClipState(NULL) {
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
     region = NULL;
@@ -53,8 +56,8 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , invisible(s->invisible)
         , empty(false)
         , alpha(s->alpha)
+        , roundRectClipState(s->roundRectClipState)
         , mViewportData(s->mViewportData) {
-
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
         transform = &mTransformRoot;
@@ -201,6 +204,49 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 void Snapshot::resetTransform(float x, float y, float z) {
     transform = &mTransformRoot;
     transform->loadTranslate(x, y, z);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Clipping outline
+///////////////////////////////////////////////////////////////////////////////
+
+void Snapshot::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
+    Rect bounds;
+    float radius;
+    if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
+
+    if (!MathUtils::isPositive(radius)) return; // leave clipping up to rect clipping
+
+    RoundRectClipState* state = new (allocator) RoundRectClipState;
+
+    // store the inverse drawing matrix
+    Matrix4 outlineDrawingMatrix;
+    outlineDrawingMatrix.load(getOrthoMatrix());
+    outlineDrawingMatrix.multiply(*transform);
+    state->matrix.loadInverse(outlineDrawingMatrix);
+
+    // compute area under rounded corners - only draws overlapping these rects need to be clipped
+    for (int i = 0 ; i < 4; i++) {
+        state->dangerRects[i] = bounds;
+    }
+    state->dangerRects[0].bottom = state->dangerRects[1].bottom = bounds.top + radius;
+    state->dangerRects[0].right = state->dangerRects[2].right = bounds.left + radius;
+    state->dangerRects[1].left = state->dangerRects[3].left = bounds.right - radius;
+    state->dangerRects[2].top = state->dangerRects[3].top = bounds.bottom - radius;
+    for (int i = 0; i < 4; i++) {
+        transform->mapRect(state->dangerRects[i]);
+
+        // round danger rects out as though they are AA geometry (since they essentially are)
+        state->dangerRects[i].snapGeometryToPixelBoundaries(true);
+    }
+
+    // store RR area
+    bounds.inset(radius);
+    state->outlineInnerRect = bounds;
+    state->outlineRadius = radius;
+
+    // store as immutable so, for this frame, pointer uniquely identifies this bundle of shader info
+    roundRectClipState = state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -53,8 +53,7 @@ public final class Outline {
         set(src);
     }
 
-    /** @hide */
-    public void markInvalid() {
+    public void reset() {
         mRadius = 0;
         mRect = null;
         mPath = null;
@@ -74,27 +73,21 @@ public final class Outline {
      *
      * @param src Source outline to copy from.
      */
-    public void set(@Nullable Outline src) {
-        if (src == null) {
-            mRadius = 0;
+    public void set(@NonNull Outline src) {
+        if (src.mPath != null) {
+            if (mPath == null) {
+                mPath = new Path();
+            }
+            mPath.set(src.mPath);
             mRect = null;
-            mPath = null;
-        } else {
-            if (src.mPath != null) {
-                if (mPath == null) {
-                    mPath = new Path();
-                }
-                mPath.set(src.mPath);
-                mRect = null;
-            }
-            if (src.mRect != null) {
-                if (mRect == null) {
-                    mRect = new Rect();
-                }
-                mRect.set(src.mRect);
-            }
-            mRadius = src.mRadius;
         }
+        if (src.mRect != null) {
+            if (mRect == null) {
+                mRect = new Rect();
+            }
+            mRect.set(src.mRect);
+        }
+        mRadius = src.mRadius;
     }
 
     /**
@@ -134,6 +127,11 @@ public final class Outline {
      * Sets the outline to the oval defined by input rect.
      */
     public void setOval(int left, int top, int right, int bottom) {
+        if ((bottom - top) == (right - left)) {
+            // represent circle as round rect, for efficiency, and to enable clipping
+            setRoundRect(left, top, right, bottom, (bottom - top) / 2.0f);
+            return;
+        }
         mRect = null;
         if (mPath == null) mPath = new Path();
         mPath.reset();
@@ -159,5 +157,17 @@ public final class Outline {
         mRect = null;
         mRadius = -1.0f;
         mPath.set(convexPath);
+    }
+
+    /**
+     * Returns whether the outline can be used to clip a View.
+     *
+     * Currently, only outlines that can be represented as a rectangle, circle, or round rect
+     * support clipping.
+     *
+     * @see {@link View#setClipToOutline(boolean)}
+     */
+    public boolean canClip() {
+        return mRect != null;
     }
 }
