@@ -49,4 +49,7 @@
 
     <dimen name="floating_window_z">16dp</dimen>
     <dimen name="floating_window_margin">32dp</dimen>
+
+    <!-- the amount of elevation for pressed button state-->
+    <dimen name="button_pressed_z">2dp</dimen>
 </resources>

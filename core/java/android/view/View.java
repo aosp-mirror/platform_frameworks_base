@@ -16,7 +16,9 @@
 
 package android.view;
 
+import android.animation.AnimatorInflater;
 import android.animation.RevealAnimator;
+import android.animation.StateListAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -667,6 +669,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_scrollbarTrackVertical
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawHorizontalTrack
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
+ * @attr ref android.R.styleable#View_stateListAnimator
  * @attr ref android.R.styleable#View_sharedElementName
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
@@ -3258,6 +3261,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Outline mOutline;
 
     /**
+     * Animator that automatically runs based on state changes.
+     */
+    private StateListAnimator mStateListAnimator;
+
+    /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
      * the user may specify which view to go to next.
      */
@@ -3994,6 +4002,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_nestedScrollingEnabled:
                     setNestedScrollingEnabled(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.View_stateListAnimator:
+                    setStateListAnimator(AnimatorInflater.loadStateListAnimator(context,
+                            a.getResourceId(attr, 0)));
                     break;
             }
         }
@@ -10620,6 +10632,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the current StateListAnimator if exists.
+     *
+     * @return StateListAnimator or null if it does not exists
+     * @see    #setStateListAnimator(android.animation.StateListAnimator)
+     */
+    public StateListAnimator getStateListAnimator() {
+        return mStateListAnimator;
+    }
+
+    /**
+     * Attaches the provided StateListAnimator to this View.
+     * <p>
+     * Any previously attached StateListAnimator will be detached.
+     *
+     * @param stateListAnimator The StateListAnimator to update the view
+     * @see {@link android.animation.StateListAnimator}
+     */
+    public void setStateListAnimator(StateListAnimator stateListAnimator) {
+        if (mStateListAnimator == stateListAnimator) {
+            return;
+        }
+        if (mStateListAnimator != null) {
+            mStateListAnimator.setTarget(null);
+        }
+        mStateListAnimator = stateListAnimator;
+        if (stateListAnimator != null) {
+            stateListAnimator.setTarget(this);
+            if (isAttachedToWindow()) {
+                stateListAnimator.setState(getDrawableState());
+            }
+        }
+    }
+
+    /**
      * Sets the outline of the view, which defines the shape of the shadow it
      * casts.
      * <p>
@@ -12835,7 +12881,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         destroyLayer(false);
 
         cleanupDraw();
-
         mCurrentAnimation = null;
     }
 
@@ -15489,9 +15534,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * This function is called whenever the state of the view changes in such
      * a way that it impacts the state of drawables being shown.
-     *
-     * <p>Be sure to call through to the superclass when overriding this
-     * function.
+     * <p>
+     * If the View has a StateListAnimator, it will also be called to run necessary state
+     * change animations.
+     * <p>
+     * Be sure to call through to the superclass when overriding this function.
      *
      * @see Drawable#setState(int[])
      */
@@ -15499,6 +15546,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Drawable d = mBackground;
         if (d != null && d.isStateful()) {
             d.setState(getDrawableState());
+        }
+
+        if (mStateListAnimator != null) {
+            mStateListAnimator.setState(getDrawableState());
         }
     }
 
@@ -15644,10 +15695,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Call {@link Drawable#jumpToCurrentState() Drawable.jumpToCurrentState()}
      * on all Drawable objects associated with this view.
+     * <p>
+     * Also calls {@link StateListAnimator#jumpToCurrentState()} if there is a StateListAnimator
+     * attached to this view.
      */
     public void jumpDrawablesToCurrentState() {
         if (mBackground != null) {
             mBackground.jumpToCurrentState();
+        }
+        if (mStateListAnimator != null) {
+            mStateListAnimator.jumpToCurrentState();
         }
     }
 
