@@ -1295,6 +1295,20 @@ public abstract class CameraMetadata {
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
+    //
+
+    /**
+     * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
+     */
+    public static final int CONTROL_VIDEO_STABILIZATION_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
+     */
+    public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 

@@ -831,9 +831,11 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * stabilized</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
      */
-    public static final Key<Boolean> CONTROL_VIDEO_STABILIZATION_MODE =
-            new Key<Boolean>("android.control.videoStabilizationMode", boolean.class);
+    public static final Key<Integer> CONTROL_VIDEO_STABILIZATION_MODE =
+            new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
     /**
      * <p>Operation mode for edge
