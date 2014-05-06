@@ -1675,6 +1675,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapsePanels(int flags) {
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+            return;
+        }
         if (SPEW) {
             Log.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
