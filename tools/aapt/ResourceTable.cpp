@@ -865,6 +865,21 @@ status_t compileResourceFile(Bundle* bundle,
         pseudoBidiParams.country[0] = 'X';
         pseudoBidiParams.country[1] = 'B';
 
+    // We should skip resources for pseudolocales if they were
+    // already added automatically. This is a fix for a transition period when
+    // manually pseudolocalized resources may be expected.
+    // TODO: remove this check after next SDK version release.
+    if ((bundle->getPseudolocalize() & PSEUDO_ACCENTED &&
+         curParams.locale == pseudoParams.locale) ||
+        (bundle->getPseudolocalize() & PSEUDO_BIDI &&
+         curParams.locale == pseudoBidiParams.locale)) {
+        SourcePos(in->getPrintableSource(), 0).warning(
+                "Resource file %s is skipped as pseudolocalization"
+                " was done automatically.",
+                in->getPrintableSource().string());
+        return NO_ERROR;
+    }
+
     while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code == ResXMLTree::START_TAG) {
             const String16* curTag = NULL;
