@@ -62,9 +62,8 @@ import android.view.Surface;
  * #updateTexImage} should not be called directly from the callback.
  */
 public class SurfaceTexture {
-
-    private EventHandler mEventHandler;
-    private OnFrameAvailableListener mOnFrameAvailableListener;
+    private final Looper mCreatorLooper;
+    private Handler mOnFrameAvailableHandler;
 
     /**
      * These fields are used by native code, do not access or modify.
@@ -83,7 +82,8 @@ public class SurfaceTexture {
     /**
      * Exception thrown when a SurfaceTexture couldn't be created or resized.
      *
-     * @deprecated No longer thrown. {@link Surface.OutOfResourcesException} is used instead.
+     * @deprecated No longer thrown. {@link android.view.Surface.OutOfResourcesException}
+     * is used instead.
      */
     @SuppressWarnings("serial")
     @Deprecated
@@ -100,10 +100,10 @@ public class SurfaceTexture {
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      *
-     * @throws OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName) {
-        init(texName, false);
+        this(texName, false);
     }
 
     /**
@@ -121,20 +121,58 @@ public class SurfaceTexture {
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
-     * @throws throws OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
-        init(texName, singleBufferMode);
+        mCreatorLooper = Looper.myLooper();
+        nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
     }
 
     /**
      * Register a callback to be invoked when a new image frame becomes available to the
-     * SurfaceTexture.  Note that this callback may be called on an arbitrary thread, so it is not
+     * SurfaceTexture.
+     * <p>
+     * This callback may be called on an arbitrary thread, so it is not
      * safe to call {@link #updateTexImage} without first binding the OpenGL ES context to the
      * thread invoking the callback.
+     * </p>
+     *
+     * @param listener The listener to set.
      */
-    public void setOnFrameAvailableListener(OnFrameAvailableListener l) {
-        mOnFrameAvailableListener = l;
+    public void setOnFrameAvailableListener(OnFrameAvailableListener listener) {
+        setOnFrameAvailableListener(listener, null);
+    }
+
+    /**
+     * Register a callback to be invoked when a new image frame becomes available to the
+     * SurfaceTexture.
+     * <p>
+     * If no handler is specified, then this callback may be called on an arbitrary thread,
+     * so it is not safe to call {@link #updateTexImage} without first binding the OpenGL ES
+     * context to the thread invoking the callback.
+     * </p>
+     *
+     * @param listener The listener to set.
+     * @param handler The handler on which the listener should be invoked, or null
+     * to use an arbitrary thread.
+     */
+    public void setOnFrameAvailableListener(final OnFrameAvailableListener listener,
+            Handler handler) {
+        if (listener != null) {
+            // Although we claim the thread is arbitrary, earlier implementation would
+            // prefer to send the callback on the creating looper or the main looper
+            // so we preserve this behavior here.
+            Looper looper = handler != null ? handler.getLooper() :
+                    mCreatorLooper != null ? mCreatorLooper : Looper.getMainLooper();
+            mOnFrameAvailableHandler = new Handler(looper, null, true /*async*/) {
+                @Override
+                public void handleMessage(Message msg) {
+                    listener.onFrameAvailable(SurfaceTexture.this);
+                }
+            };
+        } else {
+            mOnFrameAvailableHandler = null;
+        }
     }
 
     /**
@@ -285,49 +323,22 @@ public class SurfaceTexture {
         }
     }
 
-    private class EventHandler extends Handler {
-        public EventHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (mOnFrameAvailableListener != null) {
-                mOnFrameAvailableListener.onFrameAvailable(SurfaceTexture.this);
-            }
-        }
-    }
-
     /**
      * This method is invoked from native code only.
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    private static void postEventFromNative(Object selfRef) {
-        WeakReference weakSelf = (WeakReference)selfRef;
-        SurfaceTexture st = (SurfaceTexture)weakSelf.get();
-        if (st == null) {
-            return;
-        }
-
-        if (st.mEventHandler != null) {
-            Message m = st.mEventHandler.obtainMessage();
-            st.mEventHandler.sendMessage(m);
+    private static void postEventFromNative(WeakReference<SurfaceTexture> weakSelf) {
+        SurfaceTexture st = weakSelf.get();
+        if (st != null) {
+            Handler handler = st.mOnFrameAvailableHandler;
+            if (handler != null) {
+                handler.sendEmptyMessage(0);
+            }
         }
     }
 
-    private void init(int texName, boolean singleBufferMode) throws Surface.OutOfResourcesException {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else {
-            mEventHandler = null;
-        }
-        nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
-    }
-
-    private native void nativeInit(int texName, boolean singleBufferMode, Object weakSelf)
+    private native void nativeInit(int texName, boolean singleBufferMode,
+            WeakReference<SurfaceTexture> weakSelf)
             throws Surface.OutOfResourcesException;
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);

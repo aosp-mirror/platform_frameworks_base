@@ -10734,6 +10734,7 @@ package android.graphics {
     method public void releaseTexImage();
     method public void setDefaultBufferSize(int, int);
     method public void setOnFrameAvailableListener(android.graphics.SurfaceTexture.OnFrameAvailableListener);
+    method public void setOnFrameAvailableListener(android.graphics.SurfaceTexture.OnFrameAvailableListener, android.os.Handler);
     method public void updateTexImage();
   }
 
