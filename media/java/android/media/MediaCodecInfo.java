@@ -264,6 +264,37 @@ public final class MediaCodecInfo {
         // from OMX_VIDEO_VP8PROFILETYPE
         public static final int VP8ProfileMain = 0x01;
 
+        // from OMX_VIDEO_HEVCPROFILETYPE
+        public static final int HEVCProfileMain   = 0x01;
+        public static final int HEVCProfileMain10 = 0x02;
+
+        // from OMX_VIDEO_HEVCLEVELTYPE
+        public static final int HEVCMainTierLevel1  = 0x1;
+        public static final int HEVCHighTierLevel1  = 0x2;
+        public static final int HEVCMainTierLevel2  = 0x4;
+        public static final int HEVCHighTierLevel2  = 0x8;
+        public static final int HEVCMainTierLevel21 = 0x10;
+        public static final int HEVCHighTierLevel21 = 0x20;
+        public static final int HEVCMainTierLevel3  = 0x40;
+        public static final int HEVCHighTierLevel3  = 0x80;
+        public static final int HEVCMainTierLevel31 = 0x100;
+        public static final int HEVCHighTierLevel31 = 0x200;
+        public static final int HEVCMainTierLevel4  = 0x400;
+        public static final int HEVCHighTierLevel4  = 0x800;
+        public static final int HEVCMainTierLevel41 = 0x1000;
+        public static final int HEVCHighTierLevel41 = 0x2000;
+        public static final int HEVCMainTierLevel5  = 0x4000;
+        public static final int HEVCHighTierLevel5  = 0x8000;
+        public static final int HEVCMainTierLevel51 = 0x10000;
+        public static final int HEVCHighTierLevel51 = 0x20000;
+        public static final int HEVCMainTierLevel52 = 0x40000;
+        public static final int HEVCHighTierLevel52 = 0x80000;
+        public static final int HEVCMainTierLevel6  = 0x100000;
+        public static final int HEVCHighTierLevel6  = 0x200000;
+        public static final int HEVCMainTierLevel61 = 0x400000;
+        public static final int HEVCHighTierLevel61 = 0x800000;
+        public static final int HEVCMainTierLevel62 = 0x1000000;
+        public static final int HEVCHighTierLevel62 = 0x2000000;
 
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
