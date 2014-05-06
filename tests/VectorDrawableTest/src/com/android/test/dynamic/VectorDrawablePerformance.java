@@ -25,7 +25,7 @@ import android.widget.ScrollView;
 import java.text.DecimalFormat;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class VectorDrawablePerformance extends Activity implements View.OnClickListener {
+public class VectorDrawablePerformance extends Activity {
     private static final String LOGCAT = "VectorDrawable1";
     protected int[] icon = {
             R.drawable.vector_drawable01,
@@ -76,7 +76,6 @@ public class VectorDrawablePerformance extends Activity implements View.OnClickL
             button.setWidth(200);
             button.setBackgroundResource(icon[i]);
             container.addView(button);
-            button.setOnClickListener(this);
         }
         setContentView(scrollView);
         time =  android.os.SystemClock.elapsedRealtimeNanos()-time;
@@ -84,11 +83,5 @@ public class VectorDrawablePerformance extends Activity implements View.OnClickL
         t.setText("avgS=" + df.format(time / (icon.length * 1000000.)) + " ms");
         t.setBackgroundColor(0xFF000000);
         container.addView(t);
-    }
-
-    @Override
-    public void onClick(View v) {
-        VectorDrawable d = (VectorDrawable) v.getBackground();
-        d.start();
     }
 }
