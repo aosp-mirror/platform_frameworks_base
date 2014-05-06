@@ -702,7 +702,7 @@ public class ViewConfiguration {
      *
      * @return how long a user needs to press the relevant key to bring up
      *   the global actions dialog.
-     * @deprecated
+     * @deprecated This timeout should not be used by applications
      */
     @Deprecated
     public static long getGlobalActionKeyTimeout() {
