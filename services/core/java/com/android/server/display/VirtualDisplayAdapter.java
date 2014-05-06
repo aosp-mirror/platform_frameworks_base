@@ -146,9 +146,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void performTraversalInTransactionLocked() {
-            if (mSurface != null) {
-                setSurfaceInTransactionLocked(mSurface);
-            }
+            setSurfaceInTransactionLocked(mSurface);
         }
 
         public void setSurfaceLocked(Surface surface) {
