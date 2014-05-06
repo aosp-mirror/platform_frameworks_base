@@ -170,7 +170,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     boolean loadSystemProperties() {
-        return false;
+        return nLoadSystemProperties(mNativeProxy);
     }
 
     private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
@@ -306,6 +306,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nDeleteProxy(long nativeProxy);
 
     private static native void nSetFrameInterval(long nativeProxy, long frameIntervalNanos);
+    private static native boolean nLoadSystemProperties(long nativeProxy);
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);

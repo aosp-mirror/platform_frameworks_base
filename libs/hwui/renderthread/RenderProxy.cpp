@@ -98,6 +98,19 @@ void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
     post(task);
 }
 
+CREATE_BRIDGE0(loadSystemProperties) {
+    bool needsRedraw = false;
+    if (Caches::hasInstance()) {
+        needsRedraw = Caches::getInstance().initProperties();
+    }
+    return (void*) needsRedraw;
+}
+
+bool RenderProxy::loadSystemProperties() {
+    SETUP_TASK(loadSystemProperties);
+    return (bool) postAndWait(task);
+}
+
 CREATE_BRIDGE2(initialize, CanvasContext* context, EGLNativeWindowType window) {
     return (void*) args->context->initialize(args->window);
 }

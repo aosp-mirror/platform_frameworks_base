@@ -158,6 +158,12 @@ static void android_view_ThreadedRenderer_setFrameInterval(JNIEnv* env, jobject 
     proxy->setFrameInterval(frameIntervalNanos);
 }
 
+static jboolean android_view_ThreadedRenderer_loadSystemProperties(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    return proxy->loadSystemProperties();
+}
+
 static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -268,6 +274,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nSetFrameInterval", "(JJ)V", (void*) android_view_ThreadedRenderer_setFrameInterval },
+    { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
