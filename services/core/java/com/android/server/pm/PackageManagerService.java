@@ -11112,13 +11112,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    /*
-     * For filters that are added with this method:
-     * if an intent for the user whose id is userIdOrig matches the filter, then this intent can
-     * also be resolved in the user whose id is userIdDest.
-     */
     @Override
-    public void addForwardingIntentFilter(IntentFilter filter, int userIdOrig, int userIdDest) {
+    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdOrig,
+            int userIdDest) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != Process.SYSTEM_UID) {
             throw new SecurityException(
@@ -11130,7 +11126,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             mSettings.editForwardingIntentResolverLPw(userIdOrig).addFilter(
-                    new ForwardingIntentFilter(filter, userIdDest));
+                    new ForwardingIntentFilter(filter, removable, userIdDest));
             mSettings.writePackageRestrictionsLPr(userIdOrig);
         }
     }
@@ -11147,7 +11143,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             HashSet<ForwardingIntentFilter> set =
                     new HashSet<ForwardingIntentFilter>(fir.filterSet());
             for (ForwardingIntentFilter fif : set) {
-                fir.removeFilter(fif);
+                if (fif.isRemovable()) fir.removeFilter(fif);
             }
             mSettings.writePackageRestrictionsLPr(userIdOrig);
         }

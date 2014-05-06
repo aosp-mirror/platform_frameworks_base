@@ -32,20 +32,27 @@ import android.os.UserHandle;
  */
 class ForwardingIntentFilter extends IntentFilter {
     private static final String ATTR_USER_ID_DEST = "userIdDest";
+    private static final String ATTR_REMOVABLE = "removable";
     private static final String ATTR_FILTER = "filter";
 
     private static final String TAG = "ForwardingIntentFilter";
 
     // If the intent matches the IntentFilter, then it can be forwarded to this userId.
     final int mUserIdDest;
+    boolean mRemovable;
 
-    ForwardingIntentFilter(IntentFilter filter, int userIdDest) {
+    ForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdDest) {
         super(filter);
         mUserIdDest = userIdDest;
+        mRemovable = removable;
     }
 
     public int getUserIdDest() {
         return mUserIdDest;
+    }
+
+    public boolean isRemovable() {
+        return mRemovable;
     }
 
     ForwardingIntentFilter(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -57,6 +64,10 @@ class ForwardingIntentFilter extends IntentFilter {
             mUserIdDest = UserHandle.USER_NULL;
         } else {
             mUserIdDest = Integer.parseInt(userIdDestString);
+        }
+        String removableString = parser.getAttributeValue(null, ATTR_REMOVABLE);
+        if (removableString != null) {
+            mRemovable = Boolean.parseBoolean(removableString);
         }
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -89,6 +100,7 @@ class ForwardingIntentFilter extends IntentFilter {
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_USER_ID_DEST, Integer.toString(mUserIdDest));
+        serializer.attribute(null, ATTR_REMOVABLE, Boolean.toString(mRemovable));
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);
