@@ -124,7 +124,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
-        DragDownHelper.OnDragDownListener {
+        DragDownHelper.OnDragDownListener, ActivityStarter {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -236,7 +236,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // top bar
     View mNotificationPanelHeader;
     View mKeyguardStatusView;
-    View mKeyguardBottomArea;
+    KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationTextView mKeyguardIndicationTextView;
 
@@ -639,7 +639,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
-        mKeyguardBottomArea = mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
+        mKeyguardBottomArea =
+                (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
+        mKeyguardBottomArea.setActivityStarter(this);
         mKeyguardIndicationTextView = (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                 R.id.keyguard_indication_text);
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
@@ -1576,6 +1578,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     protected BaseStatusBar.H createHandler() {
         return new PhoneStatusBar.H();
+    }
+
+    @Override
+    public void startActivity(Intent intent) {
+        startActivityDismissingKeyguard(intent, false);
     }
 
     /**

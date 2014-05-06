@@ -196,6 +196,8 @@
     <string name="accessibility_search_light">Search</string>
     <!-- Content description of the camera button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_camera_button">Camera</string>
+    <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_button">Phone</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button">Switch input method button.</string>

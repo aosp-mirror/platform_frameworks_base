@@ -258,8 +258,8 @@
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">320dp</dimen>
 
-    <!-- Camera affordance drag distance -->
-    <dimen name="camera_drag_distance">100dp</dimen>
+    <!-- Lockscreen affordance drag distance for camera and phone. -->
+    <dimen name="affordance_drag_distance">100dp</dimen>
 
     <dimen name="quick_settings_tmp_scrim_stroke_width">8dp</dimen>
     <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>

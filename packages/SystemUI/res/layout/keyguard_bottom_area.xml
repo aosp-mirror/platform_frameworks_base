@@ -22,15 +22,29 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     >
-    <com.android.systemui.statusbar.policy.KeyButtonView
+    <com.android.systemui.statusbar.phone.SwipeAffordanceView
         android:id="@+id/camera_button"
-        android:layout_height="80dp"
-        android:layout_width="80dp"
-        android:layout_gravity="bottom|right"
-        android:src="@drawable/ic_sysbar_camera"
+        android:layout_height="64dp"
+        android:layout_width="64dp"
+        android:layout_gravity="bottom|end"
+        android:tint="#ffffffff"
+        android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button"
-        systemui:glowBackground="@drawable/ic_sysbar_highlight_land" />
+        systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+        systemui:swipeDirection="start"/>
+
+    <com.android.systemui.statusbar.phone.SwipeAffordanceView
+        android:id="@+id/phone_button"
+        android:layout_height="64dp"
+        android:layout_width="64dp"
+        android:layout_gravity="bottom|start"
+        android:tint="#ffffffff"
+        android:src="@drawable/ic_phone_24dp"
+        android:scaleType="center"
+        android:contentDescription="@string/accessibility_phone_button"
+        systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+        systemui:swipeDirection="end"/>
 
     <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
         android:id="@+id/keyguard_indication_text"

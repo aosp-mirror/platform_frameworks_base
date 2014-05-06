@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -42,14 +43,18 @@ import com.android.systemui.R;
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
  * text.
  */
-public class KeyguardBottomAreaView extends FrameLayout {
+public class KeyguardBottomAreaView extends FrameLayout
+        implements SwipeAffordanceView.AffordanceListener {
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
-    private View mCameraButton;
-    private float mCameraDragDistance;
+    private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
+
+    private SwipeAffordanceView mCameraButton;
+    private SwipeAffordanceView mPhoneButton;
+
     private PowerManager mPowerManager;
-    private int mScaledTouchSlop;
+    private ActivityStarter mActivityStarter;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -71,18 +76,35 @@ public class KeyguardBottomAreaView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mCameraButton = findViewById(R.id.camera_button);
+        mCameraButton = (SwipeAffordanceView) findViewById(R.id.camera_button);
+        mPhoneButton = (SwipeAffordanceView) findViewById(R.id.phone_button);
+        mCameraButton.setAffordanceListener(this);
+        mPhoneButton.setAffordanceListener(this);
         watchForDevicePolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
-        mCameraDragDistance = getResources().getDimension(R.dimen.camera_drag_distance);
-        mScaledTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        updatePhoneVisibility();
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+    }
+
+    public void setActivityStarter(ActivityStarter activityStarter) {
+        mActivityStarter = activityStarter;
     }
 
     private void updateCameraVisibility() {
         boolean visible = !isCameraDisabledByDpm();
         mCameraButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private void updatePhoneVisibility() {
+        boolean visible = isPhoneVisible();
+        mPhoneButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean isPhoneVisible() {
+        PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && pm.resolveActivity(PHONE_INTENT, 0) != null;
     }
 
     private boolean isCameraDisabledByDpm() {
@@ -136,15 +158,8 @@ public class KeyguardBottomAreaView extends FrameLayout {
     }
 
     private void enableAccessibility(boolean touchExplorationEnabled) {
-
-        // Add a touch handler or accessibility click listener for camera button.
-        if (touchExplorationEnabled) {
-            mCameraButton.setOnTouchListener(null);
-            mCameraButton.setOnClickListener(mCameraClickListener);
-        } else {
-            mCameraButton.setOnTouchListener(mCameraTouchListener);
-            mCameraButton.setOnClickListener(null);
-        }
+        mCameraButton.enableAccessibility(touchExplorationEnabled);
+        mPhoneButton.enableAccessibility(touchExplorationEnabled);
     }
 
     private void launchCamera() {
@@ -153,80 +168,21 @@ public class KeyguardBottomAreaView extends FrameLayout {
                 UserHandle.CURRENT);
     }
 
-    private final OnClickListener mCameraClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
+    private void launchPhone() {
+        mActivityStarter.startActivity(PHONE_INTENT);
+    }
+
+    @Override
+    public void onUserActivity(long when) {
+        mPowerManager.userActivity(when, false);
+    }
+
+    @Override
+    public void onActionPerformed(SwipeAffordanceView view) {
+        if (view == mCameraButton) {
             launchCamera();
+        } else if (view == mPhoneButton) {
+            launchPhone();
         }
-    };
-
-    private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
-        private float mStartX;
-        private boolean mTouchSlopReached;
-        private boolean mSkipCancelAnimation;
-
-        @Override
-        public boolean onTouch(final View cameraButtonView, MotionEvent event) {
-            float realX = event.getRawX();
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mStartX = realX;
-                    mTouchSlopReached = false;
-                    mSkipCancelAnimation = false;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (realX > mStartX) {
-                        realX = mStartX;
-                    }
-                    if (realX < mStartX - mCameraDragDistance) {
-                        cameraButtonView.setPressed(true);
-                        mPowerManager.userActivity(event.getEventTime(), false);
-                    } else {
-                        cameraButtonView.setPressed(false);
-                    }
-                    if (realX < mStartX - mScaledTouchSlop) {
-                        mTouchSlopReached = true;
-                    }
-                    cameraButtonView.setTranslationX(Math.max(realX - mStartX,
-                            -mCameraDragDistance));
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (realX < mStartX - mCameraDragDistance) {
-                        launchCamera();
-                        cameraButtonView.animate().x(-cameraButtonView.getWidth())
-                                .setInterpolator(new AccelerateInterpolator(2f)).withEndAction(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cameraButtonView.setTranslationX(0);
-                                    }
-                                });
-                        mSkipCancelAnimation = true;
-                    }
-                    if (realX < mStartX - mScaledTouchSlop) {
-                        mTouchSlopReached = true;
-                    }
-                    if (!mTouchSlopReached) {
-                        mSkipCancelAnimation = true;
-                        cameraButtonView.animate().translationX(-mCameraDragDistance / 2).
-                                setInterpolator(new DecelerateInterpolator()).withEndAction(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cameraButtonView.animate().translationX(0).
-                                                setInterpolator(new AccelerateInterpolator());
-                                    }
-                                });
-                    }
-                case MotionEvent.ACTION_CANCEL:
-                    cameraButtonView.setPressed(false);
-                    if (!mSkipCancelAnimation) {
-                        cameraButtonView.animate().translationX(0)
-                                .setInterpolator(new AccelerateInterpolator(2f));
-                    }
-                    break;
-            }
-            return true;
-        }
-    };
+    }
 }
