@@ -62,7 +62,7 @@
          a reference to a Drawable resource containing the image definition. -->
     <attr name="icon" format="reference" />
 
-    <!-- A Drawable resource providing an extended graphical banner for its
+    <!-- @hide A Drawable resource providing an extended graphical banner for its
          associated item. Use with the application tag (to supply a default
          banner for all application activities), or with the activity, tag to
          supply a banner for a specific activity.
@@ -916,6 +916,7 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
@@ -1001,6 +1002,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
@@ -1028,6 +1030,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
@@ -1061,6 +1064,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
     </declare-styleable>
@@ -1328,6 +1332,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="process" />
@@ -1410,6 +1415,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1453,6 +1459,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1488,6 +1495,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="launchMode" />
@@ -1553,6 +1561,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1625,6 +1634,7 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
@@ -1754,6 +1764,7 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
+        <!-- @hide -->
         <attr name="banner" />
         <attr name="logo" />
         <attr name="handleProfiling" />

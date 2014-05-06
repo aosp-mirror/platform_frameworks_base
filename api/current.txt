@@ -313,7 +313,6 @@ package android {
     field public static final int backgroundSplit = 16843659; // 0x101038b
     field public static final int backgroundStacked = 16843658; // 0x101038a
     field public static final int backupAgent = 16843391; // 0x101027f
-    field public static final int banner = 16843762; // 0x10103f2
     field public static final int baseline = 16843548; // 0x101031c
     field public static final int baselineAlignBottom = 16843042; // 0x1010122
     field public static final int baselineAligned = 16843046; // 0x1010126
