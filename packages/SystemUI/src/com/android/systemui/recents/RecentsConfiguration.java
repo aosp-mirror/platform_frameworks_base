@@ -37,6 +37,7 @@ public class RecentsConfiguration {
     public Rect displayRect = new Rect();
 
     boolean isLandscape;
+    boolean transposeSearchLayoutWithOrientation;
     int searchBarAppWidgetId = -1;
 
     public float animationPxMovementPerSecond;
@@ -83,6 +84,8 @@ public class RecentsConfiguration {
 
         isLandscape = res.getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
+        transposeSearchLayoutWithOrientation =
+                res.getBoolean(R.bool.recents_transpose_search_layout_with_orientation);
         Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
                 "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
                 Console.AnsiGreen);
@@ -148,7 +151,7 @@ public class RecentsConfiguration {
         if (hasSearchBarAppWidget()) {
             Rect searchBarBounds = new Rect();
             getSearchBarBounds(width, height, searchBarBounds);
-            if (isLandscape) {
+            if (isLandscape && transposeSearchLayoutWithOrientation) {
                 // In landscape, the search bar appears on the left, so shift the task rect right
                 taskStackBounds.set(searchBarBounds.width(), 0, width, height);
             } else {
@@ -171,7 +174,7 @@ public class RecentsConfiguration {
             return;
         }
 
-        if (isLandscape) {
+        if (isLandscape && transposeSearchLayoutWithOrientation) {
             // In landscape, the search bar appears on the left
             searchBarSpaceBounds.set(0, 0, searchBarSpaceHeightPx, height);
         } else {

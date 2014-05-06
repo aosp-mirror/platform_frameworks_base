@@ -55,6 +55,7 @@ public class SystemServicesProxy {
     UserManager mUm;
     SearchManager mSm;
     String mPackage;
+    ComponentName mAssistComponent;
 
     Bitmap mDummyIcon;
 
@@ -67,6 +68,12 @@ public class SystemServicesProxy {
         mIpm = AppGlobals.getPackageManager();
         mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mPackage = context.getPackageName();
+
+        // Resolve the assist intent
+        Intent assist = mSm.getAssistIntent(context, false);
+        if (assist != null) {
+            mAssistComponent = assist.getComponent();
+        }
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             // Create a dummy icon
@@ -236,30 +243,14 @@ public class SystemServicesProxy {
      */
     public Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host) {
         if (mAwm == null) return null;
+        if (mAssistComponent == null) return null;
 
-        // Ensure we have a global search activity
-        ComponentName globalSearchActivity = mSm.getGlobalSearchActivity();
-        if (globalSearchActivity == null) return null;
-
-        // Resolve the search widget provider from the search activity
-        ActivityInfo searchActivityInfo = getActivityInfo(globalSearchActivity);
-        if (searchActivityInfo == null) return null;
-
-        String key = "com.android.recents.search_widget_provider";
-        ComponentName searchWidgetCn = null;
-        Bundle searchMetaData = searchActivityInfo.metaData;
-        String searchWidgetProvider = searchMetaData.getString(key, "");
-        if (searchWidgetProvider.length() != 0) {
-            searchWidgetCn = ComponentName.unflattenFromString(searchWidgetProvider);
-        } else {
-            return null;
-        }
-
-        // Find the first Recents widget from the same package as the global search activity
-        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders();
+        // Find the first Recents widget from the same package as the global assist activity
+        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
+                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
         AppWidgetProviderInfo searchWidgetInfo = null;
         for (AppWidgetProviderInfo info : widgets) {
-            if (info.provider.equals(searchWidgetCn)) {
+            if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
                 searchWidgetInfo = info;
                 break;
             }

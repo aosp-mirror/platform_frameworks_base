@@ -55,7 +55,6 @@ public class AppWidgetProviderInfo implements Parcelable {
 
     /**
      * Indicates that the widget can be displayed within recents.
-     * @hide
      */
     public static final int WIDGET_CATEGORY_RECENTS = 4;
 
