@@ -49570,6 +49570,7 @@ package javax.net.ssl {
     method public abstract boolean getEnableSessionCreation();
     method public abstract java.lang.String[] getEnabledCipherSuites();
     method public abstract java.lang.String[] getEnabledProtocols();
+    method public javax.net.ssl.SSLSession getHandshakeSession();
     method public abstract javax.net.ssl.SSLEngineResult.HandshakeStatus getHandshakeStatus();
     method public abstract boolean getNeedClientAuth();
     method public java.lang.String getPeerHost();
@@ -49643,10 +49644,12 @@ package javax.net.ssl {
     ctor public SSLParameters(java.lang.String[]);
     ctor public SSLParameters(java.lang.String[], java.lang.String[]);
     method public java.lang.String[] getCipherSuites();
+    method public java.lang.String getEndpointIdentificationAlgorithm();
     method public boolean getNeedClientAuth();
     method public java.lang.String[] getProtocols();
     method public boolean getWantClientAuth();
     method public void setCipherSuites(java.lang.String[]);
+    method public void setEndpointIdentificationAlgorithm(java.lang.String);
     method public void setNeedClientAuth(boolean);
     method public void setProtocols(java.lang.String[]);
     method public void setWantClientAuth(boolean);
@@ -49747,6 +49750,7 @@ package javax.net.ssl {
     method public abstract boolean getEnableSessionCreation();
     method public abstract java.lang.String[] getEnabledCipherSuites();
     method public abstract java.lang.String[] getEnabledProtocols();
+    method public javax.net.ssl.SSLSession getHandshakeSession();
     method public abstract boolean getNeedClientAuth();
     method public javax.net.ssl.SSLParameters getSSLParameters();
     method public abstract javax.net.ssl.SSLSession getSession();
@@ -49800,6 +49804,14 @@ package javax.net.ssl {
     ctor protected X509ExtendedKeyManager();
     method public java.lang.String chooseEngineClientAlias(java.lang.String[], java.security.Principal[], javax.net.ssl.SSLEngine);
     method public java.lang.String chooseEngineServerAlias(java.lang.String, java.security.Principal[], javax.net.ssl.SSLEngine);
+  }
+
+  public abstract class X509ExtendedTrustManager implements javax.net.ssl.X509TrustManager {
+    ctor public X509ExtendedTrustManager();
+    method public abstract void checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket) throws java.security.cert.CertificateException;
+    method public abstract void checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine) throws java.security.cert.CertificateException;
+    method public abstract void checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket) throws java.security.cert.CertificateException;
+    method public abstract void checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine) throws java.security.cert.CertificateException;
   }
 
   public abstract interface X509KeyManager implements javax.net.ssl.KeyManager {
