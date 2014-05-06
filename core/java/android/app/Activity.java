@@ -655,7 +655,8 @@ import java.util.HashMap;
 public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
-        OnCreateContextMenuListener, ComponentCallbacks2 {
+        OnCreateContextMenuListener, ComponentCallbacks2,
+        Window.OnWindowDismissedCallback {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -2519,7 +2520,9 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called when the main window associated with the activity has been dismissed.
+     * @hide
      */
+    @Override
     public void onWindowDismissed() {
         finish();
     }
@@ -5437,6 +5440,7 @@ public class Activity extends ContextThemeWrapper
         
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
+        mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);

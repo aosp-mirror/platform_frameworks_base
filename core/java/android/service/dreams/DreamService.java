@@ -300,10 +300,6 @@ public class DreamService extends Service implements Window.Callback {
     public void onDetachedFromWindow() {
     }
 
-    @Override
-    public void onWindowDismissed() {
-    }
-
     /** {@inheritDoc} */
     @Override
     public void onPanelClosed(int featureId, Menu menu) {
