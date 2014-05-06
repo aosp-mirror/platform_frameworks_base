@@ -111,6 +111,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_FPS = false;
+    private static final boolean DEBUG_INPUT_STAGES = false || LOCAL_LOGV;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -3481,6 +3482,9 @@ public final class ViewRootImpl implements ViewParent,
          * Called when an event is being delivered to the next stage.
          */
         protected void onDeliverToNext(QueuedInputEvent q) {
+            if (DEBUG_INPUT_STAGES) {
+                Log.v(TAG, "Done with " + getClass().getSimpleName() + ". " + q);
+            }
             if (mNext != null) {
                 mNext.deliver(q);
             } else {
@@ -5514,6 +5518,37 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             return false;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder("QueuedInputEvent{flags=");
+            boolean hasPrevious = false;
+            hasPrevious = flagToString("DELIVER_POST_IME", FLAG_DELIVER_POST_IME, hasPrevious, sb);
+            hasPrevious = flagToString("DEFERRED", FLAG_DEFERRED, hasPrevious, sb);
+            hasPrevious = flagToString("FINISHED", FLAG_FINISHED, hasPrevious, sb);
+            hasPrevious = flagToString("FINISHED_HANDLED", FLAG_FINISHED_HANDLED, hasPrevious, sb);
+            hasPrevious = flagToString("RESYNTHESIZED", FLAG_RESYNTHESIZED, hasPrevious, sb);
+            hasPrevious = flagToString("UNHANDLED", FLAG_UNHANDLED, hasPrevious, sb);
+            if (!hasPrevious) {
+                sb.append("0");
+            }
+            sb.append(", hasNextQueuedEvent=" + (mEvent != null ? "true" : "false"));
+            sb.append(", hasInputEventReceiver=" + (mReceiver != null ? "true" : "false"));
+            sb.append(", mEvent=" + mEvent + "}");
+            return sb.toString();
+        }
+
+        private boolean flagToString(String name, int flag,
+                boolean hasPrevious, StringBuilder sb) {
+            if ((mFlags & flag) != 0) {
+                if (hasPrevious) {
+                    sb.append("|");
+                }
+                sb.append(name);
+                return true;
+            }
+            return hasPrevious;
         }
     }
 
