@@ -139,4 +139,19 @@ public class AudioFormat {
     public static final int CHANNEL_IN_FRONT_BACK = CHANNEL_IN_FRONT | CHANNEL_IN_BACK;
     // CHANNEL_IN_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_IN_ALL
 
+    /** @hide */
+    public static int getBytesPerSample(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+            return 1;
+        case ENCODING_PCM_16BIT:
+        case ENCODING_DEFAULT:
+            return 2;
+        case ENCODING_INVALID:
+        default:
+            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+        }
+    }
+
 }
