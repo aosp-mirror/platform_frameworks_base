@@ -19,6 +19,7 @@ package android.app;
 import android.Manifest;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
@@ -412,6 +413,58 @@ public class AppOpsManager {
     };
 
     /**
+     * Specifies whether an Op should be restricted by a user restriction.
+     * Each Op should be filled with a restriction string from UserManager or
+     * null to specify it is not affected by any user restriction.
+     */
+    private static String[] sOpRestrictions = new String[] {
+            null, //COARSE_LOCATION
+            null, //FINE_LOCATION
+            null, //GPS
+            null, //VIBRATE
+            null, //READ_CONTACTS
+            null, //WRITE_CONTACTS
+            null, //READ_CALL_LOG
+            null, //WRITE_CALL_LOG
+            null, //READ_CALENDAR
+            null, //WRITE_CALENDAR
+            null, //WIFI_SCAN
+            null, //POST_NOTIFICATION
+            null, //NEIGHBORING_CELLS
+            null, //CALL_PHONE
+            null, //READ_SMS
+            null, //WRITE_SMS
+            null, //RECEIVE_SMS
+            null, //RECEIVE_EMERGECY_SMS
+            null, //RECEIVE_MMS
+            null, //RECEIVE_WAP_PUSH
+            null, //SEND_SMS
+            null, //READ_ICC_SMS
+            null, //WRITE_ICC_SMS
+            null, //WRITE_SETTINGS
+            null, //SYSTEM_ALERT_WINDOW
+            null, //ACCESS_NOTIFICATIONS
+            null, //CAMERA
+            null, //RECORD_AUDIO
+            null, //PLAY_AUDIO
+            null, //READ_CLIPBOARD
+            null, //WRITE_CLIPBOARD
+            null, //TAKE_MEDIA_BUTTONS
+            null, //TAKE_AUDIO_FOCUS
+            null, //AUDIO_MASTER_VOLUME
+            null, //AUDIO_VOICE_VOLUME
+            null, //AUDIO_RING_VOLUME
+            null, //AUDIO_MEDIA_VOLUME
+            null, //AUDIO_ALARM_VOLUME
+            null, //AUDIO_NOTIFICATION_VOLUME
+            null, //AUDIO_BLUETOOTH_VOLUME
+            null, //WAKE_LOCK
+            null, //MONITOR_LOCATION
+            null, //MONITOR_HIGH_POWER_LOCATION
+            null, //GET_USAGE_STATS
+    };
+
+    /**
      * This specifies the default mode for each operation.
      */
     private static int[] sOpDefaultMode = new int[] {
@@ -542,6 +595,10 @@ public class AppOpsManager {
             throw new IllegalStateException("sOpDisableReset length " + sOpDisableReset.length
                     + " should be " + _NUM_OP);
         }
+        if (sOpRestrictions.length != _NUM_OP) {
+            throw new IllegalStateException("sOpRestrictions length " + sOpRestrictions.length
+                    + " should be " + _NUM_OP);
+        }
         for (int i=0; i<_NUM_OP; i++) {
             if (sOpToString[i] != null) {
                 sOpStrToOp.put(sOpToString[i], i);
@@ -572,6 +629,14 @@ public class AppOpsManager {
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
+    }
+
+    /**
+     * Retrieve the user restriction associated with an operation, or null if there is not one.
+     * @hide
+     */
+    public static String opToRestriction(int op) {
+        return sOpRestrictions[op];
     }
 
     /**

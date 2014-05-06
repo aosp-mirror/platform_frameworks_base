@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Stores and restores state for the Device and Profile owners. By definition there can be
@@ -135,6 +136,10 @@ public class DeviceOwner {
     String getProfileOwnerName(int userId) {
         OwnerInfo profileOwner = mProfileOwners.get(userId);
         return profileOwner != null ? profileOwner.name : null;
+    }
+
+    Set<Integer> getProfileOwnerKeys() {
+        return mProfileOwners.keySet();
     }
 
     boolean hasDeviceOwner() {

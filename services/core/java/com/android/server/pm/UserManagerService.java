@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.IUserManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AtomicFile;
@@ -50,6 +51,7 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -162,6 +164,8 @@ public class UserManagerService extends IUserManager.Stub {
     private int mNextSerialNumber;
     private int mUserVersion = 0;
 
+    private IAppOpsService mAppOpsService;
+
     private static UserManagerService sInstance;
 
     public static UserManagerService getInstance() {
@@ -236,6 +240,15 @@ public class UserManagerService extends IUserManager.Stub {
     void systemReady() {
         mUserPackageMonitor.register(mContext, null, UserHandle.ALL, false);
         userForeground(UserHandle.USER_OWNER);
+        mAppOpsService = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+        for (int i = 0; i < mUserIds.length; ++i) {
+            try {
+                mAppOpsService.setUserRestrictions(mUserRestrictions.get(mUserIds[i]), mUserIds[i]);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+            }
+        }
     }
 
     @Override
@@ -482,6 +495,14 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             mUserRestrictions.get(userId).clear();
             mUserRestrictions.get(userId).putAll(restrictions);
+            long token = Binder.clearCallingIdentity();
+            try {
+                mAppOpsService.setUserRestrictions(mUserRestrictions.get(userId), userId);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
             writeUserLocked(mUsers.get(userId));
         }
     }
@@ -1116,6 +1137,11 @@ public class UserManagerService extends IUserManager.Stub {
                 return false;
             }
             mRemovingUserIds.put(userHandle, true);
+            try {
+                mAppOpsService.removeUser(userHandle);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
+            }
             // Set this to a partially created user, so that the user will be purged
             // on next startup, in case the runtime stops now before stopping and
             // removing the user completely.

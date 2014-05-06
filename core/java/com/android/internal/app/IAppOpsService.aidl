@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.app.AppOpsManager;
+import android.os.Bundle;
 import com.android.internal.app.IAppOpsCallback;
 
 interface IAppOpsService {
@@ -38,4 +39,10 @@ interface IAppOpsService {
     void resetAllModes();
     int checkAudioOperation(int code, int stream, int uid, String packageName);
     void setAudioRestriction(int code, int stream, int uid, int mode, in String[] exceptionPackages);
+
+    void setDeviceOwner(String packageName);
+    void setProfileOwner(String packageName, int userHandle);
+    void setUserRestrictions(in Bundle restrictions, int userHandle);
+    void removeUser(int userHandle);
+
 }
