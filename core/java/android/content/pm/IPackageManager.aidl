@@ -247,7 +247,8 @@ interface IPackageManager {
 
     void clearPackagePersistentPreferredActivities(String packageName, int userId);
 
-    void addForwardingIntentFilter(in IntentFilter filter, int userIdOrig, int userIdDest);
+    void addForwardingIntentFilter(in IntentFilter filter, boolean removable, int userIdOrig,
+            int userIdDest);
 
     void clearForwardingIntentFilters(int userIdOrig);
 
