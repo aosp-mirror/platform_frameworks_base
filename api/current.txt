@@ -2854,7 +2854,6 @@ package android.app {
     method public void onUserInteraction();
     method protected void onUserLeaveHint();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
-    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void openContextMenu(android.view.View);
@@ -3371,7 +3370,6 @@ package android.app {
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
-    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void openContextMenu(android.view.View);
@@ -22756,7 +22754,6 @@ package android.service.dreams {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public boolean onSearchRequested();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
-    method public void onWindowDismissed();
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public void setContentView(int);
@@ -28760,7 +28757,6 @@ package android.view {
     method public abstract boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public abstract boolean onSearchRequested();
     method public abstract void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
-    method public abstract void onWindowDismissed();
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
   }

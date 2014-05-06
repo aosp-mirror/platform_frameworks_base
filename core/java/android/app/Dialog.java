@@ -80,7 +80,7 @@ import java.lang.ref.WeakReference;
  * </div>
  */
 public class Dialog implements DialogInterface, Window.Callback,
-        KeyEvent.Callback, OnCreateContextMenuListener {
+        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback {
     private static final String TAG = "Dialog";
     private Activity mOwnerActivity;
     
@@ -166,6 +166,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;
         w.setCallback(this);
+        w.setOnWindowDismissedCallback(this);
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
         mListenersHandler = new ListenersHandler(this);
@@ -696,6 +697,8 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void onDetachedFromWindow() {
     }
 
+    /** @hide */
+    @Override
     public void onWindowDismissed() {
         dismiss();
     }
