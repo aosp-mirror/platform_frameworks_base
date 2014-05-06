@@ -134,6 +134,7 @@ public abstract class Window {
     
     private TypedArray mWindowStyle;
     private Callback mCallback;
+    private OnWindowDismissedCallback mOnWindowDismissedCallback;
     private WindowManager mWindowManager;
     private IBinder mAppToken;
     private String mAppName;
@@ -390,7 +391,10 @@ public abstract class Window {
          * @param mode The mode that was just finished.
          */
         public void onActionModeFinished(ActionMode mode);
+    }
 
+    /** @hide */
+    public interface OnWindowDismissedCallback {
         /**
          * Called when a window is dismissed. This informs the callback that the
          * window is gone, and it should finish itself.
@@ -569,6 +573,18 @@ public abstract class Window {
      */
     public final Callback getCallback() {
         return mCallback;
+    }
+
+    /** @hide */
+    public final void setOnWindowDismissedCallback(OnWindowDismissedCallback dcb) {
+        mOnWindowDismissedCallback = dcb;
+    }
+
+    /** @hide */
+    public final void dispatchOnWindowDismissed() {
+        if (mOnWindowDismissedCallback != null) {
+            mOnWindowDismissedCallback.onWindowDismissed();
+        }
     }
 
     /**

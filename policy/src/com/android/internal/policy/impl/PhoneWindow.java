@@ -3429,15 +3429,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
-                Callback cb = getCallback();
-                if (cb != null) {
-                    try {
-                        cb.onWindowDismissed();
-                    } catch (AbstractMethodError e) {
-                        Log.e(TAG, "onWindowDismissed not implemented in " +
-                                cb.getClass().getSimpleName(), e);
-                    }
-                }
+                dispatchOnWindowDismissed();
             }
         });
         swipeDismiss.setOnSwipeProgressChangedListener(
