@@ -120,6 +120,6 @@ interface IDevicePolicyManager {
     Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
 
     void setUserRestriction(in ComponentName who, in String key, boolean enable);
-    void forwardMatchingIntents(in ComponentName admin, in IntentFilter filter, int flags);
+    void addForwardingIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearForwardingIntentFilters(in ComponentName admin);
 }
