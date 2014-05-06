@@ -317,6 +317,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Value for {@link #flags}: true if the application was declared to be a game, or
      * false if it is a non-game application.
+     *
+     * {@hide}
      */
     public static final int FLAG_IS_GAME = 1<<25;
 
@@ -369,7 +371,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_SUPPORTS_XLARGE_SCREENS},
      * {@link #FLAG_RESIZEABLE_FOR_SCREENS},
      * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE},
-     * {@link #FLAG_INSTALLED}, {@link #FLAG_IS_GAME}.
+     * {@link #FLAG_INSTALLED}.
      */
     public int flags = 0;
 

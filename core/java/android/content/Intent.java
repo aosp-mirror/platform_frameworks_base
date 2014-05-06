@@ -2790,6 +2790,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Indicates an activity optimized for Leanback mode, and that should
      * be displayed in the Leanback launcher.
+     * @hide
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_LEANBACK_LAUNCHER = "android.intent.category.LEANBACK_LAUNCHER";
