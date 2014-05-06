@@ -278,8 +278,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
 
     private ByteBuffer makeWavHeader(int sampleRateInHz, int audioFormat, int channelCount,
             int dataLength) {
-        // TODO: is AudioFormat.ENCODING_DEFAULT always the same as ENCODING_PCM_16BIT?
-        int sampleSizeInBytes = (audioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
+        int sampleSizeInBytes = AudioFormat.getBytesPerSample(audioFormat);
         int byteRate = sampleRateInHz * sampleSizeInBytes * channelCount;
         short blockAlign = (short) (sampleSizeInBytes * channelCount);
         short bitsPerSample = (short) (sampleSizeInBytes * 8);

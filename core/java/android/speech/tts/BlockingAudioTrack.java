@@ -83,7 +83,7 @@ class BlockingAudioTrack {
         mVolume = volume;
         mPan = pan;
 
-        mBytesPerFrame = getBytesPerFrame(mAudioFormat) * mChannelCount;
+        mBytesPerFrame = AudioFormat.getBytesPerSample(mAudioFormat) * mChannelCount;
         mIsShortUtterance = false;
         mAudioBufferSize = 0;
         mBytesWritten = 0;
@@ -228,17 +228,6 @@ class BlockingAudioTrack {
         setupVolume(audioTrack, mVolume, mPan);
         return audioTrack;
     }
-
-    private static int getBytesPerFrame(int audioFormat) {
-        if (audioFormat == AudioFormat.ENCODING_PCM_8BIT) {
-            return 1;
-        } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT) {
-            return 2;
-        }
-
-        return -1;
-    }
-
 
     private void blockUntilDone(AudioTrack audioTrack) {
         if (mBytesWritten <= 0) {

@@ -518,7 +518,7 @@ public class AudioTrack
         // NB: this section is only valid with PCM data.
         //     To update when supporting compressed formats
         int frameSizeInBytes = mChannelCount
-                * (mAudioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
+                * (AudioFormat.getBytesPerSample(mAudioFormat));
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
             throw new IllegalArgumentException("Invalid audio buffer size.");
         }
