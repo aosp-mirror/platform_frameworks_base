@@ -1032,7 +1032,7 @@
   </plurals>
   <plurals name="in_num_days">
     <item quantity="one" msgid="5413088743009839518">"ነገ"</item>
-    <item quantity="other" msgid="5109449375100953247">"በ<xliff:g id="COUNT">%d</xliff:g> ቀናት"</item>
+    <item quantity="other" msgid="5109449375100953247">"በ<xliff:g id="COUNT">%d</xliff:g> ቀኖች"</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"1 ሴኮንድ በፊት"</item>
@@ -1064,7 +1064,7 @@
   </plurals>
   <plurals name="abbrev_in_num_days">
     <item quantity="one" msgid="2178576254385739855">"ነገ"</item>
-    <item quantity="other" msgid="2973062968038355991">"በ<xliff:g id="COUNT">%d</xliff:g> ቀናት"</item>
+    <item quantity="other" msgid="2973062968038355991">"በ<xliff:g id="COUNT">%d</xliff:g> ቀኖች"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"በ <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"በ <xliff:g id="TIME">%s</xliff:g>"</string>
