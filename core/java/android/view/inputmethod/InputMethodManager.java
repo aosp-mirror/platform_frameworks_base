@@ -49,6 +49,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -321,6 +322,7 @@ public final class InputMethodManager {
      * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
      */
     private final int[] mViewTopLeft = new int[2];
+    private final CursorAnchorInfoBuilder mCursorAnchorInfoBuilder = new CursorAnchorInfoBuilder();
 
     // -----------------------------------------------------------
     
@@ -1435,7 +1437,7 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            
+
             if (mCursorSelStart != selStart || mCursorSelEnd != selEnd
                     || mCursorCandStart != candidatesStart
                     || mCursorCandEnd != candidatesEnd) {
@@ -1551,6 +1553,31 @@ public final class InputMethodManager {
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Report positional change of the text insertion point and/or characters in the composition
+     * string.
+     */
+    public void updateCursorAnchorInfo(View view, final CursorAnchorInfo cursorAnchorInfo) {
+        if (view == null || cursorAnchorInfo == null) {
+            return;
+        }
+        checkFocus();
+        synchronized (mH) {
+            if ((mServedView != view &&
+                    (mServedView == null || !mServedView.checkInputConnectionProxy(view)))
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
+                return;
+            }
+            if (DEBUG) Log.d(TAG, "updateCursorAnchorInfo");
+
+            try {
+                mCurMethod.updateCursorAnchorInfo(cursorAnchorInfo);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
             }
         }
     }
