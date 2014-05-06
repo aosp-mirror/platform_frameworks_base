@@ -35,11 +35,6 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
-import android.view.InputChannel;
-import android.view.InputDevice;
-import android.view.InputEvent;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 
 import java.util.List;
 
@@ -52,6 +47,7 @@ public class BridgeWindowManager implements IWindowManager {
     private final Configuration mConfig;
     private final DisplayMetrics mMetrics;
     private final int mRotation;
+    private boolean mHasNavBar;
 
     public BridgeWindowManager(Configuration config, DisplayMetrics metrics, int rotation) {
         mConfig = config;
@@ -63,6 +59,10 @@ public class BridgeWindowManager implements IWindowManager {
 
     public DisplayMetrics getMetrics() {
         return mMetrics;
+    }
+    
+    public void setHasNavBar(boolean hasNavBar) {
+        mHasNavBar = hasNavBar;
     }
 
     // ---- implementation of IWindowManager that we care about ----
@@ -448,7 +448,7 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public boolean hasNavigationBar() {
-        return false; // should this return something else?
+        return mHasNavBar;
     }
 
     @Override
