@@ -124,6 +124,58 @@ public final class CaptureResult extends CameraMetadata {
 
 
     /**
+     * <p>The mode control selects how the image data is converted from the
+     * sensor's native color into linear sRGB color.</p>
+     * <p>When auto-white balance is enabled with {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, this
+     * control is overridden by the AWB routine. When AWB is disabled, the
+     * application controls how the color mapping is performed.</p>
+     * <p>We define the expected processing pipeline below. For consistency
+     * across devices, this is always the case with TRANSFORM_MATRIX.</p>
+     * <p>When either FULL or HIGH_QUALITY is used, the camera device may
+     * do additional processing but {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
+     * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} will still be provided by the
+     * camera device (in the results) and be roughly correct.</p>
+     * <p>Switching to TRANSFORM_MATRIX and using the data provided from
+     * FAST or HIGH_QUALITY will yield a picture with the same white point
+     * as what was produced by the camera device in the earlier frame.</p>
+     * <p>The expected processing pipeline is as follows:</p>
+     * <p><img alt="White balance processing pipeline" src="../../../../images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png" /></p>
+     * <p>The white balance is encoded by two values, a 4-channel white-balance
+     * gain vector (applied in the Bayer domain), and a 3x3 color transform
+     * matrix (applied after demosaic).</p>
+     * <p>The 4-channel white-balance gains are defined as:</p>
+     * <pre><code>{@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} = [ R G_even G_odd B ]
+     * </code></pre>
+     * <p>where <code>G_even</code> is the gain for green pixels on even rows of the
+     * output, and <code>G_odd</code> is the gain for green pixels on the odd rows.
+     * These may be identical for a given camera device implementation; if
+     * the camera device does not support a separate gain for even/odd green
+     * channels, it will use the <code>G_even</code> value, and write <code>G_odd</code> equal to
+     * <code>G_even</code> in the output result metadata.</p>
+     * <p>The matrices for color transforms are defined as a 9-entry vector:</p>
+     * <pre><code>{@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} = [ I0 I1 I2 I3 I4 I5 I6 I7 I8 ]
+     * </code></pre>
+     * <p>which define a transform from input sensor colors, <code>P_in = [ r g b ]</code>,
+     * to output linear sRGB, <code>P_out = [ r' g' b' ]</code>,</p>
+     * <p>with colors as follows:</p>
+     * <pre><code>r' = I0r + I1g + I2b
+     * g' = I3r + I4g + I5b
+     * b' = I6r + I7g + I8b
+     * </code></pre>
+     * <p>Both the input and output value ranges must match. Overflow/underflow
+     * values are clipped to fit within the range.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see #COLOR_CORRECTION_MODE_TRANSFORM_MATRIX
+     * @see #COLOR_CORRECTION_MODE_FAST
+     * @see #COLOR_CORRECTION_MODE_HIGH_QUALITY
+     */
+    public static final Key<Integer> COLOR_CORRECTION_MODE =
+            new Key<Integer>("android.colorCorrection.mode", int.class);
+
+    /**
      * <p>A color transform matrix to use to transform
      * from sensor RGB color space to output linear sRGB color space</p>
      * <p>This matrix is either set by the camera device when the request
@@ -174,6 +226,82 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<Integer> CONTROL_AE_PRECAPTURE_ID =
             new Key<Integer>("android.control.aePrecaptureId", int.class);
+
+    /**
+     * <p>The desired setting for the camera device's auto-exposure
+     * algorithm's antibanding compensation.</p>
+     * <p>Some kinds of lighting fixtures, such as some fluorescent
+     * lights, flicker at the rate of the power supply frequency
+     * (60Hz or 50Hz, depending on country). While this is
+     * typically not noticeable to a person, it can be visible to
+     * a camera device. If a camera sets its exposure time to the
+     * wrong value, the flicker may become visible in the
+     * viewfinder as flicker or in a final captured image, as a
+     * set of variable-brightness bands across the image.</p>
+     * <p>Therefore, the auto-exposure routines of camera devices
+     * include antibanding routines that ensure that the chosen
+     * exposure value will not cause such banding. The choice of
+     * exposure time depends on the rate of flicker, which the
+     * camera device can detect automatically, or the expected
+     * rate can be selected by the application using this
+     * control.</p>
+     * <p>A given camera device may not support all of the possible
+     * options for the antibanding mode. The
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES android.control.aeAvailableAntibandingModes} key contains
+     * the available modes for a given camera device.</p>
+     * <p>The default mode is AUTO, which must be supported by all
+     * camera devices.</p>
+     * <p>If manual exposure control is enabled (by setting
+     * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} to OFF),
+     * then this setting has no effect, and the application must
+     * ensure it selects exposure times that do not cause banding
+     * issues. The {@link CaptureResult#STATISTICS_SCENE_FLICKER android.statistics.sceneFlicker} key can assist
+     * the application in this.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureResult#STATISTICS_SCENE_FLICKER
+     * @see #CONTROL_AE_ANTIBANDING_MODE_OFF
+     * @see #CONTROL_AE_ANTIBANDING_MODE_50HZ
+     * @see #CONTROL_AE_ANTIBANDING_MODE_60HZ
+     * @see #CONTROL_AE_ANTIBANDING_MODE_AUTO
+     */
+    public static final Key<Integer> CONTROL_AE_ANTIBANDING_MODE =
+            new Key<Integer>("android.control.aeAntibandingMode", int.class);
+
+    /**
+     * <p>Adjustment to AE target image
+     * brightness</p>
+     * <p>For example, if EV step is 0.333, '6' will mean an
+     * exposure compensation of +2 EV; -3 will mean an exposure
+     * compensation of -1</p>
+     */
+    public static final Key<Integer> CONTROL_AE_EXPOSURE_COMPENSATION =
+            new Key<Integer>("android.control.aeExposureCompensation", int.class);
+
+    /**
+     * <p>Whether AE is currently locked to its latest
+     * calculated values.</p>
+     * <p>Note that even when AE is locked, the flash may be
+     * fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
+     * ON_AUTO_FLASH_REDEYE.</p>
+     * <p>If AE precapture is triggered (see {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger})
+     * when AE is already locked, the camera device will not change the exposure time
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}) and sensitivity ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
+     * parameters. The flash may be fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
+     * is ON_AUTO_FLASH/ON_AUTO_FLASH_REDEYE and the scene is too dark. If the
+     * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_ALWAYS_FLASH, the scene may become overexposed.</p>
+     * <p>See {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE lock related state transition details.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureResult#CONTROL_AE_STATE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    public static final Key<Boolean> CONTROL_AE_LOCK =
+            new Key<Boolean>("android.control.aeLock", boolean.class);
 
     /**
      * <p>The desired mode for the camera device's
@@ -235,6 +363,35 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<int[]> CONTROL_AE_REGIONS =
             new Key<int[]>("android.control.aeRegions", int[].class);
+
+    /**
+     * <p>Range over which fps can be adjusted to
+     * maintain exposure</p>
+     * <p>Only constrains AE algorithm, not manual control
+     * of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     */
+    public static final Key<int[]> CONTROL_AE_TARGET_FPS_RANGE =
+            new Key<int[]>("android.control.aeTargetFpsRange", int[].class);
+
+    /**
+     * <p>Whether the camera device will trigger a precapture
+     * metering sequence when it processes this request.</p>
+     * <p>This entry is normally set to IDLE, or is not
+     * included at all in the request settings. When included and
+     * set to START, the camera device will trigger the autoexposure
+     * precapture metering sequence.</p>
+     * <p>The effect of AE precapture trigger depends on the current
+     * AE mode and state; see {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture
+     * state transition details.</p>
+     *
+     * @see CaptureResult#CONTROL_AE_STATE
+     * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
+     * @see #CONTROL_AE_PRECAPTURE_TRIGGER_START
+     */
+    public static final Key<Integer> CONTROL_AE_PRECAPTURE_TRIGGER =
+            new Key<Integer>("android.control.aePrecaptureTrigger", int.class);
 
     /**
      * <p>Current state of AE algorithm</p>
@@ -479,6 +636,24 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<int[]> CONTROL_AF_REGIONS =
             new Key<int[]>("android.control.afRegions", int[].class);
+
+    /**
+     * <p>Whether the camera device will trigger autofocus for this request.</p>
+     * <p>This entry is normally set to IDLE, or is not
+     * included at all in the request settings.</p>
+     * <p>When included and set to START, the camera device will trigger the
+     * autofocus algorithm. If autofocus is disabled, this trigger has no effect.</p>
+     * <p>When set to CANCEL, the camera device will cancel any active trigger,
+     * and return to its initial AF state.</p>
+     * <p>See {@link CaptureResult#CONTROL_AF_STATE android.control.afState} for what that means for each AF mode.</p>
+     *
+     * @see CaptureResult#CONTROL_AF_STATE
+     * @see #CONTROL_AF_TRIGGER_IDLE
+     * @see #CONTROL_AF_TRIGGER_START
+     * @see #CONTROL_AF_TRIGGER_CANCEL
+     */
+    public static final Key<Integer> CONTROL_AF_TRIGGER =
+            new Key<Integer>("android.control.afTrigger", int.class);
 
     /**
      * <p>Current state of AF algorithm.</p>
@@ -889,6 +1064,16 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.control.afTriggerId", int.class);
 
     /**
+     * <p>Whether AWB is currently locked to its
+     * latest calculated values.</p>
+     * <p>Note that AWB lock is only meaningful for AUTO
+     * mode; in other modes, AWB is already fixed to a specific
+     * setting.</p>
+     */
+    public static final Key<Boolean> CONTROL_AWB_LOCK =
+            new Key<Boolean>("android.control.awbLock", boolean.class);
+
+    /**
      * <p>Whether AWB is currently setting the color
      * transform fields, and what its illumination target
      * is.</p>
@@ -946,6 +1131,30 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<int[]> CONTROL_AWB_REGIONS =
             new Key<int[]>("android.control.awbRegions", int[].class);
+
+    /**
+     * <p>Information to the camera device 3A (auto-exposure,
+     * auto-focus, auto-white balance) routines about the purpose
+     * of this capture, to help the camera device to decide optimal 3A
+     * strategy.</p>
+     * <p>This control (except for MANUAL) is only effective if
+     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
+     * <p>ZERO_SHUTTER_LAG must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains ZSL. MANUAL must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains MANUAL_SENSOR.</p>
+     *
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see #CONTROL_CAPTURE_INTENT_CUSTOM
+     * @see #CONTROL_CAPTURE_INTENT_PREVIEW
+     * @see #CONTROL_CAPTURE_INTENT_STILL_CAPTURE
+     * @see #CONTROL_CAPTURE_INTENT_VIDEO_RECORD
+     * @see #CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT
+     * @see #CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG
+     * @see #CONTROL_CAPTURE_INTENT_MANUAL
+     */
+    public static final Key<Integer> CONTROL_CAPTURE_INTENT =
+            new Key<Integer>("android.control.captureIntent", int.class);
 
     /**
      * <p>Current state of AWB algorithm</p>
@@ -1078,6 +1287,31 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.control.awbState", int.class);
 
     /**
+     * <p>A special color effect to apply.</p>
+     * <p>When this mode is set, a color effect will be applied
+     * to images produced by the camera device. The interpretation
+     * and implementation of these color effects is left to the
+     * implementor of the camera device, and should not be
+     * depended on to be consistent (or present) across all
+     * devices.</p>
+     * <p>A color effect will only be applied if
+     * {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF.</p>
+     *
+     * @see CaptureRequest#CONTROL_MODE
+     * @see #CONTROL_EFFECT_MODE_OFF
+     * @see #CONTROL_EFFECT_MODE_MONO
+     * @see #CONTROL_EFFECT_MODE_NEGATIVE
+     * @see #CONTROL_EFFECT_MODE_SOLARIZE
+     * @see #CONTROL_EFFECT_MODE_SEPIA
+     * @see #CONTROL_EFFECT_MODE_POSTERIZE
+     * @see #CONTROL_EFFECT_MODE_WHITEBOARD
+     * @see #CONTROL_EFFECT_MODE_BLACKBOARD
+     * @see #CONTROL_EFFECT_MODE_AQUA
+     */
+    public static final Key<Integer> CONTROL_EFFECT_MODE =
+            new Key<Integer>("android.control.effectMode", int.class);
+
+    /**
      * <p>Overall mode of 3A control
      * routines.</p>
      * <p>High-level 3A control. When set to OFF, all 3A control
@@ -1104,6 +1338,57 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<Integer> CONTROL_MODE =
             new Key<Integer>("android.control.mode", int.class);
+
+    /**
+     * <p>A camera mode optimized for conditions typical in a particular
+     * capture setting.</p>
+     * <p>This is the mode that that is active when
+     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code>. Aside from FACE_PRIORITY,
+     * these modes will disable {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} while in use.</p>
+     * <p>The interpretation and implementation of these scene modes is left
+     * to the implementor of the camera device. Their behavior will not be
+     * consistent across all devices, and any given device may only implement
+     * a subset of these modes.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see #CONTROL_SCENE_MODE_DISABLED
+     * @see #CONTROL_SCENE_MODE_FACE_PRIORITY
+     * @see #CONTROL_SCENE_MODE_ACTION
+     * @see #CONTROL_SCENE_MODE_PORTRAIT
+     * @see #CONTROL_SCENE_MODE_LANDSCAPE
+     * @see #CONTROL_SCENE_MODE_NIGHT
+     * @see #CONTROL_SCENE_MODE_NIGHT_PORTRAIT
+     * @see #CONTROL_SCENE_MODE_THEATRE
+     * @see #CONTROL_SCENE_MODE_BEACH
+     * @see #CONTROL_SCENE_MODE_SNOW
+     * @see #CONTROL_SCENE_MODE_SUNSET
+     * @see #CONTROL_SCENE_MODE_STEADYPHOTO
+     * @see #CONTROL_SCENE_MODE_FIREWORKS
+     * @see #CONTROL_SCENE_MODE_SPORTS
+     * @see #CONTROL_SCENE_MODE_PARTY
+     * @see #CONTROL_SCENE_MODE_CANDLELIGHT
+     * @see #CONTROL_SCENE_MODE_BARCODE
+     */
+    public static final Key<Integer> CONTROL_SCENE_MODE =
+            new Key<Integer>("android.control.sceneMode", int.class);
+
+    /**
+     * <p>Whether video stabilization is
+     * active</p>
+     * <p>If enabled, video stabilization can modify the
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream
+     * stabilized</p>
+     *
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
+     */
+    public static final Key<Integer> CONTROL_VIDEO_STABILIZATION_MODE =
+            new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
     /**
      * <p>Operation mode for edge
@@ -1688,6 +1973,22 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Float>("android.sensor.greenSplit", float.class);
 
     /**
+     * <p>A pixel <code>[R, G_even, G_odd, B]</code> that supplies the test pattern
+     * when {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode} is SOLID_COLOR.</p>
+     * <p>Each color channel is treated as an unsigned 32-bit integer.
+     * The camera device then uses the most significant X bits
+     * that correspond to how many bits are in its Bayer raw sensor
+     * output.</p>
+     * <p>For example, a sensor with RAW10 Bayer output would use the
+     * 10 most significant bits from each color channel.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final Key<int[]> SENSOR_TEST_PATTERN_DATA =
+            new Key<int[]>("android.sensor.testPatternData", int[].class);
+
+    /**
      * <p>When enabled, the sensor sends a test pattern instead of
      * doing a real exposure from the camera.</p>
      * <p>When a test pattern is enabled, all manual sensor controls specified
@@ -1934,6 +2235,20 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<int[]> STATISTICS_HOT_PIXEL_MAP =
             new Key<int[]>("android.statistics.hotPixelMap", int[].class);
+
+    /**
+     * <p>Whether the camera device will output the lens
+     * shading map in output result metadata.</p>
+     * <p>When set to ON,
+     * {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} must be provided in
+     * the output result metadata.</p>
+     *
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
+     * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
+     */
+    public static final Key<Integer> STATISTICS_LENS_SHADING_MAP_MODE =
+            new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
     /**
      * <p>Tonemapping / contrast / gamma curve for the blue
