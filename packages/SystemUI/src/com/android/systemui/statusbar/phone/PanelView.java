@@ -623,9 +623,7 @@ public class PanelView extends FrameLayout {
                 mExpandedHeight = mMaxPanelHeight;
             }
         }
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                getDesiredMeasureHeight(), MeasureSpec.AT_MOST);
-        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(getMeasuredWidth(), getDesiredMeasureHeight());
     }
 
     protected int getDesiredMeasureHeight() {
@@ -705,11 +703,6 @@ public class PanelView extends FrameLayout {
      * @return the default implementation simply returns the maximum height.
      */
     protected int getMaxPanelHeight() {
-        if (mMaxPanelHeight <= 0) {
-            if (DEBUG) logf("Forcing measure() since mMaxPanelHeight=" + mMaxPanelHeight);
-            measure(MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY));
-        }
         return mMaxPanelHeight;
     }
 
