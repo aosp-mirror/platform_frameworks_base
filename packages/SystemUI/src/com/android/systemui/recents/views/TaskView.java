@@ -20,6 +20,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -33,7 +34,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -108,6 +108,11 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         mRoundedRectClipPath.reset();
         mRoundedRectClipPath.addRoundRect(new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight()),
                 radius, radius, Path.Direction.CW);
+
+        // Update the outline
+        Outline o = new Outline();
+        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), radius);
+        setOutline(o);
     }
 
     @Override
@@ -134,14 +139,20 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
                                              TaskViewTransform toTransform, int duration) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int minZ = config.taskViewTranslationZMinPx;
+        int incZ = config.taskViewTranslationZIncrementPx;
+
         if (duration > 0) {
             if (animateFromTransform != null) {
                 setTranslationY(animateFromTransform.translationY);
+                setTranslationZ(Math.max(minZ, minZ + (animateFromTransform.t * incZ)));
                 setScaleX(animateFromTransform.scale);
                 setScaleY(animateFromTransform.scale);
                 setAlpha(animateFromTransform.alpha);
             }
             animate().translationY(toTransform.translationY)
+                    .translationZ(Math.max(minZ, minZ + (toTransform.t * incZ)))
                     .scaleX(toTransform.scale)
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
@@ -157,6 +168,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
                     .start();
         } else {
             setTranslationY(toTransform.translationY);
+            setTranslationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
             setScaleX(toTransform.scale);
             setScaleY(toTransform.scale);
             setAlpha(toTransform.alpha);
@@ -169,6 +181,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     void resetViewProperties() {
         setTranslationX(0f);
         setTranslationY(0f);
+        setTranslationZ(0f);
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);
@@ -363,7 +376,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     @Override
     public void onClick(View v) {
         if (v == mInfoView) {
-            // Do nothing
+            hideInfoPane();
         } else if (v == mBarView.mApplicationIcon) {
             mCb.onTaskIconClicked(this);
         } else if (v == mInfoView.mAppInfoButton) {

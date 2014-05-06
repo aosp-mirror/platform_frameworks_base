@@ -227,6 +227,12 @@
     <!-- The radius of the rounded corners on a task view. -->
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
 
+    <!-- The min translation in the Z index for the last task. -->
+    <dimen name="recents_task_view_z_min">3dp</dimen>
+
+    <!-- The translation in the Z index for each task above the last task. -->
+    <dimen name="recents_task_view_z_increment">5dp</dimen>
+
     <!-- The amount of space a user has to scroll to dismiss any info panes. -->
     <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
 

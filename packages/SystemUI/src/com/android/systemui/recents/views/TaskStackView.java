@@ -395,12 +395,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return false;
     }
 
-    /** Returns whether the specified scroll is out of bounds */
-    boolean isScrollOutOfBounds(int scroll) {
-        return (scroll < mMinScroll) || (scroll > mMaxScroll);
+
+    /** Returns the amount that the scroll is out of bounds */
+    int getScrollAmountOutOfBounds(int scroll) {
+        if (scroll < mMinScroll) {
+            return mMinScroll - scroll;
+        } else if (scroll > mMaxScroll) {
+            return scroll - mMaxScroll;
+        }
+        return 0;
     }
+
+    /** Returns whether the specified scroll is out of bounds */
     boolean isScrollOutOfBounds() {
-        return isScrollOutOfBounds(getStackScroll());
+        return getScrollAmountOutOfBounds(getStackScroll()) != 0;
     }
 
     /** Updates the min and max virtual scroll bounds */
@@ -561,7 +569,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int smallestDimension = Math.min(width, height);
         int padding = (int) (Constants.Values.TaskStackView.StackPaddingPct * smallestDimension / 2f);
         if (Constants.DebugFlags.App.EnableSearchButton) {
-            // Don't need to pad the top since we have some padding on the search bar already
+            mStackRect.top += padding;
             mStackRect.left += padding;
             mStackRect.right -= padding;
             mStackRect.bottom -= padding;
@@ -1297,9 +1305,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 }
                 if (mIsScrolling) {
                     int curStackScroll = mSv.getStackScroll();
-                    if (mSv.isScrollOutOfBounds(curStackScroll + deltaY)) {
-                        // Scale the touch if we are overscrolling
-                        deltaY /= Constants.Values.TaskStackView.TouchOverscrollScaleFactor;
+                    int overScrollAmount = mSv.getScrollAmountOutOfBounds(curStackScroll + deltaY);
+                    if (overScrollAmount != 0) {
+                        // Bound the overscroll to a fixed amount, and inversely scale the y-movement
+                        // relative to how close we are to the max overscroll
+                        float maxOverScroll = mSv.mTaskRect.height() / 3f;
+                        deltaY = Math.round(deltaY * (1f - (Math.min(maxOverScroll, overScrollAmount)
+                                / maxOverScroll)));
                     }
                     mSv.setStackScroll(curStackScroll + deltaY);
                     if (mSv.isScrollOutOfBounds()) {
@@ -1319,6 +1331,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
                     // Enable HW layers on the stack
                     mSv.addHwLayersRefCount("flingScroll");
+                    // XXX: Make this animation a function of the velocity AND distance
                     int overscrollRange = (int) (Math.min(1f,
                             Math.abs((float) velocity / mMaximumVelocity)) *
                             Constants.Values.TaskStackView.TaskStackOverscrollRange);

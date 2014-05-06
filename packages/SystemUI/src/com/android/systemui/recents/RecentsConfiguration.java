@@ -48,6 +48,8 @@ public class RecentsConfiguration {
     public int taskStackScrollDismissInfoPaneDistance;
     public int taskStackMaxDim;
     public int taskViewInfoPaneAnimDuration;
+    public int taskViewTranslationZMinPx;
+    public int taskViewTranslationZIncrementPx;
     public int taskViewRoundedCornerRadiusPx;
     public int searchBarSpaceHeightPx;
 
@@ -105,6 +107,9 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_view_info_pane_duration);
         taskViewRoundedCornerRadiusPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
+        taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
+        taskViewTranslationZIncrementPx =
+                res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
 
 
