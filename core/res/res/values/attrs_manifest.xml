@@ -312,7 +312,7 @@
          content providers. -->
     <attr name="exported" format="boolean" />
 
-    <!-- A boolean flag used to indicate if an application is a Game or not.
+    <!-- @hide A boolean flag used to indicate if an application is a Game or not.
          <p>This information can be used by the system to group together
          applications that are classified as games, and display them separately
          from the other applications. -->
@@ -980,6 +980,7 @@
              any accounts. The type should correspond to the account authenticator type, such as
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
+        <!-- @hide -->
         <attr name="isGame" />
     </declare-styleable>
     
