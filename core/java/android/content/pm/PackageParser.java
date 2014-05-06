@@ -2462,17 +2462,6 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_persistable, false)) {
-            a.info.flags |= ActivityInfo.FLAG_PERSISTABLE;
-        }
-
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_allowEmbedded,
-                false)) {
-            a.info.flags |= ActivityInfo.FLAG_ALLOW_EMBEDDED;
-        }
-
         if (!receiver) {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,
@@ -2483,6 +2472,9 @@ public class PackageParser {
             a.info.launchMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_launchMode,
                     ActivityInfo.LAUNCH_MULTIPLE);
+            a.info.documentLaunchMode = sa.getInt(
+                    com.android.internal.R.styleable.AndroidManifestActivity_documentLaunchMode,
+                    ActivityInfo.DOCUMENT_LAUNCH_NONE);
             a.info.screenOrientation = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_screenOrientation,
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -2492,6 +2484,23 @@ public class PackageParser {
             a.info.softInputMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
                     0);
+
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_persistable, false)) {
+                a.info.flags |= ActivityInfo.FLAG_PERSISTABLE;
+            }
+
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_allowEmbedded,
+                    false)) {
+                a.info.flags |= ActivityInfo.FLAG_ALLOW_EMBEDDED;
+            }
+
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_autoRemoveFromRecents,
+                    false)) {
+                a.info.flags |= ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS;
+            }
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
