@@ -40,48 +40,5 @@
             android:pivotY="300"
             android:rotation="0" />
     </group>
-    <group>
-        <path
-            android:name="v"
-            android:pathData="M300,70 l 0,-70 70,70 -70,70z"
-            android:pivotX="300"
-            android:pivotY="300"
-            android:rotation="360" />
-        <path
-            android:name="pie2"
-            android:pathData="M300,70 a230,230 0 1,0 1,0 z"
-            android:pivotX="300"
-            android:pivotY="300"
-            android:rotation="360"
-            android:stroke="#FF00FF00"
-            android:strokeLineCap="round"
-            android:strokeWidth="70"
-            android:trimPathEnd=".5"
-            android:trimPathOffset="0"
-            android:trimPathStart="0" />
-    </group>
-
-    <animation
-        android:animate="easeInOut"
-        android:durations="2000"
-        android:repeatCount="-1"
-        android:repeatStyle="forward"
-        android:sequence="pie1,pie2"
-        android:startOffset="500" />
-    <animation
-        android:animate="easeInOut"
-        android:durations="2000"
-        android:repeatCount="-1"
-        android:repeatStyle="forward"
-        android:sequence="v,v"
-        android:startOffset="500" />
-    <animation
-        android:animate="easeInOut"
-        android:durations="2800"
-        android:limitTo="trimPathEnd"
-        android:repeatCount="-1"
-        android:repeatStyle="reverse"
-        android:sequence="pie1,pie2"
-        android:startOffset="500" />
 
 </vector>

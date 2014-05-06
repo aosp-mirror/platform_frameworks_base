@@ -25,14 +25,6 @@
 
     <group>
         <path
-            android:name="arrow"
-            android:fill="#ffffffff"
-            android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
-            android:stroke="#FFFF0000"
-            android:strokeWidth="1" />
-    </group>
-    <group>
-        <path
             android:name="house"
             android:fill="#ff440000"
             android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
@@ -42,7 +34,5 @@
             android:stroke="#FFFF0000"
             android:strokeWidth="10" />
     </group>
-
-    <animation android:sequence="arrow,house" />
 
 </vector>

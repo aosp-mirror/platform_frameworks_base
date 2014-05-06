@@ -14,7 +14,6 @@
 -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:trigger="state_checked"
     android:versionCode="1" >
 
     <size
@@ -27,53 +26,8 @@
 
     <group>
         <path
-            android:name="box1"
-            android:pathData="M 240,80 L 240,240 L 80,240 L 80,80 L 240,80 L 240,80 z"
-            android:stroke="?attr/colorControlNormal"
-            android:strokeWidth="20"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
-            android:name="box2"
-            android:pathData="M 160,200 L 160,240 L 120,240 L 120,200 L 160,200 L 160,200 z"
-            android:stroke="?attr/colorControlNormal"
-            android:strokeWidth="10"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
-            android:name="box3"
-            android:pathData="M 160,216.5 L 143.5,240 L 120,223.5 L 136.5,200 L 160,216.5 L 160,216.5 z"
-            android:rotation="35"
-            android:pivotX="140"
-            android:pivotY="220"
-            android:fill="?attr/colorControlNormal"
-            android:stroke="?attr/colorControlNormal"
-            android:strokeWidth="5"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
-            android:name="box4"
-            android:pathData="M 160,216.5 L 143.5,240 L 120,223.5 L 136.5,200 L 160,216.5 L 160,216.5 z"
-            android:fill="?attr/colorControlActivated"
-            android:stroke="?attr/colorControlActivated"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
             android:name="check"
             android:pathData="M 232.1,80.6 L 248.5,92.1 L 145.2,239.5 L 71.5,187.8 L 83,171.5 L 140.3,211.7 z"
             android:fill="?attr/colorControlActivated" />
     </group>
-
-    <animation
-        android:durations="300,100,0,300"
-        android:sequence="box1,box2,box3,box4,check" />
-
 </vector>

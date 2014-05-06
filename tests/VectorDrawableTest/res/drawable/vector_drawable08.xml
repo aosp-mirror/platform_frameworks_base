@@ -31,18 +31,4 @@
                 android:strokeWidth="1"/>
     </group>
 
-    <group>
-        <path
-                android:name="pie2"
-                android:pathData="M564.441,287A280.868,280.868 0 1,1 564.441,285L284.493,286.29Z"
-                android:fill="#FFccaa00"
-                android:stroke="#FF000000"
-                android:strokeWidth="10"
-                android:pivotX="90"
-                android:pivotY="100"/>
-    </group>
-
-    <animation android:sequence="pie1,pie2"/>
-
-
 </vector>

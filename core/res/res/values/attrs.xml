@@ -4660,18 +4660,6 @@
 
     <!-- Drawable used to draw Vector Drawables. -->
     <declare-styleable name="VectorDrawable">
-           <!-- What event triggers the animation -->
-        <attr name="trigger" format="enum">
-            <enum name="state_pressed" value="1" />
-            <enum name="state_focused" value="2" />
-            <enum name="state_hovered" value="3" />
-            <enum name="state_selected" value="4" />
-            <enum name="state_checkable" value="5" />
-            <enum name="state_checked" value="6" />
-            <enum name="state_enabled" value="7" />
-            <enum name="state_activated" value="8" />
-            <enum name="state_window_focused" value="9" />
-        </attr>
         <attr name="versionCode" />
     </declare-styleable>
 
@@ -4689,42 +4677,6 @@
         <attr name="width" />
         <!-- Height of the Vector Drawable. -->
         <attr name="height" />
-    </declare-styleable>
-
-    <!-- Define the animations of drawable -->
-    <declare-styleable name="VectorDrawableAnimation">
-        <!-- Configures this animation sequence between the named paths  -->
-        <attr name="sequence" format="string"/>
-        <!-- Limits an animation to only interpolate the selected variable  -->
-        <attr name="limitTo" format="enum">
-            <enum name="unlimited" value="0"/>
-            <enum name="path" value="1"/>
-            <enum name="rotation" value="2"/>
-            <enum name="trimPathStart" value="3"/>
-            <enum name="trimPathEnd" value="4"/>
-            <enum name="trimPathOffset" value="5"/>
-        </attr>
-        <!-- Number of times to loop this aspect of the animation -->
-        <attr name="repeatCount"/>
-        <!-- A list of times in milliseconds to transision from on path to another.
-         List must contain one less than the number of named paths
-         e.g. given sequence="A,B,C,D" durations="100,0,100" implies 100ms for the
-         "A" to "B" transision instantanious switch to "C" and 100ms for "C" to "D". -->
-        <attr name="durations" format="string" />
-        <!-- The delay before stating this aspect of the animation in milli seconds -->
-        <attr name="startDelay" />
-        <!-- when repeating how does it repeat back and forth or a to b -->
-        <attr name="repeatStyle" format="enum">
-            <enum name="forward"  value="0"/>
-            <enum name="reverse"  value="1"/>[]
-        </attr>
-        <!-- how does the animation progress from start to finish -->
-        <attr name="animate" format="enum">
-            <enum name="linear"  value="0"/>
-            <enum name="easeIn"  value="1"/>
-            <enum name="easeOut"  value="2"/>
-            <enum name="easeInOut"  value="3"/>
-        </attr>
     </declare-styleable>
 
     <!-- Defines the path used in Vector Drawables. -->
@@ -4771,26 +4723,6 @@
         </attr>
         <!-- sets the Miter limit for a stroked path -->
         <attr name="strokeMiterLimit" format="float"/>
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_pressed" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_focused" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_selected" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_window_focused" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_enabled" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_activated" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_accelerated" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_hovered" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_checked" />
-        <!-- sets a condition to be met to draw path -->
-        <attr name="state_checkable" />
     </declare-styleable>
 
     <!-- ========================== -->
