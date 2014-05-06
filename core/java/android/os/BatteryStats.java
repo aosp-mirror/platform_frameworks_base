@@ -911,6 +911,8 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract int getScreenOnCount(int which);
 
+    public abstract long getInteractiveTime(long elapsedRealtimeUs, int which);
+
     public static final int SCREEN_BRIGHTNESS_DARK = 0;
     public static final int SCREEN_BRIGHTNESS_DIM = 1;
     public static final int SCREEN_BRIGHTNESS_MEDIUM = 2;
@@ -936,8 +938,6 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getScreenBrightnessTime(int brightnessBin,
             long elapsedRealtimeUs, int which);
 
-    public abstract int getInputEventCount(int which);
-    
     /**
      * Returns the time in microseconds that the phone has been on while the device was
      * running on battery.
@@ -1571,6 +1571,7 @@ public abstract class BatteryStats implements Parcelable {
         final long totalRealtime = computeRealtime(rawRealtime, which);
         final long totalUptime = computeUptime(rawUptime, which);
         final long screenOnTime = getScreenOnTime(rawRealtime, which);
+        final long interactiveTime = getInteractiveTime(rawRealtime, which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
@@ -1639,8 +1640,8 @@ public abstract class BatteryStats implements Parcelable {
                 wifiRunningTime / 1000, bluetoothOnTime / 1000,
                 mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
                 fullWakeLockTimeTotal, partialWakeLockTimeTotal,
-                getInputEventCount(which), getMobileRadioActiveTime(rawRealtime, which),
-                getMobileRadioActiveAdjustedTime(which));
+                0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which),
+                getMobileRadioActiveAdjustedTime(which), interactiveTime / 1000);
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -2013,6 +2014,7 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append("realtime, ");
                 formatTimeMs(sb, totalUptime / 1000);
                 sb.append("uptime");
+        pw.println(sb.toString());
         if (batteryTimeRemaining >= 0) {
             sb.setLength(0);
             sb.append(prefix);
@@ -2031,16 +2033,25 @@ public abstract class BatteryStats implements Parcelable {
         pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss", getStartClockTime()).toString());
 
         final long screenOnTime = getScreenOnTime(rawRealtime, which);
+        final long interactiveTime = getInteractiveTime(rawRealtime, which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(rawRealtime, which);
         sb.setLength(0);
         sb.append(prefix);
+                sb.append("  Interactive: "); formatTimeMs(sb, interactiveTime / 1000);
+                sb.append("("); sb.append(formatRatioLocked(interactiveTime, whichBatteryRealtime));
+                sb.append(")");
+        pw.println(sb.toString());
+        sb.setLength(0);
+        sb.append(prefix);
                 sb.append("  Screen on: "); formatTimeMs(sb, screenOnTime / 1000);
                 sb.append("("); sb.append(formatRatioLocked(screenOnTime, whichBatteryRealtime));
                 sb.append(") "); sb.append(getScreenOnCount(which));
-                sb.append("x, Input events: "); sb.append(getInputEventCount(which));
+                sb.append("x, Active phone call: "); formatTimeMs(sb, phoneOnTime / 1000);
+                sb.append("("); sb.append(formatRatioLocked(phoneOnTime, whichBatteryRealtime));
+                sb.append(")");
         pw.println(sb.toString());
         if (phoneOnTime != 0) {
             sb.setLength(0);

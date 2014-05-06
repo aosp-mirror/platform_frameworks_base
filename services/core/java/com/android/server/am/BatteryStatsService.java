@@ -230,10 +230,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
         
-    public void noteScreenOn() {
+    public void noteScreenState(int state) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteScreenOnLocked();
+            mStats.noteScreenStateLocked(state);
         }
     }
     
@@ -244,22 +244,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void noteScreenOff() {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteScreenOffLocked();
-        }
-    }
-
-    public void noteInputEvent() {
-        enforceCallingPermission();
-        mStats.noteInputEventAtomic();
-    }
-    
     public void noteUserActivity(int uid, int event) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteUserActivityLocked(uid, event);
+        }
+    }
+    
+    public void noteInteractive(boolean interactive) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteInteractiveLocked(interactive);
         }
     }
 

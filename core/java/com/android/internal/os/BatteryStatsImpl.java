@@ -51,6 +51,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
@@ -88,7 +89,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 104 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 105 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -237,13 +238,14 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mWakeLockNesting;
     boolean mWakeLockImportant;
 
-    boolean mScreenOn;
+    int mScreenState = Display.STATE_UNKNOWN;
     StopwatchTimer mScreenOnTimer;
 
     int mScreenBrightnessBin = -1;
     final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
 
-    Counter mInputEventCounter;
+    boolean mInteractive;
+    StopwatchTimer mInteractiveTimer;
 
     boolean mPhoneOn;
     StopwatchTimer mPhoneOnTimer;
@@ -2661,58 +2663,61 @@ public final class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
     }
 
-    public void noteScreenOnLocked() {
-        if (!mScreenOn) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states |= HistoryItem.STATE_SCREEN_ON_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime, uptime);
-            mScreenOn = true;
-            mScreenOnTimer.startRunningLocked(elapsedRealtime);
-            if (mScreenBrightnessBin >= 0) {
-                mScreenBrightnessTimer[mScreenBrightnessBin].startRunningLocked(elapsedRealtime);
-            }
+    public void noteScreenStateLocked(int state) {
+        if (mScreenState != state) {
+            final int oldState = mScreenState;
+            mScreenState = state;
+            if (DEBUG) Slog.v(TAG, "Screen state: oldState=" + Display.stateToString(oldState)
+                    + ", newState=" + Display.stateToString(state));
 
-            updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), false,
-                    SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
+            if (state == Display.STATE_ON) {
+                // Screen turning on.
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                final long uptime = SystemClock.uptimeMillis();
+                mHistoryCur.states |= HistoryItem.STATE_SCREEN_ON_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+                mScreenOnTimer.startRunningLocked(elapsedRealtime);
+                if (mScreenBrightnessBin >= 0) {
+                    mScreenBrightnessTimer[mScreenBrightnessBin].startRunningLocked(elapsedRealtime);
+                }
 
-            // Fake a wake lock, so we consider the device waked as long
-            // as the screen is on.
-            noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
-                    elapsedRealtime, uptime);
+                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), false,
+                        SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
 
-            // Update discharge amounts.
-            if (mOnBatteryInternal) {
-                updateDischargeScreenLevelsLocked(false, true);
-            }
-        }
-    }
+                // Fake a wake lock, so we consider the device waked as long
+                // as the screen is on.
+                noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
+                        elapsedRealtime, uptime);
 
-    public void noteScreenOffLocked() {
-        if (mScreenOn) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_ON_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Screen off to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime, uptime);
-            mScreenOn = false;
-            mScreenOnTimer.stopRunningLocked(elapsedRealtime);
-            if (mScreenBrightnessBin >= 0) {
-                mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
-            }
+                // Update discharge amounts.
+                if (mOnBatteryInternal) {
+                    updateDischargeScreenLevelsLocked(false, true);
+                }
+            } else if (oldState == Display.STATE_ON) {
+                // Screen turning off or dozing.
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                final long uptime = SystemClock.uptimeMillis();
+                mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_ON_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Screen off to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+                mScreenOnTimer.stopRunningLocked(elapsedRealtime);
+                if (mScreenBrightnessBin >= 0) {
+                    mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
+                }
 
-            noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL,
-                    elapsedRealtime, uptime);
+                noteStopWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL,
+                        elapsedRealtime, uptime);
 
-            updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
-                    SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
+                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
+                        SystemClock.uptimeMillis() * 1000, elapsedRealtime * 1000);
 
-            // Update discharge amounts.
-            if (mOnBatteryInternal) {
-                updateDischargeScreenLevelsLocked(true, false);
+                // Update discharge amounts.
+                if (mOnBatteryInternal) {
+                    updateDischargeScreenLevelsLocked(true, false);
+                }
             }
         }
     }
@@ -2730,7 +2735,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Screen brightness " + bin + " to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            if (mScreenOn) {
+            if (mScreenState == Display.STATE_ON) {
                 if (mScreenBrightnessBin >= 0) {
                     mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
                 }
@@ -2740,14 +2745,23 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteInputEventAtomic() {
-        mInputEventCounter.stepAtomic();
-    }
-
     public void noteUserActivityLocked(int uid, int event) {
         if (mOnBatteryInternal) {
             uid = mapUid(uid);
             getUidStatsLocked(uid).noteUserActivityLocked(event);
+        }
+    }
+
+    public void noteInteractiveLocked(boolean interactive) {
+        if (mInteractive != interactive) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            mInteractive = interactive;
+            if (DEBUG) Slog.v(TAG, "Interactive: " + interactive);
+            if (interactive) {
+                mInteractiveTimer.startRunningLocked(elapsedRealtime);
+            } else {
+                mInteractiveTimer.stopRunningLocked(elapsedRealtime);
+            }
         }
     }
 
@@ -3449,8 +3463,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 elapsedRealtimeUs, which);
     }
 
-    @Override public int getInputEventCount(int which) {
-        return mInputEventCounter.getCountLocked(which);
+    @Override public long getInteractiveTime(long elapsedRealtimeUs, int which) {
+        return mInteractiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
@@ -5499,7 +5513,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase);
         }
-        mInputEventCounter = new Counter(mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i, null,
@@ -5530,6 +5543,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mAudioOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
+        mInteractiveTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
@@ -5713,7 +5727,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public boolean isScreenOn() {
-        return mScreenOn;
+        return mScreenState == Display.STATE_ON;
     }
 
     void initTimes(long uptime, long realtime) {
@@ -5753,7 +5767,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.reset(uptime, realtime);
         mOnBatteryScreenOffTimeBase.reset(uptime, realtime);
         if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) == 0) {
-            if (mScreenOn) {
+            if (mScreenState == Display.STATE_ON) {
                 mDischargeScreenOnUnplugLevel = mHistoryCur.batteryLevel;
                 mDischargeScreenOffUnplugLevel = 0;
             } else {
@@ -5773,7 +5787,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false);
         }
-        mInputEventCounter.reset(false);
+        mInteractiveTimer.reset(false);
         mPhoneOnTimer.reset(false);
         mAudioOnTimer.reset(false);
         mVideoOnTimer.reset(false);
@@ -5874,7 +5888,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         updateKernelWakelocksLocked();
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
         if (mOnBatteryInternal) {
-            updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
+            final boolean screenOn = mScreenState == Display.STATE_ON;
+            updateDischargeScreenLevelsLocked(screenOn, screenOn);
         }
     }
 
@@ -5888,6 +5903,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         final long uptime = mSecUptime * 1000;
         final long realtime = mSecRealtime * 1000;
+        final boolean screenOn = mScreenState == Display.STATE_ON;
         if (onBattery) {
             // We will reset our status if we are unplugging after the
             // battery was last full, or the level is at 100, or
@@ -5916,7 +5932,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             addHistoryRecordLocked(mSecRealtime, mSecUptime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
-            if (mScreenOn) {
+            if (screenOn) {
                 mDischargeScreenOnUnplugLevel = level;
                 mDischargeScreenOffUnplugLevel = 0;
             } else {
@@ -5925,7 +5941,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
-            updateTimeBasesLocked(true, !mScreenOn, uptime, realtime);
+            updateTimeBasesLocked(true, !screenOn, uptime, realtime);
         } else {
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
@@ -5938,8 +5954,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
                 mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
             }
-            updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
-            updateTimeBasesLocked(false, !mScreenOn, uptime, realtime);
+            updateDischargeScreenLevelsLocked(screenOn, screenOn);
+            updateTimeBasesLocked(false, !screenOn, uptime, realtime);
             mNumChargeStepDurations = 0;
             mLastChargeStepLevel = level;
             mLastChargeStepTime = -1;
@@ -6475,7 +6491,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOn() {
         synchronized(this) {
             int val = mDischargeAmountScreenOn;
-            if (mOnBattery && mScreenOn
+            if (mOnBattery && mScreenState == Display.STATE_ON
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -6486,7 +6502,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOnSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenOnSinceCharge;
-            if (mOnBattery && mScreenOn
+            if (mOnBattery && mScreenState == Display.STATE_ON
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -6497,7 +6513,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOff() {
         synchronized(this) {
             int val = mDischargeAmountScreenOff;
-            if (mOnBattery && !mScreenOn
+            if (mOnBattery && mScreenState != Display.STATE_ON
                     && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
                 val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
             }
@@ -6508,7 +6524,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOffSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenOffSinceCharge;
-            if (mOnBattery && !mScreenOn
+            if (mOnBattery && mScreenState != Display.STATE_ON
                     && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
                 val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
             }
@@ -6915,12 +6931,13 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         mStartCount++;
 
-        mScreenOn = false;
+        mScreenState = Display.STATE_UNKNOWN;
         mScreenOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].readSummaryFromParcelLocked(in);
         }
-        mInputEventCounter.readSummaryFromParcelLocked(in);
+        mInteractive = false;
+        mInteractiveTimer.readSummaryFromParcelLocked(in);
         mPhoneOn = false;
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -7175,7 +7192,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
-        mInputEventCounter.writeSummaryFromParcelLocked(out);
+        mInteractiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -7431,13 +7448,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.readFromParcel(in);
         mOnBatteryScreenOffTimeBase.readFromParcel(in);
 
-        mScreenOn = false;
+        mScreenState = Display.STATE_UNKNOWN;
         mScreenOnTimer = new StopwatchTimer(null, -1, null, mOnBatteryTimeBase, in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase,
                     in);
         }
-        mInputEventCounter = new Counter(mOnBatteryTimeBase, in);
         mPhoneOn = false;
         mPhoneOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -7461,19 +7477,25 @@ public final class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mMobileRadioActiveUnknownCount = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mWifiOn = false;
-        mWifiOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mWifiOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase, in);
         mGlobalWifiRunning = false;
-        mGlobalWifiRunningTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mGlobalWifiRunningTimer = new StopwatchTimer(null, -4, null, mOnBatteryTimeBase, in);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i] = new StopwatchTimer(null, -600-i,
                     null, mOnBatteryTimeBase, in);
         }
         mBluetoothOn = false;
-        mBluetoothOnTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mBluetoothOnTimer = new StopwatchTimer(null, -5, null, mOnBatteryTimeBase, in);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
                     null, mOnBatteryTimeBase, in);
         }
+        mAudioOn = false;
+        mAudioOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase);
+        mVideoOn = false;
+        mVideoOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
+        mInteractive = false;
+        mInteractiveTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase, in);
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
@@ -7571,7 +7593,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeToParcel(out, uSecRealtime);
         }
-        mInputEventCounter.writeToParcel(out);
+        mInteractiveTimer.writeToParcel(out, uSecRealtime);
         mPhoneOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
@@ -7688,8 +7710,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 pr.println("*** Screen brightness #" + i + ":");
                 mScreenBrightnessTimer[i].logState(pr, "  ");
             }
-            pr.println("*** Input event counter:");
-            mInputEventCounter.logState(pr, "  ");
+            pr.println("*** Interactive timer:");
+            mInteractiveTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
             for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {

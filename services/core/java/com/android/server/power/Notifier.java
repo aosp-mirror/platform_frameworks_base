@@ -132,6 +132,11 @@ final class Notifier {
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+
+        // Initialize interactive state for battery stats.
+        try {
+            mBatteryStats.noteInteractive(true);
+        } catch (RemoteException ex) { }
     }
 
     /**
@@ -259,7 +264,14 @@ final class Notifier {
                 // Going to sleep...
                 mLastGoToSleepReason = reason;
             }
-            mInputManagerInternal.setInteractive(interactive);
+        }
+
+        mInputManagerInternal.setInteractive(interactive);
+
+        if (interactive) {
+            try {
+                mBatteryStats.noteInteractive(true);
+            } catch (RemoteException ex) { }
         }
     }
 
@@ -288,6 +300,12 @@ final class Notifier {
                     updatePendingBroadcastLocked();
                 }
             }
+        }
+
+        if (!interactive) {
+            try {
+                mBatteryStats.noteInteractive(false);
+            } catch (RemoteException ex) { }
         }
     }
 
