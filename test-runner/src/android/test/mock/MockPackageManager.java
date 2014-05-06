@@ -701,4 +701,21 @@ public class MockPackageManager extends PackageManager {
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdOrig,
+            int userIdDest) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void clearForwardingIntentFilters(int userIdOrig) {
+        throw new UnsupportedOperationException();
+    }
 }
