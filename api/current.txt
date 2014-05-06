@@ -11231,19 +11231,11 @@ package android.graphics.drawable {
   public class VectorDrawable extends android.graphics.drawable.Drawable {
     ctor public VectorDrawable();
     method public void draw(android.graphics.Canvas);
-    method public float geAnimationFraction();
     method public int getOpacity();
-    method public int getRepeatCount();
     method public void setAlpha(int);
-    method public void setAnimationFraction(float);
     method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setDuration(long);
     method public void setPadding(android.graphics.Rect);
     method public void setPadding(int, int, int, int);
-    method public void setRepeatCount(int);
-    method public void setRepeatMode(int);
-    method public void start();
-    method public void stop();
   }
 
 }
