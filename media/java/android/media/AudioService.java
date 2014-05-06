@@ -149,6 +149,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 18;
     private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 19;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
+    private static final int MSG_SYSTEM_READY = 21;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -370,7 +371,7 @@ public class AudioService extends IAudioService.Stub {
     private int mScoConnectionState;
 
     // true if boot sequence has been completed
-    private boolean mBootCompleted;
+    private boolean mSystemReady;
     // listener for SoundPool sample load completion indication
     private SoundPoolCallback mSoundPoolCallBack;
     // thread for SoundPool listener
@@ -525,7 +526,6 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
-        intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -557,6 +557,43 @@ public class AudioService extends IAudioService.Stub {
         mMasterVolumeRamp = context.getResources().getIntArray(
                 com.android.internal.R.array.config_masterVolumeRamp);
 
+    }
+
+    public void systemReady() {
+        sendMsg(mAudioHandler, MSG_SYSTEM_READY, SENDMSG_QUEUE,
+                0, 0, null, 0);
+    }
+
+    public void onSystemReady() {
+        mSystemReady = true;
+        sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE,
+                0, 0, null, 0);
+
+        mKeyguardManager =
+                (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mScoConnectionState = AudioManager.SCO_AUDIO_STATE_ERROR;
+        resetBluetoothSco();
+        getBluetoothHeadset();
+        //FIXME: this is to maintain compatibility with deprecated intent
+        // AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED. Remove when appropriate.
+        Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+        newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
+                AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+        sendStickyBroadcastToAll(newIntent);
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                    BluetoothProfile.A2DP);
+        }
+
+        sendMsg(mAudioHandler,
+                MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
+                SENDMSG_REPLACE,
+                0,
+                0,
+                null,
+                SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
     }
 
     private void createAudioSystemThread() {
@@ -1996,7 +2033,7 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#startBluetoothSco() */
     public void startBluetoothSco(IBinder cb, int targetSdkVersion){
         if (!checkAudioSettingsPermission("startBluetoothSco()") ||
-                !mBootCompleted) {
+                !mSystemReady) {
             return;
         }
         ScoClient client = getScoClient(cb, true);
@@ -2013,7 +2050,7 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#stopBluetoothSco() */
     public void stopBluetoothSco(IBinder cb){
         if (!checkAudioSettingsPermission("stopBluetoothSco()") ||
-                !mBootCompleted) {
+                !mSystemReady) {
             return;
         }
         ScoClient client = getScoClient(cb, false);
@@ -3277,7 +3314,7 @@ public class AudioService extends IAudioService.Stub {
             int status;
 
             synchronized (mSoundEffectsLock) {
-                if (!mBootCompleted) {
+                if (!mSystemReady) {
                     Log.w(TAG, "onLoadSoundEffects() called before boot complete");
                     return false;
                 }
@@ -3699,6 +3736,10 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_BROADCAST_BT_CONNECTION_STATE:
                     onBroadcastScoConnectionState(msg.arg1);
+                    break;
+
+                case MSG_SYSTEM_READY:
+                    onSystemReady();
                     break;
             }
         }
@@ -4169,36 +4210,6 @@ public class AudioService extends IAudioService.Stub {
                     newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, scoAudioState);
                     sendStickyBroadcastToAll(newIntent);
                 }
-            } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                mBootCompleted = true;
-                sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE,
-                        0, 0, null, 0);
-
-                mKeyguardManager =
-                        (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-                mScoConnectionState = AudioManager.SCO_AUDIO_STATE_ERROR;
-                resetBluetoothSco();
-                getBluetoothHeadset();
-                //FIXME: this is to maintain compatibility with deprecated intent
-                // AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED. Remove when appropriate.
-                Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-                newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
-                        AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
-                sendStickyBroadcastToAll(newIntent);
-
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                if (adapter != null) {
-                    adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
-                                            BluetoothProfile.A2DP);
-                }
-
-                sendMsg(mAudioHandler,
-                        MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
-                        SENDMSG_REPLACE,
-                        0,
-                        0,
-                        null,
-                        SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {

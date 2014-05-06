@@ -70,6 +70,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
     private static final String NAME_HDMI = "hdmi";
 
     private static final int MSG_NEW_DEVICE_STATE = 1;
+    private static final int MSG_SYSTEM_READY = 2;
 
     private final Object mLock = new Object();
 
@@ -96,19 +97,9 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
 
         mObserver = new WiredAccessoryObserver();
-
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        context.registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context ctx, Intent intent) {
-                        bootCompleted();
-                    }
-                },
-                filter, null, null);
     }
 
-    private void bootCompleted() {
+    private void onSystemReady() {
         if (mUseDevInputEventForAudioJack) {
             int switchValues = 0;
             if (mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_HEADPHONE_INSERT) == 1) {
@@ -156,6 +147,16 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             }
 
             updateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC)) | headset);
+        }
+    }
+
+    @Override
+    public void systemReady() {
+        synchronized (mLock) {
+            mWakeLock.acquire();
+
+            Message msg = mHandler.obtainMessage(MSG_SYSTEM_READY, 0, 0, null);
+            mHandler.sendMessage(msg);
         }
     }
 
@@ -220,6 +221,11 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 case MSG_NEW_DEVICE_STATE:
                     setDevicesState(msg.arg1, msg.arg2, (String)msg.obj);
                     mWakeLock.release();
+                    break;
+                case MSG_SYSTEM_READY:
+                    onSystemReady();
+                    mWakeLock.release();
+                    break;
             }
         }
     };
