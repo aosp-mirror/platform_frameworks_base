@@ -50,6 +50,8 @@ static const char* const OutOfResourcesException =
     "android/view/Surface$OutOfResourcesException";
 
 static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID width;
     jfieldID height;
     jfieldID refreshRate;
@@ -346,24 +348,49 @@ static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
     SurfaceComposerClient::setDisplayProjection(token, orientation, layerStackRect, displayRect);
 }
 
-static jboolean nativeGetDisplayInfo(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jobject infoObj) {
+static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
+        jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return JNI_FALSE;
+    if (token == NULL) return NULL;
 
-    DisplayInfo info;
-    if (SurfaceComposerClient::getDisplayInfo(token, &info)) {
-        return JNI_FALSE;
+    Vector<DisplayInfo> configs;
+    if (SurfaceComposerClient::getDisplayConfigs(token, &configs) != NO_ERROR ||
+            configs.size() == 0) {
+        return NULL;
     }
 
-    env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.width, info.w);
-    env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.height, info.h);
-    env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.refreshRate, info.fps);
-    env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.density, info.density);
-    env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.xDpi, info.xdpi);
-    env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.yDpi, info.ydpi);
-    env->SetBooleanField(infoObj, gPhysicalDisplayInfoClassInfo.secure, info.secure);
-    return JNI_TRUE;
+    jobjectArray configArray = env->NewObjectArray(configs.size(),
+            gPhysicalDisplayInfoClassInfo.clazz, NULL);
+
+    for (size_t c = 0; c < configs.size(); ++c) {
+        const DisplayInfo& info = configs[c];
+        jobject infoObj = env->NewObject(gPhysicalDisplayInfoClassInfo.clazz,
+                gPhysicalDisplayInfoClassInfo.ctor);
+        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.width, info.w);
+        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.height, info.h);
+        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.refreshRate, info.fps);
+        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.density, info.density);
+        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.xDpi, info.xdpi);
+        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.yDpi, info.ydpi);
+        env->SetBooleanField(infoObj, gPhysicalDisplayInfoClassInfo.secure, info.secure);
+        env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
+        env->DeleteLocalRef(infoObj);
+    }
+
+    return configArray;
+}
+
+static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return -1;
+    return static_cast<jint>(SurfaceComposerClient::getActiveConfig(token));
+}
+
+static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj, jint id) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return JNI_FALSE;
+    status_t err = SurfaceComposerClient::setActiveConfig(token, static_cast<int>(id));
+    return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
 static void nativeBlankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
@@ -576,8 +603,12 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayLayerStack },
     {"nativeSetDisplayProjection", "(Landroid/os/IBinder;IIIIIIIII)V",
             (void*)nativeSetDisplayProjection },
-    {"nativeGetDisplayInfo", "(Landroid/os/IBinder;Landroid/view/SurfaceControl$PhysicalDisplayInfo;)Z",
-            (void*)nativeGetDisplayInfo },
+    {"nativeGetDisplayConfigs", "(Landroid/os/IBinder;)[Landroid/view/SurfaceControl$PhysicalDisplayInfo;",
+            (void*)nativeGetDisplayConfigs },
+    {"nativeGetActiveConfig", "(Landroid/os/IBinder;)I",
+            (void*)nativeGetActiveConfig },
+    {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
+            (void*)nativeSetActiveConfig },
     {"nativeBlankDisplay", "(Landroid/os/IBinder;)V",
             (void*)nativeBlankDisplay },
     {"nativeUnblankDisplay", "(Landroid/os/IBinder;)V",
@@ -598,6 +629,9 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             sSurfaceControlMethods, NELEM(sSurfaceControlMethods));
 
     jclass clazz = env->FindClass("android/view/SurfaceControl$PhysicalDisplayInfo");
+    gPhysicalDisplayInfoClassInfo.clazz = static_cast<jclass>(env->NewGlobalRef(clazz));
+    gPhysicalDisplayInfoClassInfo.ctor = env->GetMethodID(gPhysicalDisplayInfoClassInfo.clazz,
+            "<init>", "()V");
     gPhysicalDisplayInfoClassInfo.width = env->GetFieldID(clazz, "width", "I");
     gPhysicalDisplayInfoClassInfo.height = env->GetFieldID(clazz, "height", "I");
     gPhysicalDisplayInfoClassInfo.refreshRate = env->GetFieldID(clazz, "refreshRate", "F");
