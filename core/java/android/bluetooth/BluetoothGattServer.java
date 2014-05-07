@@ -50,6 +50,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
+    private int mTransport;
     private List<BluetoothGattService> mServices;
 
     private static final int CALLBACK_REG_TIMEOUT = 10000;
@@ -269,12 +270,13 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Create a BluetoothGattServer proxy object.
      */
-    /*package*/ BluetoothGattServer(Context context, IBluetoothGatt iGatt) {
+    /*package*/ BluetoothGattServer(Context context, IBluetoothGatt iGatt, int transport) {
         mContext = context;
         mService = iGatt;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mCallback = null;
         mServerIf = 0;
+        mTransport = transport;
         mServices = new ArrayList<BluetoothGattService>();
     }
 
@@ -401,7 +403,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
         try {
             mService.serverConnect(mServerIf, device.getAddress(),
-                               autoConnect ? false : true); // autoConnect is inverse of "isDirect"
+                               autoConnect ? false : true,mTransport); // autoConnect is inverse of "isDirect"
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;

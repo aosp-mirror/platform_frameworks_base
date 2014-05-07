@@ -512,6 +512,25 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
 
+     /**
+      * No preferrence of physical transport for GATT connections to remote dual-mode devices
+      * @hide
+      */
+    public static final int TRANSPORT_AUTO = 0;
+
+    /**
+     * Prefer BR/EDR transport for GATT connections to remote dual-mode devices
+     * @hide
+     */
+   public static final int TRANSPORT_BREDR = 1;
+
+    /**
+     * Prefer LE transport for GATT connections to remote dual-mode devices
+     * @hide
+     */
+   public static final int TRANSPORT_LE = 2;
+
+
     /**
      * Lazy initialization. Guaranteed final after first object constructed, or
      * getService() called.
@@ -1216,6 +1235,27 @@ public final class BluetoothDevice implements Parcelable {
      */
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
                                      BluetoothGattCallback callback) {
+        return (connectGatt(context, autoConnect,callback, TRANSPORT_AUTO));
+    }
+
+    /**
+     * Connect to GATT Server hosted by this device. Caller acts as GATT client.
+     * The callback is used to deliver results to Caller, such as connection status as well
+     * as any further GATT client operations.
+     * The method returns a BluetoothGatt instance. You can use BluetoothGatt to conduct
+     * GATT client operations.
+     * @param callback GATT callback handler that will receive asynchronous callbacks.
+     * @param autoConnect Whether to directly connect to the remote device (false)
+     *                    or to automatically connect as soon as the remote
+     *                    device becomes available (true).
+     * @param transport preferred transport for GATT connections to remote dual-mode devices
+     *             {@link BluetoothDevice#TRANSPORT_AUTO} or
+     *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
+     * @throws IllegalArgumentException if callback is null
+     * @hide
+     */
+    public BluetoothGatt connectGatt(Context context, boolean autoConnect,
+                                     BluetoothGattCallback callback, int transport) {
         // TODO(Bluetooth) check whether platform support BLE
         //     Do the check here or in GattServer?
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -1226,10 +1266,11 @@ public final class BluetoothDevice implements Parcelable {
                 // BLE is not supported
                 return null;
             }
-            BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this);
+            BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this, transport);
             gatt.connect(autoConnect, callback);
             return gatt;
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
+
 }
