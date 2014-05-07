@@ -648,7 +648,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
-    clazz = env->FindClass("android/net/ProxyProperties");
+    clazz = env->FindClass("android/net/ProxyInfo");
     if (clazz == NULL) {
         return;
     }
@@ -660,7 +660,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         env->GetMethodID(clazz, "getPort", "()I");
 
     fields.proxyConfigGetExclusionList =
-        env->GetMethodID(clazz, "getExclusionList", "()Ljava/lang/String;");
+        env->GetMethodID(clazz, "getExclusionListAsString", "()Ljava/lang/String;");
 }
 
 static void
