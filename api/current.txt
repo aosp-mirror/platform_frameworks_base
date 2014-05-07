@@ -3347,10 +3347,12 @@ package android.app {
     method public void startIntentSenderForResult(android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
     method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
+    method public void startLockTask();
     method public deprecated void startManagingCursor(android.database.Cursor);
     method public boolean startNextMatchingActivity(android.content.Intent);
     method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
+    method public void stopLockTask();
     method public deprecated void stopManagingCursor(android.database.Cursor);
     method public void takeKeyEvents(boolean);
     method public void triggerSearch(java.lang.String, android.os.Bundle);
