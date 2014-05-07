@@ -65,6 +65,8 @@ public class CommandQueue extends IStatusBar.Stub {
     public static final int FLAG_EXCLUDE_INPUT_METHODS_PANEL = 1 << 3;
     public static final int FLAG_EXCLUDE_COMPAT_MODE_PANEL = 1 << 4;
 
+    private static final String SHOW_IME_SWITCHER_KEY = "showImeSwitcherKey";
+
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
@@ -91,7 +93,8 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateExpandSettingsPanel();
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
-        public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
+        public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+                boolean showImeSwitcher);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void toggleRecentApps();
         public void preloadRecentApps();
@@ -190,11 +193,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
-            mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token)
-                    .sendToTarget();
+            Message m = mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token);
+            m.getData().putBoolean(SHOW_IME_SWITCHER_KEY, showImeSwitcher);
+            m.sendToTarget();
         }
     }
 
@@ -298,7 +303,8 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2);
+                    mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
+                            msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
                     break;
                 case MSG_SET_HARD_KEYBOARD_STATUS:
                     mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);

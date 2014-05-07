@@ -1532,14 +1532,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 mImeWindowVis = vis;
                 mBackDisposition = backDisposition;
-                if (mStatusBar != null) {
-                    mStatusBar.setImeWindowStatus(token, vis, backDisposition);
-                }
                 final boolean iconVisibility = ((vis & (InputMethodService.IME_ACTIVE)) != 0)
                         && (mWindowManagerService.isHardKeyboardAvailable()
                                 || (vis & (InputMethodService.IME_VISIBLE)) != 0);
+                final boolean needsToShowImeSwitcher = iconVisibility
+                        && needsToShowImeSwitchOngoingNotification();
+                if (mStatusBar != null) {
+                    mStatusBar.setImeWindowStatus(token, vis, backDisposition,
+                            needsToShowImeSwitcher);
+                }
                 final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
-                if (imi != null && iconVisibility && needsToShowImeSwitchOngoingNotification()) {
+                if (imi != null && needsToShowImeSwitcher) {
                     // Used to load label
                     final CharSequence title = mRes.getText(
                             com.android.internal.R.string.select_input_method);
