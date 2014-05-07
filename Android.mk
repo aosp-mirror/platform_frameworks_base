@@ -732,8 +732,9 @@ include $(BUILD_DROIDDOC)
 $(full_target): $(framework_built) $(gen)
 
 # Run this for checkbuild
-.PHONY: checkbuild
 checkbuild: doc-comment-check-docs
+# Check comment when you are updating the API
+update-api: doc-comment-check-docs
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
