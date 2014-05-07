@@ -5027,6 +5027,7 @@ package android.app.admin {
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
+    method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
     method public boolean getCameraDisabled(android.content.ComponentName);
@@ -5056,6 +5057,7 @@ package android.app.admin {
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
+    method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);

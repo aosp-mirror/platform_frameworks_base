@@ -100,6 +100,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -232,6 +233,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
+        private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
+        private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
         private static final String TAG_PASSWORD_EXPIRATION_DATE = "password-expiration-date";
         private static final String TAG_PASSWORD_EXPIRATION_TIMEOUT = "password-expiration-timeout";
@@ -297,6 +300,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         boolean encryptionRequested = false;
         boolean disableCamera = false;
+        Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -413,6 +417,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
                 out.endTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
             }
+            if (!accountTypesWithManagementDisabled.isEmpty()) {
+                out.startTag(null, TAG_DISABLE_ACCOUNT_MANAGEMENT);
+                for (String ac : accountTypesWithManagementDisabled) {
+                    out.startTag(null, TAG_ACCOUNT_TYPE);
+                    out.attribute(null, ATTR_VALUE, ac);
+                    out.endTag(null, TAG_ACCOUNT_TYPE);
+                }
+                out.endTag(null,  TAG_DISABLE_ACCOUNT_MANAGEMENT);
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -484,6 +497,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
+                    int outerDepthDAM = parser.getDepth();
+                    int typeDAM;
+                    while ((typeDAM=parser.next()) != XmlPullParser.END_DOCUMENT
+                            && (typeDAM != XmlPullParser.END_TAG
+                                    || parser.getDepth() > outerDepthDAM)) {
+                        if (typeDAM == XmlPullParser.END_TAG || typeDAM == XmlPullParser.TEXT) {
+                            continue;
+                        }
+                        String tagDAM = parser.getName();
+                        if (TAG_ACCOUNT_TYPE.equals(tagDAM)) {
+                            accountTypesWithManagementDisabled.add(
+                                    parser.getAttributeValue(null, ATTR_VALUE));
+                        } else {
+                            Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                        }
+                    }
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                 }
@@ -3178,7 +3208,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             int userId = UserHandle.getCallingUserId();
@@ -3276,5 +3305,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throws RemoteException {
         ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0, userId);
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0;
+    }
+
+    @Override
+    public void setAccountManagementDisabled(ComponentName who, String accountType,
+            boolean disabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (disabled) {
+                ap.accountTypesWithManagementDisabled.add(accountType);
+            } else {
+                ap.accountTypesWithManagementDisabled.remove(accountType);
+            }
+            saveSettingsLocked(UserHandle.getCallingUserId());
+        }
+    }
+
+    @Override
+    public String[] getAccountTypesWithManagementDisabled() {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (this) {
+            DevicePolicyData policy = getUserData(UserHandle.getCallingUserId());
+            final int N = policy.mAdminList.size();
+            HashSet<String> resultSet = new HashSet<String>();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = policy.mAdminList.get(i);
+                resultSet.addAll(admin.accountTypesWithManagementDisabled);
+            }
+            return resultSet.toArray(new String[resultSet.size()]);
+        }
     }
 }
