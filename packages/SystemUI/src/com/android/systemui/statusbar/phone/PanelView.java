@@ -526,11 +526,14 @@ public class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                if (mTimeAnimator.isRunning()) {
+                    mTimeAnimator.cancel(); // end any outstanding animations
+                    return true;
+                }
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
-                mTimeAnimator.cancel(); // end any outstanding animations
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
@@ -569,7 +572,7 @@ public class PanelView extends FrameLayout {
     }
 
     protected boolean isScrolledToBottom() {
-        return false;
+        return true;
     }
 
     protected float getContentHeight() {
