@@ -42,12 +42,8 @@ import android.util.LongSparseArray;
 public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
 
-    /** The cursor window size. resource xml file specifies the value in kB.
-     * convert it to bytes here by multiplying with 1024.
-     */
-    private static final int sCursorWindowSize =
-        Resources.getSystem().getInteger(
-                com.android.internal.R.integer.config_cursorWindowSize) * 1024;
+    // This static member will be evaluated when first used.
+    private static int sCursorWindowSize = -1;
 
     /**
      * The native CursorWindow object pointer.  (FOR INTERNAL USE ONLY)
@@ -100,6 +96,13 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     public CursorWindow(String name) {
         mStartPos = 0;
         mName = name != null && name.length() != 0 ? name : "<unnamed>";
+        if (sCursorWindowSize < 0) {
+            /** The cursor window size. resource xml file specifies the value in kB.
+             * convert it to bytes here by multiplying with 1024.
+             */
+            sCursorWindowSize = Resources.getSystem().getInteger(
+                com.android.internal.R.integer.config_cursorWindowSize) * 1024;
+        }
         mWindowPtr = nativeCreate(mName, sCursorWindowSize);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
