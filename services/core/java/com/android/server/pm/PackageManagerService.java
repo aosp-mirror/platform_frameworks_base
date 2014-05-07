@@ -615,6 +615,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (mBackgroundWriteRunning.compareAndSet(false, true)) {
                 new Thread("PackageUsage_DiskWriter") {
+                    @Override
                     public void run() {
                         try {
                             write(true);
@@ -1694,10 +1695,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public boolean isFirstBoot() {
         return !mRestoredSettings;
     }
 
+    @Override
     public boolean isOnlyCoreApps() {
         return mOnlyCore;
     }
@@ -1995,6 +1998,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 state, userId);
     }
 
+    @Override
     public boolean isPackageAvailable(String packageName, int userId) {
         if (!sUserManager.exists(userId)) return false;
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "is package available");
@@ -2032,6 +2036,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public String[] currentToCanonicalPackageNames(String[] names) {
         String[] out = new String[names.length];
         // reader
@@ -2044,6 +2049,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return out;
     }
     
+    @Override
     public String[] canonicalToCurrentPackageNames(String[] names) {
         String[] out = new String[names.length];
         // reader
@@ -2104,6 +2110,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return pi;
     }
     
+    @Override
     public PermissionInfo getPermissionInfo(String name, int flags) {
         // reader
         synchronized (mPackages) {
@@ -2115,6 +2122,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public List<PermissionInfo> queryPermissionsByGroup(String group, int flags) {
         // reader
         synchronized (mPackages) {
@@ -2138,6 +2146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public PermissionGroupInfo getPermissionGroupInfo(String name, int flags) {
         // reader
         synchronized (mPackages) {
@@ -2146,6 +2155,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
         // reader
         synchronized (mPackages) {
@@ -2231,6 +2241,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
 
+    @Override
     public void freeStorageAndNotify(final long freeStorageSize, final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
@@ -2256,6 +2267,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    @Override
     public void freeStorage(final long freeStorageSize, final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
@@ -2359,6 +2371,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public String[] getSystemSharedLibraryNames() {
         Set<String> libSet;
         synchronized (mPackages) {
@@ -2373,6 +2386,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         Collection<FeatureInfo> featSet;
         synchronized (mPackages) {
@@ -2391,6 +2405,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public boolean hasSystemFeature(String name) {
         synchronized (mPackages) {
             return mAvailableFeatures.containsKey(name);
@@ -2405,6 +2420,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 + " is not privileged to communicate with user=" + userId);
     }
 
+    @Override
     public int checkPermission(String permName, String pkgName) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(pkgName);
@@ -2422,6 +2438,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.PERMISSION_DENIED;
     }
 
+    @Override
     public int checkUidPermission(String permName, int uid) {
         synchronized (mPackages) {
             Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
@@ -2567,18 +2584,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         return added;
     }
 
+    @Override
     public boolean addPermission(PermissionInfo info) {
         synchronized (mPackages) {
             return addPermissionLocked(info, false);
         }
     }
 
+    @Override
     public boolean addPermissionAsync(PermissionInfo info) {
         synchronized (mPackages) {
             return addPermissionLocked(info, true);
         }
     }
 
+    @Override
     public void removePermission(String name) {
         synchronized (mPackages) {
             checkPermissionTreeLP(name);
@@ -2623,6 +2643,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void grantPermission(String packageName, String permissionName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.GRANT_REVOKE_PERMISSIONS, null);
@@ -2652,6 +2673,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void revokePermission(String packageName, String permissionName) {
         int changedAppId = -1;
 
@@ -2710,12 +2732,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public boolean isProtectedBroadcast(String actionName) {
         synchronized (mPackages) {
             return mProtectedBroadcasts.contains(actionName);
         }
     }
 
+    @Override
     public int checkSignatures(String pkg1, String pkg2) {
         synchronized (mPackages) {
             final PackageParser.Package p1 = mPackages.get(pkg1);
@@ -2728,6 +2752,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public int checkUidSignatures(int uid1, int uid2) {
         // Map to base uids.
         uid1 = UserHandle.getAppId(uid1);
@@ -2814,6 +2839,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.SIGNATURE_NO_MATCH;
     }
 
+    @Override
     public String[] getPackagesForUid(int uid) {
         uid = UserHandle.getAppId(uid);
         // reader
@@ -2837,6 +2863,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public String getNameForUid(int uid) {
         // reader
         synchronized (mPackages) {
@@ -2852,6 +2879,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    @Override
     public int getUidForSharedUser(String sharedUserName) {
         if(sharedUserName == null) {
             return -1;
@@ -2866,6 +2894,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public int getFlagsForUid(int uid) {
         synchronized (mPackages) {
             Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
@@ -3650,6 +3679,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public List<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
         ArrayList<ProviderInfo> finalList = null;
@@ -3687,6 +3717,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return finalList;
     }
 
+    @Override
     public InstrumentationInfo getInstrumentationInfo(ComponentName name,
             int flags) {
         // reader
@@ -3696,6 +3727,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public List<InstrumentationInfo> queryInstrumentation(String targetPackage,
             int flags) {
         ArrayList<InstrumentationInfo> finalList =
@@ -4198,6 +4230,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean performDexOpt(String packageName) {
         enforceSystemOrRoot("Only the system can request dexopt be performed");
+        return performDexOpt(packageName, true);
+    }
+
+    public boolean performDexOpt(String packageName, boolean updateUsage) {
 
         PackageParser.Package p;
         synchronized (mPackages) {
@@ -4205,7 +4241,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p == null) {
                 return false;
             }
-            p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
+            if (updateUsage) {
+                p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
+            }
             mPackageUsage.write();
             if (!p.mDexOptNeeded) {
                 return false;
@@ -4216,6 +4254,25 @@ public class PackageManagerService extends IPackageManager.Stub {
             return performDexOptLI(p, false /* force dex */, false /* defer */,
                     true /* include dependencies */) == DEX_OPT_PERFORMED;
         }
+    }
+
+    public HashSet<String> getPackagesThatNeedDexOpt() {
+        HashSet<String> pkgs = null;
+        synchronized (mPackages) {
+            for (PackageParser.Package p : mPackages.values()) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, p.packageName + " mDexOptNeeded=" + p.mDexOptNeeded);
+                }
+                if (!p.mDexOptNeeded) {
+                    continue;
+                }
+                if (pkgs == null) {
+                    pkgs = new HashSet<String>();
+                }
+                pkgs.add(p.packageName);
+            }
+        }
+        return pkgs;
     }
 
     public void shutdown() {
@@ -6952,6 +7009,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return mMediaMounted || Environment.isExternalStorageEmulated();
     }
 
+    @Override
     public PackageCleanItem nextPackageToClean(PackageCleanItem lastPackage) {
         // writer
         synchronized (mPackages) {
@@ -7131,6 +7189,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /* Called when a downloaded package installation has been confirmed by the user */
+    @Override
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags,
             final String installerPackageName) {
@@ -7148,6 +7207,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 installerPackageName, verificationParams, encryptionParams);
     }
 
+    @Override
     public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
@@ -7514,6 +7574,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void finishPackageInstall(int token) {
         enforceSystemOrRoot("Only the system is allowed to finish installs");
 
@@ -7585,6 +7646,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 -1);
     }
 
+    @Override
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
         final int uid = Binder.getCallingUid();
         // writer
@@ -10476,6 +10538,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void deleteApplicationCacheFiles(final String packageName,
             final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
@@ -10528,6 +10591,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
+    @Override
     public void getPackageSizeInfo(final String packageName, int userHandle,
             final IPackageStatsObserver observer) {
         mContext.enforceCallingOrSelfPermission(
@@ -10604,14 +10668,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
 
+    @Override
     public void addPackageToPreferred(String packageName) {
         Slog.w(TAG, "addPackageToPreferred: this is now a no-op");
     }
 
+    @Override
     public void removePackageFromPreferred(String packageName) {
         Slog.w(TAG, "removePackageFromPreferred: this is now a no-op");
     }
 
+    @Override
     public List<PackageInfo> getPreferredPackages(int flags) {
         return new ArrayList<PackageInfo>();
     }
@@ -10639,6 +10706,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
+    @Override
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
         addPreferredActivityInternal(filter, match, set, activity, true, userId);
@@ -10675,6 +10743,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity) {
         if (filter.countActions() != 1) {
@@ -10731,6 +10800,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void clearPackagePreferredActivities(String packageName) {
         final int uid = Binder.getCallingUid();
         // writer
@@ -10794,6 +10864,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return changed;
     }
 
+    @Override
     public void resetPreferredActivities(int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
@@ -10807,6 +10878,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public int getPreferredActivities(List<IntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
 
@@ -11018,6 +11090,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 new int[] {UserHandle.getUserId(packageUid)});
     }
 
+    @Override
     public void setPackageStoppedState(String packageName, boolean stopped, int userId) {
         if (!sUserManager.exists(userId)) return;
         final int uid = Binder.getCallingUid();
@@ -11034,6 +11107,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public String getInstallerPackageName(String packageName) {
         // reader
         synchronized (mPackages) {
@@ -11063,6 +11137,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void enterSafeMode() {
         enforceSystemOrRoot("Only the system can request entering safe mode");
 
@@ -11071,6 +11146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public void systemReady() {
         mSystemReady = true;
 
@@ -11116,10 +11192,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         sUserManager.systemReady();
     }
 
+    @Override
     public boolean isSafeMode() {
         return mSafeMode;
     }
 
+    @Override
     public boolean hasSystemUidErrors() {
         return mHasSystemUidErrors;
     }
@@ -11594,6 +11672,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Update media status on PackageManager.
      */
+    @Override
     public void updateExternalMediaStatus(final boolean mediaStatus, final boolean reportStatus) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
@@ -12185,6 +12264,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    @Override
     public boolean setInstallLocation(int loc) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
                 null);
@@ -12200,6 +12280,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
    }
 
+    @Override
     public int getInstallLocation() {
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Global.DEFAULT_INSTALL_LOCATION,
