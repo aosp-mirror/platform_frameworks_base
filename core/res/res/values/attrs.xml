@@ -2364,6 +2364,9 @@
         <!-- Specifies that this view should permit nested scrolling within a compatible
              ancestor view. -->
         <attr name="nestedScrollingEnabled" format="boolean" />
+
+        <!-- Sets the state-based animator for the View. -->
+        <attr name="stateListAnimator" format="reference"/>
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -4253,6 +4256,11 @@
         <!-- Reference to a drawable resource to use for the frame.  If not
              given, the drawable must be defined by the first child tag. -->
         <attr name="drawable" format="reference" />
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to a StateListAnimator item. -->
+    <declare-styleable name="StateListAnimatorItem">
+        <attr name="animation"/>
     </declare-styleable>
 
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->

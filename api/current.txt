@@ -1061,6 +1061,7 @@ package android {
     field public static final int startDelay = 16843746; // 0x10103e2
     field public static final int startOffset = 16843198; // 0x10101be
     field public static final deprecated int startYear = 16843132; // 0x101017c
+    field public static final int stateListAnimator = 16843860; // 0x1010454
     field public static final int stateNotNeeded = 16842774; // 0x1010016
     field public static final int state_above_anchor = 16842922; // 0x10100aa
     field public static final int state_accelerated = 16843547; // 0x101031b
@@ -2788,6 +2789,7 @@ package android.animation {
   public class AnimatorInflater {
     ctor public AnimatorInflater();
     method public static android.animation.Animator loadAnimator(android.content.Context, int) throws android.content.res.Resources.NotFoundException;
+    method public static android.animation.StateListAnimator loadStateListAnimator(android.content.Context, int) throws android.content.res.Resources.NotFoundException;
   }
 
   public abstract class AnimatorListenerAdapter implements android.animation.Animator.AnimatorListener android.animation.Animator.AnimatorPauseListener {
@@ -2982,6 +2984,12 @@ package android.animation {
     ctor public RectEvaluator();
     ctor public RectEvaluator(android.graphics.Rect);
     method public android.graphics.Rect evaluate(float, android.graphics.Rect, android.graphics.Rect);
+  }
+
+  public class StateListAnimator {
+    ctor public StateListAnimator();
+    method public void addState(int[], android.animation.Animator);
+    method public void jumpToCurrentState();
   }
 
   public class TimeAnimator extends android.animation.ValueAnimator {
@@ -30545,6 +30553,7 @@ package android.view {
     method public final int getScrollY();
     method public java.lang.String getSharedElementName();
     method public int getSolidColor();
+    method public android.animation.StateListAnimator getStateListAnimator();
     method protected int getSuggestedMinimumHeight();
     method protected int getSuggestedMinimumWidth();
     method public int getSystemUiVisibility();
@@ -30809,6 +30818,7 @@ package android.view {
     method public void setSelected(boolean);
     method public void setSharedElementName(java.lang.String);
     method public void setSoundEffectsEnabled(boolean);
+    method public void setStateListAnimator(android.animation.StateListAnimator);
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
