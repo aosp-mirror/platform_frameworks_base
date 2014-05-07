@@ -924,7 +924,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /**
      * This is set if we had to do a delayed dexopt of an app before launching
-     * it, to increasing the ANR timeouts in that case.
+     * it, to increase the ANR timeouts in that case.
      */
     boolean mDidDexOpt;
 
