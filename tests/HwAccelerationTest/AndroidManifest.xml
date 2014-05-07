@@ -232,6 +232,15 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+                android:name="LooperAcceleration"
+                android:label="Misc/LooperAcceleration">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
         
         <activity
                 android:name="TextFadeActivity"
