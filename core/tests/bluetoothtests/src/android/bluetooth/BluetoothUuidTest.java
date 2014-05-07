@@ -47,4 +47,20 @@ public class BluetoothUuidTest extends TestCase {
         assertEquals(ParcelUuid.fromString("FF0F0E0D-0C0B-0A09-0807-0060504030201"),
                 BluetoothUuid.parseUuidFrom(uuid128));
     }
+
+    @SmallTest
+    public void testUuidType() {
+        assertTrue(BluetoothUuid.is16BitUuid(
+                ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB")));
+        assertFalse(BluetoothUuid.is32BitUuid(
+                ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB")));
+
+        assertFalse(BluetoothUuid.is16BitUuid(
+                ParcelUuid.fromString("FE33110B-0000-1000-8000-00805F9B34FB")));
+        assertTrue(BluetoothUuid.is32BitUuid(
+                ParcelUuid.fromString("FE33110B-0000-1000-8000-00805F9B34FB")));
+        assertFalse(BluetoothUuid.is32BitUuid(
+                ParcelUuid.fromString("FE33110B-1000-1000-8000-00805F9B34FB")));
+
+    }
 }

@@ -273,11 +273,29 @@ public final class BluetoothUuid {
      * @param parcelUuid
      * @return true if the parcelUuid can be converted to 16 bit uuid, false otherwise.
      */
-    public static boolean isShortUuid(ParcelUuid parcelUuid) {
+    public static boolean is16BitUuid(ParcelUuid parcelUuid) {
         UUID uuid = parcelUuid.getUuid();
         if (uuid.getLeastSignificantBits() != BASE_UUID.getUuid().getLeastSignificantBits()) {
             return false;
         }
         return ((uuid.getMostSignificantBits() & 0xFFFF0000FFFFFFFFL) == 0x1000L);
+    }
+
+
+    /**
+     * Check whether the given parcelUuid can be converted to 32 bit bluetooth uuid.
+     *
+     * @param parcelUuid
+     * @return true if the parcelUuid can be converted to 32 bit uuid, false otherwise.
+     */
+    public static boolean is32BitUuid(ParcelUuid parcelUuid) {
+        UUID uuid = parcelUuid.getUuid();
+        if (uuid.getLeastSignificantBits() != BASE_UUID.getUuid().getLeastSignificantBits()) {
+            return false;
+        }
+        if (is16BitUuid(parcelUuid)) {
+            return false;
+        }
+        return ((uuid.getMostSignificantBits() & 0xFFFFFFFFL) == 0x1000L);
     }
 }
