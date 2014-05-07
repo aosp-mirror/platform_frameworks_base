@@ -1460,4 +1460,36 @@ public abstract class WebSettings {
      *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
      */
     public abstract int getMixedContentMode();
+
+    /**
+     * Sets whether to use a video overlay for embedded encrypted video.
+     * In API levels prior to {@link android.os.Build.VERSION_CODES#L}, encrypted video can
+     * only be rendered directly on a secure video surface, so it had been a hard problem to play
+     * encrypted video in HTML.  When this flag is on, WebView can play encrypted video (MSE/EME)
+     * by using a video overlay (aka hole-punching) for videos embedded using HTML &lt;video&gt;
+     * tag.<br>
+     * Caution: This setting is intended for use only in a narrow set of circumstances and apps
+     * should only enable it if they require playback of encrypted video content. It will impose
+     * the following limitations on the WebView:
+     * <ul>
+     * <li> Only one video overlay can be played at a time.
+     * <li> Changes made to position or dimensions of a video element may be propagated to the
+     * corresponding video overlay with a noticeable delay.
+     * <li> The video overlay is not visible to web APIs and as such may not interact with
+     * script or styling. For example, CSS styles applied to the &lt;video&gt; tag may be ignored.
+     * </ul>
+     * This is not an exhaustive set of constraints and it may vary with new versions of the
+     * WebView.
+     * @hide
+     */
+    public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean flag);
+
+    /**
+     * Gets whether a video overlay will be used for embedded encrypted video.
+     *
+     * @return true if WebView uses a video overlay for embedded encrypted video.
+     * @see #setVideoOverlayForEmbeddedEncryptedVideoEnabled
+     * @hide
+     */
+    public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
 }
