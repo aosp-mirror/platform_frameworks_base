@@ -124,7 +124,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** Adds the search bar */
     public void setSearchBar(View searchBar) {
         // Create the search bar (and hide it if we have no recent tasks)
-        if (Constants.DebugFlags.App.EnableSearchButton) {
+        if (Constants.DebugFlags.App.EnableSearchLayout) {
             // Remove the previous search bar if one exists
             if (mSearchBar != null && indexOfChild(mSearchBar) > -1) {
                 removeView(mSearchBar);
@@ -135,7 +135,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 mSearchBar.setVisibility(mHasTasks ? View.VISIBLE : View.GONE);
                 addView(mSearchBar);
 
-                Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsView|setSearchBar]",
+                Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsView|setSearchBar]",
                         "" + (mSearchBar.getVisibility() == View.VISIBLE),
                         Console.AnsiBlue);
             }
@@ -152,10 +152,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|measure]",
+        Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|measure]",
                 "width: " + width + " height: " + height, Console.AnsiGreen);
-        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
+        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
 
         // Get the search bar bounds and measure the search bar layout
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -194,10 +194,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout, "[RecentsView|layout]",
+        Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|layout]",
                 new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
-        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                Constants.DebugFlags.App.TimeRecentsStartupKey, "RecentsView.onLayout");
+        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onLayout");
 
         // Get the search bar bounds so that we lay it out
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -232,14 +232,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        Console.log(Constants.DebugFlags.UI.Draw, "[RecentsView|dispatchDraw]", "",
+        Console.log(Constants.Log.UI.Draw, "[RecentsView|dispatchDraw]", "",
                 Console.AnsiPurple);
         super.dispatchDraw(canvas);
     }
 
     @Override
     protected boolean fitSystemWindows(Rect insets) {
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
+        Console.log(Constants.Log.UI.MeasureAndLayout,
                 "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
 
         // Update the configuration with the latest system insets and trigger a relayout
@@ -359,16 +359,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 }
 
-                Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
-                        Constants.DebugFlags.App.TimeRecentsLaunchKey, "startActivity");
+                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                        Constants.Log.App.TimeRecentsLaunchKey, "startActivity");
             }
         };
 
-        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
-                Constants.DebugFlags.App.TimeRecentsLaunchKey, "onTaskLaunched");
+        Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                Constants.Log.App.TimeRecentsLaunchKey, "onTaskLaunched");
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
-        if (tv == null || !Constants.Values.TaskView.AnimateFrontTaskBarOnLeavingRecents) {
+        if (tv == null) {
             post(launchRunnable);
         } else {
             tv.animateOnLeavingRecents(launchRunnable);

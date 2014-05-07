@@ -88,7 +88,7 @@ public class RecentsConfiguration {
                 Configuration.ORIENTATION_LANDSCAPE;
         transposeSearchLayoutWithOrientation =
                 res.getBoolean(R.bool.recents_transpose_search_layout_with_orientation);
-        Console.log(Constants.DebugFlags.UI.MeasureAndLayout,
+        Console.log(Constants.Log.UI.MeasureAndLayout,
                 "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
                 Console.AnsiGreen);
 
@@ -174,7 +174,7 @@ public class RecentsConfiguration {
      */
     public void getSearchBarBounds(int width, int height, Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
-        if (!Constants.DebugFlags.App.EnableSearchButton) {
+        if (!Constants.DebugFlags.App.EnableSearchLayout) {
             searchBarSpaceBounds.set(0, 0, 0, 0);
             return;
         }
