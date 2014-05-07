@@ -63,6 +63,25 @@ public class RenderScript {
     static Method registerNativeAllocation;
     static Method registerNativeFree;
 
+    /*
+     * Context creation flag which specifies a normal context.
+    */
+    public static final long CREATE_FLAG_NONE = 0x0000;
+
+    /*
+     * Context creation flag which specifies a context optimized for low
+     * latency over peak performance. This is a hint and may have no effect
+     * on some implementations.
+    */
+    public static final long CREATE_FLAG_LOW_LATENCY = 0x0001;
+
+    /*
+     * Context creation flag which specifies a context optimized for long
+     * battery life over peak performance. This is a hint and may have no effect
+     * on some implementations.
+    */
+    public static final long CREATE_FLAG_LOW_POWER = 0x0002;
+
     static {
         sInitialized = false;
         if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
@@ -1145,7 +1164,7 @@ public class RenderScript {
      * @hide
      */
     public static RenderScript create(Context ctx, int sdkVersion) {
-        return create(ctx, sdkVersion, ContextType.NORMAL);
+        return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
     }
 
     /**
@@ -1155,7 +1174,7 @@ public class RenderScript {
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct) {
+    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct, long flags) {
         if (!sInitialized) {
             Log.e(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
             return null;
@@ -1194,7 +1213,21 @@ public class RenderScript {
      */
     public static RenderScript create(Context ctx, ContextType ct) {
         int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v, ct);
+        return create(ctx, v, ct, CREATE_FLAG_NONE);
+    }
+
+     /**
+     * Create a RenderScript context.
+     *
+     *
+     * @param ctx The context.
+     * @param ct The type of context to be created.
+     * @param flags The OR of the CREATE_FLAG_* options desired
+     * @return RenderScript
+     */
+    public static RenderScript create(Context ctx, ContextType ct, long flags) {
+        int v = ctx.getApplicationInfo().targetSdkVersion;
+        return create(ctx, v, ct, flags);
     }
 
     /**

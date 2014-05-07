@@ -24536,6 +24536,7 @@ package android.renderscript {
     method public void contextDump();
     method public static android.renderscript.RenderScript create(android.content.Context);
     method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType);
+    method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType, long);
     method public void destroy();
     method public void finish();
     method public final android.content.Context getApplicationContext();
@@ -24545,6 +24546,9 @@ package android.renderscript {
     method public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
     method public void setMessageHandler(android.renderscript.RenderScript.RSMessageHandler);
     method public void setPriority(android.renderscript.RenderScript.Priority);
+    field public static final long CREATE_FLAG_LOW_LATENCY = 1L; // 0x1L
+    field public static final long CREATE_FLAG_LOW_POWER = 2L; // 0x2L
+    field public static final long CREATE_FLAG_NONE = 0L; // 0x0L
   }
 
   public static final class RenderScript.ContextType extends java.lang.Enum {
