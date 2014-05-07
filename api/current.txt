@@ -11853,7 +11853,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_WHITE_LEVEL;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_REFERENCE_ILLUMINANT1;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_REFERENCE_ILLUMINANT2;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
@@ -12235,8 +12234,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_GREEN_SPLIT;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_NEUTRAL_COLOR_POINT;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_TONE_CURVE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_DATA;
