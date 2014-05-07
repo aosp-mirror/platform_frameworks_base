@@ -23,7 +23,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -118,8 +117,6 @@ public class TextureView extends View {
     private final Object[] mLock = new Object[0];
     private boolean mUpdateLayer;
     private boolean mUpdateSurface;
-
-    private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
     private Canvas mCanvas;
     private int mSaveCount;
@@ -370,21 +367,7 @@ public class TextureView extends View {
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             nCreateNativeWindow(mSurface);
 
-            mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
-                @Override
-                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                    // Per SurfaceTexture's documentation, the callback may be invoked
-                    // from an arbitrary thread
-                    updateLayer();
-
-                    if (Looper.myLooper() == Looper.getMainLooper()) {
-                        invalidate();
-                    } else {
-                        postInvalidate();
-                    }
-                }
-            };
-            mSurface.setOnFrameAvailableListener(mUpdateListener);
+            mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
             if (mListener != null && !mUpdateSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
@@ -422,7 +405,7 @@ public class TextureView extends View {
             // To cancel updates, the easiest thing to do is simply to remove the
             // updates listener
             if (visibility == VISIBLE) {
-                mSurface.setOnFrameAvailableListener(mUpdateListener);
+                mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
                 updateLayerAndInvalidate();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
@@ -766,6 +749,15 @@ public class TextureView extends View {
     public void setSurfaceTextureListener(SurfaceTextureListener listener) {
         mListener = listener;
     }
+
+    private final SurfaceTexture.OnFrameAvailableListener mUpdateListener =
+            new SurfaceTexture.OnFrameAvailableListener() {
+        @Override
+        public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+            updateLayer();
+            invalidate();
+        }
+    };
 
     /**
      * This listener can be used to be notified when the surface texture

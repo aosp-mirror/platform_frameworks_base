@@ -221,7 +221,7 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 
     fields.postEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
-            "(Ljava/lang/Object;)V");
+            "(Ljava/lang/ref/WeakReference;)V");
     if (fields.postEvent == NULL) {
         ALOGE("can't find android/graphics/SurfaceTexture.postEventFromNative");
     }
@@ -338,7 +338,7 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
-    {"nativeInit",                 "(IZLjava/lang/Object;)V", (void*)SurfaceTexture_init },
+    {"nativeInit",                 "(IZLjava/lang/ref/WeakReference;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",       "()V",   (void*)SurfaceTexture_updateTexImage },
