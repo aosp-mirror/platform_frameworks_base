@@ -695,7 +695,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 //                        mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
 //                    }
                 }
-                requestChildrenUpdate();
+                updateChildren();
             }
 
             // Keep on drawing until the animation has finished.
@@ -705,7 +705,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void customScrollTo(int y) {
         mOwnScrollY = y;
-        requestChildrenUpdate();
+        updateChildren();
     }
 
     @Override
@@ -721,7 +721,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (clampedY) {
                 mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange());
             }
-            requestChildrenUpdate();
+            updateChildren();
         } else {
             customScrollTo(scrollY);
             scrollTo(scrollX, mScrollY);
