@@ -33262,6 +33262,16 @@ package android.webkit {
     method public boolean hasMimeType(java.lang.String);
   }
 
+  public abstract interface PermissionRequest {
+    method public abstract void deny();
+    method public abstract android.net.Uri getOrigin();
+    method public abstract long getResources();
+    method public abstract void grant(long);
+    field public static final long RESOURCE_AUDIO_CAPTURE = 4L; // 0x4L
+    field public static final long RESOURCE_GEOLOCATION = 1L; // 0x1L
+    field public static final long RESOURCE_VIDEO_CAPTURE = 2L; // 0x2L
+  }
+
   public abstract interface PluginStub {
     method public abstract android.view.View getEmbeddedView(int, android.content.Context);
     method public abstract android.view.View getFullScreenView(int, android.content.Context);
@@ -33321,6 +33331,8 @@ package android.webkit {
     method public boolean onJsConfirm(android.webkit.WebView, java.lang.String, java.lang.String, android.webkit.JsResult);
     method public boolean onJsPrompt(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String, android.webkit.JsPromptResult);
     method public deprecated boolean onJsTimeout();
+    method public void onPermissionRequest(android.webkit.PermissionRequest);
+    method public void onPermissionRequestCanceled(android.webkit.PermissionRequest);
     method public void onProgressChanged(android.webkit.WebView, int);
     method public deprecated void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
@@ -33608,6 +33620,7 @@ package android.webkit {
     method public boolean pageUp(boolean);
     method public void pauseTimers();
     method public void postUrl(java.lang.String, byte[]);
+    method public void preauthorizePermission(android.net.Uri, long);
     method public void reload();
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);

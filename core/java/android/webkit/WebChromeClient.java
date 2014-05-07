@@ -304,7 +304,6 @@ public class WebChromeClient {
      * If this method isn't overridden, the permission is denied.
      *
      * @param request the PermissionRequest from current web content.
-     * @hide
      */
     public void onPermissionRequest(PermissionRequest request) {
         request.deny();
@@ -314,8 +313,7 @@ public class WebChromeClient {
      * Notify the host application that the given permission request
      * has been canceled. Any related UI should therefore be hidden.
      *
-     * @param request the PermissionRequest need be canceled.
-     * @hide
+     * @param request the PermissionRequest that needs be canceled.
      */
     public void onPermissionRequestCanceled(PermissionRequest request) {}
 
