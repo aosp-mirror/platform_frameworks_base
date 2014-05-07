@@ -52,7 +52,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
-    private NotificationActivator mActivator;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,8 +62,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
-
-        mActivator = new NotificationActivator(this, this);
     }
 
     @Override
@@ -208,21 +205,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
-    /**
-     * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
-     */
-    @Override
-    public void setDimmed(boolean dimmed, boolean fade) {
-        super.setDimmed(dimmed, fade);
-        mActivator.setDimmed(dimmed, fade);
-    }
-
     public int getMaxExpandHeight() {
         return mMaxExpandHeight;
-    }
-
-    public NotificationActivator getActivator() {
-        return mActivator;
     }
 
     /**
@@ -238,10 +222,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    public void setActualHeight(int height) {
-        mPrivateLayout.setActualHeight(height);
+    public void setActualHeight(int height, boolean notifyListeners) {
+        mPrivateLayout.setActualHeight(height, notifyListeners);
         invalidate();
-        super.setActualHeight(height);
+        super.setActualHeight(height, notifyListeners);
     }
 
     @Override

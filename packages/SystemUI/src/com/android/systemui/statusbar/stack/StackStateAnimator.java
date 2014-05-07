@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.stack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -40,11 +42,13 @@ public class StackStateAnimator {
     private static final int ANIMATION_DURATION = 360;
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
+    private static final int TAG_ANIMATOR_SCALE = R.id.scale_animator_tag;
     private static final int TAG_ANIMATOR_ALPHA = R.id.alpha_animator_tag;
     private static final int TAG_ANIMATOR_HEIGHT = R.id.height_animator_tag;
     private static final int TAG_ANIMATOR_TOP_INSET = R.id.top_inset_animator_tag;
     private static final int TAG_END_TRANSLATION_Y = R.id.translation_y_animator_end_value_tag;
     private static final int TAG_END_TRANSLATION_Z = R.id.translation_z_animator_end_value_tag;
+    private static final int TAG_END_SCALE = R.id.scale_animator_end_value_tag;
     private static final int TAG_END_ALPHA = R.id.alpha_animator_end_value_tag;
     private static final int TAG_END_HEIGHT = R.id.height_animator_end_value_tag;
     private static final int TAG_END_TOP_INSET = R.id.top_inset_animator_end_value_tag;
@@ -58,6 +62,7 @@ public class StackStateAnimator {
     private Set<Animator> mAnimatorSet = new HashSet<Animator>();
     private Stack<AnimatorListenerAdapter> mAnimationListenerPool
             = new Stack<AnimatorListenerAdapter>();
+    private AnimationFilter mAnimationFilter = new AnimationFilter();
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -75,8 +80,8 @@ public class StackStateAnimator {
 
         processAnimationEvents(mAnimationEvents, finalState);
 
-        boolean hasNewEvents = !mNewEvents.isEmpty();
         int childCount = mHostLayout.getChildCount();
+        mAnimationFilter.applyCombination(mNewEvents);
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
             StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
@@ -84,7 +89,7 @@ public class StackStateAnimator {
                 continue;
             }
 
-            startAnimations(child, viewState, hasNewEvents);
+            startAnimations(child, viewState);
 
             child.setClipBounds(null);
         }
@@ -97,8 +102,7 @@ public class StackStateAnimator {
     /**
      * Start an animation to the given viewState
      */
-    private void startAnimations(final ExpandableView child, StackScrollState.ViewState viewState,
-            boolean hasNewEvents) {
+    private void startAnimations(final ExpandableView child, StackScrollState.ViewState viewState) {
         int childVisibility = child.getVisibility();
         boolean wasVisible = childVisibility == View.VISIBLE;
         final float alpha = viewState.alpha;
@@ -107,33 +111,40 @@ public class StackStateAnimator {
         }
         // start translationY animation
         if (child.getTranslationY() != viewState.yTranslation) {
-            startYTranslationAnimation(child, viewState, hasNewEvents);
+            startYTranslationAnimation(child, viewState);
         }
         // start translationZ animation
         if (child.getTranslationZ() != viewState.zTranslation) {
-            startZTranslationAnimation(child, viewState, hasNewEvents);
+            startZTranslationAnimation(child, viewState);
+        }
+        // start scale animation
+        if (child.getScaleX() != viewState.scale) {
+            startScaleAnimation(child, viewState);
         }
         // start alpha animation
         if (alpha != child.getAlpha()) {
-            startAlphaAnimation(child, viewState, hasNewEvents);
+            startAlphaAnimation(child, viewState);
         }
         // start height animation
         if (viewState.height != child.getActualHeight()) {
-            startHeightAnimation(child, viewState, hasNewEvents);
+            startHeightAnimation(child, viewState);
         }
+        // start dimmed animation
+        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
     }
 
     private void startHeightAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, boolean hasNewEvents) {
-        Integer previousEndValue = getChildTag(child,TAG_END_HEIGHT);
+            StackScrollState.ViewState viewState) {
+        Integer previousEndValue = getChildTag(child, TAG_END_HEIGHT);
         if (previousEndValue != null && previousEndValue == viewState.height) {
             return;
         }
         ValueAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_HEIGHT);
-        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator,
+                mAnimationFilter.animateHeight);
         if (newDuration <= 0) {
             // no new animation needed, let's just apply the value
-            child.setActualHeight(viewState.height);
+            child.setActualHeight(viewState.height, false /* notifyListeners */);
             if (previousAnimator != null && !isRunning()) {
                 onAnimationFinished();
             }
@@ -144,7 +155,8 @@ public class StackStateAnimator {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                child.setActualHeight((int) animation.getAnimatedValue());
+                child.setActualHeight((int) animation.getAnimatedValue(),
+                        false /* notifyListeners */);
             }
         });
         animator.setInterpolator(mFastOutSlowInInterpolator);
@@ -164,14 +176,15 @@ public class StackStateAnimator {
     }
 
     private void startAlphaAnimation(final ExpandableView child,
-            final StackScrollState.ViewState viewState, boolean hasNewEvents) {
+            final StackScrollState.ViewState viewState) {
         final float endAlpha = viewState.alpha;
         Float previousEndValue = getChildTag(child,TAG_END_ALPHA);
         if (previousEndValue != null && previousEndValue == endAlpha) {
             return;
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_ALPHA);
-        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator,
+                mAnimationFilter.animateAlpha);
         if (newDuration <= 0) {
             // no new animation needed, let's just apply the value
             child.setAlpha(endAlpha);
@@ -228,13 +241,14 @@ public class StackStateAnimator {
     }
 
     private void startZTranslationAnimation(final ExpandableView child,
-            final StackScrollState.ViewState viewState, boolean hasNewEvents) {
+            final StackScrollState.ViewState viewState) {
         Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Z);
         if (previousEndValue != null && previousEndValue == viewState.zTranslation) {
             return;
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Z);
-        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator,
+                mAnimationFilter.animateZ);
         if (newDuration <= 0) {
             // no new animation needed, let's just apply the value
             child.setTranslationZ(viewState.zTranslation);
@@ -264,13 +278,14 @@ public class StackStateAnimator {
     }
 
     private void startYTranslationAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, boolean hasNewEvents) {
+            StackScrollState.ViewState viewState) {
         Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Y);
         if (previousEndValue != null && previousEndValue == viewState.yTranslation) {
             return;
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y);
-        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator, hasNewEvents);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator,
+                mAnimationFilter.animateY);
         if (newDuration <= 0) {
             // no new animation needed, let's just apply the value
             child.setTranslationY(viewState.yTranslation);
@@ -296,6 +311,46 @@ public class StackStateAnimator {
         startInstantly(animator);
         child.setTag(TAG_ANIMATOR_TRANSLATION_Y, animator);
         child.setTag(TAG_END_TRANSLATION_Y, viewState.yTranslation);
+    }
+
+    private void startScaleAnimation(final ExpandableView child,
+            StackScrollState.ViewState viewState) {
+        Float previousEndValue = getChildTag(child, TAG_END_SCALE);
+        if (previousEndValue != null && previousEndValue == viewState.scale) {
+            return;
+        }
+        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_SCALE);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator,
+                mAnimationFilter.animateScale);
+        if (newDuration <= 0) {
+            // no new animation needed, let's just apply the value
+            child.setScaleX(viewState.scale);
+            child.setScaleY(viewState.scale);
+            if (previousAnimator != null && !isRunning()) {
+                onAnimationFinished();
+            }
+            return;
+        }
+
+        PropertyValuesHolder holderX =
+                PropertyValuesHolder.ofFloat(View.SCALE_X, child.getScaleX(), viewState.scale);
+        PropertyValuesHolder holderY =
+                PropertyValuesHolder.ofFloat(View.SCALE_Y, child.getScaleY(), viewState.scale);
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(child, holderX, holderY);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setDuration(newDuration);
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_SCALE, null);
+                child.setTag(TAG_END_SCALE, null);
+            }
+        });
+        startInstantly(animator);
+        child.setTag(TAG_ANIMATOR_SCALE, animator);
+        child.setTag(TAG_END_SCALE, viewState.scale);
     }
 
     /**
@@ -349,21 +404,22 @@ public class StackStateAnimator {
      * Cancel the previous animator and get the duration of the new animation.
      *
      * @param previousAnimator the animator which was running before
-     * @param hasNewEvents indicating whether new events came in in this animation
+     * @param newAnimationNeeded indicating whether a new animation should be started for this
+     *                           property
      * @return the new duration
      */
     private long cancelAnimatorAndGetNewDuration(ValueAnimator previousAnimator,
-            boolean hasNewEvents) {
+            boolean newAnimationNeeded) {
         long newDuration = ANIMATION_DURATION;
         if (previousAnimator != null) {
-            if (!hasNewEvents) {
+            if (!newAnimationNeeded) {
                 // This is only an update, no new event came in. lets just take the remaining
                 // duration as the new duration
                 newDuration = previousAnimator.getDuration()
                         - previousAnimator.getCurrentPlayTime();
             }
             previousAnimator.cancel();
-        } else if (!hasNewEvents){
+        } else if (!newAnimationNeeded){
             newDuration = 0;
         }
         return newDuration;

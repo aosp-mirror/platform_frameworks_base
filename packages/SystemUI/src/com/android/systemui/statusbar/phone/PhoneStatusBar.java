@@ -2790,11 +2790,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mSettingsContainer.setKeyguardShowing(false);
         }
 
+        updateStackScrollerState();
         updatePublicMode();
         updateRowStates();
         checkBarModes();
         updateNotificationIcons();
         updateCarrierLabelVisibility(false);
+    }
+
+    public void updateStackScrollerState() {
+        mStackScroller.setDimmed(mState == StatusBarState.KEYGUARD, false /* animate */);
     }
 
     public void userActivity() {
@@ -2850,7 +2855,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void onActivated(View view) {
         userActivity();
         mKeyguardIndicationTextView.switchIndication(R.string.notification_tap_again);
-        super.onActivated(view);
+        mStackScroller.setActivatedChild(view);
     }
 
     /**
@@ -2862,9 +2867,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onReset(View view) {
-        super.onReset(view);
-        mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+    public void onActivationReset(View view) {
+        if (view == mStackScroller.getActivatedChild()) {
+            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+            mStackScroller.setActivatedChild(null);
+        }
     }
 
     public void onTrackingStarted() {
@@ -2896,30 +2903,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onReset() {
-        int n = mNotificationData.size();
-        for (int i = 0; i < n; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            if (entry.row.getVisibility() != View.GONE) {
-                entry.row.setDimmed(true /* dimmed */, true /* fade */);
-            }
-        }
-        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
-            mKeyguardIconOverflowContainer.setDimmed(true /* dimmed */, true /* fade */);
-        }
+    public void onDragDownReset() {
+        mStackScroller.setDimmed(true /* dimmed */, true /* animated */);
     }
 
     public void onThresholdReached() {
-        int n = mNotificationData.size();
-        for (int i = 0; i < n; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            if (entry.row.getVisibility() != View.GONE) {
-                entry.row.setDimmed(false /* dimmed */, true /* fade */);
-            }
-        }
-        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
-            mKeyguardIconOverflowContainer.setDimmed(false /* dimmed */, true /* fade */);
-        }
+        mStackScroller.setDimmed(false /* dimmed */, true /* animate */);
     }
 
     /**
