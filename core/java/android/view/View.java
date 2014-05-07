@@ -9627,6 +9627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -9678,6 +9679,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -9729,6 +9731,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -9772,6 +9775,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -9815,6 +9819,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -10000,6 +10005,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (mDisplayList != null) {
                     mDisplayList.setAlpha(getFinalAlpha());
                 }
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -10433,6 +10440,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -10474,6 +10482,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // View was rejected last time it was drawn by its parent; this may have changed
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -10620,6 +10629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -10668,6 +10678,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 invalidateParentIfNeeded();
             }
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
