@@ -35,7 +35,7 @@ interface IBluetoothGatt {
 
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
     void unregisterClient(in int clientIf);
-    void clientConnect(in int clientIf, in String address, in boolean isDirect);
+    void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport);
     void clientDisconnect(in int clientIf, in String address);
     void startAdvertising(in int appIf);
     void stopAdvertising();
@@ -77,7 +77,7 @@ interface IBluetoothGatt {
 
     void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallback callback);
     void unregisterServer(in int serverIf);
-    void serverConnect(in int servertIf, in String address, in boolean isDirect);
+    void serverConnect(in int servertIf, in String address, in boolean isDirect, in int transport);
     void serverDisconnect(in int serverIf, in String address);
     void beginServiceDeclaration(in int serverIf, in int srvcType,
                             in int srvcInstanceId, in int minHandles,
