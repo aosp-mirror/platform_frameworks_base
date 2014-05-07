@@ -885,47 +885,6 @@
          be passed a persistable Bundle in their Intent.extras. -->
     <attr name="persistable" format="boolean" />
 
-    <!-- Specify whether this activity should always be launched in doc-centric mode. For
-         values other than <code>none</code> the activity must be defined with
-         {@link android.R.attr#launchMode} <code>standard</code> or <code>singleTop</code>.
-         This attribute can be overridden by {@link
-         android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}.
-
-         <p>If this attribute is not specified, <code>none</code> will be used.
-         Note that this launch behavior can be changed in some ways at runtime
-         through the {@link android.content.Intent} flags
-         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}. -->
-    <attr name="documentLaunchMode">
-        <!-- The default mode, which will create a new task only when
-             {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
-             Intent.FLAG_ACTIVITY_NEW_TASK} is set. -->
-        <enum name="none" value="0" />
-        <!-- All tasks will be searched for a matching Intent. If one is found
-             That task will cleared and restarted with the root activity receiving a call
-             to {@link android.app.Activity#onNewIntent Activity.onNewIntent}. If no
-             such task is found a new task will be created.
-             This is the equivalent of with {@link
-             android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
-             without {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
-             Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. -->
-        <enum name="intoExisting" value="1" />
-        <!-- A new task rooted at this activity will be created.
-             This is the equivalent of with {@link
-             android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
-             paired with {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
-             Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. -->
-        <enum name="always" value="2" />
-    </attr>
-
-    <!-- Tasks launched by activities with this attribute will remain in the recent task
-         list until the last activity in the task is completed. When that happens the task
-         will be automatically removed from the recent task list.
-
-         This attribute is the equivalent of {@link
-         android.content.Intent#FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS
-         Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS} -->
-    <attr name="autoRemoveFromRecents" format="boolean" />
-
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1590,8 +1549,6 @@
         <attr name="primaryUserOnly" format="boolean" />
         <attr name="persistable" />
         <attr name="allowEmbedded" />
-        <attr name="documentLaunchMode" />
-        <attr name="autoRemoveFromRecents" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
