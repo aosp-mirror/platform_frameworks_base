@@ -67,37 +67,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #LAUNCH_SINGLE_INSTANCE}.
      */
     public int launchMode;
-
-    /**
-     * Constant corresponding to <code>none</code> in
-     * the {@link android.R.attr#documentLaunchMode} attribute.
-     */
-    public static final int DOCUMENT_LAUNCH_NONE = 0;
-    /**
-     * Constant corresponding to <code>intoExisting</code> in
-     * the {@link android.R.attr#documentLaunchMode} attribute.
-     */
-    public static final int DOCUMENT_LAUNCH_INTO_EXISTING = 1;
-    /**
-     * Constant corresponding to <code>always</code> in
-     * the {@link android.R.attr#documentLaunchMode} attribute.
-     */
-    public static final int DOCUMENT_LAUNCH_ALWAYS = 2;
-    /**
-     * The document launch mode style requested by the activity. From the
-     * {@link android.R.attr#documentLaunchMode} attribute, one of
-     * {@link #DOCUMENT_LAUNCH_NONE}, {@link #DOCUMENT_LAUNCH_INTO_EXISTING},
-     * {@link #DOCUMENT_LAUNCH_ALWAYS}.
-     *
-     * <p>Modes DOCUMENT_LAUNCH_ALWAYS
-     * and DOCUMENT_LAUNCH_INTO_EXISTING are equivalent to {@link
-     * android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
-     * Intent.FLAG_ACTIVITY_NEW_DOCUMENT} with and without {@link
-     * android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
-     * Intent.FLAG_ACTIVITY_MULTIPLE_TASK} respectively.
-     */
-    public int documentLaunchMode;
-
+    
     /**
      * Optional name of a permission required to be able to access this
      * Activity.  From the "permission" attribute.
@@ -222,14 +192,9 @@ public class ActivityInfo extends ComponentInfo
      * Bit in {@link #flags} indicating that this activity is to be persisted across
      * reboots for display in the Recents list.
      * {@link android.R.attr#persistable}
+     * @hide
      */
     public static final int FLAG_PERSISTABLE = 0x1000;
-    /**
-     * Bit in {@link #flags} indicating that tasks started with this activity are to be
-     * removed from the recent list of tasks when the last activity in the task is finished.
-     * {@link android.R.attr#autoRemoveFromRecents}
-     */
-    public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 0x2000;
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the primary user.  Only works with broadcast receivers.  Set from the
