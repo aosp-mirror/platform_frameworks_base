@@ -71,7 +71,7 @@ public final class Canvas_Delegate {
      * Returns the native delegate associated to a given {@link Canvas} object.
      */
     public static Canvas_Delegate getDelegate(Canvas canvas) {
-        return sManager.getDelegate(canvas.mNativeCanvas);
+        return sManager.getDelegate(canvas.getNativeCanvas());
     }
 
     /**
@@ -102,7 +102,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean isOpaque(Canvas thisCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return false;
         }
@@ -113,7 +113,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getWidth(Canvas thisCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return 0;
         }
@@ -124,7 +124,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getHeight(Canvas thisCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return 0;
         }
@@ -135,7 +135,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
    /*package*/ static void translate(Canvas thisCanvas, float dx, float dy) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -146,7 +146,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void rotate(Canvas thisCanvas, float degrees) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -157,7 +157,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
    /*package*/ static void scale(Canvas thisCanvas, float sx, float sy) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -168,7 +168,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
    /*package*/ static void skew(Canvas thisCanvas, float kx, float ky) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -204,7 +204,7 @@ public final class Canvas_Delegate {
     /*package*/ static boolean clipRect(Canvas thisCanvas, float left, float top, float right,
             float bottom) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return false;
         }
@@ -227,7 +227,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static int save(Canvas thisCanvas, int saveFlags) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return 0;
         }
@@ -238,7 +238,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void restore(Canvas thisCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -249,7 +249,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getSaveCount(Canvas thisCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return 0;
         }
@@ -260,7 +260,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void restoreToCount(Canvas thisCanvas, int saveCount) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.getNativeCanvas());
         if (canvasDelegate == null) {
             return;
         }
@@ -287,7 +287,7 @@ public final class Canvas_Delegate {
     /*package*/ static void drawLines(Canvas thisCanvas,
             final float[] pts, final int offset, final int count,
             Paint paint) {
-        draw(thisCanvas.mNativeCanvas, paint.mNativePaint, false /*compositeOnly*/,
+        draw(thisCanvas.getNativeCanvas(), paint.mNativePaint, false /*compositeOnly*/,
                 false /*forceSrcMode*/, new GcSnapshot.Drawable() {
                     @Override
                     public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {

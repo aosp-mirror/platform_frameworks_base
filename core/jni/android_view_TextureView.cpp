@@ -44,14 +44,9 @@ static struct {
 } gRectClassInfo;
 
 static struct {
-    jfieldID mFinalizer;
-    jfieldID mNativeCanvas;
     jfieldID mSurfaceFormat;
+    jmethodID safeCanvasSwap;
 } gCanvasClassInfo;
-
-static struct {
-    jfieldID mNativeCanvas;
-} gCanvasFinalizerClassInfo;
 
 static struct {
     jfieldID nativeWindow;
@@ -125,15 +120,6 @@ static void android_view_TextureView_destroyNativeWindow(JNIEnv* env, jobject te
     }
 }
 
-static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
-    jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
-    SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-          env->GetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    env->SetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas, (jlong)newCanvas);
-    env->SetLongField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (jlong)newCanvas);
-    SkSafeUnref(previousCanvas);
-}
-
 static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
         jlong nativeWindow, jobject canvas, jobject dirtyRect) {
 
@@ -175,7 +161,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer.format);
 
     SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
 
     SkRect clipRect;
     clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
@@ -193,7 +179,7 @@ static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong nativeWindow, jobject canvas) {
 
     SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
 
     if (nativeWindow) {
         sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
@@ -241,13 +227,8 @@ int register_android_view_TextureView(JNIEnv* env) {
     GET_FIELD_ID(gRectClassInfo.bottom, clazz, "bottom", "I");
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
-            "Landroid/graphics/Canvas$CanvasFinalizer;");
-    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
-
-    FIND_CLASS(clazz, "android/graphics/Canvas$CanvasFinalizer");
-    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
+    GET_METHOD_ID(gCanvasClassInfo.safeCanvasSwap, clazz, "safeCanvasSwap", "(JZ)V");
 
     FIND_CLASS(clazz, "android/view/TextureView");
     GET_FIELD_ID(gTextureViewClassInfo.nativeWindow, clazz, "mNativeWindow", "J");
