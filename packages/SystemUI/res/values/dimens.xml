@@ -152,21 +152,11 @@
     <!-- Amount of close_handle that will NOT overlap the notification list -->
     <dimen name="close_handle_underlap">32dp</dimen>
 
-    <!-- Height of the notification panel header bar -->
-    <dimen name="notification_panel_header_height">48dp</dimen>
+    <!-- Height of the status bar header bar -->
+    <dimen name="status_bar_header_height">48dp</dimen>
 
-    <!-- Extra space above the panel -->
-    <dimen name="notification_panel_padding_top">0dp</dimen>
-
-    <!-- Extra space above the clock in the panel -->
-    <dimen name="notification_panel_header_padding_top">0dp</dimen>
-
-    <!-- Extra space above the panel holder -->
-    <dimen name="panel_holder_padding_top">0dp</dimen>
-
-    <!-- Layout parameters for the notification panel -->
-    <dimen name="notification_panel_margin_bottom">0dp</dimen>
-    <dimen name="notification_panel_margin_left">0dp</dimen>
+    <!-- Height of the status bar header bar when expanded -->
+    <dimen name="status_bar_header_height_expanded">144dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <!-- 0x37 = fill_horizontal|top -->
@@ -260,6 +250,9 @@
 
     <!-- The padding between the individual notification cards. -->
     <dimen name="notification_padding">3dp</dimen>
+
+    <!-- The total height of the stack in its collapsed size (i.e. when quick settings is open) -->
+    <dimen name="collapsed_stack_height">94dp</dimen>
 
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">320dp</dimen>

@@ -121,11 +121,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected int getExpandedViewMaxHeight() {
-        return 0;
-    }
-
-    @Override
     protected boolean shouldDisableNavbarGestures() {
         return true;
     }

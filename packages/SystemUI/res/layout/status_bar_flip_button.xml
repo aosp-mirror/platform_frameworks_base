@@ -15,22 +15,11 @@
   ~ limitations under the License
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="50dp"
-        android:layout_height="50dp">
-    <ImageView android:id="@+id/settings_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:scaleType="center"
-        android:src="@drawable/ic_notify_settings"
-        android:background="@drawable/ic_notify_button_bg"
-        android:contentDescription="@string/accessibility_desc_quick_settings" />
-    <ImageView android:id="@+id/notification_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:scaleType="center"
-        android:src="@drawable/ic_notifications"
-        android:background="@drawable/ic_notify_button_bg"
-        android:visibility="gone"
-        android:contentDescription="@string/accessibility_notifications_button" />
-</FrameLayout>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_button"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:scaleType="center"
+    android:src="@drawable/ic_notify_quicksettings"
+    android:background="@drawable/ic_notify_button_bg"
+    android:contentDescription="@string/accessibility_desc_quick_settings"/>
