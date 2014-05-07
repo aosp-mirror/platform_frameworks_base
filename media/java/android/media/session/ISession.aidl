@@ -31,9 +31,8 @@ import android.os.ResultReceiver;
 interface ISession {
     void sendEvent(String event, in Bundle data);
     ISessionController getController();
-    void setTransportPerformerEnabled();
-    void setFlags(long flags);
-    void publish();
+    void setFlags(int flags);
+    void setActive(boolean active);
     void destroy();
 
     // These commands are for setting up and communicating with routes
