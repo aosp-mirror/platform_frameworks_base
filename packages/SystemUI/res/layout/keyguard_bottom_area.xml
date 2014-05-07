@@ -55,4 +55,14 @@
         android:textStyle="italic"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:src="@drawable/ic_lock_24dp"
+        android:scaleType="center"
+        android:alpha="0.7"
+        android:layerType="hardware"
+        android:tint="#ffffffff"/>
+
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
