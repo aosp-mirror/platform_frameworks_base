@@ -40,7 +40,7 @@ import java.util.List;
  *
  * <p>Declared as package-private, accessed by {@link HdmiControlService} only.
  */
-class HdmiCecController {
+final class HdmiCecController {
     private static final String TAG = "HdmiCecController";
 
     private static final byte[] EMPTY_BODY = EmptyArray.BYTE;
@@ -313,6 +313,63 @@ class HdmiCecController {
         return mDeviceInfos.get(logicalAddress);
     }
 
+    /**
+     * Add a new logical address to the device. Device's HW should be notified
+     * when a new logical address is assigned to a device, so that it can accept
+     * a command having available destinations.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @param newLogicalAddress a logical address to be added
+     * @return 0 on success. Otherwise, returns negative value
+     */
+    int addLogicalAddress(int newLogicalAddress) {
+        if (HdmiCec.isValidAddress(newLogicalAddress)) {
+            return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Clear all logical addresses registered in the device.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    void clearLogicalAddress() {
+        nativeClearLogicalAddress(mNativePtr);
+    }
+
+    /**
+     * Return the physical address of the device.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @return CEC physical address of the device. The range of success address
+     *         is between 0x0000 and 0xFFFF. If failed it returns -1
+     */
+    int getPhysicalAddress() {
+        return nativeGetPhysicalAddress(mNativePtr);
+    }
+
+    /**
+     * Return CEC version of the device.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    int getVersion() {
+        return nativeGetVersion(mNativePtr);
+    }
+
+    /**
+     * Return vendor id of the device.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    int getVendorId() {
+        return nativeGetVendorId(mNativePtr);
+    }
+
     private void init(HdmiControlService service, long nativePtr) {
         mIoHandler = new IoHandler(service.getServiceLooper());
         mControlHandler = new ControlHandler(service.getServiceLooper());
@@ -364,6 +421,11 @@ class HdmiCecController {
     }
 
     private static native long nativeInit(HdmiCecController handler);
-    private static native int nativeSendCecCommand(long contollerPtr, int srcAddress,
+    private static native int nativeSendCecCommand(long controllerPtr, int srcAddress,
             int dstAddress, byte[] body);
+    private static native int nativeAddLogicalAddress(long controllerPtr, int logicalAddress);
+    private static native void nativeClearLogicalAddress(long controllerPtr);
+    private static native int nativeGetPhysicalAddress(long controllerPtr);
+    private static native int nativeGetVersion(long controllerPtr);
+    private static native int nativeGetVendorId(long controllerPtr);
 }
