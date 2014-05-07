@@ -737,7 +737,7 @@ so you can populate fields of the contact details.
 <pre>
 public void editContact(Uri contactUri, String email) {
     Intent intent = new Intent(Intent.ACTION_EDIT);
-    intent.setDataAndType(contactUri, Contacts.CONTENT_TYPE);
+    intent.setData(contactUri);
     intent.putExtra(Intents.Insert.EMAIL, email);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
