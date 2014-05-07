@@ -21,7 +21,7 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
@@ -107,11 +107,11 @@ interface IConnectivityManager
 
     void reportInetCondition(int networkType, int percentage);
 
-    ProxyProperties getGlobalProxy();
+    ProxyInfo getGlobalProxy();
 
-    void setGlobalProxy(in ProxyProperties p);
+    void setGlobalProxy(in ProxyInfo p);
 
-    ProxyProperties getProxy();
+    ProxyInfo getProxy();
 
     void setDataDependency(int networkType, boolean met);
 

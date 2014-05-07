@@ -74,7 +74,7 @@ import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyDataTracker;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
 import android.net.Uri;
@@ -406,12 +406,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private ArrayList mInetLog;
 
     // track the current default http proxy - tell the world if we get a new one (real change)
-    private ProxyProperties mDefaultProxy = null;
+    private ProxyInfo mDefaultProxy = null;
     private Object mProxyLock = new Object();
     private boolean mDefaultProxyDisabled = false;
 
     // track the global proxy.
-    private ProxyProperties mGlobalProxy = null;
+    private ProxyInfo mGlobalProxy = null;
 
     private PacManager mPacManager = null;
 
@@ -3192,7 +3192,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 }
                 case EVENT_PROXY_HAS_CHANGED: {
-                    handleApplyDefaultProxy((ProxyProperties)msg.obj);
+                    handleApplyDefaultProxy((ProxyInfo)msg.obj);
                     break;
                 }
             }
@@ -3410,19 +3410,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return;
     }
 
-    public ProxyProperties getProxy() {
+    public ProxyInfo getProxy() {
         // this information is already available as a world read/writable jvm property
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
         synchronized (mProxyLock) {
-            ProxyProperties ret = mGlobalProxy;
+            ProxyInfo ret = mGlobalProxy;
             if ((ret == null) && !mDefaultProxyDisabled) ret = mDefaultProxy;
             return ret;
         }
     }
 
-    public void setGlobalProxy(ProxyProperties proxyProperties) {
+    public void setGlobalProxy(ProxyInfo proxyProperties) {
         enforceConnectivityInternalPermission();
 
         synchronized (mProxyLock) {
@@ -3435,18 +3435,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String exclList = "";
             String pacFileUrl = "";
             if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
-                    !TextUtils.isEmpty(proxyProperties.getPacFileUrl()))) {
+                    (proxyProperties.getPacFileUrl() != null))) {
                 if (!proxyProperties.isValid()) {
                     if (DBG)
                         log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
                     return;
                 }
-                mGlobalProxy = new ProxyProperties(proxyProperties);
+                mGlobalProxy = new ProxyInfo(proxyProperties);
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
-                exclList = mGlobalProxy.getExclusionList();
+                exclList = mGlobalProxy.getExclusionListAsString();
                 if (proxyProperties.getPacFileUrl() != null) {
-                    pacFileUrl = proxyProperties.getPacFileUrl();
+                    pacFileUrl = proxyProperties.getPacFileUrl().toString();
                 }
             } else {
                 mGlobalProxy = null;
@@ -3478,11 +3478,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
         String pacFileUrl = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC);
         if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
-            ProxyProperties proxyProperties;
+            ProxyInfo proxyProperties;
             if (!TextUtils.isEmpty(pacFileUrl)) {
-                proxyProperties = new ProxyProperties(pacFileUrl);
+                proxyProperties = new ProxyInfo(pacFileUrl);
             } else {
-                proxyProperties = new ProxyProperties(host, port, exclList);
+                proxyProperties = new ProxyInfo(host, port, exclList);
             }
             if (!proxyProperties.isValid()) {
                 if (DBG) log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
@@ -3495,7 +3495,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    public ProxyProperties getGlobalProxy() {
+    public ProxyInfo getGlobalProxy() {
         // this information is already available as a world read/writable jvm property
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
@@ -3505,9 +3505,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void handleApplyDefaultProxy(ProxyProperties proxy) {
+    private void handleApplyDefaultProxy(ProxyInfo proxy) {
         if (proxy != null && TextUtils.isEmpty(proxy.getHost())
-                && TextUtils.isEmpty(proxy.getPacFileUrl())) {
+                && (proxy.getPacFileUrl() == null)) {
             proxy = null;
         }
         synchronized (mProxyLock) {
@@ -3544,13 +3544,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     return;
                 }
             }
-            ProxyProperties p = new ProxyProperties(data[0], proxyPort, "");
+            ProxyInfo p = new ProxyInfo(data[0], proxyPort, "");
             setGlobalProxy(p);
         }
     }
 
-    private void sendProxyBroadcast(ProxyProperties proxy) {
-        if (proxy == null) proxy = new ProxyProperties("", 0, "");
+    private void sendProxyBroadcast(ProxyInfo proxy) {
+        if (proxy == null) proxy = new ProxyInfo("", 0, "");
         if (mPacManager.setCurrentProxyScriptUrl(proxy)) return;
         if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);

@@ -136,7 +136,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Proxy;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -1323,7 +1323,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } break;
             case UPDATE_HTTP_PROXY_MSG: {
-                ProxyProperties proxy = (ProxyProperties)msg.obj;
+                ProxyInfo proxy = (ProxyInfo)msg.obj;
                 String host = "";
                 String port = "";
                 String exclList = "";
@@ -13758,7 +13758,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (Proxy.PROXY_CHANGE_ACTION.equals(intent.getAction())) {
-            ProxyProperties proxy = intent.getParcelableExtra("proxy");
+            ProxyInfo proxy = intent.getParcelableExtra("proxy");
             mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
         }
 
