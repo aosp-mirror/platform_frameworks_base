@@ -239,8 +239,10 @@ public class LauncherAppsService extends ILauncherApps.Stub {
 
     private class MyPackageMonitor extends PackageMonitor {
 
-        /** Checks if user is a profile of or same as listeningUser. */
-        private boolean isProfileOf(UserHandle user, UserHandle listeningUser, String debugMsg) {
+        /** Checks if user is a profile of or same as listeningUser.
+          * and the user is enabled. */
+        private boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
+                String debugMsg) {
             if (user.getIdentifier() == listeningUser.getIdentifier()) {
                 if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
                 return true;
@@ -251,7 +253,8 @@ public class LauncherAppsService extends ILauncherApps.Stub {
                 UserInfo listeningUserInfo = mUm.getUserInfo(listeningUser.getIdentifier());
                 if (userInfo == null || listeningUserInfo == null
                         || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
-                        || userInfo.profileGroupId != listeningUserInfo.profileGroupId) {
+                        || userInfo.profileGroupId != listeningUserInfo.profileGroupId
+                        || !userInfo.isEnabled()) {
                     if (DEBUG) {
                         Log.d(TAG, "Not delivering msg from " + user + " to " + listeningUser + ":"
                                 + debugMsg);
@@ -276,7 +279,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                 UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                if (!isProfileOf(user, listeningUser, "onPackageAdded")) continue;
+                if (!isEnabledProfileOf(user, listeningUser, "onPackageAdded")) continue;
                 try {
                     listener.onPackageAdded(user, packageName);
                 } catch (RemoteException re) {
@@ -295,7 +298,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                 UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                if (!isProfileOf(user, listeningUser, "onPackageRemoved")) continue;
+                if (!isEnabledProfileOf(user, listeningUser, "onPackageRemoved")) continue;
                 try {
                     listener.onPackageRemoved(user, packageName);
                 } catch (RemoteException re) {
@@ -314,7 +317,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                 UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                if (!isProfileOf(user, listeningUser, "onPackageModified")) continue;
+                if (!isEnabledProfileOf(user, listeningUser, "onPackageModified")) continue;
                 try {
                     listener.onPackageChanged(user, packageName);
                 } catch (RemoteException re) {
@@ -333,7 +336,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                 UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                if (!isProfileOf(user, listeningUser, "onPackagesAvailable")) continue;
+                if (!isEnabledProfileOf(user, listeningUser, "onPackagesAvailable")) continue;
                 try {
                     listener.onPackagesAvailable(user, packages, isReplacing());
                 } catch (RemoteException re) {
@@ -352,7 +355,7 @@ public class LauncherAppsService extends ILauncherApps.Stub {
             for (int i = 0; i < n; i++) {
                 IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                 UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                if (!isProfileOf(user, listeningUser, "onPackagesUnavailable")) continue;
+                if (!isEnabledProfileOf(user, listeningUser, "onPackagesUnavailable")) continue;
                 try {
                     listener.onPackagesUnavailable(user, packages, isReplacing());
                 } catch (RemoteException re) {
