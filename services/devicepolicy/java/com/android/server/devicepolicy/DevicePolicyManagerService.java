@@ -50,7 +50,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -2533,7 +2533,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         exclusionList = exclusionList.trim();
         ContentResolver res = mContext.getContentResolver();
 
-        ProxyProperties proxyProperties = new ProxyProperties(data[0], proxyPort, exclusionList);
+        ProxyInfo proxyProperties = new ProxyInfo(data[0], proxyPort, exclusionList);
         if (!proxyProperties.isValid()) {
             Slog.e(LOG_TAG, "Invalid proxy properties, ignoring: " + proxyProperties.toString());
             return;
