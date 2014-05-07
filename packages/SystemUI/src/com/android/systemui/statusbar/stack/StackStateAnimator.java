@@ -39,7 +39,9 @@ import java.util.Stack;
  */
 public class StackStateAnimator {
 
-    private static final int ANIMATION_DURATION = 360;
+    public static final int ANIMATION_DURATION_STANDARD = 360;
+    public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
+
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
     private static final int TAG_ANIMATOR_SCALE = R.id.scale_animator_tag;
@@ -63,6 +65,7 @@ public class StackStateAnimator {
     private Stack<AnimatorListenerAdapter> mAnimationListenerPool
             = new Stack<AnimatorListenerAdapter>();
     private AnimationFilter mAnimationFilter = new AnimationFilter();
+    private long mCurrentLength;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -82,6 +85,7 @@ public class StackStateAnimator {
 
         int childCount = mHostLayout.getChildCount();
         mAnimationFilter.applyCombination(mNewEvents);
+        mCurrentLength = NotificationStackScrollLayout.AnimationEvent.combineLength(mNewEvents);
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
             StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
@@ -410,7 +414,7 @@ public class StackStateAnimator {
      */
     private long cancelAnimatorAndGetNewDuration(ValueAnimator previousAnimator,
             boolean newAnimationNeeded) {
-        long newDuration = ANIMATION_DURATION;
+        long newDuration = mCurrentLength;
         if (previousAnimator != null) {
             if (!newAnimationNeeded) {
                 // This is only an update, no new event came in. lets just take the remaining
