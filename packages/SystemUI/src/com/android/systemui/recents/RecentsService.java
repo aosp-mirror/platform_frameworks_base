@@ -45,7 +45,7 @@ class SystemUIMessageHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake,
+        Console.log(Constants.Log.App.SystemUIHandshake,
                 "[RecentsService|handleMessage]", msg);
 
         Context context = mContext.get();
@@ -115,10 +115,10 @@ class SystemUIMessageHandler extends Handler {
             context.sendBroadcast(intent);
 
             // Time this path
-            Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                    Constants.DebugFlags.App.TimeRecentsStartupKey, "receivedToggleRecents");
-            Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
-                    Constants.DebugFlags.App.TimeRecentsLaunchKey, "receivedToggleRecents");
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
+            Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                    Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
         }
     }
 }
@@ -131,31 +131,31 @@ public class RecentsService extends Service {
 
     @Override
     public void onCreate() {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onCreate]");
+        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onCreate]");
         super.onCreate();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onBind]");
+        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onBind]");
         return mSystemUIMessenger.getBinder();
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onUnbind]");
+        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onUnbind]");
         return super.onUnbind(intent);
     }
 
     @Override
     public void onRebind(Intent intent) {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onRebind]");
+        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onRebind]");
         super.onRebind(intent);
     }
 
     @Override
     public void onDestroy() {
-        Console.log(Constants.DebugFlags.App.SystemUIHandshake, "[RecentsService|onDestroy]");
+        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onDestroy]");
         super.onDestroy();
     }
 

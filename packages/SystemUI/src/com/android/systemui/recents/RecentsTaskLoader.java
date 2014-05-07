@@ -51,7 +51,7 @@ class TaskResourceLoadQueue {
 
     /** Adds a new task to the load queue */
     void addTask(Task t, boolean forceLoad) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [TaskResourceLoadQueue|addTask]");
+        Console.log(Constants.Log.App.TaskDataLoader, "  [TaskResourceLoadQueue|addTask]");
         if (!mQueue.contains(t)) {
             mQueue.add(t);
         }
@@ -68,7 +68,7 @@ class TaskResourceLoadQueue {
      * force reloaded.
      */
     Pair<Task, Boolean> nextTask() {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [TaskResourceLoadQueue|nextTask]");
+        Console.log(Constants.Log.App.TaskDataLoader, "  [TaskResourceLoadQueue|nextTask]");
         Task task = mQueue.poll();
         Boolean forceLoadTask = null;
         if (task != null) {
@@ -82,14 +82,14 @@ class TaskResourceLoadQueue {
 
     /** Removes a task from the load queue */
     void removeTask(Task t) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [TaskResourceLoadQueue|removeTask]");
+        Console.log(Constants.Log.App.TaskDataLoader, "  [TaskResourceLoadQueue|removeTask]");
         mQueue.remove(t);
         mForceLoadSet.remove(t.key);
     }
 
     /** Clears all the tasks from the load queue */
     void clearTasks() {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [TaskResourceLoadQueue|clearTasks]");
+        Console.log(Constants.Log.App.TaskDataLoader, "  [TaskResourceLoadQueue|clearTasks]");
         mQueue.clear();
         mForceLoadSet.clear();
     }
@@ -132,7 +132,7 @@ class TaskResourceLoader implements Runnable {
 
     /** Restarts the loader thread */
     void start(Context context) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[TaskResourceLoader|start]");
+        Console.log(Constants.Log.App.TaskDataLoader, "[TaskResourceLoader|start]");
         mContext = context;
         mCancelled = false;
         mSystemServicesProxy = new SystemServicesProxy(context);
@@ -144,7 +144,7 @@ class TaskResourceLoader implements Runnable {
 
     /** Requests the loader thread to stop after the current iteration */
     void stop() {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[TaskResourceLoader|stop]");
+        Console.log(Constants.Log.App.TaskDataLoader, "[TaskResourceLoader|stop]");
         // Mark as cancelled for the thread to pick up
         mCancelled = true;
         mSystemServicesProxy = null;
@@ -158,10 +158,10 @@ class TaskResourceLoader implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Console.log(Constants.DebugFlags.App.TaskDataLoader,
+            Console.log(Constants.Log.App.TaskDataLoader,
                     "[TaskResourceLoader|run|" + Thread.currentThread().getId() + "]");
             if (mCancelled) {
-                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                Console.log(Constants.Log.App.TaskDataLoader,
                         "[TaskResourceLoader|cancel|" + Thread.currentThread().getId() + "]");
                 // We have to unset the context here, since the background thread may be using it
                 // when we call stop()
@@ -169,7 +169,7 @@ class TaskResourceLoader implements Runnable {
                 // If we are cancelled, then wait until we are started again
                 synchronized(mLoadThread) {
                     try {
-                        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                        Console.log(Constants.Log.App.TaskDataLoader,
                                 "[TaskResourceLoader|waitOnLoadThreadCancelled]");
                         mLoadThread.wait();
                     } catch (InterruptedException ie) {
@@ -186,7 +186,7 @@ class TaskResourceLoader implements Runnable {
                 if (t != null) {
                     Drawable loadIcon = mApplicationIconCache.get(t.key);
                     Bitmap loadThumbnail = mThumbnailCache.get(t.key);
-                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                    Console.log(Constants.Log.App.TaskDataLoader,
                             "  [TaskResourceLoader|load]",
                             t + " icon: " + loadIcon + " thumbnail: " + loadThumbnail +
                                     " forceLoad: " + forceLoadTask);
@@ -197,7 +197,7 @@ class TaskResourceLoader implements Runnable {
                         Drawable icon = ssp.getActivityIcon(info, t.userId);
                         if (!mCancelled) {
                             if (icon != null) {
-                                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                Console.log(Constants.Log.App.TaskDataLoader,
                                         "    [TaskResourceLoader|loadIcon]",
                                         icon);
                                 loadIcon = icon;
@@ -210,7 +210,7 @@ class TaskResourceLoader implements Runnable {
                         Bitmap thumbnail = ssp.getTaskThumbnail(t.key.id);
                         if (!mCancelled) {
                             if (thumbnail != null) {
-                                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                                Console.log(Constants.Log.App.TaskDataLoader,
                                         "    [TaskResourceLoader|loadThumbnail]",
                                         thumbnail);
                                 thumbnail.setHasAlpha(false);
@@ -240,7 +240,7 @@ class TaskResourceLoader implements Runnable {
                 if (!mCancelled && mLoadQueue.isEmpty()) {
                     synchronized(mLoadQueue) {
                         try {
-                            Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                            Console.log(Constants.Log.App.TaskDataLoader,
                                     "[TaskResourceLoader|waitOnLoadQueue]");
                             mWaitingOnLoadQueue = true;
                             mLoadQueue.wait();
@@ -319,7 +319,7 @@ public class RecentsTaskLoader {
         int thumbnailCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
                 mMaxThumbnailCacheSize;
 
-        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+        Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|init]", "thumbnailCache: " + thumbnailCacheSize +
                 " iconCache: " + iconCacheSize);
 
@@ -336,7 +336,7 @@ public class RecentsTaskLoader {
         mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         mDefaultThumbnail.eraseColor(0x00000000);
         mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
-        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+        Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|defaultBitmaps]",
                 "icon: " + mDefaultApplicationIcon + " thumbnail: " + mDefaultThumbnail, Console.AnsiRed);
     }
@@ -366,10 +366,10 @@ public class RecentsTaskLoader {
         List<ActivityManager.RecentTaskInfo> tasks =
                 ssp.getRecentTasks(25, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
-        Console.log(Constants.DebugFlags.App.TimeSystemCalls,
+        Console.log(Constants.Log.App.TimeSystemCalls,
                 "[RecentsTaskLoader|getRecentTasks]",
                 "" + (System.currentTimeMillis() - t1) + "ms");
-        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+        Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|tasks]", "" + tasks.size());
 
         // Remove home/recents tasks
@@ -396,7 +396,7 @@ public class RecentsTaskLoader {
     SpaceNode reload(Context context, int preloadCount) {
         long t1 = System.currentTimeMillis();
 
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
+        Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
         Resources res = context.getResources();
         ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
         TaskStack stack = new TaskStack(context);
@@ -435,7 +435,7 @@ public class RecentsTaskLoader {
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
-                Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                Console.log(Constants.Log.App.TaskDataLoader,
                         "[RecentsTaskLoader|preloadTask]",
                         "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
 
@@ -467,7 +467,7 @@ public class RecentsTaskLoader {
                     }
                 }
                 if (task.thumbnail == null) {
-                    Console.log(Constants.DebugFlags.App.TaskDataLoader,
+                    Console.log(Constants.Log.App.TaskDataLoader,
                             "[RecentsTaskLoader|loadingTaskThumbnail]");
                     task.thumbnail = ssp.getTaskThumbnail(task.key.id);
                     if (task.thumbnail != null) {
@@ -480,11 +480,11 @@ public class RecentsTaskLoader {
             }
 
             // Add the task to the stack
-            Console.log(Constants.DebugFlags.App.TaskDataLoader,
+            Console.log(Constants.Log.App.TaskDataLoader,
                 "  [RecentsTaskLoader|task]", t.baseIntent.getComponent().getPackageName());
             stack.addTask(task);
         }
-        Console.log(Constants.DebugFlags.App.TimeSystemCalls,
+        Console.log(Constants.Log.App.TimeSystemCalls,
                 "[RecentsTaskLoader|getAllTaskTopThumbnail]",
                 "" + (System.currentTimeMillis() - t1) + "ms");
 
@@ -492,10 +492,10 @@ public class RecentsTaskLoader {
         // Get all the stacks
         t1 = System.currentTimeMillis();
         List<ActivityManager.StackInfo> stackInfos = ams.getAllStackInfos();
-        Console.log(Constants.DebugFlags.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
+        Console.log(Constants.Log.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
+        Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
         for (ActivityManager.StackInfo s : stackInfos) {
-            Console.log(Constants.DebugFlags.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
+            Console.log(Constants.Log.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
             if (stacks.containsKey(s.stackId)) {
                 stacks.get(s.stackId).setRect(s.bounds);
             }
@@ -518,7 +518,7 @@ public class RecentsTaskLoader {
         Drawable applicationIcon = mApplicationIconCache.get(t.key);
         Bitmap thumbnail = mThumbnailCache.get(t.key);
 
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
+        Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|loadTask]",
                 t + " applicationIcon: " + applicationIcon + " thumbnail: " + thumbnail +
                         " thumbnailCacheSize: " + mThumbnailCache.size());
 
@@ -539,7 +539,7 @@ public class RecentsTaskLoader {
 
     /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+        Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|unloadTask]", t +
                 " thumbnailCacheSize: " + mThumbnailCache.size());
 
@@ -549,7 +549,7 @@ public class RecentsTaskLoader {
 
     /** Completely removes the resource data from the pool. */
     public void deleteTaskData(Task t) {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader,
+        Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|deleteTask]", t);
 
         mLoadQueue.removeTask(t);
@@ -560,13 +560,13 @@ public class RecentsTaskLoader {
 
     /** Stops the task loader and clears all pending tasks */
     void stopLoader() {
-        Console.log(Constants.DebugFlags.App.TaskDataLoader, "[RecentsTaskLoader|stopLoader]");
+        Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|stopLoader]");
         mLoader.stop();
         mLoadQueue.clearTasks();
     }
 
     void onTrimMemory(int level) {
-        Console.log(Constants.DebugFlags.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
+        Console.log(Constants.Log.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
                 Console.trimMemoryLevelToString(level));
 
         switch (level) {
