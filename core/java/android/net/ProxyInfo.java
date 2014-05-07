@@ -21,14 +21,23 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import org.apache.http.client.HttpClient;
+
 import java.net.InetSocketAddress;
+import java.net.URLConnection;
+import java.util.List;
 import java.util.Locale;
 
 /**
- * A container class for the http proxy info
- * @hide
+ * Describes a proxy configuration.
+ *
+ * Proxy configurations are already integrated within the Apache HTTP stack.
+ * So {@link URLConnection} and {@link HttpClient} will use them automatically.
+ *
+ * Other HTTP stacks will need to obtain the proxy info from
+ * {@link Proxy#PROXY_CHANGE_ACTION} broadcast as the extra {@link Proxy#EXTRA_PROXY_INFO}.
  */
-public class ProxyProperties implements Parcelable {
+public class ProxyInfo implements Parcelable {
 
     private String mHost;
     private int mPort;
@@ -36,32 +45,82 @@ public class ProxyProperties implements Parcelable {
     private String[] mParsedExclusionList;
 
     private String mPacFileUrl;
+    /**
+     *@hide
+     */
     public static final String LOCAL_EXCL_LIST = "";
+    /**
+     *@hide
+     */
     public static final int LOCAL_PORT = -1;
+    /**
+     *@hide
+     */
     public static final String LOCAL_HOST = "localhost";
 
-    public ProxyProperties(String host, int port, String exclList) {
+    /**
+     * Constructs a {@link ProxyInfo} object that points at a Direct proxy
+     * on the specified host and port.
+     */
+    public static ProxyInfo buildDirectProxy(String host, int port) {
+        return new ProxyInfo(host, port, null);
+    }
+
+    /**
+     * Constructs a {@link ProxyInfo} object that points at a Direct proxy
+     * on the specified host and port.
+     *
+     * The proxy will not be used to access any host in exclusion list, exclList.
+     *
+     * @param exclList Hosts to exclude using the proxy on connections for.  These
+     *                 hosts can use wildcards such as *.example.com.
+     */
+    public static ProxyInfo buildDirectProxy(String host, int port, List<String> exclList) {
+        String[] array = exclList.toArray(new String[exclList.size()]);
+        return new ProxyInfo(host, port, TextUtils.join(",", array), array);
+    }
+
+    /**
+     * Construct a {@link ProxyInfo} that will download and run the PAC script
+     * at the specified URL.
+     */
+    public static ProxyInfo buildPacProxy(Uri pacUri) {
+        return new ProxyInfo(pacUri.toString());
+    }
+
+    /**
+     * Create a ProxyProperties that points at a HTTP Proxy.
+     * @hide
+     */
+    public ProxyInfo(String host, int port, String exclList) {
         mHost = host;
         mPort = port;
         setExclusionList(exclList);
     }
 
-    public ProxyProperties(String pacFileUrl) {
+    /**
+     * Create a ProxyProperties that points at a PAC URL.
+     * @hide
+     */
+    public ProxyInfo(String pacFileUrl) {
         mHost = LOCAL_HOST;
         mPort = LOCAL_PORT;
         setExclusionList(LOCAL_EXCL_LIST);
         mPacFileUrl = pacFileUrl;
     }
 
-    // Only used in PacManager after Local Proxy is bound.
-    public ProxyProperties(String pacFileUrl, int localProxyPort) {
+    /**
+     * Only used in PacManager after Local Proxy is bound.
+     * @hide
+     */
+    public ProxyInfo(String pacFileUrl, int localProxyPort) {
         mHost = LOCAL_HOST;
         mPort = localProxyPort;
         setExclusionList(LOCAL_EXCL_LIST);
         mPacFileUrl = pacFileUrl;
     }
 
-    private ProxyProperties(String host, int port, String exclList, String[] parsedExclList) {
+    private ProxyInfo(String host, int port, String exclList, String[] parsedExclList) {
         mHost = host;
         mPort = port;
         mExclusionList = exclList;
@@ -70,16 +129,22 @@ public class ProxyProperties implements Parcelable {
     }
 
     // copy constructor instead of clone
-    public ProxyProperties(ProxyProperties source) {
+    /**
+     * @hide
+     */
+    public ProxyInfo(ProxyInfo source) {
         if (source != null) {
             mHost = source.getHost();
             mPort = source.getPort();
-            mPacFileUrl = source.getPacFileUrl();
-            mExclusionList = source.getExclusionList();
+            mPacFileUrl = source.mPacFileUrl;
+            mExclusionList = source.getExclusionListAsString();
             mParsedExclusionList = source.mParsedExclusionList;
         }
     }
 
+    /**
+     * @hide
+     */
     public InetSocketAddress getSocketAddress() {
         InetSocketAddress inetSocketAddress = null;
         try {
@@ -88,20 +153,46 @@ public class ProxyProperties implements Parcelable {
         return inetSocketAddress;
     }
 
-    public String getPacFileUrl() {
-        return mPacFileUrl;
+    /**
+     * Returns the URL of the current PAC script or null if there is
+     * no PAC script.
+     */
+    public Uri getPacFileUrl() {
+        if (TextUtils.isEmpty(mPacFileUrl)) {
+            return null;
+        }
+        return Uri.parse(mPacFileUrl);
     }
 
+    /**
+     * When configured to use a Direct Proxy this returns the host
+     * of the proxy.
+     */
     public String getHost() {
         return mHost;
     }
 
+    /**
+     * When configured to use a Direct Proxy this returns the port
+     * of the proxy
+     */
     public int getPort() {
         return mPort;
     }
 
-    // comma separated
-    public String getExclusionList() {
+    /**
+     * When configured to use a Direct Proxy this returns the list
+     * of hosts for which the proxy is ignored.
+     */
+    public String[] getExclusionList() {
+        return mParsedExclusionList;
+    }
+
+    /**
+     * comma separated
+     * @hide
+     */
+    public String getExclusionListAsString() {
         return mExclusionList;
     }
 
@@ -111,33 +202,13 @@ public class ProxyProperties implements Parcelable {
         if (mExclusionList == null) {
             mParsedExclusionList = new String[0];
         } else {
-            String splitExclusionList[] = exclusionList.toLowerCase(Locale.ROOT).split(",");
-            mParsedExclusionList = new String[splitExclusionList.length * 2];
-            for (int i = 0; i < splitExclusionList.length; i++) {
-                String s = splitExclusionList[i].trim();
-                if (s.startsWith(".")) s = s.substring(1);
-                mParsedExclusionList[i*2] = s;
-                mParsedExclusionList[(i*2)+1] = "." + s;
-            }
+            mParsedExclusionList = exclusionList.toLowerCase(Locale.ROOT).split(",");
         }
     }
 
-    public boolean isExcluded(String url) {
-        if (TextUtils.isEmpty(url) || mParsedExclusionList == null ||
-                mParsedExclusionList.length == 0) return false;
-
-        Uri u = Uri.parse(url);
-        String urlDomain = u.getHost();
-        if (urlDomain == null) return false;
-        for (int i = 0; i< mParsedExclusionList.length; i+=2) {
-            if (urlDomain.equals(mParsedExclusionList[i]) ||
-                    urlDomain.endsWith(mParsedExclusionList[i+1])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * @hide
+     */
     public boolean isValid() {
         if (!TextUtils.isEmpty(mPacFileUrl)) return true;
         return Proxy.PROXY_VALID == Proxy.validate(mHost == null ? "" : mHost,
@@ -145,6 +216,9 @@ public class ProxyProperties implements Parcelable {
                                                 mExclusionList == null ? "" : mExclusionList);
     }
 
+    /**
+     * @hide
+     */
     public java.net.Proxy makeProxy() {
         java.net.Proxy proxy = java.net.Proxy.NO_PROXY;
         if (mHost != null) {
@@ -179,17 +253,17 @@ public class ProxyProperties implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ProxyProperties)) return false;
-        ProxyProperties p = (ProxyProperties)o;
+        if (!(o instanceof ProxyInfo)) return false;
+        ProxyInfo p = (ProxyInfo)o;
         // If PAC URL is present in either then they must be equal.
         // Other parameters will only be for fall back.
         if (!TextUtils.isEmpty(mPacFileUrl)) {
             return mPacFileUrl.equals(p.getPacFileUrl()) && mPort == p.mPort;
         }
-        if (!TextUtils.isEmpty(p.getPacFileUrl())) {
+        if (!TextUtils.isEmpty(p.mPacFileUrl)) {
             return false;
         }
-        if (mExclusionList != null && !mExclusionList.equals(p.getExclusionList())) return false;
+        if (mExclusionList != null && !mExclusionList.equals(p.getExclusionListAsString())) return false;
         if (mHost != null && p.getHost() != null && mHost.equals(p.getHost()) == false) {
             return false;
         }
@@ -245,15 +319,15 @@ public class ProxyProperties implements Parcelable {
      * Implement the Parcelable interface.
      * @hide
      */
-    public static final Creator<ProxyProperties> CREATOR =
-        new Creator<ProxyProperties>() {
-            public ProxyProperties createFromParcel(Parcel in) {
+    public static final Creator<ProxyInfo> CREATOR =
+        new Creator<ProxyInfo>() {
+            public ProxyInfo createFromParcel(Parcel in) {
                 String host = null;
                 int port = 0;
                 if (in.readByte() != 0) {
                     String url = in.readString();
                     int localPort = in.readInt();
-                    return new ProxyProperties(url, localPort);
+                    return new ProxyInfo(url, localPort);
                 }
                 if (in.readByte() != 0) {
                     host = in.readString();
@@ -261,13 +335,13 @@ public class ProxyProperties implements Parcelable {
                 }
                 String exclList = in.readString();
                 String[] parsedExclList = in.readStringArray();
-                ProxyProperties proxyProperties =
-                        new ProxyProperties(host, port, exclList, parsedExclList);
+                ProxyInfo proxyProperties =
+                        new ProxyInfo(host, port, exclList, parsedExclList);
                 return proxyProperties;
             }
 
-            public ProxyProperties[] newArray(int size) {
-                return new ProxyProperties[size];
+            public ProxyInfo[] newArray(int size) {
+                return new ProxyInfo[size];
             }
         };
 }

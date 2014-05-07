@@ -15712,6 +15712,7 @@ package android.net {
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public deprecated boolean getBackgroundDataSetting();
+    method public android.net.ProxyInfo getGlobalProxy();
     method public android.net.NetworkInfo getNetworkInfo(int);
     method public int getNetworkPreference();
     method public boolean isActiveNetworkMetered();
@@ -15719,6 +15720,7 @@ package android.net {
     method public static boolean isNetworkTypeValid(int);
     method public void registerNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public boolean requestRouteToHost(int, int);
+    method public void setGlobalProxy(android.net.ProxyInfo);
     method public void setNetworkPreference(int);
     method public int startUsingNetworkFeature(int, java.lang.String);
     method public int stopUsingNetworkFeature(int, java.lang.String);
@@ -15894,7 +15896,20 @@ package android.net {
     method public static final deprecated int getDefaultPort();
     method public static final deprecated java.lang.String getHost(android.content.Context);
     method public static final deprecated int getPort(android.content.Context);
+    field public static final java.lang.String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
     field public static final java.lang.String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
+  }
+
+  public class ProxyInfo implements android.os.Parcelable {
+    method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int);
+    method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int, java.util.List<java.lang.String>);
+    method public static android.net.ProxyInfo buildPacProxy(android.net.Uri);
+    method public int describeContents();
+    method public java.lang.String[] getExclusionList();
+    method public java.lang.String getHost();
+    method public android.net.Uri getPacFileUrl();
+    method public int getPort();
+    method public void writeToParcel(android.os.Parcel, int);
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {

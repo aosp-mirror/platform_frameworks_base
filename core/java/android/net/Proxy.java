@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.net.ProxyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -63,8 +64,11 @@ public final class Proxy {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
-    /** {@hide} **/
-    public static final String EXTRA_PROXY_INFO = "proxy";
+    /**
+     * Intent extra included with {@link #PROXY_CHANGE_ACTION} intents.
+     * It describes the new proxy being used (as a {@link ProxyInfo} object).
+     */
+    public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
 
     /** @hide */
     public static final int PROXY_VALID             = 0;
@@ -114,24 +118,14 @@ public final class Proxy {
      */
     public static final java.net.Proxy getProxy(Context ctx, String url) {
         String host = "";
-        if (url != null) {
+        if ((url != null) && !isLocalHost(host)) {
             URI uri = URI.create(url);
-            host = uri.getHost();
-        }
+            ProxySelector proxySelector = ProxySelector.getDefault();
 
-        if (!isLocalHost(host)) {
-            if (sConnectivityManager == null) {
-                sConnectivityManager = (ConnectivityManager)ctx.getSystemService(
-                        Context.CONNECTIVITY_SERVICE);
-            }
-            if (sConnectivityManager == null) return java.net.Proxy.NO_PROXY;
+            List<java.net.Proxy> proxyList = proxySelector.select(uri);
 
-            ProxyProperties proxyProperties = sConnectivityManager.getProxy();
-
-            if (proxyProperties != null) {
-                if (!proxyProperties.isExcluded(host)) {
-                    return proxyProperties.makeProxy();
-                }
+            if (proxyList.size() > 0) {
+                return proxyList.get(0);
             }
         }
         return java.net.Proxy.NO_PROXY;
@@ -275,7 +269,7 @@ public final class Proxy {
     }
 
     /** @hide */
-    public static final void setHttpProxySystemProperty(ProxyProperties p) {
+    public static final void setHttpProxySystemProperty(ProxyInfo p) {
         String host = null;
         String port = null;
         String exclList = null;
@@ -283,8 +277,8 @@ public final class Proxy {
         if (p != null) {
             host = p.getHost();
             port = Integer.toString(p.getPort());
-            exclList = p.getExclusionList();
-            pacFileUrl = p.getPacFileUrl();
+            exclList = p.getExclusionListAsString();
+            pacFileUrl = p.getPacFileUrl().toString();
         }
         setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
     }

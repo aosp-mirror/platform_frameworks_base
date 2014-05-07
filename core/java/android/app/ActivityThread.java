@@ -46,7 +46,7 @@ import android.graphics.Canvas;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -4294,8 +4294,8 @@ public final class ActivityThread {
             // crash if we can't get it.
             IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
             try {
-                ProxyProperties proxyProperties = service.getProxy();
-                Proxy.setHttpProxySystemProperty(proxyProperties);
+                ProxyInfo proxyInfo = service.getProxy();
+                Proxy.setHttpProxySystemProperty(proxyInfo);
             } catch (RemoteException e) {}
         }
 

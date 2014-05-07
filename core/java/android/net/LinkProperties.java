@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.net.ProxyProperties;
+import android.net.ProxyInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.text.TextUtils;
@@ -65,7 +65,7 @@ public class LinkProperties implements Parcelable {
     private ArrayList<InetAddress> mDnses = new ArrayList<InetAddress>();
     private String mDomains;
     private ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
-    private ProxyProperties mHttpProxy;
+    private ProxyInfo mHttpProxy;
     private int mMtu;
 
     // Stores the properties of links that are "stacked" above this link.
@@ -101,7 +101,7 @@ public class LinkProperties implements Parcelable {
             mDomains = source.getDomains();
             for (RouteInfo r : source.getRoutes()) mRoutes.add(r);
             mHttpProxy = (source.getHttpProxy() == null)  ?
-                    null : new ProxyProperties(source.getHttpProxy());
+                    null : new ProxyInfo(source.getHttpProxy());
             for (LinkProperties l: source.mStackedLinks.values()) {
                 addStackedLink(l);
             }
@@ -295,10 +295,10 @@ public class LinkProperties implements Parcelable {
         return routes;
     }
 
-    public void setHttpProxy(ProxyProperties proxy) {
+    public void setHttpProxy(ProxyInfo proxy) {
         mHttpProxy = proxy;
     }
-    public ProxyProperties getHttpProxy() {
+    public ProxyInfo getHttpProxy() {
         return mHttpProxy;
     }
 
@@ -720,7 +720,7 @@ public class LinkProperties implements Parcelable {
                     netProp.addRoute((RouteInfo)in.readParcelable(null));
                 }
                 if (in.readByte() == 1) {
-                    netProp.setHttpProxy((ProxyProperties)in.readParcelable(null));
+                    netProp.setHttpProxy((ProxyInfo)in.readParcelable(null));
                 }
                 ArrayList<LinkProperties> stackedLinks = new ArrayList<LinkProperties>();
                 in.readList(stackedLinks, LinkProperties.class.getClassLoader());
