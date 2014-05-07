@@ -92,6 +92,8 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -105,13 +107,15 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
+import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.LocationControllerImpl;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
+import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
@@ -180,12 +184,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     PhoneStatusBarPolicy mIconPolicy;
 
     // These are no longer handled by the policy, because we need custom strategies for them
-    BluetoothController mBluetoothController;
+    BluetoothControllerImpl mBluetoothController;
     BatteryController mBatteryController;
-    LocationController mLocationController;
-    NetworkController mNetworkController;
-    RotationLockController mRotationLockController;
+    LocationControllerImpl mLocationController;
+    NetworkControllerImpl mNetworkController;
+    RotationLockControllerImpl mRotationLockController;
     UserInfoController mUserInfoController;
+    ZenModeControllerImpl mZenModeController;
+    CastControllerImpl mCastController;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -226,9 +232,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     TextView mNotificationPanelDebugText;
 
     // settings
-    QuickSettings mQS;
     View mFlipSettingsView;
-    QuickSettingsContainerView mSettingsContainer;
+    private QSPanel mQSPanel;
 
     // top bar
     StatusBarHeaderView mHeader;
@@ -660,15 +665,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setAreThereNotifications();
 
         // Other icons
-        mLocationController = new LocationController(mContext); // will post a notification
+        mLocationController = new LocationControllerImpl(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
-        mNetworkController = new NetworkController(mContext);
-        mBluetoothController = new BluetoothController(mContext);
-        if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)
-                || QuickSettings.DEBUG_GONE_TILES) {
-            mRotationLockController = new RotationLockController(mContext);
+        mNetworkController = new NetworkControllerImpl(mContext);
+        mBluetoothController = new BluetoothControllerImpl(mContext);
+        if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)) {
+            mRotationLockController = new RotationLockControllerImpl(mContext);
         }
         mUserInfoController = new UserInfoController(mContext);
+        mZenModeController = new ZenModeControllerImpl(mContext, mHandler);
+        mCastController = new CastControllerImpl(mContext);
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
 
@@ -717,18 +723,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 //                    updateCarrierLabelVisibility(false);
         }
 
-        // Quick Settings needs a container to survive
-        mSettingsContainer = (QuickSettingsContainerView)
-                mStatusBarWindow.findViewById(R.id.quick_settings_container);
-        mFlipSettingsView = mSettingsContainer;
-        if (mSettingsContainer != null) {
-            mQS = new QuickSettings(mContext, mSettingsContainer);
-            mQS.setService(this);
-            mQS.setBar(mStatusBarView);
-            mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
-                    mLocationController, mRotationLockController);
-        } else {
-            mQS = null; // fly away, be free
+        // Set up the quick settings tile panel
+        mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
+        if (mQSPanel != null) {
+            final QSTileHost qsh = new QSTileHost(mContext, this,
+                    mBluetoothController, mLocationController, mRotationLockController,
+                    mNetworkController, mZenModeController, null /*tethering*/,
+                    mCastController);
+            for (QSTile<?> tile : qsh.getTiles()) {
+                mQSPanel.addTile(tile);
+            }
+            mHeader.setQSPanel(mQSPanel);
         }
 
         // User info. Trigger first load.
@@ -1471,7 +1476,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    public Handler getHandler() {
+    private Handler getHandler() {
         return mHandler;
     }
 
@@ -1512,6 +1517,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void animateCollapsePanels() {
         animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+    }
+
+    private final Runnable mAnimateCollapsePanels = new Runnable() {
+        @Override
+        public void run() {
+            animateCollapsePanels();
+        }
+    };
+
+    public void postAnimateCollapsePanels() {
+        mHandler.post(mAnimateCollapsePanels);
     }
 
     public void animateCollapsePanels(int flags) {
@@ -1591,7 +1607,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     final int FLIP_DURATION_IN = 225;
     final int FLIP_DURATION = (FLIP_DURATION_IN + FLIP_DURATION_OUT);
 
-    Animator mScrollViewAnim, mFlipSettingsViewAnim, mClearButtonAnim;
+    Animator mScrollViewAnim, mClearButtonAnim;
 
     @Override
     public void animateExpandNotificationsPanel() {
@@ -1662,7 +1678,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView.collapseAllPanels(/*animate=*/ false);
 
         // reset things to their proper state
-        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
@@ -1984,7 +1999,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         setNavigationIconHints(flags);
-        if (mQS != null) mQS.setImeWindowStatus(vis > 0);
     }
 
     @Override
@@ -2383,11 +2397,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * meantime, just update the things that we know change.
      */
     void updateResources() {
-        final Context context = mContext;
-        final Resources res = context.getResources();
-
-        // Update the QuickSettings container
-        if (mQS != null) mQS.updateResources();
+        // Update the quick setting tiles
+        if (mQSPanel != null) mQSPanel.updateResources();
 
         loadDimens();
     }
@@ -2546,10 +2557,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
-    public void startSettingsActivity(String action) {
-        if (mQS != null) {
-            mQS.startSettingsActivity(action);
+    public void postStartSettingsActivity(final Intent intent) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleStartSettingsActivity(intent, true /*onlyProvisioned*/);
+            }
+        });
+    }
+
+    private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
+        if (onlyProvisioned && !isDeviceProvisioned()) return;
+        try {
+            // Dismiss the lock screen when Settings starts.
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+        } catch (RemoteException e) {
         }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        animateCollapsePanels();
+    }
+
+    public void startSettingsActivity(String action) {
+        postStartSettingsActivity(new Intent(action));
     }
 
     private static class FastColorDrawable extends Drawable {
@@ -2711,7 +2741,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);
         }
-        mSettingsContainer.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mHeader.setKeyguardShowing(true);

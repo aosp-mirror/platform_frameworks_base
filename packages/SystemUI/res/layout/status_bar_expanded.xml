@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <include
-                    layout="@layout/flip_settings"
+                    layout="@layout/qs_panel"
                     android:layout_marginTop="@dimen/status_bar_header_height_expanded"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

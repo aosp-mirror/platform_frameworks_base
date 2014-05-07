@@ -503,9 +503,15 @@
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
     <!-- QuickSettings: Label for the toggle that controls whether display inversion is enabled. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_inversion_label">Color inversion mode</string>
+    <string name="quick_settings_inversion_label">Invert colors</string>
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_color_space_label">Color correction mode</string>
+    <!-- QuickSettings: Control panel: Label for button that navigates to settings. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_more_settings">More settings</string>
+    <!-- QuickSettings: Tethering. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_tethering_label">Tethering</string>
+    <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hotspot_label">Hotspot</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">RECENTS</string>
