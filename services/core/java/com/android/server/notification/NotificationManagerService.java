@@ -715,6 +715,22 @@ public class NotificationManagerService extends SystemService {
             EventLogTags.writeNotificationVisibilityChanged(
                     TextUtils.join(";", newlyVisibleKeys),
                     TextUtils.join(";", noLongerVisibleKeys));
+            synchronized (mNotificationList) {
+                for (String key : newlyVisibleKeys) {
+                    NotificationRecord r = mNotificationsByKey.get(key);
+                    if (r == null) continue;
+                    r.stats.onVisibilityChanged(true);
+                }
+                // Note that we might receive this event after notifications
+                // have already left the system, e.g. after dismissing from the
+                // shade. Hence not finding notifications in
+                // mNotificationsByKey is not an exceptional condition.
+                for (String key : noLongerVisibleKeys) {
+                    NotificationRecord r = mNotificationsByKey.get(key);
+                    if (r == null) continue;
+                    r.stats.onVisibilityChanged(false);
+                }
+            }
         }
     };
 
