@@ -516,7 +516,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                if (getChildCount() == 0) {
+                if (getChildCount() == 0 || !isInContentBounds(ev)) {
                     return false;
                 }
                 boolean isBeingDragged = !mScroller.isFinished();
@@ -1138,6 +1138,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         * drag mode.
         */
         return mIsBeingDragged;
+    }
+
+    /**
+     * @return Whether the specified motion event is actually happening over the content.
+     */
+    private boolean isInContentBounds(MotionEvent event) {
+        return event.getY() < getHeight() - getEmptyBottomMargin();
     }
 
     private void setIsBeingDragged(boolean isDragged) {
