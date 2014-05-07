@@ -187,7 +187,7 @@ class MountService extends IMountService.Stub
         public static final int FstrimCompleted                = 700;
     }
 
-    private Context mContext;
+    private final Context mContext;
     private NativeDaemonConnector mConnector;
 
     private final Object mVolumesLock = new Object();
