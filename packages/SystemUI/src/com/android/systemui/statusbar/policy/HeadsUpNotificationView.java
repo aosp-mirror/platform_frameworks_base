@@ -237,6 +237,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     @Override
+    public void onChildSnappedBack(View animView) {
+    }
+
+    @Override
     public View getChildAtPosition(MotionEvent ev) {
         return mContentHolder;
     }

@@ -93,6 +93,7 @@ public class StackScrollState {
         int numChildren = mHostView.getChildCount();
         float previousNotificationEnd = 0;
         float previousNotificationStart = 0;
+        boolean previousNotificationIsSwiped = false;
         for (int i = 0; i < numChildren; i++) {
             ExpandableView child = (ExpandableView) mHostView.getChildAt(i);
             ViewState state = mStateMap.get(child);
@@ -153,12 +154,20 @@ public class StackScrollState {
 
                 // apply clipping and shadow
                 float newNotificationEnd = newYTranslation + newHeight;
+
+                // When the previous notification is swiped, we don't clip the content to the
+                // bottom of it.
+                float clipHeight = previousNotificationIsSwiped
+                        ? newHeight
+                        : newNotificationEnd - (previousNotificationEnd);
+
                 updateChildClippingAndBackground(child, newHeight,
-                        newNotificationEnd - (previousNotificationEnd),
+                        clipHeight,
                         (int) (newHeight - (previousNotificationStart - newYTranslation)));
 
-                previousNotificationStart = newYTranslation;
+                previousNotificationStart = newYTranslation + child.getClipTopAmount();
                 previousNotificationEnd = newNotificationEnd;
+                previousNotificationIsSwiped = child.getTranslationX() != 0;
             }
         }
     }

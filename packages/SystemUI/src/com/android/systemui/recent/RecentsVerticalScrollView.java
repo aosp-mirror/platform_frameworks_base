@@ -225,6 +225,10 @@ public class RecentsVerticalScrollView extends ScrollView
     public void onDragCancelled(View v) {
     }
 
+    @Override
+    public void onChildSnappedBack(View animView) {
+    }
+
     public View getChildAtPosition(MotionEvent ev) {
         final float x = ev.getX() + getScrollX();
         final float y = ev.getY() + getScrollY();
