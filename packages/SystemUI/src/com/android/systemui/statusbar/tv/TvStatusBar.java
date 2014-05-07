@@ -78,7 +78,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
     }
 
     @Override

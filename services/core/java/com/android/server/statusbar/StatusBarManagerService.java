@@ -74,6 +74,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     private boolean mMenuVisible = false;
     private int mImeWindowVis = 0;
     private int mImeBackDisposition;
+    private boolean mShowImeSwitcher;
     private IBinder mImeToken = null;
     private int mCurrentUserId;
 
@@ -346,7 +347,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
-    public void setImeWindowStatus(final IBinder token, final int vis, final int backDisposition) {
+    public void setImeWindowStatus(final IBinder token, final int vis, final int backDisposition,
+            final boolean showImeSwitcher) {
         enforceStatusBar();
 
         if (SPEW) {
@@ -360,11 +362,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             mImeWindowVis = vis;
             mImeBackDisposition = backDisposition;
             mImeToken = token;
+            mShowImeSwitcher = showImeSwitcher;
             mHandler.post(new Runnable() {
                 public void run() {
                     if (mBar != null) {
                         try {
-                            mBar.setImeWindowStatus(token, vis, backDisposition);
+                            mBar.setImeWindowStatus(token, vis, backDisposition, showImeSwitcher);
                         } catch (RemoteException ex) {
                         }
                     }
@@ -512,6 +515,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             switches[2] = mMenuVisible ? 1 : 0;
             switches[3] = mImeWindowVis;
             switches[4] = mImeBackDisposition;
+            switches[7] = mShowImeSwitcher ? 1 : 0;
             binders.add(mImeToken);
         }
         switches[5] = mWindowManager.isHardKeyboardAvailable() ? 1 : 0;
