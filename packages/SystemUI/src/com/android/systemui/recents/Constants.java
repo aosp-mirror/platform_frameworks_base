@@ -91,11 +91,8 @@ public class Constants {
             public static final int TaskStackOverscrollRange = 150;
             public static final int FilterStartDelay = 25;
 
-            // The amount to inverse scale the movement if we are overscrolling
-            public static final float TouchOverscrollScaleFactor = 3f;
-
             // The padding will be applied to the smallest dimension, and then applied to all sides
-            public static final float StackPaddingPct = 0.15f;
+            public static final float StackPaddingPct = 0.1f;
             // The overlap height relative to the task height
             public static final float StackOverlapPct = 0.65f;
             // The height of the peek space relative to the stack height
