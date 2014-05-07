@@ -18,6 +18,7 @@
 package android.app.admin;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.RemoteCallback;
@@ -122,4 +123,7 @@ interface IDevicePolicyManager {
     void setUserRestriction(in ComponentName who, in String key, boolean enable);
     void addForwardingIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearForwardingIntentFilters(in ComponentName admin);
+
+    void enableSystemApp(in ComponentName admin, in String packageName);
+    int enableSystemAppWithIntent(in ComponentName admin, in Intent intent);
 }
