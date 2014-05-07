@@ -4573,6 +4573,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (invalidate) {
             invalidateViewProperty(false, false);
         }
+        notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     /**
