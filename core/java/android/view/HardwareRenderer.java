@@ -423,28 +423,6 @@ public abstract class HardwareRenderer {
     abstract boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap);
 
     /**
-     * Detaches the specified functor from the current functor execution queue.
-     *
-     * @param functor The native functor to remove from the execution queue.
-     *
-     * @see HardwareCanvas#callDrawGLFunction(int)
-     * @see #attachFunctor(android.view.View.AttachInfo, long)
-     */
-    abstract void detachFunctor(long functor);
-
-    /**
-     * Schedules the specified functor in the functors execution queue.
-     *
-     * @param attachInfo AttachInfo tied to this renderer.
-     * @param functor The native functor to insert in the execution queue.
-     *
-     * @see HardwareCanvas#callDrawGLFunction(int)
-     * @see #detachFunctor(long)
-     *
-     */
-    abstract void attachFunctor(View.AttachInfo attachInfo, long functor);
-
-    /**
      * Schedules the functor for execution in either kModeProcess or
      * kModeProcessNoContext, depending on whether or not there is an EGLContext.
      *

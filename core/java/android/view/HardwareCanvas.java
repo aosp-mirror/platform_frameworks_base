@@ -111,45 +111,6 @@ public abstract class HardwareCanvas extends Canvas {
     }
 
     /**
-     * Invoke all the functors who requested to be invoked during the previous frame.
-     *
-     * @param dirty Ignored
-     *
-     * @return Ignored
-     *
-     * @hide
-     */
-    public int invokeFunctors(Rect dirty) {
-        return RenderNode.STATUS_DONE;
-    }
-
-    /**
-     * Detaches the specified functor from the current functor execution queue.
-     *
-     * @param functor The native functor to remove from the execution queue.
-     *
-     * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
-     *
-     * @hide
-     */
-    abstract void detachFunctor(long functor);
-
-    /**
-     * Attaches the specified functor to the current functor execution queue.
-     *
-     * @param functor The native functor to add to the execution queue.
-     *
-     * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
-     *
-     * @hide
-     */
-    abstract void attachFunctor(long functor);
-
-    /**
      * Indicates that the specified layer must be updated as soon as possible.
      *
      * @param layer The layer to update
