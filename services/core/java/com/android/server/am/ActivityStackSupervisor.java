@@ -193,6 +193,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Used on user changes */
     final ArrayList<UserStartedState> mStartingUsers = new ArrayList<UserStartedState>();
 
+    /** Used to queue up any background users being started */
+    final ArrayList<UserStartedState> mStartingBackgroundUsers = new ArrayList<UserStartedState>();
+
     /** Set to indicate whether to issue an onUserLeaving callback when a newly launched activity
      * is being brought in front of us. */
     boolean mUserLeaving = false;
@@ -1988,9 +1991,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if (booting) {
             mService.finishBooting();
-        } else if (startingUsers != null) {
-            for (int i = 0; i < startingUsers.size(); i++) {
-                mService.finishUserSwitch(startingUsers.get(i));
+        } else {
+            // Complete user switch
+            if (startingUsers != null) {
+                for (int i = 0; i < startingUsers.size(); i++) {
+                    mService.finishUserSwitch(startingUsers.get(i));
+                }
+            }
+            // Complete starting up of background users
+            if (mStartingBackgroundUsers.size() > 0) {
+                startingUsers = new ArrayList<UserStartedState>(mStartingBackgroundUsers);
+                mStartingBackgroundUsers.clear();
+                for (int i = 0; i < startingUsers.size(); i++) {
+                    mService.finishUserBoot(startingUsers.get(i));
+                }
             }
         }
 
@@ -2494,6 +2508,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             resumeHomeActivity(null);
         }
         return homeInFront;
+    }
+
+    /**
+     * Add background users to send boot completed events to.
+     * @param userId The user being started in the background
+     * @param uss The state object for the user.
+     */
+    public void startBackgroundUserLocked(int userId, UserStartedState uss) {
+        mStartingBackgroundUsers.add(uss);
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {

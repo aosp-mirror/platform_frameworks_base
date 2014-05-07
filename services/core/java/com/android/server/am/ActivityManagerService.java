@@ -16523,7 +16523,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
-                    if (userId != 0) {
+                    if (userId != UserHandle.USER_OWNER) {
                         Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
@@ -16552,6 +16552,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     EventLogTags.writeAmSwitchUser(userId);
                     getUserManagerLocked().userForeground(userId);
                     sendUserSwitchBroadcastsLocked(oldUserId, userId);
+                } else {
+                    mStackSupervisor.startBackgroundUserLocked(userId, uss);
                 }
 
                 if (needStart) {
@@ -16727,7 +16729,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void finishUserSwitch(UserStartedState uss) {
+    void finishUserBoot(UserStartedState uss) {
         synchronized (this) {
             if (uss.mState == UserStartedState.STATE_BOOTING
                     && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
@@ -16741,6 +16743,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED, AppOpsManager.OP_NONE,
                         true, false, MY_PID, Process.SYSTEM_UID, userId);
             }
+        }
+    }
+
+    void finishUserSwitch(UserStartedState uss) {
+        synchronized (this) {
+            finishUserBoot(uss);
 
             startProfilesLocked();
 
