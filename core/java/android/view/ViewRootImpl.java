@@ -710,12 +710,15 @@ public final class ViewRootImpl implements ViewParent,
 
             if (!HardwareRenderer.sRendererDisabled || (HardwareRenderer.sSystemRendererDisabled
                     && forceHwAccelerated)) {
-                // Don't enable hardware acceleration when we're not on the main thread
-                if (!HardwareRenderer.sSystemRendererDisabled &&
-                        Looper.getMainLooper() != Looper.myLooper()) {
-                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
-                            + "acceleration outside of the main thread, aborting");
-                    return;
+                if (!HardwareRenderer.sUseRenderThread) {
+                    // TODO: Delete
+                    // Don't enable hardware acceleration when we're not on the main thread
+                    if (!HardwareRenderer.sSystemRendererDisabled &&
+                            Looper.getMainLooper() != Looper.myLooper()) {
+                        Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
+                                + "acceleration outside of the main thread, aborting");
+                        return;
+                    }
                 }
 
                 if (mAttachInfo.mHardwareRenderer != null) {
