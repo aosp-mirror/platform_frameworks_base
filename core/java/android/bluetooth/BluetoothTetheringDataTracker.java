@@ -53,6 +53,9 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
     private static final boolean DBG = true;
     private static final boolean VDBG = true;
 
+    // Event sent to the mBtdtHandler when DHCP fails so we can tear down the network.
+    private static final int EVENT_NETWORK_FAILED = 1;
+
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
     private AtomicInteger mDefaultGatewayAddr = new AtomicInteger(0);
@@ -315,6 +318,7 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
                     }
                     if (!success) {
                         Log.e(TAG, "DHCP request error:" + NetworkUtils.getDhcpError());
+                        mBtdtHandler.obtainMessage(EVENT_NETWORK_FAILED).sendToTarget();
                         return;
                     }
                     mLinkProperties = dhcpResults.linkProperties;
@@ -406,6 +410,10 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
                     linkProperties = (LinkProperties)(msg.obj);
                     if (VDBG) Log.d(TAG, "got EVENT_NETWORK_DISCONNECTED, " + linkProperties);
                     mBtdt.stopReverseTether();
+                    break;
+                case EVENT_NETWORK_FAILED:
+                    if (VDBG) Log.d(TAG, "got EVENT_NETWORK_FAILED");
+                    mBtdt.teardown();
                     break;
             }
         }
