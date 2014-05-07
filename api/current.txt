@@ -314,6 +314,7 @@ package android {
     field public static final int autoCompleteTextViewStyle = 16842859; // 0x101006b
     field public static final int autoLink = 16842928; // 0x10100b0
     field public static final int autoMirrored = 16843754; // 0x10103ea
+    field public static final int autoRemoveFromRecents = 16843858; // 0x1010452
     field public static final int autoStart = 16843445; // 0x10102b5
     field public static final deprecated int autoText = 16843114; // 0x101016a
     field public static final int autoUrlDetect = 16843404; // 0x101028c
@@ -463,6 +464,7 @@ package android {
     field public static final int dividerHorizontal = 16843564; // 0x101032c
     field public static final int dividerPadding = 16843562; // 0x101032a
     field public static final int dividerVertical = 16843530; // 0x101030a
+    field public static final int documentLaunchMode = 16843857; // 0x1010451
     field public static final int drawSelectorOnTop = 16843004; // 0x10100fc
     field public static final int drawable = 16843161; // 0x1010199
     field public static final int drawableBottom = 16843118; // 0x101016e
@@ -7150,6 +7152,7 @@ package android.content {
     field public static final int FILL_IN_PACKAGE = 16; // 0x10
     field public static final int FILL_IN_SELECTOR = 64; // 0x40
     field public static final int FILL_IN_SOURCE_BOUNDS = 32; // 0x20
+    field public static final int FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_BROUGHT_TO_FRONT = 4194304; // 0x400000
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
@@ -7668,8 +7671,12 @@ package android.content.pm {
     field public static final int CONFIG_TOUCHSCREEN = 8; // 0x8
     field public static final int CONFIG_UI_MODE = 512; // 0x200
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int DOCUMENT_LAUNCH_ALWAYS = 2; // 0x2
+    field public static final int DOCUMENT_LAUNCH_INTO_EXISTING = 1; // 0x1
+    field public static final int DOCUMENT_LAUNCH_NONE = 0; // 0x0
     field public static final int FLAG_ALLOW_TASK_REPARENTING = 64; // 0x40
     field public static final int FLAG_ALWAYS_RETAIN_TASK_STATE = 8; // 0x8
+    field public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 8192; // 0x2000
     field public static final int FLAG_CLEAR_TASK_ON_LAUNCH = 4; // 0x4
     field public static final int FLAG_EXCLUDE_FROM_RECENTS = 32; // 0x20
     field public static final int FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS = 256; // 0x100
@@ -7678,6 +7685,7 @@ package android.content.pm {
     field public static final int FLAG_IMMERSIVE = 2048; // 0x800
     field public static final int FLAG_MULTIPROCESS = 1; // 0x1
     field public static final int FLAG_NO_HISTORY = 128; // 0x80
+    field public static final int FLAG_PERSISTABLE = 4096; // 0x1000
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0
@@ -7702,6 +7710,7 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12; // 0xc
     field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
     field public int configChanges;
+    field public int documentLaunchMode;
     field public int flags;
     field public int launchMode;
     field public java.lang.String parentActivityName;
