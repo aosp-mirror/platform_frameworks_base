@@ -1906,36 +1906,6 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Rational[]>("android.sensor.neutralColorPoint", Rational[].class);
 
     /**
-     * <p>A mapping containing a hue shift, saturation scale, and value scale
-     * for each pixel.</p>
-     * <p>hue_samples, saturation_samples, and value_samples are given in
-     * {@link CameraCharacteristics#SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS android.sensor.profileHueSatMapDimensions}.</p>
-     * <p>Each entry of this map contains three floats corresponding to the
-     * hue shift, saturation scale, and value scale, respectively; where the
-     * hue shift has the lowest index. The map entries are stored in the tag
-     * in nested loop order, with the value divisions in the outer loop, the
-     * hue divisions in the middle loop, and the saturation divisions in the
-     * inner loop. All zero input saturation entries are required to have a
-     * value scale factor of 1.0.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     *
-     * @see CameraCharacteristics#SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS
-     */
-    public static final Key<float[]> SENSOR_PROFILE_HUE_SAT_MAP =
-            new Key<float[]>("android.sensor.profileHueSatMap", float[].class);
-
-    /**
-     * <p>A list of x,y samples defining a tone-mapping curve for gamma adjustment.</p>
-     * <p>This tag contains a default tone curve that can be applied while
-     * processing the image as a starting point for user adjustments.
-     * The curve is specified as a list of value pairs in linear gamma.
-     * The curve is interpolated using a cubic spline.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     */
-    public static final Key<float[]> SENSOR_PROFILE_TONE_CURVE =
-            new Key<float[]>("android.sensor.profileToneCurve", float[].class);
-
-    /**
      * <p>The worst-case divergence between Bayer green channels.</p>
      * <p>This value is an estimate of the worst case split between the
      * Bayer green channels in the red and blue rows in the sensor color
