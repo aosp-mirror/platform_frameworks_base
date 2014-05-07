@@ -100,7 +100,6 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Graphics.cpp \
 	android/graphics/HarfBuzzNGFaceSkia.cpp \
 	android/graphics/Interpolator.cpp \
-	android/graphics/LayerRasterizer.cpp \
 	android/graphics/MaskFilter.cpp \
 	android/graphics/Matrix.cpp \
 	android/graphics/Movie.cpp \

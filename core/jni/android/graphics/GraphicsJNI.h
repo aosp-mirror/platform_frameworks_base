@@ -52,6 +52,10 @@ public:
     static SkPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
+    // Given the 'native' long held by the Rasterizer.java object, return a
+    // ref to its SkRasterizer* (or NULL).
+    static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
+
     /** Return the corresponding native config from the java Config enum,
         or kNo_Config if the java object is null.
     */
