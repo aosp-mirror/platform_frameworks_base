@@ -486,10 +486,7 @@ void CanvasContext::invokeFunctor(Functor* functor) {
         requireGlContext();
         mode = DrawGlInfo::kModeProcess;
     }
-    // TODO: Remove the dummy info in the future
-    DrawGlInfo dummyInfo;
-    memset(&dummyInfo, 0, sizeof(DrawGlInfo));
-    (*functor)(mode, &dummyInfo);
+    (*functor)(mode, NULL);
 
     if (mCanvas) {
         mCanvas->resume();

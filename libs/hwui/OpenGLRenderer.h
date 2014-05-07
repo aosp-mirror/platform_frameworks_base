@@ -151,9 +151,6 @@ public:
         return mCountOverdraw ? mOverdraw : 0.0f;
     }
 
-    ANDROID_API status_t invokeFunctors(Rect& dirty);
-    ANDROID_API void detachFunctor(Functor* functor);
-    ANDROID_API void attachFunctor(Functor* functor);
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     ANDROID_API void pushLayerUpdate(Layer* layer);
@@ -959,8 +956,6 @@ private:
 
     // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;
-    // List of functors to invoke after a frame is drawn
-    SortedVector<Functor*> mFunctors;
     // List of layers to update at the beginning of a frame
     Vector<Layer*> mLayerUpdates;
 

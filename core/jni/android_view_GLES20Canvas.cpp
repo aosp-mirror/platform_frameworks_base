@@ -206,32 +206,6 @@ static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject cl
     return renderer->callDrawGLFunction(functor, dirty);
 }
 
-static void android_view_GLES20Canvas_detachFunctor(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong functorPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    renderer->detachFunctor(functor);
-}
-
-static void android_view_GLES20Canvas_attachFunctor(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong functorPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    renderer->attachFunctor(functor);
-}
-
-static jint android_view_GLES20Canvas_invokeFunctors(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jobject dirty) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    android::uirenderer::Rect bounds;
-    status_t status = renderer->invokeFunctors(bounds);
-    if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
-        env->CallVoidMethod(dirty, gRectClassInfo.set,
-                int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
-    }
-    return status;
-}
-
 // ----------------------------------------------------------------------------
 // Misc
 // ----------------------------------------------------------------------------
@@ -1007,10 +981,6 @@ static JNINativeMethod gMethods[] = {
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
     { "nCallDrawGLFunction", "(JJ)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
-    { "nDetachFunctor",      "(JJ)V",          (void*) android_view_GLES20Canvas_detachFunctor },
-    { "nAttachFunctor",      "(JJ)V",          (void*) android_view_GLES20Canvas_attachFunctor },
-    { "nInvokeFunctors",     "(JLandroid/graphics/Rect;)I",
-            (void*) android_view_GLES20Canvas_invokeFunctors },
 
     { "nSave",              "(JI)I",           (void*) android_view_GLES20Canvas_save },
     { "nRestore",           "(J)V",            (void*) android_view_GLES20Canvas_restore },

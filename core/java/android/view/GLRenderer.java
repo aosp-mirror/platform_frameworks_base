@@ -168,7 +168,6 @@ public class GLRenderer extends HardwareRenderer {
     private final Rect mRedrawClip = new Rect();
 
     private final int[] mSurfaceSize = new int[2];
-    private final FunctorsRunnable mFunctorsRunnable = new FunctorsRunnable();
 
     private long mDrawDelta = Long.MAX_VALUE;
 
@@ -1116,22 +1115,6 @@ public class GLRenderer extends HardwareRenderer {
         mName = name;
     }
 
-    class FunctorsRunnable implements Runnable {
-        View.AttachInfo attachInfo;
-
-        @Override
-        public void run() {
-            final HardwareRenderer renderer = attachInfo.mHardwareRenderer;
-            if (renderer == null || !renderer.isEnabled() || renderer != GLRenderer.this) {
-                return;
-            }
-
-            if (checkRenderContext() != SURFACE_STATE_ERROR) {
-                mCanvas.invokeFunctors(mRedrawClip);
-            }
-        }
-    }
-
     @Override
     void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
             Rect dirty) {
@@ -1363,23 +1346,6 @@ public class GLRenderer extends HardwareRenderer {
             if (dirty != null && (mFrameCount & 1) == 0) {
                 canvas.drawRect(dirty, mDebugPaint);
             }
-        }
-    }
-
-    @Override
-    void detachFunctor(long functor) {
-        if (mCanvas != null) {
-            mCanvas.detachFunctor(functor);
-        }
-    }
-
-    @Override
-    void attachFunctor(View.AttachInfo attachInfo, long functor) {
-        if (mCanvas != null) {
-            mCanvas.attachFunctor(functor);
-            mFunctorsRunnable.attachInfo = attachInfo;
-            attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
-            attachInfo.mHandler.postDelayed(mFunctorsRunnable,  0);
         }
     }
 

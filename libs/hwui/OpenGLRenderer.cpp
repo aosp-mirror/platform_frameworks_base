@@ -379,48 +379,8 @@ void OpenGLRenderer::resumeAfterLayer() {
     dirtyClip();
 }
 
-void OpenGLRenderer::detachFunctor(Functor* functor) {
-    mFunctors.remove(functor);
-}
-
-void OpenGLRenderer::attachFunctor(Functor* functor) {
-    mFunctors.add(functor);
-}
-
-status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
-    status_t result = DrawGlInfo::kStatusDone;
-    size_t count = mFunctors.size();
-
-    if (count > 0) {
-        interrupt();
-        SortedVector<Functor*> functors(mFunctors);
-        mFunctors.clear();
-
-        DrawGlInfo info;
-        info.clipLeft = 0;
-        info.clipTop = 0;
-        info.clipRight = 0;
-        info.clipBottom = 0;
-        info.isLayer = false;
-        info.width = 0;
-        info.height = 0;
-        memset(info.transform, 0, sizeof(float) * 16);
-
-        for (size_t i = 0; i < count; i++) {
-            Functor* f = functors.itemAt(i);
-            result |= (*f)(DrawGlInfo::kModeProcess, &info);
-        }
-        resume();
-    }
-
-    return result;
-}
-
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
-
-    detachFunctor(functor);
-
 
     Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();

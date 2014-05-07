@@ -215,16 +215,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void detachFunctor(long functor) {
-        // no-op, we never attach functors to need to detach them
-    }
-
-    @Override
-    void attachFunctor(AttachInfo attachInfo, long functor) {
-        invokeFunctor(functor, true);
-    }
-
-    @Override
     void invokeFunctor(long functor, boolean waitForCompletion) {
         nInvokeFunctor(mNativeProxy, functor, waitForCompletion);
     }
