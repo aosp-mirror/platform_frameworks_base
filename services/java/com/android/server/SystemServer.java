@@ -73,6 +73,7 @@ import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.os.SchedulingPolicyService;
+import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.PackageManagerService;
@@ -961,6 +962,13 @@ public final class SystemServer {
                     mSystemServiceManager.startService(TrustManagerService.class);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting TrustManagerService", e);
+                }
+
+                try {
+                    Slog.i(TAG, "BackgroundDexOptService");
+                    new BackgroundDexOptService(context);
+                } catch (Throwable e) {
+                    reportWtf("starting BackgroundDexOptService", e);
                 }
             }
 

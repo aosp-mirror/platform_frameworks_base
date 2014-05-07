@@ -201,8 +201,8 @@ class MountService extends IMountService.Stub
     public static final String[] CRYPTO_TYPES
         = { "password", "default", "pattern", "pin" };
 
-    private Context mContext;
-    private NativeDaemonConnector mConnector;
+    private final Context mContext;
+    private final NativeDaemonConnector mConnector;
 
     private final Object mVolumesLock = new Object();
 
