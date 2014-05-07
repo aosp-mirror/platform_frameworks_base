@@ -349,6 +349,8 @@ void CanvasContext::setSurface(EGLNativeWindowType window) {
         mDirtyRegionsEnabled = mGlobalContext->enableDirtyRegions(mEglSurface);
         mHaveNewSurface = true;
         makeCurrent();
+    } else {
+        mRenderThread.removeFrameCallback(this);
     }
 }
 
@@ -468,6 +470,10 @@ void CanvasContext::draw(Rect* dirty) {
 
 // Called by choreographer to do an RT-driven animation
 void CanvasContext::doFrame() {
+    if (CC_UNLIKELY(!mCanvas || mEglSurface == EGL_NO_SURFACE)) {
+        return;
+    }
+
     ATRACE_CALL();
 
     TreeInfo info;
