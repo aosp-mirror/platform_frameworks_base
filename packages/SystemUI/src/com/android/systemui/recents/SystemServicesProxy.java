@@ -180,7 +180,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
         if (mIpm == null) return null;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return new ActivityInfo();
 
         try {
             return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
@@ -197,7 +197,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn) {
         if (mPm == null) return null;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return new ActivityInfo();
 
         try {
             return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);

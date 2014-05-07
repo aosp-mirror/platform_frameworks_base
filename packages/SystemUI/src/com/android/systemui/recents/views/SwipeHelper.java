@@ -178,7 +178,7 @@ public class SwipeHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Console.log(Constants.DebugFlags.UI.TouchEvents,
+        Console.log(Constants.Log.UI.TouchEvents,
                 "[SwipeHelper|interceptTouchEvent]",
                 Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
         final int action = ev.getAction();
@@ -291,7 +291,7 @@ public class SwipeHelper {
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
-        Console.log(Constants.DebugFlags.UI.TouchEvents,
+        Console.log(Constants.Log.UI.TouchEvents,
                 "[SwipeHelper|touchEvent]",
                 Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
 

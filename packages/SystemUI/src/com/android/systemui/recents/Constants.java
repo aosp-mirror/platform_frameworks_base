@@ -18,7 +18,6 @@ package com.android.systemui.recents;
 
 /**
  * Constants
- * XXX: We are going to move almost all of these into a resource.
  */
 public class Constants {
     public static class DebugFlags {
@@ -26,12 +25,18 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
+            // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
+            // Enables clipping of tasks against each other
             public static final boolean EnableTaskStackClipping = false;
+            // Enables the use of theme colors as the task bar background
             public static final boolean EnableTaskBarThemeColors = true;
+            // Enables the info pane on long-press
             public static final boolean EnableInfoPane = true;
-            public static final boolean EnableSearchButton = true;
-
+            // Enables the search bar layout
+            public static final boolean EnableSearchLayout = true;
+            // Enables the dynamic shadows behind each task
+            public static final boolean EnableShadows = false;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // For debugging, this enables us to create mock recents tasks
@@ -40,8 +45,11 @@ public class Constants {
             public static final int SystemServicesProxyMockPackageCount = 3;
             // For debugging, this defines the number of mock recents tasks to create
             public static final int SystemServicesProxyMockTaskCount = 75;
+        }
+    }
 
-            // Timing certain paths
+    public static class Log {
+        public static class App {
             public static final String TimeRecentsStartupKey = "startup";
             public static final String TimeRecentsLaunchKey = "launchTask";
             public static final boolean TimeRecentsStartup = false;
@@ -72,6 +80,7 @@ public class Constants {
         }
     }
 
+    /** XXX: We are going to move almost all of these into a resource once they are nailed down. */
     public static class Values {
         public static class App {
             public static int AppWidgetHostId = 1024;
@@ -101,11 +110,6 @@ public class Constants {
             public static final float StackPeekMinScale = 0.9f;
             // The number of cards we see in the peek space
             public static final int StackPeekNumCards = 3;
-        }
-
-        public static class TaskView {
-            public static final boolean AnimateFrontTaskBarOnEnterRecents = true;
-            public static final boolean AnimateFrontTaskBarOnLeavingRecents = true;
         }
     }
 }

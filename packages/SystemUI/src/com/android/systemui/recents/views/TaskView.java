@@ -146,13 +146,17 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         if (duration > 0) {
             if (animateFromTransform != null) {
                 setTranslationY(animateFromTransform.translationY);
-                setTranslationZ(Math.max(minZ, minZ + (animateFromTransform.t * incZ)));
+                if (Constants.DebugFlags.App.EnableShadows) {
+                    setTranslationZ(Math.max(minZ, minZ + (animateFromTransform.t * incZ)));
+                }
                 setScaleX(animateFromTransform.scale);
                 setScaleY(animateFromTransform.scale);
                 setAlpha(animateFromTransform.alpha);
             }
+            if (Constants.DebugFlags.App.EnableShadows) {
+                animate().translationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
+            }
             animate().translationY(toTransform.translationY)
-                    .translationZ(Math.max(minZ, minZ + (toTransform.t * incZ)))
                     .scaleX(toTransform.scale)
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
@@ -168,7 +172,9 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
                     .start();
         } else {
             setTranslationY(toTransform.translationY);
-            setTranslationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
+            if (Constants.DebugFlags.App.EnableShadows) {
+                setTranslationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
+            }
             setScaleX(toTransform.scale);
             setScaleY(toTransform.scale);
             setAlpha(toTransform.alpha);
@@ -181,7 +187,9 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     void resetViewProperties() {
         setTranslationX(0f);
         setTranslationY(0f);
-        setTranslationZ(0f);
+        if (Constants.DebugFlags.App.EnableShadows) {
+            setTranslationZ(0f);
+        }
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);

@@ -64,7 +64,7 @@ public class AlternateRecentsComponent {
                 mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
                 mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
                 mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                Console.log(Constants.DebugFlags.App.RecentsComponent,
+                Console.log(Constants.Log.App.RecentsComponent,
                         "[RecentsComponent|RecentsMessageHandler|handleMessage]",
                         "singleTaskRect: " + mSingleCountFirstTaskRect +
                         " multipleTaskRect: " + mMultipleCountFirstTaskRect);
@@ -83,7 +83,7 @@ public class AlternateRecentsComponent {
     class RecentsServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Console.log(Constants.DebugFlags.App.RecentsComponent,
+            Console.log(Constants.Log.App.RecentsComponent,
                     "[RecentsComponent|ServiceConnection|onServiceConnected]",
                     "toggleRecents: " + mToggleRecentsUponServiceBound);
             mService = new Messenger(service);
@@ -103,7 +103,7 @@ public class AlternateRecentsComponent {
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
-            Console.log(Constants.DebugFlags.App.RecentsComponent,
+            Console.log(Constants.Log.App.RecentsComponent,
                     "[RecentsComponent|ServiceConnection|onServiceDisconnected]");
             mService = null;
             mServiceIsBound = false;
@@ -154,7 +154,7 @@ public class AlternateRecentsComponent {
     }
 
     public void onStart() {
-        Console.log(Constants.DebugFlags.App.RecentsComponent, "[RecentsComponent|start]");
+        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|start]");
 
         // Try to create a long-running connection to the recents service
         bindToRecentsService(false);
@@ -162,11 +162,11 @@ public class AlternateRecentsComponent {
 
     /** Toggles the alternate recents activity */
     public void onToggleRecents(Display display, int layoutDirection, View statusBarView) {
-        Console.logStartTracingTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                Constants.DebugFlags.App.TimeRecentsStartupKey);
-        Console.logStartTracingTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
-                Constants.DebugFlags.App.TimeRecentsLaunchKey);
-        Console.log(Constants.DebugFlags.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
+        Console.logStartTracingTime(Constants.Log.App.TimeRecentsStartup,
+                Constants.Log.App.TimeRecentsStartupKey);
+        Console.logStartTracingTime(Constants.Log.App.TimeRecentsLaunchTask,
+                Constants.Log.App.TimeRecentsLaunchKey);
+        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
                 "serviceIsBound: " + mServiceIsBound);
         mStatusBarView = statusBarView;
         if (!mServiceIsBound) {
@@ -192,7 +192,7 @@ public class AlternateRecentsComponent {
     }
 
     public void onCloseRecents() {
-        Console.log(Constants.DebugFlags.App.RecentsComponent, "[RecentsComponent|closeRecents]");
+        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|closeRecents]");
         if (mServiceIsBound) {
             // Try and update the recents configuration
             try {
@@ -400,10 +400,10 @@ public class AlternateRecentsComponent {
                     mService.send(msg);
 
                     // Time this path
-                    Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                            Constants.DebugFlags.App.TimeRecentsStartupKey, "sendToggleRecents");
-                    Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsLaunchTask,
-                            Constants.DebugFlags.App.TimeRecentsLaunchKey, "sendToggleRecents");
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                            Constants.Log.App.TimeRecentsStartupKey, "sendToggleRecents");
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                            Constants.Log.App.TimeRecentsLaunchKey, "sendToggleRecents");
                 } catch (RemoteException re) {
                     re.printStackTrace();
                 }
@@ -450,8 +450,8 @@ public class AlternateRecentsComponent {
             startAlternateRecentsActivity(opts, false);
         }
 
-        Console.logTraceTime(Constants.DebugFlags.App.TimeRecentsStartup,
-                Constants.DebugFlags.App.TimeRecentsStartupKey, "startRecentsActivity");
+        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                Constants.Log.App.TimeRecentsStartupKey, "startRecentsActivity");
         mLastToggleTime = System.currentTimeMillis();
     }
 
