@@ -3736,7 +3736,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p>When set, the activity specified by this Intent will launch into a
      * separate task rooted at that activity. The activity launched must be
-     * defined with {@link android.R.attr#launchMode} "standard" or "singleTop".
+     * defined with {@link android.R.attr#launchMode} <code>standard</code>
+     * or <code>singleTop</code>.
      *
      * <p>If FLAG_ACTIVITY_NEW_DOCUMENT is used without
      * {@link #FLAG_ACTIVITY_MULTIPLE_TASK} then the activity manager will
@@ -3750,6 +3751,8 @@ public class Intent implements Parcelable, Cloneable {
      * <p>When paired with {@link #FLAG_ACTIVITY_MULTIPLE_TASK} this will
      * always create a new task. Thus the same document may be made to appear
      * more than one time in Recents.
+     *
+     * <p>This is equivalent to the attribute {@link android.R.attr#documentLaunchMode}.
      *
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      */
@@ -3814,6 +3817,15 @@ public class Intent implements Parcelable, Cloneable {
      * saw.   This can only be used in conjunction with {@link #FLAG_ACTIVITY_NEW_TASK}.
      */
     public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
+    /**
+     * If set and the new activity is the root of a new task, then the task
+     * will remain in the list of recently launched tasks only until all of
+     * the activities in it are finished.
+     *
+     * <p>This is equivalent to the attribute
+     * {@link android.R.styleable#AndroidManifestActivity_autoRemoveFromRecents}.
+     */
+    public static final int FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS = 0x00002000;
     /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
@@ -4019,7 +4031,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Create an intent for a specific component with a specified action and data.
-     * This is equivalent using {@link #Intent(String, android.net.Uri)} to
+     * This is equivalent to using {@link #Intent(String, android.net.Uri)} to
      * construct the Intent and then calling {@link #setClass} to set its
      * class.
      *
