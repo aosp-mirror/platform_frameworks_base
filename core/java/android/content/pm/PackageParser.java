@@ -3533,10 +3533,13 @@ public class PackageParser {
         // For use by the package manager to keep track of the path to the
         // file an app came from.
         public String mScanPath;
-        
-        // For use by package manager to keep track of where it has done dexopt.
-        public boolean mDidDexOpt;
-        
+
+        // For use by package manager to keep track of where it needs to do dexopt.
+        public boolean mDexOptNeeded = true;
+
+        // For use by package manager to keep track of when a package was last used.
+        public long mLastPackageUsageTimeInMills;
+
         // // User set enabled state.
         // public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
         //
