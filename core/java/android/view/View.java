@@ -6147,12 +6147,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // call into it as a fallback in case we're in a class that overrides it
             // and has logic to perform.
             if (fitSystemWindows(insets.getSystemWindowInsets())) {
-                return insets.cloneWithSystemWindowInsetsConsumed();
+                return insets.consumeSystemWindowInsets();
             }
         } else {
             // We were called from within a direct call to fitSystemWindows.
             if (fitSystemWindowsInt(insets.getSystemWindowInsets())) {
-                return insets.cloneWithSystemWindowInsetsConsumed();
+                return insets.consumeSystemWindowInsets();
             }
         }
         return insets;
