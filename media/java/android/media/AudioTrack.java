@@ -172,13 +172,11 @@ public class AudioTrack
     public @interface WriteMode {}
 
     /**
-     * @hide CANDIDATE FOR PUBLIC API
      * The write mode indicating the write operation will block until all data has been written,
      * to be used in {@link #write(ByteBuffer, int, int, int)}.
      */
     public final static int WRITE_BLOCKING = 0;
     /**
-     * @hide CANDIDATE FOR PUBLIC API
      * The write mode indicating the write operation will return immediately after
      * queuing as much audio data for playback as possible without blocking, to be used in
      * {@link #write(ByteBuffer, int, int, int)}.
@@ -1220,7 +1218,6 @@ public class AudioTrack
 
 
     /**
-     * @hide CANDIDATE FOR PUBLIC API
      * Writes the audio data to the audio sink for playback (streaming mode),
      * or copies audio data for later playback (static buffer mode).
      * In static buffer mode, copies the data to the buffer starting at its 0 offset, and the write
