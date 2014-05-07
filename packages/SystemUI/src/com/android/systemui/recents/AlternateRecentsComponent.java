@@ -64,6 +64,17 @@ public class AlternateRecentsComponent {
                 mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
                 mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
                 mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
+                Console.log(Constants.DebugFlags.App.RecentsComponent,
+                        "[RecentsComponent|RecentsMessageHandler|handleMessage]",
+                        "singleTaskRect: " + mSingleCountFirstTaskRect +
+                        " multipleTaskRect: " + mMultipleCountFirstTaskRect);
+
+                // If we had the update the animation rects as a result of onServiceConnected, then
+                // we check for whether we need to toggle the recents here.
+                if (mToggleRecentsUponServiceBound) {
+                    startAlternateRecentsActivity();
+                    mToggleRecentsUponServiceBound = false;
+                }
             }
         }
     }
@@ -78,11 +89,16 @@ public class AlternateRecentsComponent {
             mService = new Messenger(service);
             mServiceIsBound = true;
 
-            // Toggle recents if this service connection was triggered by hitting the recents button
-            if (mToggleRecentsUponServiceBound) {
-                startAlternateRecentsActivity();
+            if (hasValidTaskRects()) {
+                // Toggle recents if this new service connection was triggered by hitting recents
+                if (mToggleRecentsUponServiceBound) {
+                    startAlternateRecentsActivity();
+                    mToggleRecentsUponServiceBound = false;
+                }
+            } else {
+                // Otherwise, update the animation rects before starting the recents if requested
+                updateAnimationRects();
             }
-            mToggleRecentsUponServiceBound = false;
         }
 
         @Override
@@ -191,6 +207,26 @@ public class AlternateRecentsComponent {
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
+        updateAnimationRects();
+    }
+
+    /** Binds to the recents implementation */
+    private void bindToRecentsService(boolean toggleRecentsUponConnection) {
+        mToggleRecentsUponServiceBound = toggleRecentsUponConnection;
+        Intent intent = new Intent();
+        intent.setClassName(sRecentsPackage, sRecentsService);
+        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /** Returns whether we have valid task rects to animate to. */
+    boolean hasValidTaskRects() {
+        return mSingleCountFirstTaskRect != null && mSingleCountFirstTaskRect.width() > 0 &&
+                mSingleCountFirstTaskRect.height() > 0 && mMultipleCountFirstTaskRect != null &&
+                mMultipleCountFirstTaskRect.width() > 0 && mMultipleCountFirstTaskRect.height() > 0;
+    }
+
+    /** Updates each of the task animation rects. */
+    void updateAnimationRects() {
         if (mServiceIsBound) {
             Resources res = mContext.getResources();
             int statusBarHeight = res.getDimensionPixelSize(
@@ -214,14 +250,6 @@ public class AlternateRecentsComponent {
                 re.printStackTrace();
             }
         }
-    }
-
-    /** Binds to the recents implementation */
-    private void bindToRecentsService(boolean toggleRecentsUponConnection) {
-        mToggleRecentsUponServiceBound = toggleRecentsUponConnection;
-        Intent intent = new Intent();
-        intent.setClassName(sRecentsPackage, sRecentsService);
-        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     /** Loads the first task thumbnail */
@@ -300,6 +328,49 @@ public class AlternateRecentsComponent {
         return SurfaceControl.screenshot((int) dims[0], (int) dims[1]);
     }
 
+    /** Creates the activity options for a thumbnail transition. */
+    ActivityOptions getThumbnailTransitionActivityOptions(Rect taskRect) {
+        // Loading from thumbnail
+        Bitmap thumbnail;
+        Bitmap firstThumbnail = loadFirstTaskThumbnail();
+        if (firstThumbnail != null) {
+            // Create the thumbnail
+            thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
+                    Bitmap.Config.ARGB_8888);
+            int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
+            Canvas c = new Canvas(thumbnail);
+            c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
+                    new Rect(0, 0, taskRect.width(), taskRect.height()), null);
+            c.setBitmap(null);
+            // Recycle the old thumbnail
+            firstThumbnail.recycle();
+        } else {
+            // Load the thumbnail from the screenshot if can't get one from the system
+            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            Display display = wm.getDefaultDisplay();
+            Bitmap screenshot = takeScreenshot(display);
+            if (screenshot != null) {
+                Resources res = mContext.getResources();
+                int size = Math.min(screenshot.getWidth(), screenshot.getHeight());
+                int statusBarHeight = res.getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height);
+                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(thumbnail);
+                c.drawBitmap(screenshot, new Rect(0, statusBarHeight, size, statusBarHeight +
+                        size), new Rect(0, 0, taskRect.width(), taskRect.height()), null);
+                c.setBitmap(null);
+                // Recycle the temporary screenshot
+                screenshot.recycle();
+            } else {
+                return null;
+            }
+        }
+
+        return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView, thumbnail,
+                taskRect.left, taskRect.top, null);
+    }
+
     /** Starts the recents activity */
     void startAlternateRecentsActivity() {
         // If the user has toggled it too quickly, then just eat up the event here (it's better than
@@ -351,47 +422,28 @@ public class AlternateRecentsComponent {
         // number of items in the list.
         List<ActivityManager.RecentTaskInfo> recentTasks =
                 ssp.getRecentTasks(4, UserHandle.CURRENT.getIdentifier());
-        boolean hasMultipleTasks = hasMultipleRecentsTask(recentTasks);
+        Rect taskRect = hasMultipleRecentsTask(recentTasks) ? mMultipleCountFirstTaskRect :
+                mSingleCountFirstTaskRect;
         boolean isTaskExcludedFromRecents = isTopTaskExcludeFromRecents(recentTasks);
-        Rect taskRect = hasMultipleTasks ? mMultipleCountFirstTaskRect : mSingleCountFirstTaskRect;
-        if (!isTopTaskHome && !isTaskExcludedFromRecents &&
-                (taskRect != null) && (taskRect.width() > 0) && (taskRect.height() > 0)) {
-            // Loading from thumbnail
-            Bitmap thumbnail;
-            Bitmap firstThumbnail = loadFirstTaskThumbnail();
-            if (firstThumbnail != null) {// Create the thumbnail
-                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
-                        Bitmap.Config.ARGB_8888);
-                int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
-                Canvas c = new Canvas(thumbnail);
-                c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                        new Rect(0, 0, taskRect.width(), taskRect.height()), null);
-                c.setBitmap(null);
-                // Recycle the old thumbnail
-                firstThumbnail.recycle();
-            } else {
-                // Load the thumbnail from the screenshot if can't get one from the system
-                WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-                Display display = wm.getDefaultDisplay();
-                Bitmap screenshot = takeScreenshot(display);
-                Resources res = mContext.getResources();
-                int size = Math.min(screenshot.getWidth(), screenshot.getHeight());
-                int statusBarHeight = res.getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height);
-                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas c = new Canvas(thumbnail);
-                c.drawBitmap(screenshot, new Rect(0, statusBarHeight, size, statusBarHeight + size),
-                        new Rect(0, 0, taskRect.width(), taskRect.height()), null);
-                c.setBitmap(null);
-                // Recycle the temporary screenshot
-                screenshot.recycle();
-            }
+        boolean useThumbnailTransition = !isTopTaskHome && !isTaskExcludedFromRecents &&
+                hasValidTaskRects();
 
-            ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
-                    thumbnail, taskRect.left, taskRect.top, null);
-            startAlternateRecentsActivity(opts, true);
-        } else {
+        if (useThumbnailTransition) {
+            // Try starting with a thumbnail transition
+            ActivityOptions opts = getThumbnailTransitionActivityOptions(taskRect);
+            if (opts != null) {
+                startAlternateRecentsActivity(opts, true);
+            } else {
+                // Fall through below to the non-thumbnail transition
+                useThumbnailTransition = false;
+            }
+        }
+
+        // If there is no thumbnail transition, then just use a generic transition
+        // XXX: This should be different between home and from a recents-excluded app, perhaps the
+        //      recents-excluded app should still show up in recents, when the app is in the
+        //      foreground
+        if (!useThumbnailTransition) {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_launcher_enter,
                     R.anim.recents_from_launcher_exit);

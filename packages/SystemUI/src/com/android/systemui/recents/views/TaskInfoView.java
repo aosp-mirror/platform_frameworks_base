@@ -20,10 +20,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.TouchFeedbackDrawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -151,6 +153,15 @@ class TaskInfoView extends FrameLayout {
         RecentsConfiguration configuration = RecentsConfiguration.getInstance();
         if (Constants.DebugFlags.App.EnableTaskBarThemeColors && t.colorPrimary != 0) {
             setBackgroundColor(t.colorPrimary);
+            // Workaround: The button currently doesn't support setting a custom background tint
+            // not defined in the theme.  Just lower the alpha on the button to make it blend more
+            // into the background.
+            if (mAppInfoButton.getBackground() instanceof TouchFeedbackDrawable) {
+                TouchFeedbackDrawable d = (TouchFeedbackDrawable) mAppInfoButton.getBackground();
+                if (d != null) {
+                    d.setAlpha(96);
+                }
+            }
         } else {
             setBackgroundColor(configuration.taskBarViewDefaultBackgroundColor);
         }
