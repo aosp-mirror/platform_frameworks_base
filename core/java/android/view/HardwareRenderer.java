@@ -491,6 +491,11 @@ public abstract class HardwareRenderer {
     abstract void setName(String name);
 
     /**
+     * Change the HardwareRenderer's opacity
+     */
+    abstract void setOpaque(boolean opaque);
+
+    /**
      * Creates a hardware renderer using OpenGL.
      *
      * @param translucent True if the surface is translucent, false otherwise

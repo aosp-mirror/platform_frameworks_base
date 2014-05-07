@@ -654,6 +654,11 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
+    void setOpaque(boolean opaque) {
+        // Not supported
+    }
+
+    @Override
     boolean loadSystemProperties() {
         boolean value;
         boolean changed = false;

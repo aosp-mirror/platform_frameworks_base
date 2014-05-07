@@ -387,6 +387,10 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
+void CanvasContext::setOpaque(bool opaque) {
+    mOpaque = opaque;
+}
+
 void CanvasContext::makeCurrent() {
     // TODO: Figure out why this workaround is needed, see b/13913604
     // In the meantime this matches the behavior of GLRenderer, so it is not a regression
