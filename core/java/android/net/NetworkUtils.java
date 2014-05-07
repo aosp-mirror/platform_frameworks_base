@@ -155,6 +155,13 @@ public class NetworkUtils {
     public native static boolean bindSocketToNetwork(int socketfd, int netId);
 
     /**
+     * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public native static boolean protectFromVpn(int socketfd);
+
+    /**
      * Convert a IPv4 address from an integer to an InetAddress.
      * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */

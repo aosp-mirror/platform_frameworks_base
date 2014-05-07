@@ -22,6 +22,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
+import android.net.UidRange;
 import android.net.wifi.WifiConfiguration;
 import android.os.INetworkActivityListener;
 
@@ -325,28 +326,14 @@ interface INetworkManagementService
     void setFirewallUidRule(int uid, boolean allow);
 
     /**
-     * Set all packets from users [uid_start,uid_end] to go through interface iface
-     * iface must already be set for marked forwarding by {@link setMarkedForwarding}
+     * Set all packets from users in ranges to go through VPN specified by netId.
      */
-    void setUidRangeRoute(String iface, int uid_start, int uid_end, boolean forward_dns);
+    void addVpnUidRanges(int netId, in UidRange[] ranges);
 
     /**
-     * Clears the special routing rules for users [uid_start,uid_end]
+     * Clears the special VPN rules for users in ranges and VPN specified by netId.
      */
-    void clearUidRangeRoute(String iface, int uid_start, int uid_end);
-
-    /**
-     * Setup an interface for routing packets marked by {@link setUidRangeRoute}
-     *
-     * This sets up a dedicated routing table for packets marked for {@code iface} and adds
-     * source-NAT rules so that the marked packets have the correct source address.
-     */
-    void setMarkedForwarding(String iface);
-
-    /**
-     * Removes marked forwarding for an interface
-     */
-    void clearMarkedForwarding(String iface);
+    void removeVpnUidRanges(int netId, in UidRange[] ranges);
 
     /**
      * Get the SO_MARK associated with routing packets for user {@code uid}
@@ -410,9 +397,14 @@ interface INetworkManagementService
     boolean isNetworkActive();
 
     /**
-     * Setup a new network.
+     * Setup a new physical network.
      */
-    void createNetwork(int netId);
+    void createPhysicalNetwork(int netId);
+
+    /**
+     * Setup a new VPN.
+     */
+    void createVirtualNetwork(int netId, boolean hasDNS);
 
     /**
      * Remove a network.
@@ -437,4 +429,14 @@ interface INetworkManagementService
 
     void setPermission(boolean internal, boolean changeNetState, in int[] uids);
     void clearPermission(in int[] uids);
+
+    /**
+     * Allow UID to call protect().
+     */
+    void allowProtect(int uid);
+
+    /**
+     * Deny UID from calling protect().
+     */
+    void denyProtect(int uid);
 }

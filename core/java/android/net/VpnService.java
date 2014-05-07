@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -168,19 +169,7 @@ public class VpnService extends Service {
      * @return {@code true} on success.
      */
     public boolean protect(int socket) {
-        ParcelFileDescriptor dup = null;
-        try {
-            dup = ParcelFileDescriptor.fromFd(socket);
-            return getService().protectVpn(dup);
-        } catch (Exception e) {
-            return false;
-        } finally {
-            try {
-                dup.close();
-            } catch (Exception e) {
-                // ignore
-            }
-        }
+        return NetworkUtils.protectFromVpn(socket);
     }
 
     /**

@@ -64,7 +64,7 @@ public final class NetworkCapabilities implements Parcelable {
      * by any Network that matches all of them.
      */
     private long mNetworkCapabilities = (1 << NET_CAPABILITY_NOT_RESTRICTED) |
-            (1 << NET_CAPABILITY_TRUSTED);
+            (1 << NET_CAPABILITY_TRUSTED) | (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
      * Indicates this is a network that has the ability to reach the
@@ -158,9 +158,15 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_TRUSTED        = 14;
 
+    /*
+     * Indicates that this network is not a VPN.  This capability is set by default and should be
+     * explicitly cleared when creating VPN networks.
+     */
+    public static final int NET_CAPABILITY_NOT_VPN        = 15;
+
 
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_TRUSTED;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_VPN;
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
@@ -271,8 +277,13 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int TRANSPORT_ETHERNET = 3;
 
+    /**
+     * Indicates this network uses a VPN transport.
+     */
+    public static final int TRANSPORT_VPN = 4;
+
     private static final int MIN_TRANSPORT = TRANSPORT_CELLULAR;
-    private static final int MAX_TRANSPORT = TRANSPORT_ETHERNET;
+    private static final int MAX_TRANSPORT = TRANSPORT_VPN;
 
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
@@ -500,6 +511,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case TRANSPORT_WIFI:        transports += "WIFI"; break;
                 case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
                 case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
+                case TRANSPORT_VPN:         transports += "VPN"; break;
             }
             if (++i < types.length) transports += "|";
         }
@@ -523,6 +535,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case NET_CAPABILITY_INTERNET:       capabilities += "INTERNET"; break;
                 case NET_CAPABILITY_NOT_RESTRICTED: capabilities += "NOT_RESTRICTED"; break;
                 case NET_CAPABILITY_TRUSTED:        capabilities += "TRUSTED"; break;
+                case NET_CAPABILITY_NOT_VPN:        capabilities += "NOT_VPN"; break;
             }
             if (++i < types.length) capabilities += "&";
         }

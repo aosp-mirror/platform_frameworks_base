@@ -16506,6 +16506,7 @@ package android.net {
     field public static final int NET_CAPABILITY_MMS = 0; // 0x0
     field public static final int NET_CAPABILITY_NOT_METERED = 11; // 0xb
     field public static final int NET_CAPABILITY_NOT_RESTRICTED = 13; // 0xd
+    field public static final int NET_CAPABILITY_NOT_VPN = 15; // 0xf
     field public static final int NET_CAPABILITY_RCS = 8; // 0x8
     field public static final int NET_CAPABILITY_SUPL = 1; // 0x1
     field public static final int NET_CAPABILITY_TRUSTED = 14; // 0xe
@@ -16514,6 +16515,7 @@ package android.net {
     field public static final int TRANSPORT_BLUETOOTH = 2; // 0x2
     field public static final int TRANSPORT_CELLULAR = 0; // 0x0
     field public static final int TRANSPORT_ETHERNET = 3; // 0x3
+    field public static final int TRANSPORT_VPN = 4; // 0x4
     field public static final int TRANSPORT_WIFI = 1; // 0x1
   }
 

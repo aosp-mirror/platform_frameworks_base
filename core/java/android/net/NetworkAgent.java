@@ -92,6 +92,20 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_NETWORK_SCORE_CHANGED = BASE + 4;
 
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to add new UID ranges
+     * to be forced into this Network.  For VPNs only.
+     * obj = UidRange[] to forward
+     */
+    public static final int EVENT_UID_RANGES_ADDED = BASE + 5;
+
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to remove UID ranges
+     * from being forced into this Network.  For VPNs only.
+     * obj = UidRange[] to stop forwarding
+     */
+    public static final int EVENT_UID_RANGES_REMOVED = BASE + 6;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         super(looper);
@@ -191,6 +205,22 @@ public abstract class NetworkAgent extends Handler {
      */
     public void sendNetworkScore(int score) {
         queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new Integer(score));
+    }
+
+    /**
+     * Called by the VPN code when it wants to add ranges of UIDs to be routed
+     * through the VPN network.
+     */
+    public void addUidRanges(UidRange[] ranges) {
+        queueOrSendMessage(EVENT_UID_RANGES_ADDED, ranges);
+    }
+
+    /**
+     * Called by the VPN code when it wants to remove ranges of UIDs from being routed
+     * through the VPN network.
+     */
+    public void removeUidRanges(UidRange[] ranges) {
+        queueOrSendMessage(EVENT_UID_RANGES_REMOVED, ranges);
     }
 
     /**

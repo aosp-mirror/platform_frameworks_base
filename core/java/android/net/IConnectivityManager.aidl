@@ -115,8 +115,6 @@ interface IConnectivityManager
 
     void setDataDependency(int networkType, boolean met);
 
-    boolean protectVpn(in ParcelFileDescriptor socket);
-
     boolean prepareVpn(String oldPackage, String newPackage);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);

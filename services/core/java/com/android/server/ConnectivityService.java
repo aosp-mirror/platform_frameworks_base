@@ -87,6 +87,7 @@ import android.net.ProxyDataTracker;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
+import android.net.UidRange;
 import android.net.Uri;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
@@ -235,7 +236,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @GuardedBy("mVpns")
     private final SparseArray<Vpn> mVpns = new SparseArray<Vpn>();
-    private VpnCallback mVpnCallback = new VpnCallback();
 
     private boolean mLockdownEnabled;
     private LockdownVpnTracker mLockdownTracker;
@@ -362,8 +362,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
      */
     private static final int EVENT_SET_POLICY_DATA_ENABLE = 12;
-
-    private static final int EVENT_VPN_STATE_CHANGED = 13;
 
     /**
      * Used internally to disable fail fast of mobile data
@@ -3178,6 +3176,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (score != null) updateNetworkScore(nai, score.intValue());
                     break;
                 }
+                case NetworkAgent.EVENT_UID_RANGES_ADDED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_UID_RANGES_ADDED from unknown NetworkAgent");
+                        break;
+                    }
+                    try {
+                        mNetd.addVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
+                    } catch (RemoteException e) {
+                    }
+                    break;
+                }
+                case NetworkAgent.EVENT_UID_RANGES_REMOVED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_UID_RANGES_REMOVED from unknown NetworkAgent");
+                        break;
+                    }
+                    try {
+                        mNetd.removeVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
+                    } catch (RemoteException e) {
+                    }
+                    break;
+                }
                 case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     handleConnectionValidated(nai);
@@ -3459,12 +3481,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (affectedNetwork != null) {
                     // check if this network still has live requests - otherwise, tear down
                     // TODO - probably push this to the NF/NA
-                    boolean keep = false;
-                    for (int i = 0; i < affectedNetwork.networkRequests.size(); i++) {
+                    boolean keep = affectedNetwork.isVPN();
+                    for (int i = 0; i < affectedNetwork.networkRequests.size() && !keep; i++) {
                         NetworkRequest r = affectedNetwork.networkRequests.valueAt(i);
                         if (mNetworkRequests.get(r).isRequest) {
                             keep = true;
-                            break;
                         }
                     }
                     if (keep == false) {
@@ -3542,12 +3563,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     final int networkType = msg.arg1;
                     final boolean enabled = msg.arg2 == ENABLED;
                     handleSetPolicyDataEnable(networkType, enabled);
-                    break;
-                }
-                case EVENT_VPN_STATE_CHANGED: {
-                    if (mLockdownTracker != null) {
-                        mLockdownTracker.onVpnStateChanged((NetworkInfo) msg.obj);
-                    }
                     break;
                 }
                 case EVENT_ENABLE_FAIL_FAST_MOBILE_DATA: {
@@ -4057,36 +4072,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Protect a socket from VPN routing rules. This method is used by
-     * VpnBuilder and not available in ConnectivityManager. Permissions
-     * are checked in Vpn class.
-     * @hide
-     */
-    @Override
-    public boolean protectVpn(ParcelFileDescriptor socket) {
-        throwIfLockdownEnabled();
-        try {
-            int type = mActiveDefaultNetwork;
-            int user = UserHandle.getUserId(Binder.getCallingUid());
-            if (ConnectivityManager.isNetworkTypeValid(type) && mNetTrackers[type] != null) {
-                synchronized(mVpns) {
-                    mVpns.get(user).protect(socket);
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            // ignore
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-        return false;
-    }
-
-    /**
      * Prepare for a VPN application. This method is used by VpnDialogs
      * and not available in ConnectivityManager. Permissions are checked
      * in Vpn class.
@@ -4177,144 +4162,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int user = UserHandle.getUserId(Binder.getCallingUid());
         synchronized(mVpns) {
             return mVpns.get(user).getVpnConfig();
-        }
-    }
-
-    /**
-     * Callback for VPN subsystem. Currently VPN is not adapted to the service
-     * through NetworkStateTracker since it works differently. For example, it
-     * needs to override DNS servers but never takes the default routes. It
-     * relies on another data network, and it could keep existing connections
-     * alive after reconnecting, switching between networks, or even resuming
-     * from deep sleep. Calls from applications should be done synchronously
-     * to avoid race conditions. As these are all hidden APIs, refactoring can
-     * be done whenever a better abstraction is developed.
-     */
-    public class VpnCallback {
-        private VpnCallback() {
-        }
-
-        public void onStateChanged(NetworkInfo info) {
-            mHandler.obtainMessage(EVENT_VPN_STATE_CHANGED, info).sendToTarget();
-        }
-
-        public void override(String iface, List<String> dnsServers, List<String> searchDomains) {
-            if (dnsServers == null) {
-                restore();
-                return;
-            }
-
-            // Convert DNS servers into addresses.
-            List<InetAddress> addresses = new ArrayList<InetAddress>();
-            for (String address : dnsServers) {
-                // Double check the addresses and remove invalid ones.
-                try {
-                    addresses.add(InetAddress.parseNumericAddress(address));
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
-            if (addresses.isEmpty()) {
-                restore();
-                return;
-            }
-
-            // Concatenate search domains into a string.
-            StringBuilder buffer = new StringBuilder();
-            if (searchDomains != null) {
-                for (String domain : searchDomains) {
-                    buffer.append(domain).append(' ');
-                }
-            }
-            String domains = buffer.toString().trim();
-
-            // Apply DNS changes.
-            synchronized (mDnsLock) {
-                // TODO: Re-enable this when the netId of the VPN is known.
-                // updateDnsLocked("VPN", netId, addresses, domains);
-            }
-
-            // Temporarily disable the default proxy (not global).
-            synchronized (mProxyLock) {
-                mDefaultProxyDisabled = true;
-                if (mGlobalProxy == null && mDefaultProxy != null) {
-                    sendProxyBroadcast(null);
-                }
-            }
-
-            // TODO: support proxy per network.
-        }
-
-        public void restore() {
-            synchronized (mProxyLock) {
-                mDefaultProxyDisabled = false;
-                if (mGlobalProxy == null && mDefaultProxy != null) {
-                    sendProxyBroadcast(mDefaultProxy);
-                }
-            }
-        }
-
-        public void protect(ParcelFileDescriptor socket) {
-            try {
-                final int mark = mNetd.getMarkForProtect();
-                NetworkUtils.markSocket(socket.getFd(), mark);
-            } catch (RemoteException e) {
-            }
-        }
-
-        public void setRoutes(String interfaze, List<RouteInfo> routes) {
-            for (RouteInfo route : routes) {
-                try {
-                    mNetd.setMarkedForwardingRoute(interfaze, route);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
-        public void setMarkedForwarding(String interfaze) {
-            try {
-                mNetd.setMarkedForwarding(interfaze);
-            } catch (RemoteException e) {
-            }
-        }
-
-        public void clearMarkedForwarding(String interfaze) {
-            try {
-                mNetd.clearMarkedForwarding(interfaze);
-            } catch (RemoteException e) {
-            }
-        }
-
-        public void addUserForwarding(String interfaze, int uid, boolean forwardDns) {
-            int uidStart = uid * UserHandle.PER_USER_RANGE;
-            int uidEnd = uidStart + UserHandle.PER_USER_RANGE - 1;
-            addUidForwarding(interfaze, uidStart, uidEnd, forwardDns);
-        }
-
-        public void clearUserForwarding(String interfaze, int uid, boolean forwardDns) {
-            int uidStart = uid * UserHandle.PER_USER_RANGE;
-            int uidEnd = uidStart + UserHandle.PER_USER_RANGE - 1;
-            clearUidForwarding(interfaze, uidStart, uidEnd, forwardDns);
-        }
-
-        public void addUidForwarding(String interfaze, int uidStart, int uidEnd,
-                boolean forwardDns) {
-            // TODO: Re-enable this when the netId of the VPN is known.
-            // try {
-            //     mNetd.setUidRangeRoute(netId, uidStart, uidEnd, forwardDns);
-            // } catch (RemoteException e) {
-            // }
-
-        }
-
-        public void clearUidForwarding(String interfaze, int uidStart, int uidEnd,
-                boolean forwardDns) {
-            // TODO: Re-enable this when the netId of the VPN is known.
-            // try {
-            //     mNetd.clearUidRangeRoute(interfaze, uidStart, uidEnd);
-            // } catch (RemoteException e) {
-            // }
-
         }
     }
 
@@ -5361,9 +5208,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mContext, mVpnCallback, mNetd, this, userId);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, this, userId);
             mVpns.put(userId, userVpn);
-            userVpn.startMonitoring(mContext, mTrackerHandler);
         }
     }
 
@@ -5885,7 +5731,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Unknown NetworkAgentInfo in handleConnectionValidated");
             return;
         }
-        boolean keep = false;
+        boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
         if (DBG) log("handleConnectionValidated for "+newNetwork.name());
         // check if any NetworkRequest wants this NetworkAgent
@@ -5947,8 +5793,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         for (NetworkAgentInfo nai : affectedNetworks) {
-            boolean teardown = true;
-            for (int i = 0; i < nai.networkRequests.size(); i++) {
+            boolean teardown = !nai.isVPN();
+            for (int i = 0; i < nai.networkRequests.size() && teardown; i++) {
                 NetworkRequest nr = nai.networkRequests.valueAt(i);
                 try {
                 if (mNetworkRequests.get(nr).isRequest) {
@@ -6031,6 +5877,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             oldInfo = networkAgent.networkInfo;
             networkAgent.networkInfo = newInfo;
         }
+        if (networkAgent.isVPN() && mLockdownTracker != null) {
+            mLockdownTracker.onVpnStateChanged(newInfo);
+        }
 
         if (oldInfo != null && oldInfo.getState() == state) {
             if (VDBG) log("ignoring duplicate network state non-change");
@@ -6049,7 +5898,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // CONNECTING and back (like wifi on DHCP renew).
                 // TODO: keep track of which networks we've created, or ask netd
                 // to tell us whether we've already created this network or not.
-                mNetd.createNetwork(networkAgent.network.netId);
+                if (networkAgent.isVPN()) {
+                    mNetd.createVirtualNetwork(networkAgent.network.netId,
+                            !networkAgent.linkProperties.getDnsServers().isEmpty());
+                } else {
+                    mNetd.createPhysicalNetwork(networkAgent.network.netId);
+                }
             } catch (Exception e) {
                 loge("Error creating network " + networkAgent.network.netId + ": "
                         + e.getMessage());
@@ -6059,9 +5913,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             updateLinkProperties(networkAgent, null);
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
+            if (networkAgent.isVPN()) {
+                // Temporarily disable the default proxy (not global).
+                synchronized (mProxyLock) {
+                    if (!mDefaultProxyDisabled) {
+                        mDefaultProxyDisabled = true;
+                        if (mGlobalProxy == null && mDefaultProxy != null) {
+                            sendProxyBroadcast(null);
+                        }
+                    }
+                }
+                // TODO: support proxy per network.
+            }
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
             networkAgent.asyncChannel.disconnect();
+            if (networkAgent.isVPN()) {
+                synchronized (mProxyLock) {
+                    if (mDefaultProxyDisabled) {
+                        mDefaultProxyDisabled = false;
+                        if (mGlobalProxy == null && mDefaultProxy != null) {
+                            sendProxyBroadcast(mDefaultProxy);
+                        }
+                    }
+                }
+            }
         }
     }
 

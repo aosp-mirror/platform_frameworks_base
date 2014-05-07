@@ -319,6 +319,9 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_REEVALUATE:
                     if (message.arg1 != mReevaluateToken)
                         break;
+                    if (mNetworkAgentInfo.isVPN()) {
+                        transitionTo(mValidatedState);
+                    }
                     // If network provides no internet connectivity adjust evaluation.
                     if (!mNetworkAgentInfo.networkCapabilities.hasCapability(
                             NetworkCapabilities.NET_CAPABILITY_INTERNET)) {

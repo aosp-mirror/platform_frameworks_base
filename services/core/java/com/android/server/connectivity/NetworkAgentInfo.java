@@ -69,6 +69,10 @@ public class NetworkAgentInfo {
         networkRequests.put(networkRequest.requestId, networkRequest);
     }
 
+    public boolean isVPN() {
+        return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
+    }
+
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  network{" +
                 network + "}  lp{" +

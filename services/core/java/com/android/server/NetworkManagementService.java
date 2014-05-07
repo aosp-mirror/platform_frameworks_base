@@ -46,6 +46,7 @@ import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.UidRange;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.BatteryStats;
@@ -90,6 +91,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +117,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private static final String DEFAULT = "default";
     private static final String SECONDARY = "secondary";
+
+    private static final int MAX_UID_RANGES_PER_COMMAND = 10;
 
     /**
      * Name representing {@link #setGlobalAlert(long)} limit when delivered to
@@ -1702,44 +1706,46 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setUidRangeRoute(String iface, int uid_start, int uid_end, boolean forward_dns) {
+    public void addVpnUidRanges(int netId, UidRange[] ranges) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark",
-                    "uid", "add", iface, uid_start, uid_end, forward_dns ? 1 : 0);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+        Object[] argv = new Object[3 + MAX_UID_RANGES_PER_COMMAND];
+        argv[0] = "users";
+        argv[1] = "add";
+        argv[2] = netId;
+        int argc = 3;
+        // Avoid overly long commands by limiting number of UID ranges per command.
+        for (int i = 0; i < ranges.length; i++) {
+            argv[argc++] = ranges[i].toString();
+            if (i == (ranges.length - 1) || argc == argv.length) {
+                try {
+                    mConnector.execute("network", Arrays.copyOf(argv, argc));
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
+                argc = 3;
+            }
         }
     }
 
     @Override
-    public void clearUidRangeRoute(String iface, int uid_start, int uid_end) {
+    public void removeVpnUidRanges(int netId, UidRange[] ranges) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark",
-                    "uid", "remove", iface, uid_start, uid_end, 0);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void setMarkedForwarding(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark", "rule", "add", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void clearMarkedForwarding(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark", "rule", "remove", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+        Object[] argv = new Object[3 + MAX_UID_RANGES_PER_COMMAND];
+        argv[0] = "users";
+        argv[1] = "remove";
+        argv[2] = netId;
+        int argc = 3;
+        // Avoid overly long commands by limiting number of UID ranges per command.
+        for (int i = 0; i < ranges.length; i++) {
+            argv[argc++] = ranges[i].toString();
+            if (i == (ranges.length - 1) || argc == argv.length) {
+                try {
+                    mConnector.execute("network", Arrays.copyOf(argv, argc));
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
+                argc = 3;
+            }
         }
     }
 
@@ -2015,11 +2021,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void createNetwork(int netId) {
+    public void createPhysicalNetwork(int netId) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
             mConnector.execute("network", "create", netId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void createVirtualNetwork(int netId, boolean hasDNS) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "create", netId, "vpn", hasDNS ? "1" : "0");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2143,4 +2160,27 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throw e.rethrowAsParcelableException();
         }
     }
+
+    @Override
+    public void allowProtect(int uid) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "protect", "allow", uid);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void denyProtect(int uid) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "protect", "deny", uid);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
 }

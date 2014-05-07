@@ -187,96 +187,6 @@ static int set_addresses(const char *name, const char *addresses)
     return count;
 }
 
-static int set_routes(const char *name, const char *routes)
-{
-    int index = get_interface_index(name);
-    if (index < 0) {
-        return index;
-    }
-
-    rtentry rt4;
-    memset(&rt4, 0, sizeof(rt4));
-    rt4.rt_dev = (char *)name;
-    rt4.rt_flags = RTF_UP;
-    rt4.rt_dst.sa_family = AF_INET;
-    rt4.rt_genmask.sa_family = AF_INET;
-
-    in6_rtmsg rt6;
-    memset(&rt6, 0, sizeof(rt6));
-    rt6.rtmsg_ifindex = index;
-    rt6.rtmsg_flags = RTF_UP;
-
-    char address[65];
-    int prefix;
-    int chars;
-    int count = 0;
-
-    while (sscanf(routes, " %64[^/]/%d %n", address, &prefix, &chars) == 2) {
-        routes += chars;
-
-        if (strchr(address, ':')) {
-            // Add an IPv6 route.
-            if (inet_pton(AF_INET6, address, &rt6.rtmsg_dst) != 1 ||
-                    prefix < 0 || prefix > 128) {
-                count = BAD_ARGUMENT;
-                break;
-            }
-
-            rt6.rtmsg_dst_len = prefix ? prefix : 1;
-            if (ioctl(inet6, SIOCADDRT, &rt6) && errno != EEXIST) {
-                count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
-                break;
-            }
-
-            if (!prefix) {
-                // Split the route instead of replacing the default route.
-                rt6.rtmsg_dst.s6_addr[0] ^= 0x80;
-                if (ioctl(inet6, SIOCADDRT, &rt6) && errno != EEXIST) {
-                    count = SYSTEM_ERROR;
-                    break;
-                }
-            }
-        } else {
-            // Add an IPv4 route.
-            if (inet_pton(AF_INET, address, as_in_addr(&rt4.rt_dst)) != 1 ||
-                    prefix < 0 || prefix > 32) {
-                count = BAD_ARGUMENT;
-                break;
-            }
-
-            in_addr_t mask = prefix ? (~0 << (32 - prefix)) : 0x80000000;
-            *as_in_addr(&rt4.rt_genmask) = htonl(mask);
-            if (ioctl(inet4, SIOCADDRT, &rt4) && errno != EEXIST) {
-                count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
-                break;
-            }
-
-            if (!prefix) {
-                // Split the route instead of replacing the default route.
-                *as_in_addr(&rt4.rt_dst) ^= htonl(0x80000000);
-                if (ioctl(inet4, SIOCADDRT, &rt4) && errno != EEXIST) {
-                    count = SYSTEM_ERROR;
-                    break;
-                }
-            }
-        }
-        ALOGD("Route added on %s: %s/%d", name, address, prefix);
-        ++count;
-    }
-
-    if (count == BAD_ARGUMENT) {
-        ALOGE("Invalid route: %s/%d", address, prefix);
-    } else if (count == SYSTEM_ERROR) {
-        ALOGE("Cannot add route: %s/%d: %s",
-                address, prefix, strerror(errno));
-    } else if (*routes) {
-        ALOGE("Invalid route: %s", routes);
-        count = BAD_ARGUMENT;
-    }
-
-    return count;
-}
-
 static int reset_interface(const char *name)
 {
     ifreq ifr4;
@@ -366,39 +276,6 @@ error:
     return count;
 }
 
-static jint setRoutes(JNIEnv *env, jobject thiz, jstring jName,
-        jstring jRoutes)
-{
-    const char *name = NULL;
-    const char *routes = NULL;
-    int count = -1;
-
-    name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
-    if (!name) {
-        jniThrowNullPointerException(env, "name");
-        goto error;
-    }
-    routes = jRoutes ? env->GetStringUTFChars(jRoutes, NULL) : NULL;
-    if (!routes) {
-        jniThrowNullPointerException(env, "routes");
-        goto error;
-    }
-    count = set_routes(name, routes);
-    if (count < 0) {
-        throwException(env, count, "Cannot set route");
-        count = -1;
-    }
-
-error:
-    if (name) {
-        env->ReleaseStringUTFChars(jName, name);
-    }
-    if (routes) {
-        env->ReleaseStringUTFChars(jRoutes, routes);
-    }
-    return count;
-}
-
 static void reset(JNIEnv *env, jobject thiz, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
@@ -430,7 +307,6 @@ static JNINativeMethod gMethods[] = {
     {"jniCreate", "(I)I", (void *)create},
     {"jniGetName", "(I)Ljava/lang/String;", (void *)getName},
     {"jniSetAddresses", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setAddresses},
-    {"jniSetRoutes", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setRoutes},
     {"jniReset", "(Ljava/lang/String;)V", (void *)reset},
     {"jniCheck", "(Ljava/lang/String;)I", (void *)check},
 };
