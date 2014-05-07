@@ -473,7 +473,7 @@ public class SyncRequest implements Parcelable {
          *   SyncRequest.Builder builder =
          *     new SyncRequest.Builder()
          *       .setSyncAdapter(dummyAccount, dummyProvider)
-         *       .syncOnce(5 * MINUTES_IN_SECS);
+         *       .syncOnce();
          *
          *   for (String syncData : syncItems) {
          *     Bundle extras = new Bundle();
