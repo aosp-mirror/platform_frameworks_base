@@ -52,6 +52,7 @@ public:
     void updateSurface(EGLNativeWindowType window);
     void pauseSurface(EGLNativeWindowType window);
     void setup(int width, int height);
+    void setOpaque(bool opaque);
     void makeCurrent();
     void prepareDraw(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
     void draw(Rect* dirty);

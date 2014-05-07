@@ -148,6 +148,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    void setOpaque(boolean opaque) {
+        nSetOpaque(mNativeProxy, opaque);
+    }
+
+    @Override
     int getWidth() {
         return mWidth;
     }
@@ -312,6 +317,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native void nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height);
+    private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native void nSetDisplayListData(long nativeProxy, long displayList,
             long newData);
     private static native int nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,

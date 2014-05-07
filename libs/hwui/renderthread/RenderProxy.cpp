@@ -159,6 +159,18 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
+CREATE_BRIDGE2(setOpaque, CanvasContext* context, bool opaque) {
+    args->context->setOpaque(args->opaque);
+    return NULL;
+}
+
+void RenderProxy::setOpaque(bool opaque) {
+    SETUP_TASK(setOpaque);
+    args->context = mContext;
+    args->opaque = opaque;
+    post(task);
+}
+
 int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos,
         int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
