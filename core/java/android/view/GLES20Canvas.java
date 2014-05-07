@@ -264,27 +264,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nCallDrawGLFunction(long renderer, long drawGLFunction);
 
-    @Override
-    public int invokeFunctors(Rect dirty) {
-        return nInvokeFunctors(mRenderer, dirty);
-    }
-
-    private static native int nInvokeFunctors(long renderer, Rect dirty);
-
-    @Override
-    public void detachFunctor(long functor) {
-        nDetachFunctor(mRenderer, functor);
-    }
-
-    private static native void nDetachFunctor(long renderer, long functor);
-
-    @Override
-    public void attachFunctor(long functor) {
-        nAttachFunctor(mRenderer, functor);
-    }
-
-    private static native void nAttachFunctor(long renderer, long functor);
-
     ///////////////////////////////////////////////////////////////////////////
     // Memory
     ///////////////////////////////////////////////////////////////////////////
