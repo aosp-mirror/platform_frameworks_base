@@ -35,7 +35,7 @@ import android.widget.FrameLayout;
 public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
-    private static final float DISMISS_MIN_PROGRESS = 0.6f;
+    private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .4f;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
@@ -244,7 +244,11 @@ public class SwipeDismissLayout extends FrameLayout {
         if (!mSwiping) {
             float deltaX = ev.getRawX() - mDownX;
             float deltaY = ev.getRawY() - mDownY;
-            mSwiping = deltaX > mSlop * 2 && Math.abs(deltaY) < mSlop * 2;
+            if ((deltaX * deltaX) + (deltaY * deltaY) > mSlop * mSlop) {
+                mSwiping = deltaX > mSlop * 2 && Math.abs(deltaY) < mSlop * 2;
+            } else {
+                mSwiping = false;
+            }
         }
     }
 
@@ -254,12 +258,7 @@ public class SwipeDismissLayout extends FrameLayout {
             mVelocityTracker.addMovement(ev);
             mVelocityTracker.computeCurrentVelocity(1000);
 
-            float velocityX = mVelocityTracker.getXVelocity();
-            float absVelocityX = Math.abs(velocityX);
-            float absVelocityY = Math.abs(mVelocityTracker.getYVelocity());
-
-            if (deltaX > (getWidth() * DISMISS_MIN_PROGRESS) &&
-                    absVelocityX < mMinFlingVelocity && 
+            if (deltaX > (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO) &&
                     ev.getRawX() >= mLastX) {
                 mDismissed = true;
             }
@@ -267,7 +266,7 @@ public class SwipeDismissLayout extends FrameLayout {
         // Check if the user tried to undo this.
         if (mDismissed && mSwiping) {
             // Check if the user's finger is actually back
-            if (deltaX < (getWidth() * DISMISS_MIN_PROGRESS)) {
+            if (deltaX < (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO)) {
                 mDismissed = false;
             }
         }
