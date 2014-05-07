@@ -2069,7 +2069,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param intent An intent matching the app(s) to be installed. All apps that resolve for this
      *               intent will be re-enabled in the current profile.
-     * @returns int The number of activities that matched the intent and were installed.
+     * @return int The number of activities that matched the intent and were installed.
      */
     public int enableSystemApp(ComponentName admin, Intent intent) {
         if (mService != null) {
