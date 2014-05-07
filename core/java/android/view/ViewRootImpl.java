@@ -6174,8 +6174,10 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void changeCanvasOpacity(boolean opaque) {
-        // TODO(romainguy): recreate Canvas (software or hardware) to reflect the opacity change.
         Log.d(TAG, "changeCanvasOpacity: opaque=" + opaque);
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.setOpaque(opaque);
+        }
     }
 
     class TakenSurfaceHolder extends BaseSurfaceHolder {
