@@ -94,10 +94,6 @@ public class NotificationContentView extends ExpandableView {
         updateClipping();
     }
 
-    public int getClipTopAmount() {
-        return mClipTopAmount;
-    }
-
     private void updateClipping() {
         mClipBounds.set(0, mClipTopAmount, getWidth(), mActualHeight);
         setClipBounds(mClipBounds);

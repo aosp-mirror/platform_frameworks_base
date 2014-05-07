@@ -61,6 +61,7 @@ public class StackScrollAlgorithm {
     private ExpandableView mFirstChildWhileExpanding;
     private boolean mExpandedOnStart;
     private int mTopStackTotalSize;
+    private ArrayList<View> mDraggedViews = new ArrayList<View>();
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -118,6 +119,34 @@ public class StackScrollAlgorithm {
 
         // Phase 3:
         updateZValuesForState(resultState, algorithmState);
+
+        handleDraggedViews(resultState, algorithmState);
+    }
+
+    /**
+     * Handle the special state when views are being dragged
+     */
+    private void handleDraggedViews(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState) {
+        for (View draggedView : mDraggedViews) {
+            int childIndex = algorithmState.visibleChildren.indexOf(draggedView);
+            if (childIndex >= 0 && childIndex < algorithmState.visibleChildren.size() - 1) {
+                View nextChild = algorithmState.visibleChildren.get(childIndex + 1);
+                if (!mDraggedViews.contains(nextChild)) {
+                    // only if the view is not dragged itself we modify its state to be fully
+                    // visible
+                    StackScrollState.ViewState viewState = resultState.getViewStateForView(
+                            nextChild);
+                    // The child below the dragged one must be fully visible
+                    viewState.alpha = 1;
+                }
+
+                // Lets set the alpha to the one it currently has, as its currently being dragged
+                StackScrollState.ViewState viewState = resultState.getViewStateForView(draggedView);
+                // The dragged child should keep the set alpha
+                viewState.alpha = draggedView.getAlpha();
+            }
+        }
     }
 
     /**
@@ -564,6 +593,14 @@ public class StackScrollAlgorithm {
         if (mIsExpansionChanging) {
             updateFirstChildHeightWhileExpanding(hostView);
         }
+    }
+
+    public void onBeginDrag(View view) {
+        mDraggedViews.add(view);
+    }
+
+    public void onDragFinished(View view) {
+        mDraggedViews.remove(view);
     }
 
     class StackScrollAlgorithmState {

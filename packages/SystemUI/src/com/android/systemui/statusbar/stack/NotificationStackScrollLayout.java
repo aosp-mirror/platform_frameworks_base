@@ -97,6 +97,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private StackScrollState mCurrentStackScrollState = new StackScrollState(this);
     private ArrayList<View> mChildrenToAddAnimated = new ArrayList<View>();
     private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<View>();
+    private ArrayList<View> mSnappedBackChildren = new ArrayList<View>();
+    private ArrayList<View> mDragAnimPendingChildren = new ArrayList<View>();
     private ArrayList<AnimationEvent> mAnimationEvents
             = new ArrayList<AnimationEvent>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
@@ -377,11 +379,34 @@ public class NotificationStackScrollLayout extends ViewGroup
             veto.performClick();
         }
         setSwipingInProgress(false);
+        if (mDragAnimPendingChildren.contains(v)) {
+            // We start the swipe and finish it in the same frame, we don't want any animation
+            // for the drag
+            mDragAnimPendingChildren.remove(v);
+        }
         mSwipedOutViews.add(v);
+        mStackScrollAlgorithm.onDragFinished(v);
+    }
+
+    @Override
+    public void onChildSnappedBack(View animView) {
+        mStackScrollAlgorithm.onDragFinished(animView);
+        if (!mDragAnimPendingChildren.contains(animView)) {
+            mSnappedBackChildren.add(animView);
+            requestChildrenUpdate();
+            mNeedsAnimation = true;
+        } else {
+            // We start the swipe and snap back in the same frame, we don't want any animation
+            mDragAnimPendingChildren.remove(animView);
+        }
     }
 
     public void onBeginDrag(View v) {
         setSwipingInProgress(true);
+        mDragAnimPendingChildren.add(v);
+        mStackScrollAlgorithm.onBeginDrag(v);
+        requestChildrenUpdate();
+        mNeedsAnimation = true;
     }
 
     public void onDragCancelled(View v) {
@@ -670,7 +695,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 //                        mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
 //                    }
                 }
-                updateChildren();
+                requestChildrenUpdate();
             }
 
             // Keep on drawing until the animation has finished.
@@ -680,7 +705,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void customScrollTo(int y) {
         mOwnScrollY = y;
-        updateChildren();
+        requestChildrenUpdate();
     }
 
     @Override
@@ -696,7 +721,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (clampedY) {
                 mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange());
             }
-            updateChildren();
+            requestChildrenUpdate();
         } else {
             customScrollTo(scrollY);
             scrollTo(scrollX, mScrollY);
@@ -934,12 +959,30 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void generateChildHierarchyEvents() {
         generateChildAdditionEvents();
         generateChildRemovalEvents();
+        generateSnapBackEvents();
+        generateDragEvents();
         generateTopPaddingEvent();
         mNeedsAnimation = false;
     }
 
+    private void generateSnapBackEvents() {
+        for (View child : mSnappedBackChildren) {
+            mAnimationEvents.add(new AnimationEvent(child,
+                    AnimationEvent.ANIMATION_TYPE_SNAP_BACK));
+        }
+        mSnappedBackChildren.clear();
+    }
+
+    private void generateDragEvents() {
+        for (View child : mDragAnimPendingChildren) {
+            mAnimationEvents.add(new AnimationEvent(child,
+                    AnimationEvent.ANIMATION_TYPE_START_DRAG));
+        }
+        mDragAnimPendingChildren.clear();
+    }
+
     private void generateChildRemovalEvents() {
-        for (View  child : mChildrenToRemoveAnimated) {
+        for (View child : mChildrenToRemoveAnimated) {
             boolean childWasSwipedOut = mSwipedOutViews.contains(child);
             int animationType = childWasSwipedOut
                     ? AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
@@ -951,7 +994,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void generateChildAdditionEvents() {
-        for (View  child : mChildrenToAddAnimated) {
+        for (View child : mChildrenToAddAnimated) {
             mAnimationEvents.add(new AnimationEvent(child,
                     AnimationEvent.ANIMATION_TYPE_ADD));
         }
@@ -1173,6 +1216,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         static int ANIMATION_TYPE_REMOVE = 2;
         static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 3;
         static int ANIMATION_TYPE_TOP_PADDING_CHANGED = 4;
+        static int ANIMATION_TYPE_START_DRAG = 5;
+        static int ANIMATION_TYPE_SNAP_BACK = 6;
 
         final long eventStartTime;
         final View changingView;
