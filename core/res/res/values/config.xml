@@ -1810,4 +1810,7 @@
 
     <!-- Sprint need a 70 ms delay for 3way call -->
     <integer name="config_cdma_3waycall_flash_delay">0</integer>
+
+    <!--SIM does not save, but the voice mail number to be changed. -->
+    <bool name="editable_voicemailnumber">false</bool>
 </resources>
