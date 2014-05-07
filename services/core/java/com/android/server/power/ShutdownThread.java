@@ -45,6 +45,7 @@ import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.server.pm.PackageManagerService;
 
 import android.util.Log;
 import android.view.WindowManager;
@@ -327,6 +328,14 @@ public final class ShutdownThread extends Thread {
                 am.shutdown(MAX_BROADCAST_TIME);
             } catch (RemoteException e) {
             }
+        }
+
+        Log.i(TAG, "Shutting down package manager...");
+
+        final PackageManagerService pm = (PackageManagerService)
+            ServiceManager.getService("package");
+        if (pm != null) {
+            pm.shutdown();
         }
 
         // Shutdown radios.
