@@ -22,6 +22,7 @@
 // keep these values in sync with AudioFormat.java
 #define ENCODING_PCM_16BIT 2
 #define ENCODING_PCM_8BIT  3
+#define ENCODING_PCM_FLOAT 4
 
 static inline audio_format_t audioFormatToNative(int audioFormat)
 {
@@ -30,6 +31,8 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_PCM_16_BIT;
     case ENCODING_PCM_8BIT:
         return AUDIO_FORMAT_PCM_8_BIT;
+    case ENCODING_PCM_FLOAT:
+        return AUDIO_FORMAT_PCM_FLOAT;
     default:
         return AUDIO_FORMAT_INVALID;
     }
