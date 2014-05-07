@@ -29,6 +29,7 @@ import com.android.internal.policy.PolicyManager;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -5689,7 +5690,16 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /** @hide */
+    /**
+     * Put this Activity in a mode where the user is locked to the
+     * current task.
+     *
+     * This will prevent the user from launching other apps, going to settings,
+     * or reaching the home screen.
+     *
+     * Lock task mode will only start if the activity has been whitelisted by the
+     * Device Owner through {@link DevicePolicyManager#setLockTaskComponents}.
+     */
     public void startLockTask() {
         try {
             ActivityManagerNative.getDefault().startLockTaskMode(mToken);
@@ -5697,7 +5707,15 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /** @hide */
+    /**
+     * Allow the user to switch away from the current task.
+     *
+     * Called to end the mode started by {@link Activity#startLockTask}. This
+     * can only be called by activities that have successfully called
+     * startLockTask previously.
+     *
+     * This will allow the user to exit this app and move onto other activities.
+     */
     public void stopLockTask() {
         try {
             ActivityManagerNative.getDefault().stopLockTaskMode();
