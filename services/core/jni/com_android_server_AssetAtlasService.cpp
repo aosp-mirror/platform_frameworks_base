@@ -46,32 +46,15 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static struct {
-    jfieldID mFinalizer;
-    jfieldID mNativeCanvas;
+    jmethodID safeCanvasSwap;
 } gCanvasClassInfo;
 
-static struct {
-    jfieldID mNativeCanvas;
-} gCanvasFinalizerClassInfo;
-
-#define GET_LONG(object, field) \
-    env->GetLongField(object, field)
-
-#define SET_LONG(object, field, value) \
-    env->SetLongField(object, field, value)
+#define INVOKEV(object, method, ...) \
+    env->CallVoidMethod(object, method, __VA_ARGS__)
 
 // ----------------------------------------------------------------------------
 // Canvas management
 // ----------------------------------------------------------------------------
-
-static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
-    jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
-    SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-            GET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    SET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas, (long) newCanvas);
-    SET_LONG(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (long) newCanvas);
-    SkSafeUnref(previousCanvas);
-}
 
 static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, jobject,
         jobject canvas, jint width, jint height) {
@@ -82,7 +65,7 @@ static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, job
     bitmap->eraseColor(0);
 
     SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (*bitmap));
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
 
     return reinterpret_cast<jlong>(bitmap);
 }
@@ -92,7 +75,7 @@ static void com_android_server_AssetAtlasService_releaseCanvas(JNIEnv* env, jobj
 
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
 
     delete bitmap;
 }
@@ -242,9 +225,9 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         var = env->FindClass(className); \
         LOG_FATAL_IF(! var, "Unable to find class " className);
 
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
+        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
+        LOG_FATAL_IF(!var, "Unable to find method " methodName);
 
 const char* const kClassPathName = "com/android/server/AssetAtlasService";
 
@@ -261,12 +244,7 @@ int register_android_server_AssetAtlasService(JNIEnv* env) {
     jclass clazz;
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
-            "Landroid/graphics/Canvas$CanvasFinalizer;");
-    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
-
-    FIND_CLASS(clazz, "android/graphics/Canvas$CanvasFinalizer");
-    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
+    GET_METHOD_ID(gCanvasClassInfo.safeCanvasSwap, clazz, "safeCanvasSwap", "(JZ)V");
 
     return jniRegisterNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

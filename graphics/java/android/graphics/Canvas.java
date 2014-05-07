@@ -39,8 +39,12 @@ import javax.microedition.khronos.opengles.GL;
 public class Canvas {
 
     // assigned in constructors or setBitmap, freed in finalizer
+    private long mNativeCanvas;
+
     /** @hide */
-    public long mNativeCanvas;
+    public long getNativeCanvas() {
+        return mNativeCanvas;
+    }
 
     // may be null
     private Bitmap mBitmap;
