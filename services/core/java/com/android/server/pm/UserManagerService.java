@@ -734,6 +734,15 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_VPN);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_FACTORY_RESET);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADD_USER);
+                writeBoolean(serializer, restrictions, UserManager.ENSURE_VERIFY_APPS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_APPS);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -873,6 +882,15 @@ public class UserManagerService extends IUserManager.Stub {
                         readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_VPN);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_FACTORY_RESET);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_ADD_USER);
+                        readBoolean(parser, restrictions, UserManager.ENSURE_VERIFY_APPS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_APPS);
                     }
                 }
             }
