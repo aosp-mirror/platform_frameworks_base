@@ -17,17 +17,24 @@
 package com.android.server.media;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
+import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,6 +45,7 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * System implementation of MediaSessionManager
@@ -56,6 +64,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final Object mLock = new Object();
     // TODO do we want a separate thread for handling mediasession messages?
     private final Handler mHandler = new Handler();
+
+    private MediaSessionRecord mPrioritySession;
 
     // Used to keep track of the current request to show routes for a specific
     // session so we drop late callbacks properly.
@@ -121,6 +131,17 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    public void publishSession(MediaSessionRecord record) {
+        synchronized (mLock) {
+            if (record.isSystemPriority()) {
+                if (mPrioritySession != null) {
+                    Log.w(TAG, "Replacing existing priority session with a new session");
+                }
+                mPrioritySession = record;
+            }
+        }
+    }
+
     @Override
     public void monitor() {
         synchronized (mLock) {
@@ -142,6 +163,9 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private void destroySessionLocked(MediaSessionRecord session) {
         mSessions.remove(session);
+        if (session == mPrioritySession) {
+            mPrioritySession = null;
+        }
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -158,8 +182,64 @@ public class MediaSessionService extends SystemService implements Monitor {
         throw new IllegalArgumentException("packageName is not owned by the calling process");
     }
 
+    protected void enforcePhoneStatePermission(int pid, int uid) {
+        if (getContext().checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE, pid, uid)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold the MODIFY_PHONE_STATE permission.");
+        }
+    }
+
+    /**
+     * Checks a caller's authorization to register an IRemoteControlDisplay.
+     * Authorization is granted if one of the following is true:
+     * <ul>
+     * <li>the caller has android.Manifest.permission.MEDIA_CONTENT_CONTROL
+     * permission</li>
+     * <li>the caller's listener is one of the enabled notification listeners</li>
+     * </ul>
+     */
+    private void enforceMediaPermissions(ComponentName compName, int pid, int uid) {
+        if (getContext()
+                .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
+                    != PackageManager.PERMISSION_GRANTED
+                && !isEnabledNotificationListener(compName)) {
+            throw new SecurityException("Missing permission to control media.");
+        }
+    }
+
+    private boolean isEnabledNotificationListener(ComponentName compName) {
+        if (compName != null) {
+            final int currentUser = ActivityManager.getCurrentUser();
+            final String enabledNotifListeners = Settings.Secure.getStringForUser(
+                    getContext().getContentResolver(),
+                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                    currentUser);
+            if (enabledNotifListeners != null) {
+                final String[] components = enabledNotifListeners.split(":");
+                for (int i = 0; i < components.length; i++) {
+                    final ComponentName component =
+                            ComponentName.unflattenFromString(components[i]);
+                    if (component != null) {
+                        if (compName.equals(component)) {
+                            if (DEBUG) {
+                                Log.d(TAG, "ok to get sessions: " + component +
+                                        " is authorized notification listener");
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+            if (DEBUG) {
+                Log.d(TAG, "not ok to get sessions, " + compName +
+                        " is not in list of ENABLED_NOTIFICATION_LISTENERS");
+            }
+        }
+        return false;
+    }
+
     private MediaSessionRecord createSessionInternal(int pid, String packageName,
-            ISessionCallback cb, String tag) {
+            ISessionCallback cb, String tag, boolean forCalls) {
         synchronized (mLock) {
             return createSessionLocked(pid, packageName, cb, tag);
         }
@@ -199,6 +279,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
         return -1;
+    }
+
+    private boolean isSessionDiscoverable(MediaSessionRecord record) {
+        // TODO probably want to check more than if it's published.
+        return record.isPublished();
     }
 
     private MediaRouteProviderWatcher.Callback mProviderWatcherCallback
@@ -266,7 +351,38 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
-                return createSessionInternal(pid, packageName, cb, tag).getSessionBinder();
+                return createSessionInternal(pid, packageName, cb, tag, false).getSessionBinder();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public List<IBinder> getSessions(ComponentName componentName) {
+
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
+            try {
+                if (componentName != null) {
+                    // If they gave us a component name verify they own the
+                    // package
+                    enforcePackageName(componentName.getPackageName(), uid);
+                }
+                // Then check if they have the permissions or their component is
+                // allowed
+                enforceMediaPermissions(componentName, pid, uid);
+                ArrayList<IBinder> binders = new ArrayList<IBinder>();
+                synchronized (mLock) {
+                    for (int i = mSessions.size() - 1; i >= 0; i--) {
+                        MediaSessionRecord record = mSessions.get(i);
+                        if (isSessionDiscoverable(record)) {
+                            binders.add(record.getControllerBinder().asBinder());
+                        }
+                    }
+                }
+                return binders;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -286,6 +402,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println();
 
             synchronized (mLock) {
+                pw.println("Session for calls:" + mPrioritySession);
+                if (mPrioritySession != null) {
+                    mPrioritySession.dump(pw, "");
+                }
                 int count = mSessions.size();
                 pw.println("Sessions - have " + count + " states:");
                 for (int i = 0; i < count; i++) {

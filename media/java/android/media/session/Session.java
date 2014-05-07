@@ -45,12 +45,13 @@ import java.util.List;
  * media to multiple routes or to provide finer grain controls of media.
  * <p>
  * A MediaSession is created by calling
- * {@link SessionManager#createSession(String)}. Once a session is created
- * apps that have the MEDIA_CONTENT_CONTROL permission can interact with the
- * session through {@link SessionManager#getActiveSessions()}. The owner of
- * the session may also use {@link #getSessionToken()} to allow apps without
- * this permission to create a {@link SessionController} to interact with this
- * session.
+ * {@link SessionManager#createSession(String)}. Once a session is created apps
+ * that have the MEDIA_CONTENT_CONTROL permission can interact with the session
+ * through
+ * {@link SessionManager#getActiveSessions(android.content.ComponentName)}. The
+ * owner of the session may also use {@link #getSessionToken()} to allow apps
+ * without this permission to create a {@link SessionController} to interact
+ * with this session.
  * <p>
  * To receive commands, media keys, and other events a Callback must be set with
  * {@link #addCallback(Callback)}.
@@ -62,6 +63,15 @@ import java.util.List;
  */
 public final class Session {
     private static final String TAG = "Session";
+
+    /**
+     * System only flag for a session that needs to have priority over all other
+     * sessions. This flag ensures this session will receive media button events
+     * regardless of the current ordering in the system.
+     *
+     * @hide
+     */
+    public static final long FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 32;
 
     private static final int MSG_MEDIA_BUTTON = 1;
     private static final int MSG_COMMAND = 2;
@@ -181,6 +191,24 @@ public final class Session {
      */
     public TransportPerformer getTransportPerformer() {
         return mPerformer;
+    }
+
+    /**
+     * Set any flags for the session. This cannot be called after calling
+     * {@link #publish()}.
+     *
+     * @param flags The flags to set for this session.
+     * @hide remove hide once we have non-system flags
+     */
+    public void setFlags(long flags) {
+        if (mPublished) {
+            throw new IllegalStateException("setFlags may not be called after publish");
+        }
+        try {
+            mBinder.setFlags(flags);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setFlags.", e);
+        }
     }
 
     /**

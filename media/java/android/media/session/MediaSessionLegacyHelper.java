@@ -43,7 +43,8 @@ public class MediaSessionLegacyHelper {
     private Handler mHandler = new Handler(Looper.getMainLooper());
     // The legacy APIs use PendingIntents to register/unregister media button
     // receivers and these are associated with RCC.
-    private ArrayMap<PendingIntent, SessionHolder> mSessions = new ArrayMap<PendingIntent, SessionHolder>();
+    private ArrayMap<PendingIntent, SessionHolder> mSessions
+            = new ArrayMap<PendingIntent, SessionHolder>();
 
     private MediaSessionLegacyHelper(Context context) {
         mSessionManager = (SessionManager) context
