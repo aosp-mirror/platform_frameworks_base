@@ -183,6 +183,10 @@ public:
         return OpenGLRenderer::getAlphaDirect(mPaint);
     }
 
+    virtual bool hasTextShadow() const {
+        return false;
+    }
+
     inline float strokeWidthOutset() {
         // since anything AA stroke with less than 1.0 pixel width is drawn with an alpha-reduced
         // 1.0 stroke, treat 1.0 as minimum.
@@ -244,11 +248,11 @@ public:
 
     bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
         localBounds.set(mLocalBounds);
-        if (drawModifiers.mHasShadow) {
-            // TODO: inspect paint's looper directly
+        OpenGLRenderer::TextShadow textShadow;
+        if (OpenGLRenderer::getTextShadow(mPaint, &textShadow)) {
             Rect shadow(mLocalBounds);
-            shadow.translate(drawModifiers.mShadowDx, drawModifiers.mShadowDy);
-            shadow.outset(drawModifiers.mShadowRadius);
+            shadow.translate(textShadow.dx, textShadow.dx);
+            shadow.outset(textShadow.radius);
             localBounds.unionWith(shadow);
         }
         return true;
@@ -617,41 +621,6 @@ public:
 
 private:
     SkiaShader* mShader;
-};
-
-class ResetShadowOp : public StateOp {
-public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.resetShadow();
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOGS("ResetShadow");
-    }
-
-    virtual const char* name() { return "ResetShadow"; }
-};
-
-class SetupShadowOp : public StateOp {
-public:
-    SetupShadowOp(float radius, float dx, float dy, int color)
-            : mRadius(radius), mDx(dx), mDy(dy), mColor(color) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.setupShadow(mRadius, mDx, mDy, mColor);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("SetupShadow, radius %f, %f, %f, color %#x", mRadius, mDx, mDy, mColor);
-    }
-
-    virtual const char* name() { return "SetupShadow"; }
-
-private:
-    float mRadius;
-    float mDx;
-    float mDy;
-    int mColor;
 };
 
 class ResetPaintFilterOp : public StateOp {
@@ -1349,6 +1318,10 @@ public:
 
     virtual void output(int level, uint32_t logFlags) const {
         OP_LOG("Draw some text, %d bytes", mBytesCount);
+    }
+
+    virtual bool hasTextShadow() const {
+        return OpenGLRenderer::hasTextShadow(mPaint);
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,

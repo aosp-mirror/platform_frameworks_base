@@ -289,6 +289,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
 
     private float mShadowRadius, mShadowDx, mShadowDy;
+    private int mShadowColor;
+
 
     private boolean mPreDrawRegistered;
 
@@ -2755,6 +2757,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShadowRadius = radius;
         mShadowDx = dx;
         mShadowDy = dy;
+        mShadowColor = color;
 
         // Will change text clip region
         if (mEditor != null) mEditor.invalidateTextDisplayList();
@@ -2804,7 +2807,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_shadowColor
      */
     public int getShadowColor() {
-        return mTextPaint.shadowColor;
+        return mShadowColor;
     }
 
     /**

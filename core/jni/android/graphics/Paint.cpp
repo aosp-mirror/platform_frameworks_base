@@ -33,6 +33,7 @@
 #include "SkXfermode.h"
 #include "unicode/uloc.h"
 #include "unicode/ushape.h"
+#include "utils/Blur.h"
 #include "TextLayout.h"
 
 // temporary for debugging
@@ -776,17 +777,21 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
-    static void setShadowLayer(JNIEnv* env, jobject jpaint, jfloat radius,
+    static void setShadowLayer(JNIEnv* env, jobject clazz, jlong paintHandle, jfloat radius,
                                jfloat dx, jfloat dy, jint color) {
-        NPE_CHECK_RETURN_VOID(env, jpaint);
-
-        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
+        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         if (radius <= 0) {
             paint->setLooper(NULL);
         }
         else {
-            paint->setLooper(new SkBlurDrawLooper(radius, dx, dy, (SkColor)color))->unref();
+            SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
+            paint->setLooper(new SkBlurDrawLooper((SkColor)color, sigma, dx, dy))->unref();
         }
+    }
+
+    static jboolean hasShadowLayer(JNIEnv* env, jobject clazz, jlong paintHandle) {
+        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        return paint->getLooper() && paint->getLooper()->asABlurShadow(NULL);
     }
 
     static int breakText(JNIEnv* env, SkPaint& paint, const jchar text[],
@@ -968,7 +973,8 @@ static JNINativeMethod methods[] = {
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
                                     (void*) SkPaintGlue::getCharArrayBounds },
-    {"nSetShadowLayer", "(FFFI)V", (void*)SkPaintGlue::setShadowLayer}
+    {"native_setShadowLayer", "(JFFFI)V", (void*)SkPaintGlue::setShadowLayer},
+    {"native_hasShadowLayer", "(J)Z", (void*)SkPaintGlue::hasShadowLayer}
 };
 
 static jfieldID req_fieldID(jfieldID id) {

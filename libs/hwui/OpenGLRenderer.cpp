@@ -2654,28 +2654,32 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
         FontRenderer& fontRenderer, int alpha, float x, float y) {
     mCaches.activeTexture(0);
 
+    TextShadow textShadow;
+    if (!getTextShadow(paint, &textShadow)) {
+        LOG_ALWAYS_FATAL("failed to query shadow attributes");
+    }
+
     // NOTE: The drop shadow will not perform gamma correction
     //       if shader-based correction is enabled
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
     const ShadowTexture* shadow = mCaches.dropShadowCache.get(
-            paint, text, bytesCount, count, mDrawModifiers.mShadowRadius, positions);
+            paint, text, bytesCount, count, textShadow.radius, positions);
     // If the drop shadow exceeds the max texture size or couldn't be
     // allocated, skip drawing
     if (!shadow) return;
     const AutoTexture autoCleanup(shadow);
 
-    const float sx = x - shadow->left + mDrawModifiers.mShadowDx;
-    const float sy = y - shadow->top + mDrawModifiers.mShadowDy;
+    const float sx = x - shadow->left + textShadow.dx;
+    const float sy = y - shadow->top + textShadow.dy;
 
-    const int shadowAlpha = ((mDrawModifiers.mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
-    int shadowColor = mDrawModifiers.mShadowColor;
+    const int shadowAlpha = ((textShadow.color >> 24) & 0xFF) * mSnapshot->alpha;
     if (mDrawModifiers.mShader) {
-        shadowColor = 0xffffffff;
+        textShadow.color = SK_ColorWHITE;
     }
 
     setupDraw();
     setupDrawWithTexture(true);
-    setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
+    setupDrawAlpha8Color(textShadow.color, shadowAlpha < 255 ? shadowAlpha : alpha);
     setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader();
     setupDrawBlending(paint, true);
@@ -2692,7 +2696,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
 }
 
 bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
-    float alpha = (mDrawModifiers.mHasShadow ? 1.0f : paint->getAlpha()) * mSnapshot->alpha;
+    float alpha = (hasTextShadow(paint) ? 1.0f : paint->getAlpha()) * mSnapshot->alpha;
     return alpha == 0.0f && getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
 }
 
@@ -2724,7 +2728,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
+    if (CC_UNLIKELY(hasTextShadow(paint))) {
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, 0.0f, 0.0f);
     }
@@ -2801,7 +2805,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
 
-    if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
+    if (CC_UNLIKELY(hasTextShadow(paint))) {
         fontRenderer.setFont(paint, mat4::identity());
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, oldX, oldY);
@@ -3019,22 +3023,6 @@ void OpenGLRenderer::setupShader(SkiaShader* shader) {
     if (mDrawModifiers.mShader) {
         mDrawModifiers.mShader->setCaches(mCaches);
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Drop shadow
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::resetShadow() {
-    mDrawModifiers.mHasShadow = false;
-}
-
-void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
-    mDrawModifiers.mHasShadow = true;
-    mDrawModifiers.mShadowRadius = radius;
-    mDrawModifiers.mShadowDx = dx;
-    mDrawModifiers.mShadowDy = dy;
-    mDrawModifiers.mShadowColor = color;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

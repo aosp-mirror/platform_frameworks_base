@@ -29,6 +29,7 @@
 #include <SkShader.h>
 #include <SkXfermode.h>
 
+#include <utils/Blur.h>
 #include <utils/Functor.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
@@ -71,13 +72,6 @@ struct DrawModifiers {
 
     SkiaShader* mShader;
     float mOverrideLayerAlpha;
-
-    // Drop shadow
-    bool mHasShadow;
-    float mShadowRadius;
-    float mShadowDx;
-    float mShadowDy;
-    int mShadowColor;
 
     // Draw filters
     bool mHasDrawFilter;
@@ -226,9 +220,6 @@ public:
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
 
-    virtual void resetShadow();
-    virtual void setupShadow(float radius, float dx, float dy, int color);
-
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
@@ -314,6 +305,31 @@ public:
     static inline int getAlphaDirect(const SkPaint* paint) {
         if (!paint) return 255;
         return paint->getAlpha();
+    }
+
+    struct TextShadow {
+        SkScalar radius;
+        float dx;
+        float dy;
+        SkColor color;
+    };
+
+    static inline bool getTextShadow(const SkPaint* paint, TextShadow* textShadow) {
+        SkDrawLooper::BlurShadowRec blur;
+        if (paint && paint->getLooper() && paint->getLooper()->asABlurShadow(&blur)) {
+            if (textShadow) {
+                textShadow->radius = Blur::convertSigmaToRadius(blur.fSigma);
+                textShadow->dx = blur.fOffset.fX;
+                textShadow->dy = blur.fOffset.fY;
+                textShadow->color = blur.fColor;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    static inline bool hasTextShadow(const SkPaint* paint) {
+        return getTextShadow(paint, NULL);
     }
 
     /**
