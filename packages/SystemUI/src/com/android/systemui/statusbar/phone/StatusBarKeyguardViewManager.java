@@ -95,7 +95,9 @@ public class StatusBarKeyguardViewManager {
     }
 
     private void showBouncer() {
-        mBouncer.show();
+        if (!mOccluded) {
+            mBouncer.show();
+        }
         updateStates();
     }
 
@@ -103,7 +105,12 @@ public class StatusBarKeyguardViewManager {
      * Reset the state of the view.
      */
     public void reset() {
-        showBouncerOrKeyguard();
+        if (mOccluded) {
+            mPhoneStatusBar.hideKeyguard();
+            mBouncer.hide();
+        } else {
+            showBouncerOrKeyguard();
+        }
         updateStates();
     }
 
@@ -114,6 +121,7 @@ public class StatusBarKeyguardViewManager {
 
     public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         mScreenOn = true;
+        reset();
         if (callback != null) {
             callbackAfterDraw(callback);
         }
@@ -147,7 +155,7 @@ public class StatusBarKeyguardViewManager {
     public void setOccluded(boolean occluded) {
         mOccluded = occluded;
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
-        updateStates();
+        reset();
     }
 
     /**
