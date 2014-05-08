@@ -224,8 +224,6 @@ LOCAL_SHARED_LIBRARIES += \
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
 LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 
-LOCAL_LDLIBS += -lpthread -ldl
-
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
 	LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
 endif

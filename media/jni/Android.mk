@@ -65,8 +65,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS +=
 
-LOCAL_LDLIBS := -lpthread
-
 LOCAL_MODULE:= libmedia_jni
 
 include $(BUILD_SHARED_LIBRARY)
