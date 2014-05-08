@@ -42,6 +42,9 @@ public class StatusBarHeaderView extends RelativeLayout {
     private int mExpandedHeight;
     private int mKeyguardHeight;
 
+    private int mKeyguardWidth = ViewGroup.LayoutParams.MATCH_PARENT;
+    private int mNormalWidth;
+
     private boolean mKeyguardShowing;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
@@ -65,6 +68,7 @@ public class StatusBarHeaderView extends RelativeLayout {
                 R.dimen.status_bar_header_height_expanded);
         mKeyguardHeight = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_header_height_keyguard);
+        mNormalWidth = getLayoutParams().width;
     }
 
     public int getCollapsedHeight() {
@@ -107,6 +111,15 @@ public class StatusBarHeaderView extends RelativeLayout {
         }
     }
 
+    private void updateWidth() {
+        int width = mKeyguardShowing ? mKeyguardWidth : mNormalWidth;
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        if (width != lp.width) {
+            lp.width = width;
+            setLayoutParams(lp);
+        }
+    }
+
     public void setExpansion(float height) {
         if (height < mCollapsedHeight) {
             height = mCollapsedHeight;
@@ -140,6 +153,7 @@ public class StatusBarHeaderView extends RelativeLayout {
             setTranslationZ(0);
         }
         updateHeights();
+        updateWidth();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
