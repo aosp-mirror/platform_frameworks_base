@@ -170,7 +170,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::initViewport(int width, int height) {
-    mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
+    mProjectionMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     initializeViewport(width, height);
 }
@@ -644,7 +644,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
     if (restoreOrtho) {
         const Rect& r = restored.viewport;
         glViewport(r.left, r.top, r.right, r.bottom);
-        mViewProjMatrix.load(removed.orthoMatrix); // TODO: should ortho be stored in 'restored'?
+        mProjectionMatrix.load(removed.orthoMatrix); // TODO: should ortho be stored in 'restored'?
     }
 
     if (restoreClip) {
@@ -870,7 +870,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     mSnapshot->height = bounds.getHeight();
-    mSnapshot->orthoMatrix.load(mViewProjMatrix);
+    mSnapshot->orthoMatrix.load(mProjectionMatrix);
 
     endTiling();
     debugOverdraw(false, false);
@@ -900,8 +900,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     // Change the ortho projection
     glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
 
-    // TODO: determine best way to support 3d drawing within HW layers
-    mViewProjMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+    mProjectionMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -1705,17 +1704,17 @@ void OpenGLRenderer::setupDrawDirtyRegionsDisabled() {
 
 void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
         float left, float top, float right, float bottom, bool ignoreTransform) {
-    mModelView.loadTranslate(left, top, 0.0f);
+    mModelViewMatrix.loadTranslate(left, top, 0.0f);
     if (mode == kModelViewMode_TranslateAndScale) {
-        mModelView.scale(right - left, bottom - top, 1.0f);
+        mModelViewMatrix.scale(right - left, bottom - top, 1.0f);
     }
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mViewProjMatrix, mModelView, *currentTransform(), offset);
+        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, *currentTransform(), offset);
         if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *currentTransform());
     } else {
-        mCaches.currentProgram->set(mViewProjMatrix, mModelView, mat4::identity(), offset);
+        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, mat4::identity(), offset);
         if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
     }
 }
@@ -1740,11 +1739,11 @@ void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
             // compensate.
             mat4 modelViewWithoutTransform;
             modelViewWithoutTransform.loadInverse(*currentTransform());
-            modelViewWithoutTransform.multiply(mModelView);
-            mModelView.load(modelViewWithoutTransform);
+            modelViewWithoutTransform.multiply(mModelViewMatrix);
+            mModelViewMatrix.load(modelViewWithoutTransform);
         }
         mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
-                mModelView, *mSnapshot, &mTextureUnit);
+                mModelViewMatrix, *mSnapshot, &mTextureUnit);
     }
 }
 

@@ -930,8 +930,8 @@ private:
      */
     Texture* getTexture(const SkBitmap* bitmap);
 
-    // Matrix used for view/projection in shaders
-    mat4 mViewProjMatrix;
+    // Ortho matrix used for projection in shaders
+    mat4 mProjectionMatrix;
 
     /**
      * Model-view matrix used to position/size objects
@@ -939,15 +939,15 @@ private:
      * Stores operation-local modifications to the draw matrix that aren't incorporated into the
      * currentTransform().
      *
-     * If generated with kModelViewMode_Translate, the mModelView will reflect an x/y offset,
+     * If generated with kModelViewMode_Translate, mModelViewMatrix will reflect an x/y offset,
      * e.g. the offset in drawLayer(). If generated with kModelViewMode_TranslateAndScale,
-     * mModelView will reflect a translation and scale, e.g. the translation and scale required to
-     * make VBO 0 (a rect of (0,0,1,1)) scaled to match the x,y offset, and width/height of a
-     * bitmap.
+     * mModelViewMatrix will reflect a translation and scale, e.g. the translation and scale
+     * required to make VBO 0 (a rect of (0,0,1,1)) scaled to match the x,y offset, and width/height
+     * of a bitmap.
      *
      * Used as input to SkiaShader transformation.
      */
-    mat4 mModelView;
+    mat4 mModelViewMatrix;
 
     // State used to define the clipping region
     Rect mTilingClip;
