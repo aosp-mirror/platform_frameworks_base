@@ -351,18 +351,8 @@ public abstract class Transition implements Cloneable {
         }
         ArrayMap<View, TransitionValues> endCopy =
                 new ArrayMap<View, TransitionValues>(endValues.viewValues);
-        SparseArray<TransitionValues> endIdCopy =
-                new SparseArray<TransitionValues>(endValues.idValues.size());
-        for (int i = 0; i < endValues.idValues.size(); ++i) {
-            int id = endValues.idValues.keyAt(i);
-            endIdCopy.put(id, endValues.idValues.valueAt(i));
-        }
-        LongSparseArray<TransitionValues> endItemIdCopy =
-                new LongSparseArray<TransitionValues>(endValues.itemIdValues.size());
-        for (int i = 0; i < endValues.itemIdValues.size(); ++i) {
-            long id = endValues.itemIdValues.keyAt(i);
-            endItemIdCopy.put(id, endValues.itemIdValues.valueAt(i));
-        }
+        SparseArray<TransitionValues> endIdCopy = endValues.idValues.clone();
+        LongSparseArray<TransitionValues> endItemIdCopy = endValues.itemIdValues.clone();
         // Walk through the start values, playing everything we find
         // Remove from the end set as we go
         ArrayList<TransitionValues> startValuesList = new ArrayList<TransitionValues>();
@@ -376,21 +366,17 @@ public abstract class Transition implements Cloneable {
             }
             if (!isInListView) {
                 int id = view.getId();
-                start = startValues.viewValues.get(view) != null ?
-                        startValues.viewValues.get(view) : startValues.idValues.get(id);
-                if (endValues.viewValues.get(view) != null) {
-                    end = endValues.viewValues.get(view);
+                start = startValues.viewValues.get(view);
+                end = endValues.viewValues.get(view);
+                if (end != null) {
                     endCopy.remove(view);
                 } else if (id != View.NO_ID) {
-                    end = endValues.idValues.get(id);
-                    View removeView = null;
-                    for (View viewToRemove : endCopy.keySet()) {
-                        if (viewToRemove.getId() == id) {
-                            removeView = viewToRemove;
-                        }
-                    }
-                    if (removeView != null) {
-                        endCopy.remove(removeView);
+                    end = endIdCopy.get(id);
+                    if (end == null || startValues.viewValues.containsKey(end.view)) {
+                        end = null;
+                        id = View.NO_ID;
+                    } else {
+                        endCopy.remove(end.view);
                     }
                 }
                 endIdCopy.remove(id);
@@ -423,35 +409,15 @@ public abstract class Transition implements Cloneable {
             }
         }
         // Now walk through the remains of the end set
+        // We've already matched everything from start to end, everything else doesn't match.
         for (View view : endCopy.keySet()) {
             int id = view.getId();
             if (isValidTarget(view, id)) {
-                TransitionValues start = startValues.viewValues.get(view) != null ?
-                        startValues.viewValues.get(view) : startValues.idValues.get(id);
+                TransitionValues start = null;
                 TransitionValues end = endCopy.get(view);
-                endIdCopy.remove(id);
                 startValuesList.add(start);
                 endValuesList.add(end);
             }
-        }
-        int endIdCopySize = endIdCopy.size();
-        for (int i = 0; i < endIdCopySize; ++i) {
-            int id = endIdCopy.keyAt(i);
-            if (isValidTarget(null, id)) {
-                TransitionValues start = startValues.idValues.get(id);
-                TransitionValues end = endIdCopy.get(id);
-                startValuesList.add(start);
-                endValuesList.add(end);
-            }
-        }
-        int endItemIdCopySize = endItemIdCopy.size();
-        for (int i = 0; i < endItemIdCopySize; ++i) {
-            long id = endItemIdCopy.keyAt(i);
-            // TODO: Deal with targetIDs and itemIDs
-            TransitionValues start = startValues.itemIdValues.get(id);
-            TransitionValues end = endItemIdCopy.get(id);
-            startValuesList.add(start);
-            endValuesList.add(end);
         }
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
         long minStartDelay = Long.MAX_VALUE;
