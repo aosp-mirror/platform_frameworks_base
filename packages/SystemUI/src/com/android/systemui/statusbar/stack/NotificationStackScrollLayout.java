@@ -516,7 +516,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                if (getChildCount() == 0) {
+                if (getChildCount() == 0 || !isInContentBounds(ev)) {
                     return false;
                 }
                 boolean isBeingDragged = !mScroller.isFinished();
@@ -1140,6 +1140,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsBeingDragged;
     }
 
+    /**
+     * @return Whether the specified motion event is actually happening over the content.
+     */
+    private boolean isInContentBounds(MotionEvent event) {
+        return event.getY() < getHeight() - getEmptyBottomMargin();
+    }
+
     private void setIsBeingDragged(boolean isDragged) {
         mIsBeingDragged = isDragged;
         if (isDragged) {
@@ -1308,6 +1315,33 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateDimmed()
         };
 
+        static int[] LENGTHS = new int[] {
+
+                // ANIMATION_TYPE_ADD
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_REMOVE
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_REMOVE_SWIPED_OUT
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_TOP_PADDING_CHANGED
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_START_DRAG
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_SNAP_BACK
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_ACTIVATED_CHILD
+                StackStateAnimator.ANIMATION_DURATION_DIMMED_ACTIVATED,
+
+                // ANIMATION_TYPE_DIMMED
+                StackStateAnimator.ANIMATION_DURATION_DIMMED_ACTIVATED,
+        };
+
         static int ANIMATION_TYPE_ADD = 0;
         static int ANIMATION_TYPE_REMOVE = 1;
         static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 2;
@@ -1321,12 +1355,29 @@ public class NotificationStackScrollLayout extends ViewGroup
         final View changingView;
         final int animationType;
         final AnimationFilter filter;
+        final long length;
 
         AnimationEvent(View view, int type) {
             eventStartTime = AnimationUtils.currentAnimationTimeMillis();
             changingView = view;
             animationType = type;
             filter = FILTERS[type];
+            length = LENGTHS[type];
+        }
+
+        /**
+         * Combines the length of several animation events into a single value.
+         *
+         * @param events The events of the lengths to combine.
+         * @return The combined length. This is just the maximum of all length.
+         */
+        static long combineLength(ArrayList<AnimationEvent> events) {
+            long length = 0;
+            int size = events.size();
+            for (int i = 0; i < size; i++) {
+                length = Math.max(length, events.get(i).length);
+            }
+            return length;
         }
     }
 
