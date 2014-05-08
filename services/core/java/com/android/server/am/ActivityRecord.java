@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.os.Trace;
-import com.android.internal.R.styleable;
 import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -480,7 +479,7 @@ final class ActivityRecord {
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
         if (task != null && task.removeActivity(this)) {
             if (task != newTask) {
-                task.stack.removeTask(task, false);
+                task.stack.removeTask(task);
             } else {
                 Slog.d(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=" +
                         (newTask == null ? null : newTask.stack));

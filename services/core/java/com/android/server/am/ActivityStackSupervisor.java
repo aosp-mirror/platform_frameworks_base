@@ -1471,6 +1471,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        switch (r.info.documentLaunchMode) {
+            case ActivityInfo.DOCUMENT_LAUNCH_NONE:
+                break;
+            case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                break;
+            case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+                break;
+        }
         final boolean newDocument = intent.isDocument();
         if (sourceRecord == null) {
             // This activity is not being started from another...  in this
@@ -2237,7 +2248,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
             return;
         }
-        task.stack.removeTask(task, true);
+        task.stack.removeTask(task);
         stack.addTask(task, toTop, true);
         mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();

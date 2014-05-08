@@ -139,6 +139,9 @@ final class TaskRecord extends ThumbnailHolder {
 
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         creatorUid = info.applicationInfo.uid;
+        if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+        }
     }
 
     void disposeThumbnail() {
@@ -244,6 +247,11 @@ final class TaskRecord extends ThumbnailHolder {
             numFullscreen--;
         }
         return mActivities.size() == 0;
+    }
+
+    boolean autoRemoveFromRecents() {
+        return intent != null &&
+                (intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS) != 0;
     }
 
     /**
