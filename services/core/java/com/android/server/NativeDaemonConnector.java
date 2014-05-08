@@ -50,6 +50,8 @@ import java.util.LinkedList;
 final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdog.Monitor {
     private static final boolean LOGD = false;
 
+    private final static boolean VDBG = false;
+
     private final String TAG;
 
     private String mSocket;
@@ -409,7 +411,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 loge("timed-out waiting for response to " + logCmd);
                 throw new NativeDaemonFailureException(logCmd, event);
             }
-            log("RMV <- {" + event + "}");
+            if (VDBG) log("RMV <- {" + event + "}");
             events.add(event);
         } while (event.isClassContinue());
 
