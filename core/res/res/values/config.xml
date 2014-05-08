@@ -1394,9 +1394,10 @@
     </string-array>
 
     <!-- The list of classes that should be added to the notification ranking pipline.
-     See {@link com.android.server.notification.NotificationSignalExtractortor} -->
+     See {@link com.android.server.notification.NotificationSignalExtractor} -->
     <string-array name="config_notificationSignalExtractors">
         <item>com.android.server.notification.ValidateNotificationPeople</item>
+        <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
     </string-array>
 
     <!-- Flag indicating that this device does not rotate and will always remain in its default
