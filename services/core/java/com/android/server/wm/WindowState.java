@@ -299,6 +299,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean mHasSurface = false;
 
+    boolean mNotOnAppsDisplay = false;
     DisplayContent  mDisplayContent;
 
     /** When true this window can be displayed on screens owther than mOwnerUid's */
@@ -430,6 +431,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         mRootToken = appToken;
         mAppToken = appToken.appWindowToken;
+        if (mAppToken != null) {
+            final DisplayContent appDisplay = getDisplayContent();
+            mNotOnAppsDisplay = displayContent != appDisplay;
+        }
 
         mWinAnimator = new WindowStateAnimator(this);
         mWinAnimator.mAlpha = a.alpha;
@@ -717,7 +722,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     public DisplayContent getDisplayContent() {
-        return mAppToken == null ? mDisplayContent : getStack().getDisplayContent();
+        return mAppToken == null || mNotOnAppsDisplay ?
+                mDisplayContent : getStack().getDisplayContent();
     }
 
     public int getDisplayId() {
