@@ -3517,6 +3517,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (DBG) log("Invalid proxy properties, ignoring: " + proxy.toString());
                 return;
             }
+
+            // This call could be coming from the PacManager, containing the port of the local
+            // proxy.  If this new proxy matches the global proxy then copy this proxy to the
+            // global (to get the correct local port), and send a broadcast.
+            // TODO: Switch PacManager to have its own message to send back rather than
+            // reusing EVENT_HAS_CHANGED_PROXY and this call to handleApplyDefaultProxy.
+            if ((mGlobalProxy != null) && (proxy != null) && (proxy.getPacFileUrl() != null)
+                    && proxy.getPacFileUrl().equals(mGlobalProxy.getPacFileUrl())) {
+                mGlobalProxy = proxy;
+                sendProxyBroadcast(mGlobalProxy);
+                return;
+            }
             mDefaultProxy = proxy;
 
             if (mGlobalProxy != null) return;
