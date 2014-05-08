@@ -107,7 +107,7 @@ public class Picture {
         if (mRecordingCanvas != null) {
             endRecording();
         }
-        nativeDraw(canvas.getNativeCanvas(), mNativePicture);
+        nativeDraw(canvas.getNativeCanvasWrapper(), mNativePicture);
     }
 
     /**

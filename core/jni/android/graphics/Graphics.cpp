@@ -320,7 +320,7 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(canvas);
     SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
     jlong canvasHandle = env->GetLongField(canvas, gCanvas_nativeInstanceID);
-    SkCanvas* c = reinterpret_cast<SkCanvas*>(canvasHandle);
+    SkCanvas* c = getNativeCanvas(canvasHandle);
     SkASSERT(c);
     return c;
 }
@@ -698,7 +698,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
                                                      "nativeInt", "I");
 
     gCanvas_class = make_globalref(env, "android/graphics/Canvas");
-    gCanvas_nativeInstanceID = getFieldIDCheck(env, gCanvas_class, "mNativeCanvas", "J");
+    gCanvas_nativeInstanceID = getFieldIDCheck(env, gCanvas_class, "mNativeCanvasWrapper", "J");
 
     gPaint_class = make_globalref(env, "android/graphics/Paint");
     gPaint_nativeInstanceID = getFieldIDCheck(env, gPaint_class, "mNativePaint", "J");

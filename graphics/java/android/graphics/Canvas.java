@@ -39,11 +39,11 @@ import javax.microedition.khronos.opengles.GL;
 public class Canvas {
 
     // assigned in constructors or setBitmap, freed in finalizer
-    private long mNativeCanvas;
+    private long mNativeCanvasWrapper;
 
     /** @hide */
-    public long getNativeCanvas() {
-        return mNativeCanvas;
+    public long getNativeCanvasWrapper() {
+        return mNativeCanvasWrapper;
     }
 
     // may be null
@@ -88,10 +88,10 @@ public class Canvas {
     private final CanvasFinalizer mFinalizer;
 
     private static final class CanvasFinalizer {
-        private long mNativeCanvas;
+        private long mNativeCanvasWrapper;
 
         public CanvasFinalizer(long nativeCanvas) {
-            mNativeCanvas = nativeCanvas;
+            mNativeCanvasWrapper = nativeCanvas;
         }
 
         @Override
@@ -104,9 +104,9 @@ public class Canvas {
         }
 
         public void dispose() {
-            if (mNativeCanvas != 0) {
-                finalizer(mNativeCanvas);
-                mNativeCanvas = 0;
+            if (mNativeCanvasWrapper != 0) {
+                finalizer(mNativeCanvasWrapper);
+                mNativeCanvasWrapper = 0;
             }
         }
     }
@@ -120,8 +120,8 @@ public class Canvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvas = initRaster(0);
-            mFinalizer = new CanvasFinalizer(mNativeCanvas);
+            mNativeCanvasWrapper = initRaster(0);
+            mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
         }
@@ -141,8 +141,8 @@ public class Canvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvas = initRaster(bitmap.ni());
-        mFinalizer = new CanvasFinalizer(mNativeCanvas);
+        mNativeCanvasWrapper = initRaster(bitmap.ni());
+        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
@@ -152,23 +152,9 @@ public class Canvas {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
-        mNativeCanvas = nativeCanvas;
-        mFinalizer = new CanvasFinalizer(mNativeCanvas);
+        mNativeCanvasWrapper = initCanvas(nativeCanvas);
+        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
-    }
-
-    /**
-     * Replace existing canvas while ensuring that the swap has occurred before
-     * the previous native canvas is unreferenced.
-     */
-    private void safeCanvasSwap(long nativeCanvas, boolean copyState) {
-        final long oldCanvas = mNativeCanvas;
-        mNativeCanvas = nativeCanvas;
-        mFinalizer.mNativeCanvas = nativeCanvas;
-        if (copyState) {
-            copyNativeCanvasState(oldCanvas, mNativeCanvas);
-        }
-        finalizer(oldCanvas);
     }
 
     /**
@@ -212,7 +198,7 @@ public class Canvas {
         }
 
         if (bitmap == null) {
-            safeCanvasSwap(initRaster(0), false);
+            native_setBitmap(mNativeCanvasWrapper, 0, false);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -220,11 +206,18 @@ public class Canvas {
             }
             throwIfCannotDraw(bitmap);
 
-            safeCanvasSwap(initRaster(bitmap.ni()), true);
+            native_setBitmap(mNativeCanvasWrapper, bitmap.ni(), true);
             mDensity = bitmap.mDensity;
         }
 
         mBitmap = bitmap;
+    }
+
+    /**
+     * setBitmap() variant for native callers with a raw bitmap handle.
+     */
+    private void setNativeBitmap(long bitmapHandle) {
+        native_setBitmap(mNativeCanvasWrapper, bitmapHandle, false);
     }
 
     /**
@@ -382,7 +375,7 @@ public class Canvas {
      * @return       value to pass to restoreToCount() to balance this save()
      */
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
-        return native_saveLayer(mNativeCanvas, bounds,
+        return native_saveLayer(mNativeCanvasWrapper, bounds,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
     }
@@ -399,7 +392,7 @@ public class Canvas {
      */
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
-        return native_saveLayer(mNativeCanvas, left, top, right, bottom,
+        return native_saveLayer(mNativeCanvasWrapper, left, top, right, bottom,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
     }
@@ -429,7 +422,7 @@ public class Canvas {
      */
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
         alpha = Math.min(255, Math.max(0, alpha));
-        return native_saveLayerAlpha(mNativeCanvas, bounds, alpha, saveFlags);
+        return native_saveLayerAlpha(mNativeCanvasWrapper, bounds, alpha, saveFlags);
     }
 
     /**
@@ -444,7 +437,7 @@ public class Canvas {
      */
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             int saveFlags) {
-        return native_saveLayerAlpha(mNativeCanvas, left, top, right, bottom,
+        return native_saveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
                                      alpha, saveFlags);
     }
 
@@ -548,7 +541,7 @@ public class Canvas {
      * @param matrix The matrix to preconcatenate with the current matrix
      */
     public void concat(Matrix matrix) {
-        if (matrix != null) native_concat(mNativeCanvas, matrix.native_instance);
+        if (matrix != null) native_concat(mNativeCanvasWrapper, matrix.native_instance);
     }
     
     /**
@@ -565,7 +558,7 @@ public class Canvas {
      * @see #concat(Matrix) 
      */
     public void setMatrix(Matrix matrix) {
-        native_setMatrix(mNativeCanvas,
+        native_setMatrix(mNativeCanvasWrapper,
                          matrix == null ? 0 : matrix.native_instance);
     }
     
@@ -575,7 +568,7 @@ public class Canvas {
      */
     @Deprecated
     public void getMatrix(Matrix ctm) {
-        native_getCTM(mNativeCanvas, ctm.native_instance);
+        native_getCTM(mNativeCanvasWrapper, ctm.native_instance);
     }
 
     /**
@@ -598,7 +591,7 @@ public class Canvas {
      * @return true if the resulting clip is non-empty
      */
     public boolean clipRect(RectF rect, Region.Op op) {
-        return native_clipRect(mNativeCanvas, rect.left, rect.top, rect.right, rect.bottom,
+        return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
     }
 
@@ -611,7 +604,7 @@ public class Canvas {
      * @return true if the resulting clip is non-empty
      */
     public boolean clipRect(Rect rect, Region.Op op) {
-        return native_clipRect(mNativeCanvas, rect.left, rect.top, rect.right, rect.bottom,
+        return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
     }
 
@@ -649,7 +642,7 @@ public class Canvas {
      * @return       true if the resulting clip is non-empty
      */
     public boolean clipRect(float left, float top, float right, float bottom, Region.Op op) {
-        return native_clipRect(mNativeCanvas, left, top, right, bottom, op.nativeInt);
+        return native_clipRect(mNativeCanvasWrapper, left, top, right, bottom, op.nativeInt);
     }
 
     /**
@@ -690,7 +683,7 @@ public class Canvas {
      * @return     true if the resulting is non-empty
      */
     public boolean clipPath(Path path, Region.Op op) {
-        return native_clipPath(mNativeCanvas, path.ni(), op.nativeInt);
+        return native_clipPath(mNativeCanvasWrapper, path.ni(), op.nativeInt);
     }
     
     /**
@@ -718,7 +711,7 @@ public class Canvas {
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
     public boolean clipRegion(Region region, Region.Op op) {
-        return native_clipRegion(mNativeCanvas, region.ni(), op.nativeInt);
+        return native_clipRegion(mNativeCanvasWrapper, region.ni(), op.nativeInt);
     }
 
     /**
@@ -748,7 +741,7 @@ public class Canvas {
             nativeFilter = filter.mNativeInt;
         }
         mDrawFilter = filter;
-        nativeSetDrawFilter(mNativeCanvas, nativeFilter);
+        nativeSetDrawFilter(mNativeCanvasWrapper, nativeFilter);
     }
 
     public enum EdgeType {
@@ -787,7 +780,7 @@ public class Canvas {
      *              does not intersect with the canvas' clip
      */
     public boolean quickReject(RectF rect, EdgeType type) {
-        return native_quickReject(mNativeCanvas, rect);
+        return native_quickReject(mNativeCanvasWrapper, rect);
     }
 
     /**
@@ -806,7 +799,7 @@ public class Canvas {
      *                    does not intersect with the canvas' clip
      */
     public boolean quickReject(Path path, EdgeType type) {
-        return native_quickReject(mNativeCanvas, path.ni());
+        return native_quickReject(mNativeCanvasWrapper, path.ni());
     }
 
     /**
@@ -831,7 +824,7 @@ public class Canvas {
      */
     public boolean quickReject(float left, float top, float right, float bottom,
                                EdgeType type) {
-        return native_quickReject(mNativeCanvas, left, top, right, bottom);
+        return native_quickReject(mNativeCanvasWrapper, left, top, right, bottom);
     }
 
     /**
@@ -845,7 +838,7 @@ public class Canvas {
      * @return true if the current clip is non-empty.
      */
     public boolean getClipBounds(Rect bounds) {
-        return native_getClipBounds(mNativeCanvas, bounds);
+        return native_getClipBounds(mNativeCanvasWrapper, bounds);
     }
     
     /**
@@ -868,7 +861,7 @@ public class Canvas {
      * @param b blue component (0..255) of the color to draw onto the canvas
      */
     public void drawRGB(int r, int g, int b) {
-        native_drawRGB(mNativeCanvas, r, g, b);
+        native_drawRGB(mNativeCanvasWrapper, r, g, b);
     }
 
     /**
@@ -881,7 +874,7 @@ public class Canvas {
      * @param b blue component (0..255) of the color to draw onto the canvas
      */
     public void drawARGB(int a, int r, int g, int b) {
-        native_drawARGB(mNativeCanvas, a, r, g, b);
+        native_drawARGB(mNativeCanvasWrapper, a, r, g, b);
     }
 
     /**
@@ -891,7 +884,7 @@ public class Canvas {
      * @param color the color to draw onto the canvas
      */
     public void drawColor(int color) {
-        native_drawColor(mNativeCanvas, color);
+        native_drawColor(mNativeCanvasWrapper, color);
     }
 
     /**
@@ -902,7 +895,7 @@ public class Canvas {
      * @param mode  the porter-duff mode to apply to the color
      */
     public void drawColor(int color, PorterDuff.Mode mode) {
-        native_drawColor(mNativeCanvas, color, mode.nativeInt);
+        native_drawColor(mNativeCanvasWrapper, color, mode.nativeInt);
     }
 
     /**
@@ -913,7 +906,7 @@ public class Canvas {
      * @param paint The paint used to draw onto the canvas
      */
     public void drawPaint(Paint paint) {
-        native_drawPaint(mNativeCanvas, paint.mNativePaint);
+        native_drawPaint(mNativeCanvasWrapper, paint.mNativePaint);
     }
     
     /**
@@ -959,7 +952,7 @@ public class Canvas {
      * @param paint  The paint used to draw the line
      */
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
-        native_drawLine(mNativeCanvas, startX, startY, stopX, stopY, paint.mNativePaint);
+        native_drawLine(mNativeCanvasWrapper, startX, startY, stopX, stopY, paint.mNativePaint);
     }
 
     /**
@@ -991,7 +984,7 @@ public class Canvas {
      * @param paint The paint used to draw the rect
      */
     public void drawRect(RectF rect, Paint paint) {
-        native_drawRect(mNativeCanvas, rect, paint.mNativePaint);
+        native_drawRect(mNativeCanvasWrapper, rect, paint.mNativePaint);
     }
 
     /**
@@ -1017,7 +1010,7 @@ public class Canvas {
      * @param paint  The paint used to draw the rect
      */
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
-        native_drawRect(mNativeCanvas, left, top, right, bottom, paint.mNativePaint);
+        native_drawRect(mNativeCanvasWrapper, left, top, right, bottom, paint.mNativePaint);
     }
 
     /**
@@ -1030,7 +1023,7 @@ public class Canvas {
         if (oval == null) {
             throw new NullPointerException();
         }
-        native_drawOval(mNativeCanvas, oval, paint.mNativePaint);
+        native_drawOval(mNativeCanvasWrapper, oval, paint.mNativePaint);
     }
 
     /**
@@ -1044,7 +1037,7 @@ public class Canvas {
      * @param paint  The paint used to draw the circle
      */
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        native_drawCircle(mNativeCanvas, cx, cy, radius, paint.mNativePaint);
+        native_drawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.mNativePaint);
     }
 
     /**
@@ -1075,7 +1068,7 @@ public class Canvas {
         if (oval == null) {
             throw new NullPointerException();
         }
-        native_drawArc(mNativeCanvas, oval, startAngle, sweepAngle,
+        native_drawArc(mNativeCanvasWrapper, oval, startAngle, sweepAngle,
                 useCenter, paint.mNativePaint);
     }
 
@@ -1102,7 +1095,7 @@ public class Canvas {
      */
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
             Paint paint) {
-        native_drawRoundRect(mNativeCanvas, left, top, right, bottom, rx, ry, paint.mNativePaint);
+        native_drawRoundRect(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, paint.mNativePaint);
     }
 
     /**
@@ -1113,7 +1106,7 @@ public class Canvas {
      * @param paint The paint used to draw the path
      */
     public void drawPath(Path path, Paint paint) {
-        native_drawPath(mNativeCanvas, path.ni(), paint.mNativePaint);
+        native_drawPath(mNativeCanvasWrapper, path.ni(), paint.mNativePaint);
     }
 
     /**
@@ -1177,7 +1170,7 @@ public class Canvas {
      */
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvas, bitmap.ni(), left, top,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top,
                 paint != null ? paint.mNativePaint : 0, mDensity, mScreenDensity, bitmap.mDensity);
     }
 
@@ -1208,7 +1201,7 @@ public class Canvas {
             throw new NullPointerException();
         }
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), src, dst,
                           paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
 
@@ -1239,7 +1232,7 @@ public class Canvas {
             throw new NullPointerException();
         }
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), src, dst,
                 paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
     
@@ -1291,7 +1284,7 @@ public class Canvas {
             return;
         }
         // punch down to native for the actual draw
-        native_drawBitmap(mNativeCanvas, colors, offset, stride, x, y, width, height, hasAlpha,
+        native_drawBitmap(mNativeCanvasWrapper, colors, offset, stride, x, y, width, height, hasAlpha,
                 paint != null ? paint.mNativePaint : 0);
     }
 
@@ -1319,7 +1312,7 @@ public class Canvas {
      * @param paint  May be null. The paint used to draw the bitmap
      */
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        nativeDrawBitmapMatrix(mNativeCanvas, bitmap.ni(), matrix.ni(),
+        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.ni(), matrix.ni(),
                 paint != null ? paint.mNativePaint : 0);
     }
 
@@ -1373,7 +1366,7 @@ public class Canvas {
             // no mul by 2, since we need only 1 color per vertex
             checkRange(colors.length, colorOffset, count);
         }
-        nativeDrawBitmapMesh(mNativeCanvas, bitmap.ni(), meshWidth, meshHeight,
+        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap.ni(), meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset,
                 paint != null ? paint.mNativePaint : 0);
     }
@@ -1436,7 +1429,7 @@ public class Canvas {
         if (indices != null) {
             checkRange(indices.length, indexOffset, indexCount);
         }
-        nativeDrawVertices(mNativeCanvas, mode.nativeInt, vertexCount, verts,
+        nativeDrawVertices(mNativeCanvasWrapper, mode.nativeInt, vertexCount, verts,
                 vertOffset, texs, texOffset, colors, colorOffset,
                 indices, indexOffset, indexCount, paint.mNativePaint);
     }
@@ -1455,7 +1448,7 @@ public class Canvas {
             (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
+        native_drawText(mNativeCanvasWrapper, text, index, count, x, y, paint.mBidiFlags,
                 paint.mNativePaint, paint.mNativeTypeface);
     }
 
@@ -1469,7 +1462,7 @@ public class Canvas {
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(String text, float x, float y, Paint paint) {
-        native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
+        native_drawText(mNativeCanvasWrapper, text, 0, text.length(), x, y, paint.mBidiFlags,
                 paint.mNativePaint, paint.mNativeTypeface);
     }
 
@@ -1488,7 +1481,7 @@ public class Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, start, end, x, y, paint.mBidiFlags,
+        native_drawText(mNativeCanvasWrapper, text, start, end, x, y, paint.mBidiFlags,
                 paint.mNativePaint, paint.mNativeTypeface);
     }
 
@@ -1508,7 +1501,7 @@ public class Canvas {
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
-            native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
+            native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
                     paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
@@ -1516,7 +1509,7 @@ public class Canvas {
         } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
-            native_drawText(mNativeCanvas, buf, 0, end - start, x, y,
+            native_drawText(mNativeCanvasWrapper, buf, 0, end - start, x, y,
                     paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
@@ -1559,7 +1552,7 @@ public class Canvas {
             throw new IllegalArgumentException("unknown dir: " + dir);
         }
 
-        native_drawTextRun(mNativeCanvas, text, index, count,
+        native_drawTextRun(mNativeCanvasWrapper, text, index, count,
                 contextIndex, contextCount, x, y, dir, paint.mNativePaint, paint.mNativeTypeface);
     }
 
@@ -1597,7 +1590,7 @@ public class Canvas {
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
-            native_drawTextRun(mNativeCanvas, text.toString(), start, end,
+            native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end,
                     contextStart, contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
@@ -1607,7 +1600,7 @@ public class Canvas {
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-            native_drawTextRun(mNativeCanvas, buf, start - contextStart, len,
+            native_drawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
                     0, contextLen, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
@@ -1632,7 +1625,7 @@ public class Canvas {
         if (index < 0 || index + count > text.length || count*2 > pos.length) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawPosText(mNativeCanvas, text, index, count, pos,
+        native_drawPosText(mNativeCanvasWrapper, text, index, count, pos,
                 paint.mNativePaint);
     }
 
@@ -1652,7 +1645,7 @@ public class Canvas {
         if (text.length()*2 > pos.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        native_drawPosText(mNativeCanvas, text, pos, paint.mNativePaint);
+        native_drawPosText(mNativeCanvasWrapper, text, pos, paint.mNativePaint);
     }
 
     /**
@@ -1673,7 +1666,7 @@ public class Canvas {
         if (index < 0 || index + count > text.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        native_drawTextOnPath(mNativeCanvas, text, index, count,
+        native_drawTextOnPath(mNativeCanvasWrapper, text, index, count,
                 path.ni(), hOffset, vOffset,
                 paint.mBidiFlags, paint.mNativePaint);
     }
@@ -1693,7 +1686,7 @@ public class Canvas {
      */
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
         if (text.length() > 0) {
-            native_drawTextOnPath(mNativeCanvas, text, path.ni(), hOffset, vOffset,
+            native_drawTextOnPath(mNativeCanvasWrapper, text, path.ni(), hOffset, vOffset,
                     paint.mBidiFlags, paint.mNativePaint);
         }
     }
@@ -1767,8 +1760,10 @@ public class Canvas {
     public static native void freeTextLayoutCaches();
 
     private static native long initRaster(long nativeBitmapOrZero);
-    private static native void copyNativeCanvasState(long nativeSrcCanvas,
-                                                     long nativeDstCanvas);
+    private static native long initCanvas(long canvasHandle);
+    private static native void native_setBitmap(long canvasHandle,
+                                                long bitmapHandle,
+                                                boolean copyState);
     private static native int native_saveLayer(long nativeCanvas,
                                                RectF bounds,
                                                long nativePaint,

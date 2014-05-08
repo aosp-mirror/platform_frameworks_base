@@ -42,22 +42,26 @@
 
 #include <utils/Log.h>
 
-static uint32_t get_thread_msec() {
-#if defined(HAVE_POSIX_CLOCKS)
-    struct timespec tm;
-
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
-
-    return tm.tv_sec * 1000LL + tm.tv_nsec / 1000000;
-#else
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000LL + tv.tv_usec / 1000;
-#endif
-}
-
 namespace android {
+
+// Holds an SkCanvas reference plus additional native data.
+class NativeCanvasWrapper {
+public:
+    NativeCanvasWrapper(SkCanvas* canvas)
+        : mCanvas(canvas) { }
+
+    SkCanvas* getCanvas() const {
+        return mCanvas.get();
+    }
+
+    void setCanvas(SkCanvas* canvas) {
+        SkASSERT(canvas);
+        mCanvas.reset(canvas);
+    }
+
+private:
+    SkAutoTUnref<SkCanvas> mCanvas;
+};
 
 class ClipCopier : public SkCanvas::ClipVisitor {
 public:
@@ -86,27 +90,30 @@ static jboolean hasNonEmptyClip(const SkCanvas& canvas) {
 class SkCanvasGlue {
 public:
 
-    static void finalizer(JNIEnv* env, jobject clazz, jlong canvasHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
-        canvas->unref();
+    // Get the SkCanvas for a given native handle.
+    static inline SkCanvas* getNativeCanvas(jlong nativeHandle) {
+        SkASSERT(nativeHandle);
+        NativeCanvasWrapper* wrapper = reinterpret_cast<NativeCanvasWrapper*>(nativeHandle);
+        SkCanvas* canvas = wrapper->getCanvas();
+        SkASSERT(canvas);
+
+        return canvas;
     }
 
-    static jlong initRaster(JNIEnv* env, jobject, jlong bitmapHandle) {
-        SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    // Construct an SkCanvas from the bitmap.
+    static SkCanvas* createCanvas(SkBitmap* bitmap) {
         if (bitmap) {
-            return reinterpret_cast<jlong>(new SkCanvas(*bitmap));
-        } else {
-            // Create an empty bitmap device to prevent callers from crashing
-            // if they attempt to draw into this canvas.
-            SkBitmap emptyBitmap;
-            return reinterpret_cast<jlong>(new SkCanvas(emptyBitmap));
+            return SkNEW_ARGS(SkCanvas, (*bitmap));
         }
+
+        // Create an empty bitmap device to prevent callers from crashing
+        // if they attempt to draw into this canvas.
+        SkBitmap emptyBitmap;
+        return new SkCanvas(emptyBitmap);
     }
 
-    static void copyCanvasState(JNIEnv* env, jobject clazz,
-                                jlong srcCanvasHandle, jlong dstCanvasHandle) {
-        SkCanvas* srcCanvas = reinterpret_cast<SkCanvas*>(srcCanvasHandle);
-        SkCanvas* dstCanvas = reinterpret_cast<SkCanvas*>(dstCanvasHandle);
+    // Copy the canvas matrix & clip state.
+    static void copyCanvasState(SkCanvas* srcCanvas, SkCanvas* dstCanvas) {
         if (srcCanvas && dstCanvas) {
             dstCanvas->setMatrix(srcCanvas->getTotalMatrix());
             if (NULL != srcCanvas->getDevice() && NULL != dstCanvas->getDevice()) {
@@ -116,6 +123,42 @@ public:
         }
     }
 
+    // Native JNI handlers
+    static void finalizer(JNIEnv* env, jobject clazz, jlong nativeHandle) {
+        NativeCanvasWrapper* wrapper = reinterpret_cast<NativeCanvasWrapper*>(nativeHandle);
+        delete wrapper;
+    }
+
+    // Native wrapper constructor used by Canvas(Bitmap)
+    static jlong initRaster(JNIEnv* env, jobject, jlong bitmapHandle) {
+        // No check - 0 is a valid bitmapHandle.
+        SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+        SkCanvas* canvas = createCanvas(bitmap);
+
+        return reinterpret_cast<jlong>(new NativeCanvasWrapper(canvas));
+    }
+
+    // Native wrapper constructor used by Canvas(native_canvas)
+    static jlong initCanvas(JNIEnv* env, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        return reinterpret_cast<jlong>(new NativeCanvasWrapper(canvas));
+    }
+
+    // Set the given bitmap as the new draw target (wrapped in a new SkCanvas),
+    // optionally copying canvas matrix & clip state.
+    static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
+                          jboolean copyState) {
+        NativeCanvasWrapper* wrapper = reinterpret_cast<NativeCanvasWrapper*>(canvasHandle);
+        SkCanvas* newCanvas = createCanvas(reinterpret_cast<SkBitmap*>(bitmapHandle));
+        NPE_CHECK_RETURN_VOID(env, newCanvas);
+
+        if (copyState == JNI_TRUE) {
+            copyCanvasState(wrapper->getCanvas(), newCanvas);
+        }
+
+        // setCanvas() unrefs the old canvas.
+        wrapper->setCanvas(newCanvas);
+    }
 
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
@@ -163,7 +206,7 @@ public:
 
     static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle, jobject bounds,
                          jlong paintHandle, jint flags) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect* bounds_ = NULL;
         SkRect  storage;
@@ -177,7 +220,7 @@ public:
     static jint saveLayer4F(JNIEnv* env, jobject, jlong canvasHandle,
                            jfloat l, jfloat t, jfloat r, jfloat b,
                            jlong paintHandle, jint flags) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect bounds;
         bounds.set(l, t, r, b);
@@ -188,7 +231,7 @@ public:
 
     static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle,
                               jobject bounds, jint alpha, jint flags) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect* bounds_ = NULL;
         SkRect  storage;
         if (bounds != NULL) {
@@ -203,7 +246,7 @@ public:
     static jint saveLayerAlpha4F(JNIEnv* env, jobject, jlong canvasHandle,
                                 jfloat l, jfloat t, jfloat r, jfloat b,
                                 jint alpha, jint flags) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect  bounds;
         bounds.set(l, t, r, b);
         int result = canvas->saveLayerAlpha(&bounds, alpha,
@@ -259,14 +302,14 @@ public:
 
     static void concat(JNIEnv* env, jobject, jlong canvasHandle,
                        jlong matrixHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         canvas->concat(*matrix);
     }
 
     static void setMatrix(JNIEnv* env, jobject, jlong canvasHandle,
                           jlong matrixHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         if (NULL == matrix) {
             canvas->resetMatrix();
@@ -318,8 +361,8 @@ public:
     static jboolean clipRect(JNIEnv* env, jobject, jlong canvasHandle,
                              jfloat left, jfloat top, jfloat right, jfloat bottom,
                              jint op) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect rect;
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
         rect.set(left, top, right, bottom);
         canvas->clipRect(rect, static_cast<SkRegion::Op>(op));
         return hasNonEmptyClip(*canvas);
@@ -327,7 +370,7 @@ public:
 
     static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle,
                              jlong pathHandle, jint op) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->clipPath(*reinterpret_cast<SkPath*>(pathHandle),
                 static_cast<SkRegion::Op>(op));
         return hasNonEmptyClip(*canvas);
@@ -335,7 +378,7 @@ public:
 
     static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle,
                                jlong deviceRgnHandle, jint op) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
         canvas->clipRegion(*deviceRgn, static_cast<SkRegion::Op>(op));
         return hasNonEmptyClip(*canvas);
@@ -343,13 +386,13 @@ public:
 
     static void setDrawFilter(JNIEnv* env, jobject, jlong canvasHandle,
                               jlong filterHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->setDrawFilter(reinterpret_cast<SkDrawFilter*>(filterHandle));
     }
 
     static jboolean quickReject__RectF(JNIEnv* env, jobject, jlong canvasHandle,
                                         jobject rect) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
         bool result = canvas->quickReject(rect_);
@@ -358,7 +401,7 @@ public:
 
     static jboolean quickReject__Path(JNIEnv* env, jobject, jlong canvasHandle,
                                        jlong pathHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         bool result = canvas->quickReject(*reinterpret_cast<SkPath*>(pathHandle));
         return result ? JNI_TRUE : JNI_FALSE;
     }
@@ -366,7 +409,7 @@ public:
     static jboolean quickReject__FFFF(JNIEnv* env, jobject, jlong canvasHandle,
                                        jfloat left, jfloat top, jfloat right,
                                        jfloat bottom) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect r;
         r.set(left, top, right, bottom);
         bool result = canvas->quickReject(r);
@@ -375,32 +418,32 @@ public:
 
     static void drawRGB(JNIEnv* env, jobject, jlong canvasHandle,
                         jint r, jint g, jint b) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->drawARGB(0xFF, r, g, b);
     }
 
     static void drawARGB(JNIEnv* env, jobject, jlong canvasHandle,
                          jint a, jint r, jint g, jint b) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->drawARGB(a, r, g, b);
     }
 
     static void drawColor__I(JNIEnv* env, jobject, jlong canvasHandle,
                              jint color) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->drawColor(color);
     }
 
     static void drawColor__II(JNIEnv* env, jobject, jlong canvasHandle,
                               jint color, jint modeHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
         canvas->drawColor(color, SkPorterDuff::ToXfermodeMode(mode));
     }
 
     static void drawPaint(JNIEnv* env, jobject, jlong canvasHandle,
                           jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawPaint(*paint);
     }
@@ -461,14 +504,14 @@ public:
     static void drawLine__FFFFPaint(JNIEnv* env, jobject, jlong canvasHandle,
                                     jfloat startX, jfloat startY, jfloat stopX,
                                     jfloat stopY, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawLine(startX, startY, stopX, stopY, *paint);
     }
 
     static void drawRect__RectFPaint(JNIEnv* env, jobject, jlong canvasHandle,
                                      jobject rect, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
@@ -478,14 +521,14 @@ public:
     static void drawRect__FFFFPaint(JNIEnv* env, jobject, jlong canvasHandle,
                                     jfloat left, jfloat top, jfloat right,
                                     jfloat bottom, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawRectCoords(left, top, right, bottom, *paint);
     }
 
     static void drawOval(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
                          jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect oval;
         GraphicsJNI::jrectf_to_rect(env, joval, &oval);
@@ -494,7 +537,7 @@ public:
 
     static void drawCircle(JNIEnv* env, jobject, jlong canvasHandle, jfloat cx,
                            jfloat cy, jfloat radius, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawCircle(cx, cy, radius, *paint);
     }
@@ -502,7 +545,7 @@ public:
     static void drawArc(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
                         jfloat startAngle, jfloat sweepAngle,
                         jboolean useCenter, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect oval;
         GraphicsJNI::jrectf_to_rect(env, joval, &oval);
@@ -512,7 +555,7 @@ public:
     static void drawRoundRect(JNIEnv* env, jobject, jlong canvasHandle,
             jfloat left, jfloat top, jfloat right, jfloat bottom, jfloat rx, jfloat ry,
             jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         canvas->drawRoundRect(rect, rx, ry, *paint);
@@ -520,7 +563,7 @@ public:
 
     static void drawPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
                          jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawPath(*path, *paint);
@@ -531,7 +574,7 @@ public:
                                           jfloat left, jfloat top,
                                           jlong paintHandle, jint canvasDensity,
                                           jint screenDensity, jint bitmapDensity) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
 
@@ -591,7 +634,7 @@ public:
                              jlong bitmapHandle, jobject srcIRect,
                              jobject dstRectF, jlong paintHandle,
                              jint screenDensity, jint bitmapDensity) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect      dst;
@@ -604,7 +647,7 @@ public:
                              jlong bitmapHandle, jobject srcIRect,
                              jobject dstRect, jlong paintHandle,
                              jint screenDensity, jint bitmapDensity) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect      dst;
@@ -616,9 +659,8 @@ public:
     static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
                                 jintArray jcolors, jint offset, jint stride,
                                 jfloat x, jfloat y, jint width, jint height,
-                                jboolean hasAlpha, jlong paintHandle)
-    {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+                                jboolean hasAlpha, jlong paintHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         SkBitmap    bitmap;
         bitmap.setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config :
@@ -638,7 +680,7 @@ public:
     static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle,
                                  jlong bitmapHandle, jlong matrixHandle,
                                  jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
@@ -649,7 +691,7 @@ public:
                           jlong bitmapHandle, jint meshWidth, jint meshHeight,
                           jfloatArray jverts, jint vertIndex, jintArray jcolors,
                           jint colorIndex, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
 
@@ -759,7 +801,7 @@ public:
                              jintArray jcolors, jint colorIndex,
                              jshortArray jindices, jint indexIndex,
                              jint indexCount, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkCanvas::VertexMode mode = static_cast<SkCanvas::VertexMode>(modeHandle);
         const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
 
@@ -799,7 +841,7 @@ public:
                                                jcharArray text, jint index, jint count,
                                                jfloat x, jfloat y, jint flags,
                                                jlong paintHandle, jlong typefaceHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
@@ -812,7 +854,7 @@ public:
                                                    jint start, jint end,
                                                    jfloat x, jfloat y, jint flags,
                                                    jlong paintHandle, jlong typefaceHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
@@ -939,10 +981,10 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
     }
 
     static void drawTextRun___CIIIIFFIPaintTypeface(
-        JNIEnv* env, jobject, jlong canvasHandle, jcharArray text, jint index,
-        jint count, jint contextIndex, jint contextCount,
-        jfloat x, jfloat y, jint dirFlags, jlong paintHandle, jlong typefaceHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+            JNIEnv* env, jobject, jlong canvasHandle, jcharArray text, jint index,
+            jint count, jint contextIndex, jint contextCount,
+            jfloat x, jfloat y, jint dirFlags, jlong paintHandle, jlong typefaceHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
@@ -953,10 +995,10 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
     }
 
     static void drawTextRun__StringIIIIFFIPaintTypeface(
-        JNIEnv* env, jobject obj, jlong canvasHandle, jstring text, jint start,
-        jint end, jint contextStart, jint contextEnd,
-        jfloat x, jfloat y, jint dirFlags, jlong paintHandle, jlong typefaceHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+            JNIEnv* env, jobject obj, jlong canvasHandle, jstring text, jint start,
+            jint end, jint contextStart, jint contextEnd,
+            jfloat x, jfloat y, jint dirFlags, jlong paintHandle, jlong typefaceHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
@@ -971,7 +1013,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
     static void drawPosText___CII_FPaint(JNIEnv* env, jobject, jlong canvasHandle,
                                          jcharArray text, jint index, jint count,
                                          jfloatArray pos, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         jchar* textArray = text ? env->GetCharArrayElements(text, NULL) : NULL;
         jsize textCount = text ? env->GetArrayLength(text) : NULL;
@@ -1002,7 +1044,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
                                            jlong canvasHandle, jstring text,
                                            jfloatArray pos,
                                            jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         const void* text_ = text ? env->GetStringChars(text, NULL) : NULL;
         int byteLength = text ? env->GetStringLength(text) : 0;
@@ -1032,7 +1074,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
     static void drawTextOnPath___CIIPathFFPaint(JNIEnv* env, jobject,
             jlong canvasHandle, jcharArray text, jint index, jint count,
             jlong pathHandle, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
 
@@ -1045,7 +1087,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
     static void drawTextOnPath__StringPathFFPaint(JNIEnv* env, jobject,
             jlong canvasHandle, jstring text, jlong pathHandle,
             jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         const jchar* text_ = env->GetStringChars(text, NULL);
@@ -1084,7 +1126,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
 
     static jboolean getClipBounds(JNIEnv* env, jobject, jlong canvasHandle,
                                   jobject bounds) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect   r;
         SkIRect ir;
         bool result = getHardClipBounds(canvas, &r);
@@ -1100,7 +1142,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
 
     static void getCTM(JNIEnv* env, jobject, jlong canvasHandle,
                        jlong matrixHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         *matrix = canvas->getTotalMatrix();
     }
@@ -1108,8 +1150,9 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
 
 static JNINativeMethod gCanvasMethods[] = {
     {"finalizer", "(J)V", (void*) SkCanvasGlue::finalizer},
-    {"initRaster","(J)J", (void*) SkCanvasGlue::initRaster},
-    {"copyNativeCanvasState","(JJ)V", (void*) SkCanvasGlue::copyCanvasState},
+    {"initRaster", "(J)J", (void*) SkCanvasGlue::initRaster},
+    {"initCanvas", "(J)J", (void*) SkCanvasGlue::initCanvas},
+    {"native_setBitmap", "(JJZ)V", (void*) SkCanvasGlue::setBitmap},
     {"isOpaque","()Z", (void*) SkCanvasGlue::isOpaque},
     {"getWidth","()I", (void*) SkCanvasGlue::getWidth},
     {"getHeight","()I", (void*) SkCanvasGlue::getHeight},
@@ -1224,4 +1267,11 @@ int register_android_graphics_Canvas(JNIEnv* env) {
     return result;
 }
 
+} // namespace android
+
+// GraphicsJNI helper for external clients.
+// We keep the implementation here to avoid exposing NativeCanvasWrapper
+// externally.
+SkCanvas* GraphicsJNI::getNativeCanvas(jlong nativeHandle) {
+    return android::SkCanvasGlue::getNativeCanvas(nativeHandle);
 }

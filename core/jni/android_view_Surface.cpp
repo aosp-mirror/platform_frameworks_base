@@ -70,7 +70,7 @@ static struct {
 
 static struct {
     jfieldID mSurfaceFormat;
-    jmethodID safeCanvasSwap;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -232,10 +232,11 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         bitmap.setPixels(NULL);
     }
 
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    env->CallVoidMethod(canvasObj, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap,
+                        reinterpret_cast<jlong>(&bitmap));
 
     if (dirtyRectPtr) {
+        SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
         nativeCanvas->clipRect( SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)) );
     }
 
@@ -262,8 +263,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    env->CallVoidMethod(canvasObj, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     // unlock surface
     status_t err = surface->unlockAndPost();
@@ -375,7 +375,7 @@ int register_android_view_Surface(JNIEnv* env)
 
     clazz = env->FindClass("android/graphics/Canvas");
     gCanvasClassInfo.mSurfaceFormat = env->GetFieldID(clazz, "mSurfaceFormat", "I");
-    gCanvasClassInfo.safeCanvasSwap = env->GetMethodID(clazz, "safeCanvasSwap", "(JZ)V");
+    gCanvasClassInfo.setNativeBitmap = env->GetMethodID(clazz, "setNativeBitmap", "(J)V");
 
     clazz = env->FindClass("android/graphics/Rect");
     gRectClassInfo.left = env->GetFieldID(clazz, "left", "I");

@@ -18,6 +18,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "android/graphics/GraphicsJNI.h"
 
 #include <android_view_GraphicBuffer.h>
 #include <cutils/log.h>
@@ -46,7 +47,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static struct {
-    jmethodID safeCanvasSwap;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
 
 #define INVOKEV(object, method, ...) \
@@ -63,9 +64,7 @@ static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, job
     bitmap->setConfig(SkBitmap::kARGB_8888_Config, width, height);
     bitmap->allocPixels();
     bitmap->eraseColor(0);
-
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (*bitmap));
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(bitmap));
 
     return reinterpret_cast<jlong>(bitmap);
 }
@@ -74,8 +73,7 @@ static void com_android_server_AssetAtlasService_releaseCanvas(JNIEnv* env, jobj
         jobject canvas, jlong bitmapHandle) {
 
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     delete bitmap;
 }
@@ -244,7 +242,7 @@ int register_android_server_AssetAtlasService(JNIEnv* env) {
     jclass clazz;
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_METHOD_ID(gCanvasClassInfo.safeCanvasSwap, clazz, "safeCanvasSwap", "(JZ)V");
+    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
 
     return jniRegisterNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
