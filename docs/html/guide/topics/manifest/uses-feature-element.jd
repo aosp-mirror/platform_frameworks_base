@@ -584,9 +584,14 @@ is sensitive to delays or lag in sound input or output.</td>
 </tr>
 <tr>
   <td><code>android.hardware.camera.any</code></td>
-  <td>The application uses at least one camera facing in any direction. Use this
-in preference to <code>android.hardware.camera</code> if a back-facing camera is
-not required.</td>
+  <td>The application uses at least one camera facing in any direction, or an
+external camera device if one is connected. Use this in preference to
+<code>android.hardware.camera</code> if a back-facing camera is not required.
+  </td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.external</code></td>
+  <td>The application uses an external camera device if one is connected.</td>
 </tr>
 
 <tr>

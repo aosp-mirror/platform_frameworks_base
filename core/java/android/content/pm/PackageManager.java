@@ -894,10 +894,18 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has at least one camera pointing in
-     * some direction.
+     * some direction, or can support an external camera being connected to it.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_ANY = "android.hardware.camera.any";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device can support having an external camera connected to it.
+     * The external camera may not always be connected or available to applications to use.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_EXTERNAL = "android.hardware.camera.external";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
