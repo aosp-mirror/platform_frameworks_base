@@ -231,14 +231,14 @@ android_media_SoundPool_SoundPoolImpl_release(JNIEnv *env, jobject thiz)
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap != NULL) {
 
-        // release weak reference
+        // release weak reference and clear callback
         jobject weakRef = (jobject) ap->getUserData();
+        ap->setCallback(NULL, NULL);
         if (weakRef != NULL) {
             env->DeleteGlobalRef(weakRef);
         }
 
-        // clear callback and native context
-        ap->setCallback(NULL, NULL);
+        // clear native context
         env->SetLongField(thiz, fields.mNativeContext, 0);
         delete ap;
     }
