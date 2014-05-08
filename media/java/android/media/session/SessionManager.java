@@ -22,6 +22,7 @@ import android.media.session.ISessionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
@@ -65,10 +66,25 @@ public final class SessionManager {
      * @return a {@link Session} for the new session
      */
     public Session createSession(String tag) {
+        return createSessionAsUser(tag, UserHandle.myUserId());
+    }
+
+    /**
+     * Creates a new session as the specified user. To create a session as a
+     * user other than your own you must hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission.
+     *
+     * @param tag A short name for debugging purposes
+     * @param userId The user id to create the session as.
+     * @return a {@link Session} for the new session
+     * @hide
+     */
+    public Session createSessionAsUser(String tag, int userId) {
         try {
             Session.CallbackStub cbStub = new Session.CallbackStub();
             Session session = new Session(mService
-                    .createSession(mContext.getPackageName(), cbStub, tag), cbStub);
+                    .createSession(mContext.getPackageName(), cbStub, tag, userId), cbStub);
             cbStub.setMediaSession(session);
 
             return session;
@@ -91,9 +107,27 @@ public final class SessionManager {
      * @return A list of controllers for ongoing sessions
      */
     public List<SessionController> getActiveSessions(ComponentName notificationListener) {
+        return getActiveSessionsForUser(notificationListener, UserHandle.myUserId());
+    }
+
+    /**
+     * Get active sessions for a specific user. To retrieve actions for a user
+     * other than your own you must hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission
+     * in addition to any other requirements. If you are an enabled notification
+     * listener you may only get sessions for the users you are enabled for.
+     *
+     * @param notificationListener The enabled notification listener component.
+     *            May be null.
+     * @param userId The user id to fetch sessions for.
+     * @return A list of controllers for ongoing sessions.
+     * @hide
+     */
+    public List<SessionController> getActiveSessionsForUser(ComponentName notificationListener,
+            int userId) {
         ArrayList<SessionController> controllers = new ArrayList<SessionController>();
         try {
-            List<IBinder> binders = mService.getSessions(notificationListener);
+            List<IBinder> binders = mService.getSessions(notificationListener, userId);
             for (int i = binders.size() - 1; i >= 0; i--) {
                 SessionController controller = SessionController.fromBinder(ISessionController.Stub
                         .asInterface(binders.get(i)));

@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.media.session.PlaybackState;
 import android.media.session.Session;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import java.io.PrintWriter;
@@ -104,11 +105,12 @@ public class MediaSessionStack {
      * Get the current priority sorted list of active sessions. The most
      * important session is at index 0 and the least important at size - 1.
      *
+     * @param userId The user to check.
      * @return All the active sessions in priority order.
      */
-    public ArrayList<MediaSessionRecord> getActiveSessions() {
+    public ArrayList<MediaSessionRecord> getActiveSessions(int userId) {
         if (mCachedActiveList == null) {
-            mCachedActiveList = getPriorityListLocked(true, 0);
+            mCachedActiveList = getPriorityListLocked(true, 0, userId);
         }
         return mCachedActiveList;
     }
@@ -118,13 +120,14 @@ public class MediaSessionStack {
      * transport controls. The most important session is at index 0 and the
      * least important at size -1.
      *
+     * @param userId The user to check.
      * @return All the active sessions that handle transport controls in
      *         priority order.
      */
-    public ArrayList<MediaSessionRecord> getTransportControlSessions() {
+    public ArrayList<MediaSessionRecord> getTransportControlSessions(int userId) {
         if (mCachedTransportControlList == null) {
             mCachedTransportControlList = getPriorityListLocked(true,
-                    Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
+                    Session.FLAG_HANDLES_TRANSPORT_CONTROLS, userId);
         }
         return mCachedTransportControlList;
     }
@@ -132,13 +135,14 @@ public class MediaSessionStack {
     /**
      * Get the highest priority active session.
      *
+     * @param userId The user to check.
      * @return The current highest priority session or null.
      */
-    public MediaSessionRecord getDefaultSession() {
+    public MediaSessionRecord getDefaultSession(int userId) {
         if (mCachedDefault != null) {
             return mCachedDefault;
         }
-        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0);
+        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userId);
         if (records.size() > 0) {
             return records.get(0);
         }
@@ -148,22 +152,24 @@ public class MediaSessionStack {
     /**
      * Get the highest priority session that can handle media buttons.
      *
+     * @param userId The user to check.
      * @return The default media button session or null.
      */
-    public MediaSessionRecord getDefaultMediaButtonSession() {
+    public MediaSessionRecord getDefaultMediaButtonSession(int userId) {
         if (mCachedButtonReceiver != null) {
             return mCachedButtonReceiver;
         }
         ArrayList<MediaSessionRecord> records = getPriorityListLocked(true,
-                Session.FLAG_HANDLES_MEDIA_BUTTONS);
+                Session.FLAG_HANDLES_MEDIA_BUTTONS, userId);
         if (records.size() > 0) {
             mCachedButtonReceiver = records.get(0);
         }
         return mCachedButtonReceiver;
     }
 
-    public void dumpLocked(PrintWriter pw, String prefix) {
-        ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0);
+    public void dump(PrintWriter pw, String prefix) {
+        ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
+                UserHandle.USER_ALL);
         int count = sortedSessions.size();
         pw.println(prefix + "Sessions Stack - have " + count + " sessions:");
         String indent = prefix + "  ";
@@ -182,9 +188,12 @@ public class MediaSessionStack {
      *            all sessions.
      * @param withFlags Only return sessions with all the specified flags set. 0
      *            returns all sessions.
+     * @param userId The user to get sessions for. {@link UserHandle#USER_ALL}
+     *            will return sessions for all users.
      * @return The priority sorted list of sessions.
      */
-    private ArrayList<MediaSessionRecord> getPriorityListLocked(boolean activeOnly, int withFlags) {
+    private ArrayList<MediaSessionRecord> getPriorityListLocked(boolean activeOnly, int withFlags,
+            int userId) {
         ArrayList<MediaSessionRecord> result = new ArrayList<MediaSessionRecord>();
         int lastLocalIndex = 0;
         int lastActiveIndex = 0;
@@ -194,7 +203,12 @@ public class MediaSessionStack {
         for (int i = 0; i < size; i++) {
             final MediaSessionRecord session = mSessions.get(i);
 
+            if (userId != UserHandle.USER_ALL && userId != session.getUserId()) {
+                // Filter out sessions for the wrong user
+                continue;
+            }
             if ((session.getFlags() & withFlags) != withFlags) {
+                // Filter out sessions with the wrong flags
                 continue;
             }
             if (!session.isActive()) {
