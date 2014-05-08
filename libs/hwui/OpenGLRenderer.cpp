@@ -37,6 +37,7 @@
 #include "PathTessellator.h"
 #include "Properties.h"
 #include "ShadowTessellator.h"
+#include "utils/GLUtils.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
 
@@ -296,24 +297,7 @@ void OpenGLRenderer::finish() {
 
     if (!suppressErrorChecks()) {
 #if DEBUG_OPENGL
-        GLenum status = GL_NO_ERROR;
-        while ((status = glGetError()) != GL_NO_ERROR) {
-            ALOGD("GL error from OpenGLRenderer: 0x%x", status);
-            switch (status) {
-                case GL_INVALID_ENUM:
-                    ALOGE("  GL_INVALID_ENUM");
-                    break;
-                case GL_INVALID_VALUE:
-                    ALOGE("  GL_INVALID_VALUE");
-                    break;
-                case GL_INVALID_OPERATION:
-                    ALOGE("  GL_INVALID_OPERATION");
-                    break;
-                case GL_OUT_OF_MEMORY:
-                    ALOGE("  Out of memory!");
-                    break;
-            }
-        }
+        GLUtils::dumpGLErrors();
 #endif
 
 #if DEBUG_MEMORY_USAGE
