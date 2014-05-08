@@ -33,6 +33,14 @@ public class ChooserActivity extends ResolverActivity {
             return;
         }
         Intent target = (Intent)targetParcelable;
+        if (target != null) {
+            final String action = target.getAction();
+            if (Intent.ACTION_SEND.equals(action) ||
+                    Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                target.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                        Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+            }
+        }
         CharSequence title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
         if (title == null) {
             title = getResources().getText(com.android.internal.R.string.chooseActivity);
@@ -43,13 +51,19 @@ public class ChooserActivity extends ResolverActivity {
             initialIntents = new Intent[pa.length];
             for (int i=0; i<pa.length; i++) {
                 if (!(pa[i] instanceof Intent)) {
-                    Log.w("ChooserActivity", "Initial intent #" + i
-                            + " not an Intent: " + pa[i]);
+                    Log.w("ChooserActivity", "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
                     super.onCreate(null);
                     return;
                 }
-                initialIntents[i] = (Intent)pa[i];
+                final Intent in = (Intent) pa[i];
+                final String action = in.getAction();
+                if (Intent.ACTION_SEND.equals(action) ||
+                        Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                    in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                            Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+                }
+                initialIntents[i] = in;
             }
         }
         super.onCreate(savedInstanceState, target, title, initialIntents, null, false);

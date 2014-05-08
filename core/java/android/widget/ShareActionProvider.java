@@ -276,8 +276,13 @@ public class ShareActionProvider extends ActionProvider {
      * @see Intent#ACTION_SEND_MULTIPLE
      */
     public void setShareIntent(Intent shareIntent) {
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+        if (shareIntent != null) {
+            final String action = shareIntent.getAction();
+            if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
                         Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+            }
+        }
         ActivityChooserModel dataModel = ActivityChooserModel.get(mContext,
             mShareHistoryFileName);
         dataModel.setIntent(shareIntent);
@@ -294,8 +299,12 @@ public class ShareActionProvider extends ActionProvider {
             final int itemId = item.getItemId();
             Intent launchIntent = dataModel.chooseActivity(itemId);
             if (launchIntent != null) {
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
-                        Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+                final String action = launchIntent.getAction();
+                if (Intent.ACTION_SEND.equals(action) ||
+                        Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                            Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+                }
                 mContext.startActivity(launchIntent);
             }
             return true;
