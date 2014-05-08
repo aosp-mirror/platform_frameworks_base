@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES := \
 		utils/Blur.cpp \
+		utils/GLUtils.cpp \
 		utils/SortedListImpl.cpp \
 		thread/TaskManager.cpp \
 		font/CacheTexture.cpp \
@@ -53,7 +54,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		TextureCache.cpp \
 		TextDropShadowCache.cpp
 
-	# RenderThread stuff
+# RenderThread stuff
 	LOCAL_SRC_FILES += \
 		renderthread/CanvasContext.cpp \
 		renderthread/DrawFrameTask.cpp \

@@ -175,6 +175,10 @@ public:
         bottom += dy;
     }
 
+    void inset(float delta) {
+        outset(-delta);
+    }
+
     void outset(float delta) {
         left -= delta;
         top -= delta;
@@ -230,8 +234,8 @@ public:
         bottom = ceilf(bottom);
     }
 
-    void dump() const {
-        ALOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
+    void dump(const char* label) const {
+        ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
     }
 
 private:

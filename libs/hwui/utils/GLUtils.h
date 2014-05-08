@@ -13,29 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MATHUTILS_H
-#define MATHUTILS_H
+#ifndef GLUTILS_H
+#define GLUTILS_H
 
 namespace android {
 namespace uirenderer {
 
-class MathUtils {
+class GLUtils {
 private:
-    static const float gNonZeroEpsilon = 0.001f;
 public:
     /**
-     * Check for floats that are close enough to zero.
+     * Print out any GL errors with ALOGE
      */
-    inline static bool isZero(float value) {
-        return (value >= -gNonZeroEpsilon) && (value <= gNonZeroEpsilon);
-    }
+    static void dumpGLErrors();
 
-    inline static bool isPositive(float value) {
-        return value >= gNonZeroEpsilon;
-    }
-}; // class MathUtils
+}; // class GLUtils
 
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif /* MATHUTILS_H */
+#endif /* GLUTILS_H */

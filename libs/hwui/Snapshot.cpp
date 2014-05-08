@@ -27,9 +27,15 @@ namespace uirenderer {
 // Constructors
 ///////////////////////////////////////////////////////////////////////////////
 
-Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
-        invisible(false), empty(false), alpha(1.0f) {
-
+Snapshot::Snapshot()
+        : flags(0)
+        , previous(NULL)
+        , layer(NULL)
+        , fbo(0)
+        , invisible(false)
+        , empty(false)
+        , height(0)
+        , alpha(1.0f) {
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
     region = NULL;
@@ -40,10 +46,16 @@ Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
  * Copies the specified snapshot/ The specified snapshot is stored as
  * the previous snapshot.
  */
-Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
-        flags(0), previous(s), layer(s->layer), fbo(s->fbo),
-        invisible(s->invisible), empty(false),
-        viewport(s->viewport), height(s->height), alpha(s->alpha) {
+Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
+        : flags(0)
+        , previous(s)
+        , layer(s->layer)
+        , fbo(s->fbo)
+        , invisible(s->invisible)
+        , empty(false)
+        , viewport(s->viewport)
+        , height(s->height)
+        , alpha(s->alpha) {
 
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
