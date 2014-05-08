@@ -19578,6 +19578,7 @@ package android.os {
   public class BatteryProperty implements android.os.Parcelable {
     method public int describeContents();
     method public int getInt();
+    method public long getLong();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPACITY = 4; // 0x4
@@ -19585,6 +19586,7 @@ package android.os {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int CURRENT_AVERAGE = 3; // 0x3
     field public static final int CURRENT_NOW = 2; // 0x2
+    field public static final int ENERGY_COUNTER = 4; // 0x4
   }
 
   public class Binder implements android.os.IBinder {

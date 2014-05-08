@@ -146,9 +146,9 @@ public class BatteryManager {
                 return null;
         }
 
-        BatteryProperty prop = new BatteryProperty(Integer.MIN_VALUE);
+        BatteryProperty prop = new BatteryProperty();
         if ((mBatteryPropertiesRegistrar.getProperty(id, prop) == 0) &&
-            (prop.getInt() != Integer.MIN_VALUE))
+            (prop.getLong() != Long.MIN_VALUE))
             return prop;
         else
             return null;

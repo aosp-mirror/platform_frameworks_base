@@ -53,20 +53,18 @@ public class BatteryProperty implements Parcelable {
      */
     public static final int CAPACITY = 4;
 
-    private int mValueInt;
-
     /**
-     * @hide
+     * Battery remaining energy in nanowatt-hours, as a long integer.
      */
-    public BatteryProperty(int value) {
-        mValueInt = value;
-    }
+    public static final int ENERGY_COUNTER = 4;
+
+    private long mValueLong;
 
     /**
      * @hide
      */
     public BatteryProperty() {
-        mValueInt = Integer.MIN_VALUE;
+        mValueLong = Long.MIN_VALUE;
     }
 
     /**
@@ -79,9 +77,21 @@ public class BatteryProperty implements Parcelable {
      * @return The queried property value, or Integer.MIN_VALUE if not supported.
      */
     public int getInt() {
-        return mValueInt;
+        return (int)mValueLong;
     }
 
+    /**
+     * Return the value of a property of long type previously queried
+     * via {@link BatteryManager#getProperty
+     * BatteryManager.getProperty()}.  If the platform does
+     * not provide the property queried, this value will be
+     * Long.MIN_VALUE.
+     *
+     * @return The queried property value, or Long.MIN_VALUE if not supported.
+     */
+    public long getLong() {
+        return mValueLong;
+    }
     /*
      * Parcel read/write code must be kept in sync with
      * frameworks/native/services/batteryservice/BatteryProperty.cpp
@@ -92,11 +102,11 @@ public class BatteryProperty implements Parcelable {
     }
 
     public void readFromParcel(Parcel p) {
-        mValueInt = p.readInt();
+        mValueLong = p.readLong();
     }
 
     public void writeToParcel(Parcel p, int flags) {
-        p.writeInt(mValueInt);
+        p.writeLong(mValueLong);
     }
 
     public static final Parcelable.Creator<BatteryProperty> CREATOR
