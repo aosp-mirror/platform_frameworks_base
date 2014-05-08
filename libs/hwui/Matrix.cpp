@@ -482,8 +482,8 @@ void Matrix4::decomposeScale(float& sx, float& sy) const {
     sy = copysignf(sqrtf(len), data[mat4::kScaleY]);
 }
 
-void Matrix4::dump() const {
-    ALOGD("Matrix4[simple=%d, type=0x%x", isSimple(), getType());
+void Matrix4::dump(const char* label) const {
+    ALOGD("%s[simple=%d, type=0x%x", label ? label : "Matrix4", isSimple(), getType());
     ALOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
     ALOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[9], data[kTranslateY]);
     ALOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);
