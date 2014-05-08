@@ -323,6 +323,10 @@ public class InputManagerService extends IInputManager.Stub
 
         mHandler.sendEmptyMessage(MSG_RELOAD_DEVICE_ALIASES);
         mHandler.sendEmptyMessage(MSG_UPDATE_KEYBOARD_LAYOUTS);
+
+        if (mWiredAccessoryCallbacks != null) {
+            mWiredAccessoryCallbacks.systemReady();
+        }
     }
 
     private void reloadKeyboardLayouts() {
@@ -1588,6 +1592,7 @@ public class InputManagerService extends IInputManager.Stub
      */
     public interface WiredAccessoryCallbacks {
         public void notifyWiredAccessoryChanged(long whenNanos, int switchValues, int switchMask);
+        public void systemReady();
     }
 
     /**
