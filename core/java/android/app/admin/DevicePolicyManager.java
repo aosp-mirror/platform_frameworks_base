@@ -2062,6 +2062,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner to disable account management for a specific type of account.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param accountType For which account management is disabled or enabled.
+     * @param disabled The boolean indicating that account management will be disabled (true) or
+     * enabled (false).
+     */
+    public void setAccountManagementDisabled(ComponentName admin, String accountType,
+            boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setAccountManagementDisabled(admin, accountType, disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
      * Called by profile or device owner to re-enable system apps by intent that were disabled
      * by default when the managed profile was created. This should only be called from a profile
      * or device owner running within a managed profile.
@@ -2080,5 +2102,27 @@ public class DevicePolicyManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Gets the array of accounts for which account management is disabled by the profile owner.
+     *
+     * <p> Account management can be disabled/enabled by calling
+     * {@link #setAccountManagementDisabled}.
+     *
+     * @return a list of account types for which account management has been disabled.
+     *
+     * @see #setAccountManagementDisabled
+     */
+    public String[] getAccountTypesWithManagementDisabled() {
+        if (mService != null) {
+            try {
+                return mService.getAccountTypesWithManagementDisabled();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+
+        return null;
     }
 }
