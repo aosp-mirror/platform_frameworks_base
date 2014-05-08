@@ -5698,7 +5698,7 @@ public class Activity extends ContextThemeWrapper
      * or reaching the home screen.
      *
      * Lock task mode will only start if the activity has been whitelisted by the
-     * Device Owner through {@link DevicePolicyManager#setLockTaskComponents}.
+     * Device Owner through DevicePolicyManager#setLockTaskComponents.
      */
     public void startLockTask() {
         try {
