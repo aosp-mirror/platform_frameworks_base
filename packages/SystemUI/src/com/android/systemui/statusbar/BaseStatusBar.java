@@ -992,7 +992,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 title.setText(entry.notification.getPackageName());
             }
 
-            final ImageView icon = (ImageView) publicViewLocal.findViewById(com.android.internal.R.id.icon);
+            final ImageView icon = (ImageView) publicViewLocal.findViewById(
+                    com.android.internal.R.id.icon);
+            final ImageView profileIcon = (ImageView) publicViewLocal.findViewById(
+                    com.android.internal.R.id.profile_icon);
 
             final StatusBarIcon ic = new StatusBarIcon(entry.notification.getPackageName(),
                     entry.notification.getUser(),
@@ -1008,7 +1011,19 @@ public abstract class BaseStatusBar extends SystemUI implements
                         com.android.internal.R.drawable.notification_icon_legacy_bg_inset);
             }
 
-            final TextView text = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.text);
+            if (profileIcon != null) {
+                Drawable profileDrawable
+                        = mUserManager.getBadgeForUser(entry.notification.getUser());
+                if (profileDrawable != null) {
+                    profileIcon.setImageDrawable(profileDrawable);
+                    profileIcon.setVisibility(View.VISIBLE);
+                } else {
+                    profileIcon.setVisibility(View.GONE);
+                }
+            }
+
+            final TextView text = (TextView) publicViewLocal.findViewById(
+                    com.android.internal.R.id.text);
             text.setText("Unlock your device to see this notification.");
 
             // TODO: fill out "time" as well

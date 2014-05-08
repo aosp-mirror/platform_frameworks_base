@@ -23,6 +23,7 @@
   <item type="id" name="empty" />
   <item type="id" name="hint" />
   <item type="id" name="icon" />
+  <item type="id" name="icon_badge" />
   <item type="id" name="icon1" />
   <item type="id" name="icon2" />
   <item type="id" name="input" />
