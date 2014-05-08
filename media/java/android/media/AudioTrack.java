@@ -42,7 +42,8 @@ import com.android.internal.app.IAppOpsService;
  * The AudioTrack class manages and plays a single audio resource for Java applications.
  * It allows streaming of PCM audio buffers to the audio sink for playback. This is
  * achieved by "pushing" the data to the AudioTrack object using one of the
- *  {@link #write(byte[], int, int)} and {@link #write(short[], int, int)} methods.
+ *  {@link #write(byte[], int, int)}, {@link #write(short[], int, int)},
+ *  and {@link #write(float[], int, int, int)} methods.
  *
  * <p>An AudioTrack instance can operate under two modes: static or streaming.<br>
  * In Streaming mode, the application writes a continuous stream of data to the AudioTrack, using
@@ -72,7 +73,6 @@ import com.android.internal.app.IAppOpsService;
  *
  * AudioTrack is not final and thus permits subclasses, but such use is not recommended.
  */
-// add {@link #write(float[], int, int)} when @hide removed
 public class AudioTrack
 {
     //---------------------------------------------------------
@@ -245,8 +245,8 @@ public class AudioTrack
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
      * @see AudioFormat#ENCODING_PCM_16BIT
+     * @see AudioFormat#ENCODING_PCM_FLOAT
      */
-    // add @see AudioFormat#ENCODING_PCM_FLOAT when @hide removed
     private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
     /**
      * Audio session ID
@@ -287,8 +287,9 @@ public class AudioTrack
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
      * @param audioFormat the format in which the audio data is represented.
-     *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
-     *   {@link AudioFormat#ENCODING_PCM_8BIT}
+     *   See {@link AudioFormat#ENCODING_PCM_16BIT},
+     *   {@link AudioFormat#ENCODING_PCM_8BIT},
+     *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      * @param bufferSizeInBytes the total size (in bytes) of the internal buffer where audio data is
      *   read from for playback.
      *   If track's creation mode is {@link #MODE_STREAM}, you can write data into
@@ -302,7 +303,6 @@ public class AudioTrack
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
      */
-    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
@@ -332,7 +332,8 @@ public class AudioTrack
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
      * @param audioFormat the format in which the audio data is represented.
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
-     *   {@link AudioFormat#ENCODING_PCM_8BIT}
+     *   {@link AudioFormat#ENCODING_PCM_8BIT},
+     *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      * @param bufferSizeInBytes the total size (in bytes) of the buffer where audio data is read
      *   from for playback. If using the AudioTrack in streaming mode, you can write data into
      *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
@@ -344,7 +345,6 @@ public class AudioTrack
      * @param sessionId Id of audio session the AudioTrack must be attached to
      * @throws java.lang.IllegalArgumentException
      */
-    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode, int sessionId)
     throws IllegalArgumentException {
@@ -469,7 +469,7 @@ public class AudioTrack
         default:
             throw new IllegalArgumentException("Unsupported sample encoding."
                 + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT"
-             // + " or ENCODING_PCM_FLOAT" when @hide removed
+                + " or ENCODING_PCM_FLOAT"
                 + ".");
         }
 
@@ -730,12 +730,12 @@ public class AudioTrack
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
      * @param audioFormat the format in which the audio data is represented.
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
-     *   {@link AudioFormat#ENCODING_PCM_8BIT}
+     *   {@link AudioFormat#ENCODING_PCM_8BIT},
+     *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      * @return {@link #ERROR_BAD_VALUE} if an invalid parameter was passed,
      *   or {@link #ERROR} if unable to query for output properties,
      *   or the minimum buffer size expressed in bytes.
      */
-    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
         switch(channelConfig) {
@@ -1259,7 +1259,6 @@ public class AudioTrack
      * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
-     * @hide candidate for public API
      */
     public int write(float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
