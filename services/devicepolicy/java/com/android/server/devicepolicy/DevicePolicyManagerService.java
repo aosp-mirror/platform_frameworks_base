@@ -97,6 +97,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -112,6 +113,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String LOG_TAG = "DevicePolicyManagerService";
 
     private static final String DEVICE_POLICIES_XML = "device_policies.xml";
+
+    private static final String LOCK_TASK_COMPONENTS_XML = "lock-task-component";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -181,6 +184,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 = new HashMap<ComponentName, ActiveAdmin>();
         final ArrayList<ActiveAdmin> mAdminList
                 = new ArrayList<ActiveAdmin>();
+
+        // This is the list of component allowed to start lock task mode.
+        final List<ComponentName> mLockTaskComponents = new ArrayList<ComponentName>();
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -955,6 +961,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "active-password");
             }
 
+            for (int i=0; i<policy.mLockTaskComponents.size(); i++) {
+                ComponentName component = policy.mLockTaskComponents.get(i);
+                out.startTag(null, LOCK_TASK_COMPONENTS_XML);
+                out.attribute(null, "name", component.flattenToString());
+                out.endTag(null, LOCK_TASK_COMPONENTS_XML);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -1004,6 +1017,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             type = parser.next();
             int outerDepth = parser.getDepth();
+            policy.mLockTaskComponents.clear();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -1055,6 +1069,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "symbols"));
                     policy.mActivePasswordNonLetter = Integer.parseInt(
                             parser.getAttributeValue(null, "nonletter"));
+                    XmlUtils.skipCurrentTag(parser);
+                } else if (LOCK_TASK_COMPONENTS_XML.equals(tag)) {
+                    policy.mLockTaskComponents.add
+                        (ComponentName.unflattenFromString
+                         (parser.getAttributeValue(null, "name")));
                     XmlUtils.skipCurrentTag(parser);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
@@ -3343,5 +3362,75 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return resultSet.toArray(new String[resultSet.size()]);
         }
+    }
+
+    /**
+     * Sets which componets may enter lock task mode.
+     *
+     * This function can only be called by the device owner or the profile owner.
+     * @param components The list of components allowed to enter lock task mode.
+     */
+    public void setLockTaskComponents(ComponentName[] components) throws SecurityException {
+        // Get the package names of the caller.
+        int uid = Binder.getCallingUid();
+        String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
+
+        // Check whether any of the package name is the device owner or the profile owner.
+        for (int i=0; i<packageNames.length; i++) {
+            String packageName = packageNames[i];
+            int userHandle = UserHandle.getUserId(uid);
+            String profileOwnerPackage = getProfileOwner(userHandle);
+            if (isDeviceOwner(packageName) ||
+                (profileOwnerPackage != null && profileOwnerPackage.equals(packageName))) {
+
+                // If a package name is the device owner or the profile owner,
+                // we update the component list.
+                DevicePolicyData policy = getUserData(userHandle);
+                policy.mLockTaskComponents.clear();
+                if (components != null) {
+                    for (int j=0; j<components.length; j++) {
+                        ComponentName component = components[j];
+                        policy.mLockTaskComponents.add(component);
+                    }
+                }
+
+                // Store the settings persistently.
+                saveSettingsLocked(userHandle);
+                return;
+            }
+        }
+        throw new SecurityException();
+    }
+
+    /**
+     * This function returns the list of components allowed to start the task lock mode.
+     */
+    public ComponentName[] getLockTaskComponents() {
+        int userHandle = UserHandle.USER_OWNER;
+        DevicePolicyData policy = getUserData(userHandle);
+        ComponentName[] tempArray = policy.mLockTaskComponents.toArray(new ComponentName[0]);
+        return tempArray;
+    }
+
+    /**
+     * This function lets the caller know whether the given component is allowed to start the
+     * lock task mode.
+     * @param component The component to check
+     */
+    public boolean isLockTaskPermitted(ComponentName component) {
+        // Get current user's devicepolicy
+        int uid = Binder.getCallingUid();
+        int userHandle = UserHandle.getUserId(uid);
+        DevicePolicyData policy = getUserData(userHandle);
+        for (int i=0; i<policy.mLockTaskComponents.size(); i++) {
+            ComponentName lockTaskComponent = policy.mLockTaskComponents.get(i);
+
+            // If the given component equals one of the component stored our device-owner-set
+            // list, we allow this component to start the lock task mode.
+            if (lockTaskComponent.getPackageName().equals(component.getPackageName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

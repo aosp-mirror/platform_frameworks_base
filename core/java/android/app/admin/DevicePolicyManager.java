@@ -2125,4 +2125,51 @@ public class DevicePolicyManager {
 
         return null;
     }
+
+    /**
+     * Sets which components may enter lock task mode.
+     *
+     * This function can only be called by the device owner or the profile owner.
+     * @param components The list of components allowed to enter lock task mode
+     */
+    public void setLockTaskComponents(ComponentName[] components) throws SecurityException {
+        if (mService != null) {
+            try {
+                mService.setLockTaskComponents(components);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * This function returns the list of components allowed to start the lock task mode.
+     * @hide
+     */
+    public ComponentName[] getLockTaskComponents() {
+        if (mService != null) {
+            try {
+                return mService.getLockTaskComponents();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * This function lets the caller know whether the given component is allowed to start the
+     * lock task mode.
+     * @param component The component to check
+     */
+    public boolean isLockTaskPermitted(ComponentName component) {
+        if (mService != null) {
+            try {
+                return mService.isLockTaskPermitted(component);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
 }
