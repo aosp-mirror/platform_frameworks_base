@@ -173,13 +173,13 @@ public class AudioTrack
 
     /**
      * The write mode indicating the write operation will block until all data has been written,
-     * to be used in {@link #write(ByteBuffer, int, int, int)}.
+     * to be used in {@link #write(ByteBuffer, int, int)}
      */
     public final static int WRITE_BLOCKING = 0;
     /**
      * The write mode indicating the write operation will return immediately after
      * queuing as much audio data for playback as possible without blocking, to be used in
-     * {@link #write(ByteBuffer, int, int, int)}.
+     * {@link #write(ByteBuffer, int, int)}.
      */
     public final static int WRITE_NON_BLOCKING = 1;
 
