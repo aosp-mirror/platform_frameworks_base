@@ -70,7 +70,7 @@ import android.widget.TextView;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
-import com.android.internal.util.LegacyNotificationUtil;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -143,7 +143,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
-    private LegacyNotificationUtil mLegacyNotificationUtil = LegacyNotificationUtil.getInstance();
+    private NotificationColorUtil mNotificationColorUtil = NotificationColorUtil.getInstance();
 
     private UserManager mUserManager;
 
@@ -852,7 +852,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
             icon.setImageDrawable(iconDrawable);
-            if (mLegacyNotificationUtil.isGrayscale(iconDrawable)) {
+            if (mNotificationColorUtil.isGrayscale(iconDrawable)) {
                 icon.setBackgroundResource(
                         com.android.internal.R.drawable.notification_icon_legacy_bg_inset);
             }

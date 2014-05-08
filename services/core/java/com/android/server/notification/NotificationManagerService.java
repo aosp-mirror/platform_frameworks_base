@@ -471,6 +471,7 @@ public class NotificationManagerService extends SystemService {
             pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
                     notification.defaults, notification.flags));
             pw.println(prefix + "  sound=" + notification.sound);
+            pw.println(prefix + String.format("  color=0x%08x", notification.color));
             pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
             pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
                     notification.ledARGB, notification.ledOnMS, notification.ledOffMS));

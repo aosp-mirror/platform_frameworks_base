@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TextAppearanceSpan;
@@ -38,21 +39,21 @@ import java.util.WeakHashMap;
  *
  * @hide
  */
-public class LegacyNotificationUtil {
+public class NotificationColorUtil {
 
-    private static final String TAG = "LegacyNotificationUtil";
+    private static final String TAG = "NotificationColorUtil";
 
     private static final Object sLock = new Object();
-    private static LegacyNotificationUtil sInstance;
+    private static NotificationColorUtil sInstance;
 
     private final ImageUtils mImageUtils = new ImageUtils();
     private final WeakHashMap<Bitmap, Pair<Boolean, Integer>> mGrayscaleBitmapCache =
             new WeakHashMap<Bitmap, Pair<Boolean, Integer>>();
 
-    public static LegacyNotificationUtil getInstance() {
+    public static NotificationColorUtil getInstance() {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new LegacyNotificationUtil();
+                sInstance = new NotificationColorUtil();
             }
             return sInstance;
         }
@@ -107,6 +108,9 @@ public class LegacyNotificationUtil {
             AnimationDrawable ad = (AnimationDrawable) d;
             int count = ad.getNumberOfFrames();
             return count > 0 && isGrayscale(ad.getFrame(0));
+        } else if (d instanceof VectorDrawable) {
+            // We just assume you're doing the right thing if using vectors
+            return true;
         } else {
             return false;
         }
