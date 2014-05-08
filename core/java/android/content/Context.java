@@ -2683,6 +2683,16 @@ public abstract class Context {
     public static final String NETWORK_SCORE_SERVICE = "network_score";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.app.UsageStatsManager} for interacting with the status bar.
+     *
+     * @see #getSystemService
+     * @see android.app.UsageStatsManager
+     * @hide
+     */
+    public static final String USAGE_STATS_SERVICE = "usagestats";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

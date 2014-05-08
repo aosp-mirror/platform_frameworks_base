@@ -678,6 +678,11 @@ class ContextImpl extends Context {
                 return new NetworkScoreManager(ctx);
             }
         });
+
+        registerService(USAGE_STATS_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                return new UsageStatsManager(ctx.getOuterContext());
+        }});
     }
 
     static ContextImpl getImpl(Context context) {
