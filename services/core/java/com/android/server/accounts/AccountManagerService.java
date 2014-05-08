@@ -34,6 +34,7 @@ import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -857,7 +858,7 @@ public class AccountManagerService
         checkManageAccountsPermission();
         UserHandle user = Binder.getCallingUserHandle();
         UserAccounts accounts = getUserAccountsForCaller();
-        if (!canUserModifyAccounts(Binder.getCallingUid())) {
+        if (!canUserModifyAccounts(Binder.getCallingUid(), account.type)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "User cannot modify accounts");
@@ -1512,7 +1513,7 @@ public class AccountManagerService
         checkManageAccountsPermission();
 
         // Is user disallowed from modifying accounts?
-        if (!canUserModifyAccounts(Binder.getCallingUid())) {
+        if (!canUserModifyAccounts(Binder.getCallingUid(), accountType)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2758,11 +2759,20 @@ public class AccountManagerService
                 Manifest.permission.USE_CREDENTIALS);
     }
 
-    private boolean canUserModifyAccounts(int callingUid) {
+    private boolean canUserModifyAccounts(int callingUid, String accountType) {
         if (callingUid != Process.myUid()) {
             if (getUserManager().getUserRestrictions(
                     new UserHandle(UserHandle.getUserId(callingUid)))
                     .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
+                return false;
+            }
+        }
+
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                .getSystemService(Context.DEVICE_POLICY_SERVICE);
+        String[] typesArray = dpm.getAccountTypesWithManagementDisabled();
+        for (String forbiddenType : typesArray) {
+            if (forbiddenType.equals(accountType)) {
                 return false;
             }
         }
