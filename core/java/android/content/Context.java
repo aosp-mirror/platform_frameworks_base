@@ -1982,6 +1982,7 @@ public abstract class Context {
             WIFI_SERVICE,
             WIFI_HOTSPOT_SERVICE,
             WIFI_P2P_SERVICE,
+            WIFI_SCANNING_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             MEDIA_ROUTER_SERVICE,
@@ -2054,6 +2055,12 @@ public abstract class Context {
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
      *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of
      * Wi-Fi connectivity.
+     *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
+     *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
+     * Wi-Fi Direct connectivity.
+     *  <dt> {@link #WIFI_SCANNING_SERVICE} ("wifiscanner")
+     *  <dd> A {@link android.net.wifi.WifiScanner WifiScanner} for scanning surrounding
+     * Wi-Fi environment.
      * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
      * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
      * for management of input methods.
@@ -2354,6 +2361,16 @@ public abstract class Context {
      * @see android.net.wifi.p2p.WifiP2pManager
      */
     public static final String WIFI_P2P_SERVICE = "wifip2p";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.wifi.WifiScanner} for scanning the wifi universe
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.WifiScanner
+     * @hide
+     */
+    public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

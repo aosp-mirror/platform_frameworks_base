@@ -125,6 +125,13 @@ public class ScanResult implements Parcelable {
         }
     }
 
+    /** empty scan result
+     *
+     * {@hide}
+     * */
+    public ScanResult() {
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
