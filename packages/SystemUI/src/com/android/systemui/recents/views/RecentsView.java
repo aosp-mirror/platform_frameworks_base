@@ -346,7 +346,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     RecentsTaskLoader.getInstance().getSystemServicesProxy()
                             .moveTaskToFront(task.key.id, opts);
                 } else {
-                    // Launch the activity with the desired animation
+                    // Launch the activity anew with the desired animation
                     Intent i = new Intent(task.key.baseIntent);
                     i.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                             | Intent.FLAG_ACTIVITY_TASK_ON_HOME
@@ -361,6 +361,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");
                     }
+
+                    // And clean up the old task
+                    onTaskRemoved(task);
                 }
 
                 Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
@@ -388,6 +391,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
                 .addNextIntentWithParentStack(intent).startActivities();
+    }
+
+    @Override
+    public void onTaskRemoved(Task t) {
+        // Remove any stored data from the loader.  We currently don't bother notifying the views
+        // that the data has been unloaded because at the point we call onTaskRemoved(), the views
+        // either don't need to be updated, or have already been removed.
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        loader.deleteTaskData(t, false);
+
+        // Remove the old task from activity manager
+        int flags = t.key.baseIntent.getFlags();
+        boolean isDocument = (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+        RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(t.key.id,
+                isDocument);
     }
 
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
