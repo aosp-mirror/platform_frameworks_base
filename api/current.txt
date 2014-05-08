@@ -6630,6 +6630,7 @@ package android.content {
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
     field public static final java.lang.String HDMI_CEC_SERVICE = "hdmi_cec";
+    field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
@@ -12503,9 +12504,15 @@ package android.hardware.hdmi {
     field public static final int MESSAGE_VENDOR_REMOTE_BUTTON_UP = 139; // 0x8b
     field public static final int POWER_STATUS_ON = 0; // 0x0
     field public static final int POWER_STATUS_STANDBY = 1; // 0x1
+    field public static final int POWER_STATUS_TRANSIENT_TO_ON = 2; // 0x2
+    field public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3; // 0x3
     field public static final int POWER_STATUS_UNKNOWN = -1; // 0xffffffff
-    field public static final int POWER_TRANSIENT_TO_ON = 2; // 0x2
-    field public static final int POWER_TRANSIENT_TO_STANDBY = 3; // 0x3
+    field public static final int RESULT_ALREADY_IN_PROGRESS = 4; // 0x4
+    field public static final int RESULT_EXCEPTION = 5; // 0x5
+    field public static final int RESULT_SOURCE_NOT_AVAILABLE = 2; // 0x2
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int RESULT_TARGET_NOT_AVAILABLE = 3; // 0x3
+    field public static final int RESULT_TIMEOUT = 1; // 0x1
     field public static final int UNKNOWN_VENDOR_ID = 16777215; // 0xffffff
   }
 
@@ -12549,6 +12556,27 @@ package android.hardware.hdmi {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final byte[] EMPTY_PARAM;
+  }
+
+  public final class HdmiControlManager {
+    method public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
+    method public android.hardware.hdmi.HdmiTvClient getTvClient();
+  }
+
+  public final class HdmiPlaybackClient {
+    method public void oneTouchPlay(android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback);
+    method public void queryDisplayStatus(android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback);
+  }
+
+  public static abstract interface HdmiPlaybackClient.DisplayStatusCallback {
+    method public abstract void onComplete(int);
+  }
+
+  public static abstract interface HdmiPlaybackClient.OneTouchPlayCallback {
+    method public abstract void onComplete(int);
+  }
+
+  public final class HdmiTvClient {
   }
 
 }

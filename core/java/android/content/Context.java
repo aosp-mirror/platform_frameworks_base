@@ -2583,13 +2583,24 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.hardware.hdmi.HdmiCecManager for controlling and managing
+     * {@link android.hardware.hdmi.HdmiCecManager} for controlling and managing
      * HDMI-CEC protocol.
      *
      * @see #getSystemService
      * @see android.hardware.hdmi.HdmiCecManager
      */
-     public static final String HDMI_CEC_SERVICE = "hdmi_cec";
+    // TODO: Remove this once HdmiControlService is ready.
+    public static final String HDMI_CEC_SERVICE = "hdmi_cec";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.hdmi.HdmiControlManager} for controlling and managing
+     * HDMI-CEC protocol.
+     *
+     * @see #getSystemService
+     * @see android.hardware.hdmi.HdmiControlManager
+     */
+    public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
 
     /**
      * Use with {@link #getSystemService} to retrieve a

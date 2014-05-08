@@ -147,6 +147,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
 	core/java/android/hardware/hdmi/IHdmiCecListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiCecService.aidl \
+	core/java/android/hardware/hdmi/IHdmiControlCallback.aidl \
+	core/java/android/hardware/hdmi/IHdmiControlService.aidl \
 	core/java/android/hardware/input/IInputManager.aidl \
 	core/java/android/hardware/input/IInputDevicesChangedListener.aidl \
 	core/java/android/hardware/location/IFusedLocationHardware.aidl \
