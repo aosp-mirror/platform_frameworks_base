@@ -334,6 +334,7 @@ public final class SystemServer {
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
+        AudioService audioService = null;
 
         boolean onlyCore = false;
         boolean firstBoot = false;
@@ -769,7 +770,8 @@ public final class SystemServer {
             if (!disableMedia && !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
                 try {
                     Slog.i(TAG, "Audio Service");
-                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+                    audioService = new AudioService(context);
+                    ServiceManager.addService(Context.AUDIO_SERVICE, audioService);
                 } catch (Throwable e) {
                     reportWtf("starting Audio Service", e);
                 }
@@ -1084,6 +1086,7 @@ public final class SystemServer {
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
+        final AudioService audioServiceF = audioService;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1151,6 +1154,11 @@ public final class SystemServer {
                     if (recognitionF != null) recognitionF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Recognition Service ready", e);
+                }
+                try {
+                    if (audioServiceF != null) audioServiceF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("Notifying AudioService running", e);
                 }
                 Watchdog.getInstance().start();
 
