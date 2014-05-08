@@ -175,8 +175,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void makeInactive() {
         if (mActivated) {
             // Make sure that we clear the hotspot from the center.
-            mBackgroundDimmed.setHotspot(0, getWidth() / 2, getActualHeight() / 2);
-            mBackgroundDimmed.removeHotspot(0);
+            if (mBackgroundDimmed != null) {
+                mBackgroundDimmed.setHotspot(0, getWidth() / 2, getActualHeight() / 2);
+                mBackgroundDimmed.removeHotspot(0);
+            }
             mActivated = false;
         }
         if (mOnActivatedListener != null) {
