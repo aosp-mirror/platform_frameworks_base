@@ -126,4 +126,7 @@ interface IDevicePolicyManager {
 
     void enableSystemApp(in ComponentName admin, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in Intent intent);
+
+    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
+    String[] getAccountTypesWithManagementDisabled();
 }
