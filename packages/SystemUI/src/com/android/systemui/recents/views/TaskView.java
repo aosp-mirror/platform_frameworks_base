@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
@@ -161,7 +160,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
                     .setDuration(duration)
-                    .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                    .setInterpolator(config.defaultBezierInterpolator)
                     .withLayer()
                     .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
@@ -221,8 +220,8 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         mBarView.setAlpha(0f);
         mBarView.animate()
                 .alpha(1f)
-                .setStartDelay(235)
-                .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                .setStartDelay(250)
+                .setInterpolator(config.defaultBezierInterpolator)
                 .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
                 .start();
@@ -234,7 +233,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         mBarView.animate()
             .alpha(0f)
             .setStartDelay(0)
-            .setInterpolator(BakedBezierInterpolator.INSTANCE)
+            .setInterpolator(config.defaultBezierInterpolator)
             .setDuration(config.taskBarExitAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {
@@ -252,7 +251,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         animate().translationX(config.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
             .setStartDelay(0)
-            .setInterpolator(BakedBezierInterpolator.INSTANCE)
+            .setInterpolator(config.defaultBezierInterpolator)
             .setDuration(config.taskViewRemoveAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {
@@ -310,7 +309,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         mInfoView.animate()
                 .alpha(0f)
                 .setDuration(config.taskViewInfoPaneAnimDuration)
-                .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                .setInterpolator(config.defaultBezierInterpolator)
                 .withLayer()
                 .withEndAction(new Runnable() {
                     @Override

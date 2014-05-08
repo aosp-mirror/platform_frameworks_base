@@ -30,7 +30,6 @@ import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.Utilities;
@@ -111,7 +110,8 @@ class TaskInfoView extends FrameLayout {
         int duration = Utilities.calculateTranslationAnimationDuration((int) mMaxClipRadius);
         mCircularClipAnimator = ObjectAnimator.ofFloat(this, "circularClipRadius", toRadius);
         mCircularClipAnimator.setDuration(duration);
-        mCircularClipAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
+        mCircularClipAnimator.setInterpolator(
+                RecentsConfiguration.getInstance().defaultBezierInterpolator);
         mCircularClipAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -143,7 +143,7 @@ class TaskInfoView extends FrameLayout {
                 .scaleX(1f)
                 .scaleY(1f)
                 .setDuration(duration)
-                .setInterpolator(BakedBezierInterpolator.INSTANCE)
+                .setInterpolator(RecentsConfiguration.getInstance().defaultBezierInterpolator)
                 .withLayer()
                 .start();
     }
