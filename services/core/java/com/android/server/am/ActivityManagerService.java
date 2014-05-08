@@ -1850,6 +1850,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            onPackageModified(packageName);
+            return true;
+        }
+
+        @Override
+        public void onPackageModified(String packageName) {
             final PackageManager pm = mContext.getPackageManager();
             final ArrayList<Pair<Intent, Integer>> recentTaskIntents =
                     new ArrayList<Pair<Intent, Integer>>();
@@ -1885,7 +1891,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     removeTaskByIdLocked(tasksToRemove.get(i), 0);
                 }
             }
-            return true;
         }
 
         @Override

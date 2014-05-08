@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -39,6 +40,7 @@ import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsPackageMonitor;
 import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -46,12 +48,13 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, ViewPool.ViewPoolConsumer<TaskView, Task>,
-        View.OnClickListener, View.OnLongClickListener {
+        View.OnClickListener, View.OnLongClickListener, RecentsPackageMonitor.PackageCallbacks {
 
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
@@ -705,9 +708,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
+        // Update the min/max scroll and animate other task views into their new positions
         updateMinMaxScroll(true);
         int movement = (int) (Constants.Values.TaskStackView.StackOverlapPct * mTaskRect.height());
         requestSynchronizeStackViewsWithModel(Utilities.calculateTranslationAnimationDuration(movement));
+
+        // If there are no remaining tasks, then either unfilter the current stack, or just close
+        // the activity if there are no filtered stacks
+        if (mStack.getTaskCount() == 0) {
+            boolean shouldFinishActivity = true;
+            if (mStack.hasFilteredTasks()) {
+                mStack.unfilterTasks();
+                shouldFinishActivity = (mStack.getTaskCount() == 0);
+            }
+            if (shouldFinishActivity) {
+                Activity activity = (Activity) getContext();
+                activity.finish();
+            }
+        }
     }
 
     /**
@@ -1069,6 +1087,32 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Show the info pane for this task view
         tv.showInfoPane(new Rect(0, 0, 0, (int) overlapHeight));
         return true;
+    }
+
+    /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
+
+    @Override
+    public void onComponentRemoved(Set<ComponentName> cns) {
+        // For other tasks, just remove them directly if they no longer exist
+        ArrayList<Task> tasks = mStack.getTasks();
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            final Task t = tasks.get(i);
+            if (cns.contains(t.key.baseIntent.getComponent())) {
+                TaskView tv = getChildViewForTask(t);
+                if (tv != null) {
+                    // For visible children, defer removing the task until after the animation
+                    tv.animateRemoval(new Runnable() {
+                        @Override
+                        public void run() {
+                            mStack.removeTask(t);
+                        }
+                    });
+                } else {
+                    // Otherwise, remove the task from the stack immediately
+                    mStack.removeTask(t);
+                }
+            }
+        }
     }
 }
 
@@ -1432,7 +1476,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     public void onChildDismissed(View v) {
         TaskView tv = (TaskView) v;
         Task task = tv.getTask();
-        Activity activity = (Activity) mSv.getContext();
 
         // Remove the task from the view
         mSv.mStack.removeTask(task);
@@ -1443,19 +1486,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
         // Remove the task from activity manager
         RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(tv.getTask().key.id);
-
-        // If there are no remaining tasks, then either unfilter the current stack, or just close
-        // the activity if there are no filtered stacks
-        if (mSv.mStack.getTaskCount() == 0) {
-            boolean shouldFinishActivity = true;
-            if (mSv.mStack.hasFilteredTasks()) {
-                mSv.mStack.unfilterTasks();
-                shouldFinishActivity = (mSv.mStack.getTaskCount() == 0);
-            }
-            if (shouldFinishActivity) {
-                activity.finish();
-            }
-        }
 
         // Disable HW layers
         mSv.decHwLayersRefCount("swipeComplete");
