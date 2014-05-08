@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
@@ -184,8 +185,10 @@ public class AppOpsManager {
     public static final int OP_MONITOR_LOCATION = 41;
     /** @hide Continually monitoring location data with a relatively high power request. */
     public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
+    /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
+    public static final int OP_GET_USAGE_STATS = 43;
     /** @hide */
-    public static final int _NUM_OP = 43;
+    public static final int _NUM_OP = 44;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -252,6 +255,7 @@ public class AppOpsManager {
             OP_WAKE_LOCK,
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
+            OP_GET_USAGE_STATS,
     };
 
     /**
@@ -302,6 +306,7 @@ public class AppOpsManager {
             null,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
+            null,
     };
 
     /**
@@ -352,6 +357,7 @@ public class AppOpsManager {
             "WAKE_LOCK",
             "MONITOR_LOCATION",
             "MONITOR_HIGH_POWER_LOCATION",
+            "GET_USAGE_STATS"
     };
 
     /**
@@ -402,6 +408,7 @@ public class AppOpsManager {
             android.Manifest.permission.WAKE_LOCK,
             null, // no permission for generic location monitoring
             null, // no permission for high power location monitoring
+            android.Manifest.permission.PACKAGE_USAGE_STATS,
     };
 
     /**
@@ -451,6 +458,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_IGNORED, // OP_GET_USAGE_STATS
     };
 
     /**
@@ -477,6 +485,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,

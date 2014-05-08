@@ -9570,6 +9570,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             mAppOpsService.systemReady();
+            mUsageStatsService.systemReady();
             mSystemReady = true;
         }
 
@@ -14391,6 +14392,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
+                mUsageStatsService.noteStartConfig(newConfig);
 
                 final Configuration configCopy = new Configuration(mConfiguration);
                 
