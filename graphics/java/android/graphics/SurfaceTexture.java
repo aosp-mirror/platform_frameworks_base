@@ -18,6 +18,7 @@ package android.graphics;
 
 import java.lang.ref.WeakReference;
 
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -132,14 +133,14 @@ public class SurfaceTexture {
      * Register a callback to be invoked when a new image frame becomes available to the
      * SurfaceTexture.
      * <p>
-     * This callback may be called on an arbitrary thread, so it is not
+     * The callback may be called on an arbitrary thread, so it is not
      * safe to call {@link #updateTexImage} without first binding the OpenGL ES context to the
      * thread invoking the callback.
      * </p>
      *
-     * @param listener The listener to set.
+     * @param listener The listener to use, or null to remove the listener.
      */
-    public void setOnFrameAvailableListener(OnFrameAvailableListener listener) {
+    public void setOnFrameAvailableListener(@Nullable OnFrameAvailableListener listener) {
         setOnFrameAvailableListener(listener, null);
     }
 
@@ -147,17 +148,18 @@ public class SurfaceTexture {
      * Register a callback to be invoked when a new image frame becomes available to the
      * SurfaceTexture.
      * <p>
-     * If no handler is specified, then this callback may be called on an arbitrary thread,
+     * If a handler is specified, the callback will be invoked on that handler's thread.
+     * If no handler is specified, then the callback may be called on an arbitrary thread,
      * so it is not safe to call {@link #updateTexImage} without first binding the OpenGL ES
      * context to the thread invoking the callback.
      * </p>
      *
-     * @param listener The listener to set.
+     * @param listener The listener to use, or null to remove the listener.
      * @param handler The handler on which the listener should be invoked, or null
      * to use an arbitrary thread.
      */
-    public void setOnFrameAvailableListener(final OnFrameAvailableListener listener,
-            Handler handler) {
+    public void setOnFrameAvailableListener(@Nullable final OnFrameAvailableListener listener,
+            @Nullable Handler handler) {
         if (listener != null) {
             // Although we claim the thread is arbitrary, earlier implementation would
             // prefer to send the callback on the creating looper or the main looper
