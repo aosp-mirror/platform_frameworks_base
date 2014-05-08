@@ -72,6 +72,7 @@ import com.android.internal.app.IAppOpsService;
  *
  * AudioTrack is not final and thus permits subclasses, but such use is not recommended.
  */
+// add {@link #write(float[], int, int)} when @hide removed
 public class AudioTrack
 {
     //---------------------------------------------------------
@@ -245,6 +246,7 @@ public class AudioTrack
      * @see AudioFormat#ENCODING_PCM_8BIT
      * @see AudioFormat#ENCODING_PCM_16BIT
      */
+    // add @see AudioFormat#ENCODING_PCM_FLOAT when @hide removed
     private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
     /**
      * Audio session ID
@@ -300,6 +302,7 @@ public class AudioTrack
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
      */
+    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
@@ -341,6 +344,7 @@ public class AudioTrack
      * @param sessionId Id of audio session the AudioTrack must be attached to
      * @throws java.lang.IllegalArgumentException
      */
+    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode, int sessionId)
     throws IllegalArgumentException {
@@ -459,11 +463,14 @@ public class AudioTrack
             break;
         case AudioFormat.ENCODING_PCM_16BIT:
         case AudioFormat.ENCODING_PCM_8BIT:
+        case AudioFormat.ENCODING_PCM_FLOAT:
             mAudioFormat = audioFormat;
             break;
         default:
             throw new IllegalArgumentException("Unsupported sample encoding."
-                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT.");
+                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT"
+             // + " or ENCODING_PCM_FLOAT" when @hide removed
+                + ".");
         }
 
         //--------------
@@ -728,6 +735,7 @@ public class AudioTrack
      *   or {@link #ERROR} if unable to query for output properties,
      *   or the minimum buffer size expressed in bytes.
      */
+    // add {@link AudioFormat#ENCODING_PCM_FLOAT} to audioFormat section above, when @hide removed
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
         switch(channelConfig) {
@@ -750,7 +758,8 @@ public class AudioTrack
         }
 
         if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT)
-            && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)) {
+            && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)
+            && (audioFormat != AudioFormat.ENCODING_PCM_FLOAT)) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }
@@ -1150,7 +1159,7 @@ public class AudioTrack
 
     public int write(byte[] audioData, int offsetInBytes, int sizeInBytes) {
 
-        if (mState == STATE_UNINITIALIZED) {
+        if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
         }
 
@@ -1188,13 +1197,13 @@ public class AudioTrack
      *     starts.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
      * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
-      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-      *    the parameters don't resolve to valid data and indexes.
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
      */
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
 
-        if (mState == STATE_UNINITIALIZED) {
+        if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
         }
 
@@ -1205,6 +1214,80 @@ public class AudioTrack
         }
 
         int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
+
+        if ((mDataLoadMode == MODE_STATIC)
+                && (mState == STATE_NO_STATIC_DATA)
+                && (ret > 0)) {
+            // benign race with respect to other APIs that read mState
+            mState = STATE_INITIALIZED;
+        }
+
+        return ret;
+    }
+
+
+    /**
+     * Writes the audio data to the audio sink for playback (streaming mode),
+     * or copies audio data for later playback (static buffer mode).
+     * In static buffer mode, copies the data to the buffer starting at offset 0,
+     * and the write mode is ignored.
+     * In streaming mode, the blocking behavior will depend on the write mode.
+     * <p>
+     * Note that the actual playback of this data might occur after this function
+     * returns. This function is thread safe with respect to {@link #stop} calls,
+     * in which case all of the specified data might not be written to the audio sink.
+     * <p>
+     * @param audioData the array that holds the data to play.
+     *     The implementation does not clip for sample values within the nominal range
+     *     [-1.0f, 1.0f], provided that all gains in the audio pipeline are
+     *     less than or equal to unity (1.0f), and in the absence of post-processing effects
+     *     that could add energy, such as reverb.  For the convenience of applications
+     *     that compute samples using filters with non-unity gain,
+     *     sample values +3 dB beyond the nominal range are permitted.
+     *     However such values may eventually be limited or clipped, depending on various gains
+     *     and later processing in the audio path.  Therefore applications are encouraged
+     *     to provide samples values within the nominal range.
+     * @param offsetInFloats the offset, expressed as a number of floats,
+     *     in audioData where the data to play starts.
+     * @param sizeInFloats the number of floats to read in audioData after the offset.
+     * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+     *     effect in static mode.
+     *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *         to the audio sink.
+     *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     queuing as much audio data for playback as possible without blocking.
+     * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     * @hide candidate for public API
+     */
+    public int write(float[] audioData, int offsetInFloats, int sizeInFloats,
+            @WriteMode int writeMode) {
+
+        if (mState == STATE_UNINITIALIZED) {
+            Log.e(TAG, "AudioTrack.write() called in invalid state STATE_UNINITIALIZED");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if (mAudioFormat != AudioFormat.ENCODING_PCM_FLOAT) {
+            Log.e(TAG, "AudioTrack.write(float[] ...) requires format ENCODING_PCM_FLOAT");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
+        }
+
+        if ( (audioData == null) || (offsetInFloats < 0 ) || (sizeInFloats < 0)
+                || (offsetInFloats + sizeInFloats < 0)  // detect integer overflow
+                || (offsetInFloats + sizeInFloats > audioData.length)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid array, offset, or size");
+            return ERROR_BAD_VALUE;
+        }
+
+        int ret = native_write_float(audioData, offsetInFloats, sizeInFloats, mAudioFormat,
+                writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
                 && (mState == STATE_NO_STATIC_DATA)
@@ -1244,6 +1327,11 @@ public class AudioTrack
 
         if (mState == STATE_UNINITIALIZED) {
             Log.e(TAG, "AudioTrack.write() called in invalid state STATE_UNINITIALIZED");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if (mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
+            Log.e(TAG, "AudioTrack.write(ByteBuffer ...) not yet supported for ENCODING_PCM_FLOAT");
             return ERROR_INVALID_OPERATION;
         }
 
@@ -1486,6 +1574,10 @@ public class AudioTrack
 
     private native final int native_write_short(short[] audioData,
                                                 int offsetInShorts, int sizeInShorts, int format);
+
+    private native final int native_write_float(float[] audioData,
+                                                int offsetInFloats, int sizeInFloats, int format,
+                                                boolean isBlocking);
 
     private native final int native_write_native_bytes(Object audioData,
             int positionInBytes, int sizeInBytes, int format, boolean blocking);
