@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,19 +34,22 @@ import android.widget.FrameLayout;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsPackageMonitor;
 import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
+public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks,
+        RecentsPackageMonitor.PackageCallbacks {
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
@@ -384,5 +388,20 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
                 .addNextIntentWithParentStack(intent).startActivities();
+    }
+
+    /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
+
+    @Override
+    public void onComponentRemoved(Set<ComponentName> cns) {
+        // Propagate this event down to each task stack view
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                TaskStackView stackView = (TaskStackView) child;
+                stackView.onComponentRemoved(cns);
+            }
+        }
     }
 }

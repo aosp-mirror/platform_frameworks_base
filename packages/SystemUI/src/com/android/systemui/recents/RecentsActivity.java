@@ -22,6 +22,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -37,6 +38,7 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /** Our special app widget host */
 class RecentsAppWidgetHost extends AppWidgetHost {
@@ -60,7 +62,7 @@ class RecentsAppWidgetHost extends AppWidgetHost {
 
 /* Activity */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks{
+        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
     FrameLayout mContainerView;
     RecentsView mRecentsView;
     View mEmptyView;
@@ -308,6 +310,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mScreenOffReceiver, filter);
+
+        // Register any broadcast receivers for the task loader
+        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
     }
 
     @Override
@@ -320,6 +325,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Unregister any broadcast receivers we have registered
         unregisterReceiver(mServiceBroadcastReceiver);
         unregisterReceiver(mScreenOffReceiver);
+        RecentsTaskLoader.getInstance().unregisterReceivers();
     }
 
     @Override

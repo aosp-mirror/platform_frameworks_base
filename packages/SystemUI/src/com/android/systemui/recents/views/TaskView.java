@@ -246,6 +246,24 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             .start();
     }
 
+    /** Animates the deletion of this task view */
+    public void animateRemoval(final Runnable r) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        animate().translationX(config.taskViewRemoveAnimTranslationXPx)
+            .alpha(0f)
+            .setStartDelay(0)
+            .setInterpolator(BakedBezierInterpolator.INSTANCE)
+            .setDuration(config.taskViewRemoveAnimDuration)
+            .withLayer()
+            .withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    post(r);
+                }
+            })
+            .start();
+    }
+
     /** Returns the rect we want to clip (it may not be the full rect) */
     Rect getClippingRect(Rect outRect) {
         getHitRect(outRect);

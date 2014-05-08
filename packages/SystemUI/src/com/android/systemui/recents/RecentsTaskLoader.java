@@ -300,6 +300,8 @@ public class RecentsTaskLoader {
     TaskResourceLoadQueue mLoadQueue;
     TaskResourceLoader mLoader;
 
+    RecentsPackageMonitor mPackageMonitor;
+
     int mMaxThumbnailCacheSize;
     int mMaxIconCacheSize;
 
@@ -325,6 +327,7 @@ public class RecentsTaskLoader {
 
         // Initialize the proxy, cache and loaders
         mSystemServicesProxy = new SystemServicesProxy(context);
+        mPackageMonitor = new RecentsPackageMonitor(context);
         mLoadQueue = new TaskResourceLoadQueue();
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
@@ -510,6 +513,9 @@ public class RecentsTaskLoader {
             mLoadQueue.addTask(t, true);
         }
 
+        // Update the package monitor with the list of packages to listen for
+        mPackageMonitor.setTasks(tasks);
+
         return root;
     }
 
@@ -565,6 +571,21 @@ public class RecentsTaskLoader {
         mLoadQueue.clearTasks();
     }
 
+    /** Registers any broadcast receivers. */
+    public void registerReceivers(Context context, RecentsPackageMonitor.PackageCallbacks cb) {
+        // Register the broadcast receiver to handle messages related to packages being added/removed
+        mPackageMonitor.register(context, cb);
+    }
+
+    /** Unregisters any broadcast receivers. */
+    public void unregisterReceivers() {
+        mPackageMonitor.unregister();
+    }
+
+    /**
+     * Handles signals from the system, trimming memory when requested to prevent us from running
+     * out of memory.
+     */
     void onTrimMemory(int level) {
         Console.log(Constants.Log.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
                 Console.trimMemoryLevelToString(level));
