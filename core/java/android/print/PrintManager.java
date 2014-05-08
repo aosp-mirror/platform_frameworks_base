@@ -167,7 +167,7 @@ public final class PrintManager {
 
         /**
          * Callback notifying that a print job state changed.
-         * 
+         *
          * @param printJobId The print job id.
          */
         public void onPrintJobStateChanged(PrintJobId printJobId);
@@ -175,7 +175,7 @@ public final class PrintManager {
 
     /**
      * Creates a new instance.
-     * 
+     *
      * @param context The current context in which to operate.
      * @param service The backing system service.
      * @hide
@@ -207,13 +207,17 @@ public final class PrintManager {
 
     /**
      * Creates an instance that can access all print jobs.
-     * 
+     *
      * @param userId The user id for which to get all print jobs.
      * @return An instance if the caller has the permission to access all print
      *         jobs, null otherwise.
      * @hide
      */
     public PrintManager getGlobalPrintManagerForUser(int userId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         return new PrintManager(mContext, mService, userId, APP_ID_ANY);
     }
 
@@ -228,11 +232,15 @@ public final class PrintManager {
 
     /**
      * Adds a listener for observing the state of print jobs.
-     * 
+     *
      * @param listener The listener to add.
      * @hide
      */
     public void addPrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         if (mPrintJobStateChangeListeners == null) {
             mPrintJobStateChangeListeners = new ArrayMap<PrintJobStateChangeListener,
                     PrintJobStateChangeListenerWrapper>();
@@ -249,11 +257,15 @@ public final class PrintManager {
 
     /**
      * Removes a listener for observing the state of print jobs.
-     * 
+     *
      * @param listener The listener to remove.
      * @hide
      */
     public void removePrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         if (mPrintJobStateChangeListeners == null) {
             return;
         }
@@ -275,12 +287,16 @@ public final class PrintManager {
 
     /**
      * Gets a print job given its id.
-     * 
+     *
      * @return The print job list.
      * @see PrintJob
      * @hide
      */
     public PrintJob getPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         try {
             PrintJobInfo printJob = mService.getPrintJobInfo(printJobId, mAppId, mUserId);
             if (printJob != null) {
@@ -294,11 +310,15 @@ public final class PrintManager {
 
     /**
      * Gets the print jobs for this application.
-     * 
+     *
      * @return The print job list.
      * @see PrintJob
      */
     public List<PrintJob> getPrintJobs() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintJobInfo> printJobInfos = mService.getPrintJobInfos(mAppId, mUserId);
             if (printJobInfos == null) {
@@ -317,6 +337,10 @@ public final class PrintManager {
     }
 
     void cancelPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
@@ -325,6 +349,10 @@ public final class PrintManager {
     }
 
     void restartPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         try {
             mService.restartPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
@@ -383,6 +411,10 @@ public final class PrintManager {
      */
     public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
             PrintAttributes attributes) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         if (!(mContext instanceof Activity)) {
             throw new IllegalStateException("Can print only from an activity");
         }
@@ -418,11 +450,15 @@ public final class PrintManager {
 
     /**
      * Gets the list of enabled print services.
-     * 
+     *
      * @return The enabled service list or an empty list.
      * @hide
      */
     public List<PrintServiceInfo> getEnabledPrintServices() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintServiceInfo> enabledServices = mService.getEnabledPrintServices(mUserId);
             if (enabledServices != null) {
@@ -436,11 +472,15 @@ public final class PrintManager {
 
     /**
      * Gets the list of installed print services.
-     * 
+     *
      * @return The installed service list or an empty list.
      * @hide
      */
     public List<PrintServiceInfo> getInstalledPrintServices() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintServiceInfo> installedServices = mService.getInstalledPrintServices(mUserId);
             if (installedServices != null) {
@@ -456,6 +496,10 @@ public final class PrintManager {
      * @hide
      */
     public PrinterDiscoverySession createPrinterDiscoverySession() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         return new PrinterDiscoverySession(mService, mContext, mUserId);
     }
 
