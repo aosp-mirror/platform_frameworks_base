@@ -234,6 +234,38 @@ public class UserManager {
      */
     public static final String DISALLOW_CONFIG_APPS = "no_config_apps";
 
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from mounting
+     * physical external media. The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from adjusting microphone
+     * volume.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from adjusting the master
+     * volume.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
+
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
     /** @hide */
@@ -661,7 +693,7 @@ public class UserManager {
     /**
      * Returns information for all users on this device. Requires
      * {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * 
+     *
      * @param excludeDying specify if the list should exclude users being
      *            removed.
      * @return the list of users that were created.

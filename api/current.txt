@@ -20546,6 +20546,7 @@ package android.os {
     method public void setUserRestrictions(android.os.Bundle);
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
     field public static final java.lang.String DISALLOW_ADD_USER = "no_add_user";
+    field public static final java.lang.String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
     field public static final java.lang.String DISALLOW_CONFIG_APPS = "no_config_apps";
     field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
@@ -20559,9 +20560,11 @@ package android.os {
     field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
+    field public static final java.lang.String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
     field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
+    field public static final java.lang.String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
     field public static final java.lang.String ENSURE_VERIFY_APPS = "ensure_verify_apps";
   }
