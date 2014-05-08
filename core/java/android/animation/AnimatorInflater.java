@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
+import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.animation.AnimationUtils;
@@ -87,9 +88,86 @@ public class AnimatorInflater {
         }
     }
 
+    public static StateListAnimator loadStateListAnimator(Context context, int id)
+            throws NotFoundException {
+        XmlResourceParser parser = null;
+        try {
+            parser = context.getResources().getAnimation(id);
+            return createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
+        } catch (XmlPullParserException ex) {
+            Resources.NotFoundException rnf =
+                    new Resources.NotFoundException(
+                            "Can't load state list animator resource ID #0x" +
+                                    Integer.toHexString(id)
+                    );
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            Resources.NotFoundException rnf =
+                    new Resources.NotFoundException(
+                            "Can't load state list animator resource ID #0x" +
+                                    Integer.toHexString(id)
+                    );
+            rnf.initCause(ex);
+            throw rnf;
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+        }
+    }
+
+    private static StateListAnimator createStateListAnimatorFromXml(Context context,
+            XmlPullParser parser, AttributeSet attributeSet)
+            throws IOException, XmlPullParserException {
+        int type;
+        StateListAnimator stateListAnimator = new StateListAnimator();
+
+        while (true) {
+            type = parser.next();
+            switch (type) {
+                case XmlPullParser.END_DOCUMENT:
+                case XmlPullParser.END_TAG:
+                    return stateListAnimator;
+
+                case XmlPullParser.START_TAG:
+                    // parse item
+                    Animator animator = null;
+                    if ("item".equals(parser.getName())) {
+                        int attributeCount = parser.getAttributeCount();
+                        int[] states = new int[attributeCount];
+                        int stateIndex = 0;
+                        for (int i = 0; i < attributeCount; i++) {
+                            int attrName = attributeSet.getAttributeNameResource(i);
+                            if (attrName == com.android.internal.R.attr.animation) {
+                                animator = loadAnimator(context,
+                                        attributeSet.getAttributeResourceValue(i, 0));
+                            } else {
+                                states[stateIndex++] =
+                                        attributeSet.getAttributeBooleanValue(i, false) ?
+                                                attrName : -attrName;
+                            }
+
+                        }
+                        if (animator == null) {
+                            animator = createAnimatorFromXml(context, parser);
+                        }
+
+                        if (animator == null) {
+                            throw new Resources.NotFoundException(
+                                    "animation state item must have a valid animation");
+                        }
+                        stateListAnimator
+                                .addState(StateSet.trimStateSet(states, stateIndex), animator);
+
+                    }
+                    break;
+            }
+        }
+    }
+
     private static Animator createAnimatorFromXml(Context c, XmlPullParser parser)
             throws XmlPullParserException, IOException {
-
         return createAnimatorFromXml(c, parser, Xml.asAttributeSet(parser), null, 0);
     }
 
