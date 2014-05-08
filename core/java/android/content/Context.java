@@ -2058,9 +2058,6 @@ public abstract class Context {
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
-     *  <dt> {@link #WIFI_SCANNING_SERVICE} ("wifiscanner")
-     *  <dd> A {@link android.net.wifi.WifiScanner WifiScanner} for scanning surrounding
-     * Wi-Fi environment.
      * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
      * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
      * for management of input methods.
