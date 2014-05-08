@@ -18,8 +18,17 @@ package com.android.server.notification;
 
 import com.android.server.notification.NotificationManagerService.NotificationRecord;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -37,9 +46,13 @@ import java.util.Map;
  * {@hide}
  */
 public class NotificationUsageStats {
-
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
+    private final SQLiteLog mSQLiteLog;
+
+    public NotificationUsageStats(Context context) {
+        mSQLiteLog = new SQLiteLog(context);
+    }
 
     /**
      * Called when a notification has been posted.
@@ -49,6 +62,7 @@ public class NotificationUsageStats {
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numPostedByApp++;
         }
+        mSQLiteLog.logPosted(notification);
     }
 
     /**
@@ -68,6 +82,7 @@ public class NotificationUsageStats {
             stats.numRemovedByApp++;
             stats.collect(notification.stats);
         }
+        mSQLiteLog.logRemoved(notification);
     }
 
     /**
@@ -79,6 +94,7 @@ public class NotificationUsageStats {
             stats.numDismissedByUser++;
             stats.collect(notification.stats);
         }
+        mSQLiteLog.logDismissed(notification);
     }
 
     /**
@@ -89,6 +105,7 @@ public class NotificationUsageStats {
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numClickedByUser++;
         }
+        mSQLiteLog.logClicked(notification);
     }
 
     /**
@@ -146,6 +163,7 @@ public class NotificationUsageStats {
         for (AggregatedStats as : mStats.values()) {
             as.dump(pw, indent);
         }
+        mSQLiteLog.dump(pw, indent);
     }
 
     /**
@@ -272,6 +290,213 @@ public class NotificationUsageStats {
                     ", avg=" + avg +
                     ", var=" + var +
                     '}';
+        }
+    }
+
+    private static class SQLiteLog {
+        private static final String TAG = "NotificationSQLiteLog";
+
+        // Message types passed to the background handler.
+        private static final int MSG_POST = 1;
+        private static final int MSG_CLICK = 2;
+        private static final int MSG_REMOVE = 3;
+        private static final int MSG_DISMISS = 4;
+
+        private static final String DB_NAME = "notification_log.db";
+        private static final int DB_VERSION = 1;
+
+        /** Age in ms after which events are pruned from the DB. */
+        private static final long HORIZON_MS = 7 * 24 * 60 * 60 * 1000L;  // 1 week
+        /** Delay between pruning the DB. Used to throttle pruning. */
+        private static final long PRUNE_MIN_DELAY_MS = 6 * 60 * 60 * 1000L;  // 6 hours
+        /** Mininum number of writes between pruning the DB. Used to throttle pruning. */
+        private static final long PRUNE_MIN_WRITES = 1024;
+
+        // Table 'log'
+        private static final String TAB_LOG = "log";
+        private static final String COL_EVENT_USER_ID = "event_user_id";
+        private static final String COL_EVENT_TYPE = "event_type";
+        private static final String COL_EVENT_TIME = "event_time_ms";
+        private static final String COL_KEY = "key";
+        private static final String COL_PKG = "pkg";
+        private static final String COL_NOTIFICATION_ID = "nid";
+        private static final String COL_TAG = "tag";
+        private static final String COL_WHEN_MS = "when_ms";
+        private static final String COL_DEFAULTS = "defaults";
+        private static final String COL_FLAGS = "flags";
+        private static final String COL_PRIORITY = "priority";
+        private static final String COL_CATEGORY = "category";
+        private static final String COL_ACTION_COUNT = "action_count";
+
+        private static final int EVENT_TYPE_POST = 1;
+        private static final int EVENT_TYPE_CLICK = 2;
+        private static final int EVENT_TYPE_REMOVE = 3;
+        private static final int EVENT_TYPE_DISMISS = 4;
+
+        private static long sLastPruneMs;
+        private static long sNumWrites;
+
+        private final SQLiteOpenHelper mHelper;
+        private final Handler mWriteHandler;
+
+        private static final long DAY_MS = 24 * 60 * 60 * 1000;
+
+        public SQLiteLog(Context context) {
+            HandlerThread backgroundThread = new HandlerThread("notification-sqlite-log",
+                    android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            backgroundThread.start();
+            mWriteHandler = new Handler(backgroundThread.getLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    NotificationRecord r = (NotificationRecord) msg.obj;
+                    long nowMs = System.currentTimeMillis();
+                    switch (msg.what) {
+                        case MSG_POST:
+                            writeEvent(r.sbn.getPostTime(), EVENT_TYPE_POST, r, true);
+                            break;
+                        case MSG_CLICK:
+                            writeEvent(nowMs, EVENT_TYPE_CLICK, r, false);
+                            break;
+                        case MSG_REMOVE:
+                            writeEvent(nowMs, EVENT_TYPE_REMOVE, r, false);
+                            break;
+                        case MSG_DISMISS:
+                            writeEvent(nowMs, EVENT_TYPE_DISMISS, r, false);
+                            break;
+                        default:
+                            Log.wtf(TAG, "Unknown message type: " + msg.what);
+                            break;
+                    }
+                }
+            };
+            mHelper = new SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
+                @Override
+                public void onCreate(SQLiteDatabase db) {
+                    db.execSQL("CREATE TABLE " + TAB_LOG + " (" +
+                            "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            COL_EVENT_USER_ID + " INT," +
+                            COL_EVENT_TYPE + " INT," +
+                            COL_EVENT_TIME + " INT," +
+                            COL_KEY + " TEXT," +
+                            COL_PKG + " TEXT," +
+                            COL_NOTIFICATION_ID + " INT," +
+                            COL_TAG + " TEXT," +
+                            COL_WHEN_MS + " INT," +
+                            COL_DEFAULTS + " INT," +
+                            COL_FLAGS + " INT," +
+                            COL_PRIORITY + " INT," +
+                            COL_CATEGORY + " TEXT," +
+                            COL_ACTION_COUNT + " INT" +
+                            ")");
+                }
+
+                @Override
+                public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+                    db.execSQL("DROP TABLE IF EXISTS " + TAB_LOG);
+                    onCreate(db);
+                }
+            };
+        }
+
+        public void logPosted(NotificationRecord notification) {
+            mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_POST, notification));
+        }
+
+        public void logClicked(NotificationRecord notification) {
+            mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_CLICK, notification));
+        }
+
+        public void logRemoved(NotificationRecord notification) {
+            mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_REMOVE, notification));
+        }
+
+        public void logDismissed(NotificationRecord notification) {
+            mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_DISMISS, notification));
+        }
+
+        public void printPostFrequencies(PrintWriter pw, String indent) {
+            SQLiteDatabase db = mHelper.getReadableDatabase();
+            long nowMs = System.currentTimeMillis();
+            String q = "SELECT " +
+                    COL_EVENT_USER_ID + ", " +
+                    COL_PKG + ", " +
+                    // Bucket by day by looking at 'floor((nowMs - eventTimeMs) / dayMs)'
+                    "CAST(((" + nowMs + " - " + COL_EVENT_TIME + ") / " + DAY_MS + ") AS int) " +
+                        "AS day, " +
+                    "COUNT(*) AS cnt " +
+                    "FROM " + TAB_LOG + " " +
+                    "WHERE " +
+                    COL_EVENT_TYPE + "=" + EVENT_TYPE_POST + " " +
+                    "GROUP BY " + COL_EVENT_USER_ID + ", day, " + COL_PKG;
+            Cursor cursor = db.rawQuery(q, null);
+            try {
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    int userId = cursor.getInt(0);
+                    String pkg = cursor.getString(1);
+                    int day = cursor.getInt(2);
+                    int count = cursor.getInt(3);
+                    pw.println(indent + "post_frequency{user_id=" + userId + ",pkg=" + pkg +
+                            ",day=" + day + ",count=" + count + "}");
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r,
+                boolean populateNotificationDetails) {
+            ContentValues cv = new ContentValues();
+            cv.put(COL_EVENT_USER_ID, r.sbn.getUser().getIdentifier());
+            cv.put(COL_EVENT_TIME, eventTimeMs);
+            cv.put(COL_EVENT_TYPE, eventType);
+            putNotificationIdentifiers(r, cv);
+            if (populateNotificationDetails) {
+                putNotificationDetails(r, cv);
+            }
+            SQLiteDatabase db = mHelper.getWritableDatabase();
+            if (db.insert(TAB_LOG, null, cv) < 0) {
+                Log.wtf(TAG, "Error while trying to insert values: " + cv);
+            }
+            sNumWrites++;
+            pruneIfNecessary(db);
+        }
+
+        private void pruneIfNecessary(SQLiteDatabase db) {
+            // Prune if we haven't in a while.
+            long nowMs = System.currentTimeMillis();
+            if (sNumWrites > PRUNE_MIN_WRITES ||
+                    nowMs - sLastPruneMs > PRUNE_MIN_DELAY_MS) {
+                sNumWrites = 0;
+                sLastPruneMs = nowMs;
+                long horizonStartMs = nowMs - HORIZON_MS;
+                int deletedRows = db.delete(TAB_LOG, COL_EVENT_TIME + " < ?",
+                        new String[] { String.valueOf(horizonStartMs) });
+                Log.d(TAG, "Pruned event entries: " + deletedRows);
+            }
+        }
+
+        private static void putNotificationIdentifiers(NotificationRecord r, ContentValues outCv) {
+            outCv.put(COL_KEY, r.sbn.getKey());
+            outCv.put(COL_PKG, r.sbn.getPackageName());
+        }
+
+        private static void putNotificationDetails(NotificationRecord r, ContentValues outCv) {
+            outCv.put(COL_NOTIFICATION_ID, r.sbn.getId());
+            if (r.sbn.getTag() != null) {
+                outCv.put(COL_TAG, r.sbn.getTag());
+            }
+            outCv.put(COL_WHEN_MS, r.sbn.getPostTime());
+            outCv.put(COL_FLAGS, r.getNotification().flags);
+            outCv.put(COL_PRIORITY, r.getNotification().priority);
+            if (r.getNotification().category != null) {
+                outCv.put(COL_CATEGORY, r.getNotification().category);
+            }
+            outCv.put(COL_ACTION_COUNT, r.getNotification().actions != null ?
+                    r.getNotification().actions.length : 0);
+        }
+
+        public void dump(PrintWriter pw, String indent) {
+            printPostFrequencies(pw, indent);
         }
     }
 }
