@@ -1080,20 +1080,6 @@ final class ActivityStack {
         }
     }
 
-    /**
-     * Version of ensureActivitiesVisible that can easily be called anywhere.
-     */
-    final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
-        return ensureActivitiesVisibleLocked(starting, configChanges, false);
-    }
-
-    final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
-            boolean forceHomeShown) {
-        ActivityRecord r = topRunningActivityLocked(null);
-        return r != null &&
-                ensureActivitiesVisibleLocked(r, starting, null, configChanges, forceHomeShown);
-    }
-
     // Checks if any of the stacks above this one has a fullscreen activity behind it.
     // If so, this stack is hidden, otherwise it is visible.
     private boolean isStackVisible() {
@@ -1105,16 +1091,26 @@ final class ActivityStack {
             return true;
         }
 
-        // Start at the task above this one and go up, looking for a visible
-        // fullscreen activity, or a translucent activity that requested the
-        // wallpaper to be shown behind it.
+        /**
+         * Start at the task above this one and go up, looking for a visible
+         * fullscreen activity, or a translucent activity that requested the
+         * wallpaper to be shown behind it.
+         */
         for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
             final ArrayList<TaskRecord> tasks = mStacks.get(i).getAllTasks();
             for (int taskNdx = 0; taskNdx < tasks.size(); taskNdx++) {
                 final ArrayList<ActivityRecord> activities = tasks.get(taskNdx).mActivities;
                 for (int activityNdx = 0; activityNdx < activities.size(); activityNdx++) {
                     final ActivityRecord r = activities.get(activityNdx);
-                    if (!r.finishing && r.visible && r.fullscreen) {
+
+                    // Conditions for an activity to obscure the stack we're
+                    // examining:
+                    // 1. Not Finishing AND Visible AND:
+                    // 2. Either:
+                    // - Full Screen Activity OR
+                    // - On top of Home and our stack is NOT home
+                    if (!r.finishing && r.visible && (r.fullscreen ||
+                            (!isHomeStack() && r.frontOfTask && tasks.get(taskNdx).mOnTopOfHome))) {
                         return false;
                     }
                 }
@@ -1124,12 +1120,19 @@ final class ActivityStack {
         return true;
     }
 
+    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+        ActivityRecord r = topRunningActivityLocked(null);
+        if (r != null) {
+            ensureActivitiesVisibleLocked(r, starting, null, configChanges);
+        }
+    }
+
     /**
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
      */
-    final boolean ensureActivitiesVisibleLocked(ActivityRecord top, ActivityRecord starting,
-            String onlyThisProcess, int configChanges, boolean forceHomeShown) {
+    final void ensureActivitiesVisibleLocked(ActivityRecord top, ActivityRecord starting,
+            String onlyThisProcess, int configChanges) {
         if (DEBUG_VISBILITY) Slog.v(
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
@@ -1147,7 +1150,6 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
-        boolean showHomeBehindStack = false;
         boolean behindFullscreen = !isStackVisible();
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -1235,11 +1237,9 @@ final class ActivityStack {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
-                        showHomeBehindStack = false;
-                    } else if (isActivityOverHome(r)) {
+                    } else if (!isHomeStack() && r.frontOfTask && task.mOnTopOfHome) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
-                        showHomeBehindStack = true;
-                        behindFullscreen = !isHomeStack() && r.frontOfTask && task.mOnTopOfHome;
+                        behindFullscreen = true;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
@@ -1289,7 +1289,6 @@ final class ActivityStack {
                 }
             }
         }
-        return showHomeBehindStack;
     }
 
     void convertToTranslucent(ActivityRecord r) {

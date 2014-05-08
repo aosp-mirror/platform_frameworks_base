@@ -2455,21 +2455,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
         // First the front stacks. In case any are not fullscreen and are in front of home.
-        boolean showHomeBehindStack = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int topStackNdx = stacks.size() - 1;
             for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (stackNdx == topStackNdx) {
-                    // Top stack.
-                    showHomeBehindStack =
-                            stack.ensureActivitiesVisibleLocked(starting, configChanges);
-                } else {
-                    // Back stack.
-                    stack.ensureActivitiesVisibleLocked(starting, configChanges,
-                            showHomeBehindStack);
-                }
+                stack.ensureActivitiesVisibleLocked(starting, configChanges);
             }
         }
     }
