@@ -605,6 +605,14 @@ public final class SystemServer {
 
             if (!disableNetwork) {
                 try {
+                    Slog.i(TAG, "Network Score Service");
+                    networkScore = new NetworkScoreService(context);
+                    ServiceManager.addService(Context.NETWORK_SCORE_SERVICE, networkScore);
+                } catch (Throwable e) {
+                    reportWtf("starting Network Score Service", e);
+                }
+
+                try {
                     Slog.i(TAG, "NetworkStats Service");
                     networkStats = new NetworkStatsService(context, networkManagement, alarm);
                     ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
@@ -650,14 +658,6 @@ public final class SystemServer {
                     networkPolicy.bindConnectivityManager(connectivity);
                 } catch (Throwable e) {
                     reportWtf("starting Connectivity Service", e);
-                }
-
-                try {
-                    Slog.i(TAG, "Network Score Service");
-                    networkScore = new NetworkScoreService(context);
-                    ServiceManager.addService(Context.NETWORK_SCORE_SERVICE, networkScore);
-                } catch (Throwable e) {
-                    reportWtf("starting Network Score Service", e);
                 }
 
                 try {

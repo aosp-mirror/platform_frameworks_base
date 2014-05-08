@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.os.Parcel;
 import android.text.TextUtils;
 
+import java.util.HashMap;
 import java.util.BitSet;
 
 /**
@@ -302,6 +303,156 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * dhcp server MAC address if known
+     */
+    public String dhcpServer;
+
+    /**
+     * @hide
+     * default Gateway MAC address if known
+     */
+    public String defaultGwMacAddress;
+
+    /**
+     * @hide
+     * BSSID list on which this configuration was seen.
+     * TODO: prevent this list to grow infinitely, age-out the results
+     */
+    public HashMap<String, ScanResult> scanResultCache;
+
+    /** @hide **/
+    public static int INVALID_RSSI = -127;
+
+    /**
+     * @hide
+     * A summary of the RSSI and Band status for that configuration
+     * This is used as a temporary value by the auto-join controller
+     */
+    public final class Visibility
+    {
+        public int rssi5;   // strongest 5GHz RSSI
+        public int rssi24;  // strongest 2.4GHz RSSI
+        public int num5;    // number of BSSIDs on 5GHz
+        public int num24;   // number of BSSIDs on 2.4GHz
+        public long age5;  // timestamp of the strongest 5GHz BSSID (last time it was seen)
+        public long age24;   // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
+        public Visibility()
+        {
+            rssi5 = INVALID_RSSI;
+            rssi24 = INVALID_RSSI;
+        }
+        public Visibility(Visibility source)
+        {
+            rssi5 = source.rssi5;
+            rssi24 = source.rssi24;
+            age24 = source.age24;
+            age5 = source.age5;
+            num24 = source.num24;
+            num5 = source.num5;
+        }
+    }
+
+    /** @hide
+     * Cache the visibility status of this configuration.
+     * Visibility can change at any time depending on scan results availability.
+     * Owner of the WifiConfiguration is responsible to set this field based on
+     * recent scan results.
+     ***/
+    public Visibility visibility;
+
+    /** @hide
+     * calculate and set Visibility for that configuration.
+     *
+     * age in milliseconds: we will consider only ScanResults that are more recent,
+     * i.e. younger.
+     ***/
+    public Visibility setVisibility(long age) {
+        if (scanResultCache == null) {
+            visibility = null;
+            return null;
+        }
+
+        Visibility status = new Visibility();
+
+        long now_ms = System.currentTimeMillis();
+        for(ScanResult result : scanResultCache.values()) {
+            if (result.seen == 0)
+                continue;
+
+            if ((result.frequency > 4900) && (result.frequency < 5900)) {
+                //strictly speaking: [4915, 5825]
+                //number of known BSSID on 5GHz band
+                status.num5 = status.num5 + 1;
+            } else if ((result.frequency > 2400) && (result.frequency < 2500)) {
+                //strictly speaking: [2412, 2482]
+                //number of known BSSID on 2.4Ghz band
+                status.num24 = status.num24 + 1;
+            }
+
+            if ((now_ms - result.seen) > age) continue;
+
+            if ((result.frequency > 4900) && (result.frequency < 5900)) {
+                if (result.level > status.rssi5) {
+                    status.rssi5 = result.level;
+                    status.age5 = result.seen;
+                }
+            } else if ((result.frequency > 2400) && (result.frequency < 2500)) {
+                if (result.level > status.rssi24) {
+                    status.rssi24 = result.level;
+                    status.age24 = result.seen;
+                }
+            }
+        }
+        visibility = status;
+        return status;
+    }
+
+    /** @hide */
+    public static final int AUTO_JOIN_ENABLED                   = 0;
+    /** @hide */
+    public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 1;
+    /**
+     * @hide
+     */
+    public int autoJoinStatus;
+
+    /**
+     * @hide
+     * Indicate that a WifiConfiguration is temporary and should not be saved
+     * nor considered by AutoJoin.
+     */
+    public boolean ephemeral;
+
+    /**
+     * @hide
+     * Connect choices
+     *
+     * remember the keys identifying the known WifiConfiguration over which this configuration
+     * was preferred by user or a "WiFi Network Management app", that is,
+     * a WifiManager.CONNECT_NETWORK or SELECT_NETWORK was received while this configuration
+     * was visible to the user:
+     * configKey is : "SSID"-WEP-WPA_PSK-WPA_EAP
+     *
+     * The integer represents the configuration's RSSI at that time (useful?)
+     *
+     * The overall auto-join algorithm make use of past connect choice so as to sort configuration,
+     * the exact algorithm still fluctuating as of 5/7/2014
+     *
+     */
+    public HashMap<String, Integer> connectChoices;
+
+    /**
+     * @hide
+     * Linked Configurations: represent the set of Wificonfigurations that are equivalent
+     * regarding roaming and auto-joining.
+     * The linked configuration may or may not have same SSID, and may or may not have same
+     * credentials.
+     * For instance, linked configurations will have same defaultGwMacAddress or same dhcp server.
+     */
+    public HashMap<String, Integer>  linkedConfigurations;
+
+    /**
+     * @hide
      */
     public enum ProxySettings {
         /* No proxy is to be used. Any existing proxy settings
@@ -346,6 +497,7 @@ public class WifiConfiguration implements Parcelable {
         ipAssignment = IpAssignment.UNASSIGNED;
         proxySettings = ProxySettings.UNASSIGNED;
         linkProperties = new LinkProperties();
+        autoJoinStatus = AUTO_JOIN_ENABLED;
     }
 
     /**
@@ -369,6 +521,32 @@ public class WifiConfiguration implements Parcelable {
 
         // TODO: Add more checks
         return true;
+
+    }
+
+    /**
+     * most recent time we have seen this configuration
+     * @return most recent scanResult
+     * @hide
+     */
+    public ScanResult lastSeen() {
+        ScanResult mostRecent = null;
+
+        if (scanResultCache == null) {
+            return null;
+        }
+
+        for (ScanResult result : scanResultCache.values()) {
+            if (mostRecent == null) {
+                if (result.seen != 0)
+                   mostRecent = result;
+            } else {
+                if (result.seen > mostRecent.seen) {
+                   mostRecent = result;
+                }
+            }
+        }
+        return mostRecent;
     }
 
     @Override
@@ -570,7 +748,48 @@ public class WifiConfiguration implements Parcelable {
         return KeyMgmt.NONE;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /* @hide
+     * Cache the config key, this seems useful as a speed up since a lot of
+     * lookups in the config store are done and based on this key.
+     */
+    String mCachedConfigKey;
+
+    /** @hide
+     *  return the string used to calculate the hash in WifiConfigStore
+     *  and uniquely identify this WifiConfiguration
+     */
+    public String configKey(boolean allowCached) {
+        String key;
+        if (allowCached && mCachedConfigKey != null) {
+            key = mCachedConfigKey;
+        } else {
+            key = this.SSID;
+            if (key == null)
+                key = "";
+            if (this.wepKeys[0] != null) {
+                key = key + "-WEP";
+            }
+            if (this.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+                key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_PSK];
+            }
+            if (this.allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
+                    this.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+                key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+            }
+            mCachedConfigKey = key;
+        }
+        return key;
+    }
+
+    /** @hide
+     * get configKey, force calculating the config string
+     */
+    public String configKey() {
+        return configKey(false);
+    }
+
+
+        /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
     }
@@ -603,8 +822,32 @@ public class WifiConfiguration implements Parcelable {
 
             ipAssignment = source.ipAssignment;
             proxySettings = source.proxySettings;
+
+            defaultGwMacAddress = source.defaultGwMacAddress;
+
             linkProperties = new LinkProperties(source.linkProperties);
-        }
+            if ((source.scanResultCache != null) && (source.scanResultCache.size() > 0)) {
+                scanResultCache = new HashMap<String, ScanResult>();
+                scanResultCache.putAll(source.scanResultCache);
+            }
+
+            if ((source.connectChoices != null) && (source.connectChoices.size() > 0)) {
+                connectChoices = new HashMap<String, Integer>();
+                connectChoices.putAll(source.connectChoices);
+            }
+
+            if ((source.linkedConfigurations != null)
+                    && (source.linkedConfigurations.size() > 0)) {
+                linkedConfigurations = new HashMap<String, Integer>();
+                linkedConfigurations.putAll(source.linkedConfigurations);
+            }
+            mCachedConfigKey = null; //force null configKey
+            autoJoinStatus = source.autoJoinStatus;
+
+            if (source.visibility != null) {
+                visibility = new Visibility(source.visibility);
+            }
+       }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -633,6 +876,10 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(ipAssignment.name());
         dest.writeString(proxySettings.name());
         dest.writeParcelable(linkProperties, flags);
+
+        dest.writeString(dhcpServer);
+        dest.writeString(defaultGwMacAddress);
+        dest.writeInt(autoJoinStatus);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -663,6 +910,10 @@ public class WifiConfiguration implements Parcelable {
                 config.ipAssignment = IpAssignment.valueOf(in.readString());
                 config.proxySettings = ProxySettings.valueOf(in.readString());
                 config.linkProperties = in.readParcelable(null);
+
+                config.dhcpServer = in.readString();
+                config.defaultGwMacAddress = in.readString();
+                config.autoJoinStatus = in.readInt();
 
                 return config;
             }
