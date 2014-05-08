@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.view.InputDevice;
+import android.media.AudioManager;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
@@ -73,6 +74,8 @@ public class VibratorService extends IVibratorService.Stub
     private boolean mInputDeviceListenerRegistered; // guarded by mInputDeviceVibrators
 
     private int mCurVibUid = -1;
+    private boolean mLowPowerMode;
+    private SettingsObserver mSettingObserver;
 
     native static boolean vibratorExists();
     native static void vibratorOn(long milliseconds);
@@ -159,15 +162,15 @@ public class VibratorService extends IVibratorService.Stub
 
     public void systemReady() {
         mIm = (InputManager)mContext.getSystemService(Context.INPUT_SERVICE);
+        mSettingObserver = new SettingsObserver(mH);
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES), true,
-                new ContentObserver(mH) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateInputDeviceVibrators();
-                    }
-                }, UserHandle.USER_ALL);
+                Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES),
+                true, mSettingObserver, UserHandle.USER_ALL);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE), false,
+                mSettingObserver, UserHandle.USER_ALL);
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -177,6 +180,17 @@ public class VibratorService extends IVibratorService.Stub
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mH);
 
         updateInputDeviceVibrators();
+    }
+
+    private final class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean SelfChange) {
+            updateInputDeviceVibrators();
+        }
     }
 
     public boolean hasVibrator() {
@@ -346,6 +360,9 @@ public class VibratorService extends IVibratorService.Stub
     // Lock held on mVibrations
     private void startVibrationLocked(final Vibration vib) {
         try {
+            if (mLowPowerMode && vib.mStreamHint != AudioManager.STREAM_RING)
+                    return;
+
             int mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
                     vib.mStreamHint, vib.mUid, vib.mOpPkg);
             if (mode == AppOpsManager.MODE_ALLOWED) {
@@ -424,6 +441,9 @@ public class VibratorService extends IVibratorService.Stub
                             Settings.System.VIBRATE_INPUT_DEVICES, UserHandle.USER_CURRENT) > 0;
                 } catch (SettingNotFoundException snfe) {
                 }
+
+                mLowPowerMode = Settings.Global.getInt(mContext.getContentResolver(),
+                     Settings.Global.LOW_POWER_MODE, 0) != 0;
 
                 if (mVibrateInputDevicesSetting) {
                     if (!mInputDeviceListenerRegistered) {
