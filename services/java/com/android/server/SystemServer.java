@@ -650,6 +650,15 @@ public final class SystemServer {
                 }
 
                 try {
+                    Slog.i(TAG, "Wi-Fi Scanning Service");
+                    mSystemServiceManager.startService(
+                            "com.android.server.wifi.WifiScanningService");
+
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi Scanning Service", e);
+                }
+
+                try {
                     Slog.i(TAG, "Connectivity Service");
                     connectivity = new ConnectivityService(
                             context, networkManagement, networkStats, networkPolicy);
