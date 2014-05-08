@@ -28,14 +28,13 @@ import com.android.systemui.R;
 public class NotificationOverflowContainer extends ActivatableNotificationView {
 
     private NotificationOverflowIconsView mIconsView;
-    private NotificationActivator mActivator;
 
     public NotificationOverflowContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
-    public void setActualHeight(int currentHeight) {
+    public void setActualHeight(int currentHeight, boolean notifyListeners) {
         // noop
     }
 
@@ -54,22 +53,9 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         super.onFinishInflate();
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
-
-        mActivator = new NotificationActivator(this, this);
-        setDimmed(true, false);
-    }
-
-    @Override
-    public void setDimmed(boolean dimmed, boolean fade) {
-        super.setDimmed(dimmed, fade);
-        mActivator.setDimmed(dimmed, fade);
     }
 
     public NotificationOverflowIconsView getIconsView() {
         return mIconsView;
-    }
-
-    public NotificationActivator getActivator() {
-        return mActivator;
     }
 }

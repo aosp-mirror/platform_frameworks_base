@@ -33,8 +33,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     @Override
-    public void setActualHeight(int actualHeight) {
-        super.setActualHeight(actualHeight);
+    public void setActualHeight(int actualHeight, boolean notifyListeners) {
+        super.setActualHeight(actualHeight, notifyListeners);
         updateOutline();
     }
 

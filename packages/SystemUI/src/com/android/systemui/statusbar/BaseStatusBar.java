@@ -1067,7 +1067,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setSystemExpanded(top);
                 }
             }
-            entry.row.setDimmed(onKeyguard, false /* fade */);
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
                     || !showOnKeyguard)) {
@@ -1087,45 +1086,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
             mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
-            mKeyguardIconOverflowContainer.setDimmed(true /* dimmed */, false /* fade */);
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onActivated(View view) {
-        int n = mNotificationData.size();
-        for (int i = 0; i < n; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            if (entry.row.getVisibility() != View.GONE) {
-                if (view == entry.row) {
-                    entry.row.getActivator().activate();
-                } else {
-                    entry.row.getActivator().activateInverse();
-                }
-            }
-        }
-        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
-            if (view == mKeyguardIconOverflowContainer) {
-                mKeyguardIconOverflowContainer.getActivator().activate();
-            } else {
-                mKeyguardIconOverflowContainer.getActivator().activateInverse();
-            }
-        }
-    }
-
-    @Override
-    public void onReset(View view) {
-        int n = mNotificationData.size();
-        for (int i = 0; i < n; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            if (entry.row.getVisibility() != View.GONE) {
-                entry.row.getActivator().reset();
-            }
-        }
-        if (mKeyguardIconOverflowContainer.getVisibility() != View.GONE) {
-            mKeyguardIconOverflowContainer.getActivator().reset();
         }
     }
 

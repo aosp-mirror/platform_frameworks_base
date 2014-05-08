@@ -150,4 +150,11 @@ public class TvStatusBar extends BaseStatusBar {
     protected void refreshLayout(int layoutDirection) {
     }
 
+    @Override
+    public void onActivated(View view) {
+    }
+
+    @Override
+    public void onActivationReset(View view) {
+    }
 }

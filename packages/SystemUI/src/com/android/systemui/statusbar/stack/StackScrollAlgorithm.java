@@ -39,6 +39,10 @@ public class StackScrollAlgorithm {
     private static final int MAX_ITEMS_IN_BOTTOM_STACK = 3;
     private static final int MAX_ITEMS_IN_TOP_STACK = 3;
 
+    /** When a child is activated, the other cards' alpha fade to this value. */
+    private static final float ACTIVATED_INVERSE_ALPHA = 0.9f;
+    private static final float DIMMED_SCALE = 0.95f;
+
     private int mPaddingBetweenElements;
     private int mCollapsedSize;
     private int mTopStackPeekSize;
@@ -61,7 +65,6 @@ public class StackScrollAlgorithm {
     private ExpandableView mFirstChildWhileExpanding;
     private boolean mExpandedOnStart;
     private int mTopStackTotalSize;
-    private ArrayList<View> mDraggedViews = new ArrayList<View>();
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -93,7 +96,7 @@ public class StackScrollAlgorithm {
     }
 
 
-    public void getStackScrollState(StackScrollState resultState) {
+    public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
         // The state of the local variables are saved in an algorithmState to easily subdivide it
         // into multiple phases.
         StackScrollAlgorithmState algorithmState = mTempAlgorithmState;
@@ -107,7 +110,7 @@ public class StackScrollAlgorithm {
         algorithmState.scrolledPixelsTop = 0;
         algorithmState.itemsInBottomStack = 0.0f;
         algorithmState.partialInBottom = 0.0f;
-        algorithmState.scrollY = resultState.getScrollY() + mCollapsedSize;
+        algorithmState.scrollY = ambientState.getScrollY() + mCollapsedSize;
 
         updateVisibleChildren(resultState, algorithmState);
 
@@ -120,19 +123,42 @@ public class StackScrollAlgorithm {
         // Phase 3:
         updateZValuesForState(resultState, algorithmState);
 
-        handleDraggedViews(resultState, algorithmState);
+        handleDraggedViews(ambientState, resultState, algorithmState);
+        updateDimmedActivated(ambientState, resultState, algorithmState);
+    }
+
+    /**
+     * Updates the dimmed and activated states of the children.
+     */
+    private void updateDimmedActivated(AmbientState ambientState, StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState) {
+        boolean dimmed = ambientState.isDimmed();
+        View activatedChild = ambientState.getActivatedChild();
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
+            childViewState.dimmed = dimmed;
+            childViewState.scale = !dimmed || activatedChild == child
+                    ? 1.0f
+                    : DIMMED_SCALE;
+            if (dimmed && activatedChild != null && child != activatedChild) {
+                childViewState.alpha *= ACTIVATED_INVERSE_ALPHA;
+            }
+        }
     }
 
     /**
      * Handle the special state when views are being dragged
      */
-    private void handleDraggedViews(StackScrollState resultState,
+    private void handleDraggedViews(AmbientState ambientState, StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
-        for (View draggedView : mDraggedViews) {
+        ArrayList<View> draggedViews = ambientState.getDraggedViews();
+        for (View draggedView : draggedViews) {
             int childIndex = algorithmState.visibleChildren.indexOf(draggedView);
             if (childIndex >= 0 && childIndex < algorithmState.visibleChildren.size() - 1) {
                 View nextChild = algorithmState.visibleChildren.get(childIndex + 1);
-                if (!mDraggedViews.contains(nextChild)) {
+                if (!draggedViews.contains(nextChild)) {
                     // only if the view is not dragged itself we modify its state to be fully
                     // visible
                     StackScrollState.ViewState viewState = resultState.getViewStateForView(
@@ -593,14 +619,6 @@ public class StackScrollAlgorithm {
         if (mIsExpansionChanging) {
             updateFirstChildHeightWhileExpanding(hostView);
         }
-    }
-
-    public void onBeginDrag(View view) {
-        mDraggedViews.add(view);
-    }
-
-    public void onDragFinished(View view) {
-        mDraggedViews.remove(view);
     }
 
     class StackScrollAlgorithmState {

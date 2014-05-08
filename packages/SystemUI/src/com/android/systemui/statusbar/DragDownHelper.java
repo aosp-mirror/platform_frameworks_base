@@ -117,7 +117,7 @@ public class DragDownHelper implements Gefingerpoken {
                 } else {
                     if (mDraggedFarEnough) {
                         mDraggedFarEnough = false;
-                        mOnDragDownListener.onReset();
+                        mOnDragDownListener.onDragDownReset();
                     }
                 }
                 return true;
@@ -188,7 +188,7 @@ public class DragDownHelper implements Gefingerpoken {
             cancelExpansion(mStartingChild);
         }
         mDraggingDown = false;
-        mOnDragDownListener.onReset();
+        mOnDragDownListener.onDragDownReset();
     }
 
     private ExpandableView findView(float x, float y) {
@@ -200,7 +200,7 @@ public class DragDownHelper implements Gefingerpoken {
 
     public interface OnDragDownListener {
         void onDraggedDown(View startingChild);
-        void onReset();
+        void onDragDownReset();
         void onThresholdReached();
     }
 }
