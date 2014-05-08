@@ -120,6 +120,15 @@
                 android:gravity="center"
                 android:paddingStart="8dp"
                 />
+            <ImageView android:id="@+id/profile_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:layout_weight="0"
+                android:layout_marginStart="8dp"
+                android:scaleType="centerInside"
+                android:visibility="gone"
+                />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

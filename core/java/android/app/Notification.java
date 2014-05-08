@@ -21,7 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaSessionToken;
 import android.net.Uri;
@@ -32,6 +35,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -2298,13 +2302,35 @@ public class Notification implements Parcelable
             return this;
         }
 
+        private Bitmap getProfileBadge() {
+            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            Drawable badge = userManager.getBadgeForUser(android.os.Process.myUserHandle());
+            if (badge == null) {
+                return null;
+            }
+            final int width = badge.getIntrinsicWidth();
+            final int height = badge.getIntrinsicHeight();
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            badge.setBounds(0, 0, width, height);
+            badge.draw(canvas);
+            return bitmap;
+        }
+
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
+            Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
 
             if (mPriority < PRIORITY_LOW) {
                 // TODO: Low priority presentation
+            }
+            if (profileIcon != null) {
+                contentView.setImageViewBitmap(R.id.profile_icon, profileIcon);
+                contentView.setViewVisibility(R.id.profile_icon, View.VISIBLE);
+            } else {
+                contentView.setViewVisibility(R.id.profile_icon, View.GONE);
             }
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
