@@ -37,18 +37,9 @@ public class StackScrollState {
 
     private final ViewGroup mHostView;
     private Map<ExpandableView, ViewState> mStateMap;
-    private int mScrollY;
     private final Rect mClipRect = new Rect();
     private int mBackgroundRoundedRectCornerRadius;
     private final Outline mChildOutline = new Outline();
-
-    public int getScrollY() {
-        return mScrollY;
-    }
-
-    public void setScrollY(int scrollY) {
-        this.mScrollY = scrollY;
-    }
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
@@ -106,10 +97,12 @@ public class StackScrollState {
                 float alpha = child.getAlpha();
                 float yTranslation = child.getTranslationY();
                 float zTranslation = child.getTranslationZ();
+                float scale = child.getScaleX();
                 int height = child.getActualHeight();
                 float newAlpha = state.alpha;
                 float newYTranslation = state.yTranslation;
                 float newZTranslation = state.zTranslation;
+                float newScale = state.scale;
                 int newHeight = state.height;
                 boolean becomesInvisible = newAlpha == 0.0f;
                 if (alpha != newAlpha) {
@@ -147,10 +140,19 @@ public class StackScrollState {
                     child.setTranslationZ(newZTranslation);
                 }
 
+                // apply scale
+                if (scale != newScale) {
+                    child.setScaleX(newScale);
+                    child.setScaleY(newScale);
+                }
+
                 // apply height
                 if (height != newHeight) {
-                    child.setActualHeight(newHeight);
+                    child.setActualHeight(newHeight, false /* notifyListeners */);
                 }
+
+                // apply dimming
+                child.setDimmed(state.dimmed, false /* animate */);
 
                 // apply clipping and shadow
                 float newNotificationEnd = newYTranslation + newHeight;
@@ -228,6 +230,8 @@ public class StackScrollState {
         float zTranslation;
         int height;
         boolean gone;
+        float scale;
+        boolean dimmed;
 
         /**
          * The location this view is currently rendered at.

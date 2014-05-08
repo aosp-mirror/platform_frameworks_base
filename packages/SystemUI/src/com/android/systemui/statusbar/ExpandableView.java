@@ -61,10 +61,19 @@ public abstract class ExpandableView extends FrameLayout {
     /**
      * Sets the actual height of this notification. This is different than the laid out
      * {@link View#getHeight()}, as we want to avoid layouting during scrolling and expanding.
+     *
+     * @param actualHeight The height of this notification.
+     * @param notifyListeners Whether the listener should be informed about the change.
      */
-    public void setActualHeight(int actualHeight) {
+    public void setActualHeight(int actualHeight, boolean notifyListeners) {
         mActualHeight = actualHeight;
-        notifyHeightChanged();
+        if (notifyListeners) {
+            notifyHeightChanged();
+        }
+    }
+
+    public void setActualHeight(int actualHeight) {
+        setActualHeight(actualHeight, true);
     }
 
     /**
@@ -88,6 +97,15 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public int getMinHeight() {
         return getHeight();
+    }
+
+    /**
+     * Sets the notification as dimmed. The default implementation does nothing.
+     *
+     * @param dimmed Whether the notification should be dimmed.
+     * @param fade Whether an animation should be played to change the state.
+     */
+    public void setDimmed(boolean dimmed, boolean fade) {
     }
 
     /**

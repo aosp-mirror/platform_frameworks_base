@@ -38,6 +38,7 @@ import com.android.internal.R;
 public abstract class ActivatableNotificationView extends ExpandableOutlineView {
 
     private static final long DOUBLETAP_TIMEOUT_MS = 1000;
+    private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
 
     private boolean mDimmed;
 
@@ -179,7 +180,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mActivated = false;
         }
         if (mOnActivatedListener != null) {
-            mOnActivatedListener.onReset(this);
+            mOnActivatedListener.onActivationReset(this);
         }
         removeCallbacks(mTapTimeoutRunnable);
     }
@@ -189,12 +190,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 && Math.abs(event.getY() - mDownY) < mTouchSlop;
     }
 
-    /**
-     * Sets the notification as dimmed, meaning that it will appear in a more gray variant.
-     *
-     * @param dimmed Whether the notification should be dimmed.
-     * @param fade Whether an animation should be played to change the state.
-     */
     public void setDimmed(boolean dimmed, boolean fade) {
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
@@ -226,7 +221,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         int startAlpha = mDimmed ? 255 : 0;
         int endAlpha = mDimmed ? 0 : 255;
-        int duration = NotificationActivator.ANIMATION_LENGTH_MS;
+        int duration = BACKGROUND_ANIMATION_LENGTH_MS;
         // Check whether there is already a background animation running.
         if (mBackgroundAnimator != null) {
             startAlpha = (Integer) mBackgroundAnimator.getAnimatedValue();
@@ -313,8 +308,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void setActualHeight(int actualHeight) {
-        super.setActualHeight(actualHeight);
+    public void setActualHeight(int actualHeight, boolean notifyListeners) {
+        super.setActualHeight(actualHeight, notifyListeners);
         invalidate();
         setPivotY(actualHeight / 2);
     }
@@ -331,6 +326,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public interface OnActivatedListener {
         void onActivated(View view);
-        void onReset(View view);
+        void onActivationReset(View view);
     }
 }

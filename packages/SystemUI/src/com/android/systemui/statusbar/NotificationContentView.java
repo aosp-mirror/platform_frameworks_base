@@ -70,8 +70,8 @@ public class NotificationContentView extends ExpandableView {
     }
 
     @Override
-    public void setActualHeight(int actualHeight) {
-        super.setActualHeight(actualHeight);
+    public void setActualHeight(int actualHeight, boolean notifyListeners) {
+        super.setActualHeight(actualHeight, notifyListeners);
         selectLayout();
         updateClipping();
     }

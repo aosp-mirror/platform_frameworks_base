@@ -84,7 +84,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mEmptyMarginBottom;
     private int mPaddingBetweenElements;
     private int mTopPadding;
-    private boolean mListenForHeightChanges = true;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -95,6 +94,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * The current State this Layout is in
      */
     private StackScrollState mCurrentStackScrollState = new StackScrollState(this);
+    private AmbientState mAmbientState = new AmbientState();
     private ArrayList<View> mChildrenToAddAnimated = new ArrayList<View>();
     private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<View>();
     private ArrayList<View> mSnappedBackChildren = new ArrayList<View>();
@@ -108,6 +108,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
+    private boolean mDimmedNeedsAnimation;
+    private boolean mActivateNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
@@ -267,8 +269,8 @@ public class NotificationStackScrollLayout extends ViewGroup
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
-        mCurrentStackScrollState.setScrollY(mOwnScrollY);
-        mStackScrollAlgorithm.getStackScrollState(mCurrentStackScrollState);
+        mAmbientState.setScrollY(mOwnScrollY);
+        mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
         } else {
@@ -385,12 +387,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDragAnimPendingChildren.remove(v);
         }
         mSwipedOutViews.add(v);
-        mStackScrollAlgorithm.onDragFinished(v);
+        mAmbientState.onDragFinished(v);
     }
 
     @Override
     public void onChildSnappedBack(View animView) {
-        mStackScrollAlgorithm.onDragFinished(animView);
+        mAmbientState.onDragFinished(animView);
         if (!mDragAnimPendingChildren.contains(animView)) {
             mSnappedBackChildren.add(animView);
             requestChildrenUpdate();
@@ -404,7 +406,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onBeginDrag(View v) {
         setSwipingInProgress(true);
         mDragAnimPendingChildren.add(v);
-        mStackScrollAlgorithm.onBeginDrag(v);
+        mAmbientState.onBeginDrag(v);
         requestChildrenUpdate();
         mNeedsAnimation = true;
     }
@@ -965,6 +967,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateSnapBackEvents();
         generateDragEvents();
         generateTopPaddingEvent();
+        generateActivateEvent();
+        generateDimmedEvent();
         mNeedsAnimation = false;
     }
 
@@ -1010,6 +1014,22 @@ public class NotificationStackScrollLayout extends ViewGroup
                     new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED));
         }
         mTopPaddingNeedsAnimation = false;
+    }
+
+    private void generateActivateEvent() {
+        if (mActivateNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_ACTIVATED_CHILD));
+        }
+        mActivateNeedsAnimation = false;
+    }
+
+    private void generateDimmedEvent() {
+        if (mDimmedNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DIMMED));
+        }
+        mDimmedNeedsAnimation = false;
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -1177,14 +1197,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onHeightChanged(ExpandableView view) {
-        if (mListenForHeightChanges && !isCurrentlyAnimating()) {
-            updateContentHeight();
-            updateScrollPositionIfNecessary();
-            if (mOnHeightChangedListener != null) {
-                mOnHeightChangedListener.onHeightChanged(view);
-            }
-            requestChildrenUpdate();
+        updateContentHeight();
+        updateScrollPositionIfNecessary();
+        if (mOnHeightChangedListener != null) {
+            mOnHeightChangedListener.onHeightChanged(view);
         }
+        requestChildrenUpdate();
     }
 
     public void setOnHeightChangedListener(
@@ -1197,10 +1215,34 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAnimationEvents.clear();
     }
 
+    /**
+     * See {@link AmbientState#setDimmed}.
+     */
+    public void setDimmed(boolean dimmed, boolean animate) {
+        mAmbientState.setDimmed(dimmed);
+        if (animate) {
+            mDimmedNeedsAnimation = true;
+            mNeedsAnimation =  true;
+        }
+        requestChildrenUpdate();
+    }
+
+    /**
+     * See {@link AmbientState#setActivatedChild}.
+     */
+    public void setActivatedChild(View activatedChild) {
+        mAmbientState.setActivatedChild(activatedChild);
+        mActivateNeedsAnimation = true;
+        mNeedsAnimation =  true;
+        requestChildrenUpdate();
+    }
+
+    public View getActivatedChild() {
+        return mAmbientState.getActivatedChild();
+    }
+
     private void applyCurrentState() {
-        mListenForHeightChanges = false;
         mCurrentStackScrollState.apply();
-        mListenForHeightChanges = true;
         if (mListener != null) {
             mListener.onChildLocationsChanged(this);
         }
@@ -1215,21 +1257,76 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     static class AnimationEvent {
 
-        static int ANIMATION_TYPE_ADD = 1;
-        static int ANIMATION_TYPE_REMOVE = 2;
-        static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 3;
-        static int ANIMATION_TYPE_TOP_PADDING_CHANGED = 4;
-        static int ANIMATION_TYPE_START_DRAG = 5;
-        static int ANIMATION_TYPE_SNAP_BACK = 6;
+        static AnimationFilter[] FILTERS = new AnimationFilter[] {
+
+                // ANIMATION_TYPE_ADD
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateY()
+                        .animateZ(),
+
+                // ANIMATION_TYPE_REMOVE
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateY()
+                        .animateZ(),
+
+                // ANIMATION_TYPE_REMOVE_SWIPED_OUT
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateY()
+                        .animateZ(),
+
+                // ANIMATION_TYPE_TOP_PADDING_CHANGED
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateY()
+                        .animateDimmed()
+                        .animateScale()
+                        .animateZ(),
+
+                // ANIMATION_TYPE_START_DRAG
+                new AnimationFilter()
+                        .animateAlpha(),
+
+                // ANIMATION_TYPE_SNAP_BACK
+                new AnimationFilter()
+                        .animateAlpha(),
+
+                // ANIMATION_TYPE_ACTIVATED_CHILD
+                new AnimationFilter()
+                        .animateScale()
+                        .animateAlpha(),
+
+                // ANIMATION_TYPE_DIMMED
+                new AnimationFilter()
+                        .animateScale()
+                        .animateDimmed()
+        };
+
+        static int ANIMATION_TYPE_ADD = 0;
+        static int ANIMATION_TYPE_REMOVE = 1;
+        static int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 2;
+        static int ANIMATION_TYPE_TOP_PADDING_CHANGED = 3;
+        static int ANIMATION_TYPE_START_DRAG = 4;
+        static int ANIMATION_TYPE_SNAP_BACK = 5;
+        static int ANIMATION_TYPE_ACTIVATED_CHILD = 6;
+        static int ANIMATION_TYPE_DIMMED = 7;
 
         final long eventStartTime;
         final View changingView;
         final int animationType;
+        final AnimationFilter filter;
 
         AnimationEvent(View view, int type) {
             eventStartTime = AnimationUtils.currentAnimationTimeMillis();
             changingView = view;
             animationType = type;
+            filter = FILTERS[type];
         }
     }
 
