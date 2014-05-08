@@ -4806,6 +4806,7 @@ public class Activity extends ContextThemeWrapper
     public void setRecentsActivityValues(ActivityManager.RecentsActivityValues values) {
         ActivityManager.RecentsActivityValues activityValues =
                 new ActivityManager.RecentsActivityValues(values);
+        // Scale the icon down to something reasonable
         if (values.icon != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
             activityValues.icon = Bitmap.createScaledBitmap(values.icon, size, size, true);

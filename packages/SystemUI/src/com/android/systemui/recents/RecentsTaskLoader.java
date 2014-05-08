@@ -554,14 +554,16 @@ public class RecentsTaskLoader {
     }
 
     /** Completely removes the resource data from the pool. */
-    public void deleteTaskData(Task t) {
+    public void deleteTaskData(Task t, boolean notifyTaskDataUnloaded) {
         Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|deleteTask]", t);
 
         mLoadQueue.removeTask(t);
         mThumbnailCache.remove(t.key);
         mApplicationIconCache.remove(t.key);
-        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
+        if (notifyTaskDataUnloaded) {
+            t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
+        }
     }
 
     /** Stops the task loader and clears all pending tasks */
