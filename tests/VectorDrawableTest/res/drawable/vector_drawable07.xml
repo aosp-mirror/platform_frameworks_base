@@ -19,14 +19,7 @@
 
     <viewport android:viewportWidth="140"
           android:viewportHeight="110"/>
-    <group>
-        <path
-                android:name="menu"
-                android:pathData="M 20,20 l 100,0 0,10 -100,0 z
-              M 20,50 l 100,0 0,10 -100,0 z
-              M 20,80 l 0,-10 100,0 0,10 z"
-                android:fill="#ffffffff"/>
-    </group>
+
     <group>
         <path
                 android:name="back"
@@ -34,12 +27,6 @@
               M 27,50 l 97,0 0,10 -97,0 z
               M 20,55 l 7.07,-7.07 35.3,35.3 -7.07,7.07 z"
                 android:fill="#ffffffff"
-                android:rotation="180"
-                android:pivotX="70"
-                android:pivotY="55"
                 />
     </group>
-    <animation android:sequence="menu,back"/>
-
-
 </vector>

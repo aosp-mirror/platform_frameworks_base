@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:trigger="state_checked" android:versionCode="1" >
+    android:versionCode="1" >
 
     <size
         android:height="48dp"
@@ -26,53 +26,11 @@
 
     <group>
         <path
-            android:name="check"
-            android:pathData="m20,200l100,90l180,-180l-35,-35l-145,145l-60,-60l-40,40z"
-            android:fill="?android:attr/colorControlActivated" />
-    </group>
-    <group>
-        <path
             android:name="box1"
-            android:pathData="m127,171l37,38l33,-31l-37,-40l-1,3l-2,0l-30,30z"
+            android:pathData="m20,200l100,90l180,-180l-35,-35l-145,145l-60,-60l-40,40z"
             android:fill="?android:attr/colorControlActivated"
             android:stroke="?android:attr/colorControlActivated"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
     </group>
-    <group>
-        <path
-            android:name="box2"
-            android:pathData="m127,171l37,38l33,-31l-37,-40l-1,3l-2,0l-30,30z"
-            android:rotation="46.757"
-            android:pivotX="162"
-            android:pivotY="173.5"
-            android:fill="?android:attr/colorControlNormal"
-            android:stroke="?android:attr/colorControlNormal"
-            android:strokeWidth="3"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
-            android:name="box3"
-            android:pathData="m187,147l-1,55l-49,-1l2,-53l48,0z"
-            android:stroke="?android:attr/colorControlNormal"
-            android:strokeWidth="10"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-    <group>
-        <path
-            android:name="box4"
-            android:pathData="m248,74l0,164l-177,0l1,-165l173,-1l3,2z"
-            android:stroke="?android:attr/colorControlNormal"
-            android:strokeWidth="30"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-    </group>
-
-    <animation
-        android:durations="300,100,0,300"
-        android:sequence="check,box1,box2,box3,box4" />
-
 </vector>
