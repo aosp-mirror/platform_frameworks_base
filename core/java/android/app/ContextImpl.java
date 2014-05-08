@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.net.wifi.IWifiScanner;
+import android.net.wifi.WifiScanner;
 import android.os.Build;
 
 import com.android.internal.policy.PolicyManager;
@@ -588,6 +590,13 @@ class ContextImpl extends Context {
                     IWifiP2pManager service = IWifiP2pManager.Stub.asInterface(b);
                     return new WifiP2pManager(service);
                 }});
+
+        registerService(WIFI_SCANNING_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(WIFI_SCANNING_SERVICE);
+                IWifiScanner service = IWifiScanner.Stub.asInterface(b);
+                return new WifiScanner(ctx.getOuterContext(), service);
+            }});
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 Display mDefaultDisplay;
