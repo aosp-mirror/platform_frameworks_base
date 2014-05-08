@@ -1685,10 +1685,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
-            case KeyEvent.KEYCODE_DPAD_UP:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-            case KeyEvent.KEYCODE_DPAD_LEFT:
                 return true;
         }
 
