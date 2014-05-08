@@ -36,8 +36,6 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
-import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.CONTAINER_STATE_HAS_SURFACE;
-
 import android.service.voice.IVoiceInteractionSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
@@ -2841,7 +2839,7 @@ final class ActivityStack {
             if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
                 mStackSupervisor.moveHomeToTop();
             }
-            removeTask(task, false);
+            removeTask(task);
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();
@@ -3717,7 +3715,7 @@ final class ActivityStack {
         return starting;
     }
 
-    void removeTask(TaskRecord task, boolean moving) {
+    void removeTask(TaskRecord task) {
         mStackSupervisor.endLockTaskModeIfTaskEnding(task);
         mWindowManager.removeTask(task.taskId);
         final ActivityRecord r = mResumedActivity;
@@ -3731,14 +3729,20 @@ final class ActivityStack {
             mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
         }
         mTaskHistory.remove(task);
-        if (!moving && task.voiceSession != null) {
-            // This task was a voice interaction, so it should not remain on the
-            // recent tasks list.
-            try {
-                task.voiceSession.taskFinished(task.intent, task.taskId);
-            } catch (RemoteException e) {
+
+        if (task.mActivities.isEmpty()) {
+            final boolean isVoiceSession = task.voiceSession != null;
+            if (isVoiceSession) {
+                try {
+                    task.voiceSession.taskFinished(task.intent, task.taskId);
+                } catch (RemoteException e) {
+                }
             }
-            mService.mRecentTasks.remove(task);
+            if (task.autoRemoveFromRecents() || isVoiceSession) {
+                // Task creator asked to remove this when done, or this task was a voice
+                // interaction, so it should not remain on the recent tasks list.
+                mService.mRecentTasks.remove(task);
+            }
         }
 
         if (mTaskHistory.isEmpty()) {
