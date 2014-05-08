@@ -43,7 +43,6 @@ import android.text.TextUtils;
 class GLES20Canvas extends HardwareCanvas {
     // Must match modifiers used in the JNI layer
     private static final int MODIFIER_NONE = 0;
-    private static final int MODIFIER_SHADOW = 1;
     private static final int MODIFIER_SHADER = 2;
 
     private final boolean mOpaque;
@@ -1297,12 +1296,6 @@ class GLES20Canvas extends HardwareCanvas {
     private int setupModifiers(Paint paint) {
         int modifiers = MODIFIER_NONE;
 
-        if (paint.hasShadow) {
-            nSetupShadow(mRenderer, paint.shadowRadius, paint.shadowDx, paint.shadowDy,
-                    paint.shadowColor);
-            modifiers |= MODIFIER_SHADOW;
-        }
-
         final Shader shader = paint.getShader();
         if (shader != null) {
             nSetupShader(mRenderer, shader.native_shader);
@@ -1315,12 +1308,6 @@ class GLES20Canvas extends HardwareCanvas {
     private int setupModifiers(Paint paint, int flags) {
         int modifiers = MODIFIER_NONE;
 
-        if (paint.hasShadow && (flags & MODIFIER_SHADOW) != 0) {
-            nSetupShadow(mRenderer, paint.shadowRadius, paint.shadowDx, paint.shadowDy,
-                    paint.shadowColor);
-            modifiers |= MODIFIER_SHADOW;
-        }
-
         final Shader shader = paint.getShader();
         if (shader != null && (flags & MODIFIER_SHADER) != 0) {
             nSetupShader(mRenderer, shader.native_shader);
@@ -1331,8 +1318,6 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native void nSetupShader(long renderer, long shader);
-    private static native void nSetupShadow(long renderer, float radius,
-            float dx, float dy, int color);
 
     private static native void nResetModifiers(long renderer, int modifiers);
 }

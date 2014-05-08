@@ -410,16 +410,6 @@ void DisplayListRenderer::setupShader(SkiaShader* shader) {
     addStateOp(new (alloc()) SetupShaderOp(shader));
 }
 
-void DisplayListRenderer::resetShadow() {
-    addStateOp(new (alloc()) ResetShadowOp());
-    OpenGLRenderer::resetShadow();
-}
-
-void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int color) {
-    addStateOp(new (alloc()) SetupShadowOp(radius, dx, dy, color));
-    OpenGLRenderer::setupShadow(radius, dx, dy, color);
-}
-
 void DisplayListRenderer::resetPaintFilter() {
     addStateOp(new (alloc()) ResetPaintFilterOp());
 }
