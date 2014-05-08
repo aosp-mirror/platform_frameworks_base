@@ -34,4 +34,6 @@ interface INfcCardEmulation
     AidGroup getAidGroupForService(int userHandle, in ComponentName service, String category);
     boolean removeAidGroupForService(int userHandle, in ComponentName service, String category);
     List<ApduServiceInfo> getServices(int userHandle, in String category);
+    boolean setPreferredService(in ComponentName service);
+    boolean unsetPreferredService();
 }

@@ -4537,6 +4537,12 @@ public final class Settings {
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         /**
+         * Whether NFC payment is handled by the foreground application or a default.
+         * @hide
+         */
+        public static final String NFC_PAYMENT_FOREGROUND = "nfc_payment_foreground";
+
+        /**
          * Specifies the package name currently configured to be the primary sms application
          * @hide
          */
