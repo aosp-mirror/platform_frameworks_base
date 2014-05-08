@@ -16,13 +16,17 @@
 
 package com.android.internal.app;
 
+import android.app.UsageStats;
 import android.content.ComponentName;
-import com.android.internal.os.PkgUsageStats;
+import android.content.res.Configuration;
+import android.os.ParcelableParcel;
 
 interface IUsageStats {
     void noteResumeComponent(in ComponentName componentName);
     void notePauseComponent(in ComponentName componentName);
     void noteLaunchTime(in ComponentName componentName, int millis);
-    PkgUsageStats getPkgUsageStats(in ComponentName componentName);
-    PkgUsageStats[] getAllPkgUsageStats();
+    void noteStartConfig(in Configuration config);
+    UsageStats.PackageStats getPkgUsageStats(String callingPkg, in ComponentName componentName);
+    UsageStats.PackageStats[] getAllPkgUsageStats(String callingPkg);
+    ParcelableParcel getCurrentStats(String callingPkg);
 }

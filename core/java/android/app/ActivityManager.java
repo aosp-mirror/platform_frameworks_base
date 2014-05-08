@@ -20,7 +20,6 @@ import android.os.BatteryStats;
 import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
 import com.android.internal.app.ProcessStats;
-import com.android.internal.os.PkgUsageStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 
@@ -2130,14 +2129,15 @@ public class ActivityManager {
                 return new HashMap<String, Integer>();
             }
 
-            PkgUsageStats[] allPkgUsageStats = usageStatsService.getAllPkgUsageStats();
+            UsageStats.PackageStats[] allPkgUsageStats = usageStatsService.getAllPkgUsageStats(
+                    ActivityThread.currentPackageName());
             if (allPkgUsageStats == null) {
                 return new HashMap<String, Integer>();
             }
 
             Map<String, Integer> launchCounts = new HashMap<String, Integer>();
-            for (PkgUsageStats pkgUsageStats : allPkgUsageStats) {
-                launchCounts.put(pkgUsageStats.packageName, pkgUsageStats.launchCount);
+            for (UsageStats.PackageStats pkgUsageStats : allPkgUsageStats) {
+                launchCounts.put(pkgUsageStats.getPackageName(), pkgUsageStats.getLaunchCount());
             }
 
             return launchCounts;
@@ -2251,17 +2251,17 @@ public class ActivityManager {
      *
      * @hide
      */
-    public PkgUsageStats[] getAllPackageUsageStats() {
+    public UsageStats.PackageStats[] getAllPackageUsageStats() {
         try {
             IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
                     ServiceManager.getService("usagestats"));
             if (usageStatsService != null) {
-                return usageStatsService.getAllPkgUsageStats();
+                return usageStatsService.getAllPkgUsageStats(ActivityThread.currentPackageName());
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Could not query usage stats", e);
         }
-        return new PkgUsageStats[0];
+        return new UsageStats.PackageStats[0];
     }
 
     /**
