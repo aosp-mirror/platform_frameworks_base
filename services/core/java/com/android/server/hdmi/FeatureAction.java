@@ -15,7 +15,6 @@
  */
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.os.Looper;
@@ -155,21 +154,8 @@ abstract class FeatureAction {
         mActionTimer.sendTimerMessage(state, delayMillis);
     }
 
-    static HdmiCecMessage buildCommand(int src, int dst, int opcode, byte[] params) {
-        return new HdmiCecMessage(src, dst, opcode, params);
-    }
-
-    // Build a CEC command that does not have parameter.
-    static HdmiCecMessage buildCommand(int src, int dst, int opcode) {
-        return new HdmiCecMessage(src, dst, opcode, HdmiCecMessage.EMPTY_PARAM);
-    }
-
     protected final void sendCommand(HdmiCecMessage cmd) {
         mService.sendCecCommand(cmd);
-    }
-
-    protected final void sendBroadcastCommand(int opcode, byte[] param) {
-        sendCommand(buildCommand(mSourceAddress, HdmiCec.ADDR_BROADCAST, opcode, param));
     }
 
     /**
@@ -188,24 +174,5 @@ abstract class FeatureAction {
      */
     private void removeAction(FeatureAction action) {
         mService.removeAction(action);
-    }
-
-    // Utility methods for generating parameter byte arrays for CEC commands.
-    protected static byte[] uiCommandParam(int uiCommand) {
-        return new byte[] {(byte) uiCommand};
-    }
-
-    protected static byte[] physicalAddressParam(int physicalAddress) {
-        return new byte[] {
-                (byte) ((physicalAddress >> 8) & 0xFF),
-                (byte) (physicalAddress & 0xFF)
-        };
-    }
-
-    protected static byte[] pathPairParam(int oldPath, int newPath) {
-        return new byte[] {
-                (byte) ((oldPath >> 8) & 0xFF), (byte) (oldPath & 0xFF),
-                (byte) ((newPath >> 8) & 0xFF), (byte) (newPath & 0xFF)
-        };
     }
 }

@@ -55,15 +55,6 @@ final class HdmiCecController {
     // A message to report allocated logical address to main control looper.
     private final static int MSG_REPORT_LOGICAL_ADDRESS = 2;
 
-    // TODO: move these values to HdmiCec.java once make it internal constant class.
-    // CEC's ABORT reason values.
-    private static final int ABORT_UNRECOGNIZED_MODE = 0;
-    private static final int ABORT_NOT_IN_CORRECT_MODE = 1;
-    private static final int ABORT_CANNOT_PROVIDE_SOURCE = 2;
-    private static final int ABORT_INVALID_OPERAND = 3;
-    private static final int ABORT_REFUSED = 4;
-    private static final int ABORT_UNABLE_TO_DETERMINE = 5;
-
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
     // TODO: define other constants for errors.
@@ -80,10 +71,16 @@ final class HdmiCecController {
     // interacts with HAL.
     private long mNativePtr;
 
+    private HdmiControlService mService;
+
     // Map-like container of all cec devices. A logical address of device is
     // used as key of container.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos =
             new SparseArray<HdmiCecDeviceInfo>();
+    // Set-like container for all local devices' logical address.
+    // Key and value are same.
+    private final SparseArray<Integer> mLocalLogicalAddresses =
+            new SparseArray<Integer>();
 
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController() {
@@ -325,6 +322,7 @@ final class HdmiCecController {
      */
     int addLogicalAddress(int newLogicalAddress) {
         if (HdmiCec.isValidAddress(newLogicalAddress)) {
+            mLocalLogicalAddresses.append(newLogicalAddress, newLogicalAddress);
             return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
             return -1;
@@ -337,6 +335,9 @@ final class HdmiCecController {
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
     void clearLogicalAddress() {
+        // TODO: consider to backup logical address so that new logical address
+        // allocation can use it as preferred address.
+        mLocalLogicalAddresses.clear();
         nativeClearLogicalAddress(mNativePtr);
     }
 
@@ -371,30 +372,37 @@ final class HdmiCecController {
     }
 
     private void init(HdmiControlService service, long nativePtr) {
+        mService = service;
         mIoHandler = new IoHandler(service.getServiceLooper());
         mControlHandler = new ControlHandler(service.getServiceLooper());
         mNativePtr = nativePtr;
     }
 
+    private boolean isAcceptableAddress(int address) {
+        // Can access command targeting devices available in local device or
+        // broadcast command.
+        return address == HdmiCec.ADDR_BROADCAST
+                || mLocalLogicalAddresses.get(address) != null;
+    }
+
     private void onReceiveCommand(HdmiCecMessage message) {
-        // TODO: Handle message according to opcode type.
+        if (isAcceptableAddress(message.getDestination()) &&
+                mService.handleCecCommand(message)) {
+            return;
+        }
 
         // TODO: Use device's source address for broadcast message.
         int sourceAddress = message.getDestination() != HdmiCec.ADDR_BROADCAST ?
                 message.getDestination() : 0;
         // Reply <Feature Abort> to initiator (source) for all requests.
-        sendFeatureAbort(sourceAddress, message.getSource(), message.getOpcode(),
-                ABORT_REFUSED);
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand
+                (sourceAddress, message.getSource(), message.getOpcode(),
+                        HdmiCecMessageBuilder.ABORT_REFUSED);
+        sendCommand(cecMessage);
+
     }
 
-    private void sendFeatureAbort(int srcAddress, int destAddress, int originalOpcode,
-            int reason) {
-        byte[] params = new byte[2];
-        params[0] = (byte) originalOpcode;
-        params[1] = (byte) reason;
-
-        HdmiCecMessage cecMessage = new HdmiCecMessage(srcAddress, destAddress,
-                HdmiCec.MESSAGE_FEATURE_ABORT, params);
+    void sendCommand(HdmiCecMessage cecMessage) {
         Message message = mIoHandler.obtainMessage(MSG_SEND_CEC_COMMAND, cecMessage);
         mIoHandler.sendMessage(message);
     }

@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.HandlerThread;
@@ -25,6 +26,8 @@ import android.os.Looper;
 import android.util.Slog;
 
 import com.android.server.SystemService;
+
+import java.util.Locale;
 
 /**
  * Provides a service for sending and processing HDMI control messages,
@@ -105,7 +108,7 @@ public final class HdmiControlService extends SystemService {
      * @param command CEC command to send out
      */
     void sendCecCommand(HdmiCecMessage command) {
-        // TODO: Implement this.
+        mCecController.sendCommand(command);
     }
 
     /**
@@ -115,5 +118,90 @@ public final class HdmiControlService extends SystemService {
      */
     void addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
         // TODO: Implement this.
+    }
+
+    boolean handleCecCommand(HdmiCecMessage message) {
+        // Commands that queries system information replies directly instead
+        // of creating FeatureAction because they are state-less.
+        switch (message.getOpcode()) {
+            case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
+                handleGetMenuLanguage(message);
+                return true;
+            case HdmiCec.MESSAGE_GET_OSD_NAME:
+                handleGetOsdName(message);
+                return true;
+            case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
+                handleGivePhysicalAddress(message);
+                return true;
+            case HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID:
+                handleGiveDeviceVendorId(message);
+                return true;
+            case HdmiCec.MESSAGE_GET_CEC_VERSION:
+                handleGetCecVersion(message);
+                return true;
+            // TODO: Add remaining system information query such as
+            // <Give Device Power Status> and <Request Active Source> handler.
+            default:
+                Slog.w(TAG, "Unsupported cec command:" + message.toString());
+                return false;
+        }
+    }
+
+    private void handleGetCecVersion(HdmiCecMessage message) {
+        int version = mCecController.getVersion();
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildCecVersion(message.getDestination(),
+                message.getSource(),
+                version);
+        sendCecCommand(cecMessage);
+    }
+
+    private void handleGiveDeviceVendorId(HdmiCecMessage message) {
+        int vendorId = mCecController.getVendorId();
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
+                message.getDestination(), vendorId);
+        sendCecCommand(cecMessage);
+    }
+
+    private void handleGivePhysicalAddress(HdmiCecMessage message) {
+        int physicalAddress = mCecController.getPhysicalAddress();
+        int deviceType = HdmiCec.getTypeFromAddress(message.getDestination());
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                message.getDestination(), physicalAddress, deviceType);
+        sendCecCommand(cecMessage);
+    }
+
+    private void handleGetOsdName(HdmiCecMessage message) {
+        // TODO: read device name from settings or property.
+        String name = HdmiCec.getDefaultDeviceName(message.getDestination());
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                message.getDestination(), message.getSource(), name);
+        if (cecMessage != null) {
+            sendCecCommand(cecMessage);
+        } else {
+            Slog.w(TAG, "Failed to build <Get Osd Name>:" + name);
+        }
+    }
+
+    private void handleGetMenuLanguage(HdmiCecMessage message) {
+        // Only 0 (TV), 14 (specific use) can answer.
+        if (message.getDestination() != HdmiCec.ADDR_TV
+                && message.getDestination() != HdmiCec.ADDR_SPECIFIC_USE) {
+            Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
+            sendCecCommand(
+                    HdmiCecMessageBuilder.buildFeatureAbortCommand(message.getDestination(),
+                            message.getSource(), HdmiCec.MESSAGE_GET_MENU_LANGUAGE,
+                            HdmiCecMessageBuilder.ABORT_UNRECOGNIZED_MODE));
+            return;
+        }
+
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
+                message.getDestination(),
+                Locale.getDefault().getISO3Language());
+        // TODO: figure out how to handle failed to get language code.
+        if (command != null) {
+            sendCecCommand(command);
+        } else {
+            Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
+        }
     }
 }
