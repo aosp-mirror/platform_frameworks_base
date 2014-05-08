@@ -23,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -60,6 +61,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     interface TaskStackViewCallbacks {
         public void onTaskLaunched(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
         public void onTaskAppInfoLaunched(Task t);
+        public void onTaskRemoved(Task t);
     }
 
     TaskStack mStack;
@@ -1480,12 +1482,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Remove the task from the view
         mSv.mStack.removeTask(task);
 
-        // Remove any stored data from the loader
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.deleteTaskData(task);
-
-        // Remove the task from activity manager
-        RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(tv.getTask().key.id);
+        // Notify the callback that we've removed the task and it can clean up after it
+        mSv.mCb.onTaskRemoved(task);
 
         // Disable HW layers
         mSv.decHwLayersRefCount("swipeComplete");

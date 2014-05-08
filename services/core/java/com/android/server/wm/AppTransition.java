@@ -116,7 +116,8 @@ public class AppTransition implements Dump {
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
 
-    private static final long DEFAULT_APP_TRANSITION_DURATION = 250;
+    private static final int DEFAULT_APP_TRANSITION_DURATION = 250;
+    private static final int THUMBNAIL_APP_TRANSITION_DURATION = 225;
 
     private final Context mContext;
     private final Handler mH;
@@ -160,6 +161,7 @@ public class AppTransition implements Dump {
     private final int mConfigShortAnimTime;
     private final Interpolator mDecelerateInterpolator;
     private final Interpolator mThumbnailFadeoutInterpolator;
+    private final Interpolator mThumbnailCubicInterpolator;
 
     private int mCurrentUserId = 0;
 
@@ -170,6 +172,8 @@ public class AppTransition implements Dump {
                 com.android.internal.R.integer.config_shortAnimTime);
         mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.decelerate_cubic);
+        mThumbnailCubicInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
         mThumbnailFadeoutInterpolator = new Interpolator() {
             @Override
             public float getInterpolation(float input) {
@@ -401,11 +405,23 @@ public class AppTransition implements Dump {
     /**
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
+    Animation prepareThumbnailAnimationWithDuration(Animation a, int appWidth, int appHeight,
+            int duration, Interpolator interpolator) {
+        a.setDuration(duration);
+        a.setFillAfter(true);
+        a.setInterpolator(interpolator);
+        a.initialize(appWidth, appHeight, appWidth, appHeight);
+        return a;
+    }
+
+    /**
+     * Prepares the specified animation with a standard duration, interpolator, etc.
+     */
     Animation prepareThumbnailAnimation(Animation a, int appWidth, int appHeight, int transit) {
         // Pick the desired duration.  If this is an inter-activity transition,
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
-        final long duration;
+        final int duration;
         switch (transit) {
             case TRANSIT_ACTIVITY_OPEN:
             case TRANSIT_ACTIVITY_CLOSE:
@@ -415,11 +431,8 @@ public class AppTransition implements Dump {
                 duration = DEFAULT_APP_TRANSITION_DURATION;
                 break;
         }
-        a.setDuration(duration);
-        a.setFillAfter(true);
-        a.setInterpolator(mDecelerateInterpolator);
-        a.initialize(appWidth, appHeight, appWidth, appHeight);
-        return a;
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
+                mDecelerateInterpolator);
     }
 
     /**
@@ -594,7 +607,8 @@ public class AppTransition implements Dump {
                 throw new RuntimeException("Invalid thumbnail transition state");
         }
 
-        return prepareThumbnailAnimation(a, appWidth, appHeight, transit);
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
+                THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailCubicInterpolator);
     }
 
     /**
