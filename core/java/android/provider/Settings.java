@@ -2831,7 +2831,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.TETHER_SUPPORTED);
             MOVED_TO_GLOBAL.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.USE_GOOGLE_MAIL);
-            MOVED_TO_GLOBAL.add(Settings.Global.WEB_AUTOFILL_QUERY_URL);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_COUNTRY_CODE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_FREQUENCY_BAND);
@@ -5362,11 +5361,6 @@ public final class Settings {
         * to Gmail on the device must change to Google Mail.
         */
        public static final String USE_GOOGLE_MAIL = "use_google_mail";
-
-       /** Autofill server address (Used in WebView/browser).
-        * {@hide} */
-       public static final String WEB_AUTOFILL_QUERY_URL =
-           "web_autofill_query_url";
 
        /**
         * Whether Wifi display is enabled/disabled
