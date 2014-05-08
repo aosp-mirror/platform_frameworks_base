@@ -526,12 +526,15 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* da
         switch (format) {
 
         default:
-            // TODO Currently the only possible values for format are AUDIO_FORMAT_PCM_16_BIT
-            // and AUDIO_FORMAT_PCM_8_BIT, due to the limited set of values for audioFormat.
+            // TODO Currently the only possible values for format are AUDIO_FORMAT_PCM_16_BIT,
+            // AUDIO_FORMAT_PCM_8_BIT, and AUDIO_FORMAT_PCM_FLOAT,
+            // due to the limited set of values for audioFormat.
             // The next section of the switch will probably work for more formats, but it has only
-            // been tested for AUDIO_FORMAT_PCM_16_BIT, so that's why the "default" case fails.
+            // been tested for AUDIO_FORMAT_PCM_16_BIT and AUDIO_FORMAT_PCM_FLOAT,
+            // so that's why the "default" case fails.
             break;
 
+        case AUDIO_FORMAT_PCM_FLOAT:
         case AUDIO_FORMAT_PCM_16_BIT: {
             // writing to shared memory, check for capacity
             if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
@@ -673,6 +676,44 @@ static jint android_media_AudioTrack_write_short(JNIEnv *env,  jobject thiz,
     }
     //ALOGV("write wrote %d (tried %d) shorts in the native AudioTrack with offset %d",
     //     (int)written, (int)(sizeInShorts), (int)offsetInShorts);
+
+    return written;
+}
+
+
+// ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_write_float(JNIEnv *env,  jobject thiz,
+                                                  jfloatArray javaAudioData,
+                                                  jint offsetInFloats, jint sizeInFloats,
+                                                  jint javaAudioFormat,
+                                                  jboolean isWriteBlocking) {
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
+    }
+
+    jfloat* cAudioData = NULL;
+    if (javaAudioData) {
+        cAudioData = (jfloat *)env->GetFloatArrayElements(javaAudioData, NULL);
+        if (cAudioData == NULL) {
+            ALOGE("Error retrieving source of audio data to play, can't play");
+            return 0; // out of memory or no data to load
+        }
+    } else {
+        ALOGE("NULL java array of audio data to play, can't play");
+        return 0;
+    }
+    jint written = writeToTrack(lpTrack, javaAudioFormat, (jbyte *)cAudioData,
+                                offsetInFloats * sizeof(float), sizeInFloats * sizeof(float),
+                                isWriteBlocking == JNI_TRUE /* blocking */);
+    env->ReleaseFloatArrayElements(javaAudioData, cAudioData, 0);
+
+    if (written > 0) {
+        written /= sizeof(float);
+    }
 
     return written;
 }
@@ -963,6 +1004,7 @@ static JNINativeMethod gMethods[] = {
                              "(Ljava/lang/Object;IIIZ)I",
                                          (void *)android_media_AudioTrack_write_native_bytes},
     {"native_write_short",   "([SIII)I", (void *)android_media_AudioTrack_write_short},
+    {"native_write_float",   "([FIIIZ)I",(void *)android_media_AudioTrack_write_float},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
     {"native_get_native_frame_count",
                              "()I",      (void *)android_media_AudioTrack_get_native_frame_count},
