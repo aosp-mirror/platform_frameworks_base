@@ -31,13 +31,13 @@
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> horas"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> seg."</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> seg."</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> seg."</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> seg."</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> seg"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> seg"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> seg"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> seg"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sem nome&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
