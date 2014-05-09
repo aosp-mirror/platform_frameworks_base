@@ -360,8 +360,9 @@ public class VibratorService extends IVibratorService.Stub
     // Lock held on mVibrations
     private void startVibrationLocked(final Vibration vib) {
         try {
-            if (mLowPowerMode && vib.mStreamHint != AudioManager.STREAM_RING)
-                    return;
+            if (mLowPowerMode && vib.mStreamHint != AudioManager.STREAM_RING) {
+                return;
+            }
 
             int mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
                     vib.mStreamHint, vib.mUid, vib.mOpPkg);
@@ -443,7 +444,7 @@ public class VibratorService extends IVibratorService.Stub
                 }
 
                 mLowPowerMode = Settings.Global.getInt(mContext.getContentResolver(),
-                     Settings.Global.LOW_POWER_MODE, 0) != 0;
+                         Settings.Global.LOW_POWER_MODE, 0) != 0;
 
                 if (mVibrateInputDevicesSetting) {
                     if (!mInputDeviceListenerRegistered) {
