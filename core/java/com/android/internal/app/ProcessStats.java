@@ -1108,13 +1108,6 @@ public final class ProcessStats implements Parcelable {
                 mRuntime = runtime;
             }
         }
-        String webview = WebViewFactory.useExperimentalWebView() ? "chromeview" : "webview";
-        if (!Objects.equals(webview, mWebView)) {
-            changed = true;
-            if (update) {
-                mWebView = webview;
-            }
-        }
         return changed;
     }
 
