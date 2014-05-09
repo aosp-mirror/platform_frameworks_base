@@ -506,6 +506,12 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public boolean isValid() {
+        if (SSID == null)
+            return false;
+
+        if (allowedKeyManagement == null)
+            return false;
+
         if (allowedKeyManagement.cardinality() > 1) {
             if (allowedKeyManagement.cardinality() != 2) {
                 return false;
