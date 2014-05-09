@@ -363,7 +363,7 @@ static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
 static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         jint width, jint height, jint configHandle, jint allocSize) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkBitmap::Config config = static_cast<SkBitmap::Config>(configHandle);    
+    SkBitmap::Config config = static_cast<SkBitmap::Config>(configHandle);
     if (width * height * SkBitmap::ComputeBytesPerPixel(config) > allocSize) {
         // done in native as there's no way to get BytesPerPixel in Java
         doThrowIAE(env, "Bitmap not large enough to support new configuration");
