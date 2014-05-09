@@ -30,7 +30,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -40,6 +39,7 @@ import android.os.UserManager;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -54,7 +54,7 @@ public class SystemServicesProxy {
     IPackageManager mIpm;
     UserManager mUm;
     SearchManager mSm;
-    String mPackage;
+    String mRecentsPackage;
     ComponentName mAssistComponent;
 
     Bitmap mDummyIcon;
@@ -67,7 +67,7 @@ public class SystemServicesProxy {
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mIpm = AppGlobals.getPackageManager();
         mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
-        mPackage = context.getPackageName();
+        mRecentsPackage = context.getPackageName();
 
         // Resolve the assist intent
         Intent assist = mSm.getAssistIntent(context, false);
@@ -83,14 +83,14 @@ public class SystemServicesProxy {
     }
 
     /** Returns a list of the recents tasks */
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             ArrayList<ActivityManager.RecentTaskInfo> tasks =
                     new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numTasks, Constants.DebugFlags.App.SystemServicesProxyMockTaskCount);
+            int count = Math.min(numLatestTasks, Constants.DebugFlags.App.SystemServicesProxyMockTaskCount);
             for (int i = 0; i < count; i++) {
                 // Create a dummy component name
                 int packageIndex = i % Constants.DebugFlags.App.SystemServicesProxyMockPackageCount;
@@ -114,9 +114,43 @@ public class SystemServicesProxy {
             return tasks;
         }
 
-        return mAm.getRecentTasksForUser(numTasks,
+        // Remove home/recents/excluded tasks
+        int minNumTasksToQuery = 10;
+        int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
+        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                        ActivityManager.RECENT_INCLUDE_PROFILES, userId);
+                ActivityManager.RECENT_INCLUDE_PROFILES |
+                ActivityManager.RECENT_WITH_EXCLUDED, userId);
+        boolean isFirstValidTask = true;
+        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+        while (iter.hasNext()) {
+            ActivityManager.RecentTaskInfo t = iter.next();
+
+            // NOTE: The order of these checks happens in the expected order of the traversal of the
+            // tasks
+
+            // Skip tasks from this Recents package
+            if (t.baseIntent.getComponent().getPackageName().equals(mRecentsPackage)) {
+                iter.remove();
+                continue;
+            }
+            // Check the first non-recents task, include this task even if it is marked as excluded
+            // from recents.  In other words, only remove excluded tasks if it is not the first task
+            boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            if (isExcluded && !isFirstValidTask) {
+                iter.remove();
+                continue;
+            }
+            isFirstValidTask = false;
+            // Skip tasks in the home stack
+            if (isInHomeStack(t.persistentId)) {
+                iter.remove();
+                continue;
+            }
+        }
+
+        return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));
     }
 
     /** Returns a list of the running tasks */

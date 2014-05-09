@@ -255,15 +255,10 @@ public class AlternateRecentsComponent {
     /** Loads the first task thumbnail */
     Bitmap loadFirstTaskThumbnail() {
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = ssp.getRecentTasks(1,
-                UserHandle.CURRENT.getIdentifier());
-        for (ActivityManager.RecentTaskInfo t : tasks) {
-            // Skip tasks in the home stack
-            if (ssp.isInHomeStack(t.persistentId)) {
-                return null;
-            }
+        List<ActivityManager.RunningTaskInfo> tasks = ssp.getRunningTasks(1);
 
-            return ssp.getTaskThumbnail(t.persistentId);
+        for (ActivityManager.RunningTaskInfo t : tasks) {
+            return ssp.getTaskThumbnail(t.id);
         }
         return null;
     }
@@ -284,17 +279,6 @@ public class AlternateRecentsComponent {
             }
         }
         return (tasks.size() > 1);
-    }
-
-    /** Returns whether the base intent of the top task stack was launched with the flag
-     * Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS. */
-    boolean isTopTaskExcludeFromRecents(List<ActivityManager.RecentTaskInfo> tasks) {
-        if (tasks.size() > 0) {
-            ActivityManager.RecentTaskInfo t = tasks.get(0);
-            Console.log(t.baseIntent.toString());
-            return (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0;
-        }
-        return false;
     }
 
     /** Converts from the device rotation to the degree */
@@ -416,16 +400,14 @@ public class AlternateRecentsComponent {
         }
 
         // Otherwise, Recents is not the front-most activity and we should animate into it.  If
-        // the activity at the root of the top task stack is excluded from recents, or if that
-        // task stack is in the home stack, then we just do a simple transition.  Otherwise, we
-        // animate to the rects defined by the Recents service, which can differ depending on the
-        // number of items in the list.
+        // the activity at the root of the top task stack in the home stack, then we just do a
+        // simple transition.  Otherwise, we animate to the rects defined by the Recents service,
+        // which can differ depending on the number of items in the list.
         List<ActivityManager.RecentTaskInfo> recentTasks =
-                ssp.getRecentTasks(4, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(2, UserHandle.CURRENT.getIdentifier());
         Rect taskRect = hasMultipleRecentsTask(recentTasks) ? mMultipleCountFirstTaskRect :
                 mSingleCountFirstTaskRect;
-        boolean isTaskExcludedFromRecents = isTopTaskExcludeFromRecents(recentTasks);
-        boolean useThumbnailTransition = !isTopTaskHome && !isTaskExcludedFromRecents &&
+        boolean useThumbnailTransition = !isTopTaskHome &&
                 hasValidTaskRects();
 
         if (useThumbnailTransition) {
