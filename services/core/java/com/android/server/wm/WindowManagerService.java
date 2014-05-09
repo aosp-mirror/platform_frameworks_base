@@ -5038,6 +5038,10 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
 
+        if (token == null) {
+            throw new IllegalArgumentException("token == null");
+        }
+
         mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
                 KeyguardDisableHandler.KEYGUARD_DISABLE, new Pair<IBinder, String>(token, tag)));
     }
@@ -5047,6 +5051,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
+        }
+
+        if (token == null) {
+            throw new IllegalArgumentException("token == null");
         }
 
         mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
@@ -5062,6 +5070,11 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
+
+        if (callback == null) {
+            throw new IllegalArgumentException("callback == null");
+        }
+
         mPolicy.exitKeyguardSecurely(new WindowManagerPolicy.OnKeyguardExitResult() {
             @Override
             public void onKeyguardExitResult(boolean success) {

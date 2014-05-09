@@ -44,8 +44,8 @@ public class KeyguardManager {
      * you to disable / reenable the keyguard.
      */
     public class KeyguardLock {
-        private IBinder mToken = new Binder();
-        private String mTag;
+        private final IBinder mToken = new Binder();
+        private final String mTag;
 
         KeyguardLock(String tag) {
             mTag = tag;
