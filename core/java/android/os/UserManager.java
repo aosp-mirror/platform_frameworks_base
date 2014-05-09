@@ -301,7 +301,8 @@ public class UserManager {
     }
 
     /**
-     * Returns the user handle for the user that this application is running for.
+     * Returns the user handle for the user that the calling process is running on.
+     *
      * @return the user handle of the user making this call.
      * @hide
      */
@@ -617,7 +618,8 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of UserHandles for profiles associated with this user, including this user.
+     * Returns a list of UserHandles for profiles associated with the user that the calling process
+     * is running on, including the user itself.
      *
      * @return A non-empty list of UserHandles associated with the calling user.
      */
@@ -635,6 +637,21 @@ public class UserManager {
             profiles.add(userHandle);
         }
         return profiles;
+    }
+
+    /**
+     * Returns the parent of the profile which this method is called from
+     * or null if called from a user that is not a profile.
+     *
+     * @hide
+     */
+    public UserInfo getProfileParent(int userHandle) {
+        try {
+            return mService.getProfileParent(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get profile parent", re);
+            return null;
+        }
     }
 
     /**
@@ -664,7 +681,7 @@ public class UserManager {
 
     private int getBadgeResIdForUser(int userHandle) {
         // Return the framework-provided badge.
-        List<UserInfo> userProfiles = getProfiles(UserHandle.myUserId());
+        List<UserInfo> userProfiles = getProfiles(getUserHandle());
         for (UserInfo user : userProfiles) {
             if (user.id == userHandle
                     && user.isManagedProfile()) {
