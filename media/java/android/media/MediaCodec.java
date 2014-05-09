@@ -585,11 +585,63 @@ final public class MediaCodec {
      * the codec. If you previously specified a surface when configuring this
      * video decoder you can optionally render the buffer.
      * @param index The index of a client-owned output buffer previously returned
-     *              in a call to {@link #dequeueOutputBuffer}.
+     *              from a call to {@link #dequeueOutputBuffer}.
      * @param render If a valid surface was specified when configuring the codec,
      *               passing true renders this output buffer to the surface.
      */
-    public native final void releaseOutputBuffer(int index, boolean render);
+    public final void releaseOutputBuffer(int index, boolean render) {
+        releaseOutputBuffer(index, render, false /* updatePTS */, 0 /* dummy */);
+    }
+
+    /**
+     * If you are done with a buffer, use this call to update its surface timestamp
+     * and return it to the codec to render it on the output surface. If you
+     * have not specified an output surface when configuring this video codec,
+     * this call will simply return the buffer to the codec.<p>
+     *
+     * The timestamp may have special meaning depending on the destination surface.
+     *
+     * <table>
+     * <tr><th>SurfaceView specifics</th></tr>
+     * <tr><td>
+     * If you render your buffer on a {@link android.view.SurfaceView},
+     * you can use the timestamp to render the buffer at a specific time (at the
+     * VSYNC at or after the buffer timestamp).  For this to work, the timestamp
+     * needs to be <i>reasonably close</i> to the current {@link System#nanoTime}.
+     * Currently, this is set as within one (1) second. A few notes:
+     *
+     * <ul>
+     * <li>the buffer will not be returned to the codec until the timestamp
+     * has passed and the buffer is no longer used by the {@link android.view.Surface}.
+     * <li>buffers are processed sequentially, so you may block subsequent buffers to
+     * be displayed on the {@link android.view.Surface}.  This is important if you
+     * want to react to user action, e.g. stop the video or seek.
+     * <li>if multiple buffers are sent to the {@link android.view.Surface} to be
+     * rendered at the same VSYNC, the last one will be shown, and the other ones
+     * will be dropped.
+     * <li>if the timestamp is <em>not</em> "reasonably close" to the current system
+     * time, the {@link android.view.Surface} will ignore the timestamp, and
+     * display the buffer at the earliest feasible time.  In this mode it will not
+     * drop frames.
+     * <li>for best performance and quality, call this method when you are about
+     * two VSYNCs' time before the desired render time.  For 60Hz displays, this is
+     * about 33 msec.
+     * </ul>
+     * </td></tr>
+     * </table>
+     *
+     * @param index The index of a client-owned output buffer previously returned
+     *              from a call to {@link #dequeueOutputBuffer}.
+     * @param renderTimestampNs The timestamp to associate with this buffer when
+     *              it is sent to the Surface.
+     */
+    public final void releaseOutputBuffer(int index, long renderTimestampNs) {
+        releaseOutputBuffer(
+                index, true /* render */, true /* updatePTS */, renderTimestampNs);
+    }
+
+    private native final void releaseOutputBuffer(
+            int index, boolean render, boolean updatePTS, long timeNs);
 
     /**
      * Signals end-of-stream on input.  Equivalent to submitting an empty buffer with
