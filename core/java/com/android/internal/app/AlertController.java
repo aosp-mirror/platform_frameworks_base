@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -38,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -240,6 +242,7 @@ public class AlertController {
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setContentView(mAlertDialogLayout);
         setupView();
+        setupDecor();
     }
     
     public void setTitle(CharSequence title) {
@@ -415,7 +418,28 @@ public class AlertController {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return mScrollView != null && mScrollView.executeKeyEvent(event);
     }
-    
+
+    private void setupDecor() {
+        final View decor = mWindow.getDecorView();
+        final View parent = mWindow.findViewById(R.id.parentPanel);
+        if (parent != null && decor != null) {
+            decor.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
+                    if (insets.isRound()) {
+                        // TODO: Get the padding as a function of the window size.
+                        int roundOffset = mContext.getResources().getDimensionPixelOffset(
+                                R.dimen.alert_dialog_round_padding);
+                        parent.setPadding(roundOffset, roundOffset, roundOffset, roundOffset);
+                    }
+                    return insets.consumeSystemWindowInsets();
+                }
+            });
+            decor.setFitsSystemWindows(true);
+            decor.requestApplyInsets();
+        }
+    }
+
     private void setupView() {
         LinearLayout contentPanel = (LinearLayout) mWindow.findViewById(R.id.contentPanel);
         setupContent(contentPanel);
@@ -636,14 +660,31 @@ public class AlertController {
 
     private void setBackground(TypedArray a, View topPanel, View contentPanel, View customPanel,
             View buttonPanel, boolean hasTitle, boolean hasCustomView, boolean hasButtons) {
-        final int topBright = a.getResourceId(
-                R.styleable.AlertDialog_topBright, R.drawable.popup_top_bright);
-        final int topDark = a.getResourceId(
-                R.styleable.AlertDialog_topDark, R.drawable.popup_top_dark);
-        final int centerBright = a.getResourceId(
-                R.styleable.AlertDialog_centerBright, R.drawable.popup_center_bright);
-        final int centerDark = a.getResourceId(
-                R.styleable.AlertDialog_centerDark, R.drawable.popup_center_dark);
+        int fullDark = 0;
+        int topDark = 0;
+        int centerDark = 0;
+        int bottomDark = 0;
+        int fullBright = 0;
+        int topBright = 0;
+        int centerBright = 0;
+        int bottomBright = 0;
+        int bottomMedium = 0;
+        if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.KITKAT) {
+            fullDark = R.drawable.popup_full_dark;
+            topDark = R.drawable.popup_top_dark;
+            centerDark = R.drawable.popup_center_dark;
+            bottomDark = R.drawable.popup_bottom_dark;
+            fullBright = R.drawable.popup_full_bright;
+            topBright = R.drawable.popup_top_bright;
+            centerBright = R.drawable.popup_center_bright;
+            bottomBright = R.drawable.popup_bottom_bright;
+            bottomMedium = R.drawable.popup_bottom_medium;
+        }
+        topBright = a.getResourceId(R.styleable.AlertDialog_topBright, topBright);
+        topDark = a.getResourceId(R.styleable.AlertDialog_topDark, topDark);
+        centerBright = a.getResourceId(R.styleable.AlertDialog_centerBright, centerBright);
+        centerDark = a.getResourceId(R.styleable.AlertDialog_centerDark, centerDark);
+
 
         /* We now set the background of all of the sections of the alert.
          * First collect together each section that is being displayed along
@@ -707,22 +748,17 @@ public class AlertController {
 
         if (lastView != null) {
             if (setView) {
-                final int bottomBright = a.getResourceId(
-                        R.styleable.AlertDialog_bottomBright, R.drawable.popup_bottom_bright);
-                final int bottomMedium = a.getResourceId(
-                        R.styleable.AlertDialog_bottomMedium, R.drawable.popup_bottom_medium);
-                final int bottomDark = a.getResourceId(
-                        R.styleable.AlertDialog_bottomDark, R.drawable.popup_bottom_dark);
+                bottomBright = a.getResourceId(R.styleable.AlertDialog_bottomBright, bottomBright);
+                bottomMedium = a.getResourceId(R.styleable.AlertDialog_bottomMedium, bottomMedium);
+                bottomDark = a.getResourceId(R.styleable.AlertDialog_bottomDark, bottomDark);
 
                 // ListViews will use the Bright background, but buttons use the
                 // Medium background.
                 lastView.setBackgroundResource(
                         lastLight ? (hasButtons ? bottomMedium : bottomBright) : bottomDark);
             } else {
-                final int fullBright = a.getResourceId(
-                        R.styleable.AlertDialog_fullBright, R.drawable.popup_full_bright);
-                final int fullDark = a.getResourceId(
-                        R.styleable.AlertDialog_fullDark, R.drawable.popup_full_dark);
+                fullBright = a.getResourceId(R.styleable.AlertDialog_fullBright, fullBright);
+                fullDark = a.getResourceId(R.styleable.AlertDialog_fullDark, fullDark);
 
                 lastView.setBackgroundResource(lastLight ? fullBright : fullDark);
             }
