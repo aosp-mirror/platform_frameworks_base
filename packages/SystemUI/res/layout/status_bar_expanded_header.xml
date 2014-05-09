@@ -25,6 +25,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:baselineAligned="false"
+    android:elevation="14dp"
     >
 
     <View

@@ -102,6 +102,8 @@
     <include layout="@layout/status_bar_expanded_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_header_height"
+        android:layout_marginLeft="@dimen/notification_side_padding"
+        android:layout_marginRight="@dimen/notification_side_padding"
         />
 
     <include
