@@ -88,16 +88,15 @@ public final class CorrectionInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<CorrectionInfo> CREATOR
-            = new Parcelable.Creator<CorrectionInfo>() {
-        public CorrectionInfo createFromParcel(Parcel source) {
-            return new CorrectionInfo(source);
-        }
-
-        public CorrectionInfo[] newArray(int size) {
-            return new CorrectionInfo[size];
-        }
-    };
+    public static final Parcelable.Creator<CorrectionInfo> CREATOR =
+            new Parcelable.Creator<CorrectionInfo>() {
+                public CorrectionInfo createFromParcel(Parcel source) {
+                    return new CorrectionInfo(source);
+                }
+                public CorrectionInfo[] newArray(int size) {
+                    return new CorrectionInfo[size];
+                }
+            };
 
     public int describeContents() {
         return 0;
