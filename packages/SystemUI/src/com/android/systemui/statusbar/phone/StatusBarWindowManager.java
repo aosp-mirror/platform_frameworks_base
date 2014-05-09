@@ -79,9 +79,8 @@ public class StatusBarWindowManager {
                         | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                 PixelFormat.TRANSLUCENT);
 
-        mLp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         mLp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        mLp.gravity = Gravity.TOP;
+        mLp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("StatusBar");
         mLp.packageName = mContext.getPackageName();
