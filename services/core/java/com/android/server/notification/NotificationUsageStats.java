@@ -58,6 +58,7 @@ public class NotificationUsageStats {
      * Called when a notification has been posted.
      */
     public synchronized void registerPostedByApp(NotificationRecord notification) {
+        notification.stats = new SingleNotificationStats();
         notification.stats.posttimeElapsedMs = SystemClock.elapsedRealtime();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numPostedByApp++;
@@ -68,7 +69,8 @@ public class NotificationUsageStats {
     /**
      * Called when a notification has been updated.
      */
-    public void registerUpdatedByApp(NotificationRecord notification) {
+    public void registerUpdatedByApp(NotificationRecord notification, NotificationRecord old) {
+        notification.stats = old.stats;
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numUpdatedByApp++;
         }
