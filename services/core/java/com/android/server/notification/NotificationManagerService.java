@@ -444,7 +444,7 @@ public class NotificationManagerService extends SystemService {
     public static final class NotificationRecord
     {
         final StatusBarNotification sbn;
-        final SingleNotificationStats stats = new SingleNotificationStats();
+        SingleNotificationStats stats;
         IBinder statusBarKey;
 
         NotificationRecord(StatusBarNotification sbn)
@@ -1639,7 +1639,7 @@ public class NotificationManagerService extends SystemService {
                     } else {
                         old = mNotificationList.get(index);
                         mNotificationList.set(index, r);
-                        mUsageStats.registerUpdatedByApp(r);
+                        mUsageStats.registerUpdatedByApp(r, old);
                         // Make sure we don't lose the foreground service state.
                         if (old != null) {
                             notification.flags |=
