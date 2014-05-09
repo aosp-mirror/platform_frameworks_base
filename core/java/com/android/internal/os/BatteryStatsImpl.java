@@ -188,8 +188,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     boolean mShuttingDown;
 
-    HashMap<String, SparseBooleanArray>[] mActiveEvents
-            = (HashMap<String, SparseBooleanArray>[]) new HashMap[HistoryItem.EVENT_COUNT];
+    final HistoryEventTracker mActiveEvents = new HistoryEventTracker();
 
     long mHistoryBaseTime;
     boolean mHaveBatteryLevel = false;
@@ -2297,44 +2296,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void noteEventLocked(int code, String name, int uid) {
         uid = mapUid(uid);
-        if ((code&HistoryItem.EVENT_FLAG_START) != 0) {
-            int idx = code&~HistoryItem.EVENT_FLAG_START;
-            HashMap<String, SparseBooleanArray> active = mActiveEvents[idx];
-            if (active == null) {
-                active = new HashMap<String, SparseBooleanArray>();
-                mActiveEvents[idx] = active;
-            }
-            SparseBooleanArray uids = active.get(name);
-            if (uids == null) {
-                uids = new SparseBooleanArray();
-                active.put(name, uids);
-            }
-            if (uids.get(uid)) {
-                // Already set, nothing to do!
-                return;
-            }
-            uids.put(uid, true);
-        } else if ((code&HistoryItem.EVENT_FLAG_FINISH) != 0) {
-            int idx = code&~HistoryItem.EVENT_FLAG_FINISH;
-            HashMap<String, SparseBooleanArray> active = mActiveEvents[idx];
-            if (active == null) {
-                // not currently active, nothing to do.
-                return;
-            }
-            SparseBooleanArray uids = active.get(name);
-            if (uids == null) {
-                // not currently active, nothing to do.
-                return;
-            }
-            idx = uids.indexOfKey(uid);
-            if (idx < 0 || !uids.valueAt(idx)) {
-                // not currently active, nothing to do.
-                return;
-            }
-            uids.removeAt(idx);
-            if (uids.size() <= 0) {
-                active.remove(name);
-            }
+        if (!mActiveEvents.updateState(code, name, uid, 0)) {
+            return;
         }
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
@@ -2348,6 +2311,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private String mInitialAcquireWakeName;
+    private int mInitialAcquireWakeUid = -1;
+
     public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging, long elapsedRealtime, long uptime) {
         uid = mapUid(uid);
@@ -2360,8 +2326,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
                 mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
-                mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
-                mHistoryCur.wakelockTag.uid = uid;
+                mHistoryCur.wakelockTag.string = mInitialAcquireWakeName
+                        = historyName != null ? historyName : name;
+                mHistoryCur.wakelockTag.uid = mInitialAcquireWakeUid = uid;
                 mWakeLockImportant = !unimportantForLogging;
                 addHistoryRecordLocked(elapsedRealtime, uptime);
             } else if (!mWakeLockImportant && !unimportantForLogging) {
@@ -2369,8 +2336,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                     // We'll try to update the last tag.
                     mHistoryLastWritten.wakelockTag = null;
                     mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
-                    mHistoryCur.wakelockTag.string = historyName != null ? historyName : name;
-                    mHistoryCur.wakelockTag.uid = uid;
+                    mHistoryCur.wakelockTag.string = mInitialAcquireWakeName
+                            = historyName != null ? historyName : name;
+                    mHistoryCur.wakelockTag.uid = mInitialAcquireWakeUid = uid;
                     addHistoryRecordLocked(elapsedRealtime, uptime);
                 }
                 mWakeLockImportant = true;
@@ -2395,6 +2363,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.states &= ~HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Stop wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
+                if ((name != null && !name.equals(mInitialAcquireWakeName))
+                        || uid != mInitialAcquireWakeUid) {
+                    mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
+                    mHistoryCur.wakelockTag.string = name;
+                    mHistoryCur.wakelockTag.uid = uid;
+                }
+                mInitialAcquireWakeName = null;
+                mInitialAcquireWakeUid = -1;
                 addHistoryRecordLocked(elapsedRealtime, uptime);
             }
         }
@@ -5699,7 +5675,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         final long lastRealtime = out.time;
         final long lastWalltime = out.currentTime;
         readHistoryDelta(mHistoryBuffer, out);
-        if (out.cmd != HistoryItem.CMD_CURRENT_TIME && lastWalltime != 0) {
+        if (out.cmd != HistoryItem.CMD_CURRENT_TIME
+                && out.cmd != HistoryItem.CMD_RESET && lastWalltime != 0) {
             out.currentTime = lastWalltime + (out.time - lastRealtime);
         }
         return true;
@@ -5845,17 +5822,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private void initActiveHistoryEventsLocked(long elapsedRealtimeMs, long uptimeMs) {
         for (int i=0; i<HistoryItem.EVENT_COUNT; i++) {
-            HashMap<String, SparseBooleanArray> active = mActiveEvents[i];
+            HashMap<String, SparseIntArray> active = mActiveEvents.getStateForEvent(i);
             if (active == null) {
                 continue;
             }
-            for (HashMap.Entry<String, SparseBooleanArray> ent : active.entrySet()) {
-                SparseBooleanArray uids = ent.getValue();
+            for (HashMap.Entry<String, SparseIntArray> ent : active.entrySet()) {
+                SparseIntArray uids = ent.getValue();
                 for (int j=0; j<uids.size(); j++) {
-                    if (uids.valueAt(j)) {
-                        addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, i, ent.getKey(),
-                                uids.keyAt(j));
-                    }
+                    addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, i, ent.getKey(),
+                            uids.keyAt(j));
                 }
             }
         }
@@ -5971,7 +5946,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             boolean reset) {
         mRecordingHistory = true;
         mHistoryCur.currentTime = System.currentTimeMillis();
-        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_CURRENT_TIME,
+        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs,
+                reset ? HistoryItem.CMD_RESET : HistoryItem.CMD_CURRENT_TIME,
                 mHistoryCur);
         mHistoryCur.currentTime = 0;
         if (reset) {
