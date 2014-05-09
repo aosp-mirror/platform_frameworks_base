@@ -55,6 +55,7 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , empty(false)
         , viewport(s->viewport)
         , height(s->height)
+        , orthoMatrix(s->orthoMatrix)
         , alpha(s->alpha) {
 
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
