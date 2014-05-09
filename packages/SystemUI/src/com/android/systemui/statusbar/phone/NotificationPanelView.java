@@ -144,7 +144,6 @@ public class NotificationPanelView extends PanelView implements
 
     public void setQsExpansionEnabled(boolean qsExpansionEnabled) {
         mQsExpansionEnabled = qsExpansionEnabled;
-        mHeader.setExpansionEnabled(qsExpansionEnabled);
     }
 
     public void closeQs() {

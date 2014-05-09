@@ -240,8 +240,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     String mKeyguardHotwordPhrase = "";
     int mKeyguardMaxNotificationCount;
     View mDateTimeView;
-    View mClearButton;
-    ImageView mHeaderFlipper;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -640,11 +638,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea.setActivityStarter(this);
         mKeyguardIndicationTextView = (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                 R.id.keyguard_indication_text);
-        mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
-        mClearButton.setOnClickListener(mClearButtonListener);
-        mClearButton.setAlpha(0f);
-        mClearButton.setVisibility(View.INVISIBLE);
-        mClearButton.setEnabled(false);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
         mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
@@ -652,8 +645,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDateTimeView.setOnClickListener(mClockClickListener);
             mDateTimeView.setEnabled(true);
         }
-
-        mHeaderFlipper = (ImageView) mStatusBarWindow.findViewById(R.id.header_flipper);
 
         if (!mNotificationPanelIsFullScreenWidth) {
             mNotificationPanel.setSystemUiVisibility(
@@ -1118,19 +1109,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mNavigationBarView != null) {
             mNavigationBarView.setLayoutDirection(layoutDirection);
         }
-
-        if (mClearButton != null && mClearButton instanceof ImageView) {
-            // Force asset reloading
-            ((ImageView)mClearButton).setImageDrawable(null);
-            ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
-        }
-
-        if (mHeaderFlipper != null) {
-            // Force asset reloading
-            mHeaderFlipper.setImageDrawable(null);
-            mHeaderFlipper.setImageResource(R.drawable.ic_notify_quicksettings);
-        }
-
         refreshAllStatusBarIcons();
     }
 
@@ -1300,38 +1278,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             Log.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
                     + " any=" + any + " clearable=" + clearable);
         }
-
-        if (mFlipSettingsView != null
-                && mFlipSettingsView.getVisibility() == View.VISIBLE
-                && mStackScroller.getVisibility() != View.VISIBLE) {
-            // the flip settings panel is unequivocally showing; we should not be shown
-            mClearButton.setVisibility(View.INVISIBLE);
-        } else if (mClearButton.isShown()) {
-            if (clearable != (mClearButton.getAlpha() == 1.0f)) {
-                ObjectAnimator clearAnimation = ObjectAnimator.ofFloat(
-                        mClearButton, "alpha", clearable ? 1.0f : 0.0f).setDuration(250);
-                clearAnimation.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (mClearButton.getAlpha() <= 0.0f) {
-                            mClearButton.setVisibility(View.INVISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        if (mClearButton.getAlpha() <= 0.0f) {
-                            mClearButton.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
-                clearAnimation.start();
-            }
-        } else {
-            mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
-            mClearButton.setVisibility(clearable ? View.VISIBLE : View.INVISIBLE);
-        }
-        mClearButton.setEnabled(clearable);
 
         final View nlo = mStatusBarView.findViewById(R.id.notification_lights_out);
         final boolean showDot = (any&&!areLightsOn());
@@ -2448,10 +2394,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     void updateResources() {
         final Context context = mContext;
         final Resources res = context.getResources();
-
-        if (mClearButton instanceof TextView) {
-            ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
-        }
 
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
