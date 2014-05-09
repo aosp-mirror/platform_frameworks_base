@@ -35,7 +35,6 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -362,7 +361,7 @@ public class RecentsTaskLoader {
         return mSystemServicesProxy;
     }
 
-    private List<ActivityManager.RecentTaskInfo> getRecentTasks(Context context) {
+    private List<ActivityManager.RecentTaskInfo> getRecentTasks() {
         long t1 = System.currentTimeMillis();
 
         SystemServicesProxy ssp = mSystemServicesProxy;
@@ -374,23 +373,6 @@ public class RecentsTaskLoader {
                 "" + (System.currentTimeMillis() - t1) + "ms");
         Console.log(Constants.Log.App.TaskDataLoader,
                 "[RecentsTaskLoader|tasks]", "" + tasks.size());
-
-        // Remove home/recents tasks
-        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            ActivityManager.RecentTaskInfo t = iter.next();
-
-            // Skip tasks in the home stack
-            if (ssp.isInHomeStack(t.persistentId)) {
-                iter.remove();
-                continue;
-            }
-            // Skip tasks from this Recents package
-            if (t.baseIntent.getComponent().getPackageName().equals(context.getPackageName())) {
-                iter.remove();
-                continue;
-            }
-        }
 
         return tasks;
     }
@@ -408,7 +390,7 @@ public class RecentsTaskLoader {
 
         // Get the recent tasks
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(context);
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks();
 
         // Add each task to the task stack
         t1 = System.currentTimeMillis();

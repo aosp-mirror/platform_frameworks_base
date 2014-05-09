@@ -23,6 +23,8 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import com.android.systemui.R;
 
 
@@ -41,6 +43,8 @@ public class RecentsConfiguration {
     int searchBarAppWidgetId = -1;
 
     public float animationPxMovementPerSecond;
+
+    public Interpolator defaultBezierInterpolator;
 
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
@@ -121,7 +125,6 @@ public class RecentsConfiguration {
                 res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
 
-
         taskBarViewDefaultBackgroundColor =
                 res.getColor(R.color.recents_task_bar_default_background_color);
         taskBarViewDefaultTextColor =
@@ -130,6 +133,9 @@ public class RecentsConfiguration {
                 res.getColor(R.color.recents_task_bar_light_text_color);
         taskBarViewDarkTextColor =
                 res.getColor(R.color.recents_task_bar_dark_text_color);
+
+        defaultBezierInterpolator = AnimationUtils.loadInterpolator(context,
+                        com.android.internal.R.interpolator.fast_out_slow_in);
 
         // Update the search widget id
         SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);

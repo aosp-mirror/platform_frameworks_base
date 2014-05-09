@@ -37,7 +37,6 @@ import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
 import com.android.systemui.R;
-import com.android.systemui.recents.BakedBezierInterpolator;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -338,7 +337,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mScrollAnimator = ObjectAnimator.ofInt(this, "stackScroll", curScroll, newScroll);
         mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
                 curScroll, 250));
-        mScrollAnimator.setInterpolator(BakedBezierInterpolator.INSTANCE);
+        mScrollAnimator.setInterpolator(RecentsConfiguration.getInstance().defaultBezierInterpolator);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
