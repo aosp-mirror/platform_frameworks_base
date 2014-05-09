@@ -16,6 +16,7 @@ page.title=Notifications
       <li><a href="#Required">Required notification contents</a></li>
       <li><a href="#Optional">Optional notification contents and settings</a></li>
       <li><a href="#Actions">Notification actions</a></li>
+      <li><a href="#Priority">Notification priority</a></li>
       <li><a href="#SimpleNotification">Creating a simple notification</a></li>
       <li><a href="#ApplyStyle">Applying a big view style to a notification</a></li>
       <li><a href="#Compatibility">Handling compatibility</a></li>
@@ -288,6 +289,26 @@ page.title=Notifications
     dismisses a notification. In Android 4.1 and later, you can start an
     {@link android.app.Activity} from an action button. To learn more, read the reference guide for
     {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Notification priority</h3>
+<p>
+    If you wish, you can set the priority of a notification. The priority acts
+    as a hint to the device UI about how the notification should be displayed.
+    To set a notification's priority, call {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} and pass in one of the {@link
+    android.support.v4.app.NotificationCompat} priority constants. There are
+    five priority levels, ranging from {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) to {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); if not set, the
+    priority defaults to {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> For information about setting an appropriate priority level, see "Correctly
+    set and manage notification priority" in the <a
+    href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design
+    guide.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="SimpleNotification">Creating a simple notification</h3>
