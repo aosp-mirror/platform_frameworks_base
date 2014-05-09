@@ -153,7 +153,7 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">48dp</dimen>
+    <dimen name="status_bar_header_height">56dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">144dp</dimen>

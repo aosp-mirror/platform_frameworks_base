@@ -65,6 +65,12 @@
             />
     </RelativeLayout>
 
+    <FrameLayout android:id="@+id/system_icons_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        />
     <TextView
         android:id="@+id/header_debug_info"
         android:visibility="invisible"

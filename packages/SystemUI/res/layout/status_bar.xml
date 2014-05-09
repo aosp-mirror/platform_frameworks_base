@@ -77,26 +77,24 @@
         <LinearLayout android:id="@+id/system_icon_area"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <LinearLayout android:id="@+id/statusIcons"
+            android:orientation="horizontal"
+            >
+            <LinearLayout android:id="@+id/system_icons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"/>    
-    
-            <LinearLayout
-                android:id="@+id/signal_battery_cluster"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingStart="2dp"
-                android:orientation="horizontal"
-                android:gravity="center"
                 >
-                <include layout="@layout/signal_cluster_view" 
+                <LinearLayout android:id="@+id/statusIcons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"/>
+
+                <include layout="@layout/signal_cluster_view"
                     android:id="@+id/signal_cluster"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
                     />
                 <!-- battery must be padded below to match assets -->
                 <com.android.systemui.BatteryMeterView
@@ -107,7 +105,6 @@
                     android:layout_marginStart="4dip"
                     />
             </LinearLayout>
-    
             <com.android.systemui.statusbar.policy.Clock
                 android:id="@+id/clock"
                 android:textAppearance="@style/TextAppearance.StatusBar.Clock"
