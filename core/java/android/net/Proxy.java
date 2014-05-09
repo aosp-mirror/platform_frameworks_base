@@ -278,7 +278,9 @@ public final class Proxy {
             host = p.getHost();
             port = Integer.toString(p.getPort());
             exclList = p.getExclusionListAsString();
-            pacFileUrl = p.getPacFileUrl().toString();
+            if (p.getPacFileUrl() != null) {
+                pacFileUrl = p.getPacFileUrl().toString();
+            }
         }
         setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
     }
