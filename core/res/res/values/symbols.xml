@@ -120,6 +120,7 @@
   <java-symbol type="id" name="overlay_display_window_title" />
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
+  <java-symbol type="id" name="parentPanel" />
   <java-symbol type="id" name="pause" />
   <java-symbol type="id" name="perms_list" />
   <java-symbol type="id" name="perm_icon" />
@@ -324,6 +325,7 @@
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
   <java-symbol type="dimen" name="accessibility_touch_slop" />
+  <java-symbol type="dimen" name="alert_dialog_round_padding"/>
   <java-symbol type="dimen" name="config_prefDialogWidth" />
   <java-symbol type="dimen" name="config_viewConfigurationTouchSlop" />
   <java-symbol type="dimen" name="config_viewMinFlingVelocity" />
