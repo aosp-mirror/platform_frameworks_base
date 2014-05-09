@@ -68,6 +68,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -276,7 +277,7 @@ final class ActivityStack {
                         if (r.app != null) {
                             mService.logAppTooSlow(r.app, r.pauseTime, "pausing " + r);
                         }
-                        activityPausedLocked(r.appToken, true);
+                        activityPausedLocked(r.appToken, true, r.persistentState);
                     }
                 } break;
                 case LAUNCH_TICK_MSG: {
@@ -860,13 +861,15 @@ final class ActivityStack {
         }
     }
 
-    final void activityPausedLocked(IBinder token, boolean timeout) {
+    final void activityPausedLocked(IBinder token, boolean timeout,
+            PersistableBundle persistentState) {
         if (DEBUG_PAUSE) Slog.v(
             TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
 
         final ActivityRecord r = isInStackLocked(token);
         if (r != null) {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+            r.persistentState = persistentState;
             if (mPausingActivity == r) {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
@@ -881,13 +884,14 @@ final class ActivityStack {
         }
     }
 
-    final void activityStoppedLocked(ActivityRecord r, Bundle icicle, Bitmap thumbnail,
-            CharSequence description) {
+    final void activityStoppedLocked(ActivityRecord r, Bundle icicle,
+            PersistableBundle persistentState, CharSequence description) {
         if (r.state != ActivityState.STOPPING) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + r);
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             return;
         }
+        r.persistentState = persistentState;
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Saving icicle of " + r + ": " + icicle);
         if (icicle != null) {
             // If icicle is null, this is happening due to a timeout, so we
@@ -895,7 +899,7 @@ final class ActivityStack {
             r.icicle = icicle;
             r.haveState = true;
             r.launchCount = 0;
-            r.updateThumbnail(thumbnail, description);
+            r.updateThumbnail(null, description);
         }
         if (!r.stopped) {
             if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r + " (stop complete)");

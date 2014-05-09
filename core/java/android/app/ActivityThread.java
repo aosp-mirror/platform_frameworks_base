@@ -56,11 +56,11 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -69,8 +69,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.transition.Scene;
-import android.transition.TransitionManager;
 import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -268,6 +266,7 @@ public final class ActivityThread {
         Intent intent;
         IVoiceInteractor voiceInteractor;
         Bundle state;
+        PersistableBundle persistentState;
         Activity activity;
         Window window;
         Activity parent;
@@ -315,6 +314,10 @@ public final class ActivityThread {
                         < android.os.Build.VERSION_CODES.HONEYCOMB;
             }
             return false;
+        }
+
+        public boolean isPersistable() {
+            return (activityInfo.flags & ActivityInfo.FLAG_PERSISTABLE) != 0;
         }
 
         public String toString() {
@@ -605,8 +608,8 @@ public final class ActivityThread {
         // activity itself back to the activity manager. (matters more with ipc)
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
                 ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-                IVoiceInteractor voiceInteractor,
-                int procState, Bundle state, List<ResultInfo> pendingResults,
+                IVoiceInteractor voiceInteractor, int procState, Bundle state,
+                PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
                 String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
                 Bundle resumeArgs) {
@@ -622,6 +625,7 @@ public final class ActivityThread {
             r.activityInfo = info;
             r.compatInfo = compatInfo;
             r.state = state;
+            r.persistentState = persistentState;
 
             r.pendingResults = pendingResults;
             r.pendingIntents = pendingNewIntents;
@@ -2205,7 +2209,11 @@ public final class ActivityThread {
                 }
 
                 activity.mCalled = false;
-                mInstrumentation.callActivityOnCreate(activity, r.state);
+                if (r.isPersistable()) {
+                    mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);
+                } else {
+                    mInstrumentation.callActivityOnCreate(activity, r.state);
+                }
                 if (!activity.mCalled) {
                     throw new SuperNotCalledException(
                         "Activity " + r.intent.getComponent().toShortString() +
@@ -2218,13 +2226,23 @@ public final class ActivityThread {
                     r.stopped = false;
                 }
                 if (!r.activity.mFinished) {
-                    if (r.state != null) {
+                    if (r.isPersistable()) {
+                        if (r.state != null || r.persistentState != null) {
+                            mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state,
+                                    r.persistentState);
+                        }
+                    } else if (r.state != null) {
                         mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state);
                     }
                 }
                 if (!r.activity.mFinished) {
                     activity.mCalled = false;
-                    mInstrumentation.callActivityOnPostCreate(activity, r.state);
+                    if (r.isPersistable()) {
+                        mInstrumentation.callActivityOnPostCreate(activity, r.state,
+                                r.persistentState);
+                    } else {
+                        mInstrumentation.callActivityOnPostCreate(activity, r.state);
+                    }
                     if (!activity.mCalled) {
                         throw new SuperNotCalledException(
                             "Activity " + r.intent.getComponent().toShortString() +
@@ -2842,6 +2860,7 @@ public final class ActivityThread {
                 r.paused = false;
                 r.stopped = false;
                 r.state = null;
+                r.persistentState = null;
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(
@@ -3069,7 +3088,7 @@ public final class ActivityThread {
 
             // Tell the activity manager we have paused.
             try {
-                ActivityManagerNative.getDefault().activityPaused(token);
+                ActivityManagerNative.getDefault().activityPaused(token, r.persistentState);
             } catch (RemoteException ex) {
             }
         }
@@ -3099,17 +3118,13 @@ public final class ActivityThread {
                     + r.intent.getComponent().toShortString());
             Slog.e(TAG, e.getMessage(), e);
         }
-        Bundle state = null;
         if (finished) {
             r.activity.mFinished = true;
         }
         try {
             // Next have the activity save its current state and managed dialogs...
             if (!r.activity.mFinished && saveState) {
-                state = new Bundle();
-                state.setAllowFds(false);
-                mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
-                r.state = state;
+                callCallActivityOnSaveInstanceState(r);
             }
             // Now we are idle.
             r.activity.mCalled = false;
@@ -3145,7 +3160,7 @@ public final class ActivityThread {
             listeners.get(i).onPaused(r.activity);
         }
 
-        return state;
+        return !r.activity.mFinished && saveState ? r.state : null;
     }
 
     final void performStopActivity(IBinder token, boolean saveState) {
@@ -3156,7 +3171,7 @@ public final class ActivityThread {
     private static class StopInfo implements Runnable {
         ActivityClientRecord activity;
         Bundle state;
-        Bitmap thumbnail;
+        PersistableBundle persistentState;
         CharSequence description;
 
         @Override public void run() {
@@ -3164,7 +3179,7 @@ public final class ActivityThread {
             try {
                 if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + activity);
                 ActivityManagerNative.getDefault().activityStopped(
-                    activity.token, state, thumbnail, description);
+                    activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
             }
         }
@@ -3203,7 +3218,6 @@ public final class ActivityThread {
     private void performStopActivityInner(ActivityClientRecord r,
             StopInfo info, boolean keepShown, boolean saveState) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
-        Bundle state = null;
         if (r != null) {
             if (!keepShown && r.stopped) {
                 if (r.activity.mFinished) {
@@ -3223,7 +3237,6 @@ public final class ActivityThread {
                     // First create a thumbnail for the activity...
                     // For now, don't create the thumbnail here; we are
                     // doing that by doing a screen snapshot.
-                    info.thumbnail = null; //createThumbnailBitmap(r);
                     info.description = r.activity.onCreateDescription();
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
@@ -3238,12 +3251,7 @@ public final class ActivityThread {
             // Next have the activity save its current state and managed dialogs...
             if (!r.activity.mFinished && saveState) {
                 if (r.state == null) {
-                    state = new Bundle();
-                    state.setAllowFds(false);
-                    mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
-                    r.state = state;
-                } else {
-                    state = r.state;
+                    callCallActivityOnSaveInstanceState(r);
                 }
             }
 
@@ -3319,6 +3327,7 @@ public final class ActivityThread {
         // manager to proceed and allow us to go fully into the background.
         info.activity = r;
         info.state = r.state;
+        info.persistentState = r.persistentState;
         mH.post(info);
     }
 
@@ -3775,9 +3784,7 @@ public final class ActivityThread {
             performPauseActivity(r.token, false, r.isPreHoneycomb());
         }
         if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
-            r.state = new Bundle();
-            r.state.setAllowFds(false);
-            mInstrumentation.callActivityOnSaveInstanceState(r.activity, r.state);
+            callCallActivityOnSaveInstanceState(r);
         }
 
         handleDestroyActivity(r.token, false, configChanges, true);
@@ -3805,6 +3812,18 @@ public final class ActivityThread {
         r.activityOptions = null;
 
         handleLaunchActivity(r, currentIntent);
+    }
+
+    private void callCallActivityOnSaveInstanceState(ActivityClientRecord r) {
+        r.state = new Bundle();
+        r.state.setAllowFds(false);
+        if (r.isPersistable()) {
+            r.persistentState = new PersistableBundle();
+            mInstrumentation.callActivityOnSaveInstanceState(r.activity, r.state,
+                    r.persistentState);
+        } else {
+            mInstrumentation.callActivityOnSaveInstanceState(r.activity, r.state);
+        }
     }
 
     ArrayList<ComponentCallbacks2> collectComponentCallbacks(

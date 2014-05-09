@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.os.PersistableBundle;
 import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
@@ -922,6 +923,30 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Same as {@link #onCreate(android.os.Bundle)} but called for those activities created with
+     * the attribute {@link android.R.attr#persistable} set true.
+     *
+     * @param savedInstanceState if the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.
+     *     <b><i>Note: Otherwise it is null.</i></b>
+     * @param persistentState if the activity is being re-initialized after
+     *     previously being shut down or powered off then this Bundle contains the data it most
+     *     recently supplied to outPersistentState in {@link #onSaveInstanceState}.
+     *     <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * @see #onCreate(android.os.Bundle)
+     * @see #onStart
+     * @see #onSaveInstanceState
+     * @see #onRestoreInstanceState
+     * @see #onPostCreate
+     */
+    protected void onCreate(@Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
+        onCreate(savedInstanceState);
+    }
+
+    /**
      * The hook for {@link ActivityThread} to restore the state of this activity.
      *
      * Calls {@link #onSaveInstanceState(android.os.Bundle)} and
@@ -932,6 +957,23 @@ public class Activity extends ContextThemeWrapper
     final void performRestoreInstanceState(Bundle savedInstanceState) {
         onRestoreInstanceState(savedInstanceState);
         restoreManagedDialogs(savedInstanceState);
+    }
+
+    /**
+     * The hook for {@link ActivityThread} to restore the state of this activity.
+     *
+     * Calls {@link #onSaveInstanceState(android.os.Bundle)} and
+     * {@link #restoreManagedDialogs(android.os.Bundle)}.
+     *
+     * @param savedInstanceState contains the saved state
+     * @param persistentState contains the persistable saved state
+     */
+    final void performRestoreInstanceState(Bundle savedInstanceState,
+            PersistableBundle persistentState) {
+        onRestoreInstanceState(savedInstanceState, persistentState);
+        if (savedInstanceState != null) {
+            restoreManagedDialogs(savedInstanceState);
+        }
     }
 
     /**
@@ -962,7 +1004,34 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-    
+
+    /**
+     * This is the same as {@link #onRestoreInstanceState(Bundle)} but is called for activities
+     * created with the attribute {@link android.R.attr#persistable}. The {@link
+     * android.os.PersistableBundle} passed came from the restored PersistableBundle first
+     * saved in {@link #onSaveInstanceState(Bundle, PersistableBundle)}.
+     *
+     * <p>This method is called between {@link #onStart} and
+     * {@link #onPostCreate}.
+     *
+     * <p>If this method is called {@link #onRestoreInstanceState(Bundle)} will not be called.
+     *
+     * @param savedInstanceState the data most recently supplied in {@link #onSaveInstanceState}.
+     * @param persistentState the data most recently supplied in {@link #onSaveInstanceState}.
+     *
+     * @see #onRestoreInstanceState(Bundle)
+     * @see #onCreate
+     * @see #onPostCreate
+     * @see #onResume
+     * @see #onSaveInstanceState
+     */
+    protected void onRestoreInstanceState(Bundle savedInstanceState,
+            PersistableBundle persistentState) {
+        if (savedInstanceState != null) {
+            onRestoreInstanceState(savedInstanceState);
+        }
+    }
+
     /**
      * Restore the state of any saved managed dialogs.
      *
@@ -1036,6 +1105,21 @@ public class Activity extends ContextThemeWrapper
             mEnterTransitionCoordinator.readyToEnter();
         }
         mCalled = true;
+    }
+
+    /**
+     * This is the same as {@link #onPostCreate(Bundle)} but is called for activities
+     * created with the attribute {@link android.R.attr#persistable}.
+     *
+     * @param savedInstanceState The data most recently supplied in {@link #onSaveInstanceState}
+     * @param persistentState The data caming from the PersistableBundle first
+     * saved in {@link #onSaveInstanceState(Bundle, PersistableBundle)}.
+     *
+     * @see #onCreate
+     */
+    protected void onPostCreate(@Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
+        onPostCreate(savedInstanceState);
     }
 
     /**
@@ -1194,6 +1278,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * The hook for {@link ActivityThread} to save the state of this activity.
+     *
+     * Calls {@link #onSaveInstanceState(android.os.Bundle)}
+     * and {@link #saveManagedDialogs(android.os.Bundle)}.
+     *
+     * @param outState The bundle to save the state to.
+     * @param outPersistentState The bundle to save persistent state to.
+     */
+    final void performSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        onSaveInstanceState(outState, outPersistentState);
+        saveManagedDialogs(outState);
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState +
+                ", " + outPersistentState);
+    }
+
+    /**
      * Called to retrieve per-instance state from an activity before being killed
      * so that the state can be restored in {@link #onCreate} or
      * {@link #onRestoreInstanceState} (the {@link Bundle} populated by this method
@@ -1245,6 +1345,25 @@ public class Activity extends ContextThemeWrapper
             outState.putParcelable(FRAGMENTS_TAG, p);
         }
         getApplication().dispatchActivitySaveInstanceState(this, outState);
+    }
+
+    /**
+     * This is the same as {@link #onSaveInstanceState} but is called for activities
+     * created with the attribute {@link android.R.attr#persistable}. The {@link
+     * android.os.PersistableBundle} passed in will be saved and presented in
+     * {@link #onCreate(Bundle, PersistableBundle)} the first time that this activity
+     * is restarted following the next device reboot.
+     *
+     * @param outState Bundle in which to place your saved state.
+     * @param outPersistentState State which will be saved across reboots.
+     *
+     * @see #onSaveInstanceState(Bundle)
+     * @see #onCreate
+     * @see #onRestoreInstanceState(Bundle, PersistableBundle)
+     * @see #onPause
+     */
+    protected void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        onSaveInstanceState(outState);
     }
 
     /**
@@ -5489,11 +5608,20 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
-    final void performCreate(Bundle icicle) {
-        onCreate(icicle);
+    final void performCreateCommon() {
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
+    }
+
+    final void performCreate(Bundle icicle) {
+        onCreate(icicle);
+        performCreateCommon();
+    }
+
+    final void performCreate(Bundle icicle, PersistableBundle persistentState) {
+        onCreate(icicle, persistentState);
+        performCreateCommon();
     }
 
     final void performStart() {

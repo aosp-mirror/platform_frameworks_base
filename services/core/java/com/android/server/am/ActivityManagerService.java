@@ -35,6 +35,7 @@ import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.os.BatteryStats;
+import android.os.PersistableBundle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 
@@ -5429,22 +5430,21 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final void activityPaused(IBinder token) {
+    public final void activityPaused(IBinder token, PersistableBundle persistentState) {
         final long origId = Binder.clearCallingIdentity();
         synchronized(this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
-                stack.activityPausedLocked(token, false);
+                stack.activityPausedLocked(token, false, persistentState);
             }
         }
         Binder.restoreCallingIdentity(origId);
     }
 
     @Override
-    public final void activityStopped(IBinder token, Bundle icicle, Bitmap thumbnail,
-            CharSequence description) {
-        if (localLOGV) Slog.v(
-            TAG, "Activity stopped: token=" + token);
+    public final void activityStopped(IBinder token, Bundle icicle,
+            PersistableBundle persistentState, CharSequence description) {
+        if (localLOGV) Slog.v(TAG, "Activity stopped: token=" + token);
 
         // Refuse possible leaked file descriptors
         if (icicle != null && icicle.hasFileDescriptors()) {
@@ -5456,7 +5456,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.task.stack.activityStoppedLocked(r, icicle, thumbnail, description);
+                r.task.stack.activityStoppedLocked(r, icicle, persistentState, description);
             }
         }
 
