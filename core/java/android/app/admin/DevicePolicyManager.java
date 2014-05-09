@@ -16,8 +16,6 @@
 
 package android.app.admin;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -38,6 +36,8 @@ import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -359,8 +359,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current minimum password quality for all admins
-     * or a particular one.
+     * Retrieve the current minimum password quality for all admins of this user
+     * and its profiles or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      */
@@ -412,8 +412,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current minimum password length for all admins
-     * or a particular one.
+     * Retrieve the current minimum password length for all admins of this
+     * user and its profiles or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      */
@@ -467,8 +467,9 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of upper case letters required in the
-     * password for all admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumUpperCase(ComponentName, int)}
+     * password for all admins of this user and its profiles or a particular one.
+     * This is the same value as set by
+     * {#link {@link #setPasswordMinimumUpperCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
@@ -527,8 +528,9 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of lower case letters required in the
-     * password for all admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumLowerCase(ComponentName, int)}
+     * password for all admins of this user and its profiles or a particular one.
+     * This is the same value as set by
+     * {#link {@link #setPasswordMinimumLowerCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
@@ -644,8 +646,9 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of numerical digits required in the password
-     * for all admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumNumeric(ComponentName, int)}
+     * for all admins of this user and its profiles or a particular one.
+     * This is the same value as set by
+     * {#link {@link #setPasswordMinimumNumeric(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
@@ -760,8 +763,9 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of non-letter characters required in the
-     * password for all admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumNonLetter(ComponentName, int)}
+     * password for all admins of this user and its profiles or a particular one.
+     * This is the same value as set by
+     * {#link {@link #setPasswordMinimumNonLetter(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
@@ -868,9 +872,10 @@ public class DevicePolicyManager {
 
     /**
      * Get the current password expiration time for the given admin or an aggregate of
-     * all admins if admin is null. If the password is expired, this will return the time since
-     * the password expired as a negative number.  If admin is null, then a composite of all
-     * expiration timeouts is returned - which will be the minimum of all timeouts.
+     * all admins of this user and its profiles if admin is null. If the password is
+     * expired, this will return the time since the password expired as a negative number.
+     * If admin is null, then a composite of all expiration timeouts is returned
+     * - which will be the minimum of all timeouts.
      *
      * @param admin The name of the admin component to check, or null to aggregate all admins.
      * @return The password expiration time, in ms.
@@ -887,8 +892,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current password history length for all admins
-     * or a particular one.
+     * Retrieve the current password history length for all admins of this
+     * user and its profiles or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      * @return The length of the password history
@@ -923,14 +928,13 @@ public class DevicePolicyManager {
     /**
      * Determine whether the current password the user has set is sufficient
      * to meet the policy requirements (quality, minimum length) that have been
-     * requested.
+     * requested by the admins of this user and its profiles.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * @return Returns true if the password meets the current requirements,
-     * else false.
+     * @return Returns true if the password meets the current requirements, else false.
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
@@ -993,7 +997,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current maximum number of login attempts that are allowed
-     * before the device wipes itself, for all admins
+     * before the device wipes itself, for all admins of this user and its profiles
      * or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
@@ -1037,6 +1041,8 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
+     * Can not be called from a managed profile.
+     *
      * @param password The new password for the user.
      * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
      * @return Returns true if the password was applied, or false if it is
@@ -1077,8 +1083,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current maximum time to unlock for all admins
-     * or a particular one.
+     * Retrieve the current maximum time to unlock for all admins of this user
+     * and its profiles or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      */
