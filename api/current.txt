@@ -13834,6 +13834,7 @@ package android.media {
     method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
+    method public final void releaseOutputBuffer(int, long);
     method public void setNotificationCallback(android.media.MediaCodec.NotificationCallback);
     method public final void setParameters(android.os.Bundle);
     method public final void setVideoScalingMode(int);
