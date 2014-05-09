@@ -55,8 +55,9 @@ import android.util.StateSet;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
+    private static final String TAG = StateListDrawable.class.getSimpleName();
+
     private static final boolean DEBUG = false;
-    private static final String TAG = "StateListDrawable";
 
     /**
      * To be proper, we should have a getter for dither (and alpha, etc.)
@@ -69,7 +70,8 @@ public class StateListDrawable extends DrawableContainer {
      * to improve the quality at negligible cost.
      */
     private static final boolean DEFAULT_DITHER = true;
-    private final StateListState mStateListState;
+
+    private StateListState mStateListState;
     private boolean mMutated;
 
     public StateListDrawable() {
@@ -274,7 +276,7 @@ public class StateListDrawable extends DrawableContainer {
         mStateListState.setLayoutDirection(layoutDirection);
     }
 
-    static final class StateListState extends DrawableContainerState {
+    static class StateListState extends DrawableContainerState {
         int[][] mStateSets;
 
         StateListState(StateListState orig, StateListDrawable owner, Resources res) {
@@ -293,7 +295,7 @@ public class StateListDrawable extends DrawableContainer {
             return pos;
         }
 
-        private int indexOfStateSet(int[] stateSet) {
+        int indexOfStateSet(int[] stateSet) {
             final int[][] stateSets = mStateSets;
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
@@ -323,11 +325,26 @@ public class StateListDrawable extends DrawableContainer {
         }
     }
 
+    void setConstantState(StateListState state) {
+        super.setConstantState(state);
+
+        mStateListState = state;
+    }
+
     private StateListDrawable(StateListState state, Resources res) {
-        StateListState as = new StateListState(state, this, res);
-        mStateListState = as;
-        setConstantState(as);
+        final StateListState newState = new StateListState(state, this, res);
+        setConstantState(newState);
         onStateChange(getState());
+    }
+
+    /**
+     * This constructor exists so subclasses can avoid calling the default
+     * constructor and setting up a StateListDrawable-specific constant state.
+     */
+    StateListDrawable(StateListState state) {
+        if (state != null) {
+            setConstantState(state);
+        }
     }
 }
 

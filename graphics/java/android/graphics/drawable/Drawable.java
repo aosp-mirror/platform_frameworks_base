@@ -1039,6 +1039,8 @@ public abstract class Drawable {
         final String name = parser.getName();
         if (name.equals("selector")) {
             drawable = new StateListDrawable();
+        } else if (name.equals("animated-selector")) {
+            drawable = new AnimatedStateListDrawable();
         } else if (name.equals("level-list")) {
             drawable = new LevelListDrawable();
         } else if (name.equals("layer-list")) {

@@ -2166,6 +2166,9 @@
   <public type="attr" name="documentLaunchMode" />
   <public type="attr" name="autoRemoveFromRecents" />
   <public type="attr" name="stateListAnimator" />
+  <public type="attr" name="toId" />
+  <public type="attr" name="fromId" />
+  <public type="attr" name="reversible" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

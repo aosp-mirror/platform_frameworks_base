@@ -4239,6 +4239,58 @@
         <attr name="autoMirrored"/>
     </declare-styleable>
 
+    <!-- Drawable used to render several states with animated transitions. Each state
+         is represented by a child drawable with an optional keyframe ID. -->
+    <declare-styleable name="AnimatedStateListDrawable">
+        <!-- Indicates whether the drawable should be initially visible. -->
+        <attr name="visible" />
+        <!-- If true, allows the drawable's padding to change based on the
+             current state that is selected.  If false, the padding will
+             stay the same (based on the maximum padding of all the states).
+             Enabling this feature requires that the owner of the drawable
+             deal with performing layout when the state changes, which is
+             often not supported. -->
+        <attr name="variablePadding" />
+        <!-- If true, the drawable's reported internal size will remain
+             constant as the state changes; the size is the maximum of all
+             of the states.  If false, the size will vary based on the
+             current state. -->
+        <attr name="constantSize" />
+        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
+             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
+             an RGB 565 screen). -->
+        <attr name="dither" />
+        <!-- Amount of time (in milliseconds) to fade in a new state drawable. -->
+        <attr name="enterFadeDuration" />
+        <!-- Amount of time (in milliseconds) to fade out an old state drawable. -->
+        <attr name="exitFadeDuration" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored"/>
+    </declare-styleable>
+
+    <!-- Transition used to animate between states with keyframe IDs. -->
+    <declare-styleable name="AnimatedStateListDrawableItem">
+        <!-- Reference to a drawable resource to use for the frame.  If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+        <!-- Keyframe identifier for use in specifying transitions. -->
+        <attr name="id" />
+    </declare-styleable>
+
+    <!-- Transition used to animate between states with keyframe IDs. -->
+    <declare-styleable name="AnimatedStateListDrawableTransition">
+        <!-- Keyframe identifier for the starting state. -->
+        <attr name="fromId" format="reference" />
+        <!-- Keyframe identifier for the ending state. -->
+        <attr name="toId" format="reference" />
+        <!-- Reference to a animation drawable resource to use for the frame.  If not
+             given, the animation drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+        <!-- Whether this transition is reversible. -->
+        <attr name="reversible" format="boolean" />
+    </declare-styleable>
+
     <!-- Drawable used to render several animated frames. -->
     <declare-styleable name="AnimationDrawable">
         <attr name="visible" />
