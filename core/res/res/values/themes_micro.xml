@@ -47,10 +47,15 @@
         <item name="textAppearanceInverse">@style/TextAppearance.Micro</item>
     </style>
 
-    <style name="Theme.Micro.Dialog.Alert" parent="Theme.Holo.Light.Dialog.Alert">
+    <style name="Theme.Micro.Dialog.Alert">
         <item name="windowTitleStyle">@style/DialogWindowTitle.Micro</item>
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
         <item name="windowIsFloating">false</item>
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowOverscan">true</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <style name="Theme.Micro.Dialog.AppError" parent="Theme.Micro.Dialog">
