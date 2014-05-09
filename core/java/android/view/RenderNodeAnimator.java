@@ -21,6 +21,8 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.SparseIntArray;
 
+import com.android.internal.util.VirtualRefBasePtr;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -70,28 +72,32 @@ public final class RenderNodeAnimator {
     public static final int DELTA_TYPE_DELTA = 1;
 
     private RenderNode mTarget;
-    private long mNativePtr;
+    private VirtualRefBasePtr mNativePtr;
 
     public int mapViewPropertyToRenderProperty(int viewProperty) {
         return sViewPropertyAnimatorMap.get(viewProperty);
     }
 
     public RenderNodeAnimator(int property, int deltaType, float deltaValue) {
-        mNativePtr = nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
-                property, deltaType, deltaValue);
+        init(nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
+                property, deltaType, deltaValue));
     }
 
     public RenderNodeAnimator(CanvasProperty<Float> property, int deltaType, float deltaValue) {
-        mNativePtr = nCreateCanvasPropertyFloatAnimator(
+        init(nCreateCanvasPropertyFloatAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
-                property.getNativeContainer(), deltaType, deltaValue);
+                property.getNativeContainer(), deltaType, deltaValue));
     }
 
     public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField,
             int deltaType, float deltaValue) {
-        mNativePtr = nCreateCanvasPropertyPaintAnimator(
+        init(nCreateCanvasPropertyPaintAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
-                property.getNativeContainer(), paintField, deltaType, deltaValue);
+                property.getNativeContainer(), paintField, deltaType, deltaValue));
+    }
+
+    private void init(long ptr) {
+        mNativePtr = new VirtualRefBasePtr(ptr);
     }
 
     public void start(View target) {
@@ -115,11 +121,11 @@ public final class RenderNodeAnimator {
     }
 
     public void setDuration(int duration) {
-        nSetDuration(mNativePtr, duration);
+        nSetDuration(mNativePtr.get(), duration);
     }
 
     long getNativeAnimator() {
-        return mNativePtr;
+        return mNativePtr.get();
     }
 
     private void onFinished() {
@@ -134,16 +140,6 @@ public final class RenderNodeAnimator {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            nUnref(mNativePtr);
-            mNativePtr = 0;
-        } finally {
-            super.finalize();
-        }
-    }
-
     private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
             int property, int deltaValueType, float deltaValue);
     private static native long nCreateCanvasPropertyFloatAnimator(WeakReference<RenderNodeAnimator> weakThis,
@@ -151,5 +147,4 @@ public final class RenderNodeAnimator {
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
             long canvasProperty, int paintField, int deltaValueType, float deltaValue);
     private static native void nSetDuration(long nativePtr, int duration);
-    private static native void nUnref(long nativePtr);
 }

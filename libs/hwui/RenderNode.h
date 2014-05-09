@@ -45,7 +45,6 @@
 #include "DisplayList.h"
 #include "RenderProperties.h"
 #include "TreeInfo.h"
-#include "utils/VirtualLightRefBase.h"
 
 class SkBitmap;
 class SkPaint;
