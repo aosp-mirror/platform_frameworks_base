@@ -50,28 +50,6 @@ public final class WebViewFactory {
     private static WebViewFactoryProvider sProviderInstance;
     private static final Object sProviderLock = new Object();
 
-    public static boolean isExperimentalWebViewAvailable() {
-        // TODO: Remove callers of this method then remove it.
-        return false;  // Hide the toggle in Developer Settings.
-    }
-
-    /** @hide */
-    public static void setUseExperimentalWebView(boolean enable) {
-        // TODO: Remove callers of this method then remove it.
-    }
-
-    /** @hide */
-    public static boolean useExperimentalWebView() {
-        // TODO: Remove callers of this method then remove it.
-        return true;
-    }
-
-    /** @hide */
-    public static boolean isUseExperimentalWebViewSet() {
-        // TODO: Remove callers of this method then remove it.
-        return false;  // User has not modifed Developer Settings
-    }
-
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
