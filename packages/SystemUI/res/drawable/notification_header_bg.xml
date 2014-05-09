@@ -24,7 +24,7 @@
     </item>
     <item>
         <shape>
-            <solid android:color="#ff374248" />
+            <solid android:color="#ff384248" />
             <corners android:radius="@*android:dimen/notification_quantum_rounded_rect_radius" />
         </shape>
     </item>

@@ -158,6 +158,9 @@
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">144dp</dimen>
 
+    <!-- Height of the status bar header bar when on Keyguard -->
+    <dimen name="status_bar_header_height_keyguard">40dp</dimen>
+
     <!-- Gravity for the notification panel -->
     <!-- 0x37 = fill_horizontal|top -->
     <integer name="notification_panel_layout_gravity">0x37</integer>

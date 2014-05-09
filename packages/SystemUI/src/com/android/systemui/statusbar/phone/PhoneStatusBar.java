@@ -247,7 +247,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mCarrierLabelHeight;
     private TextView mEmergencyCallLabel;
     private int mStatusBarHeaderHeight;
-    private View mKeyguardCarrierLabel;
 
     private boolean mShowCarrierInPanel = false;
 
@@ -626,7 +625,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
         mKeyguardIconOverflowContainer.setOnActivatedListener(this);
-        mKeyguardCarrierLabel = mStatusBarWindow.findViewById(R.id.keyguard_carrier_text);
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
@@ -2717,14 +2715,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
-            mKeyguardCarrierLabel.setVisibility(View.VISIBLE);
 
             mNotificationPanel.closeQs();
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardBottomArea.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);
-            mKeyguardCarrierLabel.setVisibility(View.GONE);
         }
         mSettingsContainer.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
         mHeader.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
