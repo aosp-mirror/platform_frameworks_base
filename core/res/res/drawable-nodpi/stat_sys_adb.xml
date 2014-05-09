@@ -21,7 +21,7 @@
     <group>
         <path
             android:name="adb"
-            android:pathData="m3,3l8,0l0,11l11,0l0,8l-18,0z"
+            android:pathData="m3,3l8,0l0,11l11,0l0,8l-19,0z"
             android:fill="#FFFFFFFF"
             />
     </group>
