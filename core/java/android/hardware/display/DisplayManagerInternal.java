@@ -156,6 +156,9 @@ public abstract class DisplayManagerInternal {
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
+        //If true, scales the brightness to half of desired.
+        public boolean lowPowerMode;
+
         // If true, prevents the screen from completely turning on if it is currently off.
         // The display does not enter a "ready" state if this flag is true and screen on is
         // blocked.  The window manager policy blocks screen on while it prepares the keyguard to
@@ -203,6 +206,7 @@ public abstract class DisplayManagerInternal {
             screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
+            lowPowerMode = other.lowPowerMode;
         }
 
         @Override
@@ -218,7 +222,8 @@ public abstract class DisplayManagerInternal {
                     && screenBrightness == other.screenBrightness
                     && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
                     && useAutoBrightness == other.useAutoBrightness
-                    && blockScreenOn == other.blockScreenOn;
+                    && blockScreenOn == other.blockScreenOn
+                    && lowPowerMode == other.lowPowerMode;
         }
 
         @Override
@@ -233,7 +238,8 @@ public abstract class DisplayManagerInternal {
                     + ", screenBrightness=" + screenBrightness
                     + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
                     + ", useAutoBrightness=" + useAutoBrightness
-                    + ", blockScreenOn=" + blockScreenOn;
+                    + ", blockScreenOn=" + blockScreenOn
+                    + ", lowPowerMode=" + lowPowerMode;
         }
     }
 

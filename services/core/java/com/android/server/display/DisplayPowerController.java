@@ -518,6 +518,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // Brighten quickly.
                 slow = false;
             }
+            // If low power mode is enabled, brightness level
+            // would be scaled down to half
+            if (mPowerRequest.lowPowerMode) {
+                target = target/2;
+            }
             animateScreenBrightness(clampScreenBrightness(target),
                     slow ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
         } else {
