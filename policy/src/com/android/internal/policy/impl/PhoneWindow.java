@@ -4166,4 +4166,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     void sendCloseSystemWindows(String reason) {
         PhoneWindowManager.sendCloseSystemWindows(getContext(), reason);
     }
+
+    @Override
+    public int getStatusBarColor() {
+        return 0;
+    }
+
+    @Override
+    public void setStatusBarColor(int color) {
+    }
+
+    @Override
+    public int getNavigationBarColor() {
+        return 0;
+    }
+
+    @Override
+    public void setNavigationBarColor(int color) {
+    }
 }

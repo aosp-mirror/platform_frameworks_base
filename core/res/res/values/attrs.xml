@@ -1775,6 +1775,35 @@
              finishes. Corresponds to
              {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
         <attr name="windowAllowExitTransitionOverlap"/>
+
+        <!-- Flag indicating whether this Window is responsible for drawing the background for the
+             system bars. If true and the window is not floating, the system bars are drawn with a
+             transparent background and the corresponding areas in this window are filled with the
+             colors specified in {@link android.R.attr#statusBarColor} and
+             {@link android.R.attr#navigationBarColor}. Corresponds to
+             {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS}. -->
+        <attr name="windowDrawsSystemBarBackgrounds" format="boolean" />
+
+        <!-- The color for the status bar. If the color is not opaque, consider setting
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+             For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentStatus}.
+             Corresponds to {@link android.view.Window#setStatusBarColor(int)}. -->
+        <attr name="statusBarColor" format="color" />
+
+        <!-- The color for the navigation bar. If the color is not opaque, consider setting
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+             For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
+        <attr name="navigationBarColor" format="color" />
+
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

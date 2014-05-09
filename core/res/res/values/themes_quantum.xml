@@ -161,6 +161,9 @@ please see themes_device_defaults.xml.
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">true</item>
         <item name="windowActionModeOverlay">false</item>
+        <item name="windowDrawsSystemBarBackgrounds">true</item>
+        <item name="statusBarColor">?attr/colorPrimaryDark</item>
+        <item name="navigationBarColor">?attr/colorPrimaryDark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Dialog</item>
@@ -501,6 +504,9 @@ please see themes_device_defaults.xml.
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">true</item>
         <item name="windowActionModeOverlay">false</item>
+        <item name="windowDrawsSystemBarBackgrounds">true</item>
+        <item name="statusBarColor">?attr/colorPrimaryDark</item>
+        <item name="navigationBarColor">?attr/colorPrimaryDark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Light.Dialog</item>

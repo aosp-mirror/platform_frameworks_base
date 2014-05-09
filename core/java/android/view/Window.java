@@ -1527,4 +1527,44 @@ public abstract class Window {
      * until the called Activity's exiting transition completes.
      */
     public boolean getAllowExitTransitionOverlap() { return true; }
+
+    /**
+     * @return the color of the status bar.
+     */
+    public abstract int getStatusBarColor();
+
+    /**
+     * Sets the color of the status bar to {@param color}.
+     *
+     * For this to take effect,
+     * the window must be drawing the system bar backgrounds with
+     * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_STATUS} must not be set.
+     *
+     * If {@param color} is not opaque, consider setting
+     * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+     * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+     */
+    public abstract void setStatusBarColor(int color);
+
+    /**
+     * @return the color of the navigation bar.
+     */
+    public abstract int getNavigationBarColor();
+
+    /**
+     * Sets the color of the navigation bar to {@param color}.
+     *
+     * For this to take effect,
+     * the window must be drawing the system bar backgrounds with
+     * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION} must not be set.
+     *
+     * If {@param color} is not opaque, consider setting
+     * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+     * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+     */
+    public abstract void setNavigationBarColor(int color);
+
+
 }
