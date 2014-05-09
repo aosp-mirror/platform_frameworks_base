@@ -13374,6 +13374,7 @@ package android.media {
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
     field public static final int ENCODING_PCM_8BIT = 3; // 0x3
+    field public static final int ENCODING_PCM_FLOAT = 4; // 0x4
   }
 
   public class AudioManager {
@@ -13591,6 +13592,7 @@ package android.media {
     method public void stop() throws java.lang.IllegalStateException;
     method public int write(byte[], int, int);
     method public int write(short[], int, int);
+    method public int write(float[], int, int, int);
     method public int write(java.nio.ByteBuffer, int, int);
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_BAD_VALUE = -2; // 0xfffffffe
