@@ -38,6 +38,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -197,6 +198,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
 
+    private final UserManager mUserManager;
+
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
     private final LongArray mTempLongArray = new LongArray();
@@ -210,15 +213,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return getUserStateLocked(mCurrentUserId);
     }
 
-    private UserState getUserStateLocked(int userId) {
-        UserState state = mUserStates.get(userId);
-        if (state == null) {
-            state = new UserState(userId);
-            mUserStates.put(userId, state);
-        }
-        return state;
-    }
-
     /**
      * Creates a new instance.
      *
@@ -228,6 +222,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
         registerBroadcastReceivers();
@@ -235,11 +230,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 context.getContentResolver());
     }
 
+    private UserState getUserStateLocked(int userId) {
+        UserState state = mUserStates.get(userId);
+        if (state == null) {
+            state = new UserState(userId);
+            mUserStates.put(userId, state);
+        }
+        return state;
+    }
+
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
                 synchronized (mLock) {
+                    // Only the profile parent can install accessibility services.
+                    // Therefore we ignore packages from linked profiles.
                     if (getChangingUserId() != mCurrentUserId) {
                         return;
                     }
@@ -262,6 +268,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
+                    // Only the profile parent can install accessibility services.
+                    // Therefore we ignore packages from linked profiles.
                     if (userId != mCurrentUserId) {
                         return;
                     }
@@ -297,6 +305,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     int uid, boolean doit) {
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
+                    // Only the profile parent can install accessibility services.
+                    // Therefore we ignore packages from linked profiles.
                     if (userId != mCurrentUserId) {
                         return false;
                     }
@@ -359,6 +369,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public int addClient(IAccessibilityManagerClient client, int userId) {
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // If the client is from a process that runs across users such as
@@ -388,6 +401,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public boolean sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution..
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // This method does nothing for a background user.
@@ -414,6 +430,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId) {
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // The automation service is a fake one and should not be reported
@@ -435,6 +454,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             int userId) {
         List<AccessibilityServiceInfo> result = null;
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
@@ -468,6 +490,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     public void interrupt(int userId) {
         CopyOnWriteArrayList<Service> services;
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // This method does nothing for a background user.
@@ -491,6 +516,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     public int addAccessibilityInteractionConnection(IWindow windowToken,
             IAccessibilityInteractionConnection connection, int userId) throws RemoteException {
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             final int windowId = sNextWindowId++;
@@ -527,6 +555,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public void removeAccessibilityInteractionConnection(IWindow window) {
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             mSecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
                     UserHandle.getCallingUserId());
             IBinder token = window.asBinder();
@@ -675,6 +706,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Manifest.permission.RETRIEVE_WINDOW_TOKEN,
                 GET_WINDOW_TOKEN);
         synchronized (mLock) {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(
                             UserHandle.getCallingUserId());
@@ -770,7 +804,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             // Disconnect from services for the old user.
-            UserState oldUserState = getUserStateLocked(mCurrentUserId);
+            UserState oldUserState = getCurrentUserStateLocked();
             oldUserState.onSwitchToAnotherUser();
 
             // Disable the local managers for the old user.
@@ -2034,6 +2068,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public List<AccessibilityWindowInfo> getWindows() {
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its perent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
                                 UserHandle.getCallingUserId());
@@ -2062,6 +2099,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public AccessibilityWindowInfo getWindow(int windowId) {
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
                                 UserHandle.getCallingUserId());
@@ -2092,6 +2132,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
                                 UserHandle.getCallingUserId());
@@ -2136,9 +2179,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2180,9 +2226,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2224,9 +2273,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2268,9 +2320,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2311,9 +2366,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2346,9 +2404,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public boolean performGlobalAction(int action) {
             synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                        UserHandle.getCallingUserId());
+                                UserHandle.getCallingUserId());
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -3407,16 +3468,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
         }
 
+        private int resolveProfileParentLocked(int userId) {
+            if (userId != mCurrentUserId) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    UserInfo parent = mUserManager.getProfileParent(userId);
+                    if (parent != null) {
+                        return parent.getUserHandle().getIdentifier();
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return userId;
+        }
+
         public int resolveCallingUserIdEnforcingPermissionsLocked(int userId) {
             final int callingUid = Binder.getCallingUid();
             if (callingUid == 0
                     || callingUid == Process.SYSTEM_UID
                     || callingUid == Process.SHELL_UID) {
-                return mCurrentUserId;
+                if (userId == UserHandle.USER_CURRENT
+                        || userId == UserHandle.USER_CURRENT_OR_SELF) {
+                    return mCurrentUserId;
+                }
+                return resolveProfileParentLocked(userId);
             }
             final int callingUserId = UserHandle.getUserId(callingUid);
             if (callingUserId == userId) {
-                return userId;
+                return resolveProfileParentLocked(userId);
             }
             if (!hasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
                     && !hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)) {
@@ -3673,8 +3753,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public void onChange(boolean selfChange, Uri uri) {
             if (mAccessibilityEnabledUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readAccessibilityEnabledSettingLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3683,8 +3765,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } else if (mTouchExplorationEnabledUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readTouchExplorationEnabledSettingLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3693,8 +3777,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readDisplayMagnificationEnabledSettingLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3703,8 +3789,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } else if (mEnabledAccessibilityServicesUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readEnabledAccessibilityServicesLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3713,8 +3801,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readTouchExplorationGrantedAccessibilityServicesLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3723,8 +3813,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } else if (mEnhancedWebAccessibilityUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
                             onUserStateChangedLocked(userState);
@@ -3739,8 +3831,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     || mDisplayInversionUri.equals(uri)
                     || mDisplayDaltonizerUri.equals(uri)) {
                 synchronized (mLock) {
-                    // We will update when the automation service dies.
+                    // Profiles share the accessibility state of the parent. Therefore,
+                    // we are checking for changes only the parent settings.
                     UserState userState = getCurrentUserStateLocked();
+                    // We will update when the automation service dies.
                     if (userState.mUiAutomationService == null) {
                         if (readDisplayColorAdjustmentSettingsLocked(userState)) {
                             updateDisplayColorAdjustmentSettingsLocked(userState);
