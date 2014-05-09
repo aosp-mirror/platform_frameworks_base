@@ -32,7 +32,6 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     private boolean mExpanded;
     private View mBackground;
-    private View mFlipper;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -45,7 +44,6 @@ public class StatusBarHeaderView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mBackground = findViewById(R.id.background);
-        mFlipper = findViewById(R.id.header_flipper);
         loadDimens();
     }
 
@@ -71,10 +69,6 @@ public class StatusBarHeaderView extends RelativeLayout {
             setLayoutParams(lp);
             mExpanded = expanded;
         }
-    }
-
-    public void setExpansionEnabled(boolean enabled) {
-        mFlipper.setVisibility(enabled ? View.VISIBLE : View.GONE);
     }
 
     public void setExpansion(float height) {
