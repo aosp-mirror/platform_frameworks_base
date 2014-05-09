@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -40,7 +41,9 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
+import libcore.io.IoUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -838,6 +841,44 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error getting window animation frame stats!", re);
         }
         return null;
+    }
+
+    /**
+     * Executes a shell command. This method returs a file descriptor that points
+     * to the standard output stream. The command execution is similar to running
+     * "adb shell <command>" from a host connected to the device.
+     * <p>
+     * <strong>Note:</strong> It is your responsibility to close the retunred file
+     * descriptor once you are done reading.
+     * </p>
+     *
+     * @param command The command to execute.
+     * @return A file descriptor to the standard output stream.
+     */
+    public ParcelFileDescriptor executeShellCommand(String command) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+
+        ParcelFileDescriptor source = null;
+        ParcelFileDescriptor sink = null;
+
+        try {
+            ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            source = pipe[0];
+            sink = pipe[1];
+
+            // Calling out without a lock held.
+            mUiAutomationConnection.executeShellCommand(command, sink);
+        } catch (IOException ioe) {
+            Log.e(LOG_TAG, "Error executing shell command!", ioe);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } finally {
+            IoUtils.closeQuietly(sink);
+        }
+
+        return source;
     }
 
     private static float getDegreesForRotation(int value) {
