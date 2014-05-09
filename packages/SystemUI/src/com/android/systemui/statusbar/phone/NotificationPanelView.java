@@ -24,9 +24,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
@@ -420,6 +422,34 @@ public class NotificationPanelView extends PanelView implements
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0);
         } else {
             return onHeader;
+        }
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        int oldVisibility = getVisibility();
+        super.setVisibility(visibility);
+        if (visibility != oldVisibility) {
+            reparentStatusIcons(visibility == VISIBLE);
+        }
+    }
+
+    /**
+     * When the notification panel gets expanded, we need to move the status icons in the header
+     * card.
+     */
+    private void reparentStatusIcons(boolean toHeader) {
+        if (mStatusBar == null) {
+            return;
+        }
+        LinearLayout systemIcons = mStatusBar.getSystemIcons();
+        if (systemIcons.getParent() != null) {
+            ((ViewGroup) systemIcons.getParent()).removeView(systemIcons);
+        }
+        if (toHeader) {
+            mHeader.attachSystemIcons(systemIcons);
+        } else {
+            mStatusBar.reattachSystemIcons();
         }
     }
 

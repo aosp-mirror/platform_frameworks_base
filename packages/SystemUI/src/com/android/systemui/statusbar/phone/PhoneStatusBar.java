@@ -29,7 +29,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -205,6 +204,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // right-hand icons
     LinearLayout mSystemIconArea;
+    LinearLayout mSystemIcons;
 
     // left-hand icons
     LinearLayout mStatusIcons;
@@ -230,7 +230,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     QuickSettingsContainerView mSettingsContainer;
 
     // top bar
-    View mNotificationPanelHeader;
+    StatusBarHeaderView mHeader;
     View mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
@@ -607,6 +607,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mPixelFormat = PixelFormat.OPAQUE;
 
         mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
+        mSystemIcons = (LinearLayout) mStatusBarView.findViewById(R.id.system_icons);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
@@ -631,7 +632,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mExpandedContents = mStackScroller;
 
-        mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
+        mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
@@ -640,7 +641,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 R.id.keyguard_indication_text);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
-        mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
+        mDateTimeView = mHeader.findViewById(R.id.datetime);
         if (mDateTimeView != null) {
             mDateTimeView.setOnClickListener(mClockClickListener);
             mDateTimeView.setEnabled(true);
@@ -2717,19 +2718,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
             mKeyguardCarrierLabel.setVisibility(View.VISIBLE);
-            mNotificationPanelHeader.setVisibility(View.GONE);
 
             mNotificationPanel.closeQs();
-            mSettingsContainer.setKeyguardShowing(true);
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardBottomArea.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);
             mKeyguardCarrierLabel.setVisibility(View.GONE);
-            mNotificationPanelHeader.setVisibility(View.VISIBLE);
-
-            mSettingsContainer.setKeyguardShowing(false);
         }
+        mSettingsContainer.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
+        mHeader.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
 
         updateStackScrollerState();
         updatePublicMode();
@@ -2884,5 +2882,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public ViewGroup getQuickSettingsOverlayParent() {
         return mNotificationPanel;
+    }
+
+    public LinearLayout getSystemIcons() {
+        return mSystemIcons;
+    }
+
+    /**
+     * Reattaches the system icons to its normal parent in collapsed status bar.
+     */
+    public void reattachSystemIcons() {
+        mSystemIconArea.addView(mSystemIcons, 0);
     }
 }
