@@ -47,6 +47,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -839,7 +840,7 @@ public final class ActivityThread {
             InetAddress.clearDnsCache();
         }
 
-        public void setHttpProxy(String host, String port, String exclList, String pacFileUrl) {
+        public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
             Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
         }
 

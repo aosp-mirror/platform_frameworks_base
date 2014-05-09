@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
@@ -106,7 +107,7 @@ public interface IApplicationThread extends IInterface {
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
     void setHttpProxy(String proxy, String port, String exclList,
-            String pacFileUrl) throws RemoteException;
+            Uri pacFileUrl) throws RemoteException;
     void processInBackground() throws RemoteException;
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
