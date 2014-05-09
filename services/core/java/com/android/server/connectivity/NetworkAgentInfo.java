@@ -16,15 +16,18 @@
 
 package com.android.server.connectivity;
 
+import android.content.Context;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.os.Handler;
 import android.os.Messenger;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
+import com.android.server.connectivity.NetworkMonitor;
 
 import java.util.ArrayList;
 
@@ -40,6 +43,8 @@ public class NetworkAgentInfo {
     public LinkProperties linkProperties;
     public NetworkCapabilities networkCapabilities;
     public int currentScore;
+    public final NetworkMonitor networkMonitor;
+
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
@@ -50,7 +55,8 @@ public class NetworkAgentInfo {
     public final AsyncChannel asyncChannel;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, int netId, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, int score) {
+            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
+            Handler handler) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = new Network(netId);
@@ -58,7 +64,7 @@ public class NetworkAgentInfo {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-
+        networkMonitor = new NetworkMonitor(context, handler, this);
     }
 
     public String toString() {

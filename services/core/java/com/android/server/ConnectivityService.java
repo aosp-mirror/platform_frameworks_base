@@ -31,7 +31,6 @@ import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.ConnectivityServiceProtocol.NetworkFactoryProtocol;
-import static android.net.ConnectivityServiceProtocol.NetworkMonitorProtocol;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
@@ -131,6 +130,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
+import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -2932,12 +2932,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     updateNetworkInfo(nai, info);
                     break;
                 }
-                case NetworkMonitorProtocol.EVENT_NETWORK_VALIDATED: {
+                case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     handleConnectionValidated(nai);
                     break;
                 }
-                case NetworkMonitorProtocol.EVENT_NETWORK_LINGER_COMPLETE: {
+                case NetworkMonitor.EVENT_NETWORK_LINGER_COMPLETE: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     handleLingerComplete(nai);
                     break;
@@ -3068,20 +3068,38 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 loge("Exception removing network: " + e);
             }
             notifyNetworkCallbacks(nai, NetworkCallbacks.LOST);
+            nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(nai);
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
+            final ArrayList<NetworkAgentInfo> toActivate = new ArrayList<NetworkAgentInfo>();
             for (int i = 0; i < nai.networkRequests.size(); i++) {
                 NetworkRequest request = nai.networkRequests.valueAt(i);
                 NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(request.requestId);
                 if (currentNetwork != null && currentNetwork.network.netId == nai.network.netId) {
                     mNetworkForRequestId.remove(request.requestId);
-                    // TODO Check if any other live network will work
                     sendUpdatedScoreToFactories(request, 0);
+                    NetworkAgentInfo alternative = null;
+                    for (Map.Entry entry : mNetworkAgentInfos.entrySet()) {
+                        NetworkAgentInfo existing = (NetworkAgentInfo)entry.getValue();
+                        if (existing.networkInfo.isConnected() &&
+                                request.networkCapabilities.satisfiedByNetworkCapabilities(
+                                existing.networkCapabilities) &&
+                                (alternative == null ||
+                                 alternative.currentScore < existing.currentScore)) {
+                            alternative = existing;
+                        }
+                    }
+                    if (alternative != null && !toActivate.contains(alternative)) {
+                        toActivate.add(alternative);
+                    }
                 }
             }
             if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
                 removeDataActivityTracking(nai);
+            }
+            for (NetworkAgentInfo networkToActivate : toActivate) {
+                networkToActivate.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             }
         }
     }
@@ -5070,7 +5088,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(), nextNetId(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
-            new NetworkCapabilities(networkCapabilities), currentScore);
+            new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
     }
@@ -5238,14 +5256,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         currentNetwork.networkRequests.remove(nr.requestId);
                         currentNetwork.networkListens.add(nr);
                         if (currentNetwork.networkRequests.size() == 0) {
-                            // TODO tell current Network to go to linger state
-
-                            // fake the linger state:
-                            Message message = Message.obtain();
-                            message.obj = currentNetwork;
-                            message.what = NetworkMonitorProtocol.EVENT_NETWORK_LINGER_COMPLETE;
-                            mTrackerHandler.sendMessage(message);
-
+                            currentNetwork.networkMonitor.sendMessage(
+                                    NetworkMonitor.CMD_NETWORK_LINGER);
                             notifyNetworkCallbacks(currentNetwork, NetworkCallbacks.LOSING);
                         }
                     }
@@ -5301,7 +5313,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 //BatteryStatsService.getService().noteNetworkInterfaceType(iface, netType);
 //            } catch (RemoteException e) { }
             notifyNetworkCallbacks(newNetwork, NetworkCallbacks.AVAILABLE);
-        } else {
+        } else if (newNetwork.networkRequests.size() == 0) {
             if (VDBG) log("Validated network turns out to be unwanted.  Tear it down.");
             newNetwork.asyncChannel.disconnect();
         }
@@ -5331,13 +5343,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             updateLinkProperties(networkAgent, null);
             notifyNetworkCallbacks(networkAgent, NetworkCallbacks.PRECHECK);
-            // TODO - kick the network monitor
-
-            // Fake things by sending self a NETWORK_VALIDATED msg
-            Message message = Message.obtain();
-            message.obj = networkAgent;
-            message.what = NetworkMonitorProtocol.EVENT_NETWORK_VALIDATED;
-            mTrackerHandler.sendMessage(message);
+            networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
             networkAgent.asyncChannel.disconnect();
