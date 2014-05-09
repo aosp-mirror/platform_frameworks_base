@@ -101,7 +101,6 @@ static jlong createAnimator(JNIEnv* env, jobject clazz, jobject weakThis,
     RenderPropertyAnimator::DeltaValueType deltaType = toDeltaType(deltaTypeRaw);
 
     BaseAnimator* animator = new RenderPropertyAnimator(property, deltaType, deltaValue);
-    animator->incStrong(0);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
@@ -111,7 +110,6 @@ static jlong createCanvasPropertyFloatAnimator(JNIEnv* env, jobject clazz,
     RenderPropertyAnimator::DeltaValueType deltaType = toDeltaType(deltaTypeRaw);
     CanvasPropertyPrimitive* canvasProperty = reinterpret_cast<CanvasPropertyPrimitive*>(canvasPropertyPtr);
     BaseAnimator* animator = new CanvasPropertyPrimitiveAnimator(canvasProperty, deltaType, deltaValue);
-    animator->incStrong(0);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
@@ -124,7 +122,6 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
     CanvasPropertyPaintAnimator::PaintField paintField = toPaintField(paintFieldRaw);
     BaseAnimator* animator = new CanvasPropertyPaintAnimator(
             canvasProperty, paintField, deltaType, deltaValue);
-    animator->incStrong(0);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
@@ -133,11 +130,6 @@ static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jint dura
     LOG_ALWAYS_FATAL_IF(duration < 0, "Duration cannot be negative");
     BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
     animator->setDuration(duration);
-}
-
-static void unref(JNIEnv* env, jobject clazz, jlong objPtr) {
-    VirtualLightRefBase* obj = reinterpret_cast<VirtualLightRefBase*>(objPtr);
-    obj->decStrong(0);
 }
 
 #endif
@@ -154,7 +146,6 @@ static JNINativeMethod gMethods[] = {
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIIF)J", (void*) createCanvasPropertyPaintAnimator },
     { "nSetDuration", "(JI)V", (void*) setDuration },
-    { "nUnref", "(J)V", (void*) unref },
 #endif
 };
 

@@ -155,7 +155,8 @@ LOCAL_SRC_FILES:= \
 	android_content_res_Configuration.cpp \
 	android_animation_PropertyValuesHolder.cpp \
 	com_android_internal_net_NetworkStatsFactory.cpp \
-	com_android_internal_os_Zygote.cpp
+	com_android_internal_os_Zygote.cpp \
+	com_android_internal_util_VirtualRefBasePtr.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \

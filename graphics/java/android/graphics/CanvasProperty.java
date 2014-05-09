@@ -16,12 +16,15 @@
 
 package android.graphics;
 
+import com.android.internal.util.VirtualRefBasePtr;
+
 /**
  * TODO: Make public?
  * @hide
  */
 public final class CanvasProperty<T> {
-    private long mNativeContainer;
+
+    private VirtualRefBasePtr mProperty;
 
     public static CanvasProperty<Float> createFloat(float initialValue) {
         return new CanvasProperty<Float>(nCreateFloat(initialValue));
@@ -32,25 +35,14 @@ public final class CanvasProperty<T> {
     }
 
     private CanvasProperty(long nativeContainer) {
-        mNativeContainer = nativeContainer;
+        mProperty = new VirtualRefBasePtr(nativeContainer);
     }
 
     /** @hide */
     public long getNativeContainer() {
-        return mNativeContainer;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            nUnref(mNativeContainer);
-            mNativeContainer = 0;
-        } finally {
-            super.finalize();
-        }
+        return mProperty.get();
     }
 
     private static native long nCreateFloat(float initialValue);
     private static native long nCreatePaint(long initialValuePaintPtr);
-    private static native void nUnref(long ptr);
 }
