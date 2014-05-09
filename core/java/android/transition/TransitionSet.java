@@ -272,24 +272,8 @@ public class TransitionSet extends Transition {
         int numValues = values.viewValues.size();
         for (int i = 0; i < numValues; i++) {
             View view = values.viewValues.keyAt(i);
-            if (isValidTarget(view, view.getId())) {
-                included.viewValues.put(view, values.viewValues.valueAt(i));
-            }
-        }
-        numValues = values.idValues.size();
-        for (int i = 0; i < numValues; i++) {
-            int id = values.idValues.keyAt(i);
-            TransitionValues transitionValues = values.idValues.valueAt(i);
-            if (isValidTarget(transitionValues.view, id)) {
-                included.idValues.put(id, transitionValues);
-            }
-        }
-        numValues = values.itemIdValues.size();
-        for (int i = 0; i < numValues; i++) {
-            long id = values.itemIdValues.keyAt(i);
-            TransitionValues transitionValues = values.itemIdValues.valueAt(i);
-            if (isValidTarget(transitionValues.view, id)) {
-                included.itemIdValues.put(id, transitionValues);
+            if (isValidTarget(view)) {
+                addViewValues(included, view, values.viewValues.valueAt(i));
             }
         }
         return included;
@@ -328,10 +312,9 @@ public class TransitionSet extends Transition {
 
     @Override
     public void captureStartValues(TransitionValues transitionValues) {
-        int targetId = transitionValues.view.getId();
-        if (isValidTarget(transitionValues.view, targetId)) {
+        if (isValidTarget(transitionValues.view)) {
             for (Transition childTransition : mTransitions) {
-                if (childTransition.isValidTarget(transitionValues.view, targetId)) {
+                if (childTransition.isValidTarget(transitionValues.view)) {
                     childTransition.captureStartValues(transitionValues);
                 }
             }
@@ -340,10 +323,9 @@ public class TransitionSet extends Transition {
 
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
-        int targetId = transitionValues.view.getId();
-        if (isValidTarget(transitionValues.view, targetId)) {
+        if (isValidTarget(transitionValues.view)) {
             for (Transition childTransition : mTransitions) {
-                if (childTransition.isValidTarget(transitionValues.view, targetId)) {
+                if (childTransition.isValidTarget(transitionValues.view)) {
                     childTransition.captureEndValues(transitionValues);
                 }
             }

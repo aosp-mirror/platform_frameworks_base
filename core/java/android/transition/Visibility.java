@@ -162,26 +162,15 @@ public abstract class Visibility extends Transition {
     public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         VisibilityInfo visInfo = getVisibilityChangeInfo(startValues, endValues);
-        if (visInfo.visibilityChange) {
-            // Only transition views that are either targets of this transition
-            // or whose parent hierarchies remain stable between scenes
-            boolean isTarget = false;
-            if (mTargets.size() > 0 || mTargetIds.size() > 0) {
-                View startView = startValues != null ? startValues.view : null;
-                View endView = endValues != null ? endValues.view : null;
-                int startId = startView != null ? startView.getId() : -1;
-                int endId = endView != null ? endView.getId() : -1;
-                isTarget = isValidTarget(startView, startId) || isValidTarget(endView, endId);
-            }
-            if (isTarget || ((visInfo.startParent != null || visInfo.endParent != null))) {
-                if (visInfo.fadeIn) {
-                    return onAppear(sceneRoot, startValues, visInfo.startVisibility,
-                            endValues, visInfo.endVisibility);
-                } else {
-                    return onDisappear(sceneRoot, startValues, visInfo.startVisibility,
-                            endValues, visInfo.endVisibility
-                    );
-                }
+        if (visInfo.visibilityChange
+                && (visInfo.startParent != null || visInfo.endParent != null)) {
+            if (visInfo.fadeIn) {
+                return onAppear(sceneRoot, startValues, visInfo.startVisibility,
+                        endValues, visInfo.endVisibility);
+            } else {
+                return onDisappear(sceneRoot, startValues, visInfo.startVisibility,
+                        endValues, visInfo.endVisibility
+                );
             }
         }
         return null;

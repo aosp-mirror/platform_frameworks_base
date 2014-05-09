@@ -5020,10 +5020,14 @@
         <attr name="targetId" format="reference" />
         <!-- The id of a target to exclude from this transition. -->
         <attr name="excludeId" format="reference" />
-        <!-- The fully-qualified name of the Class to exclude from this transition. -->
-        <attr name="excludeClass" format="string" />
         <!-- The fully-qualified name of the Class to include in this transition. -->
         <attr name="targetClass" />
+        <!-- The fully-qualified name of the Class to exclude from this transition. -->
+        <attr name="excludeClass" format="string" />
+        <!-- The viewName of the target on which this transition will animation changes. -->
+        <attr name="targetViewName" format="string" />
+        <!-- The viewName of the target to exclude from this transition. -->
+        <attr name="excludeViewName" format="string" />
     </declare-styleable>
 
     <!-- Use <code>set</code> as the root tag of the XML resource that

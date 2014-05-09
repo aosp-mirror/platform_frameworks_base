@@ -24,7 +24,7 @@ import android.view.View;
 class TransitionValuesMaps {
     ArrayMap<View, TransitionValues> viewValues =
             new ArrayMap<View, TransitionValues>();
-    SparseArray<TransitionValues> idValues = new SparseArray<TransitionValues>();
-    LongSparseArray<TransitionValues> itemIdValues =
-            new LongSparseArray<TransitionValues>();
+    SparseArray<View> idValues = new SparseArray<View>();
+    LongSparseArray<View> itemIdValues = new LongSparseArray<View>();
+    ArrayMap<String, View> nameValues = new ArrayMap<String, View>();
 }

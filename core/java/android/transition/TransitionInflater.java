@@ -229,11 +229,20 @@ public class TransitionInflater {
                         com.android.internal.R.styleable.TransitionTarget);
                 int id = a.getResourceId(
                         com.android.internal.R.styleable.TransitionTarget_targetId, -1);
+                String viewName;
                 if (id >= 0) {
                     transition.addTarget(id);
                 } else if ((id = a.getResourceId(
                         com.android.internal.R.styleable.TransitionTarget_excludeId, -1)) >= 0) {
                     transition.excludeTarget(id, true);
+                } else if ((viewName = a.getString(
+                            com.android.internal.R.styleable.TransitionTarget_targetViewName))
+                        != null) {
+                    transition.addTarget(viewName);
+                } else if ((viewName = a.getString(
+                        com.android.internal.R.styleable.TransitionTarget_excludeViewName))
+                        != null) {
+                    transition.excludeTarget(viewName, true);
                 } else {
                     String className = a.getString(
                             com.android.internal.R.styleable.TransitionTarget_excludeClass);
