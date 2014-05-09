@@ -65,6 +65,15 @@
             />
     </RelativeLayout>
 
+    <com.android.keyguard.CarrierText
+        android:id="@+id/keyguard_carrier_text"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height_keyguard"
+        android:layout_marginLeft="8dp"
+        android:gravity="center_vertical"
+        android:ellipsize="marquee"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <FrameLayout android:id="@+id/system_icons_container"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/status_bar_header_height"
