@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.os.PersistableBundle;
 import android.os.Trace;
 import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
@@ -117,6 +118,7 @@ final class ActivityRecord {
     ProcessRecord app;      // if non-null, hosting application
     ActivityState state;    // current state we are in
     Bundle  icicle;         // last saved activity state
+    PersistableBundle persistentState; // last persistently saved activity state
     boolean frontOfTask;    // is this the root activity of its task?
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?

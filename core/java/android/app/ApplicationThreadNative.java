@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -141,6 +142,7 @@ public abstract class ApplicationThreadNative extends Binder
                     data.readStrongBinder());
             int procState = data.readInt();
             Bundle state = data.readBundle();
+            PersistableBundle persistentState = data.readPersistableBundle();
             List<ResultInfo> ri = data.createTypedArrayList(ResultInfo.CREATOR);
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             boolean notResumed = data.readInt() != 0;
@@ -151,9 +153,9 @@ public abstract class ApplicationThreadNative extends Binder
             boolean autoStopProfiler = data.readInt() != 0;
             Bundle resumeArgs = data.readBundle();
             scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo,
-                    voiceInteractor, procState, state,
-                    ri, pi, notResumed, isForward, profileName, profileFd, autoStopProfiler,
-                    resumeArgs);
+                    voiceInteractor, procState, state, persistentState,
+                    ri, pi, notResumed, isForward, profileName, profileFd,
+                    autoStopProfiler, resumeArgs);
             return true;
         }
         
@@ -731,8 +733,8 @@ class ApplicationThreadProxy implements IApplicationThread {
 
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-            IVoiceInteractor voiceInteractor,
-            int procState, Bundle state, List<ResultInfo> pendingResults,
+            IVoiceInteractor voiceInteractor, int procState, Bundle state,
+            PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
             String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
             Bundle resumeArgs)
@@ -748,6 +750,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(voiceInteractor != null ? voiceInteractor.asBinder() : null);
         data.writeInt(procState);
         data.writeBundle(state);
+        data.writePersistableBundle(persistentState);
         data.writeTypedList(pendingResults);
         data.writeTypedList(pendingNewIntents);
         data.writeInt(notResumed ? 1 : 0);

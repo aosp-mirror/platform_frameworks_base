@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.PerformanceCollector;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1061,15 +1062,7 @@ public class Instrumentation {
         return (Activity)cl.loadClass(className).newInstance();
     }
 
-    /**
-     * Perform calling of an activity's {@link Activity#onCreate}
-     * method.  The default implementation simply calls through to that method.
-     * 
-     * @param activity The activity being created.
-     * @param icicle The previously frozen state (or null) to pass through to
-     *               onCreate().
-     */
-    public void callActivityOnCreate(Activity activity, Bundle icicle) {
+    private void prePerformCreate(Activity activity) {
         if (mWaitingActivities != null) {
             synchronized (mSync) {
                 final int N = mWaitingActivities.size();
@@ -1083,9 +1076,9 @@ public class Instrumentation {
                 }
             }
         }
-        
-        activity.performCreate(icicle);
-        
+    }
+
+    private void postPerformCreate(Activity activity) {
         if (mActivityMonitors != null) {
             synchronized (mSync) {
                 final int N = mActivityMonitors.size();
@@ -1095,6 +1088,33 @@ public class Instrumentation {
                 }
             }
         }
+    }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onCreate}
+     * method.  The default implementation simply calls through to that method.
+     *
+     * @param activity The activity being created.
+     * @param icicle The previously frozen state (or null) to pass through to onCreate().
+     */
+    public void callActivityOnCreate(Activity activity, Bundle icicle) {
+        prePerformCreate(activity);
+        activity.performCreate(icicle);
+        postPerformCreate(activity);
+    }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onCreate}
+     * method.  The default implementation simply calls through to that method.
+     *  @param activity The activity being created.
+     * @param icicle The previously frozen state (or null) to pass through to
+     * @param persistentState The previously persisted state (or null)
+     */
+    public void callActivityOnCreate(Activity activity, Bundle icicle,
+            PersistableBundle persistentState) {
+        prePerformCreate(activity);
+        activity.performCreate(icicle, persistentState);
+        postPerformCreate(activity);
     }
     
     public void callActivityOnDestroy(Activity activity) {
@@ -1130,7 +1150,7 @@ public class Instrumentation {
     /**
      * Perform calling of an activity's {@link Activity#onRestoreInstanceState}
      * method.  The default implementation simply calls through to that method.
-     * 
+     *
      * @param activity The activity being restored.
      * @param savedInstanceState The previously saved state being restored.
      */
@@ -1139,15 +1159,41 @@ public class Instrumentation {
     }
 
     /**
+     * Perform calling of an activity's {@link Activity#onRestoreInstanceState}
+     * method.  The default implementation simply calls through to that method.
+     *
+     * @param activity The activity being restored.
+     * @param savedInstanceState The previously saved state being restored.
+     * @param persistentState The previously persisted state (or null)
+     */
+    public void callActivityOnRestoreInstanceState(Activity activity, Bundle savedInstanceState,
+            PersistableBundle persistentState) {
+        activity.performRestoreInstanceState(savedInstanceState, persistentState);
+    }
+
+    /**
      * Perform calling of an activity's {@link Activity#onPostCreate} method.
      * The default implementation simply calls through to that method.
-     * 
+     *
      * @param activity The activity being created.
      * @param icicle The previously frozen state (or null) to pass through to
      *               onPostCreate().
      */
     public void callActivityOnPostCreate(Activity activity, Bundle icicle) {
         activity.onPostCreate(icicle);
+    }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onPostCreate} method.
+     * The default implementation simply calls through to that method.
+     *
+     * @param activity The activity being created.
+     * @param icicle The previously frozen state (or null) to pass through to
+     *               onPostCreate().
+     */
+    public void callActivityOnPostCreate(Activity activity, Bundle icicle,
+            PersistableBundle persistentState) {
+        activity.onPostCreate(icicle, persistentState);
     }
 
     /**
@@ -1215,12 +1261,24 @@ public class Instrumentation {
     /**
      * Perform calling of an activity's {@link Activity#onSaveInstanceState}
      * method.  The default implementation simply calls through to that method.
-     * 
+     *
      * @param activity The activity being saved.
      * @param outState The bundle to pass to the call.
      */
     public void callActivityOnSaveInstanceState(Activity activity, Bundle outState) {
         activity.performSaveInstanceState(outState);
+    }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onSaveInstanceState}
+     * method.  The default implementation simply calls through to that method.
+     *  @param activity The activity being saved.
+     * @param outState The bundle to pass to the call.
+     * @param outPersistentState The persistent bundle to pass to the call.
+     */
+    public void callActivityOnSaveInstanceState(Activity activity, Bundle outState,
+            PersistableBundle outPersistentState) {
+        activity.performSaveInstanceState(outState, outPersistentState);
     }
 
     /**
@@ -1428,7 +1486,7 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity},
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int, Bundle)},
      * but accepts an array of activities to be started.  Note that active
      * {@link ActivityMonitor} objects only match against the first activity in
      * the array.
@@ -1442,7 +1500,7 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity},
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int, Bundle)},
      * but accepts an array of activities to be started.  Note that active
      * {@link ActivityMonitor} objects only match against the first activity in
      * the array.
@@ -1545,7 +1603,8 @@ public class Instrumentation {
     }
 
     /**
-     * Like {@link #execStartActivity}, but for starting as a particular user.
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int, Bundle)},
+     * but for starting as a particular user.
      *
      * @param who The Context from which the activity is being started.
      * @param contextThread The main thread of the Context from which the activity

@@ -1026,10 +1026,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.clearOptionsLocked();
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
-                    new Configuration(mService.mConfiguration), r.compat,
-                    r.task.voiceInteractor, app.repProcState, r.icicle, results, newIntents,
-                    !andResume, mService.isNextTransitionForward(), profileFile, profileFd,
-                    profileAutoStop, options);
+                    new Configuration(mService.mConfiguration), r.compat, r.task.voiceInteractor,
+                    app.repProcState, r.icicle, r.persistentState, results, newIntents, !andResume,
+                    mService.isNextTransitionForward(), profileFile, profileFd, profileAutoStop,
+                    options);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
