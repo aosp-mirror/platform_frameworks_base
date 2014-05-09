@@ -17,13 +17,13 @@
 #define ANIMATOR_H
 
 #include <cutils/compiler.h>
+#include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 
 #include "CanvasProperty.h"
 #include "Interpolator.h"
 #include "TreeInfo.h"
 #include "utils/Macros.h"
-#include "utils/VirtualLightRefBase.h"
 
 namespace android {
 namespace uirenderer {

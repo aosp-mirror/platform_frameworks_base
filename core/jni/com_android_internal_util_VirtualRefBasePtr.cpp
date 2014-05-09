@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20014 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,44 +15,35 @@
  */
 
 #include "jni.h"
-#include "GraphicsJNI.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
-
-#include <utils/RefBase.h>
-#include <CanvasProperty.h>
 
 namespace android {
 
-using namespace uirenderer;
-
-#ifdef USE_OPENGL_RENDERER
-
-static jlong createFloat(JNIEnv* env, jobject clazz, jfloat initialValue) {
-    return reinterpret_cast<jlong>(new CanvasPropertyPrimitive(initialValue));
+static void incStrong(JNIEnv* env, jobject clazz, jlong objPtr) {
+    VirtualLightRefBase* obj = reinterpret_cast<VirtualLightRefBase*>(objPtr);
+    obj->incStrong(0);
 }
 
-static jlong createPaint(JNIEnv* env, jobject clazz, jlong paintPtr) {
-    const SkPaint* paint = reinterpret_cast<const SkPaint*>(paintPtr);
-    return reinterpret_cast<jlong>(new CanvasPropertyPaint(*paint));
+static void decStrong(JNIEnv* env, jobject clazz, jlong objPtr) {
+    VirtualLightRefBase* obj = reinterpret_cast<VirtualLightRefBase*>(objPtr);
+    obj->decStrong(0);
 }
-
-#endif
 
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/graphics/CanvasProperty";
+const char* const kClassPathName = "com/android/internal/util/VirtualRefBasePtr";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
-    { "nCreateFloat", "(F)J", (void*) createFloat },
-    { "nCreatePaint", "(J)J", (void*) createPaint },
-#endif
+    { "nIncStrong", "(J)V", (void*) incStrong },
+    { "nDecStrong", "(J)V", (void*) decStrong },
 };
 
-int register_android_graphics_CanvasProperty(JNIEnv* env) {
+int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
-}; // namespace android
+
+} // namespace android

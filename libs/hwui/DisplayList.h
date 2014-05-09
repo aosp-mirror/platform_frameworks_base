@@ -41,7 +41,6 @@
 #include "Matrix.h"
 #include "DeferredDisplayList.h"
 #include "RenderProperties.h"
-#include "utils/VirtualLightRefBase.h"
 
 class SkBitmap;
 class SkPaint;

@@ -16,8 +16,9 @@
 #ifndef CANVASPROPERTY_H
 #define CANVASPROPERTY_H
 
+#include <utils/RefBase.h>
+
 #include "utils/Macros.h"
-#include "utils/VirtualLightRefBase.h"
 
 #include <SkPaint.h>
 
