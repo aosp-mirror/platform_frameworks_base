@@ -135,7 +135,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 7;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 8;
     
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
