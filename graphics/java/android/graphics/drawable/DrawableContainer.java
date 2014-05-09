@@ -359,6 +359,16 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mDrawableContainerState.getOpacity();
     }
 
+    /** @hide */
+    public void setCurrentIndex(int index) {
+        selectDrawable(index);
+    }
+
+    /** @hide */
+    public int getCurrentIndex() {
+        return mCurIndex;
+    }
+
     public boolean selectDrawable(int idx) {
         if (idx == mCurIndex) {
             return false;

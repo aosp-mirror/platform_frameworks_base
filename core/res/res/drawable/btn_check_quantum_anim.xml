@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,21 +14,92 @@
      limitations under the License.
 -->
 
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="1" >
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:state_checked="true">
+        <bitmap android:src="@drawable/btn_check_anim_00015_qntm_alpha"
+            android:tint="?attr/colorControlActivated"
+            android:alpha="?attr/disabledAlpha" />
+    </item>
+    <item android:state_enabled="false">
+        <bitmap android:src="@drawable/btn_check_anim_00000_qntm_alpha"
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
+    </item>
+    <item android:state_checked="true" android:id="@+id/on">
+        <bitmap android:src="@drawable/btn_check_anim_00015_qntm_alpha"
+            android:tint="?attr/colorControlActivated" />
+    </item>
+    <item android:id="@+id/off">
+        <bitmap android:src="@drawable/btn_check_anim_00000_qntm_alpha"
+            android:tint="?attr/colorControlNormal" />
+    </item>
+    <transition android:fromId="@+id/off" android:toId="@+id/on" android:reversible="true">
+        <animation-list>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00000_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00001_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00002_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00003_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00004_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00005_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00006_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00007_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00008_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00009_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00010_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00011_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00012_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00013_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00014_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+            <item android:duration="33">
+                <bitmap android:src="@drawable/btn_check_anim_00015_qntm_alpha"
+                    android:tint="?attr/colorControlActivated" />
+            </item>
+        </animation-list>
+    </transition>
+</animated-selector>
 
-    <size
-        android:height="32dp"
-        android:width="32dp" />
-
-    <viewport
-        android:viewportHeight="320"
-        android:viewportWidth="320" />
-
-    <group>
-        <path
-            android:name="check"
-            android:pathData="M 232.1,80.6 L 248.5,92.1 L 145.2,239.5 L 71.5,187.8 L 83,171.5 L 140.3,211.7 z"
-            android:fill="?attr/colorControlActivated" />
-    </group>
-</vector>

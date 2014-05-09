@@ -122,8 +122,8 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@drawable/list_divider_quantum</item>
         <item name="listSeparatorTextViewStyle">@style/Widget.Quantum.TextView.ListSeparator</item>
 
-        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum</item>
-        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum</item>
+        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_anim</item>
+        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_anim</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum</item>
 
@@ -466,8 +466,8 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@drawable/list_divider_quantum</item>
         <item name="listSeparatorTextViewStyle">@style/Widget.Quantum.Light.TextView.ListSeparator</item>
 
-        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum</item>
-        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum</item>
+        <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_anim</item>
+        <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_anim</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum</item>
 
