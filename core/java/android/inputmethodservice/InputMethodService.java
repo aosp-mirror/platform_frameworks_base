@@ -51,6 +51,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -544,6 +545,17 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public void toggleSoftInput(int showFlags, int hideFlags) {
             InputMethodService.this.onToggleSoftInput(showFlags, hideFlags);
+        }
+
+        /**
+         * Call {@link InputMethodService#onUpdateCursorAnchorInfo
+         * InputMethodService.onUpdateCursorAnchorInfo()}.
+         */
+        public void updateCursorAnchorInfo(CursorAnchorInfo info) {
+            if (!isEnabled()) {
+                return;
+            }
+            InputMethodService.this.onUpdateCursorAnchorInfo(info);
         }
     }
     
@@ -1713,6 +1725,17 @@ public class InputMethodService extends AbstractInputMethodService {
      * Otherwise, this is in local coordinates.
      */
     public void onUpdateCursor(Rect newCursor) {
+        // Intentionally empty
+    }
+
+    /**
+     * Called when the application has reported a new location of its text insertion point and
+     * characters in the composition string.  This is only called if explicitly requested by the
+     * input method. The default implementation does nothing.
+     * @param cursorAnchorInfo The positional information of the text insertion point and the
+     * composition string.
+     */
+    public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
         // Intentionally empty
     }
 

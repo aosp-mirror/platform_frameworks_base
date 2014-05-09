@@ -165,7 +165,7 @@ public interface InputMethodSession {
     public void appPrivateCommand(String action, Bundle data);
     
     /**
-     * Toggle the soft input window. 
+     * Toggle the soft input window.
      * Applications can toggle the state of the soft input window.
      * @param showFlags Provides additional operating flags.  May be
      * 0 or have the {@link InputMethodManager#SHOW_IMPLICIT},
@@ -175,4 +175,14 @@ public interface InputMethodSession {
      * {@link  InputMethodManager#HIDE_NOT_ALWAYS} bit set.
      */
     public void toggleSoftInput(int showFlags, int hideFlags);
+
+    /**
+     * This method is called when the cursor and/or the character position relevant to text input
+     * is changed on the screen.  This is not called by default.  It will only be reported if
+     * requested by the input method.
+     *
+     * @param cursorAnchorInfo Positional information relevant to text input, such as text
+     * insertion point and composition string.
+     */
+    public void updateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo);
 }
