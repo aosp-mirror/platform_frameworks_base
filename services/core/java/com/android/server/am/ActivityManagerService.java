@@ -1327,12 +1327,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 String host = "";
                 String port = "";
                 String exclList = "";
-                String pacFileUrl = null;
+                String pacFileUrl = "";
                 if (proxy != null) {
                     host = proxy.getHost();
                     port = Integer.toString(proxy.getPort());
                     exclList = proxy.getExclusionListAsString();
-                    pacFileUrl = proxy.getPacFileUrl().toString();
+                    if (proxy.getPacFileUrl() != null) {
+                        pacFileUrl = proxy.getPacFileUrl().toString();
+                    }
                 }
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
