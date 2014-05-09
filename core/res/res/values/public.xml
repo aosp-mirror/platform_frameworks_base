@@ -2114,7 +2114,7 @@
   <public type="attr" name="controlY1" />
   <public type="attr" name="controlX2" />
   <public type="attr" name="controlY2" />
-  <public type="attr" name="sharedElementName" />
+  <public type="attr" name="viewName" />
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="viewportWidth" />
   <public type="attr" name="viewportHeight" />
@@ -2178,7 +2178,6 @@
 
   <public-padding type="id" name="l_resource_pad" end="0x01020040" />
 
-  <public type="id" name="shared_element_name" />
   <public type="id" name="mask" />
   <public type="id" name="shared_element" />
 

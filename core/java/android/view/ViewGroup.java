@@ -2301,13 +2301,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * individually during the transition.
      * @return True if the ViewGroup should be acted on together during an Activity transition.
      * The default value is false when the background is null and true when the background
-     * is not null or if {@link #getSharedElementName()} is not null.
+     * is not null or if {@link #getViewName()} is not null.
      */
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
         } else {
-            return getBackground() != null || getSharedElementName() != null;
+            return getBackground() != null || getViewName() != null;
         }
     }
 
@@ -5956,15 +5956,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     @Override
-    public void findSharedElements(Map<String, View> sharedElements) {
+    public void findNamedViews(Map<String, View> namedElements) {
         if (getVisibility() != VISIBLE) {
             return;
         }
-        super.findSharedElements(sharedElements);
+        super.findNamedViews(namedElements);
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
-            child.findSharedElements(sharedElements);
+            child.findNamedViews(namedElements);
         }
     }
 

@@ -472,7 +472,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             if (getViewsTransition() != null) {
                 setViewVisibility(mEnteringViews, View.VISIBLE);
             }
-            getDecor().findSharedElements(map);
+            getDecor().findNamedViews(map);
             if (getViewsTransition() != null) {
                 setViewVisibility(mEnteringViews, View.INVISIBLE);
             }
@@ -712,7 +712,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
 
-        sharedElementBundle.putString(KEY_NAME, view.getSharedElementName());
+        sharedElementBundle.putString(KEY_NAME, view.getViewName());
 
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -882,7 +882,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 imageView.setId(com.android.internal.R.id.shared_element);
                 imageView.setScaleType(ImageView.ScaleType.CENTER);
                 imageView.setImageBitmap(bitmap);
-                imageView.setSharedElementName(name);
+                imageView.setViewName(name);
                 setSharedElementState(imageView, name, state, parentLoc);
                 if (mTargetSharedNames.contains(name)) {
                     accepted.add(imageView);
