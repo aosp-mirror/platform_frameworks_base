@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
@@ -537,6 +540,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final byte CMD_START = 4;
         public static final byte CMD_CURRENT_TIME = 5;
         public static final byte CMD_OVERFLOW = 6;
+        public static final byte CMD_RESET = 7;
 
         public byte cmd = CMD_NULL;
         
@@ -620,6 +624,8 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_SYNC = 0x0004;
         // Number of event types.
         public static final int EVENT_COUNT = 0x0005;
+        // Mask to extract out only the type part of the event.
+        public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
         public static final int EVENT_PROC_START = EVENT_PROC | EVENT_FLAG_START;
         public static final int EVENT_PROC_FINISH = EVENT_PROC | EVENT_FLAG_FINISH;
@@ -684,7 +690,7 @@ public abstract class BatteryStats implements Parcelable {
                 dest.writeInt(eventCode);
                 eventTag.writeToParcel(dest, flags);
             }
-            if (cmd == CMD_CURRENT_TIME) {
+            if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
                 dest.writeLong(currentTime);
             }
         }
@@ -722,7 +728,7 @@ public abstract class BatteryStats implements Parcelable {
                 eventCode = EVENT_NONE;
                 eventTag = null;
             }
-            if (cmd == CMD_CURRENT_TIME) {
+            if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
                 currentTime = src.readLong();
             } else {
                 currentTime = 0;
@@ -833,7 +839,59 @@ public abstract class BatteryStats implements Parcelable {
             return true;
         }
     }
-    
+
+    public final static class HistoryEventTracker {
+        private final HashMap<String, SparseIntArray>[] mActiveEvents
+                = (HashMap<String, SparseIntArray>[]) new HashMap[HistoryItem.EVENT_COUNT];
+
+        public boolean updateState(int code, String name, int uid, int poolIdx) {
+            if ((code&HistoryItem.EVENT_FLAG_START) != 0) {
+                int idx = code&HistoryItem.EVENT_TYPE_MASK;
+                HashMap<String, SparseIntArray> active = mActiveEvents[idx];
+                if (active == null) {
+                    active = new HashMap<String, SparseIntArray>();
+                    mActiveEvents[idx] = active;
+                }
+                SparseIntArray uids = active.get(name);
+                if (uids == null) {
+                    uids = new SparseIntArray();
+                    active.put(name, uids);
+                }
+                if (uids.indexOfKey(uid) >= 0) {
+                    // Already set, nothing to do!
+                    return false;
+                }
+                uids.put(uid, poolIdx);
+            } else if ((code&HistoryItem.EVENT_FLAG_FINISH) != 0) {
+                int idx = code&HistoryItem.EVENT_TYPE_MASK;
+                HashMap<String, SparseIntArray> active = mActiveEvents[idx];
+                if (active == null) {
+                    // not currently active, nothing to do.
+                    return false;
+                }
+                SparseIntArray uids = active.get(name);
+                if (uids == null) {
+                    // not currently active, nothing to do.
+                    return false;
+                }
+                idx = uids.indexOfKey(uid);
+                if (idx < 0) {
+                    // not currently active, nothing to do.
+                    return false;
+                }
+                uids.removeAt(idx);
+                if (uids.size() <= 0) {
+                    active.remove(name);
+                }
+            }
+            return true;
+        }
+
+        public HashMap<String, SparseIntArray> getStateForEvent(int code) {
+            return mActiveEvents[code];
+        }
+    }
+
     public static final class BitDescription {
         public final int mask;
         public final int shift;
@@ -861,7 +919,7 @@ public abstract class BatteryStats implements Parcelable {
             this.shortValues = shortValues;
         }
     }
-    
+
     public abstract int getHistoryTotalSize();
 
     public abstract int getHistoryUsedSize();
@@ -2958,9 +3016,13 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(":");
                 }
                 pw.println("START");
-            } else if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
+            } else if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
+                    || rec.cmd == HistoryItem.CMD_RESET) {
                 if (checkin) {
                     pw.print(":");
+                }
+                if (rec.cmd == HistoryItem.CMD_RESET) {
+                    pw.print("RESET:");
                 }
                 pw.print("TIME:");
                 if (checkin) {
@@ -3187,6 +3249,86 @@ public abstract class BatteryStats implements Parcelable {
     public static final int DUMP_INCLUDE_HISTORY = 1<<3;
     public static final int DUMP_VERBOSE = 1<<4;
 
+    private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
+        final HistoryPrinter hprinter = new HistoryPrinter();
+        final HistoryItem rec = new HistoryItem();
+        long lastTime = -1;
+        long baseTime = -1;
+        boolean printed = false;
+        HistoryEventTracker tracker = null;
+        while (getNextHistoryLocked(rec)) {
+            lastTime = rec.time;
+            if (baseTime < 0) {
+                baseTime = lastTime;
+            }
+            if (rec.time >= histStart) {
+                if (histStart >= 0 && !printed) {
+                    if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
+                            || rec.cmd == HistoryItem.CMD_RESET) {
+                        printed = true;
+                    } else if (rec.currentTime != 0) {
+                        printed = true;
+                        byte cmd = rec.cmd;
+                        rec.cmd = HistoryItem.CMD_CURRENT_TIME;
+                        if (checkin) {
+                            pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                            pw.print(HISTORY_DATA); pw.print(',');
+                        }
+                        hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                (flags&DUMP_VERBOSE) != 0);
+                        rec.cmd = cmd;
+                    }
+                    if (tracker != null) {
+                        int oldCode = rec.eventCode;
+                        HistoryTag oldTag = rec.eventTag;
+                        rec.eventTag = new HistoryTag();
+                        for (int i=0; i<HistoryItem.EVENT_COUNT; i++) {
+                            HashMap<String, SparseIntArray> active
+                                    = tracker.getStateForEvent(i);
+                            if (active == null) {
+                                continue;
+                            }
+                            for (HashMap.Entry<String, SparseIntArray> ent
+                                    : active.entrySet()) {
+                                SparseIntArray uids = ent.getValue();
+                                for (int j=0; j<uids.size(); j++) {
+                                    rec.eventCode = i;
+                                    rec.eventTag.string = ent.getKey();
+                                    rec.eventTag.uid = uids.keyAt(j);
+                                    rec.eventTag.poolIdx = uids.valueAt(j);
+                                    if (checkin) {
+                                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                                        pw.print(HISTORY_DATA); pw.print(',');
+                                    }
+                                    hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                            (flags&DUMP_VERBOSE) != 0);
+                                }
+                            }
+                        }
+                        rec.eventCode = oldCode;
+                        rec.eventTag = oldTag;
+                        tracker = null;
+                    }
+                }
+                if (checkin) {
+                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                    pw.print(HISTORY_DATA); pw.print(',');
+                }
+                hprinter.printNextItem(pw, rec, baseTime, checkin,
+                        (flags&DUMP_VERBOSE) != 0);
+            } else if (rec.eventCode != HistoryItem.EVENT_NONE) {
+                if (tracker == null) {
+                    tracker = new HistoryEventTracker();
+                }
+                tracker.updateState(rec.eventCode, rec.eventTag.string,
+                        rec.eventTag.uid, rec.eventTag.poolIdx);
+            }
+        }
+        if (histStart >= 0) {
+            pw.print(checkin ? "NEXT: " : "  NEXT: "); pw.println(lastTime+1);
+        }
+    }
+
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
@@ -3200,9 +3342,6 @@ public abstract class BatteryStats implements Parcelable {
                 (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
 
         if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
-            long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
-
-            final HistoryItem rec = new HistoryItem();
             final long historyTotalSize = getHistoryTotalSize();
             final long historyUsedSize = getHistoryUsedSize();
             if (startIteratingHistoryLocked()) {
@@ -3218,35 +3357,7 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(" strings using ");
                     printSizeValue(pw, getHistoryStringPoolBytes());
                     pw.println("):");
-                    HistoryPrinter hprinter = new HistoryPrinter();
-                    long lastTime = -1;
-                    long baseTime = -1;
-                    boolean printed = false;
-                    while (getNextHistoryLocked(rec)) {
-                        lastTime = rec.time;
-                        if (baseTime < 0) {
-                            baseTime = lastTime;
-                        }
-                        if (rec.time >= histStart) {
-                            if (histStart >= 0 && !printed) {
-                                if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
-                                    printed = true;
-                                } else if (rec.currentTime != 0) {
-                                    printed = true;
-                                    byte cmd = rec.cmd;
-                                    rec.cmd = HistoryItem.CMD_CURRENT_TIME;
-                                    hprinter.printNextItem(pw, rec, baseTime, false,
-                                            (flags&DUMP_VERBOSE) != 0);
-                                    rec.cmd = cmd;
-                                }
-                            }
-                            hprinter.printNextItem(pw, rec, baseTime, false,
-                                    (flags&DUMP_VERBOSE) != 0);
-                        }
-                    }
-                    if (histStart >= 0) {
-                        pw.print("  NEXT: "); pw.println(lastTime+1);
-                    }
+                    dumpHistoryLocked(pw, flags, histStart, false);
                     pw.println();
                 } finally {
                     finishIteratingHistoryLocked();
@@ -3255,6 +3366,7 @@ public abstract class BatteryStats implements Parcelable {
 
             if (startIteratingOldHistoryLocked()) {
                 try {
+                    final HistoryItem rec = new HistoryItem();
                     pw.println("Old battery History:");
                     HistoryPrinter hprinter = new HistoryPrinter();
                     long baseTime = -1;
@@ -3348,7 +3460,6 @@ public abstract class BatteryStats implements Parcelable {
                 (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
 
         if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
-            final HistoryItem rec = new HistoryItem();
             if (startIteratingHistoryLocked()) {
                 try {
                     for (int i=0; i<getHistoryStringPoolSize(); i++) {
@@ -3365,37 +3476,7 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print("\"");
                         pw.println();
                     }
-                    HistoryPrinter hprinter = new HistoryPrinter();
-                    long lastTime = -1;
-                    long baseTime = -1;
-                    boolean printed = false;
-                    while (getNextHistoryLocked(rec)) {
-                        lastTime = rec.time;
-                        if (baseTime < 0) {
-                            baseTime = lastTime;
-                        }
-                        if (rec.time >= histStart) {
-                            if (histStart >= 0 && !printed) {
-                                if (rec.cmd == HistoryItem.CMD_CURRENT_TIME) {
-                                    printed = true;
-                                } else if (rec.currentTime != 0) {
-                                    printed = true;
-                                    byte cmd = rec.cmd;
-                                    rec.cmd = HistoryItem.CMD_CURRENT_TIME;
-                                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                                    pw.print(HISTORY_DATA); pw.print(',');
-                                    hprinter.printNextItem(pw, rec, baseTime, true, false);
-                                    rec.cmd = cmd;
-                                }
-                            }
-                            pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                            pw.print(HISTORY_DATA); pw.print(',');
-                            hprinter.printNextItem(pw, rec, baseTime, true, false);
-                        }
-                    }
-                    if (histStart >= 0) {
-                        pw.print("NEXT: "); pw.println(lastTime+1);
-                    }
+                    dumpHistoryLocked(pw, flags, histStart, true);
                 } finally {
                     finishIteratingHistoryLocked();
                 }
