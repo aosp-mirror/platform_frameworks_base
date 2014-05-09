@@ -32,6 +32,8 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     private boolean mExpanded;
     private View mBackground;
+    private ViewGroup mSystemIconsContainer;
+    private View mDateTime;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -44,12 +46,13 @@ public class StatusBarHeaderView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mBackground = findViewById(R.id.background);
+        mSystemIconsContainer = (ViewGroup) findViewById(R.id.system_icons_container);
+        mDateTime = findViewById(R.id.datetime);
         loadDimens();
     }
 
     private void loadDimens() {
-        mCollapsedHeight = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_header_height);
+        mCollapsedHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_header_height);
         mExpandedHeight = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_header_height_expanded);
     }
@@ -87,5 +90,19 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     public View getBackgroundView() {
         return mBackground;
+    }
+
+    public void attachSystemIcons(LinearLayout systemIcons) {
+        mSystemIconsContainer.addView(systemIcons);
+    }
+
+    public void setKeyguardShowing(boolean keyguardShowing) {
+        mBackground.setVisibility(keyguardShowing ? View.INVISIBLE : View.VISIBLE);
+        mDateTime.setVisibility(keyguardShowing ? View.INVISIBLE : View.VISIBLE);
+        if (keyguardShowing) {
+            setZ(0);
+        } else {
+            setTranslationZ(0);
+        }
     }
 }
