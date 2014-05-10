@@ -69,6 +69,7 @@ public:
     }
 
 private:
+    static const int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
     static void onReceived(const hdmi_event_t* event, void* arg);
 
     hdmi_cec_device_t* mDevice;
@@ -209,11 +210,11 @@ void HdmiCecController::clearLogicaladdress() {
 }
 
 int HdmiCecController::getPhysicalAddress() {
-    uint16_t physicalAddress = 0xFFFF;
-    if (mDevice->get_physical_address(mDevice, &physicalAddress) == 0) {
-        return physicalAddress;
+    uint16_t addr;
+    if (!mDevice->get_physical_address(mDevice, &addr)) {
+        return addr;
     }
-    return -1;
+    return INVALID_PHYSICAL_ADDRESS;
 }
 
 int HdmiCecController::getVersion() {
@@ -311,58 +312,45 @@ static jint nativeSendCecCommand(JNIEnv* env, jclass clazz, jlong controllerPtr,
     return controller->sendMessage(message);
 }
 
-static jint nativeAddLogicalAddress(JNIEnv* env, jclass clazz,
-        jlong controllerPtr, jint logicalAddress) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
-    return controller->addLogicalAddress(
-            static_cast<cec_logical_address_t>(logicalAddress));
+static jint nativeAddLogicalAddress(JNIEnv* env, jclass clazz, jlong controllerPtr,
+        jint logicalAddress) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->addLogicalAddress(static_cast<cec_logical_address_t>(logicalAddress));
 }
 
-static void nativeClearLogicalAddress(JNIEnv* env, jclass clazz,
-        jlong controllerPtr) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+static void nativeClearLogicalAddress(JNIEnv* env, jclass clazz, jlong controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     controller->clearLogicaladdress();
 }
 
-static jint nativeGetPhysicalAddress(JNIEnv* env, jclass clazz,
-        jlong controllerPtr) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+static jint nativeGetPhysicalAddress(JNIEnv* env, jclass clazz, jlong controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     return controller->getPhysicalAddress();
 }
 
-static jint nativeGetVersion(JNIEnv* env, jclass clazz,
-        jlong controllerPtr) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+static jint nativeGetVersion(JNIEnv* env, jclass clazz, jlong controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     return controller->getVersion();
 }
 
 static jint nativeGetVendorId(JNIEnv* env, jclass clazz, jlong controllerPtr) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     return controller->getVendorId();
 }
 
-static void nativeSetOption(JNIEnv* env, jclass clazz, jlong controllerPtr, jint flag,
-        jint value) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+static void nativeSetOption(JNIEnv* env, jclass clazz, jlong controllerPtr, jint flag, jint value) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     controller->setOption(flag, value);
 }
 
 static void nativeSetAudioReturnChannel(JNIEnv* env, jclass clazz, jlong controllerPtr,
         jboolean enabled) {
-    HdmiCecController* controller =
-            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     controller->setAudioReturnChannel(enabled == JNI_TRUE);
 }
 
 static jboolean nativeIsConnected(JNIEnv* env, jclass clazz, jlong controllerPtr, jint port) {
-    HdmiCecController* controller =
-                reinterpret_cast<HdmiCecController*>(controllerPtr);
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     return controller->isConnected(port) ? JNI_TRUE : JNI_FALSE ;
 }
 
@@ -385,8 +373,7 @@ static JNINativeMethod sMethods[] = {
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecController"
 
 int register_android_server_hdmi_HdmiCecController(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, CLASS_PATH, sMethods,
-            NELEM(sMethods));
+    int res = jniRegisterNativeMethods(env, CLASS_PATH, sMethods, NELEM(sMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
     return 0;
 }

@@ -46,8 +46,9 @@ abstract class FeatureAction {
     // Timer handler message used for timeout event
     protected static final int MSG_TIMEOUT = 100;
 
-    // Default timeout for the incoming command to arrive in response to a request
-    protected static final int TIMEOUT_MS = 1000;
+    // Default timeout for the incoming command to arrive in response to a request.
+    // TODO: Consider reading this value from configuration to allow customization.
+    protected static final int TIMEOUT_MS = 2000;
 
     // Default state used in common by all the feature actions.
     protected static final int STATE_NONE = 0;

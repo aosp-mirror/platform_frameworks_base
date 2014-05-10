@@ -33,4 +33,5 @@ interface IHdmiControlService {
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
+    void deviceSelect(int logicalAddress, IHdmiControlCallback callback);
 }

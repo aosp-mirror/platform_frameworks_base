@@ -125,6 +125,21 @@ public final class HdmiControlService extends SystemService {
     @Nullable
     private HdmiMhlController mMhlController;
 
+    // Logical address of the active source.
+    @GuardedBy("mLock")
+    private int mActiveSource;
+
+    // Active routing path. Physical address of the active source but not all the time, such as
+    // when the new active source does not claim itself to be one.
+    @GuardedBy("mLock")
+    private int mActiveRoutingPath;
+
+    // Set to true while the service is in normal mode. While set to false, no input change is
+    // allowed. Used for situations where input change can confuse users such as channel auto-scan,
+    // system upgrade, etc., a.k.a. "prohibit mode".
+    @GuardedBy("mLock")
+    private boolean mInputChangeEnabled;
+
     @GuardedBy("mLock")
     // Whether ARC is "enabled" or not.
     // TODO: it may need to hold lock if it's accessed from others.
@@ -141,6 +156,8 @@ public final class HdmiControlService extends SystemService {
         super(context);
         mLocalDevices = getContext().getResources().getIntArray(
                 com.android.internal.R.array.config_hdmiCecLogicalDeviceType);
+        // TODO: Get control flag from persistent storage
+        mInputChangeEnabled = true;
     }
 
     @Override
@@ -224,6 +241,41 @@ public final class HdmiControlService extends SystemService {
         return mHandler.getLooper();
     }
 
+    int getActiveSource() {
+        synchronized (mLock) {
+            return mActiveSource;
+        }
+    }
+
+    int getActivePath() {
+        synchronized (mLock) {
+            return mActiveRoutingPath;
+        }
+    }
+
+    /**
+     * Returns the path (physical address) of the device at the top of the currently active
+     * routing path. Used to get the corresponding port address of the HDMI input of the TV.
+     */
+    int getActiveInput() {
+        synchronized (mLock) {
+            return mActiveRoutingPath & HdmiConstants.ROUTING_PATH_TOP_MASK;
+        }
+    }
+
+    void updateActiveDevice(int logicalAddress, int physicalAddress) {
+        synchronized (mLock) {
+            mActiveSource = logicalAddress;
+            mActiveRoutingPath = physicalAddress;
+        }
+    }
+
+    void setInputChangeEnabled(boolean enabled) {
+        synchronized (mLock) {
+            mInputChangeEnabled = enabled;
+        }
+    }
+
     /**
      * Returns physical address of the device.
      */
@@ -236,6 +288,10 @@ public final class HdmiControlService extends SystemService {
      */
     int getVendorId() {
         return mCecController.getVendorId();
+    }
+
+    HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
+        return mCecController.getDeviceInfo(logicalAddress);
     }
 
     /**
@@ -304,7 +360,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     // Remove all actions matched with the given Class type.
-    private <T extends FeatureAction> void removeAction(final Class<T> clazz) {
+    <T extends FeatureAction> void removeAction(final Class<T> clazz) {
         removeActionExcept(clazz, null);
     }
 
@@ -575,6 +631,25 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void deviceSelect(final int logicalAddress, final IHdmiControlCallback callback) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv =
+                            (HdmiCecLocalDeviceTv) mCecController.getLocalDevice(HdmiCec.DEVICE_TV);
+                    if (tv == null) {
+                        Slog.w(TAG, "Local playback device not available");
+                        invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+                        return;
+                    }
+                    tv.deviceSelect(logicalAddress, callback);
+                }
+            });
+        }
+
+
+        @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
@@ -710,8 +785,9 @@ public final class HdmiControlService extends SystemService {
     }
 
     boolean isInPresetInstallationMode() {
-        // TODO: Implement this.
-        return false;
+        synchronized (mLock) {
+            return !mInputChangeEnabled;
+        }
     }
 
     /**

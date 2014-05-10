@@ -16,6 +16,8 @@
 package android.hardware.hdmi;
 
 import android.annotation.SystemApi;
+import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
@@ -32,5 +34,47 @@ public final class HdmiTvClient {
 
     HdmiTvClient(IHdmiControlService service) {
         mService = service;
+    }
+
+    // Factory method for HdmiTvClient.
+    // Declared package-private. Accessed by HdmiControlManager only.
+    static HdmiTvClient create(IHdmiControlService service) {
+        return new HdmiTvClient(service);
+    }
+
+    /**
+     * Callback interface used to get the result of {@link #deviceSelect}.
+     */
+    public interface SelectCallback {
+        /**
+         * Called when the operation is finished.
+         *
+         * @param result the result value of {@link #deviceSelect}
+         */
+        void onComplete(int result);
+    }
+
+    /**
+     * Select a CEC logical device to be a new active source.
+     *
+     * @param logicalAddress
+     * @param callback
+     */
+    public void deviceSelect(int logicalAddress, SelectCallback callback) {
+        // TODO: Replace SelectCallback with PartialResult.
+        try {
+            mService.deviceSelect(logicalAddress, getCallbackWrapper(callback));
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to select device: ", e);
+        }
+    }
+
+    private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
+        return new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+                callback.onComplete(result);
+            }
+        };
     }
 }

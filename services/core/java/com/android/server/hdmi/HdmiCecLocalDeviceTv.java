@@ -16,8 +16,11 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import java.util.Locale;
@@ -52,6 +55,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 return handleReportPhysicalAddress(message);
             default:
                 return super.onMessage(message);
+        }
+    }
+
+    /**
+     * Performs the action 'device select', or 'one touch play' initiated by TV.
+     *
+     * @param targetAddress logical address of the device to select
+     * @param callback callback object to report the result with
+     */
+    void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
+        HdmiCecDeviceInfo targetDevice = mService.getDeviceInfo(targetAddress);
+        if (targetDevice == null) {
+            invokeCallback(callback, HdmiCec.RESULT_TARGET_NOT_AVAILABLE);
+            return;
+        }
+        mService.removeAction(DeviceSelectAction.class);
+        mService.addAndStartAction(new DeviceSelectAction(mService, mAddress,
+                                                          mService.getPhysicalAddress(), targetDevice, callback));
+    }
+
+    private static void invokeCallback(IHdmiControlCallback callback, int result) {
+        try {
+            callback.onComplete(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Invoking callback failed:" + e);
         }
     }
 

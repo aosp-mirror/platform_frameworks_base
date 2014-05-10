@@ -270,6 +270,38 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Set Stream Path&gt; command.
+     *
+     * <p>This is a broadcast message sent to all devices on the bus.
+     *
+     * @param src source address of command
+     * @param streamPath physical address of the device to start streaming
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSetStreamPath(int src, int streamPath) {
+        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_SET_STREAM_PATH,
+                physicalAddressToParam(streamPath));
+    }
+
+    /**
+     * Build &lt;Routing Change&gt; command.
+     *
+     * <p>This is a broadcast message sent to all devices on the bus.
+     *
+     * @param src source address of command
+     * @param oldPath physical address of the currently active routing path
+     * @param newPath physical address of the new active routing path
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRoutingChange(int src, int oldPath, int newPath) {
+        byte[] param = new byte[] {
+            (byte) ((oldPath >> 8) & 0xFF), (byte) (oldPath & 0xFF),
+            (byte) ((newPath >> 8) & 0xFF), (byte) (newPath & 0xFF)
+        };
+        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_ROUTING_CHANGE, param);
+    }
+
+    /**
      * Build &lt;Give Device Power Status&gt; command.
      *
      * @param src source address of command
