@@ -4307,6 +4307,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      *
      * @param a the styled attributes set to initialize the scrollbars from
+     *
+     * @removed Apps were never able to call this safely since the TypedArray parameter
+     * must have been obtained by filtering on android.R.styleable.View, which is not public.
      */
     protected void initializeScrollbars(TypedArray a) {
         initScrollCache();
