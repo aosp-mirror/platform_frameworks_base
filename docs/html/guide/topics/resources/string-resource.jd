@@ -20,9 +20,6 @@ your application with strings:</p>
 information about styling and formatting strings, see the section about <a
 href="#FormattingAndStyling">Formatting and Styling</a>.</p>
 
-
-
-
 <h2 id="String">String</h2>
 
 <p>A single string that can be referenced from the application or from other resource files (such
@@ -433,7 +430,7 @@ java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), usern
 
 
 
-<h3>Styling with HTML markup</h3>
+<h3 id="StylingWithHTML">Styling with HTML markup</h3>
 
 <p>You can add styling to your strings with HTML markup. For example:</p>
 <pre>
@@ -497,5 +494,107 @@ java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), escap
 CharSequence styledText = Html.fromHtml(text);
 </pre>
 
+<h2 id="StylingWithSpannables">Styling with Spannables</h2>
+<p>
+A {@link android.text.Spannable} is a text object that you can style with
+typeface properties such as color and font weight. You use
+{@link android.text.SpannableStringBuilder} to build
+your text and then apply styles defined in the {@link android.text.style}
+package to the text.
+</p>
 
+<p>You can use the following helper methods to set up much of the work
+of creating spannable text:</p>
 
+<pre style="pretty-print">
+/**
+ * Returns a CharSequence that concatenates the specified array of CharSequence
+ * objects and then applies a list of zero or more tags to the entire range.
+ *
+ * @param content an array of character sequences to apply a style to
+ * @param tags the styled span objects to apply to the content
+ *        such as android.text.style.StyleSpan
+ *
+ */
+private static CharSequence apply(CharSequence[] content, Object... tags) {
+    SpannableStringBuilder text = new SpannableStringBuilder();
+    openTags(text, tags);
+    for (CharSequence item : content) {
+        text.append(item);
+    }
+    closeTags(text, tags);
+    return text;
+}
+
+/**
+ * Iterates over an array of tags and applies them to the beginning of the specified
+ * Spannable object so that future text appended to the text will have the styling
+ * applied to it. Do not call this method directly.
+ */
+private static void openTags(Spannable text, Object[] tags) {
+    for (Object tag : tags) {
+        text.setSpan(tag, 0, 0, Spannable.SPAN_MARK_MARK);
+    }
+}
+
+/**
+ * "Closes" the specified tags on a Spannable by updating the spans to be
+ * endpoint-exclusive so that future text appended to the end will not take
+ * on the same styling. Do not call this method directly.
+ */
+private static void closeTags(Spannable text, Object[] tags) {
+    int len = text.length();
+    for (Object tag : tags) {
+        if (len > 0) {
+            text.setSpan(tag, 0, len, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            text.removeSpan(tag);
+        }
+    }
+}
+</pre>
+
+<p>
+The following <code>bold</code>, <code>italic</code>, and <code>color</code>
+methods show you how to call the helper methods to apply
+styles defined in the {@link android.text.style} package. You
+can create similar methods to do other types of text styling.
+</p>
+
+<pre style="pretty-print">
+/**
+ * Returns a CharSequence that applies boldface to the concatenation
+ * of the specified CharSequence objects.
+ */
+public static CharSequence bold(CharSequence... content) {
+    return apply(content, new StyleSpan(Typeface.BOLD));
+}
+
+/**
+ * Returns a CharSequence that applies italics to the concatenation
+ * of the specified CharSequence objects.
+ */
+public static CharSequence italic(CharSequence... content) {
+    return apply(content, new StyleSpan(Typeface.ITALIC));
+}
+
+/**
+ * Returns a CharSequence that applies a foreground color to the
+ * concatenation of the specified CharSequence objects.
+ */
+public static CharSequence color(int color, CharSequence... content) {
+    return apply(content, new ForegroundColorSpan(color));
+}
+</pre>
+
+<p>
+Here's an example of how to chain these methods to create a character sequence
+with different types of styling applied to individual words:
+</p>
+
+<pre style="pretty-print">
+// Create an italic "hello, " a red "world",
+// and bold the entire sequence.
+CharSequence text = bold(italic(res.getString(R.string.hello)),
+    color(Color.RED, res.getString(R.string.world)));
+</pre>
