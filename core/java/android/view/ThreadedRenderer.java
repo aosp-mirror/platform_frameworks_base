@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Trace;
+import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
@@ -50,8 +51,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static final String LOGTAG = "ThreadedRenderer";
 
     private static final Rect NULL_RECT = new Rect();
-
-    private static final long NANOS_PER_MS = 1000000;
 
     // Keep in sync with DrawFrameTask.h SYNC_* flags
     // Nothing interesting to report
@@ -203,7 +202,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
         attachInfo.mIgnoreDirtyState = true;
         long frameTimeNanos = mChoreographer.getFrameTimeNanos();
-        attachInfo.mDrawingTime = frameTimeNanos / NANOS_PER_MS;
+        attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
 
         updateRootDisplayList(view, callbacks);
 

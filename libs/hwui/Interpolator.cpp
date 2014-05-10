@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define LOG_TAG "Interpolator"
+
 #include "Interpolator.h"
 
 #include <math.h>
+#include <cutils/log.h>
+
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -27,6 +33,35 @@ Interpolator* Interpolator::createDefaultInterpolator() {
 float AccelerateDecelerateInterpolator::interpolate(float input) {
     return (float)(cosf((input + 1) * M_PI) / 2.0f) + 0.5f;
 }
+
+LUTInterpolator::LUTInterpolator(float* values, size_t size) {
+    mValues = values;
+    mSize = size;
+}
+
+LUTInterpolator::~LUTInterpolator() {
+    delete mValues;
+    mValues = 0;
+}
+
+float LUTInterpolator::interpolate(float input) {
+    float lutpos = input * mSize;
+    if (lutpos >= (mSize - 1)) {
+        return mValues[mSize - 1];
+    }
+
+    float ipart, weight;
+    weight = modff(lutpos, &ipart);
+
+    int i1 = (int) ipart;
+    int i2 = MathUtils::min(i1 + 1, mSize - 1);
+
+    float v1 = mValues[i1];
+    float v2 = mValues[i2];
+
+    return MathUtils::lerp(v1, v2, weight);
+}
+
 
 } /* namespace uirenderer */
 } /* namespace android */

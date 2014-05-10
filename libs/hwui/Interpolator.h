@@ -16,6 +16,10 @@
 #ifndef INTERPOLATOR_H
 #define INTERPOLATOR_H
 
+#include <stddef.h>
+
+#include <cutils/compiler.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -31,12 +35,24 @@ protected:
     Interpolator() {}
 };
 
-class AccelerateDecelerateInterpolator : public Interpolator {
+class ANDROID_API AccelerateDecelerateInterpolator : public Interpolator {
 public:
     AccelerateDecelerateInterpolator() {}
     virtual ~AccelerateDecelerateInterpolator() {}
 
     virtual float interpolate(float input);
+};
+
+class ANDROID_API LUTInterpolator : public Interpolator {
+public:
+    LUTInterpolator(float* values, size_t size);
+    ~LUTInterpolator();
+
+    virtual float interpolate(float input);
+
+private:
+    float* mValues;
+    size_t mSize;
 };
 
 } /* namespace uirenderer */

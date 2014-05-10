@@ -112,8 +112,6 @@ public final class Choreographer {
     private static final int SKIPPED_FRAME_WARNING_LIMIT = SystemProperties.getInt(
             "debug.choreographer.skipwarning", 30);
 
-    private static final long NANOS_PER_MS = 1000000;
-
     private static final int MSG_DO_FRAME = 0;
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
@@ -263,7 +261,7 @@ public final class Choreographer {
      * @return The refresh rate as the nanoseconds between frames
      * @hide
      */
-    long getFrameIntervalNanos() {
+    public long getFrameIntervalNanos() {
         return mFrameIntervalNanos;
     }
 
@@ -456,7 +454,7 @@ public final class Choreographer {
      * @hide
      */
     public long getFrameTime() {
-        return getFrameTimeNanos() / NANOS_PER_MS;
+        return getFrameTimeNanos() / TimeUtils.NANOS_PER_MS;
     }
 
     /**
@@ -497,7 +495,7 @@ public final class Choreographer {
                 }
             } else {
                 final long nextFrameTime = Math.max(
-                        mLastFrameTimeNanos / NANOS_PER_MS + sFrameDelay, now);
+                        mLastFrameTimeNanos / TimeUtils.NANOS_PER_MS + sFrameDelay, now);
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling next frame in " + (nextFrameTime - now) + " ms.");
                 }
@@ -746,7 +744,7 @@ public final class Choreographer {
             mFrame = frame;
             Message msg = Message.obtain(mHandler, this);
             msg.setAsynchronous(true);
-            mHandler.sendMessageAtTime(msg, timestampNanos / NANOS_PER_MS);
+            mHandler.sendMessageAtTime(msg, timestampNanos / TimeUtils.NANOS_PER_MS);
         }
 
         @Override

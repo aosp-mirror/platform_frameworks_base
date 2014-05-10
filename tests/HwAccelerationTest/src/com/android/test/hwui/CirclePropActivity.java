@@ -16,6 +16,7 @@
 
 package com.android.test.hwui;
 
+import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -27,6 +28,8 @@ import android.os.Trace;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -122,8 +125,11 @@ public class CirclePropActivity extends Activity {
                     mPaint, RenderNodeAnimator.PAINT_STROKE_WIDTH,
                     RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 5.0f : 60.0f));
 
+            TimeInterpolator interp = new OvershootInterpolator(3.0f);
             for (int i = 0; i < mRunningAnimations.size(); i++) {
-                mRunningAnimations.get(i).start(this);
+                RenderNodeAnimator anim = mRunningAnimations.get(i);
+                anim.setInterpolator(interp);
+                anim.start(this);
             }
 
             if (mToggle) {
