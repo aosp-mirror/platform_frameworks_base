@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import android.util.Rational;
 import android.view.Surface;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -196,6 +198,20 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         mSettings.writeToParcel(dest, flags);
         dest.writeParcelableArray(mSurfaceSet.toArray(new Surface[mSurfaceSet.size()]), flags);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean containsTarget(Surface surface) {
+        return mSurfaceSet.contains(surface);
+    }
+
+    /**
+     * @hide
+     */
+    public Collection<Surface> getTargets() {
+        return Collections.unmodifiableCollection(mSurfaceSet);
     }
 
     /**

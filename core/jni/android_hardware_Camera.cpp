@@ -27,6 +27,7 @@
 
 #include <cutils/properties.h>
 #include <utils/Vector.h>
+#include <utils/Errors.h>
 
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
@@ -464,7 +465,7 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 }
 
 // connect to camera service
-static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
+static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     jobject weak_this, jint cameraId, jstring clientPackageName)
 {
     // Convert jstring to String16
@@ -477,20 +478,19 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
             Camera::USE_CALLING_UID);
 
     if (camera == NULL) {
-        jniThrowRuntimeException(env, "Fail to connect to camera service");
-        return;
+        return -EACCES;
     }
 
     // make sure camera hardware is alive
     if (camera->getStatus() != NO_ERROR) {
-        jniThrowRuntimeException(env, "Camera initialization failed");
-        return;
+        return NO_INIT;
     }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
+        // This should never happen
         jniThrowRuntimeException(env, "Can't find android/hardware/Camera");
-        return;
+        return INVALID_OPERATION;
     }
 
     // We use a weak reference so the Camera object can be garbage collected.
@@ -501,6 +501,7 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 
     // save context in opaque field
     env->SetLongField(thiz, fields.context, (jlong)context.get());
+    return NO_ERROR;
 }
 
 // disconnect from camera service
@@ -538,9 +539,9 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
     }
 }
 
-static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz, jobject jSurface)
+static void android_hardware_Camera_setPreviewSurface(JNIEnv *env, jobject thiz, jobject jSurface)
 {
-    ALOGV("setPreviewDisplay");
+    ALOGV("setPreviewSurface");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
@@ -890,14 +891,14 @@ static JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;ILjava/lang/String;)V",
+    "(Ljava/lang/Object;ILjava/lang/String;)I",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",
     (void*)android_hardware_Camera_release },
-  { "setPreviewDisplay",
+  { "setPreviewSurface",
     "(Landroid/view/Surface;)V",
-    (void *)android_hardware_Camera_setPreviewDisplay },
+    (void *)android_hardware_Camera_setPreviewSurface },
   { "setPreviewTexture",
     "(Landroid/graphics/SurfaceTexture;)V",
     (void *)android_hardware_Camera_setPreviewTexture },

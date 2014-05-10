@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.legacy.CameraDeviceUserShim;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.BinderHolder;
@@ -194,7 +195,6 @@ public final class CameraManager {
             // impossible
             return null;
         }
-
         return new CameraCharacteristics(info);
     }
 
@@ -236,10 +236,23 @@ public final class CameraManager {
                                 handler);
 
                 BinderHolder holder = new BinderHolder();
-                mCameraService.connectDevice(device.getCallbacks(),
-                        Integer.parseInt(cameraId),
-                        mContext.getPackageName(), USE_CALLING_UID, holder);
-                cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
+
+                ICameraDeviceCallbacks callbacks = device.getCallbacks();
+                int id = Integer.parseInt(cameraId);
+                try {
+                    mCameraService.connectDevice(callbacks, id, mContext.getPackageName(),
+                            USE_CALLING_UID, holder);
+                    cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
+                } catch (CameraRuntimeException e) {
+                    if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
+                        // Use legacy camera implementation for HAL1 devices
+                        Log.i(TAG, "Using legacy camera HAL.");
+                        cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id);
+                    } else {
+                        // Rethrow otherwise
+                        throw e;
+                    }
+                }
 
                 // TODO: factor out listener to be non-nested, then move setter to constructor
                 // For now, calling setRemoteDevice will fire initial

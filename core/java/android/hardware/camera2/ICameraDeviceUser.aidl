@@ -26,7 +26,8 @@ import android.hardware.camera2.utils.LongParcelable;
 interface ICameraDeviceUser
 {
     /**
-     * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceUser.h
+     * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceUser.h and
+     * frameworks/base/core/java/android/hardware/camera2/legacy/CameraDeviceUserShim.java
      */
     void disconnect();
 
@@ -40,6 +41,27 @@ interface ICameraDeviceUser
                           out LongParcelable lastFrameNumber);
 
     int cancelRequest(int requestId, out LongParcelable lastFrameNumber);
+
+    /**
+     * Begin the device configuration.
+     *
+     * <p>
+     * beginConfigure must be called before any call to deleteStream, createStream,
+     * or endConfigure.  It is not valid to call this when the device is not idle.
+     * <p>
+     */
+    int beginConfigure();
+
+    /**
+     * End the device configuration.
+     *
+     * <p>
+     * endConfigure must be called after stream configuration is complete (i.e. after
+     * a call to beginConfigure and subsequent createStream/deleteStream calls).  This
+     * must be called before any requests can be submitted.
+     * <p>
+     */
+    int endConfigure();
 
     int deleteStream(int streamId);
 

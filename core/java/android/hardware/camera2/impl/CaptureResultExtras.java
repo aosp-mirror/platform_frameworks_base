@@ -45,6 +45,15 @@ public class CaptureResultExtras implements Parcelable {
         readFromParcel(in);
     }
 
+    public CaptureResultExtras(int requestId, int subsequenceId, int afTriggerId,
+                               int precaptureTriggerId, long frameNumber) {
+        this.requestId = requestId;
+        this.subsequenceId = subsequenceId;
+        this.afTriggerId = afTriggerId;
+        this.precaptureTriggerId = precaptureTriggerId;
+        this.frameNumber = frameNumber;
+    }
+
     @Override
     public int describeContents() {
         return 0;
