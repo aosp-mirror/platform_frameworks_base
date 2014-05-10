@@ -61,8 +61,7 @@ public interface IApplicationThread extends IInterface {
             IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
-            Bundle resumeArgs)
+            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
             throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,

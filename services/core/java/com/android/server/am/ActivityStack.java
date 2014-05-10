@@ -205,6 +205,9 @@ final class ActivityStack {
     ActivityRecord mTranslucentActivityWaiting = null;
     ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
             new ArrayList<ActivityRecord>();
+    // Options passed from the caller of the convertToTranslucent to the activity that will
+    // appear below it.
+    ActivityOptions mReturningActivityOptions = null;
 
     /**
      * Set when we know we are going to be calling updateConfiguration()
@@ -1218,6 +1221,7 @@ final class ActivityStack {
                                     TAG, "Making visible and scheduling visibility: " + r);
                             try {
                                 if (mTranslucentActivityWaiting != null) {
+                                    r.updateOptionsLocked(mReturningActivityOptions);
                                     mUndrawnActivitiesBelowTopTranslucent.add(r);
                                 }
                                 setVisibile(r, true);
@@ -1295,9 +1299,10 @@ final class ActivityStack {
         }
     }
 
-    void convertToTranslucent(ActivityRecord r) {
+    void convertToTranslucent(ActivityRecord r, ActivityOptions options) {
         mTranslucentActivityWaiting = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
+        mReturningActivityOptions = options;
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
     }
 
@@ -1469,8 +1474,6 @@ final class ActivityStack {
         mStackSupervisor.mGoingToSleepActivities.remove(next);
         next.sleeping = false;
         mStackSupervisor.mWaitingVisibleActivities.remove(next);
-
-        next.updateOptionsLocked(options);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
 
@@ -1915,7 +1918,6 @@ final class ActivityStack {
                         : AppTransition.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
-            r.updateOptionsLocked(options);
             mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
@@ -1966,13 +1968,14 @@ final class ActivityStack {
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
                     r.info.configChanges);
             ActivityOptions.abort(options);
+            options = null;
         }
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
 
         if (doResume) {
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeTopActivitiesLocked(this, r, options);
         }
     }
 

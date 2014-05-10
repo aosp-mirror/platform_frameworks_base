@@ -30,7 +30,6 @@ import com.android.internal.policy.PolicyManager;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1150,6 +1149,12 @@ public class Activity extends ContextThemeWrapper
         }
 
         getApplication().dispatchActivityStarted(this);
+
+        final ActivityOptions activityOptions = getActivityOptions();
+        if (activityOptions != null &&
+                activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+            mEnterTransitionCoordinator = activityOptions.createEnterActivityTransition(this);
+        }
     }
 
     /**
@@ -5272,19 +5277,29 @@ public class Activity extends ContextThemeWrapper
      *
      * @param callback the method to call when all visible Activities behind this one have been
      * drawn and it is safe to make this Activity translucent again.
+     * @param options activity options delivered to the activity below this one. The options
+     * are retrieved using {@link #getActivityOptions}.
      *
      * @see #convertFromTranslucent()
      * @see TranslucentConversionListener
      *
      * @hide
      */
-    public void convertToTranslucent(TranslucentConversionListener callback) {
+    void convertToTranslucent(TranslucentConversionListener callback, ActivityOptions options) {
+        boolean drawComplete;
         try {
             mTranslucentCallback = callback;
             mChangeCanvasToTranslucent =
-                    ActivityManagerNative.getDefault().convertToTranslucent(mToken);
+                    ActivityManagerNative.getDefault().convertToTranslucent(mToken, options);
+            drawComplete = true;
         } catch (RemoteException e) {
-            // pass
+            // Make callback return as though it timed out.
+            mChangeCanvasToTranslucent = false;
+            drawComplete = false;
+        }
+        if (!mChangeCanvasToTranslucent && mTranslucentCallback != null) {
+            // Window is already translucent.
+            mTranslucentCallback.onTranslucentConversionComplete(drawComplete);
         }
     }
 
@@ -5297,6 +5312,22 @@ public class Activity extends ContextThemeWrapper
         if (mChangeCanvasToTranslucent) {
             WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
         }
+    }
+
+    /**
+     * Retrieve the ActivityOptions passed in from the launching activity or passed back
+     * from an activity launched by this activity in its call to {@link
+     * #convertToTranslucent(TranslucentConversionListener, ActivityOptions)}
+     *
+     * @return The ActivityOptions passed to {@link #convertToTranslucent}.
+     * @hide
+     */
+    ActivityOptions getActivityOptions() {
+        try {
+            return ActivityManagerNative.getDefault().getActivityOptions(mToken);
+        } catch (RemoteException e) {
+        }
+        return null;
     }
 
     /**
@@ -5533,30 +5564,12 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
     }
 
-    final void attach(Context context, ActivityThread aThread, Instrumentation instr, IBinder token,
-            Application application, Intent intent, ActivityInfo info, CharSequence title, 
-            Activity parent, String id, NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config) {
-        attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
-            lastNonConfigurationInstances, config);
-    }
-    
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config) {
-        attach(context, aThread, instr, token, ident, application, intent, info, title, parent, id,
-                lastNonConfigurationInstances, config, null, null);
-    }
-
-    final void attach(Context context, ActivityThread aThread,
-            Instrumentation instr, IBinder token, int ident,
-            Application application, Intent intent, ActivityInfo info,
-            CharSequence title, Activity parent, String id,
-            NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config, Bundle options, IVoiceInteractor voiceInteractor) {
+            Configuration config, IVoiceInteractor voiceInteractor) {
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
@@ -5597,12 +5610,6 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
-        if (options != null) {
-            ActivityOptions activityOptions = new ActivityOptions(options);
-            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-                mEnterTransitionCoordinator = activityOptions.createEnterActivityTransition(this);
-            }
-        }
     }
 
     /** @hide */
@@ -5873,7 +5880,7 @@ public class Activity extends ContextThemeWrapper
          * occurred waiting for the Activity to complete drawing.
          *
          * @see Activity#convertFromTranslucent()
-         * @see Activity#convertToTranslucent(TranslucentConversionListener)
+         * @see Activity#convertToTranslucent(TranslucentConversionListener, ActivityOptions)
          */
         public void onTranslucentConversionComplete(boolean drawComplete);
     }

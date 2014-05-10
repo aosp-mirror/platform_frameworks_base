@@ -1022,14 +1022,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
 
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
-            Bundle options = (r.pendingOptions == null) ? null : r.pendingOptions.toBundle();
-            r.clearOptionsLocked();
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
                     new Configuration(mService.mConfiguration), r.compat, r.task.voiceInteractor,
                     app.repProcState, r.icicle, r.persistentState, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profileFile, profileFd, profileAutoStop,
-                    options);
+                    mService.isNextTransitionForward(), profileFile, profileFd, profileAutoStop
+            );
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -1325,7 +1323,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
-                requestCode, componentSpecified, this, container);
+                requestCode, componentSpecified, this, container, options);
         if (outActivity != null) {
             outActivity[0] = r;
         }

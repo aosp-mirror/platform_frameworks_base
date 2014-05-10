@@ -9028,7 +9028,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean convertToTranslucent(IBinder token) {
+    public boolean convertToTranslucent(IBinder token, ActivityOptions options) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9037,12 +9037,30 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
                 if (r.changeWindowTranslucency(false)) {
-                    r.task.stack.convertToTranslucent(r);
+                    r.task.stack.convertToTranslucent(r, options);
                     mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return true;
                 }
                 return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public ActivityOptions getActivityOptions(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r != null) {
+                    final ActivityOptions activityOptions = r.pendingOptions;
+                    r.pendingOptions = null;
+                    return activityOptions;
+                }
+                return null;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
