@@ -1,0 +1,8 @@
+package android.view {
+
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method protected void initializeScrollbars(android.content.res.TypedArray);
+  }
+
+}
+
