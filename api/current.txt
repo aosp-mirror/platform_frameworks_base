@@ -25788,6 +25788,7 @@ package android.system {
     method public static boolean isatty(java.io.FileDescriptor);
     method public static void kill(int, int) throws android.system.ErrnoException;
     method public static void lchown(java.lang.String, int, int) throws android.system.ErrnoException;
+    method public static void link(java.lang.String, java.lang.String) throws android.system.ErrnoException;
     method public static void listen(java.io.FileDescriptor, int) throws android.system.ErrnoException;
     method public static long lseek(java.io.FileDescriptor, long, int) throws android.system.ErrnoException;
     method public static android.system.StructStat lstat(java.lang.String) throws android.system.ErrnoException;
