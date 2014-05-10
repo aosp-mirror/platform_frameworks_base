@@ -24,6 +24,7 @@ public class TaskViewTransform {
     public int translationY = 0;
     public float scale = 1f;
     public float alpha = 1f;
+    public float dismissAlpha = 1f;
     public boolean visible = false;
     public Rect rect = new Rect();
     float t;
@@ -36,6 +37,7 @@ public class TaskViewTransform {
         translationY = o.translationY;
         scale = o.scale;
         alpha = o.alpha;
+        dismissAlpha = o.dismissAlpha;
         visible = o.visible;
         rect.set(o.rect);
         t = o.t;
@@ -44,6 +46,6 @@ public class TaskViewTransform {
     @Override
     public String toString() {
         return "TaskViewTransform y: " + translationY + " scale: " + scale + " alpha: " + alpha +
-                " visible: " + visible + " rect: " + rect;
+                " visible: " + visible + " rect: " + rect + " dismissAlpha: " + dismissAlpha;
     }
 }

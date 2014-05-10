@@ -169,6 +169,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             transform.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
         }
 
+        // Set the alphas
+        transform.dismissAlpha = Math.max(-1f, Math.min(0f, t)) + 1f;
+
         // Update the rect and visibility
         transform.rect.set(mTaskRect);
         if (t < -(numPeekCards + 1)) {
@@ -1035,6 +1038,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    @Override
+    public void onTaskDismissed(TaskView tv) {
+        Task task = tv.getTask();
+        // Remove the task from the view
+        mStack.removeTask(task);
+        // Notify the callback that we've removed the task and it can clean up after it
+        mCb.onTaskRemoved(task);
+    }
+
     /**** View.OnClickListener Implementation ****/
 
     @Override
@@ -1094,6 +1106,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onComponentRemoved(Set<ComponentName> cns) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
@@ -1476,13 +1489,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onChildDismissed(View v) {
         TaskView tv = (TaskView) v;
-        Task task = tv.getTask();
-
-        // Remove the task from the view
-        mSv.mStack.removeTask(task);
-
-        // Notify the callback that we've removed the task and it can clean up after it
-        mSv.mCb.onTaskRemoved(task);
+        mSv.onTaskDismissed(tv);
 
         // Disable HW layers
         mSv.decHwLayersRefCount("swipeComplete");

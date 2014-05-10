@@ -119,7 +119,7 @@
     <!-- The animation duration for animating in the info pane. -->
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
     <!-- The animation duration for animating the removal of a task view. -->
-    <integer name="recents_animate_task_view_remove_duration">150</integer>
+    <integer name="recents_animate_task_view_remove_duration">250</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
     <!-- Transposes the search bar layout in landscape -->

@@ -45,6 +45,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         public void onTaskInfoPanelShown(TaskView tv);
         public void onTaskInfoPanelHidden(TaskView tv);
         public void onTaskAppInfoClicked(TaskView tv);
+        public void onTaskDismissed(TaskView tv);
 
         // public void onTaskViewReboundToTask(TaskView tv, Task t);
     }
@@ -142,6 +143,10 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         int minZ = config.taskViewTranslationZMinPx;
         int incZ = config.taskViewTranslationZIncrementPx;
 
+        // Update the bar view
+        mBarView.updateViewPropertiesToTaskTransform(animateFromTransform, toTransform, duration);
+
+        // Update this task view
         if (duration > 0) {
             if (animateFromTransform != null) {
                 setTranslationY(animateFromTransform.translationY);
@@ -379,6 +384,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             mInfoView.rebindToTask(mTask, reloadingTaskData);
             // Rebind any listeners
             mBarView.mApplicationIcon.setOnClickListener(this);
+            mBarView.mDismissButton.setOnClickListener(this);
             mInfoView.mAppInfoButton.setOnClickListener(this);
         }
         mTaskDataLoaded = true;
@@ -404,6 +410,15 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             hideInfoPane();
         } else if (v == mBarView.mApplicationIcon) {
             mCb.onTaskIconClicked(this);
+        } else if (v == mBarView.mDismissButton) {
+            // Animate out the view and call the callback
+            final TaskView tv = this;
+            animateRemoval(new Runnable() {
+                @Override
+                public void run() {
+                    mCb.onTaskDismissed(tv);
+                }
+            });
         } else if (v == mInfoView.mAppInfoButton) {
             mCb.onTaskAppInfoClicked(this);
         }
