@@ -31,7 +31,6 @@ import android.util.SparseArray;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -41,27 +40,45 @@ import java.util.concurrent.CountDownLatch;
  * Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context
  * .WIFI_SCANNING_SERVICE)}.
- * @hide
  */
 public class WifiScanner {
 
+    /** no band specified; use channel list instead */
     public static final int WIFI_BAND_UNSPECIFIED = 0;      /* not specified */
+
+    /** 2.4 GHz band */
     public static final int WIFI_BAND_24_GHZ = 1;           /* 2.4 GHz band */
+    /** 5 GHz band excluding DFS channels */
     public static final int WIFI_BAND_5_GHZ = 2;            /* 5 GHz band without DFS channels */
+    /** DFS channels from 5 GHz band only */
     public static final int WIFI_BAND_5_GHZ_DFS_ONLY  = 4;  /* 5 GHz band with DFS channels */
+    /** 5 GHz band including DFS channels */
     public static final int WIFI_BAND_5_GHZ_WITH_DFS  = 6;  /* 5 GHz band with DFS channels */
+    /** Both 2.4 GHz band and 5 GHz band; no DFS channels */
     public static final int WIFI_BAND_BOTH = 3;             /* both bands without DFS channels */
+    /** Both 2.4 GHz band and 5 GHz band; with DFS channels */
     public static final int WIFI_BAND_BOTH_WITH_DFS = 7;    /* both bands with DFS channels */
 
-    public static final int MIN_SCAN_PERIOD_MS = 300;       /* minimum supported period */
+    /** Minimum supported scanning period */
+    public static final int MIN_SCAN_PERIOD_MS = 2000;      /* minimum supported period */
+    /** Maximum supported scanning period */
     public static final int MAX_SCAN_PERIOD_MS = 1024000;   /* maximum supported period */
 
+    /** No Error */
     public static final int REASON_SUCCEEDED = 0;
+    /** Unknown error */
     public static final int REASON_UNSPECIFIED = -1;
+    /** Invalid listener */
     public static final int REASON_INVALID_LISTENER = -2;
+    /** Invalid request */
     public static final int REASON_INVALID_REQUEST = -3;
+    /** Request conflicts with other scans that may be going on */
     public static final int REASON_CONFLICTING_REQUEST = -4;
 
+    /**
+     * Generic action callback invocation interface
+     *  @hide
+     */
     public static interface ActionListener {
         public void onSuccess(Object result);
         public void onFailure(int reason, Object exception);
@@ -70,19 +87,35 @@ public class WifiScanner {
     /**
      * gives you all the possible channels; channel is specified as an
      * integer with frequency in MHz i.e. channel 1 is 2412
+     * @hide
      */
     public List<Integer> getAvailableChannels(int band) {
         return null;
     }
 
     /**
-     * provides channel specification to the APIs
+     * provides channel specification for scanning
      */
     public static class ChannelSpec {
+        /**
+         * channel frequency in KHz; for example channel 1 is specified as 2412
+         */
         public int frequency;
+        /**
+         * if true, scan this channel in passive fashion.
+         * This flag is ignored on DFS channel specification.
+         * @hide
+         */
         public boolean passive;                                    /* ignored on DFS channels */
+        /**
+         * how long to dwell on this channel
+         * @hide
+         */
         public int dwellTimeMS;                                    /* not supported for now */
 
+        /**
+         * default constructor for channel spec
+         */
         public ChannelSpec(int frequency) {
             this.frequency = frequency;
             passive = false;
@@ -90,19 +123,26 @@ public class WifiScanner {
         }
     }
 
+    /** reports {@link ScanListener#onResults} when underlying buffers are full */
     public static final int REPORT_EVENT_AFTER_BUFFER_FULL = 0;
+    /** reports {@link ScanListener#onResults} after each scan */
     public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1;
+    /** reports {@link ScanListener#onFullResult} whenever each beacon is discovered */
     public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2;
 
     /**
-     * scan configuration parameters
+     * scan configuration parameters to be sent to {@link #startBackgroundScan}
      */
     public static class ScanSettings implements Parcelable {
 
-        public int band;                                           /* ignore channels if specified */
-        public ChannelSpec[] channels;                             /* list of channels to scan */
-        public int periodInMs;                                     /* period of scan */
-        public int reportEvents;                                   /* a valid REPORT_EVENT value */
+        /** one of the WIFI_BAND values */
+        public int band;
+        /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
+        public ChannelSpec[] channels;
+        /** period of background scan; in millisecond */
+        public int periodInMs;
+        /** must have a valid REPORT_EVENT value */
+        public int reportEvents;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -151,11 +191,13 @@ public class WifiScanner {
 
     }
 
+    /** information element from beacon */
     public static class InformationElement {
         public int id;
         public byte[] bytes;
     }
 
+    /** scan result with information elements from beacons */
     public static class FullScanResult {
         public ScanResult result;
         public InformationElement informationElements[];
@@ -206,50 +248,89 @@ public class WifiScanner {
     }
 
     /**
-     * Framework is co-ordinating scans across multiple apps; so it may not give exactly the
-     * same period requested. The period granted is stated on the onSuccess() event; and
-     * onPeriodChanged() will be called if/when it is changed because of multiple conflicting
-     * requests. This is similar to the way timers are handled.
+     * interface to get scan events on; specify this on {@link #startBackgroundScan}
      */
     public interface ScanListener extends ActionListener {
+        /**
+         * Framework co-ordinates scans across multiple apps; so it may not give exactly the
+         * same period requested. If period of a scan is changed; it is reported by this event.
+         */
         public void onPeriodChanged(int periodInMs);
+        /**
+         * reports results retrieved from background scan
+         */
         public void onResults(ScanResult[] results);
+        /**
+         * reports full scan result for each access point found in scan
+         */
         public void onFullResult(FullScanResult fullScanResult);
     }
 
+    /** @hide */
     public void scan(ScanSettings settings, ScanListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_SCAN, 0, putListener(listener), settings);
     }
+
+    /** start wifi scan in background
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, putListener(listener), settings);
     }
-    public void stopBackgroundScan(boolean flush, ScanListener listener) {
+    /**
+     * stop an ongoing wifi scan
+     * @param listener specifies which scan to cancel; must be same object as passed in {@link
+     *  #startBackgroundScan}
+     */
+    public void stopBackgroundScan(ScanListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, removeListener(listener));
     }
+    /**
+     * retrieves currently available scan results
+     * @param flush {@code true} means flush all results
+     * @param listener specifies which scan to cancel; must be same object as passed in {@link
+     *                 #startBackgroundScan}
+     */
     public void retrieveScanResults(boolean flush, ScanListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_GET_SCAN_RESULTS, 0, getListenerKey(listener));
     }
 
+    /** specifies information about an access point of interest */
     public static class HotspotInfo {
+        /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
         public String bssid;
+        /** low signal strength threshold; more information at {@link ScanResult#level} */
         public int low;                                            /* minimum RSSI */
+        /** high signal threshold; more information at {@link ScanResult#level} */
         public int high;                                           /* maximum RSSI */
     }
 
+    /** @hide */
     public static class WifiChangeSettings {
-        public int rssiSampleSize;                                 /* sample size for RSSI averaging */
-        public int lostApSampleSize;                               /* samples to confirm AP's loss */
-        public int unchangedSampleSize;                            /* samples to confirm no change */
-        public int minApsBreachingThreshold;                       /* change threshold to trigger event */
+        public int rssiSampleSize;                          /* sample size for RSSI averaging */
+        public int lostApSampleSize;                        /* samples to confirm AP's loss */
+        public int unchangedSampleSize;                     /* samples to confirm no change */
+        public int minApsBreachingThreshold;                /* change threshold to trigger event */
         public HotspotInfo[] hotspotInfos;
     }
 
-    /* overrides the significant wifi change state machine configuration */
-    public void configureSignificantWifiChange(
+    /** configure WifiChange detection
+     * @param rssiSampleSize number of samples used for RSSI averaging
+     * @param lostApSampleSize number of samples to confirm an access point's loss
+     * @param unchangedSampleSize number of samples to confirm there are no changes
+     * @param minApsBreachingThreshold minimum number of access points that need to be
+     *                                 out of range to detect WifiChange
+     * @param hotspotInfos access points to watch
+     */
+    public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
             int lostApSampleSize,                           /* samples to confirm AP's loss */
             int unchangedSampleSize,                        /* samples to confirm no change */
@@ -268,26 +349,51 @@ public class WifiScanner {
         sAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
     }
 
-    public interface SignificantWifiChangeListener extends ActionListener {
+    /**
+     * interface to get wifi change events on; use this on {@link #startTrackingWifiChange}
+     */
+    public interface WifiChangeListener extends ActionListener {
+        /** indicates that changes were detected in wifi environment
+         * @param results indicate the access points that exhibited change
+         */
         public void onChanging(ScanResult[] results);           /* changes are found */
+        /** indicates that no wifi changes are being detected for a while
+         * @param results indicate the access points that are bing monitored for change
+         */
         public void onQuiescence(ScanResult[] results);         /* changes settled down */
     }
 
-    public void trackSignificantWifiChange(SignificantWifiChangeListener listener) {
+    /**
+     * track changes in wifi environment
+     * @param listener object to report events on; this object must be unique and must also be
+     *                 provided on {@link #stopTrackingWifiChange}
+     */
+    public void startTrackingWifiChange(WifiChangeListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, putListener(listener));
     }
-    public void untrackSignificantWifiChange(SignificantWifiChangeListener listener) {
+
+    /**
+     * stop tracking changes in wifi environment
+     * @param listener object that was provided to report events on {@link
+     * #stopTrackingWifiChange}
+     */
+    public void stopTrackingWifiChange(WifiChangeListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, removeListener(listener));
     }
 
-    public void configureSignificantWifiChange(WifiChangeSettings settings) {
+    /** @hide */
+    public void configureWifiChange(WifiChangeSettings settings) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
     }
 
+    /** interface to receive hotlist events on; use this on {@link #setHotlist} */
     public static interface HotlistListener extends ActionListener {
+        /** indicates that access points were found by on going scans
+         * @param results list of scan results, one for each access point visible currently
+         */
         public void onFound(ScanResult[] results);
     }
 
@@ -337,6 +443,13 @@ public class WifiScanner {
                 };
     }
 
+    /**
+     * set interesting access points to find
+     * @param hotspots access points of interest
+     * @param apLostThreshold number of scans needed to indicate that AP is lost
+     * @param listener object provided to report events on; this object must be unique and must
+     *                 also be provided on {@link #resetHotlist}
+     */
     public void setHotlist(HotspotInfo[] hotspots,
             int apLostThreshold, HotlistListener listener) {
         validateChannel();
@@ -345,6 +458,10 @@ public class WifiScanner {
         sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, putListener(listener), settings);
     }
 
+    /**
+     * remove tracking of interesting access points
+     * @param listener same object provided in {@link #setHotlist}
+     */
     public void resetHotlist(HotlistListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, removeListener(listener));
@@ -554,6 +671,7 @@ public class WifiScanner {
                     break;
                 case CMD_OP_FAILED :
                     ((ActionListener) listener).onFailure(msg.arg1, msg.obj);
+                    removeListener(msg.arg2);
                     break;
                 case CMD_SCAN_RESULT :
                     ((ScanListener) listener).onResults(
@@ -568,11 +686,11 @@ public class WifiScanner {
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_WIFI_CHANGE_DETECTED:
-                    ((SignificantWifiChangeListener) listener).onChanging(
+                    ((WifiChangeListener) listener).onChanging(
                             ((ParcelableScanResults) msg.obj).getResults());
                    return;
                 case CMD_WIFI_CHANGES_STABILIZED:
-                    ((SignificantWifiChangeListener) listener).onQuiescence(
+                    ((WifiChangeListener) listener).onQuiescence(
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 default:
