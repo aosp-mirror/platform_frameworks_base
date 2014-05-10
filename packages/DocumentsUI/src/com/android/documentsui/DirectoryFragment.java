@@ -436,6 +436,8 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
+            mode.setTitle(getResources()
+                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
             return true;
         }
 
