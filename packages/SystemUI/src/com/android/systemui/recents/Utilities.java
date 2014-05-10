@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 
 /* Common code */
 public class Utilities {
@@ -54,12 +55,15 @@ public class Utilities {
                 0.0722f * Color.blue(color));
     }
 
-    /** Returns the ideal text color to draw on top of a specified background color. */
-    public static int getIdealTextColorForBackgroundColor(int color) {
-        RecentsConfiguration configuration = RecentsConfiguration.getInstance();
+    /** Returns the ideal color to draw on top of a specified background color. */
+    public static int getIdealColorForBackgroundColor(int color, int lightRes, int darkRes) {
         int greyscale = colorToGreyscale(color);
-        return (greyscale < 128) ? configuration.taskBarViewLightTextColor :
-                configuration.taskBarViewDarkTextColor;
-
+        return (greyscale < 128) ? lightRes : darkRes;
+    }
+    /** Returns the ideal drawable to draw on top of a specified background color. */
+    public static Drawable getIdealResourceForBackgroundColor(int color, Drawable lightRes,
+                                                           Drawable darkRes) {
+        int greyscale = colorToGreyscale(color);
+        return (greyscale < 128) ? lightRes : darkRes;
     }
 }

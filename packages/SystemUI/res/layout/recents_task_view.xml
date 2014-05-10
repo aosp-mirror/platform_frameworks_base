@@ -63,6 +63,13 @@
             android:maxLines="2"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal" />
+        <ImageView
+            android:id="@+id/dismiss_task"
+            android:layout_width="@dimen/recents_task_view_application_icon_size"
+            android:layout_height="@dimen/recents_task_view_application_icon_size"
+            android:layout_gravity="center_vertical|end"
+            android:padding="23dp"
+            android:src="@drawable/recents_dismiss_dark" />
     </com.android.systemui.recents.views.TaskBarView>
 </com.android.systemui.recents.views.TaskView>
 
