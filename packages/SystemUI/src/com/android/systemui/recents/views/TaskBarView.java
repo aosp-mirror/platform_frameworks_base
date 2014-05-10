@@ -16,7 +16,10 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -32,8 +35,12 @@ import com.android.systemui.recents.model.Task;
 class TaskBarView extends FrameLayout {
     Task mTask;
 
+    ImageView mDismissButton;
     ImageView mApplicationIcon;
     TextView mActivityDescription;
+
+    Drawable mLightDismissDrawable;
+    Drawable mDarkDismissDrawable;
 
     public TaskBarView(Context context) {
         this(context, null);
@@ -49,6 +56,9 @@ class TaskBarView extends FrameLayout {
 
     public TaskBarView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        Resources res = context.getResources();
+        mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
+        mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
     }
 
     @Override
@@ -56,6 +66,28 @@ class TaskBarView extends FrameLayout {
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
+        mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
+    }
+
+    /** Synchronizes this bar view's properties with the task's transform */
+    void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
+                                             TaskViewTransform toTransform, int duration) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (duration > 0) {
+            if (animateFromTransform != null) {
+                mDismissButton.setAlpha(animateFromTransform.dismissAlpha);
+            }
+            mDismissButton.animate()
+                    .alpha(toTransform.dismissAlpha)
+                    .setStartDelay(0)
+                    .setDuration(duration)
+                    .setInterpolator(config.defaultBezierInterpolator)
+                    .withLayer()
+                    .start();
+        } else {
+            mDismissButton.setAlpha(toTransform.dismissAlpha);
+        }
+        mDismissButton.invalidate();
     }
 
     /** Binds the bar view to the task */
@@ -74,7 +106,10 @@ class TaskBarView extends FrameLayout {
         int tint = t.colorPrimary;
         if (Constants.DebugFlags.App.EnableTaskBarThemeColors && tint != 0) {
             setBackgroundColor(tint);
-            mActivityDescription.setTextColor(Utilities.getIdealTextColorForBackgroundColor(tint));
+            mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColor(tint,
+                    configuration.taskBarViewLightTextColor, configuration.taskBarViewDarkTextColor));
+            mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColor(tint,
+                    mLightDismissDrawable, mDarkDismissDrawable));
         } else {
             setBackgroundColor(configuration.taskBarViewDefaultBackgroundColor);
             mActivityDescription.setTextColor(configuration.taskBarViewDefaultTextColor);

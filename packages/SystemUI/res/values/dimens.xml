@@ -224,7 +224,7 @@
     <dimen name="recents_task_view_z_increment">5dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
-    <dimen name="recents_task_view_remove_anim_translation_x">75dp</dimen>
+    <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
 
     <!-- The amount of space a user has to scroll to dismiss any info panes. -->
     <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
