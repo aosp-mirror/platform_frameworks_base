@@ -930,6 +930,9 @@ private:
      */
     Texture* getTexture(const SkBitmap* bitmap);
 
+    // Ortho matrix used for projection in shaders
+    mat4 mProjectionMatrix;
+
     /**
      * Model-view matrix used to position/size objects
      *

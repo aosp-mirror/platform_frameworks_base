@@ -65,16 +65,17 @@ public:
          * Indicates that this snapshot is a special type of layer
          * backed by an FBO. This flag only makes sense when the
          * flag kFlagIsLayer is also set.
-         *
-         * Viewport has been modified to fit the new Fbo, and must be
-         * restored when this snapshot is restored.
          */
         kFlagIsFboLayer = 0x4,
+        /**
+         * Indicates that this snapshot has changed the ortho matrix.
+         */
+        kFlagDirtyOrtho = 0x8,
         /**
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x8,
+        kFlagFboTarget = 0x10
     };
 
     /**
@@ -182,7 +183,7 @@ public:
     int height;
 
     /**
-     * Contains the current orthographic, projection matrix.
+     * Contains the previous ortho matrix.
      */
     mat4 orthoMatrix;
 

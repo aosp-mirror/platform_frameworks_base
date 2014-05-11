@@ -171,7 +171,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::initViewport(int width, int height) {
-    mSnapshot->orthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
+    mProjectionMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     initializeViewport(width, height);
 }
@@ -621,13 +621,14 @@ void OpenGLRenderer::flushLayerUpdates() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
-    bool restoreViewport = removed.flags & Snapshot::kFlagIsFboLayer;
+    bool restoreOrtho = removed.flags & Snapshot::kFlagDirtyOrtho;
     bool restoreClip = removed.flags & Snapshot::kFlagClipSet;
     bool restoreLayer = removed.flags & Snapshot::kFlagIsLayer;
 
-    if (restoreViewport) {
+    if (restoreOrtho) {
         const Rect& r = restored.viewport;
         glViewport(r.left, r.top, r.right, r.bottom);
+        mProjectionMatrix.load(removed.orthoMatrix); // TODO: should ortho be stored in 'restored'?
     }
 
     if (restoreClip) {
@@ -846,12 +847,14 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     layer->setFbo(mCaches.fboCache.get());
 
     mSnapshot->region = &mSnapshot->layer->region;
-    mSnapshot->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
+    mSnapshot->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer |
+            Snapshot::kFlagDirtyOrtho;
     mSnapshot->fbo = layer->getFbo();
     mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     mSnapshot->height = bounds.getHeight();
+    mSnapshot->orthoMatrix.load(mProjectionMatrix);
 
     endTiling();
     debugOverdraw(false, false);
@@ -880,7 +883,8 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
 
     // Change the ortho projection
     glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
-    mSnapshot->orthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+
+    mProjectionMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -1690,14 +1694,12 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
     }
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
-    const Matrix4& transformMatrix = ignoreTransform ? Matrix4::identity() : *currentTransform();
-    mCaches.currentProgram->set(mSnapshot->orthoMatrix, mModelViewMatrix, transformMatrix, offset);
-    if (dirty && mTrackDirtyRegions) {
-        if (!ignoreTransform) {
-            dirtyLayer(left, top, right, bottom, *currentTransform());
-        } else {
-            dirtyLayer(left, top, right, bottom);
-        }
+    if (!ignoreTransform) {
+        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, *currentTransform(), offset);
+        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *currentTransform());
+    } else {
+        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, mat4::identity(), offset);
+        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
     }
 }
 
