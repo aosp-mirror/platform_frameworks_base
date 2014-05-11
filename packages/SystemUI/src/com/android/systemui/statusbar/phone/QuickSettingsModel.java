@@ -460,6 +460,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 rebindMediaRouterAsCurrentUser();
             }
         };
+        mUserTracker.startTracking();
 
         mNextAlarmObserver = new NextAlarmObserver(mHandler);
         mNextAlarmObserver.startObserving();

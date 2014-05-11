@@ -92,6 +92,7 @@ public class BrightnessDialog extends Dialog implements
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
+        mBrightnessController.registerCallbacks();
         dismissBrightnessDialog(mBrightnessDialogLongTimeout);
         mBrightnessController.addStateChangedCallback(this);
     }

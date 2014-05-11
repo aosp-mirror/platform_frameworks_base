@@ -119,7 +119,6 @@ public class BrightnessController implements ToggleSlider.Listener {
             }
         };
         mBrightnessObserver = new BrightnessObserver(mHandler);
-        mBrightnessObserver.startObserving();
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mMinimumBacklight = pm.getMinimumScreenBrightnessSetting();
@@ -128,13 +127,6 @@ public class BrightnessController implements ToggleSlider.Listener {
         mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
-
-        // Update the slider and mode before attaching the listener so we don't receive the
-        // onChanged notifications for the initial values.
-        updateMode();
-        updateSlider();
-
-        control.setOnChangedListener(this);
     }
 
     public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
@@ -150,11 +142,24 @@ public class BrightnessController implements ToggleSlider.Listener {
         // Do nothing
     }
 
+    public void registerCallbacks() {
+        mBrightnessObserver.startObserving();
+        mUserTracker.startTracking();
+
+        // Update the slider and mode before attaching the listener so we don't receive the
+        // onChanged notifications for the initial values.
+        updateMode();
+        updateSlider();
+
+        mControl.setOnChangedListener(this);
+    }
+
     /** Unregister all call backs, both to and from the controller */
     public void unregisterCallbacks() {
         mBrightnessObserver.stopObserving();
         mChangeCallbacks.clear();
         mUserTracker.stopTracking();
+        mControl.setOnChangedListener(null);
     }
 
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {

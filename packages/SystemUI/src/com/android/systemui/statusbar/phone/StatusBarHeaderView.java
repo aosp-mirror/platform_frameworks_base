@@ -16,18 +16,18 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.settings.BrightnessController;
+import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
@@ -47,6 +47,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mStatusIcons;
     private View mSignalCluster;
     private View mSettingsButton;
+    private View mBrightnessContainer;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -56,6 +57,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private int mNormalWidth;
 
     private ActivityStarter mActivityStarter;
+    private BrightnessController mBrightnessController;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -72,6 +74,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDate = findViewById(R.id.date);
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(this);
+        mBrightnessContainer = findViewById(R.id.brightness_container);
+        mBrightnessController = new BrightnessController(getContext(),
+                (ImageView) findViewById(R.id.brightness_icon),
+                (ToggleSlider) findViewById(R.id.brightness_slider));
         loadDimens();
     }
 
@@ -103,6 +109,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateHeights();
             updateVisibilities();
             updateSystemIconsLayoutParams();
+            updateBrightnessControllerState();
         }
     }
 
@@ -148,6 +155,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mKeyguardCarrierText.setVisibility(mKeyguardShowing ? View.VISIBLE : View.GONE);
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mBrightnessContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         if (mStatusIcons != null) {
             mStatusIcons.setVisibility(!mExpanded ? View.VISIBLE : View.GONE);
         }
@@ -161,6 +169,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         lp.addRule(RelativeLayout.START_OF, mExpanded
                 ? mSettingsButton.getId()
                 : mMultiUserSwitch.getId());
+    }
+
+    private void updateBrightnessControllerState() {
+        if (mExpanded) {
+            mBrightnessController.registerCallbacks();
+        } else {
+            mBrightnessController.unregisterCallbacks();
+        }
     }
 
     public void setExpansion(float height) {

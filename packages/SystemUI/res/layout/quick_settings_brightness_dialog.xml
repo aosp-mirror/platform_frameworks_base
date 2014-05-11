@@ -29,7 +29,7 @@
     <com.android.systemui.settings.ToggleSlider
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
-        android:layout_height="40dp"
+        android:layout_height="44dp"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         systemui:text="@string/status_bar_settings_auto_brightness_label" />
