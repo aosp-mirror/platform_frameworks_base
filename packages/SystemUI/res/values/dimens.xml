@@ -243,7 +243,10 @@
     <dimen name="top_stack_peek_amount">12dp</dimen>
 
     <!-- Space reserved for the cards behind the top card in the bottom stack -->
-    <dimen name="bottom_stack_peek_amount">18dp</dimen>
+    <dimen name="bottom_stack_peek_amount">12dp</dimen>
+
+    <!-- The height of the area before the bottom stack in which the notifications slow down -->
+    <dimen name="bottom_stack_slow_down_length">12dp</dimen>
 
     <!-- The side padding of the notifications-->
     <dimen name="notification_side_padding">8dp</dimen>
@@ -251,8 +254,11 @@
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">2dp</dimen>
 
+    <!-- The padding between the individual notification cards when dimmed. -->
+    <dimen name="notification_padding_dimmed">0dp</dimen>
+
     <!-- The padding between the individual notification cards. -->
-    <dimen name="notification_padding">3dp</dimen>
+    <dimen name="notification_padding">4dp</dimen>
 
     <!-- The total height of the stack in its collapsed size (i.e. when quick settings is open) -->
     <dimen name="collapsed_stack_height">94dp</dimen>
