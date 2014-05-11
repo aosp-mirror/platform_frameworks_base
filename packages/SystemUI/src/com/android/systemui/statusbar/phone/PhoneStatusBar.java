@@ -223,7 +223,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mNotificationPanelGravity;
     int mNotificationPanelMarginBottomPx;
     float mNotificationPanelMinHeightFrac;
-    boolean mNotificationPanelIsFullScreenWidth;
     TextView mNotificationPanelDebugText;
 
     // settings
@@ -553,8 +552,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
                 R.id.notification_panel);
         mNotificationPanel.setStatusBar(this);
-        mNotificationPanelIsFullScreenWidth =
-            (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
 
         // make the header non-responsive to clicks
         mNotificationPanel.findViewById(R.id.header).setOnTouchListener(
@@ -647,11 +644,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDateTimeView.setEnabled(true);
         }
 
-        if (!mNotificationPanelIsFullScreenWidth) {
-            mNotificationPanel.setSystemUiVisibility(
-                    View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
-                    View.STATUS_BAR_DISABLE_CLOCK);
-        }
+        mNotificationPanel.setSystemUiVisibility(
+                View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
+                View.STATUS_BAR_DISABLE_CLOCK);
 
         mTicker = new MyTicker(context, mStatusBarView);
 
@@ -727,11 +722,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mFlipSettingsView = mSettingsContainer;
         if (mSettingsContainer != null) {
             mQS = new QuickSettings(mContext, mSettingsContainer);
-            if (!mNotificationPanelIsFullScreenWidth) {
-                mSettingsContainer.setSystemUiVisibility(
-                        View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS
-                        | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
-            }
             mQS.setService(this);
             mQS.setBar(mStatusBarView);
             mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
