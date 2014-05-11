@@ -63,7 +63,7 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onAttachedToWindow() {
+    public void onFinishInflate() {
         mBarTransitions.init();
     }
 
