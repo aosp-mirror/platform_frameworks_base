@@ -168,7 +168,9 @@
         <item name="android:textSize">14dp</item>
     </style>
 
-    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault" />
+    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">@color/primary_color</item>
+    </style>
 
     <style name="NotificationsQuickSettings">
         <item name="android:layout_width">match_parent</item>

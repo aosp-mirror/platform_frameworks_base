@@ -62,7 +62,6 @@ public class ToggleSlider extends RelativeLayout {
 
         mToggle = (CompoundButton) findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(mCheckListener);
-        mToggle.setBackground(res.getDrawable(R.drawable.status_bar_toggle_button));
 
         mSlider = (SeekBar) findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(mSeekListener);
