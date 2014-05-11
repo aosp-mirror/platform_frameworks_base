@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -33,6 +34,12 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+import libcore.io.IoUtils;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * This is a remote object that is passed from the shell to an instrumentation
@@ -50,8 +57,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     private final IWindowManager mWindowManager = IWindowManager.Stub.asInterface(
             ServiceManager.getService(Service.WINDOW_SERVICE));
 
-    private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub.asInterface(
-            ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
+    private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub
+            .asInterface(ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
 
     private final Object mLock = new Object();
 
@@ -216,6 +223,41 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             return stats;
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void executeShellCommand(String command, ParcelFileDescriptor sink)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+
+        InputStream in = null;
+        OutputStream out = null;
+
+        try {
+            java.lang.Process process = Runtime.getRuntime().exec(command);
+
+            in = process.getInputStream();
+            out = new FileOutputStream(sink.getFileDescriptor());
+
+            final byte[] buffer = new byte[8192];
+            while (true) {
+                final int readByteCount = in.read(buffer);
+                if (readByteCount < 0) {
+                    break;
+                }
+                out.write(buffer, 0, readByteCount);
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error running shell command", ioe);
+        } finally {
+            IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(sink);
         }
     }
 

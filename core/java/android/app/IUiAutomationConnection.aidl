@@ -43,4 +43,5 @@ interface IUiAutomationConnection {
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();
     WindowAnimationFrameStats getWindowAnimationFrameStats();
+    void executeShellCommand(String command, in ParcelFileDescriptor fd);
 }
