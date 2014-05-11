@@ -16,7 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.Intent;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,15 +33,20 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 /**
  * The view to manage the header area in the expanded status bar.
  */
-public class StatusBarHeaderView extends RelativeLayout {
+public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener {
 
     private boolean mExpanded;
+    private boolean mKeyguardShowing;
+
     private View mBackground;
     private ViewGroup mSystemIconsContainer;
     private View mDateTime;
     private View mKeyguardCarrierText;
     private MultiUserSwitch mMultiUserSwitch;
     private View mDate;
+    private View mStatusIcons;
+    private View mSignalCluster;
+    private View mSettingsButton;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -46,7 +55,7 @@ public class StatusBarHeaderView extends RelativeLayout {
     private int mKeyguardWidth = ViewGroup.LayoutParams.MATCH_PARENT;
     private int mNormalWidth;
 
-    private boolean mKeyguardShowing;
+    private ActivityStarter mActivityStarter;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +70,8 @@ public class StatusBarHeaderView extends RelativeLayout {
         mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mDate = findViewById(R.id.date);
+        mSettingsButton = findViewById(R.id.settings_button);
+        mSettingsButton.setOnClickListener(this);
         loadDimens();
     }
 
@@ -73,6 +84,10 @@ public class StatusBarHeaderView extends RelativeLayout {
         mNormalWidth = getLayoutParams().width;
     }
 
+    public void setActivityStarter(ActivityStarter activityStarter) {
+        mActivityStarter = activityStarter;
+    }
+
     public int getCollapsedHeight() {
         return mKeyguardShowing ? mKeyguardHeight : mCollapsedHeight;
     }
@@ -82,9 +97,13 @@ public class StatusBarHeaderView extends RelativeLayout {
     }
 
     public void setExpanded(boolean expanded) {
+        boolean changed = expanded != mExpanded;
         mExpanded = expanded;
-        updateHeights();
-        updateVisibilities();
+        if (changed) {
+            updateHeights();
+            updateVisibilities();
+            updateSystemIconsLayoutParams();
+        }
     }
 
     private void updateHeights() {
@@ -128,6 +147,20 @@ public class StatusBarHeaderView extends RelativeLayout {
         mDateTime.setVisibility(mKeyguardShowing ? View.INVISIBLE : View.VISIBLE);
         mKeyguardCarrierText.setVisibility(mKeyguardShowing ? View.VISIBLE : View.GONE);
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        if (mStatusIcons != null) {
+            mStatusIcons.setVisibility(!mExpanded ? View.VISIBLE : View.GONE);
+        }
+        if (mSignalCluster != null) {
+            mSignalCluster.setVisibility(!mExpanded ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void updateSystemIconsLayoutParams() {
+        RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsContainer.getLayoutParams();
+        lp.addRule(RelativeLayout.START_OF, mExpanded
+                ? mSettingsButton.getId()
+                : mMultiUserSwitch.getId());
     }
 
     public void setExpansion(float height) {
@@ -150,6 +183,19 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     public void attachSystemIcons(LinearLayout systemIcons) {
         mSystemIconsContainer.addView(systemIcons);
+        mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
+        mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
+    }
+
+    public void onSystemIconsDetached() {
+        if (mStatusIcons != null) {
+            mStatusIcons.setVisibility(View.VISIBLE);
+        }
+        if (mSignalCluster != null) {
+            mSignalCluster.setVisibility(View.VISIBLE);
+        }
+        mStatusIcons = null;
+        mSignalCluster = null;
     }
 
     public void setKeyguardShowing(boolean keyguardShowing) {
@@ -170,5 +216,16 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     public void setOverlayParent(ViewGroup parent) {
         mMultiUserSwitch.setOverlayParent(parent);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == mSettingsButton) {
+            startSettingsActivity();
+        }
+    }
+
+    private void startSettingsActivity() {
+        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
     }
 }
