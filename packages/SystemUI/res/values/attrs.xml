@@ -51,6 +51,13 @@
             <enum name="end" value="1" />
         </attr>
     </declare-styleable>
+    <declare-styleable name="Clock">
+        <attr name="amPmStyle" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="small" value="1" />
+            <enum name="gone" value="2" />
+        </attr>
+    </declare-styleable>
     <attr name="orientation">
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
