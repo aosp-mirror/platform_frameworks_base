@@ -669,12 +669,14 @@ public class ScrollView extends FrameLayout {
                     } else if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
-                            mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                            mEdgeGlowTop.onPull((float) deltaY / getHeight(),
+                                    ev.getX(activePointerIndex) / getWidth());
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
                         } else if (pulledToY > range) {
-                            mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                            mEdgeGlowBottom.onPull((float) deltaY / getHeight(),
+                                    1.f - ev.getX(activePointerIndex) / getWidth());
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
