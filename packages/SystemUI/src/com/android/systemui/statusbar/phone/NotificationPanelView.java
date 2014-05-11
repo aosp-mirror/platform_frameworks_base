@@ -414,11 +414,8 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpansionEnabled) {
             return false;
         }
-        View headerView = mStatusBar.getBarState() == StatusBarState.KEYGUARD && !mQsExpanded
-                ? mKeyguardStatusView
-                : mHeader;
-        boolean onHeader = x >= headerView.getLeft() && x <= headerView.getRight()
-                && y >= headerView.getTop() && y <= headerView.getBottom();
+        boolean onHeader = x >= mHeader.getLeft() && x <= mHeader.getRight()
+                && y >= mHeader.getTop() && y <= mHeader.getBottom();
         if (mQsExpanded) {
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0);
         } else {
