@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
  * The view to manage the header area in the expanded status bar.
@@ -35,6 +36,7 @@ public class StatusBarHeaderView extends RelativeLayout {
     private ViewGroup mSystemIconsContainer;
     private View mDateTime;
     private View mKeyguardCarrierText;
+    private MultiUserSwitch mMultiUserSwitch;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -53,6 +55,7 @@ public class StatusBarHeaderView extends RelativeLayout {
         mSystemIconsContainer = (ViewGroup) findViewById(R.id.system_icons_container);
         mDateTime = findViewById(R.id.datetime);
         mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
+        mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         loadDimens();
     }
 
@@ -97,6 +100,11 @@ public class StatusBarHeaderView extends RelativeLayout {
             lp.height = systemIconsContainerHeight;
             mSystemIconsContainer.setLayoutParams(lp);
         }
+        lp = mMultiUserSwitch.getLayoutParams();
+        if (lp.height != systemIconsContainerHeight) {
+            lp.height = systemIconsContainerHeight;
+            mMultiUserSwitch.setLayoutParams(lp);
+        }
     }
 
     public void setExpansion(float height) {
@@ -132,5 +140,13 @@ public class StatusBarHeaderView extends RelativeLayout {
             setTranslationZ(0);
         }
         updateHeights();
+    }
+
+    public void setUserInfoController(UserInfoController userInfoController) {
+        mMultiUserSwitch.setUserInfoController(userInfoController);
+    }
+
+    public void setOverlayParent(ViewGroup parent) {
+        mMultiUserSwitch.setOverlayParent(parent);
     }
 }
