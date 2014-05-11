@@ -38,10 +38,12 @@
     <RelativeLayout
         android:id="@+id/datetime"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:background="@drawable/ic_notify_button_bg"
         android:enabled="false"
         >
@@ -49,10 +51,9 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-            android:layout_centerVertical="true"
+            systemui:amPmStyle="normal"
             />
 
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
@@ -60,8 +61,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            android:layout_toEndOf="@id/clock"
-            android:layout_alignBaseline="@id/clock"
+            android:layout_below="@id/clock"
             />
     </RelativeLayout>
 

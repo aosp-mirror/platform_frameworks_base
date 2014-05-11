@@ -69,8 +69,7 @@
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
-        <item name="android:textSize">32dp</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">18dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#ffffff</item>
     </style>
@@ -78,8 +77,7 @@
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#cccccc</item>
-        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">#afb3b6</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">

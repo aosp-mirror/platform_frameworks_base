@@ -37,6 +37,7 @@ public class StatusBarHeaderView extends RelativeLayout {
     private View mDateTime;
     private View mKeyguardCarrierText;
     private MultiUserSwitch mMultiUserSwitch;
+    private View mDate;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -59,6 +60,7 @@ public class StatusBarHeaderView extends RelativeLayout {
         mDateTime = findViewById(R.id.datetime);
         mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
+        mDate = findViewById(R.id.date);
         loadDimens();
     }
 
@@ -82,6 +84,7 @@ public class StatusBarHeaderView extends RelativeLayout {
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
         updateHeights();
+        updateVisibilities();
     }
 
     private void updateHeights() {
@@ -120,6 +123,13 @@ public class StatusBarHeaderView extends RelativeLayout {
         }
     }
 
+    private void updateVisibilities() {
+        mBackground.setVisibility(mKeyguardShowing ? View.INVISIBLE : View.VISIBLE);
+        mDateTime.setVisibility(mKeyguardShowing ? View.INVISIBLE : View.VISIBLE);
+        mKeyguardCarrierText.setVisibility(mKeyguardShowing ? View.VISIBLE : View.GONE);
+        mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+    }
+
     public void setExpansion(float height) {
         if (height < mCollapsedHeight) {
             height = mCollapsedHeight;
@@ -144,9 +154,6 @@ public class StatusBarHeaderView extends RelativeLayout {
 
     public void setKeyguardShowing(boolean keyguardShowing) {
         mKeyguardShowing = keyguardShowing;
-        mBackground.setVisibility(keyguardShowing ? View.INVISIBLE : View.VISIBLE);
-        mDateTime.setVisibility(keyguardShowing ? View.INVISIBLE : View.VISIBLE);
-        mKeyguardCarrierText.setVisibility(keyguardShowing ? View.VISIBLE : View.GONE);
         if (keyguardShowing) {
             setZ(0);
         } else {
@@ -154,6 +161,7 @@ public class StatusBarHeaderView extends RelativeLayout {
         }
         updateHeights();
         updateWidth();
+        updateVisibilities();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
