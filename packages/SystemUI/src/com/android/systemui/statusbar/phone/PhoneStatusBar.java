@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
@@ -184,6 +185,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     LocationController mLocationController;
     NetworkController mNetworkController;
     RotationLockController mRotationLockController;
+    UserInfoController mUserInfoController;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -670,6 +672,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 || QuickSettings.DEBUG_GONE_TILES) {
             mRotationLockController = new RotationLockController(mContext);
         }
+        mUserInfoController = new UserInfoController(mContext);
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
 
@@ -736,6 +739,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             mQS = null; // fly away, be free
         }
+
+        // User info. Trigger first load.
+        mHeader.setUserInfoController(mUserInfoController);
+        mUserInfoController.reloadUserInfo();
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
