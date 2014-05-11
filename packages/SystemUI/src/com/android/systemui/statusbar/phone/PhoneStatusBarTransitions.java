@@ -44,16 +44,12 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     public void init() {
         mLeftSide = mView.findViewById(R.id.notification_icon_area);
-        initStatus();
-        applyModeBackground(-1, getMode(), false /*animate*/);
-        applyMode(getMode(), false /*animate*/);
-    }
-
-    private void initStatus() {
         mStatusIcons = mView.findViewById(R.id.statusIcons);
         mSignalCluster = mView.findViewById(R.id.signal_cluster);
         mBattery = mView.findViewById(R.id.battery);
         mClock = mView.findViewById(R.id.clock);
+        applyModeBackground(-1, getMode(), false /*animate*/);
+        applyMode(getMode(), false /*animate*/);
     }
 
     public ObjectAnimator animateTransitionTo(View v, float toAlpha) {
@@ -83,8 +79,6 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     private void applyMode(int mode, boolean animate) {
         if (mLeftSide == null) return; // pre-init
-        if (mStatusIcons == null) initStatus();
-        if (mStatusIcons == null) return;
         float newAlpha = getNonBatteryClockAlphaFor(mode);
         float newAlphaBC = getBatteryClockAlpha(mode);
         if (mCurrentAnimation != null) {
