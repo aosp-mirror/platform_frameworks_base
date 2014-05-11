@@ -20,10 +20,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/header"
-    android:layout_width="match_parent"
+    style="@style/StatusBarHeader"
     android:layout_height="@dimen/status_bar_header_height"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
+    android:paddingStart="@dimen/notification_side_padding"
+    android:paddingEnd="@dimen/notification_side_padding"
     android:baselineAligned="false"
     android:elevation="10dp"
     >
