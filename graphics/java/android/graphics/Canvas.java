@@ -713,6 +713,9 @@ public class Canvas {
      * @param region The region to operate on the current clip, based on op
      * @param op How the clip is modified
      * @return true if the resulting is non-empty
+     *
+     * @deprecated Unlike all other clip calls this API does not respect the
+     *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
     public boolean clipRegion(Region region, Region.Op op) {
         return native_clipRegion(mNativeCanvas, region.ni(), op.nativeInt);
@@ -727,6 +730,9 @@ public class Canvas {
      *
      * @param region The region to operate on the current clip, based on op
      * @return true if the resulting is non-empty
+     *
+     * @deprecated Unlike all other clip calls this API does not respect the
+     *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
     public boolean clipRegion(Region region) {
         return clipRegion(region, Region.Op.INTERSECT);
