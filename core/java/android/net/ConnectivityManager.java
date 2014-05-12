@@ -408,6 +408,11 @@ public class ConnectivityManager {
      */
     public static final int CONNECTIVITY_CHANGE_DELAY_DEFAULT = 3000;
 
+    /**
+     * @hide
+     */
+    public final static int INVALID_NET_ID = 0;
+
     private final IConnectivityManager mService;
 
     private final String mPackageName;
