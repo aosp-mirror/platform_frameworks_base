@@ -25,6 +25,6 @@ import android.os.Bundle;
  * @hide
  */
 interface ISessionManager {
-    ISession createSession(String packageName, in ISessionCallback cb, String tag);
-    List<IBinder> getSessions(in ComponentName compName);
+    ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
+    List<IBinder> getSessions(in ComponentName compName, int userId);
 }
