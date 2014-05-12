@@ -82,7 +82,7 @@ public class StackScrollAlgorithm {
         mTopStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
                 MAX_ITEMS_IN_TOP_STACK,
                 mTopStackPeekSize,
-                mTopStackTotalSize,
+                mTopStackTotalSize - mTopStackPeekSize,
                 0.5f);
         mBottomStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
                 MAX_ITEMS_IN_BOTTOM_STACK,
