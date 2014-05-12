@@ -16,22 +16,26 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false">
-        <bitmap android:src="@drawable/scrubber_track_qntm_alpha"
+        <nine-patch android:src="@drawable/scrubber_track_qntm_alpha"
             android:tint="?attr/colorControlNormal" />
     </item>
     <item>
         <layer-list>
             <item android:id="@id/background">
-                <bitmap android:src="@drawable/scrubber_track_qntm_alpha"
+                <nine-patch android:src="@drawable/scrubber_track_qntm_alpha"
                     android:tint="?attr/colorControlNormal" />
             </item>
             <item android:id="@id/secondaryProgress">
-                <bitmap android:src="@drawable/scrubber_primary_qntm_alpha"
-                    android:tint="?attr/colorControlNormal" />
+                <scale android:scaleWidth="100%">
+                    <nine-patch android:src="@drawable/scrubber_primary_qntm_alpha"
+                        android:tint="?attr/colorControlNormal" />
+                </scale>
             </item>
             <item android:id="@id/progress">
-                <bitmap android:src="@drawable/scrubber_primary_qntm_alpha"
-                    android:tint="?attr/colorControlActivated" />
+                <scale android:scaleWidth="100%">
+                    <nine-patch android:src="@drawable/scrubber_primary_qntm_alpha"
+                        android:tint="?attr/colorControlActivated" />
+                </scale>
             </item>
         </layer-list>
     </item>
