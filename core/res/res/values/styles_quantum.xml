@@ -455,10 +455,10 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.CompoundButton.Switch">
         <item name="track">@drawable/switch_track_quantum</item>
         <item name="thumb">@drawable/switch_inner_quantum</item>
+        <item name="splitTrack">true</item>
         <item name="switchTextAppearance">@style/TextAppearance.Quantum.Widget.Switch</item>
         <item name="textOn"></item>
         <item name="textOff"></item>
-        <item name="thumbTextPadding">12dip</item>
         <item name="switchMinWidth">72dip</item>
         <item name="switchPadding">16dip</item>
         <item name="background">?attr/selectableItemBackground</item>
@@ -572,10 +572,8 @@ please see styles_device_defaults.xml.
         <item name="indeterminateOnly">false</item>
         <item name="progressDrawable">@drawable/scrubber_progress_horizontal_quantum</item>
         <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_quantum</item>
-        <item name="minHeight">13dip</item>
-        <item name="maxHeight">13dip</item>
         <item name="thumb">@drawable/scrubber_control_selector_quantum</item>
-        <item name="thumbOffset">16dip</item>
+        <item name="splitTrack">true</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>

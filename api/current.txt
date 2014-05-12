@@ -1047,6 +1047,7 @@ package android {
     field public static final int spinnerStyle = 16842881; // 0x1010081
     field public static final int spinnersShown = 16843595; // 0x101034b
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
+    field public static final int splitTrack = 16843858; // 0x1010452
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
     field public static final int sspPattern = 16843749; // 0x10103e5
@@ -34675,9 +34676,11 @@ package android.widget {
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet, int);
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet, int, int);
     method public int getKeyProgressIncrement();
+    method public boolean getSplitTrack();
     method public android.graphics.drawable.Drawable getThumb();
     method public int getThumbOffset();
     method public void setKeyProgressIncrement(int);
+    method public void setSplitTrack(boolean);
     method public void setThumb(android.graphics.drawable.Drawable);
     method public void setThumbOffset(int);
   }
@@ -36482,6 +36485,7 @@ package android.widget {
     ctor public Switch(android.content.Context, android.util.AttributeSet);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int, int);
+    method public boolean getSplitTrack();
     method public int getSwitchMinWidth();
     method public int getSwitchPadding();
     method public java.lang.CharSequence getTextOff();
@@ -36490,6 +36494,7 @@ package android.widget {
     method public int getThumbTextPadding();
     method public android.graphics.drawable.Drawable getTrackDrawable();
     method public void onMeasure(int, int);
+    method public void setSplitTrack(boolean);
     method public void setSwitchMinWidth(int);
     method public void setSwitchPadding(int);
     method public void setSwitchTextAppearance(android.content.Context, int);

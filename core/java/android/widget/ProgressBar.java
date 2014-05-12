@@ -1066,21 +1066,30 @@ public class ProgressBar extends View {
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Drawable d = mCurrentDrawable;
+        drawTrack(canvas);
+    }
+
+    /**
+     * Draws the progress bar track.
+     */
+    void drawTrack(Canvas canvas) {
+        final Drawable d = mCurrentDrawable;
         if (d != null) {
             // Translate canvas so a indeterminate circular progress bar with padding
             // rotates properly in its animation
-            canvas.save();
+            final int saveCount = canvas.save();
+
             if(isLayoutRtl() && mMirrorForRtl) {
                 canvas.translate(getWidth() - mPaddingRight, mPaddingTop);
                 canvas.scale(-1.0f, 1.0f);
             } else {
                 canvas.translate(mPaddingLeft, mPaddingTop);
             }
-            long time = getDrawingTime();
+
+            final long time = getDrawingTime();
             if (mHasAnimation) {
                 mAnimation.getTransformation(time, mTransformation);
-                float scale = mTransformation.getAlpha();
+                final float scale = mTransformation.getAlpha();
                 try {
                     mInDrawing = true;
                     d.setLevel((int) (scale * MAX_LEVEL));
@@ -1089,8 +1098,10 @@ public class ProgressBar extends View {
                 }
                 postInvalidateOnAnimation();
             }
+
             d.draw(canvas);
-            canvas.restore();
+            canvas.restoreToCount(saveCount);
+
             if (mShouldStartAnimationDrawable && d instanceof Animatable) {
                 ((Animatable) d).start();
                 mShouldStartAnimationDrawable = false;
