@@ -49,7 +49,6 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -322,8 +321,6 @@ public final class InputMethodManager {
      * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
      */
     private final int[] mViewTopLeft = new int[2];
-    private final CursorAnchorInfoBuilder mCursorAnchorInfoBuilder = new CursorAnchorInfoBuilder();
-
     // -----------------------------------------------------------
     
     /**
