@@ -3343,6 +3343,8 @@
         <attr name="thumb" format="reference" />
         <!-- An offset for the thumb that allows it to extend out of the range of the track. -->
         <attr name="thumbOffset" format="dimension" />
+        <!-- Whether to split the track and leave a gap for the thumb drawable. -->
+        <attr name="splitTrack" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="StackView">
@@ -6393,6 +6395,8 @@
         <attr name="switchMinWidth" format="dimension" />
         <!-- Minimum space between the switch and caption text -->
         <attr name="switchPadding" format="dimension" />
+        <!-- Whether to split the track and leave a gap for the thumb drawable. -->
+        <attr name="splitTrack" />
     </declare-styleable>
 
     <declare-styleable name="Pointer">

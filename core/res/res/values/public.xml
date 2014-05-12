@@ -2169,6 +2169,7 @@
   <public type="attr" name="toId" />
   <public type="attr" name="fromId" />
   <public type="attr" name="reversible" />
+  <public type="attr" name="splitTrack" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
