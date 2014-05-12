@@ -3320,7 +3320,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         final int deltaY = rawDeltaY;
         int incrementalDeltaY =
-                mLastY != Integer.MIN_VALUE ? y - mLastY - scrollConsumedCorrection : deltaY;
+                mLastY != Integer.MIN_VALUE ? y - mLastY + scrollConsumedCorrection : deltaY;
         int lastYCorrection = 0;
 
         if (mTouchMode == TOUCH_MODE_SCROLL) {
