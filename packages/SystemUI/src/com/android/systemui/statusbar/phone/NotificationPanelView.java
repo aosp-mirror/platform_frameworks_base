@@ -450,6 +450,7 @@ public class NotificationPanelView extends PanelView implements
         if (toHeader) {
             mHeader.attachSystemIcons(systemIcons);
         } else {
+            mHeader.onSystemIconsDetached();
             mStatusBar.reattachSystemIcons();
         }
     }
