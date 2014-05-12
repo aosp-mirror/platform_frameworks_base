@@ -168,9 +168,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Poll interval in milliseconds for watching boot animation finished.
     private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
-    //powerHint
+    // Used to send the hint to the PowerHAL indicating transitions
+    // from and to the low power mode.
     private static final int POWER_HINT_LOW_POWER_MODE = 5;
-    private static boolean mLowPowerModeEnabled;
 
     private final Context mContext;
     private LightsManager mLightsManager;
@@ -399,6 +399,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Time when we last logged a warning about calling userActivity() without permission.
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
+    // If true, the device is in low power mode.
+    private static boolean mLowPowerModeEnabled;
+
     private native void nativeInit();
 
     private static native void nativeAcquireSuspendBlocker(String name);
@@ -617,12 +620,11 @@ public final class PowerManagerService extends com.android.server.SystemService
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
 
-        boolean mIsEnabled = Settings.Global.getInt(resolver,
-            Settings.Global.LOW_POWER_MODE, 0) != 0;
-        if (mIsEnabled != mLowPowerModeEnabled) {
-            BinderService bs = new BinderService();
-            bs.powerHint(POWER_HINT_LOW_POWER_MODE, mIsEnabled ? 1 : 0);
-            mLowPowerModeEnabled = mIsEnabled;
+        boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
+                Settings.Global.LOW_POWER_MODE, 0) != 0;
+        if (lowPowerModeEnabled != mLowPowerModeEnabled) {
+            powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
+            mLowPowerModeEnabled = lowPowerModeEnabled;
         }
 
         mDirty |= DIRTY_SETTINGS;
@@ -2020,6 +2022,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
+    private void powerHintInternal(int hintId, int data) {
+        nativeSendPowerHint(hintId, data);
+    }
+
     /**
      * Low-level function turn the device off immediately, without trying
      * to be clean.  Most people should use {@link ShutdownThread} for a clean shutdown.
@@ -2529,7 +2535,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         @Override // Binder call
         public void powerHint(int hintId, int data) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-            nativeSendPowerHint(hintId, data);
+            powerHintInternal(hintId, data);
         }
 
         @Override // Binder call
