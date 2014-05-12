@@ -427,7 +427,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to fused provider if supported
-        if (FlpHardwareProvider.isSupported()) {
+        if (FlpHardwareProvider.getInstance(mContext).isSupported()) {
           FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
           FusedProxy fusedProxy = FusedProxy.createAndBind(
                   mContext,
