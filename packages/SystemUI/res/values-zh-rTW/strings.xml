@@ -78,8 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"最近使用的應用程式"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"搜尋"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"相機"</string>
-    <!-- no translation found for accessibility_phone_button (6738112589538563574) -->
-    <skip />
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"電話"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
