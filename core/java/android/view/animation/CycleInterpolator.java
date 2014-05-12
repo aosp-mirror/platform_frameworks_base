@@ -20,12 +20,17 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
+
 /**
  * Repeats the animation for a specified number of cycles. The
  * rate of change follows a sinusoidal pattern.
  *
  */
-public class CycleInterpolator implements Interpolator {
+@HasNativeInterpolator
+public class CycleInterpolator implements Interpolator, NativeInterpolatorFactory {
     public CycleInterpolator(float cycles) {
         mCycles = cycles;
     }
@@ -44,4 +49,10 @@ public class CycleInterpolator implements Interpolator {
     }
     
     private float mCycles;
+
+    /** @hide */
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createCycleInterpolator(mCycles);
+    }
 }

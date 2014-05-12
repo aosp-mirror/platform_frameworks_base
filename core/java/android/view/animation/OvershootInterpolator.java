@@ -20,11 +20,16 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
+
 /**
  * An interpolator where the change flings forward and overshoots the last value
  * then comes back.
  */
-public class OvershootInterpolator implements Interpolator {
+@HasNativeInterpolator
+public class OvershootInterpolator implements Interpolator, NativeInterpolatorFactory {
     private final float mTension;
 
     public OvershootInterpolator() {
@@ -55,5 +60,11 @@ public class OvershootInterpolator implements Interpolator {
         // o(t) = _o(t - 1) + 1
         t -= 1.0f;
         return t * t * ((mTension + 1) * t + mTension) + 1.0f;
+    }
+
+    /** @hide */
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createOvershootInterpolator(mTension);
     }
 }

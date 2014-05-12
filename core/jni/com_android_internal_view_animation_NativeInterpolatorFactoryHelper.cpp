@@ -32,6 +32,38 @@ static jlong createAccelerateDecelerateInterpolator(JNIEnv* env, jobject clazz) 
     return reinterpret_cast<jlong>(new AccelerateDecelerateInterpolator());
 }
 
+static jlong createAccelerateInterpolator(JNIEnv* env, jobject clazz, jfloat factor) {
+    return reinterpret_cast<jlong>(new AccelerateInterpolator(factor));
+}
+
+static jlong createAnticipateInterpolator(JNIEnv* env, jobject clazz, jfloat tension) {
+    return reinterpret_cast<jlong>(new AnticipateInterpolator(tension));
+}
+
+static jlong createAnticipateOvershootInterpolator(JNIEnv* env, jobject clazz, jfloat tension) {
+    return reinterpret_cast<jlong>(new AnticipateOvershootInterpolator(tension));
+}
+
+static jlong createBounceInterpolator(JNIEnv* env, jobject clazz) {
+    return reinterpret_cast<jlong>(new BounceInterpolator());
+}
+
+static jlong createCycleInterpolator(JNIEnv* env, jobject clazz, jfloat cycles) {
+    return reinterpret_cast<jlong>(new CycleInterpolator(cycles));
+}
+
+static jlong createDecelerateInterpolator(JNIEnv* env, jobject clazz, jfloat factor) {
+    return reinterpret_cast<jlong>(new DecelerateInterpolator(factor));
+}
+
+static jlong createLinearInterpolator(JNIEnv* env, jobject clazz) {
+    return reinterpret_cast<jlong>(new LinearInterpolator());
+}
+
+static jlong createOvershootInterpolator(JNIEnv* env, jobject clazz, jfloat tension) {
+    return reinterpret_cast<jlong>(new OvershootInterpolator(tension));
+}
+
 static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut) {
     jsize len = env->GetArrayLength(jlut);
     if (len <= 0) {
@@ -53,6 +85,14 @@ const char* const kClassPathName = "com/android/internal/view/animation/NativeIn
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "createAccelerateDecelerateInterpolator", "()J", (void*) createAccelerateDecelerateInterpolator },
+    { "createAccelerateInterpolator", "(F)J", (void*) createAccelerateInterpolator },
+    { "createAnticipateInterpolator", "(F)J", (void*) createAnticipateInterpolator },
+    { "createAnticipateOvershootInterpolator", "(F)J", (void*) createAnticipateOvershootInterpolator },
+    { "createBounceInterpolator", "()J", (void*) createBounceInterpolator },
+    { "createCycleInterpolator", "(F)J", (void*) createCycleInterpolator },
+    { "createDecelerateInterpolator", "(F)J", (void*) createDecelerateInterpolator },
+    { "createLinearInterpolator", "()J", (void*) createLinearInterpolator },
+    { "createOvershootInterpolator", "(F)J", (void*) createOvershootInterpolator },
     { "createLutInterpolator", "([F)J", (void*) createLutInterpolator },
 #endif
 };

@@ -37,10 +37,66 @@ protected:
 
 class ANDROID_API AccelerateDecelerateInterpolator : public Interpolator {
 public:
-    AccelerateDecelerateInterpolator() {}
-    virtual ~AccelerateDecelerateInterpolator() {}
-
     virtual float interpolate(float input);
+};
+
+class ANDROID_API AccelerateInterpolator : public Interpolator {
+public:
+    AccelerateInterpolator(float factor) : mFactor(factor), mDoubleFactor(factor*2) {}
+    virtual float interpolate(float input);
+private:
+    const float mFactor;
+    const float mDoubleFactor;
+};
+
+class ANDROID_API AnticipateInterpolator : public Interpolator {
+public:
+    AnticipateInterpolator(float tension) : mTension(tension) {}
+    virtual float interpolate(float input);
+private:
+    const float mTension;
+};
+
+class ANDROID_API AnticipateOvershootInterpolator : public Interpolator {
+public:
+    AnticipateOvershootInterpolator(float tension) : mTension(tension) {}
+    virtual float interpolate(float input);
+private:
+    const float mTension;
+};
+
+class ANDROID_API BounceInterpolator : public Interpolator {
+public:
+    virtual float interpolate(float input);
+};
+
+class ANDROID_API CycleInterpolator : public Interpolator {
+public:
+    CycleInterpolator(float cycles) : mCycles(cycles) {}
+    virtual float interpolate(float input);
+private:
+    const float mCycles;
+};
+
+class ANDROID_API DecelerateInterpolator : public Interpolator {
+public:
+    DecelerateInterpolator(float factor) : mFactor(factor) {}
+    virtual float interpolate(float input);
+private:
+    const float mFactor;
+};
+
+class ANDROID_API LinearInterpolator : public Interpolator {
+public:
+    virtual float interpolate(float input) { return input; }
+};
+
+class ANDROID_API OvershootInterpolator : public Interpolator {
+public:
+    OvershootInterpolator(float tension) : mTension(tension) {}
+    virtual float interpolate(float input);
+private:
+    const float mTension;
 };
 
 class ANDROID_API LUTInterpolator : public Interpolator {

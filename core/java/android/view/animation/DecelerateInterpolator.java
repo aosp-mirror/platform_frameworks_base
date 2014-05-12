@@ -20,12 +20,17 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
+
 /**
  * An interpolator where the rate of change starts out quickly and 
  * and then decelerates.
  *
  */
-public class DecelerateInterpolator implements Interpolator {
+@HasNativeInterpolator
+public class DecelerateInterpolator implements Interpolator, NativeInterpolatorFactory {
     public DecelerateInterpolator() {
     }
 
@@ -60,4 +65,10 @@ public class DecelerateInterpolator implements Interpolator {
     }
     
     private float mFactor = 1.0f;
+
+    /** @hide */
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createDecelerateInterpolator(mFactor);
+    }
 }

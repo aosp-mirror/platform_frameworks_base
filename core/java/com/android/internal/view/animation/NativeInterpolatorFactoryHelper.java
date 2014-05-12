@@ -24,5 +24,13 @@ public final class NativeInterpolatorFactoryHelper {
     private NativeInterpolatorFactoryHelper() {}
 
     public static native long createAccelerateDecelerateInterpolator();
+    public static native long createAccelerateInterpolator(float factor);
+    public static native long createAnticipateInterpolator(float tension);
+    public static native long createAnticipateOvershootInterpolator(float tension);
+    public static native long createBounceInterpolator();
+    public static native long createCycleInterpolator(float cycles);
+    public static native long createDecelerateInterpolator(float factor);
+    public static native long createLinearInterpolator();
+    public static native long createOvershootInterpolator(float tension);
     public static native long createLutInterpolator(float[] values);
 }
