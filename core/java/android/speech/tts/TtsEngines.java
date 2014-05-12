@@ -307,6 +307,24 @@ public class TtsEngines {
     }
 
     /**
+     * True if a given TTS engine uses the default phone locale as a default locale. Attempts to
+     * read the value from {@link Settings.Secure#TTS_DEFAULT_LOCALE}, failing which the
+     * old style value from {@link Settings.Secure#TTS_DEFAULT_LANG} is read. If
+     * both these values are empty, this methods returns true.
+     *
+     * @param engineName the engine to return the locale for.
+     */
+    public boolean isLocaleSetToDefaultForEngine(String engineName) {
+        return (TextUtils.isEmpty(parseEnginePrefFromList(
+                    getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE),
+                    engineName)) &&
+                    TextUtils.isEmpty(
+                        Settings.Secure.getString(mContext.getContentResolver(),
+                        Settings.Secure.TTS_DEFAULT_LANG)));
+    }
+
+
+    /**
      * Parses a locale preference value delimited by {@link #LOCALE_DELIMITER}.
      * Varies from {@link String#split} in that it will always return an array
      * of length 3 with non null values.
