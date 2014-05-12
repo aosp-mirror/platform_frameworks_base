@@ -114,10 +114,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateHeights() {
+        boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
         int height;
         if (mExpanded) {
             height = mExpandedHeight;
-        } else if (mKeyguardShowing) {
+        } else if (onKeyguardAndCollapsed) {
             height = mKeyguardHeight;
         } else {
             height = mCollapsedHeight;
@@ -127,7 +128,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             lp.height = height;
             setLayoutParams(lp);
         }
-        int systemIconsContainerHeight = mKeyguardShowing ? mKeyguardHeight : mCollapsedHeight;
+        int systemIconsContainerHeight = onKeyguardAndCollapsed ? mKeyguardHeight : mCollapsedHeight;
         lp = mSystemIconsContainer.getLayoutParams();
         if (lp.height != systemIconsContainerHeight) {
             lp.height = systemIconsContainerHeight;
@@ -150,9 +151,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateVisibilities() {
-        mBackground.setVisibility(mKeyguardShowing ? View.INVISIBLE : View.VISIBLE);
-        mDateTime.setVisibility(mKeyguardShowing ? View.INVISIBLE : View.VISIBLE);
-        mKeyguardCarrierText.setVisibility(mKeyguardShowing ? View.VISIBLE : View.GONE);
+        boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
+        mBackground.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
+        mDateTime.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
+        mKeyguardCarrierText.setVisibility(onKeyguardAndCollapsed ? View.VISIBLE : View.GONE);
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         mBrightnessContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
