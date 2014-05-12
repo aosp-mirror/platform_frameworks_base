@@ -112,7 +112,7 @@ public abstract class ExpandableView extends FrameLayout {
      * @return The desired notification height.
      */
     public int getIntrinsicHeight() {
-        return mActualHeight;
+        return getHeight();
     }
 
     /**
