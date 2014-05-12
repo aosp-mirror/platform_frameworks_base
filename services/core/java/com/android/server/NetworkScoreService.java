@@ -171,6 +171,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             return;
         }
         writer.println("Current scorer: " + currentScorer);
+        writer.flush();
 
         for (INetworkScoreCache scoreCache : getScoreCaches()) {
             try {
