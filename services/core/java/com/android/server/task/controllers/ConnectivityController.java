@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package com.android.server.task.controllers;
+
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.UserHandle;
+import android.util.Log;
+
+import com.android.server.task.TaskManagerService;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ *
+ */
+public class ConnectivityController extends StateController {
+    private static final String TAG = "TaskManager.Connectivity";
+
+    private final List<TaskStatus> mTrackedTasks = new LinkedList<TaskStatus>();
+    private final BroadcastReceiver mConnectivityChangedReceiver =
+            new ConnectivityChangedReceiver();
+
+    public ConnectivityController(TaskManagerService service) {
+        super(service);
+        // Register connectivity changed BR.
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        mContext.registerReceiverAsUser(
+                mConnectivityChangedReceiver, UserHandle.ALL, intentFilter, null, null);
+    }
+
+    @Override
+    public void maybeTrackTaskState(TaskStatus taskStatus) {
+        if (taskStatus.hasConnectivityConstraint() || taskStatus.hasMeteredConstraint()) {
+            mTrackedTasks.add(taskStatus);
+        }
+    }
+
+    @Override
+    public void removeTaskStateIfTracked(TaskStatus taskStatus) {
+        mTrackedTasks.remove(taskStatus);
+    }
+
+    /**
+     * @param isConnected Whether the active network is connected for the given uid
+     * @param isMetered Whether the active network is metered for the given uid. This is
+     *                  necessarily false if <code>isConnected</code> is false.
+     * @param userId Id of the user for whom we are updating the connectivity state.
+     */
+    private void updateTrackedTasks(boolean isConnected, boolean isMetered, int userId) {
+        for (TaskStatus ts : mTrackedTasks) {
+            if (ts.userId != userId) {
+                continue;
+            }
+            boolean prevIsConnected = ts.connectivityConstraintSatisfied.getAndSet(isConnected);
+            boolean prevIsMetered = ts.meteredConstraintSatisfied.getAndSet(isMetered);
+            if (prevIsConnected != isConnected || prevIsMetered != isMetered) {
+                    mStateChangedListener.onTaskStateChanged(ts);
+            }
+        }
+    }
+
+    class ConnectivityChangedReceiver extends BroadcastReceiver {
+        /**
+         * We'll receive connectivity changes for each user here, which we'll process independently.
+         * We are only interested in the active network here. We're only interested in the active
+         * network, b/c the end result of this will be for apps to try to hit the network.
+         * @param context The Context in which the receiver is running.
+         * @param intent The Intent being received.
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                final int networkType =
+                        intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE,
+                                ConnectivityManager.TYPE_NONE);
+                // Connectivity manager for THIS context - important!
+                final ConnectivityManager connManager = (ConnectivityManager)
+                        context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                final NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
+                // This broadcast gets sent a lot, only update if the active network has changed.
+                if (activeNetwork.getType() == networkType) {
+                    final int userid = context.getUserId();
+                    boolean isMetered = false;
+                    boolean isConnected =
+                            !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+                    if (isConnected) {  // No point making the call if we know there's no conn.
+                        isMetered = connManager.isActiveNetworkMetered();
+                    }
+                    updateTrackedTasks(isConnected, isMetered, userid);
+                }
+            } else {
+                Log.w(TAG, "Unrecognised action in intent: " + action);
+            }
+        }
+    };
+}

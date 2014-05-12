@@ -29,7 +29,14 @@ public class TaskParams implements Parcelable {
 
     private final int taskId;
     private final Bundle extras;
-    private final IBinder mCallback;
+    private final IBinder callback;
+
+    /** @hide */
+    public TaskParams(int taskId, Bundle extras, IBinder callback) {
+        this.taskId = taskId;
+        this.extras = extras;
+        this.callback = callback;
+    }
 
     /**
      * @return The unique id of this task, specified at creation time.
@@ -47,17 +54,15 @@ public class TaskParams implements Parcelable {
         return extras;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public ITaskCallback getCallback() {
-        return ITaskCallback.Stub.asInterface(mCallback);
+        return ITaskCallback.Stub.asInterface(callback);
     }
 
     private TaskParams(Parcel in) {
         taskId = in.readInt();
         extras = in.readBundle();
-        mCallback = in.readStrongBinder();
+        callback = in.readStrongBinder();
     }
 
     @Override
@@ -69,7 +74,7 @@ public class TaskParams implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
         dest.writeBundle(extras);
-        dest.writeStrongBinder(mCallback);
+        dest.writeStrongBinder(callback);
     }
 
     public static final Creator<TaskParams> CREATOR = new Creator<TaskParams>() {

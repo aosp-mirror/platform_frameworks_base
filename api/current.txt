@@ -7613,7 +7613,7 @@ package android.content {
     method public long getMaxExecutionDelayMillis();
     method public long getMinLatencyMillis();
     method public int getNetworkCapabilities();
-    method public java.lang.String getServiceClassName();
+    method public android.content.ComponentName getService();
     method public int getTaskId();
     method public boolean isPeriodic();
     method public boolean isRequireCharging();
@@ -7628,7 +7628,7 @@ package android.content {
   }
 
   public final class Task.Builder {
-    ctor public Task.Builder(int, java.lang.Class<android.app.task.TaskService>);
+    ctor public Task.Builder(int, android.content.ComponentName);
     method public android.content.Task build();
     method public android.content.Task.Builder setBackoffCriteria(long, int);
     method public android.content.Task.Builder setExtras(android.os.Bundle);
