@@ -743,7 +743,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          *
          * @param view The view whose scroll state is being reported
          *
-         * @param scrollState The current scroll state. One of 
+         * @param scrollState The current scroll state. One of
          * {@link #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
          */
         public void onScrollStateChanged(AbsListView view, int scrollState);
@@ -3305,18 +3305,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private void scrollIfNeeded(int x, int y, MotionEvent vtev) {
         int rawDeltaY = y - mMotionY;
+        int scrollOffsetCorrection = 0;
+        int scrollConsumedCorrection = 0;
+        if (mLastY == Integer.MIN_VALUE) {
+            rawDeltaY -= mMotionCorrection;
+        }
         if (dispatchNestedPreScroll(0, rawDeltaY, mScrollConsumed, mScrollOffset)) {
             rawDeltaY -= mScrollConsumed[1];
-            mMotionCorrection -= mScrollOffset[1];
-            if (mLastY != Integer.MIN_VALUE) {
-                mLastY -= mScrollOffset[1] + mScrollConsumed[1];
-            }
+            scrollOffsetCorrection -= mScrollOffset[1];
+            scrollConsumedCorrection -= mScrollConsumed[1];
             if (vtev != null) {
                 vtev.offsetLocation(0, mScrollOffset[1]);
             }
         }
-        final int deltaY = rawDeltaY - mMotionCorrection;
-        int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
+        final int deltaY = rawDeltaY;
+        int incrementalDeltaY =
+                mLastY != Integer.MIN_VALUE ? y - mLastY - scrollConsumedCorrection : deltaY;
         int lastYCorrection = 0;
 
         if (mTouchMode == TOUCH_MODE_SCROLL) {
@@ -3378,7 +3382,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 (motionViewRealTop - motionViewPrevTop);
                         if (dispatchNestedScroll(0, overscroll - incrementalDeltaY, 0, overscroll,
                                 mScrollOffset)) {
-                            mMotionCorrection -= mScrollOffset[1];
                             lastYCorrection -= mScrollOffset[1];
                             if (vtev != null) {
                                 vtev.offsetLocation(0, mScrollOffset[1]);
@@ -3421,9 +3424,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                         }
                     }
-                    mMotionY = y;
+                    mMotionY = y + scrollOffsetCorrection;
                 }
-                mLastY = y + lastYCorrection;
+                mLastY = y + lastYCorrection + scrollOffsetCorrection;
             }
         } else if (mTouchMode == TOUCH_MODE_OVERSCROLL) {
             if (y != mLastY) {
