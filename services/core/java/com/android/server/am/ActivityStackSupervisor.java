@@ -45,6 +45,7 @@ import android.app.PendingIntent;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
+import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -73,6 +74,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
@@ -88,10 +90,12 @@ import android.view.Surface;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService;
+
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -128,8 +132,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
     static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
     static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
+    static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
+    static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
+
+    /** Status Bar Service **/
+    private IBinder mToken = new Binder();
+    private IStatusBarService mStatusBarService;
 
     // For debugging to make sure the caller when acquiring/releasing our
     // wake lock is the system process.
@@ -251,6 +261,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLaunchingActivity =
                 pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);
+    }
+
+    // This function returns a IStatusBarService. The value is from ServiceManager.
+    // getService and is cached.
+    private IStatusBarService getStatusBarService() {
+        synchronized (mService) {
+            if (mStatusBarService == null) {
+                mStatusBarService = IStatusBarService.Stub.asInterface(
+                    ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
+                if (mStatusBarService == null) {
+                    Slog.w("StatusBarManager", "warning: no STATUS_BAR_SERVICE");
+                }
+            }
+            return mStatusBarService;
+        }
     }
 
     void setWindowManager(WindowManagerService wm) {
@@ -2953,9 +2978,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void setLockTaskModeLocked(TaskRecord task) {
+        final Message lockTaskMsg = Message.obtain();
         if (task == null) {
             // Take out of lock task mode.
             mLockTaskModeTask = null;
+            lockTaskMsg.what = LOCK_TASK_END_MSG;
+            mHandler.sendMessage(lockTaskMsg);
             return;
         }
         if (isLockTaskModeViolation(task)) {
@@ -2965,6 +2993,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLockTaskModeTask = task;
         findTaskToMoveToFrontLocked(task, 0, null);
         resumeTopActivitiesLocked();
+        lockTaskMsg.what = LOCK_TASK_START_MSG;
+        mHandler.sendMessage(lockTaskMsg);
     }
 
     boolean isLockTaskModeViolation(TaskRecord task) {
@@ -3060,6 +3090,32 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         container.mCallback.setVisible(container.asBinder(), msg.arg1 == 1);
                     } catch (RemoteException e) {
                     }
+                }
+                case LOCK_TASK_START_MSG: {
+                    // When lock task starts, we disable the status bars.
+                    try {
+                        if (getStatusBarService() != null) {
+                            getStatusBarService().disable
+                                (StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK,
+                                mToken, mService.mContext.getPackageName());
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    break;
+                }
+                case LOCK_TASK_END_MSG: {
+                    // When lock task ends, we enable the status bars.
+                    try {
+                       if (getStatusBarService() != null) {
+                           getStatusBarService().disable
+                               (StatusBarManager.DISABLE_NONE,
+                               mToken, mService.mContext.getPackageName());
+                       }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    break;
                 }
             }
         }
