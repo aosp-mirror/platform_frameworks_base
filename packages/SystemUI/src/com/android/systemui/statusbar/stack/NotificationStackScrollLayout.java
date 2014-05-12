@@ -80,9 +80,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     private Paint mDebugPaint;
     private int mContentHeight;
     private int mCollapsedSize;
+    private int mBottomStackSlowDownHeight;
     private int mBottomStackPeekSize;
     private int mEmptyMarginBottom;
     private int mPaddingBetweenElements;
+    private int mPaddingBetweenElementsDimmed;
+    private int mPaddingBetweenElementsNormal;
     private int mTopPadding;
 
     /**
@@ -154,7 +157,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             int y = mCollapsedSize;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) (getLayoutHeight() - mBottomStackPeekSize
-                    - mStackScrollAlgorithm.getBottomStackSlowDownLength());
+                    - mBottomStackSlowDownHeight);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) (getLayoutHeight() - mBottomStackPeekSize);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -186,9 +189,20 @@ public class NotificationStackScrollLayout extends ViewGroup
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mEmptyMarginBottom = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_stack_margin_bottom);
-        mPaddingBetweenElements = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_padding);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
+        mPaddingBetweenElementsDimmed = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
+        mPaddingBetweenElementsNormal = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_padding);
+        updatePadding(false);
+    }
+
+    private void updatePadding(boolean dimmed) {
+        mPaddingBetweenElements = dimmed
+                ? mPaddingBetweenElementsDimmed
+                : mPaddingBetweenElementsNormal;
+        mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
+        updateContentHeight();
     }
 
     @Override
@@ -742,15 +756,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (firstChild != null) {
             int contentHeight = getContentHeight();
             int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
-
-            scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize);
+            scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
+                    + mBottomStackSlowDownHeight);
             if (scrollRange > 0) {
                 View lastChild = getLastChildNotGone();
-                if (isViewExpanded(lastChild)) {
-                    // last child is expanded, so we have to ensure that it can exit the
-                    // bottom stack
-                    scrollRange += mCollapsedSize + mPaddingBetweenElements;
-                }
                 // We want to at least be able collapse the first item and not ending in a weird
                 // end state.
                 scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight - mCollapsedSize);
@@ -1184,7 +1193,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public int getEmptyBottomMargin() {
         int emptyMargin = mMaxLayoutHeight - mContentHeight;
         if (needsHeightAdaption()) {
-            emptyMargin = emptyMargin - mCollapsedSize - mBottomStackPeekSize;
+            emptyMargin = emptyMargin - mBottomStackSlowDownHeight - mBottomStackPeekSize;
         }
         return Math.max(emptyMargin, 0);
     }
@@ -1231,6 +1240,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setDimmed(boolean dimmed, boolean animate) {
         mStackScrollAlgorithm.setDimmed(dimmed);
         mAmbientState.setDimmed(dimmed);
+        updatePadding(dimmed);
         if (animate) {
             mDimmedNeedsAnimation = true;
             mNeedsAnimation =  true;
