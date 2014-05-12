@@ -38,27 +38,26 @@ public class PiecewiseLinearIndentationFunctor extends StackIndentationFunctor {
      *                 the actual visual distance below the top card but is a maximum,
      *                 achieved when the next card just starts transitioning into the stack and
      *                 the stack is full.
-     *                 If totalTransitionDistance is equal to this, we directly start at the peek,
-     *                 otherwise the first element transitions between 0 and
-     *                 totalTransitionDistance - peekSize.
+     *                 If distanceToPeekStart is 0, we directly start at the peek, otherwise the
+     *                 first element transitions between 0 and distanceToPeekStart.
      *                 Visualization:
      *           ---------------------------------------------------   ---
      *          |                                                   |   |
-     *          |                  FIRST ITEM                       |   | <- totalTransitionDistance
+     *          |                  FIRST ITEM                       |   | <- distanceToPeekStart
      *          |                                                   |   |
-     *          |---------------------------------------------------|   |   ---
-     *          |__________________SECOND ITEM______________________|   |    |  <- peekSize
-     *          |===================================================|  _|_  _|_
+     *          |---------------------------------------------------|  ---  ---
+     *          |__________________SECOND ITEM______________________|        |  <- peekSize
+     *          |===================================================|       _|_
      *
-     * @param totalTransitionDistance The total transition distance an element has to go through
+     * @param distanceToPeekStart The distance to the start of the peak.
      * @param linearPart The interpolation factor between the linear and the quadratic amount taken.
      *                   This factor must be somewhere in [0 , 1]
      */
     PiecewiseLinearIndentationFunctor(int maxItemsInStack,
                                       int peekSize,
-                                      int totalTransitionDistance,
+                                      int distanceToPeekStart,
                                       float linearPart) {
-        super(maxItemsInStack, peekSize, totalTransitionDistance);
+        super(maxItemsInStack, peekSize, distanceToPeekStart);
         mBaseValues = new ArrayList<Float>(maxItemsInStack+1);
         initBaseValues();
         mLinearPart = linearPart;

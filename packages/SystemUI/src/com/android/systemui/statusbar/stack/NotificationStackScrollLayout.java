@@ -153,7 +153,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (DEBUG) {
             int y = mCollapsedSize;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-            y = (int) (getLayoutHeight() - mBottomStackPeekSize - mCollapsedSize);
+            y = (int) (getLayoutHeight() - mBottomStackPeekSize
+                    - mStackScrollAlgorithm.getBottomStackSlowDownLength());
+            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+            y = (int) (getLayoutHeight() - mBottomStackPeekSize);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) getLayoutHeight();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -1226,6 +1229,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * See {@link AmbientState#setDimmed}.
      */
     public void setDimmed(boolean dimmed, boolean animate) {
+        mStackScrollAlgorithm.setDimmed(dimmed);
         mAmbientState.setDimmed(dimmed);
         if (animate) {
             mDimmedNeedsAnimation = true;
@@ -1311,6 +1315,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_DIMMED
                 new AnimationFilter()
+                        .animateY()
                         .animateScale()
                         .animateDimmed()
         };

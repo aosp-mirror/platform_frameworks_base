@@ -21,8 +21,8 @@ package com.android.systemui.statusbar.stack;
  */
 public abstract class StackIndentationFunctor {
 
-    protected final int mTotalTransitionDistance;
-    protected final int mDistanceToPeekStart;
+    protected int mTotalTransitionDistance;
+    protected int mDistanceToPeekStart;
     protected int mMaxItemsInStack;
     protected int mPeekSize;
     protected boolean mStackStartsAtPeek;
@@ -37,31 +37,41 @@ public abstract class StackIndentationFunctor {
      *                 the actual visual distance below the top card but is a maximum,
      *                 achieved when the next card just starts transitioning into the stack and
      *                 the stack is full.
-     *                 If totalTransitionDistance is equal to this, we directly start at the peek,
-     *                 otherwise the first element transitions between 0 and
-     *                 totalTransitionDistance - peekSize.
+     *                 If distanceToPeekStart is 0, we directly start at the peek, otherwise the
+     *                 first element transitions between 0 and distanceToPeekStart.
      *                 Visualization:
      *           ---------------------------------------------------   ---
      *          |                                                   |   |
-     *          |                  FIRST ITEM                       |   | <- totalTransitionDistance
+     *          |                  FIRST ITEM                       |   | <- distanceToPeekStart
      *          |                                                   |   |
-     *          |---------------------------------------------------|   |   ---
-     *          |__________________SECOND ITEM______________________|   |    |  <- peekSize
-     *          |===================================================|  _|_  _|_
+     *          |---------------------------------------------------|  ---  ---
+     *          |__________________SECOND ITEM______________________|        |  <- peekSize
+     *          |===================================================|       _|_
      *
-     * @param totalTransitionDistance The total transition distance an element has to go through
+     * @param distanceToPeekStart The distance to the start of the peak.
      */
-    StackIndentationFunctor(int maxItemsInStack, int peekSize, int totalTransitionDistance) {
-        mTotalTransitionDistance = totalTransitionDistance;
-        mDistanceToPeekStart = mTotalTransitionDistance - peekSize;
+    StackIndentationFunctor(int maxItemsInStack, int peekSize, int distanceToPeekStart) {
+        mDistanceToPeekStart = distanceToPeekStart;
         mStackStartsAtPeek = mDistanceToPeekStart == 0;
         mMaxItemsInStack = maxItemsInStack;
         mPeekSize = peekSize;
+        updateTotalTransitionDistance();
 
+    }
+
+    private void updateTotalTransitionDistance() {
+        mTotalTransitionDistance = mDistanceToPeekStart + mPeekSize;
     }
 
     public void setPeekSize(int mPeekSize) {
         this.mPeekSize = mPeekSize;
+        updateTotalTransitionDistance();
+    }
+
+    public void setDistanceToPeekStart(int distanceToPeekStart) {
+        mDistanceToPeekStart = distanceToPeekStart;
+        mStackStartsAtPeek = mDistanceToPeekStart == 0;
+        updateTotalTransitionDistance();
     }
 
     /**

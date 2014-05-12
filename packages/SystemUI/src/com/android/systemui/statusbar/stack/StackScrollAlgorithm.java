@@ -65,13 +65,40 @@ public class StackScrollAlgorithm {
     private ExpandableView mFirstChildWhileExpanding;
     private boolean mExpandedOnStart;
     private int mTopStackTotalSize;
+    private int mPaddingBetweenElementsDimmed;
+    private int mPaddingBetweenElementsNormal;
+    private int mBottomStackSlowDownLength;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
+        updatePadding(false);
+    }
+
+    private void updatePadding(boolean dimmed) {
+        mPaddingBetweenElements = dimmed
+                ? mPaddingBetweenElementsDimmed
+                : mPaddingBetweenElementsNormal;
+        mTopStackTotalSize = mCollapsedSize + mPaddingBetweenElements;
+        mTopStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
+                MAX_ITEMS_IN_TOP_STACK,
+                mTopStackPeekSize,
+                mTopStackTotalSize,
+                0.5f);
+        mBottomStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
+                MAX_ITEMS_IN_BOTTOM_STACK,
+                mBottomStackPeekSize,
+                getBottomStackSlowDownLength(),
+                0.5f);
+    }
+
+    public int getBottomStackSlowDownLength() {
+        return mBottomStackSlowDownLength + mPaddingBetweenElements;
     }
 
     private void initConstants(Context context) {
-        mPaddingBetweenElements = context.getResources()
+        mPaddingBetweenElementsDimmed = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
+        mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
@@ -82,17 +109,8 @@ public class StackScrollAlgorithm {
         mZDistanceBetweenElements = context.getResources()
                 .getDimensionPixelSize(R.dimen.z_distance_between_notifications);
         mZBasicHeight = (MAX_ITEMS_IN_BOTTOM_STACK + 1) * mZDistanceBetweenElements;
-        mTopStackTotalSize = mCollapsedSize + mPaddingBetweenElements;
-        mTopStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
-                MAX_ITEMS_IN_TOP_STACK,
-                mTopStackPeekSize,
-                mTopStackTotalSize,
-                0.5f);
-        mBottomStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
-                MAX_ITEMS_IN_BOTTOM_STACK,
-                mBottomStackPeekSize,
-                mCollapsedSize + mBottomStackPeekSize + mPaddingBetweenElements,
-                0.5f);
+        mBottomStackSlowDownLength = context.getResources()
+                .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
     }
 
 
@@ -206,7 +224,7 @@ public class StackScrollAlgorithm {
         float bottomPeekStart = mInnerHeight - mBottomStackPeekSize;
 
         // The position where the bottom stack starts.
-        float bottomStackStart = bottomPeekStart - mCollapsedSize;
+        float bottomStackStart = bottomPeekStart - mBottomStackSlowDownLength;
 
         // The y coordinate of the current child.
         float currentYPosition = 0.0f;
@@ -352,7 +370,7 @@ public class StackScrollAlgorithm {
         algorithmState.itemsInBottomStack += algorithmState.partialInBottom;
         childViewState.yTranslation = transitioningPositionStart + offset - childHeight
                 - mPaddingBetweenElements;
-
+        
         // We want at least to be at the end of the top stack when collapsing
         clampPositionToTopStackEnd(childViewState, childHeight);
         childViewState.location = StackScrollState.ViewState.LOCATION_MAIN_AREA;
@@ -619,6 +637,10 @@ public class StackScrollAlgorithm {
         if (mIsExpansionChanging) {
             updateFirstChildHeightWhileExpanding(hostView);
         }
+    }
+
+    public void setDimmed(boolean dimmed) {
+        updatePadding(dimmed);
     }
 
     class StackScrollAlgorithmState {
