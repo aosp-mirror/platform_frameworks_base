@@ -7244,7 +7244,6 @@ package android.content.pm {
     method public abstract java.lang.String getInstallerPackageName(java.lang.String);
     method public abstract android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.Intent getLaunchIntentForPackage(java.lang.String);
-    method public abstract android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public abstract java.lang.String getNameForUid(int);
     method public android.content.pm.PackageInfo getPackageArchiveInfo(java.lang.String, int);
     method public abstract int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -7310,7 +7309,6 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
     field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final java.lang.String FEATURE_INPUT_METHODS = "android.software.input_methods";
-    field public static final java.lang.String FEATURE_LEANBACK = "android.software.leanback";
     field public static final java.lang.String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
     field public static final java.lang.String FEATURE_LOCATION = "android.hardware.location";
     field public static final java.lang.String FEATURE_LOCATION_GPS = "android.hardware.location.gps";
@@ -7335,7 +7333,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_TELEPHONY = "android.hardware.telephony";
     field public static final java.lang.String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
     field public static final java.lang.String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
-    field public static final deprecated java.lang.String FEATURE_TELEVISION = "android.hardware.type.television";
+    field public static final java.lang.String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final java.lang.String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
@@ -24146,7 +24144,6 @@ package android.test.mock {
     method public java.lang.String getInstallerPackageName(java.lang.String);
     method public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.Intent getLaunchIntentForPackage(java.lang.String);
-    method public android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public java.lang.String getNameForUid(int);
     method public int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
