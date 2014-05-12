@@ -23,19 +23,21 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ColorSpaceTransform;
 import android.hardware.camera2.Face;
 import android.hardware.camera2.MeteringRectangle;
 import android.hardware.camera2.Rational;
-import android.hardware.camera2.ReprocessFormatsMap;
 import android.hardware.camera2.RggbChannelVector;
 import android.hardware.camera2.Size;
-import android.hardware.camera2.StreamConfiguration;
-import android.hardware.camera2.StreamConfigurationDuration;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
+import android.hardware.camera2.params.ReprocessFormatsMap;
+import android.hardware.camera2.params.StreamConfiguration;
+import android.hardware.camera2.params.StreamConfigurationDuration;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.TypeReference;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
@@ -71,6 +73,9 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     static final int ANDROID_CONTROL_AE_ANTIBANDING_MODE = ANDROID_CONTROL_START;
     static final int ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION = ANDROID_CONTROL_START + 1;
+
+    // From graphics.h
+    private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
 
     @Override
     public void setUp() {
@@ -291,6 +296,28 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                                 formatArray(actual, i)));
             }
         }
+    }
+
+    private static <T, T2> void assertArrayContains(T needle, T2 array) {
+        if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("actual must be array");
+        }
+
+        int len = Array.getLength(array);
+        for (int i = 0; i < len; ++i) {
+
+            Object actualElement = Array.get(array, i);
+
+            if (needle.equals(actualElement)) {
+                return;
+            }
+        }
+
+        fail(String.format(
+                "could not find element in array (needle %s). "
+                        + "Array was: %s.",
+                        needle,
+                        formatArray(array, len)));
     }
 
     private <T> void checkKeyGetAndSet(String keyStr, TypeReference<T> typeToken, T expected,
@@ -804,18 +831,48 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     @SmallTest
     public void testReadWriteReprocessFormatsMap() {
 
-        final int RAW_OPAQUE = 0x24;
+        // final int RAW_OPAQUE = 0x24; // TODO: add RAW_OPAQUE to ImageFormat
         final int RAW16 = ImageFormat.RAW_SENSOR;
         final int YUV_420_888 = ImageFormat.YUV_420_888;
         final int BLOB = 0x21;
 
+        // TODO: also test HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED as an output
         int[] contents = new int[] {
-                RAW_OPAQUE, 3, RAW16, YUV_420_888, BLOB,
+                YUV_420_888, 3, YUV_420_888, ImageFormat.NV21, BLOB,
                 RAW16, 2, YUV_420_888, BLOB,
+
         };
 
         // int32 x n
-        checkKeyMarshal("android.scaler.availableInputOutputFormatsMap",
+        Key<ReprocessFormatsMap> key = new Key<ReprocessFormatsMap>(
+                "android.scaler.availableInputOutputFormatsMap", ReprocessFormatsMap.class);
+        mMetadata.writeValues(key.getTag(), toByteArray(contents));
+
+        ReprocessFormatsMap map = mMetadata.get(key);
+
+        /*
+         * Make sure the inputs/outputs were what we expected.
+         * - Use public image format constants here.
+         */
+
+        int[] expectedInputs = new int[] {
+                YUV_420_888, RAW16
+        };
+        assertArrayEquals(expectedInputs, map.getInputs());
+
+        int[] expectedYuvOutputs = new int[] {
+                YUV_420_888, ImageFormat.NV21, ImageFormat.JPEG,
+        };
+        assertArrayEquals(expectedYuvOutputs, map.getOutputs(ImageFormat.YUV_420_888));
+
+        int[] expectedRaw16Outputs = new int[] {
+                YUV_420_888, ImageFormat.JPEG,
+        };
+        assertArrayEquals(expectedRaw16Outputs, map.getOutputs(ImageFormat.RAW_SENSOR));
+
+        // Finally, do a round-trip check as a sanity
+        checkKeyMarshal(
+                "android.scaler.availableInputOutputFormatsMap",
                 new ReprocessFormatsMap(contents),
                 toByteArray(contents)
         );
@@ -889,68 +946,6 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 expectedIntValues, availableFormatTag);
 
         //
-        // android.scaler.availableStreamConfigurations (int x n x 4 array)
-        //
-        final int OUTPUT = CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT;
-        int[] availableStreamConfigs = new int[] {
-                0x20, 3280, 2464, OUTPUT, // RAW16
-                0x23, 3264, 2448, OUTPUT, // YCbCr_420_888
-                0x23, 3200, 2400, OUTPUT, // YCbCr_420_888
-                0x100, 3264, 2448, OUTPUT, // ImageFormat.JPEG
-                0x100, 3200, 2400, OUTPUT, // ImageFormat.JPEG
-                0x100, 2592, 1944, OUTPUT, // ImageFormat.JPEG
-                0x100, 2048, 1536, OUTPUT, // ImageFormat.JPEG
-                0x100, 1920, 1080, OUTPUT  // ImageFormat.JPEG
-        };
-        int[] expectedAvailableStreamConfigs = new int[] {
-                0x20, 3280, 2464, OUTPUT, // RAW16
-                0x23, 3264, 2448, OUTPUT, // YCbCr_420_888
-                0x23, 3200, 2400, OUTPUT, // YCbCr_420_888
-                0x21, 3264, 2448, OUTPUT, // BLOB
-                0x21, 3200, 2400, OUTPUT, // BLOB
-                0x21, 2592, 1944, OUTPUT, // BLOB
-                0x21, 2048, 1536, OUTPUT, // BLOB
-                0x21, 1920, 1080, OUTPUT  // BLOB
-        };
-        int availableStreamConfigTag =
-                CameraMetadataNative.getTag("android.scaler.availableStreamConfigurations");
-
-        Key<int[]> configKey = CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
-        validateArrayMetadataReadWriteOverride(configKey, availableStreamConfigs,
-                expectedAvailableStreamConfigs, availableStreamConfigTag);
-
-        //
-        // android.scaler.availableMinFrameDurations (int x n x 4 array)
-
-        //
-        long[] availableMinDurations = new long[] {
-                0x20, 3280, 2464, 33333336, // RAW16
-                0x23, 3264, 2448, 33333336, // YCbCr_420_888
-                0x23, 3200, 2400, 33333336, // YCbCr_420_888
-                0x100, 3264, 2448, 33333336, // ImageFormat.JPEG
-                0x100, 3200, 2400, 33333336, // ImageFormat.JPEG
-                0x100, 2592, 1944, 33333336, // ImageFormat.JPEG
-                0x100, 2048, 1536, 33333336, // ImageFormat.JPEG
-                0x100, 1920, 1080, 33333336  // ImageFormat.JPEG
-        };
-        long[] expectedAvailableMinDurations = new long[] {
-                0x20, 3280, 2464, 33333336, // RAW16
-                0x23, 3264, 2448, 33333336, // YCbCr_420_888
-                0x23, 3200, 2400, 33333336, // YCbCr_420_888
-                0x21, 3264, 2448, 33333336, // BLOB
-                0x21, 3200, 2400, 33333336, // BLOB
-                0x21, 2592, 1944, 33333336, // BLOB
-                0x21, 2048, 1536, 33333336, // BLOB
-                0x21, 1920, 1080, 33333336  // BLOB
-        };
-        int availableMinDurationsTag =
-                CameraMetadataNative.getTag("android.scaler.availableMinFrameDurations");
-
-        Key<long[]> durationKey = CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
-        validateArrayMetadataReadWriteOverride(durationKey, availableMinDurations,
-                expectedAvailableMinDurations, availableMinDurationsTag);
-
-        //
         // android.statistics.faces (Face x n array)
         //
         int[] expectedFaceIds = new int[] {1, 2, 3, 4, 5};
@@ -1015,14 +1010,238 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     }
 
     /**
+     * Set the raw native value of the available stream configurations; ensure that
+     * the read-out managed value is consistent with what we write in.
+     */
+    @SmallTest
+    public void testOverrideStreamConfigurationMap() {
+
+        /*
+         * First, write all the raw values:
+         * - availableStreamConfigurations
+         * - availableMinFrameDurations
+         * - availableStallDurations
+         *
+         * Then, read this out as a synthetic multi-key 'streamConfigurationMap'
+         *
+         * Finally, validate that the map was unmarshaled correctly
+         * and is converting the internal formats to public formats properly.
+         */
+
+        //
+        // android.scaler.availableStreamConfigurations (int x n x 4 array)
+        //
+        final int OUTPUT = 0;
+        final int INPUT = 1;
+        int[] rawAvailableStreamConfigs = new int[] {
+                0x20, 3280, 2464, OUTPUT, // RAW16
+                0x23, 3264, 2448, OUTPUT, // YCbCr_420_888
+                0x23, 3200, 2400, OUTPUT, // YCbCr_420_888
+                0x21, 3264, 2448, OUTPUT, // BLOB
+                0x21, 3200, 2400, OUTPUT, // BLOB
+                0x21, 2592, 1944, OUTPUT, // BLOB
+                0x21, 2048, 1536, OUTPUT, // BLOB
+                0x21, 1920, 1080, OUTPUT, // BLOB
+                0x22, 640, 480, OUTPUT,   // IMPLEMENTATION_DEFINED
+                0x20, 320, 240, INPUT,   // RAW16
+        };
+        Key<StreamConfiguration[]> configKey =
+                CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
+        mMetadata.writeValues(configKey.getTag(),
+                toByteArray(rawAvailableStreamConfigs));
+
+        //
+        // android.scaler.availableMinFrameDurations (int x n x 4 array)
+        //
+        long[] expectedAvailableMinDurations = new long[] {
+                0x20, 3280, 2464, 33333331, // RAW16
+                0x23, 3264, 2448, 33333332, // YCbCr_420_888
+                0x23, 3200, 2400, 33333333, // YCbCr_420_888
+                0x100, 3264, 2448, 33333334, // ImageFormat.JPEG
+                0x100, 3200, 2400, 33333335, // ImageFormat.JPEG
+                0x100, 2592, 1944, 33333336, // ImageFormat.JPEG
+                0x100, 2048, 1536, 33333337, // ImageFormat.JPEG
+                0x100, 1920, 1080, 33333338  // ImageFormat.JPEG
+        };
+        long[] rawAvailableMinDurations = new long[] {
+                0x20, 3280, 2464, 33333331, // RAW16
+                0x23, 3264, 2448, 33333332, // YCbCr_420_888
+                0x23, 3200, 2400, 33333333, // YCbCr_420_888
+                0x21, 3264, 2448, 33333334, // BLOB
+                0x21, 3200, 2400, 33333335, // BLOB
+                0x21, 2592, 1944, 33333336, // BLOB
+                0x21, 2048, 1536, 33333337, // BLOB
+                0x21, 1920, 1080, 33333338  // BLOB
+        };
+        Key<StreamConfigurationDuration[]> durationKey =
+                CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
+        mMetadata.writeValues(durationKey.getTag(),
+                toByteArray(rawAvailableMinDurations));
+
+        //
+        // android.scaler.availableStallDurations (int x n x 4 array)
+        //
+        long[] expectedAvailableStallDurations = new long[] {
+                0x20, 3280, 2464, 0,        // RAW16
+                0x23, 3264, 2448, 0,        // YCbCr_420_888
+                0x23, 3200, 2400, 0,        // YCbCr_420_888
+                0x100, 3264, 2448, 33333334, // ImageFormat.JPEG
+                0x100, 3200, 2400, 33333335, // ImageFormat.JPEG
+                0x100, 2592, 1944, 33333336, // ImageFormat.JPEG
+                0x100, 2048, 1536, 33333337, // ImageFormat.JPEG
+                0x100, 1920, 1080, 33333338  // ImageFormat.JPEG
+        };
+        // Note: RAW16 and YUV_420_888 omitted intentionally; omitted values should default to 0
+        long[] rawAvailableStallDurations = new long[] {
+                0x21, 3264, 2448, 33333334, // BLOB
+                0x21, 3200, 2400, 33333335, // BLOB
+                0x21, 2592, 1944, 33333336, // BLOB
+                0x21, 2048, 1536, 33333337, // BLOB
+                0x21, 1920, 1080, 33333338  // BLOB
+        };
+        Key<StreamConfigurationDuration[]> stallDurationKey =
+                CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS;
+        mMetadata.writeValues(stallDurationKey.getTag(),
+                toByteArray(rawAvailableStallDurations));
+
+        //
+        // android.scaler.streamConfigurationMap (synthetic as StreamConfigurationMap)
+        //
+        StreamConfigurationMap streamConfigMap = mMetadata.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+        // Inputs
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.RAW_SENSOR, 320, 240, /*output*/false);
+
+        // Outputs
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 640, 480, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.JPEG, 1920, 1080, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.JPEG, 2048, 1536, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.JPEG, 2592, 1944, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.JPEG, 3200, 2400, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.YUV_420_888, 3200, 2400, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.YUV_420_888, 3264, 2448, /*output*/true);
+        checkStreamConfigurationMapByFormatSize(
+                streamConfigMap, ImageFormat.RAW_SENSOR, 3280, 2464, /*output*/true);
+
+        // Min Frame Durations
+
+        final int DURATION_TUPLE_SIZE = 4;
+        for (int i = 0; i < expectedAvailableMinDurations.length; i += DURATION_TUPLE_SIZE) {
+            checkStreamConfigurationMapDurationByFormatSize(
+                    streamConfigMap,
+                    (int)expectedAvailableMinDurations[i],
+                    (int)expectedAvailableMinDurations[i+1],
+                    (int)expectedAvailableMinDurations[i+2],
+                    Duration.MinFrame,
+                    expectedAvailableMinDurations[i+3]);
+        }
+
+        // Stall Frame Durations
+
+        for (int i = 0; i < expectedAvailableStallDurations.length; i += DURATION_TUPLE_SIZE) {
+            checkStreamConfigurationMapDurationByFormatSize(
+                    streamConfigMap,
+                    (int)expectedAvailableStallDurations[i],
+                    (int)expectedAvailableStallDurations[i+1],
+                    (int)expectedAvailableStallDurations[i+2],
+                    Duration.Stall,
+                    expectedAvailableStallDurations[i+3]);
+        }
+    }
+
+    private static void checkStreamConfigurationMapByFormatSize(StreamConfigurationMap configMap,
+            int format, int width, int height,
+            boolean output) {
+
+        /** arbitrary class for which StreamConfigurationMap#isOutputSupportedFor(Class) is true */
+        final Class<?> IMPLEMENTATION_DEFINED_OUTPUT_CLASS = SurfaceTexture.class;
+
+        android.util.Size[] sizes;
+        int[] formats;
+
+        if (output) {
+            if (format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+                sizes = configMap.getOutputSizes(IMPLEMENTATION_DEFINED_OUTPUT_CLASS);
+                // in this case the 'is output format supported' is vacuously true
+                formats = new int[] { HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED };
+            } else {
+                sizes = configMap.getOutputSizes(format);
+                formats = configMap.getOutputFormats();
+                assertTrue("Format must be supported by stream configuration map",
+                        configMap.isOutputSupportedFor(format));
+            }
+        } else {
+            // NOTE: No function to do input sizes from IMPL_DEFINED, so it would just fail for that
+            sizes = configMap.getInputSizes(format);
+            formats = configMap.getInputFormats();
+        }
+
+        android.util.Size expectedSize = new android.util.Size(width, height);
+
+        assertArrayContains(format, formats);
+        assertArrayContains(expectedSize, sizes);
+    }
+
+    private enum Duration {
+        MinFrame,
+        Stall
+    }
+
+    private static void checkStreamConfigurationMapDurationByFormatSize(
+            StreamConfigurationMap configMap,
+            int format, int width, int height, Duration durationKind, long expectedDuration) {
+
+        /** arbitrary class for which StreamConfigurationMap#isOutputSupportedFor(Class) is true */
+        final Class<?> IMPLEMENTATION_DEFINED_OUTPUT_CLASS = SurfaceTexture.class;
+
+        long actualDuration;
+
+        android.util.Size size = new android.util.Size(width, height);
+        switch (durationKind) {
+            case MinFrame:
+                if (format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+                    actualDuration = configMap.getOutputMinFrameDuration(
+                            IMPLEMENTATION_DEFINED_OUTPUT_CLASS, size);
+                } else {
+                    actualDuration = configMap.getOutputMinFrameDuration(format, size);
+                }
+
+                break;
+            case Stall:
+                if (format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+                    actualDuration = configMap.getOutputStallDuration(
+                            IMPLEMENTATION_DEFINED_OUTPUT_CLASS, size);
+                } else {
+                    actualDuration = configMap.getOutputStallDuration(format, size);
+                }
+
+                break;
+            default:
+                throw new AssertionError();
+        }
+
+        assertEquals("Expected " + durationKind + " to match actual value", expectedDuration,
+                actualDuration);
+    }
+
+    /**
      * Validate metadata array tag read/write override.
      *
      * <p>Only support long and int array for now, can be easily extend to support other
      * primitive arrays.</p>
      */
-    private <T> void validateArrayMetadataReadWriteOverride(Key<T> key, T writeValues,
-            T readValues, int tag) {
-        Class<?> type = writeValues.getClass();
+    private <T> void validateArrayMetadataReadWriteOverride(Key<T> key, T expectedWriteValues,
+            T expectedReadValues, int tag) {
+        Class<?> type = expectedWriteValues.getClass();
         if (!type.isArray()) {
             throw new IllegalArgumentException("This function expects an key with array type");
         } else if (type != int[].class && type != long[].class) {
@@ -1030,13 +1249,13 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         }
 
         // Write
-        mMetadata.set(key, writeValues);
+        mMetadata.set(key, expectedWriteValues);
 
         byte[] readOutValues = mMetadata.readValues(tag);
 
         ByteBuffer bf = ByteBuffer.wrap(readOutValues).order(ByteOrder.nativeOrder());
 
-        int readValuesLength = Array.getLength(readValues);
+        int readValuesLength = Array.getLength(expectedReadValues);
         int readValuesNumBytes = readValuesLength * 4;
         if (type == long[].class) {
             readValuesNumBytes = readValuesLength * 8;
@@ -1045,9 +1264,9 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         assertEquals(readValuesNumBytes, readOutValues.length);
         for (int i = 0; i < readValuesLength; ++i) {
             if (type == int[].class) {
-                assertEquals(Array.getInt(readValues, i), bf.getInt());
+                assertEquals(Array.getInt(expectedReadValues, i), bf.getInt());
             } else if (type == long[].class) {
-                assertEquals(Array.getLong(readValues, i), bf.getLong());
+                assertEquals(Array.getLong(expectedReadValues, i), bf.getLong());
             }
         }
 
@@ -1057,16 +1276,16 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 ByteBuffer.wrap(readOutValuesAsByteArray).order(ByteOrder.nativeOrder());
         for (int i = 0; i < readValuesLength; ++i) {
             if (type == int[].class) {
-                readOutValuesByteBuffer.putInt(Array.getInt(readValues, i));
+                readOutValuesByteBuffer.putInt(Array.getInt(expectedReadValues, i));
             } else if (type == long[].class) {
-                readOutValuesByteBuffer.putLong(Array.getLong(readValues, i));
+                readOutValuesByteBuffer.putLong(Array.getLong(expectedReadValues, i));
             }
         }
         mMetadata.writeValues(tag, readOutValuesAsByteArray);
 
         T result = mMetadata.get(key);
         assertNotNull(key.getName() + " result shouldn't be null", result);
-        assertArrayEquals(writeValues, result);
+        assertArrayEquals(expectedWriteValues, result);
     }
 
     // TODO: move somewhere else

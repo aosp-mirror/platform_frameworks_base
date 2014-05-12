@@ -11855,16 +11855,8 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PARTIAL_RESULT_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_MAX_DEPTH;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_STALL_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_STREAM_CONFIGURATION_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BLACK_LEVEL_PATTERN;
@@ -12074,8 +12066,6 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
-    field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1; // 0x1
-    field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT = 0; // 0x0
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3; // 0x3
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG = 2; // 0x2
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG = 1; // 0x1
@@ -12356,6 +12346,22 @@ package android.hardware.camera2 {
     method public final int getWidth();
   }
 
+  public final class TonemapCurve {
+    method public void copyColorCurve(int, float[], int);
+    method public android.graphics.PointF getPoint(int, int);
+    method public int getPointCount(int);
+    field public static final int CHANNEL_BLUE = 2; // 0x2
+    field public static final int CHANNEL_GREEN = 1; // 0x1
+    field public static final int CHANNEL_RED = 0; // 0x0
+    field public static final float LEVEL_BLACK = 0.0f;
+    field public static final float LEVEL_WHITE = 1.0f;
+    field public static final int POINT_SIZE = 2; // 0x2
+  }
+
+}
+
+package android.hardware.camera2.params {
+
   public final class StreamConfigurationMap {
     method public final int[] getOutputFormats();
     method public long getOutputMinFrameDuration(int, android.util.Size);
@@ -12367,18 +12373,6 @@ package android.hardware.camera2 {
     method public boolean isOutputSupportedFor(int);
     method public static boolean isOutputSupportedFor(java.lang.Class<T>);
     method public boolean isOutputSupportedFor(android.view.Surface);
-  }
-
-  public final class TonemapCurve {
-    method public void copyColorCurve(int, float[], int);
-    method public android.graphics.PointF getPoint(int, int);
-    method public int getPointCount(int);
-    field public static final int CHANNEL_BLUE = 2; // 0x2
-    field public static final int CHANNEL_GREEN = 1; // 0x1
-    field public static final int CHANNEL_RED = 0; // 0x0
-    field public static final float LEVEL_BLACK = 0.0f;
-    field public static final float LEVEL_WHITE = 1.0f;
-    field public static final int POINT_SIZE = 2; // 0x2
   }
 
 }

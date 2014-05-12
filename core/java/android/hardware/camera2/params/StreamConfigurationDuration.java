@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
-import static android.hardware.camera2.StreamConfigurationMap.checkArgumentFormatInternal;
+import static android.hardware.camera2.params.StreamConfigurationMap.checkArgumentFormatInternal;
 
 import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.graphics.PixelFormat;
 import android.util.Size;
 
 /**
@@ -59,11 +61,12 @@ public final class StreamConfigurationDuration {
     }
 
     /**
-     * Get the image {@code format} in this stream configuration duration
+     * Get the internal image {@code format} in this stream configuration duration
      *
      * @return an integer format
      *
      * @see ImageFormat
+     * @see PixelFormat
      */
     public final int getFormat() {
         return mFormat;

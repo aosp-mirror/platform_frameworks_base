@@ -20,7 +20,7 @@ import android.view.Surface;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.CaptureRequest;
 
-import android.hardware.camera2.LongParcelable;
+import android.hardware.camera2.utils.LongParcelable;
 
 /** @hide */
 interface ICameraDeviceUser

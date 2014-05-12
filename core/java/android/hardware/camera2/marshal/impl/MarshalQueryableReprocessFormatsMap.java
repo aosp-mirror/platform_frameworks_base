@@ -15,9 +15,10 @@
  */
 package android.hardware.camera2.marshal.impl;
 
-import android.hardware.camera2.ReprocessFormatsMap;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
+import android.hardware.camera2.params.ReprocessFormatsMap;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.TypeReference;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
@@ -50,12 +51,13 @@ public class MarshalQueryableReprocessFormatsMap
              *   INPUT_FORMAT, OUTPUT_FORMAT_COUNT, [OUTPUT_0, OUTPUT_1, ..., OUTPUT_FORMAT_COUNT-1]
              * };
              */
-            int[] inputs = value.getInputs();
+            int[] inputs = StreamConfigurationMap.imageFormatToInternal(value.getInputs());
             for (int input : inputs) {
                 // INPUT_FORMAT
                 buffer.putInt(input);
 
-                int[] outputs = value.getOutputs(input);
+                int[] outputs =
+                        StreamConfigurationMap.imageFormatToInternal(value.getOutputs(input));
                 // OUTPUT_FORMAT_COUNT
                 buffer.putInt(outputs.length);
 

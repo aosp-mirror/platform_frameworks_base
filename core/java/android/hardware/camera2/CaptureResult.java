@@ -216,18 +216,6 @@ public final class CaptureResult extends CameraMetadata {
             new Key<float[]>("android.colorCorrection.gains", float[].class);
 
     /**
-     * <p>The ID sent with the latest
-     * CAMERA2_TRIGGER_PRECAPTURE_METERING call</p>
-     * <p>Must be 0 if no
-     * CAMERA2_TRIGGER_PRECAPTURE_METERING trigger received yet
-     * by HAL. Always updated even if AE algorithm ignores the
-     * trigger</p>
-     * @hide
-     */
-    public static final Key<Integer> CONTROL_AE_PRECAPTURE_ID =
-            new Key<Integer>("android.control.aePrecaptureId", int.class);
-
-    /**
      * <p>The desired setting for the camera device's auto-exposure
      * algorithm's antibanding compensation.</p>
      * <p>Some kinds of lighting fixtures, such as some fluorescent
@@ -1068,17 +1056,6 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.control.afState", int.class);
 
     /**
-     * <p>The ID sent with the latest
-     * CAMERA2_TRIGGER_AUTOFOCUS call</p>
-     * <p>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
-     * received yet by HAL. Always updated even if AF algorithm
-     * ignores the trigger</p>
-     * @hide
-     */
-    public static final Key<Integer> CONTROL_AF_TRIGGER_ID =
-            new Key<Integer>("android.control.afTriggerId", int.class);
-
-    /**
      * <p>Whether AWB is currently locked to its
      * latest calculated values.</p>
      * <p>Note that AWB lock is only meaningful for AUTO
@@ -1713,8 +1690,10 @@ public final class CaptureResult extends CameraMetadata {
      * capture must arrive before the FINAL buffer for that capture. This entry may
      * only be used by the camera device if quirks.usePartialResult is set to 1.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @deprecated
      * @hide
      */
+    @Deprecated
     public static final Key<Boolean> QUIRKS_PARTIAL_RESULT =
             new Key<Boolean>("android.quirks.partialResult", boolean.class);
 
@@ -1834,7 +1813,8 @@ public final class CaptureResult extends CameraMetadata {
      * cannot process more than 1 capture at a time.</li>
      * </ul>
      * <p>The necessary information for the application, given the model above,
-     * is provided via the {@link CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS android.scaler.availableMinFrameDurations} field.
+     * is provided via the {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} field
+     * using StreamConfigurationMap#getOutputMinFrameDuration(int, Size).
      * These are used to determine the maximum frame rate / minimum frame
      * duration that is possible for a given stream configuration.</p>
      * <p>Specifically, the application can use the following rules to
@@ -1844,7 +1824,8 @@ public final class CaptureResult extends CameraMetadata {
      * <li>Let the set of currently configured input/output streams
      * be called <code>S</code>.</li>
      * <li>Find the minimum frame durations for each stream in <code>S</code>, by
-     * looking it up in {@link CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS android.scaler.availableMinFrameDurations} (with
+     * looking it up in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} using
+     * StreamConfigurationMap#getOutputMinFrameDuration(int, Size) (with
      * its respective size/format). Let this set of frame durations be called
      * <code>F</code>.</li>
      * <li>For any given request <code>R</code>, the minimum frame duration allowed
@@ -1852,7 +1833,8 @@ public final class CaptureResult extends CameraMetadata {
      * used in <code>R</code> be called <code>S_r</code>.</li>
      * </ol>
      * <p>If none of the streams in <code>S_r</code> have a stall time (listed in
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations}), then the frame duration in
+     * StreamConfigurationMap#getOutputStallDuration(int,Size) using its
+     * respective size/format), then the frame duration in
      * <code>F</code> determines the steady state frame rate that the application will
      * get if it uses <code>R</code> as a repeating request. Let this special kind
      * of request be called <code>Rsimple</code>.</p>
@@ -1863,10 +1845,9 @@ public final class CaptureResult extends CameraMetadata {
      * if all buffers from the previous <code>Rstall</code> have already been
      * delivered.</p>
      * <p>For more details about stalling, see
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations}.</p>
+     * StreamConfigurationMap#getOutputStallDuration(int,Size).</p>
      *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
     public static final Key<Long> SENSOR_FRAME_DURATION =
             new Key<Long>("android.sensor.frameDuration", long.class);
@@ -2141,8 +2122,10 @@ public final class CaptureResult extends CameraMetadata {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @deprecated
      * @hide
      */
+    @Deprecated
     public static final Key<float[]> STATISTICS_PREDICTED_COLOR_GAINS =
             new Key<float[]>("android.statistics.predictedColorGains", float[].class);
 
@@ -2163,8 +2146,10 @@ public final class CaptureResult extends CameraMetadata {
      * <p>This value should always be calculated by the AWB block,
      * regardless of the android.control.* current values.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @deprecated
      * @hide
      */
+    @Deprecated
     public static final Key<Rational[]> STATISTICS_PREDICTED_COLOR_TRANSFORM =
             new Key<Rational[]>("android.statistics.predictedColorTransform", Rational[].class);
 
@@ -2440,6 +2425,14 @@ public final class CaptureResult extends CameraMetadata {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
+
+
+
+
+
+
 
     /**
      * <p>

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
 
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.util.Arrays;
@@ -61,8 +62,11 @@ public final class ReprocessFormatsMap {
      * @throws IllegalArgumentException
      *              if the data was poorly formatted
      *              (missing output format length or too few output formats)
+     *              or if any of the input/formats were not valid
      * @throws NullPointerException
      *              if entry was null
+     *
+     * @see StreamConfigurationMap#checkArgumentFormatInternal
      *
      * @hide
      */
@@ -72,26 +76,31 @@ public final class ReprocessFormatsMap {
         int numInputs = 0;
         int left = entry.length;
         for (int i = 0; i < entry.length; ) {
-            final int format = entry[i];
+            int inputFormat = StreamConfigurationMap.checkArgumentFormatInternal(entry[i]);
 
             left--;
             i++;
 
             if (left < 1) {
                 throw new IllegalArgumentException(
-                        String.format("Input %x had no output format length listed", format));
+                        String.format("Input %x had no output format length listed", inputFormat));
             }
 
             final int length = entry[i];
             left--;
             i++;
 
+            for (int j = 0; j < length; ++j) {
+                int outputFormat = entry[i + j];
+                StreamConfigurationMap.checkArgumentFormatInternal(outputFormat);
+            }
+
             if (length > 0) {
                 if (left < length) {
                     throw new IllegalArgumentException(
                             String.format(
                                     "Input %x had too few output formats listed (actual: %d, " +
-                                    "expected: %d)", format, left, length));
+                                    "expected: %d)", inputFormat, left, length));
                 }
 
                 i += length;
@@ -131,7 +140,6 @@ public final class ReprocessFormatsMap {
                 throw new AssertionError(
                         String.format("Input %x had no output format length listed", format));
             }
-            // TODO: check format is a valid input format
 
             final int length = mEntry[i];
             left--;
@@ -149,12 +157,10 @@ public final class ReprocessFormatsMap {
                 left -= length;
             }
 
-            // TODO: check output format is a valid output format
-
             inputs[j] = format;
         }
 
-        return inputs;
+        return StreamConfigurationMap.imageFormatToPublic(inputs);
     }
 
     /**
@@ -204,7 +210,7 @@ public final class ReprocessFormatsMap {
                     outputs[k] = mEntry[i + k];
                 }
 
-                return outputs;
+                return StreamConfigurationMap.imageFormatToPublic(outputs);
             }
 
             i += length;
