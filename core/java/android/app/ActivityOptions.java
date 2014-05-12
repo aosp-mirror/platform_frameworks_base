@@ -365,11 +365,15 @@ public class ActivityOptions {
      * @param listener The listener to use to monitor activity transition events.
      * @return Returns a new ActivityOptions object that you can use to
      *         supply these options as the options Bundle when starting an activity.
+     *         Returns null if the Window does not have {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
     public static ActivityOptions makeSceneTransitionAnimation(Window window,
             ActivityTransitionListener listener) {
+        if (!window.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+            return null;
+        }
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
         ExitTransitionCoordinator exit = new ExitTransitionCoordinator(window, listener);
