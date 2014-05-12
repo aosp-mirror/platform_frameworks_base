@@ -7,8 +7,10 @@
 #ifndef RESOURCE_TABLE_H
 #define RESOURCE_TABLE_H
 
+#include "ConfigDescription.h"
 #include "StringPool.h"
 #include "SourcePos.h"
+#include "ResourceFilter.h"
 
 #include <set>
 #include <map>
@@ -75,37 +77,6 @@ public:
     class Package;
     class Type;
     class Entry;
-
-    struct ConfigDescription : public ResTable_config {
-        ConfigDescription() {
-            memset(this, 0, sizeof(*this));
-            size = sizeof(ResTable_config);
-        }
-        ConfigDescription(const ResTable_config&o) {
-            *static_cast<ResTable_config*>(this) = o;
-            size = sizeof(ResTable_config);
-        }
-        ConfigDescription(const ConfigDescription&o) {
-            *static_cast<ResTable_config*>(this) = o;
-        }
-
-        ConfigDescription& operator=(const ResTable_config& o) {
-            *static_cast<ResTable_config*>(this) = o;
-            size = sizeof(ResTable_config);
-            return *this;
-        }
-        ConfigDescription& operator=(const ConfigDescription& o) {
-            *static_cast<ResTable_config*>(this) = o;
-            return *this;
-        }
-
-        inline bool operator<(const ConfigDescription& o) const { return compare(o) < 0; }
-        inline bool operator<=(const ConfigDescription& o) const { return compare(o) <= 0; }
-        inline bool operator==(const ConfigDescription& o) const { return compare(o) == 0; }
-        inline bool operator!=(const ConfigDescription& o) const { return compare(o) != 0; }
-        inline bool operator>=(const ConfigDescription& o) const { return compare(o) >= 0; }
-        inline bool operator>(const ConfigDescription& o) const { return compare(o) > 0; }
-    };
 
     ResourceTable(Bundle* bundle, const String16& assetsPackage);
 
@@ -182,7 +153,7 @@ public:
     size_t numLocalResources() const;
     bool hasResources() const;
 
-    sp<AaptFile> flatten(Bundle*);
+    sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter);
 
     static inline uint32_t makeResId(uint32_t packageId,
                                      uint32_t typeId,
@@ -223,7 +194,7 @@ public:
     void addLocalization(const String16& name, const String8& locale, const SourcePos& src);
     status_t validateLocalizations(void);
 
-    status_t flatten(Bundle*, const sp<AaptFile>& dest);
+    status_t flatten(Bundle* bundle, const sp<const ResourceFilter>& filter, const sp<AaptFile>& dest);
     status_t flattenLibraryTable(const sp<AaptFile>& dest, const Vector<sp<Package> >& libs);
 
     void writePublicDefinitions(const String16& package, FILE* fp);

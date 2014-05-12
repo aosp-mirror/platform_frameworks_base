@@ -2095,10 +2095,10 @@ bool ResourceTable::hasResources() const {
     return mNumLocal > 0;
 }
 
-sp<AaptFile> ResourceTable::flatten(Bundle* bundle)
+sp<AaptFile> ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter)
 {
     sp<AaptFile> data = new AaptFile(String8(), AaptGroupEntry(), String8());
-    status_t err = flatten(bundle, data);
+    status_t err = flatten(bundle, filter, data);
     return err == NO_ERROR ? data : NULL;
 }
 
@@ -2658,8 +2658,8 @@ ResourceTable::validateLocalizations(void)
         }
 
         // Check that all requested localizations are present for this string
-        if (mBundle->getConfigurations() != NULL && mBundle->getRequireLocalization()) {
-            const char* allConfigs = mBundle->getConfigurations();
+        if (mBundle->getConfigurations().size() > 0 && mBundle->getRequireLocalization()) {
+            const char* allConfigs = mBundle->getConfigurations().string();
             const char* start = allConfigs;
             const char* comma;
             
@@ -2713,14 +2713,8 @@ ResourceTable::validateLocalizations(void)
     return err;
 }
 
-status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
+status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter, const sp<AaptFile>& dest)
 {
-    ResourceFilter filter;
-    status_t err = filter.parse(bundle->getConfigurations());
-    if (err != NO_ERROR) {
-        return err;
-    }
-
     const ConfigDescription nullConfig;
 
     const size_t N = mOrderedPackages.size();
@@ -2795,7 +2789,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 const size_t N = c->getEntries().size();
                 for (size_t ei=0; ei<N; ei++) {
                     ConfigDescription config = c->getEntries().keyAt(ei);
-                    if (filterable && !filter.match(config)) {
+                    if (filterable && !filter->match(config)) {
                         continue;
                     }
                     sp<Entry> e = c->getEntries().valueAt(ei);
@@ -2887,7 +2881,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
             return amt;
         }
 
-        err = flattenLibraryTable(data, libraryPackages);
+        status_t err = flattenLibraryTable(data, libraryPackages);
         if (err != NO_ERROR) {
             fprintf(stderr, "ERROR: failed to write library table\n");
             return err;
@@ -2943,11 +2937,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                     }
                     const size_t CN = cl->getEntries().size();
                     for (size_t ci=0; ci<CN; ci++) {
-                        if (filterable && !filter.match(cl->getEntries().keyAt(ci))) {
+                        if (filterable && !filter->match(cl->getEntries().keyAt(ci))) {
                             continue;
                         }
                         for (size_t cj=ci+1; cj<CN; cj++) {
-                            if (filterable && !filter.match(cl->getEntries().keyAt(cj))) {
+                            if (filterable && !filter->match(cl->getEntries().keyAt(cj))) {
                                 continue;
                             }
                             typeSpecFlags[ei] |= htodl(
@@ -2989,7 +2983,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.screenHeightDp,
                       config.layoutDirection));
                       
-                if (filterable && !filter.match(config)) {
+                if (filterable && !filter->match(config)) {
                     continue;
                 }
                 
@@ -3108,7 +3102,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     }
     
     ssize_t strStart = dest->getSize();
-    err = valueStrings.writeStringBlock(dest);
+    status_t err = valueStrings.writeStringBlock(dest);
     if (err != NO_ERROR) {
         return err;
     }

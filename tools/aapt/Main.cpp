@@ -70,6 +70,7 @@ void usage(void)
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
         "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
+        "        [--split CONFIGS [--split CONFIGS]] \\\n"
         "        [raw-files-dir [raw-files-dir] ...] \\\n"
         "        [--output-text-symbols DIR]\n"
         "\n"
@@ -166,10 +167,12 @@ void usage(void)
         "       generate dependency files in the same directories for R.java and resource package\n"
         "   --auto-add-overlay\n"
         "       Automatically add resources that are only in overlays.\n"
-        "   --preferred-configurations\n"
-        "       Like the -c option for filtering out unneeded configurations, but\n"
-        "       only expresses a preference.  If there is no resource available with\n"
-        "       the preferred configuration then it will not be stripped.\n"
+        "   --preferred-density\n"
+        "       Specifies a preference for a particular density. Resources that do not\n"
+        "       match this density and have variants that are a closer match are removed.\n"
+        "   --split\n"
+        "       Builds a separate split APK for the configurations listed. This can\n"
+        "       be loaded alongside the base APK at runtime.\n"
         "   --rename-manifest-package\n"
         "       Rewrite the manifest so that its package name is the package name\n"
         "       given here.  Relative class names (for example .Foo) will be\n"
@@ -568,15 +571,24 @@ int main(int argc, char* const argv[])
                     bundle.setGenDependencies(true);
                 } else if (strcmp(cp, "-utf16") == 0) {
                     bundle.setWantUTF16(true);
-                } else if (strcmp(cp, "-preferred-configurations") == 0) {
+                } else if (strcmp(cp, "-preferred-density") == 0) {
                     argc--;
                     argv++;
                     if (!argc) {
-                        fprintf(stderr, "ERROR: No argument supplied for '--preferred-configurations' option\n");
+                        fprintf(stderr, "ERROR: No argument supplied for '--preferred-density' option\n");
                         wantUsage = true;
                         goto bail;
                     }
-                    bundle.addPreferredConfigurations(argv[0]);
+                    bundle.setPreferredDensity(argv[0]);
+                } else if (strcmp(cp, "-split") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--split' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.addSplitConfigurations(argv[0]);
                 } else if (strcmp(cp, "-rename-manifest-package") == 0) {
                     argc--;
                     argv++;
