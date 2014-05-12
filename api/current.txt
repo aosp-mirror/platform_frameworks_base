@@ -11933,6 +11933,7 @@ package android.hardware {
   public final class Sensor {
     method public int getFifoMaxEventCount();
     method public int getFifoReservedEventCount();
+    method public int getMaxDelay();
     method public float getMaximumRange();
     method public int getMinDelay();
     method public java.lang.String getName();
@@ -11942,6 +11943,9 @@ package android.hardware {
     method public int getType();
     method public java.lang.String getVendor();
     method public int getVersion();
+    method public boolean isWakeUpSensor();
+    field public static final java.lang.String SENSOR_STRING_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR = "android.sensor.non_wake_up_proximity_sensor";
+    field public static final java.lang.String SENSOR_STRING_TYPE_WAKE_UP_TILT_DETECTOR = "android.sensor.wake_up_tilt_detector";
     field public static final java.lang.String STRING_TYPE_ACCELEROMETER = "android.sensor.accelerometer";
     field public static final java.lang.String STRING_TYPE_AMBIENT_TEMPERATURE = "android.sensor.ambient_temperature";
     field public static final java.lang.String STRING_TYPE_GAME_ROTATION_VECTOR = "android.sensor.game_rotation_vector";
@@ -11963,6 +11967,24 @@ package android.hardware {
     field public static final java.lang.String STRING_TYPE_STEP_COUNTER = "android.sensor.step_counter";
     field public static final java.lang.String STRING_TYPE_STEP_DETECTOR = "android.sensor.step_detector";
     field public static final deprecated java.lang.String STRING_TYPE_TEMPERATURE = "android.sensor.temperature";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_ACCELEROMETER = "android.sensor.wake_up_accelerometer";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_AMBIENT_TEMPERATURE = "android.sensor.wake_up_ambient_temperature";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_GAME_ROTATION_VECTOR = "android.sensor.wake_up_game_rotation_vector";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR = "android.sensor.wake_up_geomagnetic_rotation_vector";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_GRAVITY = "android.sensor.wake_up_gravity";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_GYROSCOPE = "android.sensor.wake_up_gyroscope";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED = "android.sensor.wake_up_gyroscope_uncalibrated";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_HEART_RATE = "android.sensor.wake_up_heart_rate";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_LIGHT = "android.sensor.wake_up_light";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_LINEAR_ACCELERATION = "android.sensor.wake_up_linear_acceleration";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_MAGNETIC_FIELD = "android.sensor.wake_up_magnetic_field";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED = "android.sensor.wake_up_magnetic_field_uncalibrated";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_ORIENTATION = "android.sensor.wake_up_orientation";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_PRESSURE = "android.sensor.wake_up_pressure";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_RELATIVE_HUMIDITY = "android.sensor.wake_up_relative_humidity";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_ROTATION_VECTOR = "android.sensor.wake_up_rotation_vector";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_STEP_COUNTER = "android.sensor.wake_up_step_counter";
+    field public static final java.lang.String STRING_TYPE_WAKE_UP_STEP_DETECTOR = "android.sensor.wake_up_step_detector";
     field public static final int TYPE_ACCELEROMETER = 1; // 0x1
     field public static final int TYPE_ALL = -1; // 0xffffffff
     field public static final int TYPE_AMBIENT_TEMPERATURE = 13; // 0xd
@@ -11976,6 +11998,7 @@ package android.hardware {
     field public static final int TYPE_LINEAR_ACCELERATION = 10; // 0xa
     field public static final int TYPE_MAGNETIC_FIELD = 2; // 0x2
     field public static final int TYPE_MAGNETIC_FIELD_UNCALIBRATED = 14; // 0xe
+    field public static final int TYPE_NON_WAKE_UP_PROXIMITY_SENSOR = 22; // 0x16
     field public static final deprecated int TYPE_ORIENTATION = 3; // 0x3
     field public static final int TYPE_PRESSURE = 6; // 0x6
     field public static final int TYPE_PROXIMITY = 8; // 0x8
@@ -11985,6 +12008,25 @@ package android.hardware {
     field public static final int TYPE_STEP_COUNTER = 19; // 0x13
     field public static final int TYPE_STEP_DETECTOR = 18; // 0x12
     field public static final deprecated int TYPE_TEMPERATURE = 7; // 0x7
+    field public static final int TYPE_WAKE_UP_ACCELEROMETER = 23; // 0x17
+    field public static final int TYPE_WAKE_UP_AMBIENT_TEMPERATURE = 33; // 0x21
+    field public static final int TYPE_WAKE_UP_GAME_ROTATION_VECTOR = 35; // 0x23
+    field public static final int TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR = 39; // 0x27
+    field public static final int TYPE_WAKE_UP_GRAVITY = 29; // 0x1d
+    field public static final int TYPE_WAKE_UP_GYROSCOPE = 26; // 0x1a
+    field public static final int TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED = 36; // 0x24
+    field public static final int TYPE_WAKE_UP_HEART_RATE = 40; // 0x28
+    field public static final int TYPE_WAKE_UP_LIGHT = 27; // 0x1b
+    field public static final int TYPE_WAKE_UP_LINEAR_ACCELERATION = 30; // 0x1e
+    field public static final int TYPE_WAKE_UP_MAGNETIC_FIELD = 24; // 0x18
+    field public static final int TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED = 34; // 0x22
+    field public static final int TYPE_WAKE_UP_ORIENTATION = 25; // 0x19
+    field public static final int TYPE_WAKE_UP_PRESSURE = 28; // 0x1c
+    field public static final int TYPE_WAKE_UP_RELATIVE_HUMIDITY = 32; // 0x20
+    field public static final int TYPE_WAKE_UP_ROTATION_VECTOR = 31; // 0x1f
+    field public static final int TYPE_WAKE_UP_STEP_COUNTER = 38; // 0x26
+    field public static final int TYPE_WAKE_UP_STEP_DETECTOR = 37; // 0x25
+    field public static final int TYPE_WAKE_UP_TILT_DETECTOR = 41; // 0x29
   }
 
   public class SensorEvent {
