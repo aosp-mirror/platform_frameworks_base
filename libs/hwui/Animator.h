@@ -45,6 +45,7 @@ public:
 
     ANDROID_API void setInterpolator(Interpolator* interpolator);
     ANDROID_API void setDuration(nsecs_t durationInMs);
+    ANDROID_API nsecs_t duration() { return mDuration; }
     ANDROID_API void setListener(AnimationListener* listener) {
         mListener = listener;
     }

@@ -33,6 +33,14 @@ public:
     inline static bool isPositive(float value) {
         return value >= gNonZeroEpsilon;
     }
+
+    inline static int min(int a, int b) {
+        return a < b ? a : b;
+    }
+
+    inline static float lerp(float v1, float v2, float t) {
+        return v1 + ((v2 - v1) * t);
+    }
 }; // class MathUtils
 
 } /* namespace uirenderer */

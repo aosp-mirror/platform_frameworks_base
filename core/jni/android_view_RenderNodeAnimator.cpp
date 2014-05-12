@@ -132,6 +132,17 @@ static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jint dura
     animator->setDuration(duration);
 }
 
+static jint getDuration(JNIEnv* env, jobject clazz, jlong animatorPtr) {
+    BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
+    return static_cast<jint>(animator->duration());
+}
+
+static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong interpolatorPtr) {
+    BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
+    Interpolator* interpolator = reinterpret_cast<Interpolator*>(interpolatorPtr);
+    animator->setInterpolator(interpolator);
+}
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -146,6 +157,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIIF)J", (void*) createCanvasPropertyPaintAnimator },
     { "nSetDuration", "(JI)V", (void*) setDuration },
+    { "nGetDuration", "(J)I", (void*) getDuration },
+    { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
 #endif
 };
 
