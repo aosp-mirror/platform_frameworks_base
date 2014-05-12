@@ -22,9 +22,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
+
+import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * A service that receives calls from the system when new notifications are posted or removed.
@@ -46,6 +49,7 @@ public abstract class NotificationListenerService extends Service {
             + "[" + getClass().getSimpleName() + "]";
 
     private INotificationListenerWrapper mWrapper = null;
+    private String[] mNotificationKeys;
 
     private INotificationManager mNoMan;
 
@@ -92,6 +96,15 @@ public abstract class NotificationListenerService extends Service {
      * @param notificationKeys The notification keys for all currently posted notifications.
      */
     public void onListenerConnected(String[] notificationKeys) {
+        // optional
+    }
+
+    /**
+     * Implement this method to be notified when the notification order cahnges.
+     *
+     * Call {@link #getOrderedNotificationKeys()} to retrieve the new order.
+     */
+    public void onNotificationOrderUpdate() {
         // optional
     }
 
@@ -202,7 +215,7 @@ public abstract class NotificationListenerService extends Service {
      * Request the list of outstanding notifications (that is, those that are visible to the
      * current user). Useful when you don't know what's already been posted.
      *
-     * @return An array of active notifications.
+     * @return An array of active notifications, sorted in natural order.
      */
     public StatusBarNotification[] getActiveNotifications() {
         return getActiveNotifications(null /*all*/);
@@ -213,7 +226,8 @@ public abstract class NotificationListenerService extends Service {
      * current user). Useful when you don't know what's already been posted.
      *
      * @param keys A specific list of notification keys, or {@code null} for all.
-     * @return An array of active notifications.
+     * @return An array of active notifications, sorted in natural order
+     *   if {@code keys} is {@code null}.
      */
     public StatusBarNotification[] getActiveNotifications(String[] keys) {
         if (!isBound()) return null;
@@ -226,21 +240,15 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Request the list of outstanding notification keys(that is, those that are visible to the
-     * current user).  You can use the notification keys for subsequent retrieval via
+     * Request the list of notification keys in their current natural order.
+     * You can use the notification keys for subsequent retrieval via
      * {@link #getActiveNotifications(String[]) or dismissal via
      * {@link #cancelNotifications(String[]).
      *
-     * @return An array of active notification keys.
+     * @return An array of active notification keys, in their natural order.
      */
-    public String[] getActiveNotificationKeys() {
-        if (!isBound()) return null;
-        try {
-            return getNotificationInterface().getActiveNotificationKeysFromListener(mWrapper);
-        } catch (android.os.RemoteException ex) {
-            Log.v(TAG, "Unable to contact notification manager", ex);
-        }
-        return null;
+    public String[] getOrderedNotificationKeys() {
+        return mNotificationKeys;
     }
 
     @Override
@@ -261,28 +269,60 @@ public abstract class NotificationListenerService extends Service {
 
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
-        public void onNotificationPosted(StatusBarNotification sbn) {
+        public void onNotificationPosted(StatusBarNotification sbn,
+                NotificationOrderUpdate update) {
             try {
-                NotificationListenerService.this.onNotificationPosted(sbn);
+                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+                synchronized (mWrapper) {
+                    updateNotificationKeys(update);
+                    NotificationListenerService.this.onNotificationPosted(sbn);
+                }
             } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationPosted", t);
+                Log.w(TAG, "Error running onOrderedNotificationPosted", t);
             }
         }
         @Override
-        public void onNotificationRemoved(StatusBarNotification sbn) {
+        public void onNotificationRemoved(StatusBarNotification sbn,
+                NotificationOrderUpdate update) {
             try {
-                NotificationListenerService.this.onNotificationRemoved(sbn);
+                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+                synchronized (mWrapper) {
+                    updateNotificationKeys(update);
+                    NotificationListenerService.this.onNotificationRemoved(sbn);
+                }
             } catch (Throwable t) {
                 Log.w(TAG, "Error running onNotificationRemoved", t);
             }
         }
         @Override
-        public void onListenerConnected(String[] notificationKeys) {
+        public void onListenerConnected(NotificationOrderUpdate update) {
             try {
-                NotificationListenerService.this.onListenerConnected(notificationKeys);
+                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+                synchronized (mWrapper) {
+                    updateNotificationKeys(update);
+                    NotificationListenerService.this.onListenerConnected(mNotificationKeys);
+                }
             } catch (Throwable t) {
                 Log.w(TAG, "Error running onListenerConnected", t);
             }
         }
+        @Override
+        public void onNotificationOrderUpdate(NotificationOrderUpdate update)
+                throws RemoteException {
+            try {
+                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+                synchronized (mWrapper) {
+                    updateNotificationKeys(update);
+                    NotificationListenerService.this.onNotificationOrderUpdate();
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationOrderUpdate", t);
+            }
+        }
+    }
+
+    private void updateNotificationKeys(NotificationOrderUpdate update) {
+        // TODO: avoid garbage by comparing the lists
+        mNotificationKeys = update.getOrderedKeys();
     }
 }

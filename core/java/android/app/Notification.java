@@ -659,8 +659,8 @@ public class Notification implements Parcelable
 
     /**
      * @hide
-     * Extra added by NotificationManagerService to indicate whether a NotificationScorer
-     * modified the Notifications's score.
+     * Extra added by NotificationManagerService to indicate whether
+     * the Notifications's score has been modified.
      */
     public static final String EXTRA_SCORE_MODIFIED = "android.scoreModified";
 
