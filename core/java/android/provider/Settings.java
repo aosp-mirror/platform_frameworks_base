@@ -3838,20 +3838,9 @@ public final class Settings {
 
         /**
          * Setting that specifies whether display color inversion is enabled.
-         *
-         * @hide
          */
         public static final String ACCESSIBILITY_DISPLAY_INVERSION_ENABLED =
                 "accessibility_display_inversion_enabled";
-
-        /**
-         * Integer property that specifies the type of color inversion to
-         * perform. Valid values are defined in AccessibilityManager.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_INVERSION =
-                "accessibility_display_inversion";
 
         /**
          * Setting that specifies whether the quick setting tile for display
@@ -3879,44 +3868,6 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER =
                 "accessibility_display_daltonizer";
-
-        /**
-         * Setting that specifies whether the quick setting tile for display
-         * contrast enhancement is enabled.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_CONTRAST_QUICK_SETTING_ENABLED =
-                "accessibility_display_contrast_quick_setting_enabled";
-
-        /**
-         * Setting that specifies whether display contrast enhancement is
-         * enabled.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED =
-                "accessibility_display_contrast_enabled";
-
-        /**
-         * Floating point property that specifies display contrast adjustment.
-         * Valid range is [0, ...] where 0 is gray, 1 is normal, and higher
-         * values indicate enhanced contrast.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_CONTRAST =
-                "accessibility_display_contrast";
-
-        /**
-         * Floating point property that specifies display brightness adjustment.
-         * Valid range is [-1, 1] where -1 is black, 0 is default, and 1 is
-         * white.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_BRIGHTNESS =
-                "accessibility_display_brightness";
 
         /**
          * The timout for considering a press to be a long press in milliseconds.

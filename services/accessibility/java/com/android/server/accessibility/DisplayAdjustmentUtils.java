@@ -41,22 +41,6 @@ class DisplayAdjustmentUtils {
              0,      0,      0, 1
     };
 
-    /** Matrix and offset used for standard display inversion. */
-    private static final float[] INVERSION_MATRIX_STANDARD = new float[] {
-        -1,  0,  0, 0,
-         0, -1,  0, 0,
-         0,  0, -1, 0,
-         1,  1,  1, 1
-    };
-
-    /** Matrix and offset used for hue-only display inversion. */
-    private static final float[] INVERSION_MATRIX_HUE_ONLY = new float[] {
-          0, .5f, .5f, 0,
-        .5f,   0, .5f, 0,
-        .5f, .5f,   0, 0,
-          0,   0,   0, 1
-    };
-
     /** Matrix and offset used for value-only display inversion. */
     private static final float[] INVERSION_MATRIX_VALUE_ONLY = new float[] {
            0, -.5f, -.5f, 0,
@@ -64,15 +48,6 @@ class DisplayAdjustmentUtils {
         -.5f, -.5f,    0, 0,
            1,    1,    1, 1
     };
-
-    /** Default contrast for display contrast enhancement. */
-    private static final float DEFAULT_DISPLAY_CONTRAST = 2;
-
-    /** Default brightness for display contrast enhancement. */
-    private static final float DEFAULT_DISPLAY_BRIGHTNESS = 0;
-
-    /** Default inversion mode for display color inversion. */
-    private static final int DEFAULT_DISPLAY_INVERSION = AccessibilityManager.INVERSION_STANDARD;
 
     /** Default inversion mode for display color correction. */
     private static final int DEFAULT_DISPLAY_DALTONIZER =
@@ -87,11 +62,6 @@ class DisplayAdjustmentUtils {
 
         boolean hasColorTransform = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
-
-        if (!hasColorTransform) {
-            hasColorTransform |= Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, userId) == 1;
-        }
 
         if (!hasColorTransform) {
             hasColorTransform |= Settings.Secure.getIntForUser(
@@ -115,47 +85,8 @@ class DisplayAdjustmentUtils {
         final boolean inversionEnabled = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
         if (inversionEnabled) {
-            final int inversionMode = Settings.Secure.getIntForUser(cr,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION, DEFAULT_DISPLAY_INVERSION,
-                    userId);
-            final float[] inversionMatrix;
-            switch (inversionMode) {
-                case AccessibilityManager.INVERSION_HUE_ONLY:
-                    inversionMatrix = INVERSION_MATRIX_HUE_ONLY;
-                    break;
-                case AccessibilityManager.INVERSION_VALUE_ONLY:
-                    inversionMatrix = INVERSION_MATRIX_VALUE_ONLY;
-                    break;
-                default:
-                    inversionMatrix = INVERSION_MATRIX_STANDARD;
-            }
-
+            final float[] inversionMatrix = INVERSION_MATRIX_VALUE_ONLY;
             Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, inversionMatrix, 0);
-
-            colorMatrix = outputMatrix;
-            outputMatrix = colorMatrix;
-
-            hasColorTransform = true;
-        }
-
-        final boolean contrastEnabled = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, userId) == 1;
-        if (contrastEnabled) {
-            final float contrast = Settings.Secure.getFloatForUser(cr,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST, DEFAULT_DISPLAY_CONTRAST,
-                    userId);
-            final float brightness = Settings.Secure.getFloatForUser(cr,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS, DEFAULT_DISPLAY_BRIGHTNESS,
-                    userId);
-            final float off = brightness * contrast - 0.5f * contrast + 0.5f;
-            final float[] contrastMatrix = {
-                    contrast, 0, 0, 0,
-                    0, contrast, 0, 0,
-                    0, 0, contrast, 0,
-                    off, off, off, 1
-            };
-
-            Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, contrastMatrix, 0);
 
             colorMatrix = outputMatrix;
             outputMatrix = colorMatrix;

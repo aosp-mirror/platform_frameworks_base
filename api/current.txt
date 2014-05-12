@@ -23498,6 +23498,7 @@ package android.provider {
     method public static boolean putLong(android.content.ContentResolver, java.lang.String, long);
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
     method public static final deprecated void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
+    field public static final java.lang.String ACCESSIBILITY_DISPLAY_INVERSION_ENABLED = "accessibility_display_inversion_enabled";
     field public static final java.lang.String ACCESSIBILITY_ENABLED = "accessibility_enabled";
     field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
     field public static final deprecated java.lang.String ADB_ENABLED = "adb_enabled";
