@@ -196,7 +196,9 @@ public class TvView extends SurfaceView {
         if (mSession == null) {
             return false;
         }
-        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        InputEvent copiedEvent = event.copy();
+        int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
+                mHandler);
         return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
@@ -209,7 +211,9 @@ public class TvView extends SurfaceView {
         if (mSession == null) {
             return false;
         }
-        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        InputEvent copiedEvent = event.copy();
+        int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
+                mHandler);
         return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
@@ -222,7 +226,9 @@ public class TvView extends SurfaceView {
         if (mSession == null) {
             return false;
         }
-        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        InputEvent copiedEvent = event.copy();
+        int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
+                mHandler);
         return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
@@ -235,7 +241,9 @@ public class TvView extends SurfaceView {
         if (mSession == null) {
             return false;
         }
-        int ret = mSession.dispatchInputEvent(event, event, mFinishedInputEventCallback, mHandler);
+        InputEvent copiedEvent = event.copy();
+        int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
+                mHandler);
         return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
