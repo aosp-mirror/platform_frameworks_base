@@ -2452,15 +2452,19 @@ String8 ResTable_config::toString() const {
 
     if (mcc != 0) {
         if (res.size() > 0) res.append("-");
-        res.appendFormat("%dmcc", dtohs(mcc));
+        res.appendFormat("mcc%d", dtohs(mcc));
     }
     if (mnc != 0) {
         if (res.size() > 0) res.append("-");
-        res.appendFormat("%dmnc", dtohs(mnc));
+        res.appendFormat("mnc%d", dtohs(mnc));
     }
+
     char localeStr[RESTABLE_MAX_LOCALE_LEN];
     getBcp47Locale(localeStr);
-    res.append(localeStr);
+    if (strlen(localeStr) > 0) {
+        if (res.size() > 0) res.append("-");
+        res.append(localeStr);
+    }
 
     if ((screenLayout&MASK_LAYOUTDIR) != 0) {
         if (res.size() > 0) res.append("-");
@@ -2627,6 +2631,20 @@ String8 ResTable_config::toString() const {
                 break;
         }
     }
+    if ((inputFlags&MASK_KEYSHIDDEN) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (inputFlags&MASK_KEYSHIDDEN) {
+            case ResTable_config::KEYSHIDDEN_NO:
+                res.append("keysexposed");
+                break;
+            case ResTable_config::KEYSHIDDEN_YES:
+                res.append("keyshidden");
+                break;
+            case ResTable_config::KEYSHIDDEN_SOFT:
+                res.append("keyssoft");
+                break;
+        }
+    }
     if (keyboard != KEYBOARD_ANY) {
         if (res.size() > 0) res.append("-");
         switch (keyboard) {
@@ -2644,17 +2662,18 @@ String8 ResTable_config::toString() const {
                 break;
         }
     }
-    if ((inputFlags&MASK_KEYSHIDDEN) != 0) {
+    if ((inputFlags&MASK_NAVHIDDEN) != 0) {
         if (res.size() > 0) res.append("-");
-        switch (inputFlags&MASK_KEYSHIDDEN) {
-            case ResTable_config::KEYSHIDDEN_NO:
-                res.append("keysexposed");
+        switch (inputFlags&MASK_NAVHIDDEN) {
+            case ResTable_config::NAVHIDDEN_NO:
+                res.append("navexposed");
                 break;
-            case ResTable_config::KEYSHIDDEN_YES:
-                res.append("keyshidden");
+            case ResTable_config::NAVHIDDEN_YES:
+                res.append("navhidden");
                 break;
-            case ResTable_config::KEYSHIDDEN_SOFT:
-                res.append("keyssoft");
+            default:
+                res.appendFormat("inputFlagsNavHidden=%d",
+                        dtohs(inputFlags&MASK_NAVHIDDEN));
                 break;
         }
     }
@@ -2675,21 +2694,6 @@ String8 ResTable_config::toString() const {
                 break;
             default:
                 res.appendFormat("navigation=%d", dtohs(navigation));
-                break;
-        }
-    }
-    if ((inputFlags&MASK_NAVHIDDEN) != 0) {
-        if (res.size() > 0) res.append("-");
-        switch (inputFlags&MASK_NAVHIDDEN) {
-            case ResTable_config::NAVHIDDEN_NO:
-                res.append("navsexposed");
-                break;
-            case ResTable_config::NAVHIDDEN_YES:
-                res.append("navhidden");
-                break;
-            default:
-                res.appendFormat("inputFlagsNavHidden=%d",
-                        dtohs(inputFlags&MASK_NAVHIDDEN));
                 break;
         }
     }
@@ -5503,7 +5507,25 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         if (package == NULL) {
             return (mError=NO_MEMORY);
         }
-        
+
+        if (idmap_id == 0) {
+            err = package->typeStrings.setTo(base+dtohl(pkg->typeStrings),
+                                           header->dataEnd-(base+dtohl(pkg->typeStrings)));
+            if (err != NO_ERROR) {
+                delete group;
+                delete package;
+                return (mError=err);
+            }
+
+            err = package->keyStrings.setTo(base+dtohl(pkg->keyStrings),
+                                          header->dataEnd-(base+dtohl(pkg->keyStrings)));
+            if (err != NO_ERROR) {
+                delete group;
+                delete package;
+                return (mError=err);
+            }
+        }
+
         if (id == 0) {
             // This is a library so assign an ID
             id = mNextPackageId++;
@@ -5519,21 +5541,6 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             if (group == NULL) {
                 delete package;
                 return (mError=NO_MEMORY);
-            }
-
-            err = package->typeStrings.setTo(base+dtohl(pkg->typeStrings),
-                                           header->dataEnd-(base+dtohl(pkg->typeStrings)));
-            if (err != NO_ERROR) {
-                delete group;
-                delete package;
-                return (mError=err);
-            }
-            err = package->keyStrings.setTo(base+dtohl(pkg->keyStrings),
-                                          header->dataEnd-(base+dtohl(pkg->keyStrings)));
-            if (err != NO_ERROR) {
-                delete group;
-                delete package;
-                return (mError=err);
             }
 
             //printf("Adding new package id %d at index %d\n", id, idx);

@@ -3,6 +3,7 @@
 //
 // Android Asset Packaging Tool main entry point.
 //
+#include "ApkBuilder.h"
 #include "Main.h"
 #include "Bundle.h"
 #include "ResourceFilter.h"
@@ -2034,6 +2035,47 @@ bail:
     return (result != NO_ERROR);
 }
 
+static status_t addResourcesToBuilder(const sp<AaptDir>& dir, const sp<ApkBuilder>& builder) {
+    const size_t numDirs = dir->getDirs().size();
+    for (size_t i = 0; i < numDirs; i++) {
+        status_t err = addResourcesToBuilder(dir->getDirs().valueAt(i), builder);
+        if (err != NO_ERROR) {
+            return err;
+        }
+    }
+
+    const size_t numFiles = dir->getFiles().size();
+    for (size_t i = 0; i < numFiles; i++) {
+        sp<AaptGroup> gp = dir->getFiles().valueAt(i);
+        const size_t numConfigs = gp->getFiles().size();
+        for (size_t j = 0; j < numConfigs; j++) {
+            status_t err = builder->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
+            if (err != NO_ERROR) {
+                fprintf(stderr, "Failed to add %s (%s) to builder.\n",
+                        gp->getPath().string(), gp->getFiles()[j]->getPrintableSource().string());
+                return err;
+            }
+        }
+    }
+    return NO_ERROR;
+}
+
+static String8 buildApkName(const String8& original, const sp<ApkSplit>& split) {
+    if (split->isBase()) {
+        return original;
+    }
+
+    String8 ext(original.getPathExtension());
+    if (ext == String8(".apk")) {
+        return String8::format("%s_%s%s",
+                original.getBasePath().string(),
+                split->getDirectorySafeName().string(),
+                ext.string());
+    }
+
+    return String8::format("%s_%s", original.string(),
+            split->getDirectorySafeName().string());
+}
 
 /*
  * Package up an asset directory and associated application files.
@@ -2047,17 +2089,18 @@ int doPackage(Bundle* bundle)
     int N;
     FILE* fp;
     String8 dependencyFile;
+    sp<ApkBuilder> builder;
 
     // -c en_XA or/and ar_XB means do pseudolocalization
-    ResourceFilter filter;
-    err = filter.parse(bundle->getConfigurations());
+    sp<WeakResourceFilter> configFilter = new WeakResourceFilter();
+    err = configFilter->parse(bundle->getConfigurations());
     if (err != NO_ERROR) {
         goto bail;
     }
-    if (filter.containsPseudo()) {
+    if (configFilter->containsPseudo()) {
         bundle->setPseudolocalize(bundle->getPseudolocalize() | PSEUDO_ACCENTED);
     }
-    if (filter.containsPseudoBidi()) {
+    if (configFilter->containsPseudoBidi()) {
         bundle->setPseudolocalize(bundle->getPseudolocalize() | PSEUDO_BIDI);
     }
 
@@ -2105,9 +2148,32 @@ int doPackage(Bundle* bundle)
         assets->print(String8());
     }
 
+    // Create the ApkBuilder, which will collect the compiled files
+    // to write to the final APK (or sets of APKs if we are building
+    // a Split APK.
+    builder = new ApkBuilder(configFilter);
+
+    // If we are generating a Split APK, find out which configurations to split on.
+    if (bundle->getSplitConfigurations().size() > 0) {
+        const Vector<String8>& splitStrs = bundle->getSplitConfigurations();
+        const size_t numSplits = splitStrs.size();
+        for (size_t i = 0; i < numSplits; i++) {
+            std::set<ConfigDescription> configs;
+            if (!AaptConfig::parseCommaSeparatedList(splitStrs[i], &configs)) {
+                fprintf(stderr, "ERROR: failed to parse split configuration '%s'\n", splitStrs[i].string());
+                goto bail;
+            }
+
+            err = builder->createSplitForConfigs(configs);
+            if (err != NO_ERROR) {
+                goto bail;
+            }
+        }
+    }
+
     // If they asked for any fileAs that need to be compiled, do so.
     if (bundle->getResourceSourceDirs().size() || bundle->getAndroidManifestFile()) {
-        err = buildResources(bundle, assets);
+        err = buildResources(bundle, assets, builder);
         if (err != 0) {
             goto bail;
         }
@@ -2194,10 +2260,23 @@ int doPackage(Bundle* bundle)
 
     // Write the apk
     if (outputAPKFile) {
-        err = writeAPK(bundle, assets, String8(outputAPKFile));
+        // Gather all resources and add them to the APK Builder. The builder will then
+        // figure out which Split they belong in.
+        err = addResourcesToBuilder(assets, builder);
         if (err != NO_ERROR) {
-            fprintf(stderr, "ERROR: packaging of '%s' failed\n", outputAPKFile);
             goto bail;
+        }
+
+        const Vector<sp<ApkSplit> >& splits = builder->getSplits();
+        const size_t numSplits = splits.size();
+        for (size_t i = 0; i < numSplits; i++) {
+            const sp<ApkSplit>& split = splits[i];
+            String8 outputPath = buildApkName(String8(outputAPKFile), split);
+            err = writeAPK(bundle, outputPath, split);
+            if (err != NO_ERROR) {
+                fprintf(stderr, "ERROR: packaging of '%s' failed\n", outputPath.string());
+                goto bail;
+            }
         }
     }
 

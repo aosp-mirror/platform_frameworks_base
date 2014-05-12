@@ -5,6 +5,7 @@
 //
 #include "Main.h"
 #include "AaptAssets.h"
+#include "OutputSet.h"
 #include "ResourceTable.h"
 #include "ResourceFilter.h"
 
@@ -36,11 +37,8 @@ static const char* kNoCompressExt[] = {
 };
 
 /* fwd decls, so I can write this downward */
-ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptAssets>& assets);
-ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptDir>& dir,
-                        const AaptGroupEntry& ge, const ResourceFilter* filter);
-bool processFile(Bundle* bundle, ZipFile* zip,
-                        const sp<AaptGroup>& group, const sp<AaptFile>& file);
+ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<const OutputSet>& outputSet);
+bool processFile(Bundle* bundle, ZipFile* zip, String8 storageName, const sp<const AaptFile>& file);
 bool okayToCompress(Bundle* bundle, const String8& pathName);
 ssize_t processJarFiles(Bundle* bundle, ZipFile* zip);
 
@@ -51,8 +49,7 @@ ssize_t processJarFiles(Bundle* bundle, ZipFile* zip);
  * On success, "bundle->numPackages" will be the number of Zip packages
  * we created.
  */
-status_t writeAPK(Bundle* bundle, const sp<AaptAssets>& assets,
-                       const String8& outputFile)
+status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>& outputSet)
 {
     #if BENCHMARK
     fprintf(stdout, "BENCHMARK: Starting APK Bundling \n");
@@ -112,7 +109,7 @@ status_t writeAPK(Bundle* bundle, const sp<AaptAssets>& assets,
         printf("Writing all files...\n");
     }
 
-    count = processAssets(bundle, zip, assets);
+    count = processAssets(bundle, zip, outputSet);
     if (count < 0) {
         fprintf(stderr, "ERROR: unable to process assets while packaging '%s'\n",
                 outputFile.string());
@@ -218,72 +215,24 @@ bail:
     return result;
 }
 
-ssize_t processAssets(Bundle* bundle, ZipFile* zip,
-                      const sp<AaptAssets>& assets)
-{
-    ResourceFilter filter;
-    status_t status = filter.parse(bundle->getConfigurations());
-    if (status != NO_ERROR) {
-        return -1;
-    }
-
-    ssize_t count = 0;
-
-    const size_t N = assets->getGroupEntries().size();
-    for (size_t i=0; i<N; i++) {
-        const AaptGroupEntry& ge = assets->getGroupEntries()[i];
-
-        ssize_t res = processAssets(bundle, zip, assets, ge, &filter);
-        if (res < 0) {
-            return res;
-        }
-
-        count += res;
-    }
-
-    return count;
-}
-
-ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptDir>& dir,
-        const AaptGroupEntry& ge, const ResourceFilter* filter)
+ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<const OutputSet>& outputSet)
 {
     ssize_t count = 0;
-
-    const size_t ND = dir->getDirs().size();
-    size_t i;
-    for (i=0; i<ND; i++) {
-        const sp<AaptDir>& subDir = dir->getDirs().valueAt(i);
-
-        const bool filterable = filter != NULL && subDir->getLeaf().find("mipmap-") != 0;
-
-        if (filterable && subDir->getLeaf() != subDir->getPath() && !filter->match(ge.toParams())) {
-            continue;
-        }
-
-        ssize_t res = processAssets(bundle, zip, subDir, ge, filterable ? filter : NULL);
-        if (res < 0) {
-            return res;
-        }
-        count += res;
-    }
-
-    if (filter != NULL && !filter->match(ge.toParams())) {
-        return count;
-    }
-
-    const size_t NF = dir->getFiles().size();
-    for (i=0; i<NF; i++) {
-        sp<AaptGroup> gp = dir->getFiles().valueAt(i);
-        ssize_t fi = gp->getFiles().indexOfKey(ge);
-        if (fi >= 0) {
-            sp<AaptFile> fl = gp->getFiles().valueAt(fi);
-            if (!processFile(bundle, zip, gp, fl)) {
+    const std::set<OutputEntry>& entries = outputSet->getEntries();
+    std::set<OutputEntry>::const_iterator iter = entries.begin();
+    for (; iter != entries.end(); iter++) {
+        const OutputEntry& entry = *iter;
+        if (entry.getFile() == NULL) {
+            fprintf(stderr, "warning: null file being processed.\n");
+        } else {
+            String8 storagePath(entry.getPath());
+            storagePath.convertToResPath();
+            if (!processFile(bundle, zip, storagePath, entry.getFile())) {
                 return UNKNOWN_ERROR;
             }
             count++;
         }
     }
-
     return count;
 }
 
@@ -294,12 +243,10 @@ ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptDir>& dir,
  * delete the existing entry before adding the new one.
  */
 bool processFile(Bundle* bundle, ZipFile* zip,
-                 const sp<AaptGroup>& group, const sp<AaptFile>& file)
+                 String8 storageName, const sp<const AaptFile>& file)
 {
     const bool hasData = file->hasData();
 
-    String8 storageName(group->getPath());
-    storageName.convertToResPath();
     ZipEntry* entry;
     bool fromGzip = false;
     status_t result;
@@ -403,8 +350,8 @@ bool processFile(Bundle* bundle, ZipFile* zip,
             fprintf(stderr, "      Unable to add '%s': file already in archive (try '-u'?)\n",
                     file->getPrintableSource().string());
         } else {
-            fprintf(stderr, "      Unable to add '%s': Zip add failed\n", 
-                    file->getPrintableSource().string());
+            fprintf(stderr, "      Unable to add '%s': Zip add failed (%d)\n",
+                    file->getPrintableSource().string(), result);
         }
         return false;
     }

@@ -151,10 +151,12 @@ public:
     void setPublicOutputFile(const char* file) { mPublicOutputFile = file; }
     const char* getRClassDir() const { return mRClassDir; }
     void setRClassDir(const char* dir) { mRClassDir = dir; }
-    const char* getConfigurations() const { return mConfigurations.size() > 0 ? mConfigurations.string() : NULL; }
+    const android::String8& getConfigurations() const { return mConfigurations; }
     void addConfigurations(const char* val) { if (mConfigurations.size() > 0) { mConfigurations.append(","); mConfigurations.append(val); } else { mConfigurations = val; } }
-    const char* getPreferredConfigurations() const { return mPreferredConfigurations.size() > 0 ? mPreferredConfigurations.string() : NULL; }
-    void addPreferredConfigurations(const char* val) { if (mPreferredConfigurations.size() > 0) { mPreferredConfigurations.append(","); mPreferredConfigurations.append(val); } else { mPreferredConfigurations = val; } }
+    const android::String8& getPreferredDensity() const { return mPreferredDensity; }
+    void setPreferredDensity(const char* val) { mPreferredDensity = val; }
+    void addSplitConfigurations(const char* val) { mPartialConfigurations.add(android::String8(val)); }
+    const android::Vector<android::String8>& getSplitConfigurations() const { return mPartialConfigurations; }
     const char* getResourceIntermediatesDir() const { return mResourceIntermediatesDir; }
     void setResourceIntermediatesDir(const char* dir) { mResourceIntermediatesDir = dir; }
     const android::Vector<const char*>& getPackageIncludes() const { return mPackageIncludes; }
@@ -286,7 +288,8 @@ private:
     const char* mRClassDir;
     const char* mResourceIntermediatesDir;
     android::String8 mConfigurations;
-    android::String8 mPreferredConfigurations;
+    android::String8 mPreferredDensity;
+    android::Vector<android::String8> mPartialConfigurations;
     android::Vector<const char*> mPackageIncludes;
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
