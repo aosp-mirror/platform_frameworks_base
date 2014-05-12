@@ -63,7 +63,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final ArrayList<MediaRouteProviderProxy> mProviders
             = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
-    // TODO do we want a separate thread for handling mediasession messages?
     private final Handler mHandler = new Handler();
 
     private MediaSessionRecord mPrioritySession;
@@ -72,8 +71,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     // session so we drop late callbacks properly.
     private int mShowRoutesRequestId = 0;
 
-    // TODO refactor to have per user state. See MediaRouterService for an
-    // example
+    // TODO refactor to have per user state for providers. See
+    // MediaRouterService for an example
 
     public MediaSessionService(Context context) {
         super(context);
@@ -211,25 +210,42 @@ public class MediaSessionService extends SystemService implements Monitor {
      * <ul>
      * <li>the caller has android.Manifest.permission.MEDIA_CONTENT_CONTROL
      * permission</li>
-     * <li>the caller's listener is one of the enabled notification listeners</li>
+     * <li>the caller's listener is one of the enabled notification listeners
+     * for the caller's user</li>
      * </ul>
      */
-    private void enforceMediaPermissions(ComponentName compName, int pid, int uid) {
+    private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
+            int resolvedUserId) {
         if (getContext()
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                     != PackageManager.PERMISSION_GRANTED
-                && !isEnabledNotificationListener(compName)) {
+                && !isEnabledNotificationListener(compName, UserHandle.getUserId(uid),
+                        resolvedUserId)) {
             throw new SecurityException("Missing permission to control media.");
         }
     }
 
-    private boolean isEnabledNotificationListener(ComponentName compName) {
+    /**
+     * This checks if the component is an enabled notification listener for the
+     * specified user. Enabled components may only operate on behalf of the user
+     * they're running as.
+     *
+     * @param compName The component that is enabled.
+     * @param userId The user id of the caller.
+     * @param forUserId The user id they're making the request on behalf of.
+     * @return True if the component is enabled, false otherwise
+     */
+    private boolean isEnabledNotificationListener(ComponentName compName, int userId,
+            int forUserId) {
+        if (userId != forUserId) {
+            // You may not access another user's content as an enabled listener.
+            return false;
+        }
         if (compName != null) {
-            final int currentUser = ActivityManager.getCurrentUser();
             final String enabledNotifListeners = Settings.Secure.getStringForUser(
                     getContext().getContentResolver(),
                     Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    currentUser);
+                    userId);
             if (enabledNotifListeners != null) {
                 final String[] components = enabledNotifListeners.split(":");
                 for (int i = 0; i < components.length; i++) {
@@ -248,23 +264,23 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             if (DEBUG) {
                 Log.d(TAG, "not ok to get sessions, " + compName +
-                        " is not in list of ENABLED_NOTIFICATION_LISTENERS");
+                        " is not in list of ENABLED_NOTIFICATION_LISTENERS for user " + userId);
             }
         }
         return false;
     }
 
-    private MediaSessionRecord createSessionInternal(int pid, String packageName,
-            ISessionCallback cb, String tag, boolean forCalls) {
+    private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
+            String callerPackageName, ISessionCallback cb, String tag) {
         synchronized (mLock) {
-            return createSessionLocked(pid, packageName, cb, tag);
+            return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb, tag);
         }
     }
 
-    private MediaSessionRecord createSessionLocked(int pid, String packageName,
-            ISessionCallback cb, String tag) {
-        final MediaSessionRecord session = new MediaSessionRecord(pid, packageName, cb, tag, this,
-                mHandler);
+    private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
+            String callerPackageName, ISessionCallback cb, String tag) {
+        final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
+                callerPackageName, cb, tag, this, mHandler);
         try {
             cb.asBinder().linkToDeath(session, 0);
         } catch (RemoteException e) {
@@ -273,7 +289,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mRecords.add(session);
         mPriorityStack.addSession(session);
         if (DEBUG) {
-            Log.d(TAG, "Created session for package " + packageName + " with tag " + tag);
+            Log.d(TAG, "Created session for package " + callerPackageName + " with tag " + tag);
         }
         return session;
     }
@@ -358,41 +374,50 @@ public class MediaSessionService extends SystemService implements Monitor {
         // ActivityManagerNative.handleIncomingUser and stash result for use
         // when starting services on that session's behalf.
         @Override
-        public ISession createSession(String packageName, ISessionCallback cb, String tag)
-                throws RemoteException {
+        public ISession createSession(String packageName, ISessionCallback cb, String tag,
+                int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 enforcePackageName(packageName, uid);
+                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
+                        false /* allowAll */, true /* requireFull */, "createSession", packageName);
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
-                return createSessionInternal(pid, packageName, cb, tag, false).getSessionBinder();
+                return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag)
+                        .getSessionBinder();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public List<IBinder> getSessions(ComponentName componentName) {
+        public List<IBinder> getSessions(ComponentName componentName, int userId) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
 
             try {
+                String packageName = null;
                 if (componentName != null) {
                     // If they gave us a component name verify they own the
                     // package
-                    enforcePackageName(componentName.getPackageName(), uid);
+                    packageName = componentName.getPackageName();
+                    enforcePackageName(packageName, uid);
                 }
-                // Then check if they have the permissions or their component is
-                // allowed
-                enforceMediaPermissions(componentName, pid, uid);
+                // Check that they can make calls on behalf of the user and
+                // get the final user id
+                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
+                        true /* allowAll */, true /* requireFull */, "getSessions", packageName);
+                // Check if they have the permissions or their component is
+                // enabled for the user they're calling from.
+                enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
                 ArrayList<IBinder> binders = new ArrayList<IBinder>();
                 synchronized (mLock) {
                     ArrayList<MediaSessionRecord> records = mPriorityStack
-                            .getActiveSessions();
+                            .getActiveSessions(resolvedUserId);
                     int size = records.size();
                     for (int i = 0; i < size; i++) {
                         binders.add(records.get(i).getControllerBinder().asBinder());
@@ -428,7 +453,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mRecords.get(i).dump(pw, "");
                     pw.println();
                 }
-                mPriorityStack.dumpLocked(pw, "");
+                mPriorityStack.dump(pw, "");
 
                 pw.println("Providers:");
                 count = mProviders.size();

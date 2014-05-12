@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
@@ -42,6 +43,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -80,7 +82,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private final MessageHandler mHandler;
 
-    private final int mPid;
+    private final int mOwnerPid;
+    private final int mOwnerUid;
+    private final int mUserId;
     private final SessionInfo mSessionInfo;
     private final String mTag;
     private final ControllerStub mController;
@@ -110,10 +114,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private boolean mIsActive = false;
 
-    public MediaSessionRecord(int pid, String packageName, ISessionCallback cb, String tag,
-            MediaSessionService service, Handler handler) {
-        mPid = pid;
-        mSessionInfo = new SessionInfo(UUID.randomUUID().toString(), packageName);
+    public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
+            ISessionCallback cb, String tag, MediaSessionService service, Handler handler) {
+        mOwnerPid = ownerPid;
+        mOwnerUid = ownerUid;
+        mUserId = userId;
+        mSessionInfo = new SessionInfo(UUID.randomUUID().toString(), ownerPackageName);
         mTag = tag;
         mController = new ControllerStub();
         mSession = new SessionStub();
@@ -184,6 +190,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public boolean hasFlag(int flag) {
         return (mFlags & flag) != 0;
+    }
+
+    /**
+     * Get the user id this session was created for.
+     *
+     * @return The user id for this session.
+     */
+    public int getUserId() {
+        return mUserId;
     }
 
     /**
@@ -305,7 +320,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(prefix + mTag + " " + this);
 
         final String indent = prefix + "  ";
-        pw.println(indent + "pid=" + mPid);
+        pw.println(indent + "ownerPid=" + mOwnerPid + ", ownerUid=" + mOwnerUid
+                + ", userId=" + mUserId);
         pw.println(indent + "info=" + mSessionInfo.toString());
         pw.println(indent + "published=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
