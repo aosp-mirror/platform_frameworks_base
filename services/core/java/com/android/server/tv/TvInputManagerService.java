@@ -648,10 +648,10 @@ public final class TvInputManagerService extends SystemService {
 
                         // Create a log entry and fill it later.
                         ContentValues values = new ContentValues();
-                        values.put(TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
+                        values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                                 currentTime);
-                        values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, 0);
-                        values.put(TvContract.WatchedPrograms.CHANNEL_ID, channelId);
+                        values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, 0);
+                        values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
 
                         sessionState.mLogUri = mContentResolver.insert(
                                 TvContract.WatchedPrograms.CONTENT_URI, values);
@@ -944,31 +944,32 @@ public final class TvInputManagerService extends SystemService {
 
         private void onOpenEntry(Uri uri, long channelId, long watchStarttime) {
             String[] projection = {
-                    TvContract.Programs.TITLE,
-                    TvContract.Programs.START_TIME_UTC_MILLIS,
-                    TvContract.Programs.END_TIME_UTC_MILLIS,
-                    TvContract.Programs.DESCRIPTION
+                    TvContract.Programs.COLUMN_TITLE,
+                    TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS,
+                    TvContract.Programs.COLUMN_END_TIME_UTC_MILLIS,
+                    TvContract.Programs.COLUMN_DESCRIPTION
             };
-            String selection = TvContract.Programs.CHANNEL_ID + "=? AND "
-                    + TvContract.Programs.START_TIME_UTC_MILLIS + "<=? AND "
-                    + TvContract.Programs.END_TIME_UTC_MILLIS + ">?";
+            String selection = TvContract.Programs.COLUMN_CHANNEL_ID + "=? AND "
+                    + TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS + "<=? AND "
+                    + TvContract.Programs.COLUMN_END_TIME_UTC_MILLIS + ">?";
             String[] selectionArgs = {
                     String.valueOf(channelId),
                     String.valueOf(watchStarttime),
                     String.valueOf(watchStarttime)
             };
-            String sortOrder = TvContract.Programs.START_TIME_UTC_MILLIS + " ASC";
+            String sortOrder = TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS + " ASC";
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(TvContract.Programs.CONTENT_URI, projection,
                         selection, selectionArgs, sortOrder);
                 if (cursor != null && cursor.moveToNext()) {
                     ContentValues values = new ContentValues();
-                    values.put(TvContract.WatchedPrograms.TITLE, cursor.getString(0));
-                    values.put(TvContract.WatchedPrograms.START_TIME_UTC_MILLIS, cursor.getLong(1));
+                    values.put(TvContract.WatchedPrograms.COLUMN_TITLE, cursor.getString(0));
+                    values.put(TvContract.WatchedPrograms.COLUMN_START_TIME_UTC_MILLIS,
+                            cursor.getLong(1));
                     long endTime = cursor.getLong(2);
-                    values.put(TvContract.WatchedPrograms.END_TIME_UTC_MILLIS, endTime);
-                    values.put(TvContract.WatchedPrograms.DESCRIPTION, cursor.getString(3));
+                    values.put(TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS, endTime);
+                    values.put(TvContract.WatchedPrograms.COLUMN_DESCRIPTION, cursor.getString(3));
                     mContentResolver.update(uri, values, null, null);
 
                     // Schedule an update when the current program ends.
@@ -988,12 +989,12 @@ public final class TvInputManagerService extends SystemService {
 
         private void onUpdateEntry(Uri uri, long channelId, long time) {
             String[] projection = {
-                    TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.TITLE,
-                    TvContract.WatchedPrograms.START_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.END_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.DESCRIPTION
+                    TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.COLUMN_TITLE,
+                    TvContract.WatchedPrograms.COLUMN_START_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS,
+                    TvContract.WatchedPrograms.COLUMN_DESCRIPTION
             };
             Cursor cursor = null;
             try {
@@ -1014,14 +1015,14 @@ public final class TvInputManagerService extends SystemService {
                     // The current program has just ended. Create a (complete) log entry off the
                     // current entry.
                     ContentValues values = new ContentValues();
-                    values.put(TvContract.WatchedPrograms.WATCH_START_TIME_UTC_MILLIS,
+                    values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                             watchStartTime);
-                    values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, time);
-                    values.put(TvContract.WatchedPrograms.CHANNEL_ID, channelId);
-                    values.put(TvContract.WatchedPrograms.TITLE, title);
-                    values.put(TvContract.WatchedPrograms.START_TIME_UTC_MILLIS, startTime);
-                    values.put(TvContract.WatchedPrograms.END_TIME_UTC_MILLIS, endTime);
-                    values.put(TvContract.WatchedPrograms.DESCRIPTION, description);
+                    values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, time);
+                    values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
+                    values.put(TvContract.WatchedPrograms.COLUMN_TITLE, title);
+                    values.put(TvContract.WatchedPrograms.COLUMN_START_TIME_UTC_MILLIS, startTime);
+                    values.put(TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS, endTime);
+                    values.put(TvContract.WatchedPrograms.COLUMN_DESCRIPTION, description);
                     mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
                 }
             } finally {
@@ -1035,7 +1036,7 @@ public final class TvInputManagerService extends SystemService {
 
         private void onCloseEntry(Uri uri, long watchEndTime) {
             ContentValues values = new ContentValues();
-            values.put(TvContract.WatchedPrograms.WATCH_END_TIME_UTC_MILLIS, watchEndTime);
+            values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, watchEndTime);
             mContentResolver.update(uri, values, null, null);
         }
     }
