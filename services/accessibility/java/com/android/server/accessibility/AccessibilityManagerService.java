@@ -3698,17 +3698,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mEnhancedWebAccessibilityUri = Settings.Secure
                 .getUriFor(Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION);
 
-        private final Uri mDisplayContrastEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED);
-        private final Uri mDisplayContrastUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST);
-        private final Uri mDisplayBrightnessUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS);
-
         private final Uri mDisplayInversionEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-        private final Uri mDisplayInversionUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION);
 
         private final Uri mDisplayDaltonizerEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
@@ -3734,15 +3725,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             contentResolver.registerContentObserver(mEnhancedWebAccessibilityUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
-                    mDisplayContrastEnabledUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayContrastUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayBrightnessUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
                     mDisplayInversionEnabledUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayInversionUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
@@ -3823,12 +3806,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     }
                 }
-            } else if (mDisplayContrastEnabledUri.equals(uri)
-                    || mDisplayInversionEnabledUri.equals(uri)
+            } else if (mDisplayInversionEnabledUri.equals(uri)
                     || mDisplayDaltonizerEnabledUri.equals(uri)
-                    || mDisplayContrastUri.equals(uri)
-                    || mDisplayBrightnessUri.equals(uri)
-                    || mDisplayInversionUri.equals(uri)
                     || mDisplayDaltonizerUri.equals(uri)) {
                 synchronized (mLock) {
                     // Profiles share the accessibility state of the parent. Therefore,
