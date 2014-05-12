@@ -89,10 +89,10 @@
             <name>ITC Stone Serif</name>
         </nameset>
         <fileset>
-            <file>DroidSerif-Regular.ttf</file>
-            <file>DroidSerif-Bold.ttf</file>
-            <file>DroidSerif-Italic.ttf</file>
-            <file>DroidSerif-BoldItalic.ttf</file>
+            <file>NotoSerif-Regular.ttf</file>
+            <file>NotoSerif-Bold.ttf</file>
+            <file>NotoSerif-Italic.ttf</file>
+            <file>NotoSerif-BoldItalic.ttf</file>
         </fileset>
     </family>
 
