@@ -24,12 +24,11 @@
         android:viewportHeight="100"
         android:viewportWidth="100" />
 
-    <group>
-        <path
-            android:name="x"
-            android:pathData="M0,0L100,100M0,100L100,0z"
-            android:stroke="@color/recents_task_bar_dark_dismiss_color"
-            android:strokeWidth="8.0"
-            android:strokeLineCap="square" />
-    </group>
+    <path
+        android:name="x"
+        android:pathData="M0,0L100,100M0,100L100,0z"
+        android:stroke="@color/recents_task_bar_dark_dismiss_color"
+        android:strokeWidth="8.0"
+        android:strokeLineCap="square" />
+
 </vector>

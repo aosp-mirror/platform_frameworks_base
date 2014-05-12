@@ -18,22 +18,21 @@
 
     <viewport android:viewportHeight="25" android:viewportWidth="25" />
 
-    <group>
-        <path
-            android:name="shadow"
-            android:pathData="m12,2.5 a11,11 0 1,0 1,0
-            M6.5,7.5
-            l5,0 l0,7 l7,0 l0,5 l-12,0 z"
-            android:fill="#40000000"
-            />
-        <path
-            android:name="circle-L-ranch"
-            android:pathData="m12,1.5 a11,11 0 1,0 1,0
-            M6.5,6.5
-            l5,0 l0,7 l7,0 l0,5 l-12,0 z"
-            android:fill="#FFFFFF40"
-            />
-    </group>
+    <path
+        android:name="shadow"
+        android:pathData="m12,2.5 a11,11 0 1,0 1,0
+        M6.5,7.5
+        l5,0 l0,7 l7,0 l0,5 l-12,0 z"
+        android:fill="#40000000"
+        />
+    <path
+        android:name="circle-L-ranch"
+        android:pathData="m12,1.5 a11,11 0 1,0 1,0
+        M6.5,6.5
+        l5,0 l0,7 l7,0 l0,5 l-12,0 z"
+        android:fill="#FFFFFF40"
+        />
+
 </vector>
 
 
