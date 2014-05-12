@@ -16,15 +16,11 @@
 
 package com.android.server.task;
 
-import android.content.ComponentName;
+import android.content.Context;
 import android.content.Task;
+import android.util.SparseArray;
 
 import com.android.server.task.controllers.TaskStatus;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Maintain a list of classes, and accessor methods/logic for these tasks.
@@ -36,25 +32,39 @@ import java.util.Map;
  *     - Handles rescheduling of tasks.
  *       - When a periodic task is executed and must be re-added.
  *       - When a task fails and the client requests that it be retried with backoff.
+ *       - This class is <strong>not</strong> thread-safe.
  */
-public class TaskList {
+public class TaskStore {
 
-    final List<TaskStatus> mTasks;
+    /**
+     * Master list, indexed by {@link com.android.server.task.controllers.TaskStatus#hashCode()}.
+     */
+    final SparseArray<TaskStatus> mTasks;
+    final Context mContext;
 
-    TaskList() {
+    TaskStore(Context context) {
         mTasks = intialiseTaskMapFromDisk();
+        mContext = context;
     }
 
     /**
      * Add a task to the master list, persisting it if necessary.
+     * Will first check to see if the task already exists. If so, it will replace it.
+     * {@link android.content.pm.PackageManager} is queried to see if the calling package has
+     * permission to
      * @param task Task to add.
-     * @param persistable true if the TaskQueue should persist this task to the disk.
-     * @return true if this operation was successful. If false, this task was neither added nor
-     * persisted.
+     * @return The initialised TaskStatus object if this operation was successful, null if it
+     * failed.
      */
-    // TODO: implement this when i decide whether i want to key by TaskStatus
-    public boolean add(Task task, boolean persistable) {
-        return true;
+    public TaskStatus addNewTaskForUser(Task task, int userId, int uId,
+                                                     boolean canPersistTask) {
+        TaskStatus taskStatus = TaskStatus.getForTaskAndUser(task, userId, uId);
+        if (canPersistTask && task.isPeriodic()) {
+            if (writeStatusToDisk()) {
+                mTasks.put(taskStatus.hashCode(), taskStatus);
+            }
+        }
+        return taskStatus;
     }
 
     /**
@@ -68,11 +78,26 @@ public class TaskList {
     }
 
     /**
+     * Every time the state changes we write all the tasks in one swathe, instead of trying to
+     * track incremental changes.
+     */
+    private boolean writeStatusToDisk() {
+        return true;
+    }
+
+    /**
      *
      * @return
      */
     // TODO: Implement this.
-    private List<TaskStatus> intialiseTaskMapFromDisk() {
-        return new ArrayList<TaskStatus>();
+    private SparseArray<TaskStatus> intialiseTaskMapFromDisk() {
+        return new SparseArray<TaskStatus>();
+    }
+
+    /**
+     * @return The live array of TaskStatus objects.
+     */
+    public SparseArray<TaskStatus> getTasks() {
+        return mTasks;
     }
 }

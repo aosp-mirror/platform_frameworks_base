@@ -18,7 +18,6 @@ package android.app.task;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -124,22 +123,20 @@ public abstract class TaskService extends Service {
             switch (msg.what) {
                 case MSG_EXECUTE_TASK:
                     try {
-                        TaskService.this.onStartTask(params);
+                        boolean workOngoing = TaskService.this.onStartTask(params);
+                        ackStartMessage(params, workOngoing);
                     } catch (Exception e) {
                         Log.e(TAG, "Error while executing task: " + params.getTaskId());
                         throw new RuntimeException(e);
-                    } finally {
-                        maybeAckMessageReceived(params, MSG_EXECUTE_TASK);
                     }
                     break;
                 case MSG_STOP_TASK:
                     try {
-                        TaskService.this.onStopTask(params);
+                        boolean ret = TaskService.this.onStopTask(params);
+                        ackStopMessage(params, ret);
                     } catch (Exception e) {
                         Log.e(TAG, "Application unable to handle onStopTask.", e);
                         throw new RuntimeException(e);
-                    } finally {
-                        maybeAckMessageReceived(params, MSG_STOP_TASK);
                     }
                     break;
                 case MSG_TASK_FINISHED:
@@ -162,30 +159,34 @@ public abstract class TaskService extends Service {
             }
         }
 
-        /**
-         * Messages come in on the application's main thread, so rather than run the risk of
-         * waiting for an app that may be doing something foolhardy, we ack to the system after
-         * processing a message. This allows us to throw up an ANR dialogue as quickly as possible.
-         * @param params id of the task we're acking.
-         * @param state Information about what message we're acking.
-         */
-        private void maybeAckMessageReceived(TaskParams params, int state) {
+        private void ackStartMessage(TaskParams params, boolean workOngoing) {
             final ITaskCallback callback = params.getCallback();
             final int taskId = params.getTaskId();
             if (callback != null) {
                 try {
-                    if (state == MSG_EXECUTE_TASK) {
-                        callback.acknowledgeStartMessage(taskId);
-                    } else if (state == MSG_STOP_TASK) {
-                        callback.acknowledgeStopMessage(taskId);
-                    }
+                     callback.acknowledgeStartMessage(taskId, workOngoing);
                 } catch(RemoteException e) {
                     Log.e(TAG, "System unreachable for starting task.");
                 }
             } else {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, state + ": Attempting to ack a task that has already been" +
-                            "processed.");
+                    Log.d(TAG, "Attempting to ack a task that has already been processed.");
+                }
+            }
+        }
+
+        private void ackStopMessage(TaskParams params, boolean reschedule) {
+            final ITaskCallback callback = params.getCallback();
+            final int taskId = params.getTaskId();
+            if (callback != null) {
+                try {
+                    callback.acknowledgeStopMessage(taskId, reschedule);
+                } catch(RemoteException e) {
+                    Log.e(TAG, "System unreachable for stopping task.");
+                }
+            } else {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Attempting to ack a task that has already been processed.");
                 }
             }
         }
@@ -203,12 +204,14 @@ public abstract class TaskService extends Service {
      *
      * @param params Parameters specifying info about this task, including the extras bundle you
      *               optionally provided at task-creation time.
+     * @return True if your service needs to process the work (on a separate thread). False if
+     * there's no more work to be done for this task.
      */
-    public abstract void onStartTask(TaskParams params);
+    public abstract boolean onStartTask(TaskParams params);
 
     /**
-     * This method is called if your task should be stopped even before you've called
-     * {@link #taskFinished(TaskParams, boolean)}.
+     * This method is called if the system has determined that you must stop execution of your task
+     * even before you've had a chance to call {@link #taskFinished(TaskParams, boolean)}.
      *
      * <p>This will happen if the requirements specified at schedule time are no longer met. For
      * example you may have requested WiFi with
@@ -217,33 +220,27 @@ public abstract class TaskService extends Service {
      * {@link android.content.Task.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
      * idle maintenance window. You are solely responsible for the behaviour of your application
      * upon receipt of this message; your app will likely start to misbehave if you ignore it. One
-     * repercussion is that the system will cease to hold a wakelock for you.</p>
-     *
-     * <p>After you've done your clean-up you are still expected to call
-     * {@link #taskFinished(TaskParams, boolean)} this will inform the TaskManager that all is well, and
-     * allow you to reschedule your task as it is probably uncompleted. Until you call
-     * taskFinished() you will not receive any newly scheduled tasks with the given task id as the
-     * TaskManager will consider the task to be in an error state.</p>
+     * immediate repercussion is that the system will cease holding a wakelock for you.</p>
      *
      * @param params Parameters specifying info about this task.
      * @return True to indicate to the TaskManager whether you'd like to reschedule this task based
-     * on the criteria provided at task creation-time. False to drop the task. Regardless of the
-     * value returned, your task must stop executing.
+     * on the retry criteria provided at task creation-time. False to drop the task. Regardless of
+     * the value returned, your task must stop executing.
      */
     public abstract boolean onStopTask(TaskParams params);
 
     /**
-     * Callback to inform the TaskManager you have completed execution. This can be called from any
+     * Callback to inform the TaskManager you've finished executing. This can be called from any
      * thread, as it will ultimately be run on your application's main thread. When the system
      * receives this message it will release the wakelock being held.
      * <p>
-     *     You can specify post-execution behaviour to the scheduler here with <code>needsReschedule
-     *     </code>. This will apply a back-off timer to your task based on the default, or what was
-     *     set with {@link android.content.Task.Builder#setBackoffCriteria(long, int)}. The
-     *     original requirements are always honoured even for a backed-off task.
-     *     Note that a task running in idle mode will not be backed-off. Instead what will happen
-     *     is the task will be re-added to the queue and re-executed within a future idle
-     *     maintenance window.
+     *     You can specify post-execution behaviour to the scheduler here with
+     *     <code>needsReschedule </code>. This will apply a back-off timer to your task based on
+     *     the default, or what was set with
+     *     {@link android.content.Task.Builder#setBackoffCriteria(long, int)}. The original
+     *     requirements are always honoured even for a backed-off task. Note that a task running in
+     *     idle mode will not be backed-off. Instead what will happen is the task will be re-added
+     *     to the queue and re-executed within a future idle maintenance window.
      * </p>
      *
      * @param params Parameters specifying system-provided info about this task, this was given to
