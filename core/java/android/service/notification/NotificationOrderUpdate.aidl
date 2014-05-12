@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, The Android Open Source Project
+ * Copyright (c) 2014, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,4 @@
 
 package android.service.notification;
 
-import android.service.notification.StatusBarNotification;
-import android.service.notification.NotificationOrderUpdate;
-
-/** @hide */
-oneway interface INotificationListener
-{
-    void onListenerConnected(in NotificationOrderUpdate update);
-    void onNotificationPosted(in StatusBarNotification notification,
-            in NotificationOrderUpdate update);
-    void onNotificationRemoved(in StatusBarNotification notification,
-            in NotificationOrderUpdate update);
-    void onNotificationOrderUpdate(in NotificationOrderUpdate update);
-}
+parcelable NotificationOrderUpdate;

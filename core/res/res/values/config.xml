@@ -1393,8 +1393,10 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
-    <string-array name="config_notificationScorers">
-        <item>com.android.internal.notification.PeopleNotificationScorer</item>
+    <!-- The list of classes that should be added to the notification ranking pipline.
+     See {@link com.android.server.notification.NotificationSignalExtractortor} -->
+    <string-array name="config_notificationSignalExtractors">
+        <item>com.android.server.notification.ValidateNotificationPeople</item>
     </string-array>
 
     <!-- Flag indicating that this device does not rotate and will always remain in its default
