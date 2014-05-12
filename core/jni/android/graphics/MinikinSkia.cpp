@@ -57,7 +57,9 @@ float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
     SkScalar skWidth;
     MinikinFontSkia_SetSkiaPaint(mTypeface, &skPaint, paint);
     skPaint.getTextWidths(&glyph16, sizeof(glyph16), &skWidth, NULL);
+#ifdef VERBOSE
     ALOGD("width for typeface %d glyph %d = %f", mTypeface->uniqueID(), glyph_id, skWidth);
+#endif
     return skWidth;
 }
 

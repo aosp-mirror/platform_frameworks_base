@@ -502,7 +502,7 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray + index, count);
         result = layout.getAdvance();
 #else
@@ -536,7 +536,7 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray + start, count);
         width = layout.getAdvance();
 #else
@@ -564,7 +564,7 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray, textLength);
         width = layout.getAdvance();
 #else
@@ -599,7 +599,7 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, count);
         layout.getAdvances(widthsArray);
 #else
@@ -697,7 +697,7 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
         layout.doLayout(text + start, count);
         layout.getAdvances(advancesArray);
         totalAdvance = layout.getAdvance();
