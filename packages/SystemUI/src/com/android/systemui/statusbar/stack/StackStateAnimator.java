@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.stack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
@@ -72,6 +71,9 @@ public class StackStateAnimator {
             = new Stack<AnimatorListenerAdapter>();
     private AnimationFilter mAnimationFilter = new AnimationFilter();
     private long mCurrentLength;
+
+    private ValueAnimator mTopOverScrollAnimator;
+    private ValueAnimator mBottomOverScrollAnimator;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -510,7 +512,7 @@ public class StackStateAnimator {
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents,
             StackScrollState finalState) {
         mNewEvents.clear();
-        for (NotificationStackScrollLayout.AnimationEvent event: animationEvents) {
+        for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
             View changingView = event.changingView;
             if (!mHandledEvents.contains(event)) {
                 if (event.animationType == NotificationStackScrollLayout.AnimationEvent
@@ -530,6 +532,36 @@ public class StackStateAnimator {
                 mHandledEvents.add(event);
                 mNewEvents.add(event);
             }
+        }
+    }
+
+    public void animateOverScrollToAmount(float targetAmount, final boolean onTop) {
+        final float startOverScrollAmount = mHostLayout.getCurrentOverScrollAmount(onTop);
+        cancelOverScrollAnimators(onTop);
+        ValueAnimator overScrollAnimator = ValueAnimator.ofFloat(startOverScrollAmount,
+                targetAmount);
+        overScrollAnimator.setDuration(ANIMATION_DURATION_STANDARD);
+        overScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float currentOverScroll = (float) animation.getAnimatedValue();
+                mHostLayout.setOverScrollAmount(currentOverScroll, onTop, false /* animate */,
+                        false /* cancelAnimators */);
+            }
+        });
+        overScrollAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        overScrollAnimator.start();
+        if (onTop) {
+            mTopOverScrollAnimator = overScrollAnimator;
+        } else {
+            mBottomOverScrollAnimator = overScrollAnimator;
+        }
+    }
+
+    public void cancelOverScrollAnimators(boolean onTop) {
+        ValueAnimator currentAnimator = onTop ? mTopOverScrollAnimator : mBottomOverScrollAnimator;
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
         }
     }
 }

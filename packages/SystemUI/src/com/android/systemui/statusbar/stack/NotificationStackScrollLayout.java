@@ -53,6 +53,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
+    private static final float RUBBER_BAND_FACTOR = 0.35f;
 
     /**
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
@@ -70,8 +71,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mTouchSlop;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
-    private int mOverscrollDistance;
     private int mOverflingDistance;
+    private float mMaxOverScroll;
     private boolean mIsBeingDragged;
     private int mLastMotionY;
     private int mActivePointerId;
@@ -106,6 +107,16 @@ public class NotificationStackScrollLayout extends ViewGroup
             = new ArrayList<AnimationEvent>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
+
+    /**
+     * The raw amount of the overScroll on the top, which is not rubber-banded.
+     */
+    private float mOverScrolledTopPixels;
+
+    /**
+     * The raw amount of the overScroll on the bottom, which is not rubber-banded.
+     */
+    private float mOverScrolledBottomPixels;
 
     private OnChildLocationsChangedListener mListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
@@ -175,7 +186,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mTouchSlop = configuration.getScaledTouchSlop();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
-        mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
@@ -544,7 +554,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                  * will be false if being flinged.
                  */
                 if (!mScroller.isFinished()) {
-                    mScroller.abortAnimation();
+                    mScroller.forceFinished(true);
                 }
 
                 // Remember where the motion event started
@@ -572,40 +582,23 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     mLastMotionY = y;
-
-                    final int oldX = mScrollX;
-                    final int oldY = mOwnScrollY;
                     final int range = getScrollRange();
-                    final int overscrollMode = getOverScrollMode();
-                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
-                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                    float scrollAmount;
+                    if (deltaY < 0) {
+                        scrollAmount = overScrollDown(deltaY);
+                    } else {
+                        scrollAmount = overScrollUp(deltaY, range);
+                    }
 
                     // Calling overScrollBy will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
-                    if (overScrollBy(0, deltaY, 0, mOwnScrollY,
-                            0, range, 0, mOverscrollDistance, true)) {
-                        // Break our velocity if we hit a scroll barrier.
-                        mVelocityTracker.clear();
+                    if (scrollAmount != 0.0f) {
+                        // The scrolling motion could not be compensated with the
+                        // existing overScroll, we have to scroll the view
+                        overScrollBy(0, (int) scrollAmount, 0, mOwnScrollY,
+                                0, range, 0, getHeight() / 2, true);
                     }
-                    // TODO: Overscroll
-//                    if (canOverscroll) {
-//                        final int pulledToY = oldY + deltaY;
-//                        if (pulledToY < 0) {
-//                            mEdgeGlowTop.onPull((float) deltaY / getHeight());
-//                            if (!mEdgeGlowBottom.isFinished()) {
-//                                mEdgeGlowBottom.onRelease();
-//                            }
-//                        } else if (pulledToY > range) {
-//                            mEdgeGlowBottom.onPull((float) deltaY / getHeight());
-//                            if (!mEdgeGlowTop.isFinished()) {
-//                                mEdgeGlowTop.onRelease();
-//                            }
-//                        }
-//                        if (mEdgeGlowTop != null
-//                                && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())){
-//                            postInvalidateOnAnimation();
-//                        }
-//                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -650,6 +643,68 @@ public class NotificationStackScrollLayout extends ViewGroup
                 break;
         }
         return true;
+    }
+
+    /**
+     * Perform a scroll upwards and adapt the overscroll amounts accordingly
+     *
+     * @param deltaY The amount to scroll upwards, has to be positive.
+     * @return The amount of scrolling to be performed by the scroller,
+     *         not handled by the overScroll amount.
+     */
+    private float overScrollUp(int deltaY, int range) {
+        deltaY = Math.max(deltaY, 0);
+        float currentTopAmount = getCurrentOverScrollAmount(true);
+        float newTopAmount = currentTopAmount - deltaY;
+        if (currentTopAmount > 0) {
+            setOverScrollAmount(newTopAmount, true /* onTop */,
+                    false /* animate */);
+        }
+        // Top overScroll might not grab all scrolling motion,
+        // we have to scroll as well.
+        float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
+        float newScrollY = mOwnScrollY + scrollAmount;
+        if (newScrollY > range) {
+            float currentBottomPixels = getCurrentOverScrolledPixels(false);
+            // We overScroll on the top
+            setOverScrolledPixels(currentBottomPixels + newScrollY - range,
+                    false /* onTop */,
+                    false /* animate */);
+            mOwnScrollY = range;
+            scrollAmount = 0.0f;
+        }
+        return scrollAmount;
+    }
+
+    /**
+     * Perform a scroll downward and adapt the overscroll amounts accordingly
+     *
+     * @param deltaY The amount to scroll downwards, has to be negative.
+     * @return The amount of scrolling to be performed by the scroller,
+     *         not handled by the overScroll amount.
+     */
+    private float overScrollDown(int deltaY) {
+        deltaY = Math.min(deltaY, 0);
+        float currentBottomAmount = getCurrentOverScrollAmount(false);
+        float newBottomAmount = currentBottomAmount + deltaY;
+        if (currentBottomAmount > 0) {
+            setOverScrollAmount(newBottomAmount, false /* onTop */,
+                    false /* animate */);
+        }
+        // Bottom overScroll might not grab all scrolling motion,
+        // we have to scroll as well.
+        float scrollAmount = newBottomAmount < 0 ? newBottomAmount : 0.0f;
+        float newScrollY = mOwnScrollY + scrollAmount;
+        if (newScrollY < 0) {
+            float currentTopPixels = getCurrentOverScrolledPixels(true);
+            // We overScroll on the top
+            setOverScrolledPixels(currentTopPixels - newScrollY,
+                    true /* onTop */,
+                    false /* animate */);
+            mOwnScrollY = 0;
+            scrollAmount = 0.0f;
+        }
+        return scrollAmount;
     }
 
     private void onSecondaryPointerUp(MotionEvent ev) {
@@ -701,27 +756,95 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             if (oldX != x || oldY != y) {
                 final int range = getScrollRange();
-                final int overscrollMode = getOverScrollMode();
-                final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
-                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+                if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
+                    float currVelocity = mScroller.getCurrVelocity();
+                    if (currVelocity >= mMinimumVelocity * 20) {
+                        mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
+                    }
+                }
 
                 overScrollBy(x - oldX, y - oldY, oldX, oldY, 0, range,
-                        0, mOverflingDistance, false);
+                        0, (int) (mMaxOverScroll), false);
                 onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
-
-                if (canOverscroll) {
-                    // TODO: Overscroll
-//                    if (y < 0 && oldY >= 0) {
-//                        mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
-//                    } else if (y > range && oldY <= range) {
-//                        mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
-//                    }
-                }
-                updateChildren();
             }
 
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
+        }
+    }
+
+    @Override
+    protected int computeVerticalScrollRange() {
+        // needed for the overScroller
+        return mContentHeight;
+    }
+
+    /**
+     * Set the amount of overScrolled pixels which will force the view to apply a rubber-banded
+     * overscroll effect based on numPixels. By default this will also cancel animations on the
+     * same overScroll edge.
+     *
+     * @param numPixels The amount of pixels to overScroll by. These will be scaled according to
+     *                  the rubber-banding logic.
+     * @param onTop Should the effect be applied on top of the scroller.
+     * @param animate Should an animation be performed.
+     */
+    public void setOverScrolledPixels(float numPixels, boolean onTop, boolean animate) {
+        setOverScrollAmount(numPixels * RUBBER_BAND_FACTOR, onTop, animate, true);
+    }
+
+    /**
+     * Set the effective overScroll amount which will be directly reflected in the layout.
+     * By default this will also cancel animations on the same overScroll edge.
+     *
+     * @param amount The amount to overScroll by.
+     * @param onTop Should the effect be applied on top of the scroller.
+     * @param animate Should an animation be performed.
+     */
+    public void setOverScrollAmount(float amount, boolean onTop, boolean animate) {
+        setOverScrollAmount(amount, onTop, animate, true);
+    }
+
+    /**
+     * Set the effective overScroll amount which will be directly reflected in the layout.
+     *
+     * @param amount The amount to overScroll by.
+     * @param onTop Should the effect be applied on top of the scroller.
+     * @param animate Should an animation be performed.
+     * @param cancelAnimators Should running animations be cancelled.
+     */
+    public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
+            boolean cancelAnimators) {
+        if (cancelAnimators) {
+            mStateAnimator.cancelOverScrollAnimators(onTop);
+        }
+        setOverScrollAmountInternal(amount, onTop, animate);
+    }
+
+    private void setOverScrollAmountInternal(float amount, boolean onTop, boolean animate) {
+        amount = Math.max(0, amount);
+        if (animate) {
+            mStateAnimator.animateOverScrollToAmount(amount, onTop);
+        } else {
+            setOverScrolledPixels(amount / RUBBER_BAND_FACTOR, onTop);
+            mAmbientState.setOverScrollAmount(amount, onTop);
+            requestChildrenUpdate();
+        }
+    }
+
+    public float getCurrentOverScrollAmount(boolean top) {
+        return mAmbientState.getOverScrollAmount(top);
+    }
+
+    public float getCurrentOverScrolledPixels(boolean top) {
+        return top? mOverScrolledTopPixels : mOverScrolledBottomPixels;
+    }
+
+    private void setOverScrolledPixels(float amount, boolean onTop) {
+        if (onTop) {
+            mOverScrolledTopPixels = amount;
+        } else {
+            mOverScrolledBottomPixels = amount;
         }
     }
 
@@ -738,15 +861,38 @@ public class NotificationStackScrollLayout extends ViewGroup
             final int oldY = mOwnScrollY;
             mScrollX = scrollX;
             mOwnScrollY = scrollY;
-            invalidateParentIfNeeded();
-            onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
             if (clampedY) {
-                mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange());
+                springBack();
+            } else {
+                onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
+                invalidateParentIfNeeded();
+                updateChildren();
             }
-            updateChildren();
         } else {
             customScrollTo(scrollY);
             scrollTo(scrollX, mScrollY);
+        }
+    }
+
+    private void springBack() {
+        int scrollRange = getScrollRange();
+        boolean overScrolledTop = mOwnScrollY <= 0;
+        boolean overScrolledBottom = mOwnScrollY >= scrollRange;
+        if (overScrolledTop || overScrolledBottom) {
+            boolean onTop;
+            float newAmount;
+            if (overScrolledTop) {
+                onTop = true;
+                newAmount = -mOwnScrollY;
+                mOwnScrollY = 0;
+            } else {
+                onTop = false;
+                newAmount = mOwnScrollY - scrollRange;
+                mOwnScrollY = scrollRange;
+            }
+            setOverScrollAmount(newAmount, onTop, false);
+            setOverScrollAmount(0.0f, onTop, true);
+            mScroller.forceFinished(true);
         }
     }
 
@@ -841,7 +987,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             int height = (int) getLayoutHeight();
             int bottom = getContentHeight();
 
-            mScroller.fling(mScrollX, mOwnScrollY, 0, velocityY, 0, 0, 0,
+            float topAmount = getCurrentOverScrollAmount(true);
+            float bottomAmount = getCurrentOverScrollAmount(false);
+            if (velocityY < 0 && topAmount > 0) {
+                mOwnScrollY -= (int) topAmount;
+                setOverScrollAmount(0, true, false);
+                mMaxOverScroll = Math.abs(velocityY) / 1000f * RUBBER_BAND_FACTOR
+                        * mOverflingDistance + topAmount;
+            } else if (velocityY > 0 && bottomAmount > 0) {
+                mOwnScrollY += bottomAmount;
+                setOverScrollAmount(0, false, false);
+                mMaxOverScroll = Math.abs(velocityY) / 1000f * RUBBER_BAND_FACTOR
+                        * mOverflingDistance + bottomAmount;
+            } else {
+                // it will be set once we reach the boundary
+                mMaxOverScroll = 0.0f;
+            }
+            mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0,
                     Math.max(0, bottom - height), 0, height/2);
 
             postInvalidateOnAnimation();
@@ -853,11 +1015,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         recycleVelocityTracker();
 
-        // TODO: Overscroll
-//        if (mEdgeGlowTop != null) {
-//            mEdgeGlowTop.onRelease();
-//            mEdgeGlowBottom.onRelease();
-//        }
+        if (getCurrentOverScrollAmount(true /* onTop */) > 0) {
+            setOverScrollAmount(0, true /* onTop */, true /* animate */);
+        }
+        if (getCurrentOverScrollAmount(false /* onTop */) > 0) {
+            setOverScrollAmount(0, false /* onTop */, true /* animate */);
+        }
     }
 
     @Override
