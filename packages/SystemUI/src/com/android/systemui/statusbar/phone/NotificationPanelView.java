@@ -58,10 +58,18 @@ public class NotificationPanelView extends PanelView implements
     private int mTrackingPointer;
     private VelocityTracker mVelocityTracker;
     private boolean mTracking;
+
+    /**
+     * Whether we are currently handling a motion gesture in #onInterceptTouchEvent, but haven't
+     * intercepted yet.
+     */
+    private boolean mIntercepting;
     private boolean mQsExpanded;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
     private float mInitialTouchY;
+    private float mLastTouchX;
+    private float mLastTouchY;
     private float mQsExpansionHeight;
     private int mQsMinExpansionHeight;
     private int mQsMaxExpansionHeight;
@@ -195,6 +203,7 @@ public class NotificationPanelView extends PanelView implements
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mIntercepting = true;
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 initVelocityTracker();
@@ -217,6 +226,16 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
+                if (mTracking) {
+
+                    // Already tracking because onOverscrolled was called. We need to update here
+                    // so we don't stop for a frame until the next touch event gets handled in
+                    // onTouchEvent.
+                    setQsExpansion(h + mInitialHeightOnTouch);
+                    trackMovement(event);
+                    mIntercepting = false;
+                    return true;
+                }
                 if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     onQsExpansionStarted();
@@ -224,11 +243,26 @@ public class NotificationPanelView extends PanelView implements
                     mInitialTouchY = y;
                     mInitialTouchX = x;
                     mTracking = true;
+                    mIntercepting = false;
                     return true;
                 }
                 break;
+
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIntercepting = false;
+                break;
         }
         return !mQsExpanded && super.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+        // Block request so we can still intercept the scrolling when QS is expanded.
+        if (!mQsExpanded) {
+            super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
     }
 
     @Override
@@ -299,11 +333,26 @@ public class NotificationPanelView extends PanelView implements
         return mQsExpanded || super.onTouchEvent(event);
     }
 
+    @Override
+    public void onOverscrolled(int amount) {
+        if (mIntercepting) {
+            onQsExpansionStarted(amount);
+            mInitialHeightOnTouch = mQsExpansionHeight;
+            mInitialTouchY = mLastTouchY;
+            mInitialTouchX = mLastTouchX;
+            mTracking = true;
+        }
+    }
+
     private void onQsExpansionStarted() {
+        onQsExpansionStarted(0);
+    }
+
+    private void onQsExpansionStarted(int overscrollAmount) {
         cancelAnimation();
 
         // Reset scroll position and apply that position to the expanded height.
-        float height = mQsExpansionHeight - mScrollView.getScrollY();
+        float height = mQsExpansionHeight - mScrollView.getScrollY() - overscrollAmount;
         mScrollView.scrollTo(0, 0);
         setQsExpansion(height);
     }
@@ -361,6 +410,8 @@ public class NotificationPanelView extends PanelView implements
 
     private void trackMovement(MotionEvent event) {
         if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
+        mLastTouchX = event.getX();
+        mLastTouchY = event.getY();
     }
 
     private void initVelocityTracker() {

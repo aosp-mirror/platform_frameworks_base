@@ -27,6 +27,7 @@ import android.widget.ScrollView;
 public class ObservableScrollView extends ScrollView {
 
     private Listener mListener;
+    private int mLastOverscrollAmount;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,7 +59,25 @@ public class ObservableScrollView extends ScrollView {
         }
     }
 
+    @Override
+    protected boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY,
+            int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY,
+            boolean isTouchEvent) {
+        mLastOverscrollAmount = Math.max(0, scrollY + deltaY - getMaxScrollY());
+        return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY,
+                        maxOverScrollX, maxOverScrollY, isTouchEvent);
+    }
+
+    @Override
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+        super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
+        if (mListener != null && mLastOverscrollAmount > 0) {
+            mListener.onOverscrolled(mLastOverscrollAmount);
+        }
+    }
+
     public interface Listener {
         void onScrollChanged();
+        void onOverscrolled(int amount);
     }
 }
