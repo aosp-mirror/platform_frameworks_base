@@ -46,7 +46,7 @@ import java.util.HashMap;
  * This lets you create a drawable based on an XML vector graphic It can be
  * defined in an XML file with the <code>&lt;vector></code> element.
  * <p/>
- * The vector drawable has 6 elements:
+ * The vector drawable has the following elements:
  * <p/>
  * <dl>
  * <dt><code>&lt;vector></code></dt>
@@ -59,15 +59,15 @@ import java.util.HashMap;
  * <dd>Used to defined the size of the virtual canvas the paths are drawn on.
  * The size is defined using the attributes <code>android:viewportHeight</code>
  * <code>android:viewportWidth</code></dd>
- * <dt><code>&lt;group></code></dt>
- * <dd>Defines the static 2D image.</dd>
  * <dt><code>&lt;path></code></dt>
- * <dd>Defines paths to be drawn. The path elements must be within a group
+ * <dd>Defines paths to be drawn. Multiple paths can be defined in one xml file.
+ * The paths are drawn in the order of their definition order.
  * <dl>
  * <dt><code>android:name</code>
  * <dd>Defines the name of the path.</dd></dt>
  * <dt><code>android:pathData</code>
- * <dd>Defines path string.</dd></dt>
+ * <dd>Defines path string. This is using exactly same format as "d" attribute
+ * in the SVG's path data</dd></dt>
  * <dt><code>android:fill</code>
  * <dd>Defines the color to fill the path (none if not present).</dd></dt>
  * <dt><code>android:stroke</code>
@@ -108,7 +108,6 @@ public class VectorDrawable extends Drawable {
 
     private static final String SHAPE_SIZE = "size";
     private static final String SHAPE_VIEWPORT = "viewport";
-    private static final String SHAPE_GROUP = "group";
     private static final String SHAPE_PATH = "path";
     private static final String SHAPE_VECTOR = "vector";
 
@@ -266,10 +265,9 @@ public class VectorDrawable extends Drawable {
 
         boolean noSizeTag = true;
         boolean noViewportTag = true;
-        boolean noGroupTag = true;
         boolean noPathTag = true;
 
-        VGroup currentGroup = null;
+        VGroup currentGroup = new VGroup();
 
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -286,10 +284,6 @@ public class VectorDrawable extends Drawable {
                 } else if (SHAPE_VIEWPORT.equals(tagName)) {
                     pathRenderer.parseViewport(res, attrs);
                     noViewportTag = false;
-                } else if (SHAPE_GROUP.equals(tagName)) {
-                    currentGroup = new VGroup();
-                    pathRenderer.mGroupList.add(currentGroup);
-                    noGroupTag = false;
                 } else if (SHAPE_VECTOR.equals(tagName)) {
                     final TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
 
@@ -310,7 +304,7 @@ public class VectorDrawable extends Drawable {
             eventType = parser.next();
         }
 
-        if (noSizeTag || noViewportTag || noGroupTag || noPathTag) {
+        if (noSizeTag || noViewportTag || noPathTag) {
             final StringBuffer tag = new StringBuffer();
 
             if (noSizeTag) {
@@ -324,13 +318,6 @@ public class VectorDrawable extends Drawable {
                 tag.append(SHAPE_SIZE);
             }
 
-            if (noGroupTag) {
-                if (tag.length() > 0) {
-                    tag.append(" & ");
-                }
-                tag.append(SHAPE_GROUP);
-            }
-
             if (noPathTag) {
                 if (tag.length() > 0) {
                     tag.append(" or ");
@@ -341,6 +328,7 @@ public class VectorDrawable extends Drawable {
             throw new XmlPullParserException("no " + tag + " defined");
         }
 
+        pathRenderer.mCurrentGroup = currentGroup;
         // post parse cleanup
         pathRenderer.parseFinish();
         return pathRenderer;
@@ -394,7 +382,7 @@ public class VectorDrawable extends Drawable {
         private Paint mFillPaint;
         private PathMeasure mPathMeasure;
 
-        final ArrayList<VGroup> mGroupList = new ArrayList<VGroup>();
+        private VGroup mCurrentGroup = new VGroup();
 
         float mBaseWidth = 1;
         float mBaseHeight = 1;
@@ -405,7 +393,7 @@ public class VectorDrawable extends Drawable {
         }
 
         public VPathRenderer(VPathRenderer copy) {
-            mGroupList.addAll(copy.mGroupList);
+            mCurrentGroup = copy.mCurrentGroup;
             if (copy.mCurrentPaths != null) {
                 mCurrentPaths = new VPath[copy.mCurrentPaths.length];
                 for (int i = 0; i < mCurrentPaths.length; i++) {
@@ -420,32 +408,24 @@ public class VectorDrawable extends Drawable {
         }
 
         public boolean canApplyTheme() {
-            final ArrayList<VGroup> groups = mGroupList;
-            for (int i = groups.size() - 1; i >= 0; i--) {
-                final ArrayList<VPath> paths = groups.get(i).mVGList;
-                for (int j = paths.size() - 1; j >= 0; j--) {
-                    final VPath path = paths.get(j);
-                    if (path.canApplyTheme()) {
-                        return true;
-                    }
+            final ArrayList<VPath> paths = mCurrentGroup.mVGList;
+            for (int j = paths.size() - 1; j >= 0; j--) {
+                final VPath path = paths.get(j);
+                if (path.canApplyTheme()) {
+                    return true;
                 }
             }
-
             return false;
         }
 
         public void applyTheme(Theme t) {
-            final ArrayList<VGroup> groups = mGroupList;
-            for (int i = groups.size() - 1; i >= 0; i--) {
-                final ArrayList<VPath> paths = groups.get(i).mVGList;
-                for (int j = paths.size() - 1; j >= 0; j--) {
-                    final VPath path = paths.get(j);
-                    if (path.canApplyTheme()) {
-                        path.applyTheme(t);
-                    }
+            final ArrayList<VPath> paths = mCurrentGroup.mVGList;
+            for (int j = paths.size() - 1; j >= 0; j--) {
+                final VPath path = paths.get(j);
+                if (path.canApplyTheme()) {
+                    path.applyTheme(t);
                 }
             }
-
         }
 
         public void draw(Canvas canvas, int w, int h) {
@@ -537,11 +517,11 @@ public class VectorDrawable extends Drawable {
         }
 
         /**
-         * Build the "current" path based on the first group
+         * Build the "current" path based on the current group
          * TODO: improve memory use & performance or move to C++
          */
         public void parseFinish() {
-            final Collection<VPath> paths = mGroupList.get(0).getPaths();
+            final Collection<VPath> paths = mCurrentGroup.getPaths();
             mCurrentPaths = paths.toArray(new VPath[paths.size()]);
             for (int i = 0; i < mCurrentPaths.length; i++) {
                 mCurrentPaths[i] = new VPath(mCurrentPaths[i]);
