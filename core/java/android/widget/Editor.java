@@ -39,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -94,6 +95,8 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -215,6 +218,8 @@ public class Editor {
 
     private TextView mTextView;
 
+    final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
+
     Editor(TextView textView) {
         mTextView = textView;
     }
@@ -249,9 +254,13 @@ public class Editor {
             // We had an active selection from before, start the selection mode.
             startSelectionActionMode();
         }
+
+        getPositionListener().addSubscriber(mCursorAnchorInfoNotifier, true);
     }
 
     void onDetachedFromWindow() {
+        getPositionListener().removeSubscriber(mCursorAnchorInfoNotifier);
+
         if (mError != null) {
             hideError();
         }
@@ -780,7 +789,7 @@ public class Editor {
                 boolean parentPositionChanged, boolean parentScrolled);
     }
 
-    private boolean isPositionVisible(int positionX, int positionY) {
+    private boolean isPositionVisible(final float positionX, final float positionY) {
         synchronized (TEMP_POSITION) {
             final float[] position = TEMP_POSITION;
             position[0] = positionX;
@@ -2134,7 +2143,8 @@ public class Editor {
     private class PositionListener implements ViewTreeObserver.OnPreDrawListener {
         // 3 handles
         // 3 ActionPopup [replace, suggestion, easyedit] (suggestionsPopup first hides the others)
-        private final int MAXIMUM_NUMBER_OF_LISTENERS = 6;
+        // 1 CursorAnchorInfoNotifier
+        private final int MAXIMUM_NUMBER_OF_LISTENERS = 7;
         private TextViewPositionListener[] mPositionListeners =
                 new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
         private boolean mCanMove[] = new boolean[MAXIMUM_NUMBER_OF_LISTENERS];
@@ -2994,6 +3004,116 @@ public class Editor {
             }
 
             return positionY;
+        }
+    }
+
+    /**
+     * A listener to call {@link InputMethodManager#updateCursorAnchorInfo(View, CursorAnchorInfo)}
+     * while the input method is requesting the cursor/anchor position. Does nothing as long as
+     * {@link InputMethodManager#isWatchingCursor(View)} returns false.
+     */
+    private final class CursorAnchorInfoNotifier implements TextViewPositionListener {
+        final CursorAnchorInfoBuilder mSelectionInfoBuilder = new CursorAnchorInfoBuilder();
+        final int[] mTmpIntOffset = new int[2];
+        final Matrix mViewToScreenMatrix = new Matrix();
+
+        @Override
+        public void updatePosition(int parentPositionX, int parentPositionY,
+                boolean parentPositionChanged, boolean parentScrolled) {
+            final InputMethodState ims = mInputMethodState;
+            if (ims == null || ims.mBatchEditNesting > 0) {
+                return;
+            }
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (null == imm) {
+                return;
+            }
+            // Skip if the IME has not requested the cursor/anchor position.
+            if (!imm.isWatchingCursor(mTextView)) {
+                return;
+            }
+            Layout layout = mTextView.getLayout();
+            if (layout == null) {
+                return;
+            }
+
+            final CursorAnchorInfoBuilder builder = mSelectionInfoBuilder;
+            builder.reset();
+
+            final int selectionStart = mTextView.getSelectionStart();
+            final int selectionEnd = mTextView.getSelectionEnd();
+            builder.setSelectionRange(mTextView.getSelectionStart(), mTextView.getSelectionEnd());
+
+            // Construct transformation matrix from view local coordinates to screen coordinates.
+            mViewToScreenMatrix.set(mTextView.getMatrix());
+            mTextView.getLocationOnScreen(mTmpIntOffset);
+            mViewToScreenMatrix.postTranslate(mTmpIntOffset[0], mTmpIntOffset[1]);
+            builder.setMatrix(mViewToScreenMatrix);
+
+            final float viewportToContentHorizontalOffset =
+                    mTextView.viewportToContentHorizontalOffset();
+            final float viewportToContentVerticalOffset =
+                    mTextView.viewportToContentVerticalOffset();
+
+            if (mTextView.getText() instanceof Spannable) {
+                final Spannable sp = (Spannable) mTextView.getText();
+                int compositionStart = EditableInputConnection.getComposingSpanStart(sp);
+                int compositionEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                if (compositionEnd < compositionStart) {
+                    final int temp = compositionEnd;
+                    compositionEnd = compositionStart;
+                    compositionStart = temp;
+                }
+                builder.setCandidateRange(compositionStart, compositionEnd);
+                for (int offset = compositionStart; offset < compositionEnd; offset++) {
+                    if (offset < 0) {
+                        continue;
+                    }
+                    final int line = layout.getLineForOffset(offset);
+                    final float left = layout.getPrimaryHorizontal(offset)
+                            + viewportToContentHorizontalOffset;
+                    final float top = layout.getLineTop(line) + viewportToContentVerticalOffset;
+                    // Here we are tentatively passing offset + 1 to calculate the other side of
+                    // the primary horizontal to preserve as many positions as possible so that
+                    // the IME can reconstruct the layout entirely. However, we should revisit this
+                    // to have a clear specification about the relationship between the index of
+                    // the character and its bounding box. See also the TODO comment below.
+                    final float right = layout.getPrimaryHorizontal(offset + 1)
+                            + viewportToContentHorizontalOffset;
+                    final float bottom = layout.getLineBottom(line)
+                            + viewportToContentVerticalOffset;
+                    // Take TextView's padding and scroll into account.
+                    if (isPositionVisible(left, top) && isPositionVisible(right, bottom)) {
+                        // Here offset is the index in Java chars.
+                        // TODO: We must have a well-defined specification. For example, how
+                        // RTL, surrogate pairs, and composition letters are handled must be
+                        // documented.
+                        builder.addCharacterRect(offset, left, top, right, bottom);
+                    }
+                }
+            }
+
+            // Treat selectionStart as the insertion point.
+            if (0 <= selectionStart) {
+                final int offset = selectionStart;
+                final int line = layout.getLineForOffset(offset);
+                final float insertionMarkerX = layout.getPrimaryHorizontal(offset)
+                        + viewportToContentHorizontalOffset;
+                final float insertionMarkerTop = layout.getLineTop(line)
+                        + viewportToContentVerticalOffset;
+                final float insertionMarkerBaseline = layout.getLineBaseline(line)
+                        + viewportToContentVerticalOffset;
+                final float insertionMarkerBottom = layout.getLineBottom(line)
+                        + viewportToContentVerticalOffset;
+                // Take TextView's padding and scroll into account.
+                if (isPositionVisible(insertionMarkerX, insertionMarkerTop) &&
+                        isPositionVisible(insertionMarkerX, insertionMarkerBottom)) {
+                    builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
+                            insertionMarkerBaseline, insertionMarkerBottom);
+                }
+            }
+
+            imm.updateCursorAnchorInfo(mTextView, builder.build());
         }
     }
 
