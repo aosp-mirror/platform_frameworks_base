@@ -250,4 +250,14 @@ public interface NetworkStateTracker {
      */
     public void stopSampling(SamplingDataTracker.SamplingSnapshot s);
 
+    /*
+     * Record the current netId
+     */
+    public void setNetId(int netId);
+
+    /*
+     * ?
+     */
+    public Network getNetwork();
+
 }

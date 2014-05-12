@@ -2029,4 +2029,24 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
     }
+
+    public void createNetwork(int netId, String iface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "create", netId, iface);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    public void removeNetwork(int netId) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "destroy", netId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
 }
