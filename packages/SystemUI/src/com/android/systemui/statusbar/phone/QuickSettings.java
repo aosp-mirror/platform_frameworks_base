@@ -323,14 +323,6 @@ class QuickSettings {
         mModel.addInversionTile(inversionTile, inversionTile.getRefreshCallback());
         parent.addView(inversionTile);
 
-        // Contrast enhancement tile
-        final SystemSettingTile contrastTile = new SystemSettingTile(mContext);
-        contrastTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED,
-                SystemSettingTile.TYPE_SECURE);
-        contrastTile.setFragment("Settings$AccessibilityContrastSettingsActivity");
-        mModel.addContrastTile(contrastTile, contrastTile.getRefreshCallback());
-        parent.addView(contrastTile);
-
         // Color space adjustment tile
         final SystemSettingTile colorSpaceTile = new SystemSettingTile(mContext);
         colorSpaceTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,

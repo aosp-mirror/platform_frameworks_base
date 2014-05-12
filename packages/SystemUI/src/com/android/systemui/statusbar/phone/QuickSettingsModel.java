@@ -95,12 +95,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     static class InversionState extends State {
         boolean toggled;
-        int type;
-    }
-    static class ContrastState extends State {
-        boolean toggled;
-        float contrast;
-        float brightness;
     }
     static class ColorSpaceState extends State {
         boolean toggled;
@@ -237,38 +231,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             cr.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_QUICK_SETTING_ENABLED),
                     false, this, mUserTracker.getCurrentUserId());
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION),
-                    false, this, mUserTracker.getCurrentUserId());
-        }
-    }
-
-    /** ContentObserver to watch display contrast */
-    private class DisplayContrastObserver extends ContentObserver {
-        public DisplayContrastObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            onContrastChanged();
-        }
-
-        public void startObserving() {
-            final ContentResolver cr = mContext.getContentResolver();
-            cr.unregisterContentObserver(this);
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED),
-                    false, this, mUserTracker.getCurrentUserId());
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_QUICK_SETTING_ENABLED),
-                    false, this, mUserTracker.getCurrentUserId());
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST),
-                    false, this, mUserTracker.getCurrentUserId());
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS),
-                    false, this, mUserTracker.getCurrentUserId());
         }
     }
 
@@ -348,7 +310,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
     private final DisplayInversionObserver mInversionObserver;
-    private final DisplayContrastObserver mContrastObserver;
     private final DisplayColorSpaceObserver mColorSpaceObserver;
     private final ZenModeObserver mZenModeObserver;
 
@@ -417,10 +378,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mInversionCallback;
     private InversionState mInversionState = new InversionState();
 
-    private QuickSettingsTileView mContrastTile;
-    private RefreshCallback mContrastCallback;
-    private ContrastState mContrastState = new ContrastState();
-
     private QuickSettingsTileView mColorSpaceTile;
     private RefreshCallback mColorSpaceCallback;
     private ColorSpaceState mColorSpaceState = new ColorSpaceState();
@@ -448,12 +405,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
                 mInversionObserver.startObserving();
-                mContrastObserver.startObserving();
                 mColorSpaceObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onInversionChanged();
-                onContrastChanged();
                 onColorSpaceChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
@@ -470,8 +425,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBrightnessObserver.startObserving();
         mInversionObserver = new DisplayInversionObserver(mHandler);
         mInversionObserver.startObserving();
-        mContrastObserver = new DisplayContrastObserver(mHandler);
-        mContrastObserver.startObserving();
         mColorSpaceObserver = new DisplayColorSpaceObserver(mHandler);
         mColorSpaceObserver.startObserving();
         mZenModeObserver = new ZenModeObserver(mHandler);
@@ -1037,46 +990,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 currentUserId) == 1;
         final boolean enabled = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, currentUserId) == 1;
-        final int type = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION, 0, currentUserId);
         mInversionState.enabled = quickSettingEnabled;
         mInversionState.toggled = enabled;
-        mInversionState.type = type;
         // TODO: Add real icon assets.
         mInversionState.iconId = enabled ? R.drawable.ic_qs_inversion_on
                 : R.drawable.ic_qs_inversion_off;
         mInversionState.label = res.getString(R.string.quick_settings_inversion_label);
         mInversionCallback.refreshView(mInversionTile, mInversionState);
-    }
-
-    // Contrast enhancement
-    void addContrastTile(QuickSettingsTileView view, RefreshCallback cb) {
-        mContrastTile = view;
-        mContrastCallback = cb;
-        onContrastChanged();
-    }
-    public void onContrastChanged() {
-        final Resources res = mContext.getResources();
-        final ContentResolver cr = mContext.getContentResolver();
-        final int currentUserId = mUserTracker.getCurrentUserId();
-        final boolean quickSettingEnabled = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_QUICK_SETTING_ENABLED, 0,
-                currentUserId) == 1;
-        final boolean enabled = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, currentUserId) == 1;
-        final float contrast = Settings.Secure.getFloatForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST, 1, currentUserId);
-        final float brightness = Settings.Secure.getFloatForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS, 0, currentUserId);
-        mContrastState.enabled = quickSettingEnabled;
-        mContrastState.toggled = enabled;
-        mContrastState.contrast = contrast;
-        mContrastState.brightness = brightness;
-        // TODO: Add real icon assets.
-        mContrastState.iconId = enabled ? R.drawable.ic_qs_contrast_on
-                : R.drawable.ic_qs_contrast_off;
-        mContrastState.label = res.getString(R.string.quick_settings_contrast_label);
-        mContrastCallback.refreshView(mContrastTile, mContrastState);
     }
 
     // Color space adjustment
