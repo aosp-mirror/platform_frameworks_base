@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Outline;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +60,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private ActivityStarter mActivityStarter;
     private BrightnessController mBrightnessController;
+
+    private final Rect mClipBounds = new Rect();
+    private final Outline mOutline = new Outline();
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -193,6 +198,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else {
             mBackground.setTranslationY(0);
         }
+        setClipping(height);
+    }
+
+    private void setClipping(float height) {
+        mClipBounds.set(getPaddingLeft(), 0, getWidth() - getPaddingRight(), (int) height);
+        setClipBounds(mClipBounds);
+        mOutline.setRect(mClipBounds);
+        setOutline(mOutline);
     }
 
     public View getBackgroundView() {
