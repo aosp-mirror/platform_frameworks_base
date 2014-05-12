@@ -33,6 +33,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
+import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.os.BatteryStats;
@@ -7576,12 +7577,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private boolean isLockTaskAuthorized(ComponentName name) {
-//        enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
-//                "startLockTaskMode()");
-//        DevicePolicyManager dpm = (DevicePolicyManager)
-//                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-//        return dpm != null && dpm.isLockTaskPermitted(name);
-        return true;
+        final DevicePolicyManager dpm = (DevicePolicyManager)
+                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        return dpm != null && dpm.isLockTaskPermitted(name);
     }
 
     private void startLockTaskMode(TaskRecord task) {
@@ -7640,8 +7638,18 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void stopLockTaskMode() {
-//        enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
-//                "stopLockTaskMode()");
+        // Check if the calling task is eligible to use lock task
+        final int uid = Binder.getCallingUid();
+        try {
+            final String name = AppGlobals.getPackageManager().getNameForUid(uid);
+            if (!isLockTaskAuthorized(new ComponentName(name, name))) {
+                return;
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "stopLockTaskMode " + e);
+            return;
+        }
+        // Stop lock task
         synchronized (this) {
             mStackSupervisor.setLockTaskModeLocked(null);
         }
@@ -8759,7 +8767,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
             return true;
         }
-            
+
         final int perm = checkComponentPermission(
                 android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
                 callingUid, -1, true);
@@ -13273,7 +13281,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    // A backup agent has just come up                    
+    // A backup agent has just come up
     public void backupAgentCreated(String agentPackageName, IBinder agent) {
         if (DEBUG_BACKUP) Slog.v(TAG, "backupAgentCreated: " + agentPackageName
                 + " = " + agent);
@@ -14492,7 +14500,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     msg.obj = new Configuration(configCopy);
                     mHandler.sendMessage(msg);
                 }
-        
+
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
                     ProcessRecord app = mLruProcesses.get(i);
                     try {
