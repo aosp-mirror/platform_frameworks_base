@@ -397,6 +397,32 @@ public final class Sensor {
     public static final String STRING_TYPE_HEART_RATE = "android.sensor.heart_rate";
 
     /**
+     * A constant describing a wake gesture sensor.
+     * <p>
+     * Wake gesture sensors enable waking up the device based on a device specific motion.
+     * <p>
+     * When this sensor triggers, the device behaves as if the power button was pressed, turning the
+     * screen on. This behavior (turning on the screen when this sensor triggers) might be
+     * deactivated by the user in the device settings. Changes in settings do not impact the
+     * behavior of the sensor: only whether the framework turns the screen on when it triggers.
+     * <p>
+     * The actual gesture to be detected is not specified, and can be chosen by the manufacturer of
+     * the device. This sensor must be low power, as it is likely to be activated 24/7.
+     * Values of events created by this sensors should not be used.
+     *
+     * @hide This sensor is expected to only be used by the power manager
+     */
+    public static final int TYPE_WAKE_GESTURE = 42;
+
+    /**
+     * A constant string describing a wake gesture sensor.
+     *
+     * @hide This sensor is expected to only be used by the power manager
+     * @see #TYPE_WAKE_GESTURE
+     */
+    public static final String STRING_TYPE_WAKE_GESTURE = "android.sensor.wake_gesture";
+
+    /**
      * A constant describing all sensor types.
      */
     public static final int TYPE_ALL = -1;
