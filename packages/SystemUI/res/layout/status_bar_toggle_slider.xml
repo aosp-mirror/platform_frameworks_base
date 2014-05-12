@@ -28,6 +28,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:button="@null"
+        android:background="@*android:drawable/switch_track_quantum"
         />
     <com.android.systemui.settings.ToggleSeekBar
         android:id="@+id/slider"
