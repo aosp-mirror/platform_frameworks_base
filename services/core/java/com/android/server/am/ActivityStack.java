@@ -1421,7 +1421,8 @@ final class ActivityStack {
 
         final TaskRecord nextTask = next.task;
         final TaskRecord prevTask = prev != null ? prev.task : null;
-        if (prevTask != null && prevTask.mOnTopOfHome && prev.finishing && prev.frontOfTask) {
+        if (prevTask != null && prevTask.stack == this &&
+                prevTask.mOnTopOfHome && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             if (prevTask == nextTask) {
                 prevTask.setFrontOfTask();
