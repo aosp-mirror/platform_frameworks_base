@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,7 +33,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -71,7 +71,7 @@ public class PacManager {
     public static final String KEY_PROXY = "keyProxy";
     private String mCurrentPac;
     @GuardedBy("mProxyLock")
-    private String mPacUrl;
+    private Uri mPacUrl;
 
     private AlarmManager mAlarmManager;
     @GuardedBy("mProxyLock")
@@ -100,7 +100,7 @@ public class PacManager {
         public void run() {
             String file;
             synchronized (mProxyLock) {
-                if (mPacUrl == null) return;
+                if (Uri.EMPTY.equals(mPacUrl)) return;
                 try {
                     file = get(mPacUrl);
                 } catch (IOException ioe) {
@@ -158,13 +158,13 @@ public class PacManager {
      * @return Returns true when the broadcast should not be sent
      */
     public synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
-        if (proxy.getPacFileUrl() != null) {
+        if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
                 return false;
             }
             synchronized (mProxyLock) {
-                mPacUrl = proxy.getPacFileUrl().toString();
+                mPacUrl = proxy.getPacFileUrl();
             }
             mCurrentDelay = DELAY_1;
             mHasSentBroadcast = false;
@@ -196,8 +196,8 @@ public class PacManager {
      *
      * @throws IOException
      */
-    private static String get(String urlString) throws IOException {
-        URL url = new URL(urlString);
+    private static String get(Uri pacUri) throws IOException {
+        URL url = new URL(pacUri.toString());
         URLConnection urlConnection = url.openConnection(java.net.Proxy.NO_PROXY);
         return new String(Streams.readFully(urlConnection.getInputStream()));
     }

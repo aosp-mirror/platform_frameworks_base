@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -339,7 +340,7 @@ public abstract class ApplicationThreadNative extends Binder
             final String proxy = data.readString();
             final String port = data.readString();
             final String exclList = data.readString();
-            final String pacFileUrl = data.readString();
+            final Uri pacFileUrl = Uri.CREATOR.createFromParcel(data);
             setHttpProxy(proxy, port, exclList, pacFileUrl);
             return true;
         }
@@ -1008,13 +1009,13 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public void setHttpProxy(String proxy, String port, String exclList,
-            String pacFileUrl) throws RemoteException {
+            Uri pacFileUrl) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(proxy);
         data.writeString(port);
         data.writeString(exclList);
-        data.writeString(pacFileUrl);
+        pacFileUrl.writeToParcel(data, 0);
         mRemote.transact(SET_HTTP_PROXY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
