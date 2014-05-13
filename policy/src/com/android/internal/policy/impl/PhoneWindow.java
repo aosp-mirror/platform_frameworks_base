@@ -301,11 +301,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             throw new AndroidRuntimeException(
                     "You cannot combine swipe dismissal and the action bar.");
         }
-
-        if (featureId == FEATURE_INDETERMINATE_PROGRESS &&
-                getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            throw new AndroidRuntimeException("You cannot use indeterminate progress on a watch.");
-        }
         return super.requestFeature(featureId);
     }
 
