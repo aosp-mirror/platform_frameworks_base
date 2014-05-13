@@ -210,14 +210,16 @@ public interface IActivityManager extends IInterface {
     public int checkPermission(String permission, int pid, int uid)
             throws RemoteException;
 
-    public int checkUriPermission(Uri uri, int pid, int uid, int mode)
+    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId)
             throws RemoteException;
-    public void grantUriPermission(IApplicationThread caller, String targetPkg,
-            Uri uri, int mode) throws RemoteException;
-    public void revokeUriPermission(IApplicationThread caller, Uri uri,
-            int mode) throws RemoteException;
-    public void takePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
-    public void releasePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
+    public void grantUriPermission(IApplicationThread caller, String targetPkg, Uri uri,
+            int mode, int userId) throws RemoteException;
+    public void revokeUriPermission(IApplicationThread caller, Uri uri, int mode, int userId)
+            throws RemoteException;
+    public void takePersistableUriPermission(Uri uri, int modeFlags, int userId)
+            throws RemoteException;
+    public void releasePersistableUriPermission(Uri uri, int modeFlags, int userId)
+            throws RemoteException;
     public ParceledListSlice<UriPermission> getPersistedUriPermissions(
             String packageName, boolean incoming) throws RemoteException;
 
@@ -323,12 +325,12 @@ public interface IActivityManager extends IInterface {
     
     public IBinder newUriPermissionOwner(String name) throws RemoteException;
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
-            Uri uri, int mode) throws RemoteException;
+            Uri uri, int mode, int userId) throws RemoteException;
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
-            int mode) throws RemoteException;
+            int mode, int userId) throws RemoteException;
 
-    public int checkGrantUriPermission(int callingUid, String targetPkg,
-            Uri uri, int modeFlags) throws RemoteException;
+    public int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri,
+            int modeFlags, int userId) throws RemoteException;
 
     // Cause the specified process to dump the specified heap.
     public boolean dumpHeap(String process, int userId, boolean managed, String path,

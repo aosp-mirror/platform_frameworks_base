@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.pm.ActivityInfo;
+import static android.content.ContentProvider.maybeAddUserId;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -7428,6 +7429,41 @@ public class Intent implements Parcelable, Cloneable {
                     ACTION_EDIT.equals(mAction) ||
                     ACTION_ATTACH_DATA.equals(mAction)) {
                 mData.checkFileUriExposed("Intent.getData()");
+            }
+        }
+    }
+
+    /**
+     * Prepare this {@link Intent} to be sent to another user
+     *
+     * @hide
+     */
+    public void prepareToLeaveUser(int userId) {
+        Uri data = getData();
+        if (data != null) {
+            mData = maybeAddUserId(data, userId);
+        }
+        if (mSelector != null) {
+            mSelector.prepareToLeaveUser(userId);
+        }
+        if (mClipData != null) {
+            mClipData.prepareToLeaveUser(userId);
+        }
+        String action = getAction();
+        if (ACTION_SEND.equals(action)) {
+            final Uri stream = getParcelableExtra(EXTRA_STREAM);
+            if (stream != null) {
+                putExtra(EXTRA_STREAM, maybeAddUserId(stream, userId));
+            }
+        }
+        if (ACTION_SEND_MULTIPLE.equals(action)) {
+            final ArrayList<Uri> streams = getParcelableArrayListExtra(EXTRA_STREAM);
+            if (streams != null) {
+                ArrayList<Uri> newStreams = new ArrayList<Uri>();
+                for (int i = 0; i < streams.size(); i++) {
+                    newStreams.add(maybeAddUserId(streams.get(i), userId));
+                }
+                putParcelableArrayListExtra(EXTRA_STREAM, newStreams);
             }
         }
     }

@@ -23,6 +23,7 @@ import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ContentProvider;
 import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
 import android.content.Context;
@@ -255,7 +256,8 @@ public class ClipboardService extends IClipboard.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException for us.
-            mAm.checkGrantUriPermission(uid, null, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            mAm.checkGrantUriPermission(uid, null, ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION, resolveUserId(uri, uid));
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -282,8 +284,10 @@ public class ClipboardService extends IClipboard.Stub {
     private final void grantUriLocked(Uri uri, String pkg) {
         long ident = Binder.clearCallingIdentity();
         try {
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, Process.myUid(), pkg, uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            mAm.grantUriPermissionFromOwner(mPermissionOwner, Process.myUid(), pkg,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    resolveUserId(uri, Process.myUid()));
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -331,9 +335,10 @@ public class ClipboardService extends IClipboard.Stub {
     private final void revokeUriLocked(Uri uri) {
         long ident = Binder.clearCallingIdentity();
         try {
-            mAm.revokeUriPermissionFromOwner(mPermissionOwner, uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            mAm.revokeUriPermissionFromOwner(mPermissionOwner,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    resolveUserId(uri, Process.myUid()));
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -360,5 +365,9 @@ public class ClipboardService extends IClipboard.Stub {
         for (int i=0; i<N; i++) {
             revokeItemLocked(clipboard.primaryClip.getItemAt(i));
         }
+    }
+
+    private final int resolveUserId(Uri uri, int uid) {
+        return ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(uid));
     }
 }

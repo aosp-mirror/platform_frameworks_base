@@ -44,7 +44,7 @@ final class UriPermission {
     public static final int STRENGTH_GLOBAL = 2;
     public static final int STRENGTH_PERSISTABLE = 3;
 
-    final int userHandle;
+    final int targetUserId;
     final String sourcePkg;
     final String targetPkg;
 
@@ -86,7 +86,7 @@ final class UriPermission {
     private String stringName;
 
     UriPermission(String sourcePkg, String targetPkg, int targetUid, GrantUri uri) {
-        this.userHandle = UserHandle.getUserId(targetUid);
+        this.targetUserId = UserHandle.getUserId(targetUid);
         this.sourcePkg = sourcePkg;
         this.targetPkg = targetPkg;
         this.targetUid = targetUid;
@@ -307,7 +307,7 @@ final class UriPermission {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
-        pw.print("userHandle=" + userHandle);
+        pw.print("targetUserId=" + targetUserId);
         pw.print(" sourcePkg=" + sourcePkg);
         pw.println(" targetPkg=" + targetPkg);
 
@@ -352,7 +352,7 @@ final class UriPermission {
      * {@link UriPermission#persistedModeFlags} state.
      */
     public static class Snapshot {
-        final int userHandle;
+        final int targetUserId;
         final String sourcePkg;
         final String targetPkg;
         final GrantUri uri;
@@ -360,7 +360,7 @@ final class UriPermission {
         final long persistedCreateTime;
 
         private Snapshot(UriPermission perm) {
-            this.userHandle = perm.userHandle;
+            this.targetUserId = perm.targetUserId;
             this.sourcePkg = perm.sourcePkg;
             this.targetPkg = perm.targetPkg;
             this.uri = perm.uri;
