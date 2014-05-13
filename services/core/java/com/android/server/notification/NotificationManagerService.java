@@ -1401,7 +1401,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setZenModeCondition(Uri conditionId) {
             enforceSystemOrSystemUI("INotificationManager.setZenModeCondition");
-            mConditionProviders.setZenModeCondition(conditionId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mConditionProviders.setZenModeCondition(conditionId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

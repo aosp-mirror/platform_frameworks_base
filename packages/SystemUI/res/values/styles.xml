@@ -180,4 +180,16 @@
     <style name="StatusBarHeader">
         <item name="android:layout_width">match_parent</item>
     </style>
+
+    <style name="QSWhiteTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorControlNormal">#ffffffff</item>
+        <item name="android:colorControlActivated">#ffffffff</item>
+    </style>
+
+    <style name="QSAccentTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorControlNormal">@color/system_accent_color</item>
+        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    </style>
+
+    <style name="QSBorderless" parent="@android:style/Widget.Quantum.Button.Borderless" />
 </resources>

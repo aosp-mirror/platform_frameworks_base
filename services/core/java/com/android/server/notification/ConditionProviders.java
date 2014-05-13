@@ -16,8 +16,13 @@
 
 package com.android.server.notification;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,6 +35,7 @@ import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -39,6 +45,7 @@ import com.android.internal.R;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 public class ConditionProviders extends ManagedServices {
     private static final Condition[] NO_CONDITIONS = new Condition[0];
@@ -47,6 +54,7 @@ public class ConditionProviders extends ManagedServices {
     private final ArrayMap<IBinder, IConditionListener> mListeners
             = new ArrayMap<IBinder, IConditionListener>();
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<ConditionRecord>();
+    private final CountdownConditionHelper mCountdownHelper = new CountdownConditionHelper();
 
     public ConditionProviders(Context context, Handler handler,
             UserProfiles userProfiles, ZenModeHelper zenModeHelper) {
@@ -267,6 +275,7 @@ public class ConditionProviders extends ManagedServices {
                 }
             }
         }
+        mCountdownHelper.setZenModeCondition(conditionId);
     }
 
     private void subscribeLocked(ConditionRecord r) {
@@ -432,6 +441,68 @@ public class ConditionProviders extends ManagedServices {
         }
         if (DEBUG) Slog.d(TAG, "Setting zen config to: " + config);
         mZenModeHelper.setConfig(config);
+    }
+
+    private final class CountdownConditionHelper extends BroadcastReceiver {
+        private static final String ACTION = "CountdownConditionHelper";
+        private static final int REQUEST_CODE = 100;
+        private static final String EXTRA_TIME = "time";
+
+        private long mCurrent;
+
+        public CountdownConditionHelper() {
+            mContext.registerReceiver(this, new IntentFilter(ACTION));
+        }
+
+        public void setZenModeCondition(Uri conditionId) {
+            final long time = tryParseCondition(conditionId);
+            final AlarmManager alarms = (AlarmManager)
+                    mContext.getSystemService(Context.ALARM_SERVICE);
+            final Intent intent = new Intent(ACTION).putExtra(EXTRA_TIME, time)
+                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarms.cancel(pendingIntent);
+            mCurrent = time;
+            if (time > 0) {
+                final long now = System.currentTimeMillis();
+                final CharSequence span =
+                        DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+                Slog.d(TAG, String.format("Scheduling %s for %s, %s in the future (%s), now=%s",
+                        ACTION, ts(time), time - now, span, ts(now)));
+                alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+            }
+        }
+
+        private String ts(long time) {
+            return new Date(time) + " (" + time + ")";
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION.equals(intent.getAction())) {
+                final long time = intent.getLongExtra(EXTRA_TIME, 0);
+                Slog.d(TAG, "Countdown condition fired. time=" + time + " mCurrent=" + mCurrent);
+                if (time > 0 && time == mCurrent) {
+                    // countdown condition is still the manual condition, leave zen
+                    mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF);
+                    ConditionProviders.this.setZenModeCondition(null);
+                }
+            }
+        }
+
+        private long tryParseCondition(Uri conditionId) {
+            // condition://android/countdown/1399917958951
+            if (!Condition.isValidId(conditionId, "android")) return 0;
+            if (conditionId.getPathSegments().size() != 2
+                    || !"countdown".equals(conditionId.getPathSegments().get(0))) return 0;
+            try {
+                return Long.parseLong(conditionId.getPathSegments().get(1));
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error parsing countdown condition: " + conditionId, e);
+                return 0;
+            }
+        }
     }
 
     private class ZenModeHelperCallback extends ZenModeHelper.Callback {

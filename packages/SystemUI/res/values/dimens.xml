@@ -271,6 +271,10 @@
 
     <dimen name="quick_settings_tmp_scrim_stroke_width">8dp</dimen>
     <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>
+    <dimen name="quick_settings_panel_padding">16dp</dimen>
+    <dimen name="quick_settings_tile_icon_outline">2dp</dimen>
+    <dimen name="quick_settings_tile_text_size">12sp</dimen>
+    <dimen name="quick_settings_tile_divider_height">1dp</dimen>
 
     <dimen name="notifications_top_padding">8dp</dimen>
     

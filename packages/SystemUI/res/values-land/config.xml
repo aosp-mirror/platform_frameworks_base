@@ -25,7 +25,7 @@
     <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
 
     <!-- The number of columns in the QuickSettings -->
-    <integer name="quick_settings_num_columns">6</integer>
+    <integer name="quick_settings_num_columns">4</integer>
 
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">2</integer>

@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -60,6 +61,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private ActivityStarter mActivityStarter;
     private BrightnessController mBrightnessController;
+    private QSPanel mQSPanel;
 
     private final Rect mClipBounds = new Rect();
     private final Outline mOutline = new Outline();
@@ -115,6 +117,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateVisibilities();
             updateSystemIconsLayoutParams();
             updateBrightnessControllerState();
+            if (mQSPanel != null) {
+                mQSPanel.setExpanded(expanded);
+            }
         }
     }
 
@@ -258,5 +263,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void startSettingsActivity() {
         mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+    }
+
+    public void setQSPanel(QSPanel qsp) {
+        mQSPanel = qsp;
     }
 }

@@ -66,7 +66,7 @@ abstract public class ManagedServices {
 
     private static final String ENABLED_SERVICES_SEPARATOR = ":";
 
-    private final Context mContext;
+    protected final Context mContext;
     protected final Object mMutex;
     private final UserProfiles mUserProfiles;
     private final SettingsObserver mSettingsObserver;

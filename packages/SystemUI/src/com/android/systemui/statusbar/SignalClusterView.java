@@ -28,19 +28,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
         extends LinearLayout
-        implements NetworkController.SignalCluster {
+        implements NetworkControllerImpl.SignalCluster {
 
     static final boolean DEBUG = false;
     static final String TAG = "SignalClusterView";
     static final PorterDuffColorFilter PROBLEM_FILTER
             = new PorterDuffColorFilter(0xffab653b, PorterDuff.Mode.SRC_ATOP);
 
-    NetworkController mNC;
+    NetworkControllerImpl mNC;
 
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
@@ -67,7 +67,7 @@ public class SignalClusterView
         super(context, attrs, defStyle);
     }
 
-    public void setNetworkController(NetworkController nc) {
+    public void setNetworkController(NetworkControllerImpl nc) {
         if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
         mNC = nc;
     }

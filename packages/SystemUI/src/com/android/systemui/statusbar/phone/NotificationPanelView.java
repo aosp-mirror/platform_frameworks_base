@@ -45,7 +45,7 @@ public class NotificationPanelView extends PanelView implements
 
     PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
-    private QuickSettingsContainerView mQsContainer;
+    private View mQsContainer;
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private View mStackScrollerContainer;
@@ -106,7 +106,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setOverlayParent(this);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mStackScrollerContainer = findViewById(R.id.notification_container_parent);
-        mQsContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
+        mQsContainer = findViewById(R.id.quick_settings_container);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
         mNotificationStackScroller = (NotificationStackScrollLayout)
