@@ -1464,6 +1464,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private boolean needsToShowImeSwitchOngoingNotification() {
         if (!mShowOngoingImeSwitcherForPhones) return false;
+        if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
         synchronized (mMethodMap) {
             List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
@@ -2812,6 +2813,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog.getWindow().getAttributes().privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             mSwitchingDialog.getWindow().getAttributes().setTitle("Select input method");
+            updateImeWindowStatusLocked();
             mSwitchingDialog.show();
         }
     }
@@ -2869,6 +2871,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog = null;
         }
 
+        updateImeWindowStatusLocked();
         mDialogBuilder = null;
         mIms = null;
     }
