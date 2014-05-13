@@ -20,7 +20,9 @@ import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.DataBindingItem;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
+import com.android.util.Pair;
 
+import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
@@ -29,8 +31,14 @@ import android.widget.HeterogeneousExpandableList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FakeExpandableAdapter extends BaseAdapter implements ExpandableListAdapter,
-        HeterogeneousExpandableList {
+@SuppressWarnings("deprecation")
+public class FakeExpandableAdapter implements ExpandableListAdapter, HeterogeneousExpandableList {
+
+    private final IProjectCallback mCallback;
+    private final ResourceReference mAdapterRef;
+    private boolean mSkipCallbackParser = false;
+
+    protected final List<AdapterItem> mItems = new ArrayList<AdapterItem>();
 
     // don't use a set because the order is important.
     private final List<ResourceReference> mGroupTypes = new ArrayList<ResourceReference>();
@@ -38,7 +46,8 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
 
     public FakeExpandableAdapter(ResourceReference adapterRef, AdapterBinding binding,
             IProjectCallback callback) {
-        super(adapterRef, binding, callback);
+        mAdapterRef = adapterRef;
+        mCallback = callback;
 
         createItems(binding, binding.getItemCount(), binding.getRepeatCount(), mGroupTypes, 1);
     }
@@ -125,7 +134,10 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
             ViewGroup parent) {
         // we don't care about recycling here because we never scroll.
         AdapterItem item = mItems.get(groupPosition);
-        return getView(item, null /*parentItem*/, convertView, parent);
+        Pair<View, Boolean> pair = AdapterHelper.getView(item, null /*parentItem*/, parent,
+                mCallback, mAdapterRef, mSkipCallbackParser);
+        mSkipCallbackParser = pair.getSecond();
+        return pair.getFirst();
     }
 
     @Override
@@ -134,7 +146,10 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
         // we don't care about recycling here because we never scroll.
         AdapterItem parentItem = mItems.get(groupPosition);
         AdapterItem item = getChildItem(groupPosition, childPosition);
-        return getView(item, parentItem, convertView, parent);
+        Pair<View, Boolean> pair = AdapterHelper.getView(item, parentItem, parent, mCallback,
+                mAdapterRef, mSkipCallbackParser);
+        mSkipCallbackParser = pair.getSecond();
+        return pair.getFirst();
     }
 
     @Override
@@ -170,6 +185,31 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
     @Override
     public void onGroupExpanded(int groupPosition) {
         // pass
+    }
+
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        // pass
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        // pass
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return mItems.isEmpty();
     }
 
     // ---- HeterogeneousExpandableList
