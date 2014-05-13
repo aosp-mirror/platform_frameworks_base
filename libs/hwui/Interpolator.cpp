@@ -18,7 +18,7 @@
 
 #include "Interpolator.h"
 
-#include <math.h>
+#include <cmath>
 #include <cutils/log.h>
 
 #include "utils/MathUtils.h"
@@ -32,6 +32,62 @@ Interpolator* Interpolator::createDefaultInterpolator() {
 
 float AccelerateDecelerateInterpolator::interpolate(float input) {
     return (float)(cosf((input + 1) * M_PI) / 2.0f) + 0.5f;
+}
+
+float AccelerateInterpolator::interpolate(float input) {
+    if (mFactor == 1.0f) {
+        return input * input;
+    } else {
+        return pow(input, mDoubleFactor);
+    }
+}
+
+float AnticipateInterpolator::interpolate(float t) {
+    return t * t * ((mTension + 1) * t - mTension);
+}
+
+static float a(float t, float s) {
+    return t * t * ((s + 1) * t - s);
+}
+
+static float o(float t, float s) {
+    return t * t * ((s + 1) * t + s);
+}
+
+float AnticipateOvershootInterpolator::interpolate(float t) {
+    if (t < 0.5f) return 0.5f * a(t * 2.0f, mTension);
+    else return 0.5f * (o(t * 2.0f - 2.0f, mTension) + 2.0f);
+}
+
+static float bounce(float t) {
+    return t * t * 8.0f;
+}
+
+float BounceInterpolator::interpolate(float t) {
+    t *= 1.1226f;
+    if (t < 0.3535f) return bounce(t);
+    else if (t < 0.7408f) return bounce(t - 0.54719f) + 0.7f;
+    else if (t < 0.9644f) return bounce(t - 0.8526f) + 0.9f;
+    else return bounce(t - 1.0435f) + 0.95f;
+}
+
+float CycleInterpolator::interpolate(float input) {
+    return sinf(2 * mCycles * M_PI * input);
+}
+
+float DecelerateInterpolator::interpolate(float input) {
+    float result;
+    if (mFactor == 1.0f) {
+        result = 1.0f - (1.0f - input) * (1.0f - input);
+    } else {
+        result = 1.0f - pow((1.0f - input), 2 * mFactor);
+    }
+    return result;
+}
+
+float OvershootInterpolator::interpolate(float t) {
+    t -= 1.0f;
+    return t * t * ((mTension + 1) * t + mTension) + 1.0f;
 }
 
 LUTInterpolator::LUTInterpolator(float* values, size_t size) {
