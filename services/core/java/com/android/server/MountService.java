@@ -977,19 +977,21 @@ class MountService extends IMountService.Stub
             }
 
             if (code == VoldResponseCode.VolumeDiskInserted) {
-                new Thread("MountService#VolumeDiskInserted") {
-                    @Override
-                    public void run() {
-                        try {
-                            int rc;
-                            if ((rc = doMountVolume(path)) != StorageResultCode.OperationSucceeded) {
-                                Slog.w(TAG, String.format("Insertion mount failed (%d)", rc));
+                if(!(isUsbMassStorageConnected() && volume.allowMassStorage()))
+                    new Thread("MountService#VolumeDiskInserted") {
+                        @Override
+                        public void run() {
+                            try {
+                                int rc;
+                                if ((rc = doMountVolume(path)) !=
+                                        StorageResultCode.OperationSucceeded) {
+                                    Slog.w(TAG, String.format("Insertion mount failed (%d)", rc));
+                                }
+                            } catch (Exception ex) {
+                                Slog.w(TAG, "Failed to mount media on insertion", ex);
                             }
-                        } catch (Exception ex) {
-                            Slog.w(TAG, "Failed to mount media on insertion", ex);
                         }
-                    }
-                }.start();
+                    }.start();
             } else if (code == VoldResponseCode.VolumeDiskRemoved) {
                 /*
                  * This event gets trumped if we're already in BAD_REMOVAL state
@@ -1063,6 +1065,8 @@ class MountService extends IMountService.Stub
                 updatePublicVolumeState(volume, Environment.MEDIA_UNMOUNTED);
                 action = Intent.ACTION_MEDIA_UNMOUNTED;
             }
+            if(isUsbMassStorageConnected() && volume.allowMassStorage())
+                doShareUnshareVolume(path, "ums", true);
         } else if (newState == VolumeState.Pending) {
         } else if (newState == VolumeState.Checking) {
             if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state checking");
