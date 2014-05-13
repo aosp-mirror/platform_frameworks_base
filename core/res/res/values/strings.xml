@@ -953,10 +953,11 @@
         Malicious apps may use this to forge MMS message receipt or to
         silently replace the content of any webpage with malicious variants.</string>
 
+    <!-- TODO: Mark these as translatable when API is finalized. -->
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastScoreNetworks">send score networks broadcast</string>
+    <string name="permlab_broadcastScoreNetworks" translatable="false">send score networks broadcast</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastScoreNetworks">Allows the app
+    <string name="permdesc_broadcastScoreNetworks" translatable="false">Allows the app
         to broadcast a notification that networks need to be scored.
         Never needed for normal apps.
     </string>
