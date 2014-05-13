@@ -67,9 +67,9 @@ public class FlpHardwareProvider {
     public static FlpHardwareProvider getInstance(Context context) {
         if (sSingletonInstance == null) {
             sSingletonInstance = new FlpHardwareProvider(context);
+            sSingletonInstance.nativeInit();
         }
 
-        nativeInit();
         return sSingletonInstance;
     }
 
@@ -96,8 +96,7 @@ public class FlpHardwareProvider {
                 Looper.myLooper());
     }
 
-    public static boolean isSupported() {
-        nativeInit();
+    public boolean isSupported() {
         return nativeIsSupported();
     }
 
@@ -218,9 +217,9 @@ public class FlpHardwareProvider {
     // Core members
     private static native void nativeClassInit();
     private static native boolean nativeIsSupported();
-    private static native void nativeInit();
 
     // FlpLocationInterface members
+    private native void nativeInit();
     private native int nativeGetBatchSize();
     private native void nativeStartBatching(int requestId, FusedBatchOptions options);
     private native void nativeUpdateBatchingOptions(int requestId, FusedBatchOptions optionsObject);
