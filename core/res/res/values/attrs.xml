@@ -2355,11 +2355,9 @@
              view with a theme override will inherit the themed context. -->
         <attr name="theme" />
 
-        <!-- Specifies that the shared name of the View to be shared with another Activity.
-             When transitioning between Activities, the name links a UI element in the starting
-             Activity to UI element in the called Activity. Names should be unique in the
-             View hierarchy. -->
-        <attr name="sharedElementName" format="string" />
+        <!-- Names a View such that it can be identified for Transitions. Names should be
+             unique in the View hierarchy. -->
+        <attr name="viewName" format="string" />
 
         <!-- Specifies that this view should permit nested scrolling within a compatible
              ancestor view. -->

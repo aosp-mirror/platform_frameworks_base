@@ -670,7 +670,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawHorizontalTrack
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
  * @attr ref android.R.styleable#View_stateListAnimator
- * @attr ref android.R.styleable#View_sharedElementName
+ * @attr ref android.R.styleable#View_viewName
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
  * @attr ref android.R.styleable#View_textAlignment
@@ -3185,6 +3185,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
 
+    private String mViewName;
+
     static class ListenerInfo {
         /**
          * Listener used to dispatch focus change events.
@@ -3997,8 +3999,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_accessibilityLiveRegion:
                     setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
                     break;
-                case R.styleable.View_sharedElementName:
-                    setSharedElementName(a.getString(attr));
+                case R.styleable.View_viewName:
+                    setViewName(a.getString(attr));
                     break;
                 case R.styleable.View_nestedScrollingEnabled:
                     setNestedScrollingEnabled(a.getBoolean(attr, false));
@@ -18839,15 +18841,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Adds all Views that have {@link #getSharedElementName()} non-null to sharedElements.
-     * @param sharedElements Will contain all Views in the hierarchy having a shared element name.
+     * Adds all Views that have {@link #getViewName()} non-null to namedElements.
+     * @param namedElements Will contain all Views in the hierarchy having a view name.
      * @hide
      */
-    public void findSharedElements(Map<String, View> sharedElements) {
+    public void findNamedViews(Map<String, View> namedElements) {
         if (getVisibility() == VISIBLE) {
-            String sharedElementName = getSharedElementName();
-            if (sharedElementName != null) {
-                sharedElements.put(sharedElementName, this);
+            String viewName = getViewName();
+            if (viewName != null) {
+                namedElements.put(viewName, this);
             }
         }
     }
@@ -19247,32 +19249,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Specifies that the shared name of the View to be shared with another Activity.
-     * When transitioning between Activities, the name links a UI element in the starting
-     * Activity to UI element in the called Activity. Names should be unique in the
-     * View hierarchy.
+     * Sets the name of the View to be used to identify Views in Transitions.
+     * Names should be unique in the View hierarchy.
      *
-     * @param sharedElementName The cross-Activity View identifier. The called Activity will use
-     *                 the name to match the location with a View in its layout.
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     * @param viewName The name of the View to uniquely identify it for Transitions.
      */
-    public void setSharedElementName(String sharedElementName) {
-        setTagInternal(com.android.internal.R.id.shared_element_name, sharedElementName);
+    public final void setViewName(String viewName) {
+        mViewName = viewName;
     }
 
     /**
-     * Returns the shared name of the View to be shared with another Activity.
-     * When transitioning between Activities, the name links a UI element in the starting
-     * Activity to UI element in the called Activity. Names should be unique in the
-     * View hierarchy.
+     * Returns the name of the View to be used to identify Views in Transitions.
+     * Names should be unique in the View hierarchy.
      *
-     * <p>This returns null if the View is not a shared element or the name if it is.</p>
+     * <p>This returns null if the View has not been given a name.</p>
      *
-     * @return The name used for this View for cross-Activity transitions or null if
-     * this View has not been identified as shared.
+     * @return The name used of the View to be used to identify Views in Transitions or null
+     * if no name has been given.
      */
-    public String getSharedElementName() {
-        return (String) getTag(com.android.internal.R.id.shared_element_name);
+    public String getViewName() {
+        return mViewName;
     }
 
     /**
