@@ -24,6 +24,8 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
+import libcore.util.Objects;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
@@ -317,10 +319,17 @@ public final class InputMethodManager {
     int mCursorSelEnd;
     int mCursorCandStart;
     int mCursorCandEnd;
+
+    /**
+     * The instance that has previously been sent to the input method.
+     */
+    private CursorAnchorInfo mCursorAnchorInfo = null;
+
     /**
      * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
      */
     private final int[] mViewTopLeft = new int[2];
+
     // -----------------------------------------------------------
     
     /**
@@ -489,6 +498,9 @@ public final class InputMethodManager {
                 case SET_CURSOR_ANCHOR_MONITOR_MODE: {
                     synchronized (mH) {
                         mCursorAnchorMonitorMode = msg.arg1;
+                        // Clear the cache.
+                        mCursorRect.setEmpty();
+                        mCursorAnchorInfo = null;
                     }
                     return;
                 }
@@ -1173,6 +1185,7 @@ public final class InputMethodManager {
                 mCursorCandStart = -1;
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
+                mCursorAnchorInfo = null;
                 servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic, this);
             } else {
                 servedContext = null;
@@ -1535,10 +1548,9 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
+            if (DEBUG) Log.d(TAG, "updateCursor");
             mTmpCursorRect.set(left, top, right, bottom);
-            if (!mCursorRect.equals(mTmpCursorRect)) {
-                if (DEBUG) Log.d(TAG, "updateCursor");
-
+            if (!Objects.equal(mCursorRect, mTmpCursorRect)) {
                 try {
                     if (DEBUG) Log.v(TAG, "CURSOR CHANGE: " + mCurMethod);
                     mCursorRect.set(mTmpCursorRect);
@@ -1569,10 +1581,14 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            if (DEBUG) Log.d(TAG, "updateCursorAnchorInfo");
-
+            if (Objects.equal(mCursorAnchorInfo, cursorAnchorInfo)) {
+                Log.w(TAG, "Ignoring redundant updateCursorAnchorInfo: info=" + cursorAnchorInfo);
+                return;
+            }
+            if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
             try {
                 mCurMethod.updateCursorAnchorInfo(cursorAnchorInfo);
+                mCursorAnchorInfo = cursorAnchorInfo;
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
