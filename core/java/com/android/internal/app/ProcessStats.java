@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
-import android.webkit.WebViewFactory;
 
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -55,6 +54,11 @@ public final class ProcessStats implements Parcelable {
     // that is done.
     public static long COMMIT_PERIOD = 3*60*60*1000;  // Commit current stats every 3 hours
 
+    // Minimum uptime period before committing.  If the COMMIT_PERIOD has elapsed but
+    // the total uptime has not exceeded this amount, then the commit will be held until
+    // it is reached.
+    public static long COMMIT_UPTIME_PERIOD = 60*60*1000;  // Must have at least 1 hour elapsed
+
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
@@ -80,6 +84,24 @@ public final class ProcessStats implements Parcelable {
     public static final int PSS_USS_AVERAGE = 5;
     public static final int PSS_USS_MAXIMUM = 6;
     public static final int PSS_COUNT = PSS_USS_MAXIMUM+1;
+
+    public static final int SYS_MEM_USAGE_SAMPLE_COUNT = 0;
+    public static final int SYS_MEM_USAGE_CACHED_MINIMUM = 1;
+    public static final int SYS_MEM_USAGE_CACHED_AVERAGE = 2;
+    public static final int SYS_MEM_USAGE_CACHED_MAXIMUM = 3;
+    public static final int SYS_MEM_USAGE_FREE_MINIMUM = 4;
+    public static final int SYS_MEM_USAGE_FREE_AVERAGE = 5;
+    public static final int SYS_MEM_USAGE_FREE_MAXIMUM = 6;
+    public static final int SYS_MEM_USAGE_ZRAM_MINIMUM = 7;
+    public static final int SYS_MEM_USAGE_ZRAM_AVERAGE = 8;
+    public static final int SYS_MEM_USAGE_ZRAM_MAXIMUM = 9;
+    public static final int SYS_MEM_USAGE_KERNEL_MINIMUM = 10;
+    public static final int SYS_MEM_USAGE_KERNEL_AVERAGE = 11;
+    public static final int SYS_MEM_USAGE_KERNEL_MAXIMUM = 12;
+    public static final int SYS_MEM_USAGE_NATIVE_MINIMUM = 13;
+    public static final int SYS_MEM_USAGE_NATIVE_AVERAGE = 14;
+    public static final int SYS_MEM_USAGE_NATIVE_MAXIMUM = 15;
+    public static final int SYS_MEM_USAGE_COUNT = SYS_MEM_USAGE_NATIVE_MAXIMUM+1;
 
     public static final int ADJ_NOTHING = -1;
     public static final int ADJ_MEM_FACTOR_NORMAL = 0;
@@ -174,7 +196,7 @@ public final class ProcessStats implements Parcelable {
     static final String CSV_SEP = "\t";
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 14;
+    private static final int PARCEL_VERSION = 18;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535453;
 
@@ -200,11 +222,16 @@ public final class ProcessStats implements Parcelable {
     public int mMemFactor = STATE_NOTHING;
     public long mStartTime;
 
+    public int[] mSysMemUsageTable = null;
+    public int mSysMemUsageTableSize = 0;
+    public final long[] mSysMemUsageArgs = new long[SYS_MEM_USAGE_COUNT];
+
     public long mTimePeriodStartClock;
     public long mTimePeriodStartRealtime;
     public long mTimePeriodEndRealtime;
+    public long mTimePeriodStartUptime;
+    public long mTimePeriodEndUptime;
     String mRuntime;
-    String mWebView;
     boolean mRunning;
 
     static final int LONGS_SIZE = 4096;
@@ -304,11 +331,77 @@ public final class ProcessStats implements Parcelable {
             mMemFactorDurations[i] += other.mMemFactorDurations[i];
         }
 
+        for (int i=0; i<other.mSysMemUsageTableSize; i++) {
+            int ent = other.mSysMemUsageTable[i];
+            int state = (ent>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
+            long[] longs = other.mLongs.get((ent>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+            addSysMemUsage(state, longs, ((ent >> OFFSET_INDEX_SHIFT) & OFFSET_INDEX_MASK));
+        }
+
         if (other.mTimePeriodStartClock < mTimePeriodStartClock) {
             mTimePeriodStartClock = other.mTimePeriodStartClock;
             mTimePeriodStartClockStr = other.mTimePeriodStartClockStr;
         }
         mTimePeriodEndRealtime += other.mTimePeriodEndRealtime - other.mTimePeriodStartRealtime;
+        mTimePeriodEndUptime += other.mTimePeriodEndUptime - other.mTimePeriodStartUptime;
+    }
+
+    public void addSysMemUsage(long cachedMem, long freeMem, long zramMem, long kernelMem,
+            long nativeMem) {
+        if (mMemFactor != STATE_NOTHING) {
+            int state = mMemFactor * STATE_COUNT;
+            mSysMemUsageArgs[SYS_MEM_USAGE_SAMPLE_COUNT] = 1;
+            for (int i=0; i<3; i++) {
+                mSysMemUsageArgs[SYS_MEM_USAGE_CACHED_MINIMUM + i] = cachedMem;
+                mSysMemUsageArgs[SYS_MEM_USAGE_FREE_MINIMUM + i] = freeMem;
+                mSysMemUsageArgs[SYS_MEM_USAGE_ZRAM_MINIMUM + i] = zramMem;
+                mSysMemUsageArgs[SYS_MEM_USAGE_KERNEL_MINIMUM + i] = kernelMem;
+                mSysMemUsageArgs[SYS_MEM_USAGE_NATIVE_MINIMUM + i] = nativeMem;
+            }
+            addSysMemUsage(state, mSysMemUsageArgs, 0);
+        }
+    }
+
+    void addSysMemUsage(int state, long[] data, int dataOff) {
+        int idx = binarySearch(mSysMemUsageTable, mSysMemUsageTableSize, state);
+        int off;
+        if (idx >= 0) {
+            off = mSysMemUsageTable[idx];
+        } else {
+            mAddLongTable = mSysMemUsageTable;
+            mAddLongTableSize = mSysMemUsageTableSize;
+            off = addLongData(~idx, state, SYS_MEM_USAGE_COUNT);
+            mSysMemUsageTable = mAddLongTable;
+            mSysMemUsageTableSize = mAddLongTableSize;
+        }
+        long[] longs = mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+        idx = (off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK;
+        addSysMemUsage(longs, idx, data, dataOff);
+    }
+
+    static void addSysMemUsage(long[] dstData, int dstOff, long[] addData, int addOff) {
+        final long dstCount = dstData[dstOff+SYS_MEM_USAGE_SAMPLE_COUNT];
+        final long addCount = addData[addOff+SYS_MEM_USAGE_SAMPLE_COUNT];
+        if (dstCount == 0) {
+            dstData[dstOff+SYS_MEM_USAGE_SAMPLE_COUNT] = addCount;
+            for (int i=SYS_MEM_USAGE_CACHED_MINIMUM; i<SYS_MEM_USAGE_COUNT; i++) {
+                dstData[dstOff+i] = addData[addOff+i];
+            }
+        } else if (addCount > 0) {
+            dstData[dstOff+SYS_MEM_USAGE_SAMPLE_COUNT] = dstCount + addCount;
+            for (int i=SYS_MEM_USAGE_CACHED_MINIMUM; i<SYS_MEM_USAGE_COUNT; i+=3) {
+                if (dstData[dstOff+i] > addData[addOff+i]) {
+                    dstData[dstOff+i] = addData[addOff+i];
+                }
+                dstData[dstOff+i+1] = (long)(
+                        ((dstData[dstOff+i+1]*(double)dstCount)
+                                + (addData[addOff+i+1]*(double)addCount))
+                                / (dstCount+addCount) );
+                if (dstData[dstOff+i+2] < addData[addOff+i+2]) {
+                    dstData[dstOff+i+2] = addData[addOff+i+2];
+                }
+            }
+        }
     }
 
     public static final Parcelable.Creator<ProcessStats> CREATOR
@@ -564,6 +657,164 @@ public final class ProcessStats implements Parcelable {
         return totalTime;
     }
 
+    static class PssAggr {
+        long pss = 0;
+        long samples = 0;
+
+        void add(long newPss, long newSamples) {
+            pss = (long)( (pss*(double)samples) + (newPss*(double)newSamples) )
+                    / (samples+newSamples);
+            samples += newSamples;
+        }
+    }
+
+    public void computeTotalMemoryUse(TotalMemoryUseCollection data, long now) {
+        data.totalTime = 0;
+        for (int i=0; i<STATE_COUNT; i++) {
+            data.processStateWeight[i] = 0;
+            data.processStatePss[i] = 0;
+            data.processStateTime[i] = 0;
+            data.processStateSamples[i] = 0;
+        }
+        for (int i=0; i<SYS_MEM_USAGE_COUNT; i++) {
+            data.sysMemUsage[i] = 0;
+        }
+        data.sysMemCachedWeight = 0;
+        data.sysMemFreeWeight = 0;
+        data.sysMemZRamWeight = 0;
+        data.sysMemKernelWeight = 0;
+        data.sysMemNativeWeight = 0;
+        data.sysMemSamples = 0;
+        long[] totalMemUsage = new long[SYS_MEM_USAGE_COUNT];
+        for (int i=0; i<mSysMemUsageTableSize; i++) {
+            int ent = mSysMemUsageTable[i];
+            long[] longs = mLongs.get((ent>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+            int idx = (ent >> OFFSET_INDEX_SHIFT) & OFFSET_INDEX_MASK;
+            addSysMemUsage(totalMemUsage, 0, longs, idx);
+        }
+        for (int is=0; is<data.screenStates.length; is++) {
+            for (int im=0; im<data.memStates.length; im++) {
+                int memBucket = data.screenStates[is] + data.memStates[im];
+                int stateBucket = memBucket * STATE_COUNT;
+                long memTime = mMemFactorDurations[memBucket];
+                if (mMemFactor == memBucket) {
+                    memTime += now - mStartTime;
+                }
+                data.totalTime += memTime;
+                int sysIdx = binarySearch(mSysMemUsageTable, mSysMemUsageTableSize, stateBucket);
+                long[] longs = totalMemUsage;
+                int idx = 0;
+                if (sysIdx >= 0) {
+                    int ent = mSysMemUsageTable[sysIdx];
+                    long[] tmpLongs = mLongs.get((ent>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+                    int tmpIdx = (ent >> OFFSET_INDEX_SHIFT) & OFFSET_INDEX_MASK;
+                    if (tmpLongs[tmpIdx+SYS_MEM_USAGE_SAMPLE_COUNT] >= 3) {
+                        addSysMemUsage(data.sysMemUsage, 0, longs, idx);
+                        longs = tmpLongs;
+                        idx = tmpIdx;
+                    }
+                }
+                data.sysMemCachedWeight += longs[idx+SYS_MEM_USAGE_CACHED_AVERAGE]
+                        * (double)memTime;
+                data.sysMemFreeWeight += longs[idx+SYS_MEM_USAGE_FREE_AVERAGE]
+                        * (double)memTime;
+                data.sysMemZRamWeight += longs[idx+SYS_MEM_USAGE_ZRAM_AVERAGE]
+                        * (double)memTime;
+                data.sysMemKernelWeight += longs[idx+SYS_MEM_USAGE_KERNEL_AVERAGE]
+                        * (double)memTime;
+                data.sysMemNativeWeight += longs[idx+SYS_MEM_USAGE_NATIVE_AVERAGE]
+                        * (double)memTime;
+                data.sysMemSamples += longs[idx+SYS_MEM_USAGE_SAMPLE_COUNT];
+             }
+        }
+        ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        for (int iproc=0; iproc<procMap.size(); iproc++) {
+            SparseArray<ProcessState> uids = procMap.valueAt(iproc);
+            for (int iu=0; iu<uids.size(); iu++) {
+                final ProcessState proc = uids.valueAt(iu);
+                final PssAggr fgPss = new PssAggr();
+                final PssAggr bgPss = new PssAggr();
+                final PssAggr cachedPss = new PssAggr();
+                boolean havePss = false;
+                for (int i=0; i<proc.mDurationsTableSize; i++) {
+                    int off = proc.mDurationsTable[i];
+                    int type = (off>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
+                    int procState = type % STATE_COUNT;
+                    long samples = proc.getPssSampleCount(type);
+                    if (samples > 0) {
+                        long avg = proc.getPssAverage(type);
+                        havePss = true;
+                        if (procState <= STATE_IMPORTANT_FOREGROUND) {
+                            fgPss.add(avg, samples);
+                        } else if (procState <= STATE_RECEIVER) {
+                            bgPss.add(avg, samples);
+                        } else {
+                            cachedPss.add(avg, samples);
+                        }
+                    }
+                }
+                if (!havePss) {
+                    continue;
+                }
+                boolean fgHasBg = false;
+                boolean fgHasCached = false;
+                boolean bgHasCached = false;
+                if (fgPss.samples < 3 && bgPss.samples > 0) {
+                    fgHasBg = true;
+                    fgPss.add(bgPss.pss, bgPss.samples);
+                }
+                if (fgPss.samples < 3 && cachedPss.samples > 0) {
+                    fgHasCached = true;
+                    fgPss.add(cachedPss.pss, cachedPss.samples);
+                }
+                if (bgPss.samples < 3 && cachedPss.samples > 0) {
+                    bgHasCached = true;
+                    bgPss.add(cachedPss.pss, cachedPss.samples);
+                }
+                if (bgPss.samples < 3 && !fgHasBg && fgPss.samples > 0) {
+                    bgPss.add(fgPss.pss, fgPss.samples);
+                }
+                if (cachedPss.samples < 3 && !bgHasCached && bgPss.samples > 0) {
+                    cachedPss.add(bgPss.pss, bgPss.samples);
+                }
+                if (cachedPss.samples < 3 && !fgHasCached && fgPss.samples > 0) {
+                    cachedPss.add(fgPss.pss, fgPss.samples);
+                }
+                for (int i=0; i<proc.mDurationsTableSize; i++) {
+                    final int off = proc.mDurationsTable[i];
+                    final int type = (off>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
+                    long time = getLong(off, 0);
+                    if (proc.mCurState == type) {
+                        time += now - proc.mStartTime;
+                    }
+                    final int procState = type % STATE_COUNT;
+                    data.processStateTime[procState] += time;
+                    long samples = proc.getPssSampleCount(type);
+                    long avg;
+                    if (samples > 0) {
+                        avg = proc.getPssAverage(type);
+                    } else if (procState <= STATE_IMPORTANT_FOREGROUND) {
+                        samples = fgPss.samples;
+                        avg = fgPss.pss;
+                    } else if (procState <= STATE_RECEIVER) {
+                        samples = bgPss.samples;
+                        avg = bgPss.pss;
+                    } else {
+                        samples = cachedPss.samples;
+                        avg = cachedPss.pss;
+                    }
+                    double newAvg = ( (data.processStatePss[procState]
+                            * (double)data.processStateSamples[procState])
+                                + (avg*(double)samples)
+                            ) / (data.processStateSamples[procState]+samples);
+                    data.processStatePss[procState] = (long)newAvg;
+                    data.processStateSamples[procState] += samples;
+                    data.processStateWeight[procState] += avg * (double)time;
+                }
+            }
+        }
+    }
+
     static void dumpProcessState(PrintWriter pw, String prefix, ProcessState proc,
             int[] screenStates, int[] memStates, int[] procStates, long now) {
         long totalTime = 0;
@@ -676,6 +927,62 @@ public final class ProcessStats implements Parcelable {
                     printSizeValue(pw, proc.mMinCachedKillPss * 1024); pw.print("-");
                     printSizeValue(pw, proc.mAvgCachedKillPss * 1024); pw.print("-");
                     printSizeValue(pw, proc.mMaxCachedKillPss * 1024); pw.println();
+        }
+    }
+
+    long getSysMemUsageValue(int state, int index) {
+        int idx = binarySearch(mSysMemUsageTable, mSysMemUsageTableSize, state);
+        return idx >= 0 ? getLong(mSysMemUsageTable[idx], index) : 0;
+    }
+
+    void dumpSysMemUsageCategory(PrintWriter pw, String prefix, String label,
+            int bucket, int index) {
+        pw.print(prefix); pw.print(label);
+        pw.print(": ");
+        printSizeValue(pw, getSysMemUsageValue(bucket, index) * 1024);
+        pw.print(" min, ");
+        printSizeValue(pw, getSysMemUsageValue(bucket, index + 1) * 1024);
+        pw.print(" avg, ");
+        printSizeValue(pw, getSysMemUsageValue(bucket, index+2) * 1024);
+        pw.println(" max");
+    }
+
+    void dumpSysMemUsage(PrintWriter pw, String prefix, int[] screenStates,
+            int[] memStates) {
+        int printedScreen = -1;
+        for (int is=0; is<screenStates.length; is++) {
+            int printedMem = -1;
+            for (int im=0; im<memStates.length; im++) {
+                final int iscreen = screenStates[is];
+                final int imem = memStates[im];
+                final int bucket = ((iscreen + imem) * STATE_COUNT);
+                long count = getSysMemUsageValue(bucket, SYS_MEM_USAGE_SAMPLE_COUNT);
+                if (count > 0) {
+                    pw.print(prefix);
+                    if (screenStates.length > 1) {
+                        printScreenLabel(pw, printedScreen != iscreen
+                                ? iscreen : STATE_NOTHING);
+                        printedScreen = iscreen;
+                    }
+                    if (memStates.length > 1) {
+                        printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING, '\0');
+                        printedMem = imem;
+                    }
+                    pw.print(": ");
+                    pw.print(count);
+                    pw.println(" samples:");
+                    dumpSysMemUsageCategory(pw, prefix, "  Cached", bucket,
+                            SYS_MEM_USAGE_CACHED_MINIMUM);
+                    dumpSysMemUsageCategory(pw, prefix, "  Free", bucket,
+                            SYS_MEM_USAGE_FREE_MINIMUM);
+                    dumpSysMemUsageCategory(pw, prefix, "  ZRam", bucket,
+                            SYS_MEM_USAGE_ZRAM_MINIMUM);
+                    dumpSysMemUsageCategory(pw, prefix, "  Kernel", bucket,
+                            SYS_MEM_USAGE_KERNEL_MINIMUM);
+                    dumpSysMemUsageCategory(pw, prefix, "  Native", bucket,
+                            SYS_MEM_USAGE_NATIVE_MINIMUM);
+                }
+            }
         }
     }
 
@@ -1088,10 +1395,13 @@ public final class ProcessStats implements Parcelable {
         mTimePeriodStartClock = System.currentTimeMillis();
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
+        mTimePeriodStartUptime = mTimePeriodEndUptime = SystemClock.uptimeMillis();
         mLongs.clear();
         mLongs.add(new long[LONGS_SIZE]);
         mNextLong = 0;
         Arrays.fill(mMemFactorDurations, 0);
+        mSysMemUsageTable = null;
+        mSysMemUsageTableSize = 0;
         mStartTime = 0;
         mReadError = null;
         mFlags = 0;
@@ -1220,12 +1530,17 @@ public final class ProcessStats implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        long now = SystemClock.uptimeMillis();
+        writeToParcel(out, SystemClock.uptimeMillis(), flags);
+    }
+
+    /** @hide */
+    public void writeToParcel(Parcel out, long now, int flags) {
         out.writeInt(MAGIC);
         out.writeInt(PARCEL_VERSION);
         out.writeInt(STATE_COUNT);
         out.writeInt(ADJ_COUNT);
         out.writeInt(PSS_COUNT);
+        out.writeInt(SYS_MEM_USAGE_COUNT);
         out.writeInt(LONGS_SIZE);
 
         mCommonStringToIndex = new ArrayMap<String, Integer>(mProcesses.mMap.size());
@@ -1268,8 +1583,9 @@ public final class ProcessStats implements Parcelable {
         out.writeLong(mTimePeriodStartClock);
         out.writeLong(mTimePeriodStartRealtime);
         out.writeLong(mTimePeriodEndRealtime);
+        out.writeLong(mTimePeriodStartUptime);
+        out.writeLong(mTimePeriodEndUptime);
         out.writeString(mRuntime);
-        out.writeString(mWebView);
         out.writeInt(mFlags);
 
         out.writeInt(mLongs.size());
@@ -1286,6 +1602,13 @@ public final class ProcessStats implements Parcelable {
             mStartTime = now;
         }
         writeCompactedLongArray(out, mMemFactorDurations, mMemFactorDurations.length);
+
+        out.writeInt(mSysMemUsageTableSize);
+        for (int i=0; i<mSysMemUsageTableSize; i++) {
+            if (DEBUG_PARCEL) Slog.i(TAG, "Writing sys mem usage #" + i + ": "
+                    + printLongOffset(mSysMemUsageTable[i]));
+            out.writeInt(mSysMemUsageTable[i]);
+        }
 
         out.writeInt(NPROC);
         for (int ip=0; ip<NPROC; ip++) {
@@ -1417,6 +1740,9 @@ public final class ProcessStats implements Parcelable {
         if (!readCheckedInt(in, PSS_COUNT, "pss count")) {
             return;
         }
+        if (!readCheckedInt(in, SYS_MEM_USAGE_COUNT, "sys mem usage count")) {
+            return;
+        }
         if (!readCheckedInt(in, LONGS_SIZE, "longs size")) {
             return;
         }
@@ -1427,8 +1753,9 @@ public final class ProcessStats implements Parcelable {
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = in.readLong();
         mTimePeriodEndRealtime = in.readLong();
+        mTimePeriodStartUptime = in.readLong();
+        mTimePeriodEndUptime = in.readLong();
         mRuntime = in.readString();
-        mWebView = in.readString();
         mFlags = in.readInt();
 
         final int NLONGS = in.readInt();
@@ -1446,6 +1773,12 @@ public final class ProcessStats implements Parcelable {
         mLongs.add(longs);
 
         readCompactedLongArray(in, version, mMemFactorDurations, mMemFactorDurations.length);
+
+        mSysMemUsageTable = readTableFromParcel(in, TAG, "sys mem usage");
+        if (mSysMemUsageTable == BAD_TABLE) {
+            return;
+        }
+        mSysMemUsageTableSize = mSysMemUsageTable != null ? mSysMemUsageTable.length : 0;
 
         int NPROC = in.readInt();
         if (NPROC < 0) {
@@ -1826,6 +2159,10 @@ public final class ProcessStats implements Parcelable {
             boolean dumpAll, boolean activeOnly) {
         long totalTime = dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
+        if (mSysMemUsageTable != null) {
+            pw.println("System memory usage:");
+            dumpSysMemUsage(pw, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ);
+        }
         ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
         boolean printedHeader = false;
         boolean sepNeeded = false;
@@ -2089,9 +2426,56 @@ public final class ProcessStats implements Parcelable {
         dumpTotalsLocked(pw, now);
     }
 
+    long printMemoryCategory(PrintWriter pw, String prefix, String label, double memWeight,
+            long totalTime, long curTotalMem, int samples) {
+        if (memWeight != 0) {
+            long mem = (long)(memWeight * 1024 / totalTime);
+            pw.print(prefix);
+            pw.print(label);
+            pw.print(": ");
+            printSizeValue(pw, mem);
+            pw.print(" (");
+            pw.print(samples);
+            pw.print(" samples)");
+            pw.println();
+            return curTotalMem + mem;
+        }
+        return curTotalMem;
+    }
+
     void dumpTotalsLocked(PrintWriter pw, long now) {
         pw.println("Run time Stats:");
         dumpSingleTime(pw, "  ", mMemFactorDurations, mMemFactor, mStartTime, now);
+        pw.println();
+        pw.println("Memory usage:");
+        TotalMemoryUseCollection totalMem = new TotalMemoryUseCollection(ALL_SCREEN_ADJ,
+                ALL_MEM_ADJ);
+        computeTotalMemoryUse(totalMem, now);
+        long totalPss = 0;
+        totalPss = printMemoryCategory(pw, "  ", "Kernel ", totalMem.sysMemKernelWeight,
+                totalMem.totalTime, totalPss, totalMem.sysMemSamples);
+        totalPss = printMemoryCategory(pw, "  ", "Native ", totalMem.sysMemNativeWeight,
+                totalMem.totalTime, totalPss, totalMem.sysMemSamples);
+        for (int i=0; i<STATE_COUNT; i++) {
+            // Skip restarting service state -- that is not actually a running process.
+            if (i != STATE_SERVICE_RESTARTING) {
+                totalPss = printMemoryCategory(pw, "  ", STATE_NAMES[i],
+                        totalMem.processStateWeight[i], totalMem.totalTime, totalPss,
+                        totalMem.processStateSamples[i]);
+            }
+        }
+        totalPss = printMemoryCategory(pw, "  ", "Cached ", totalMem.sysMemCachedWeight,
+                totalMem.totalTime, totalPss, totalMem.sysMemSamples);
+        totalPss = printMemoryCategory(pw, "  ", "Free   ", totalMem.sysMemFreeWeight,
+                totalMem.totalTime, totalPss, totalMem.sysMemSamples);
+        totalPss = printMemoryCategory(pw, "  ", "Z-Ram   ", totalMem.sysMemZRamWeight,
+                totalMem.totalTime, totalPss, totalMem.sysMemSamples);
+        pw.print("  TOTAL  : ");
+        printSizeValue(pw, totalPss);
+        pw.println();
+        printMemoryCategory(pw, "  ", STATE_NAMES[STATE_SERVICE_RESTARTING],
+                totalMem.processStateWeight[STATE_SERVICE_RESTARTING], totalMem.totalTime, totalPss,
+                totalMem.processStateSamples[STATE_SERVICE_RESTARTING]);
         pw.println();
         pw.print("          Start time: ");
         pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
@@ -2118,8 +2502,6 @@ public final class ProcessStats implements Parcelable {
         }
         pw.print(' ');
         pw.print(mRuntime);
-        pw.print(' ');
-        pw.print(mWebView);
         pw.println();
     }
 
@@ -2208,7 +2590,7 @@ public final class ProcessStats implements Parcelable {
     public void dumpCheckinLocked(PrintWriter pw, String reqPackage) {
         final long now = SystemClock.uptimeMillis();
         final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
-        pw.println("vers,4");
+        pw.println("vers,5");
         pw.print("period,"); pw.print(mTimePeriodStartClockStr);
         pw.print(","); pw.print(mTimePeriodStartRealtime); pw.print(",");
         pw.print(mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
@@ -2229,7 +2611,7 @@ public final class ProcessStats implements Parcelable {
             pw.print(",partial");
         }
         pw.println();
-        pw.print("config,"); pw.print(mRuntime); pw.print(','); pw.println(mWebView);
+        pw.print("config,"); pw.println(mRuntime);
         for (int ip=0; ip<pkgMap.size(); ip++) {
             final String pkgName = pkgMap.keyAt(ip);
             if (reqPackage != null && !reqPackage.equals(pkgName)) {
@@ -2362,6 +2744,53 @@ public final class ProcessStats implements Parcelable {
         pw.print("total");
         dumpAdjTimesCheckin(pw, ",", mMemFactorDurations, mMemFactor,
                 mStartTime, now);
+        if (mSysMemUsageTable != null) {
+            pw.print("sysmemusage");
+            for (int i=0; i<mSysMemUsageTableSize; i++) {
+                int off = mSysMemUsageTable[i];
+                int type = (off>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
+                pw.print(",");
+                printProcStateTag(pw, type);
+                for (int j=SYS_MEM_USAGE_SAMPLE_COUNT; j<SYS_MEM_USAGE_COUNT; j++) {
+                    if (j > SYS_MEM_USAGE_CACHED_MINIMUM) {
+                        pw.print(":");
+                    }
+                    pw.print(getLong(off, j));
+                }
+            }
+        }
+        pw.println();
+        TotalMemoryUseCollection totalMem = new TotalMemoryUseCollection(ALL_SCREEN_ADJ,
+                ALL_MEM_ADJ);
+        computeTotalMemoryUse(totalMem, now);
+        pw.print("weights,");
+        pw.print(totalMem.totalTime);
+        pw.print(",");
+        pw.print(totalMem.sysMemCachedWeight);
+        pw.print(":");
+        pw.print(totalMem.sysMemSamples);
+        pw.print(",");
+        pw.print(totalMem.sysMemFreeWeight);
+        pw.print(":");
+        pw.print(totalMem.sysMemSamples);
+        pw.print(",");
+        pw.print(totalMem.sysMemZRamWeight);
+        pw.print(":");
+        pw.print(totalMem.sysMemSamples);
+        pw.print(",");
+        pw.print(totalMem.sysMemKernelWeight);
+        pw.print(":");
+        pw.print(totalMem.sysMemSamples);
+        pw.print(",");
+        pw.print(totalMem.sysMemNativeWeight);
+        pw.print(":");
+        pw.print(totalMem.sysMemSamples);
+        for (int i=0; i<STATE_COUNT; i++) {
+            pw.print(",");
+            pw.print(totalMem.processStateWeight[i]);
+            pw.print(":");
+            pw.print(totalMem.processStateSamples[i]);
+        }
         pw.println();
     }
 
@@ -2449,6 +2878,15 @@ public final class ProcessStats implements Parcelable {
         long getDuration(int state, long now) {
             int idx = binarySearch(mDurationsTable, mDurationsTableSize, state);
             return idx >= 0 ? mStats.getLong(mDurationsTable[idx], 0) : 0;
+        }
+    }
+
+    final public static class ProcessStateHolder {
+        public final int appVersion;
+        public ProcessStats.ProcessState state;
+
+        public ProcessStateHolder(int _appVersion) {
+            appVersion = _appVersion;
         }
     }
 
@@ -2660,7 +3098,7 @@ public final class ProcessStats implements Parcelable {
          * @param pkgList Processes to update.
          */
         public void setState(int state, int memFactor, long now,
-                ArrayMap<String, ProcessState> pkgList) {
+                ArrayMap<String, ProcessStateHolder> pkgList) {
             if (state < 0) {
                 state = mNumStartedServices > 0
                         ? (STATE_SERVICE_RESTARTING+(memFactor*STATE_COUNT)) : STATE_NOTHING;
@@ -2770,7 +3208,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public void addPss(long pss, long uss, boolean always,
-                ArrayMap<String, ProcessState> pkgList) {
+                ArrayMap<String, ProcessStateHolder> pkgList) {
             ensureNotDead();
             if (!always) {
                 if (mLastPssState == mCurState && SystemClock.uptimeMillis()
@@ -2845,7 +3283,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        public void reportExcessiveWake(ArrayMap<String, ProcessState> pkgList) {
+        public void reportExcessiveWake(ArrayMap<String, ProcessStateHolder> pkgList) {
             ensureNotDead();
             mCommonProcess.mNumExcessiveWake++;
             if (!mCommonProcess.mMultiPackage) {
@@ -2857,7 +3295,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        public void reportExcessiveCpu(ArrayMap<String, ProcessState> pkgList) {
+        public void reportExcessiveCpu(ArrayMap<String, ProcessStateHolder> pkgList) {
             ensureNotDead();
             mCommonProcess.mNumExcessiveCpu++;
             if (!mCommonProcess.mMultiPackage) {
@@ -2888,7 +3326,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        public void reportCachedKill(ArrayMap<String, ProcessState> pkgList, long pss) {
+        public void reportCachedKill(ArrayMap<String, ProcessStateHolder> pkgList, long pss) {
             ensureNotDead();
             mCommonProcess.addCachedKill(1, pss, pss, pss);
             if (!mCommonProcess.mMultiPackage) {
@@ -2925,8 +3363,10 @@ public final class ProcessStats implements Parcelable {
             return this;
         }
 
-        private ProcessState pullFixedProc(ArrayMap<String, ProcessState> pkgList, int index) {
-            ProcessState proc = pkgList.valueAt(index);
+        private ProcessState pullFixedProc(ArrayMap<String, ProcessStateHolder> pkgList,
+                int index) {
+            ProcessStateHolder holder = pkgList.valueAt(index);
+            ProcessState proc = holder.state;
             if (mDead && proc.mCommonProcess != proc) {
                 // Somehow we are contining to use a process state that is dead, because
                 // it was not being told it was active during the last commit.  We can recover
@@ -2959,7 +3399,7 @@ public final class ProcessStats implements Parcelable {
                     throw new IllegalStateException("Didn't create per-package process "
                             + proc.mName + " in pkg " + pkg.mPackageName + "/" + pkg.mUid);
                 }
-                pkgList.setValueAt(index, proc);
+                holder.state = proc;
             }
             return proc;
         }
@@ -3350,5 +3790,28 @@ public final class ProcessStats implements Parcelable {
                 pw.print(")");
             }
         }
+    }
+
+    public static class TotalMemoryUseCollection {
+        final int[] screenStates;
+        final int[] memStates;
+
+        public TotalMemoryUseCollection(int[] _screenStates, int[] _memStates) {
+            screenStates = _screenStates;
+            memStates = _memStates;
+        }
+
+        public long totalTime;
+        public long[] processStatePss = new long[STATE_COUNT];
+        public double[] processStateWeight = new double[STATE_COUNT];
+        public long[] processStateTime = new long[STATE_COUNT];
+        public int[] processStateSamples = new int[STATE_COUNT];
+        public long[] sysMemUsage = new long[SYS_MEM_USAGE_COUNT];
+        public double sysMemCachedWeight;
+        public double sysMemFreeWeight;
+        public double sysMemZRamWeight;
+        public double sysMemKernelWeight;
+        public double sysMemNativeWeight;
+        public int sysMemSamples;
     }
 }

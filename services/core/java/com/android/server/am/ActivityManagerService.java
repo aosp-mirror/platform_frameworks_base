@@ -570,6 +570,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     long mLastFullPssTime = SystemClock.uptimeMillis();
 
     /**
+     * If set, the next time we collect PSS data we should do a full collection
+     * with data from native processes and the kernel.
+     */
+    boolean mFullPssPending = false;
+
+    /**
      * This is the process holding what we currently consider to be
      * the "home" activity.
      */
@@ -1801,8 +1807,49 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case COLLECT_PSS_BG_MSG: {
-                int i=0, num=0;
                 long start = SystemClock.uptimeMillis();
+                MemInfoReader memInfo = null;
+                synchronized (ActivityManagerService.this) {
+                    if (mFullPssPending) {
+                        mFullPssPending = false;
+                        memInfo = new MemInfoReader();
+                    }
+                }
+                if (memInfo != null) {
+                    updateCpuStatsNow();
+                    long nativeTotalPss = 0;
+                    synchronized (mProcessCpuThread) {
+                        final int N = mProcessCpuTracker.countStats();
+                        for (int j=0; j<N; j++) {
+                            ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(j);
+                            if (st.vsize <= 0 || st.uid >= Process.FIRST_APPLICATION_UID
+                                    || st.uid == Process.SYSTEM_UID) {
+                                // This is definitely an application process; skip it.
+                                continue;
+                            }
+                            synchronized (mPidsSelfLocked) {
+                                if (mPidsSelfLocked.indexOfKey(st.pid) >= 0) {
+                                    // This is one of our own processes; skip it.
+                                    continue;
+                                }
+                            }
+                            nativeTotalPss += Debug.getPss(st.pid, null);
+                        }
+                    }
+                    memInfo.readMemInfo();
+                    synchronized (this) {
+                        if (DEBUG_PSS) Slog.d(TAG, "Collected native and kernel memory in "
+                                + (SystemClock.uptimeMillis()-start) + "ms");
+                        mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
+                                memInfo.getFreeSizeKb(),
+                                memInfo.getSwapTotalSizeKb()-memInfo.getSwapFreeSizeKb(),
+                                memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()
+                                        +memInfo.getSlabSizeKb(),
+                                nativeTotalPss);
+                    }
+                }
+
+                int i=0, num=0;
                 long[] tmp = new long[1];
                 do {
                     ProcessRecord proc;
@@ -2764,7 +2811,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // come up (we have a pid but not yet its thread), so keep it.
                 if (DEBUG_PROCESSES) Slog.v(TAG, "App already running: " + app);
                 // If this is a new package in the process, add the package to the list
-                app.addPackage(info.packageName, mProcessStats);
+                app.addPackage(info.packageName, info.versionCode, mProcessStats);
                 return app;
             }
 
@@ -2819,7 +2866,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } else {
             // If this is a new package in the process, add the package to the list
-            app.addPackage(info.packageName, mProcessStats);
+            app.addPackage(info.packageName, info.versionCode, mProcessStats);
         }
 
         // If the system is not ready yet, then hold off on starting this
@@ -7759,7 +7806,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // to run in multiple processes, because this is actually
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
-                    app.addPackage(cpi.applicationInfo.packageName, mProcessStats);
+                    app.addPackage(cpi.applicationInfo.packageName, cpi.applicationInfo.versionCode,
+                            mProcessStats);
                 }
                 ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
@@ -12567,6 +12615,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        long nativeProcTotalPss = 0;
+
         if (!isCheckinRequest && procs.size() > 1) {
             // If we are showing aggregations, also look for native processes to
             // include so that our aggregations are more accurate.
@@ -12588,6 +12638,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                         final long myTotalPss = mi.getTotalPss();
                         totalPss += myTotalPss;
+                        nativeProcTotalPss += myTotalPss;
 
                         MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
                                 st.name, myTotalPss, st.pid, false);
@@ -12655,6 +12706,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
+            if (nativeProcTotalPss > 0) {
+                synchronized (this) {
+                    mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
+                            memInfo.getFreeSizeKb(),
+                            memInfo.getSwapTotalSizeKb()-memInfo.getSwapFreeSizeKb(),
+                            memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()+memInfo.getSlabSizeKb(),
+                            nativeProcTotalPss);
+                }
+            }
             if (!brief) {
                 if (!isCompact) {
                     pw.print("Total RAM: "); pw.print(memInfo.getTotalSizeKb());
@@ -15435,6 +15495,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (DEBUG_PSS) Slog.d(TAG, "Requesting PSS of all procs!  memLowered=" + memLowered);
         mLastFullPssTime = now;
+        mFullPssPending = true;
         mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
         mPendingPssProcesses.clear();
         for (int i=mLruProcesses.size()-1; i>=0; i--) {

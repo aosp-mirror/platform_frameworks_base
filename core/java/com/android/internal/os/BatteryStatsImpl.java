@@ -291,6 +291,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     final StopwatchTimer[] mBluetoothStateTimer = new StopwatchTimer[NUM_BLUETOOTH_STATES];
 
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    long mMobileRadioActiveStartTime;
     StopwatchTimer mMobileRadioActiveTimer;
     StopwatchTimer mMobileRadioActivePerAppTimer;
     LongSamplingCounter mMobileRadioActiveAdjustedTime;
@@ -1423,10 +1424,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return heldTime;
             }
             return 0;
-        }
-
-        long getLastUpdateTimeMs() {
-            return mUpdateTime;
         }
 
         void stopRunningLocked(long elapsedRealtimeMs) {
@@ -2790,11 +2787,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                     powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
                             || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
             if (active) {
-                realElapsedRealtimeMs = elapsedRealtime;
+                mMobileRadioActiveStartTime = realElapsedRealtimeMs = elapsedRealtime;
                 mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
             } else {
                 realElapsedRealtimeMs = timestampNs / (1000*1000);
-                long lastUpdateTimeMs = mMobileRadioActiveTimer.getLastUpdateTimeMs();
+                long lastUpdateTimeMs = mMobileRadioActiveStartTime;
                 if (realElapsedRealtimeMs < lastUpdateTimeMs) {
                     Slog.wtf(TAG, "Data connection inactive timestamp " + realElapsedRealtimeMs
                             + " is before start time " + lastUpdateTimeMs);

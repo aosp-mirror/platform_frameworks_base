@@ -53,8 +53,8 @@ final class ProcessRecord {
     final int userId;           // user of process.
     final String processName;   // name of the process
     // List of packages running in the process
-    final ArrayMap<String, ProcessStats.ProcessState> pkgList
-            = new ArrayMap<String, ProcessStats.ProcessState>();
+    final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList
+            = new ArrayMap<String, ProcessStats.ProcessStateHolder>();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -371,7 +371,7 @@ final class ProcessRecord {
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
-        pkgList.put(_info.packageName, null);
+        pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.versionCode));
         maxAdj = ProcessList.UNKNOWN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;
@@ -398,16 +398,15 @@ final class ProcessRecord {
                     info.versionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
-                ProcessStats.ProcessState ps = pkgList.valueAt(i);
-                if (ps != null && ps != origBase) {
-                    ps.makeInactive();
+                ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                if (holder.state != null && holder.state != origBase) {
+                    holder.state.makeInactive();
                 }
-                ps = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
+                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
                         info.versionCode, processName);
-                if (ps != baseProcessTracker) {
-                    ps.makeActive();
+                if (holder.state != baseProcessTracker) {
+                    holder.state.makeActive();
                 }
-                pkgList.setValueAt(i, ps);
             }
         }
         thread = _thread;
@@ -424,11 +423,11 @@ final class ProcessRecord {
             }
             baseProcessTracker = null;
             for (int i=0; i<pkgList.size(); i++) {
-                ProcessStats.ProcessState ps = pkgList.valueAt(i);
-                if (ps != null && ps != origBase) {
-                    ps.makeInactive();
+                ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                if (holder.state != null && holder.state != origBase) {
+                    holder.state.makeInactive();
                 }
-                pkgList.setValueAt(i, null);
+                holder.state = null;
             }
         }
     }
@@ -572,14 +571,16 @@ final class ProcessRecord {
     /*
      *  Return true if package has been added false if not
      */
-    public boolean addPackage(String pkg, ProcessStatsService tracker) {
+    public boolean addPackage(String pkg, int versionCode, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
             if (baseProcessTracker != null) {
-                ProcessStats.ProcessState state = tracker.getProcessStateLocked(
-                        pkg, info.uid, info.versionCode, processName);
-                pkgList.put(pkg, state);
-                if (state != baseProcessTracker) {
-                    state.makeActive();
+                ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
+                        versionCode);
+                holder.state = tracker.getProcessStateLocked(
+                        pkg, info.uid, versionCode, processName);
+                pkgList.put(pkg, holder);
+                if (holder.state != baseProcessTracker) {
+                    holder.state.makeActive();
                 }
             } else {
                 pkgList.put(pkg, null);
@@ -615,23 +616,26 @@ final class ProcessRecord {
                     tracker.getMemFactorLocked(), now, pkgList);
             if (N != 1) {
                 for (int i=0; i<N; i++) {
-                    ProcessStats.ProcessState ps = pkgList.valueAt(i);
-                    if (ps != null && ps != baseProcessTracker) {
-                        ps.makeInactive();
+                    ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
+                    if (holder.state != null && holder.state != baseProcessTracker) {
+                        holder.state.makeInactive();
                     }
 
                 }
                 pkgList.clear();
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
                         info.packageName, info.uid, info.versionCode, processName);
-                pkgList.put(info.packageName, ps);
+                ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
+                        info.versionCode);
+                holder.state = ps;
+                pkgList.put(info.packageName, holder);
                 if (ps != baseProcessTracker) {
                     ps.makeActive();
                 }
             }
         } else if (N != 1) {
             pkgList.clear();
-            pkgList.put(info.packageName, null);
+            pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.versionCode));
         }
     }
     
