@@ -28,7 +28,6 @@ import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
-import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceReference;
@@ -39,6 +38,12 @@ import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.view.menu.ActionMenuItemView;
+import com.android.internal.view.menu.BridgeMenuItemImpl;
+import com.android.internal.view.menu.IconMenuItemView;
+import com.android.internal.view.menu.ListMenuItemView;
+import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuView;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
@@ -562,7 +567,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mViewRoot.draw(mCanvas);
             }
 
-            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(), false);
+            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+                    false);
 
             // success!
             return SUCCESS.createResult();
@@ -1457,13 +1463,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         ViewInfo result;
         if (isContentFrame) {
             result = new ViewInfo(view.getClass().getName(),
-                    getContext().getViewKey(view),
+                    getViewKey(view),
                     view.getLeft(), view.getTop() + offset, view.getRight(),
                     view.getBottom() + offset, view, view.getLayoutParams());
 
         } else {
             result = new SystemViewInfo(view.getClass().getName(),
-                    getContext().getViewKey(view),
+                    getViewKey(view),
                     view.getLeft(), view.getTop(), view.getRight(),
                     view.getBottom(), view, view.getLayoutParams());
         }
@@ -1482,6 +1488,32 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
 
         return result;
+    }
+
+    /**
+     * The cookie for menu items are stored in menu item and not in the map from View stored in
+     * BridgeContext.
+     */
+    private Object getViewKey(View view) {
+        BridgeContext context = getContext();
+        if (!(view instanceof MenuView.ItemView)) {
+            return context.getViewKey(view);
+        }
+        MenuItemImpl menuItem;
+        if (view instanceof ActionMenuItemView) {
+            menuItem = ((ActionMenuItemView) view).getItemData();
+        } else if (view instanceof ListMenuItemView) {
+            menuItem = ((ListMenuItemView) view).getItemData();
+        } else if (view instanceof IconMenuItemView) {
+            menuItem = ((IconMenuItemView) view).getItemData();
+        } else {
+            menuItem = null;
+        }
+        if (menuItem instanceof BridgeMenuItemImpl) {
+            return ((BridgeMenuItemImpl) menuItem).getViewCookie();
+        }
+
+        return null;
     }
 
     private void invalidateRenderingSize() {
