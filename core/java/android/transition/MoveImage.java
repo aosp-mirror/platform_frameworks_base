@@ -64,7 +64,13 @@ public class MoveImage extends Transition {
         if (!(view instanceof ImageView) || view.getVisibility() != View.VISIBLE) {
             return;
         }
+        ImageView imageView = (ImageView) view;
+        Drawable drawable = imageView.getDrawable();
+        if (drawable == null) {
+            return;
+        }
         Map<String, Object> values = transitionValues.values;
+        values.put(PROPNAME_DRAWABLE, drawable);
 
         ViewGroup parent = (ViewGroup) view.getParent();
         parent.getLocationInWindow(mTempLoc);
@@ -79,11 +85,9 @@ public class MoveImage extends Transition {
 
         Rect bounds = new Rect(left, top, right, bottom);
         values.put(PROPNAME_BOUNDS, bounds);
-        ImageView imageView = (ImageView) view;
         Matrix matrix = getMatrix(imageView);
         values.put(PROPNAME_MATRIX, matrix);
         values.put(PROPNAME_CLIP, findClip(imageView));
-        values.put(PROPNAME_DRAWABLE, imageView.getDrawable());
     }
 
     @Override
