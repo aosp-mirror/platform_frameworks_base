@@ -89,6 +89,7 @@ public abstract class NotificationListenerService extends Service {
      * at this time.
      *
      * @param notificationKeys The notification keys for all currently posted notifications.
+     * @hide
      */
     public void onListenerConnected(String[] notificationKeys) {
         // optional
@@ -155,6 +156,7 @@ public abstract class NotificationListenerService extends Service {
      * @param keys Notifications to dismiss, or {@code null} to dismiss all.
      *
      * {@see #cancelNotification(String, String, int)}
+     * @hide
      */
     public final void cancelNotifications(String[] keys) {
         if (!isBound()) return;
@@ -181,6 +183,7 @@ public abstract class NotificationListenerService extends Service {
      *
      * @param keys A specific list of notification keys, or {@code null} for all.
      * @return An array of active notifications.
+     * @hide
      */
     public StatusBarNotification[] getActiveNotifications(String[] keys) {
         if (!isBound()) return null;
