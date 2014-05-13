@@ -78,8 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"אפליקציות אחרונות"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"חפש"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"מצלמה"</string>
-    <!-- no translation found for accessibility_phone_button (6738112589538563574) -->
-    <skip />
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"טלפון"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>

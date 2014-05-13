@@ -78,8 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"Aplicativos recentes"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Pesquisar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Câmera"</string>
-    <!-- no translation found for accessibility_phone_button (6738112589538563574) -->
-    <skip />
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefone"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alterar botão do método de entrada."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão de zoom da compatibilidade."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Aumentar a tela com zoom."</string>

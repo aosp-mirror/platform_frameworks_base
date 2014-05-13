@@ -181,7 +181,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"„Bluetooth“ (<xliff:g id="NUMBER">%d</xliff:g> įreng.)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"„Bluetooth“ išjungta"</string>
-    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Skaistis"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Šviesumas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automatiškai sukti"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Sukimas užrakintas"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Užrakinta stačia padėtis"</string>
@@ -200,7 +200,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tinklo nėra"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Perduoti ekraną"</string>
-    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Skaistis"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Šviesumas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="quick_settings_inversion_label" msgid="1666358784283020762">"Spalvų inversijos režimas"</string>
     <string name="quick_settings_contrast_label" msgid="3319507551689108692">"Patobulinto kontrasto režimas"</string>

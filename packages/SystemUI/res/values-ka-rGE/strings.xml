@@ -78,8 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"ბოლოს გამოყენებული აპები"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ძიება"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"კამერა"</string>
-    <!-- no translation found for accessibility_phone_button (6738112589538563574) -->
-    <skip />
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"ტელეფონი"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"შეყვანის მეთოდის გადართვის ღილაკი."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"თავსებადი მასშტაბირების ღილაკი."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"შეცვალეთ პატარა ეკრანი უფრო დიდით."</string>
