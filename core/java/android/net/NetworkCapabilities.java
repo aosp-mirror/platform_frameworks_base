@@ -84,6 +84,13 @@ public final class NetworkCapabilities implements Parcelable {
     public Collection<Integer> getNetworkCapabilities() {
         return enumerateBits(mNetworkCapabilities);
     }
+    public boolean hasCapability(int networkCapability) {
+        if (networkCapability < MIN_NET_CAPABILITY ||
+                networkCapability > MAX_NET_CAPABILITY) {
+            return false;
+        }
+        return ((mNetworkCapabilities & (1 << networkCapability)) != 0);
+    }
 
     private Collection<Integer> enumerateBits(long val) {
         ArrayList<Integer> result = new ArrayList<Integer>();
@@ -141,6 +148,12 @@ public final class NetworkCapabilities implements Parcelable {
     }
     public Collection<Integer> getTransportTypes() {
         return enumerateBits(mTransportTypes);
+    }
+    public boolean hasTransport(int transportType) {
+        if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
+            return false;
+        }
+        return ((mTransportTypes & (1 << transportType)) != 0);
     }
 
     private void combineTransportTypes(NetworkCapabilities nc) {
@@ -205,7 +218,8 @@ public final class NetworkCapabilities implements Parcelable {
      * {@hide}
      */
     public boolean satisfiedByNetworkCapabilities(NetworkCapabilities nc) {
-        return (satisfiedByNetCapabilities(nc) &&
+        return (nc != null &&
+                satisfiedByNetCapabilities(nc) &&
                 satisfiedByTransportTypes(nc) &&
                 satisfiedByLinkBandwidths(nc));
     }
