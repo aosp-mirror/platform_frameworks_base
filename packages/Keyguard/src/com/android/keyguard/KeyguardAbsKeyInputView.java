@@ -68,13 +68,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mEnableHaptics = mLockPatternUtils.isTactileFeedbackEnabled();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (hasWindowFocus) {
-            reset();
-        }
-    }
-
     public void reset() {
         // start fresh
         mPasswordEntry.setText("");
