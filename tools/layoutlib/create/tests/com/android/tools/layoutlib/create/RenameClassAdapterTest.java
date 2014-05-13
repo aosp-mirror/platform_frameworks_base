@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * 
+ *
  */
 public class RenameClassAdapterTest {
 
@@ -36,10 +36,10 @@ public class RenameClassAdapterTest {
         mOuter = new RenameClassAdapter(null, // cv
                                          "com.pack.Old",
                                          "org.blah.New");
-        
+
         mInner = new RenameClassAdapter(null, // cv
                                          "com.pack.Old$Inner",
-                                         "org.blah.New$Inner"); 
+                                         "org.blah.New$Inner");
     }
 
     @After
@@ -72,7 +72,7 @@ public class RenameClassAdapterTest {
         // arrays
         assertEquals("[Lorg.blah.New;",  mOuter.renameTypeDesc("[Lcom.pack.Old;"));
         assertEquals("[[Lorg.blah.New;", mOuter.renameTypeDesc("[[Lcom.pack.Old;"));
-        
+
         assertEquals("[Lorg.blah.New;",  mInner.renameTypeDesc("[Lcom.pack.Old;"));
         assertEquals("[[Lorg.blah.New;", mInner.renameTypeDesc("[[Lcom.pack.Old;"));
     }
@@ -93,10 +93,6 @@ public class RenameClassAdapterTest {
      */
     @Test
     public void testRenameInternalType() {
-        // a descriptor is not left untouched
-        assertEquals("Lorg.blah.New;", mOuter.renameInternalType("Lcom.pack.Old;"));
-        assertEquals("Lorg.blah.New$Inner;", mOuter.renameInternalType("Lcom.pack.Old$Inner;"));
-
         // an actual FQCN
         assertEquals("org.blah.New", mOuter.renameInternalType("com.pack.Old"));
         assertEquals("org.blah.New$Inner", mOuter.renameInternalType("com.pack.Old$Inner"));
@@ -115,6 +111,6 @@ public class RenameClassAdapterTest {
                mOuter.renameMethodDesc("(IDLcom.pack.Old;[Lcom.pack.Old$Inner;)Lcom.pack.Old$Other;"));
     }
 
-    
+
 
 }
