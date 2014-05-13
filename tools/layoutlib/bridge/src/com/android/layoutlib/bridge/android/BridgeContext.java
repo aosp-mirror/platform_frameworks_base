@@ -609,7 +609,8 @@ public final class BridgeContext extends Context {
             }
 
             if (value != null) {
-                if (value.getFirst() == ResourceType.STYLE) {
+                if ((value.getFirst() == ResourceType.STYLE)
+                        || (value.getFirst() == ResourceType.ATTR)) {
                     // look for the style in the current theme, and its parent:
                     ResourceValue item = mRenderResources.findItemInTheme(value.getSecond(),
                             isFrameworkRes);
