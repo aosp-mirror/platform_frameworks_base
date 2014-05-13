@@ -208,7 +208,7 @@ public class ActionBarView extends AbsActionBarView {
                     Log.e(TAG, "Activity component name not found!", e);
                 }
             }
-            if (mIcon == null) {
+            if (mIcon == null && !isInEditMode()) {
                 mIcon = appInfo.loadIcon(pm);
             }
         }
