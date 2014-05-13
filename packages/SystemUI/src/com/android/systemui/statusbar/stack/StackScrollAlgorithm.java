@@ -128,7 +128,10 @@ public class StackScrollAlgorithm {
         algorithmState.scrolledPixelsTop = 0;
         algorithmState.itemsInBottomStack = 0.0f;
         algorithmState.partialInBottom = 0.0f;
-        algorithmState.scrollY = ambientState.getScrollY() + mCollapsedSize;
+        float topOverScroll = ambientState.getOverScrollAmount(true /* onTop */);
+        float bottomOverScroll = ambientState.getOverScrollAmount(false /* onTop */);
+        algorithmState.scrollY = (int) (ambientState.getScrollY() + mCollapsedSize
+                + bottomOverScroll - topOverScroll);
 
         updateVisibleChildren(resultState, algorithmState);
 
@@ -215,7 +218,6 @@ public class StackScrollAlgorithm {
      *
      * @param resultState The result state to update if a change to the properties of a child occurs
      * @param algorithmState The state in which the current pass of the algorithm is currently in
-     *                       and which will be updated
      */
     private void updatePositionsForState(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
@@ -295,7 +297,7 @@ public class StackScrollAlgorithm {
             // The first card is always rendered.
             if (i == 0) {
                 childViewState.alpha = 1.0f;
-                childViewState.yTranslation = 0;
+                childViewState.yTranslation = Math.max(mCollapsedSize - algorithmState.scrollY, 0);
                 childViewState.location = StackScrollState.ViewState.LOCATION_FIRST_CARD;
             }
             if (childViewState.location == StackScrollState.ViewState.LOCATION_UNKNOWN) {
@@ -454,7 +456,6 @@ public class StackScrollAlgorithm {
      *
      * @param resultState The result state to update if a height change of an child occurs
      * @param algorithmState The state in which the current pass of the algorithm is currently in
-     *                       and which will be updated
      */
     private void findNumberOfItemsInTopStackAndUpdateState(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
@@ -472,7 +473,7 @@ public class StackScrollAlgorithm {
                     + childHeight
                     + mPaddingBetweenElements;
             if (yPositionInScrollView < algorithmState.scrollY) {
-                if (i == 0 && algorithmState.scrollY == mCollapsedSize) {
+                if (i == 0 && algorithmState.scrollY <= mCollapsedSize) {
 
                     // The starting position of the bottom stack peek
                     int bottomPeekStart = mInnerHeight - mBottomStackPeekSize;

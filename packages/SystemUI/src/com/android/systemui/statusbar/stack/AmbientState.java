@@ -28,6 +28,8 @@ public class AmbientState {
     private int mScrollY;
     private boolean mDimmed;
     private View mActivatedChild;
+    private float mOverScrollTopAmount;
+    private float mOverScrollBottomAmount;
 
     public int getScrollY() {
         return mScrollY;
@@ -71,5 +73,17 @@ public class AmbientState {
 
     public View getActivatedChild() {
         return mActivatedChild;
+    }
+
+    public void setOverScrollAmount(float amount, boolean onTop) {
+        if (onTop) {
+            mOverScrollTopAmount = amount;
+        } else {
+            mOverScrollBottomAmount = amount;
+        }
+    }
+
+    public float getOverScrollAmount(boolean top) {
+        return top ? mOverScrollTopAmount : mOverScrollBottomAmount;
     }
 }
