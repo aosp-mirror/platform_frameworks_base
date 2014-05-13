@@ -49,7 +49,6 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.bars.ActionBarLayout;
-import com.android.layoutlib.bridge.bars.CustomBar;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
@@ -265,8 +264,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     topLayout.setOrientation(LinearLayout.HORIZONTAL);
 
                     try {
-                        CustomBar navigationBar = createNavigationBar(context,
-                                hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
+                        NavigationBar navigationBar = createNavigationBar(context,
+                                hardwareConfig.getDensity());
                         topLayout.addView(navigationBar);
                     } catch (XmlPullParserException ignored) {
 
@@ -360,8 +359,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         mNavigationBarSize > 0) {
                     // system bar
                     try {
-                        CustomBar navigationBar = createNavigationBar(context,
-                                hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
+                        NavigationBar navigationBar = createNavigationBar(context,
+                                hardwareConfig.getDensity());
                         topLayout.addView(navigationBar);
                     } catch (XmlPullParserException ignored) {
 
@@ -1538,15 +1537,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @param isRtlSupported true is the project manifest declares that the application
      *        is RTL aware.
      */
-    private CustomBar createNavigationBar(BridgeContext context, Density density, ScreenSize size)
+    private NavigationBar createNavigationBar(BridgeContext context, Density density)
             throws XmlPullParserException {
-        CustomBar navigationBar;
-        if (size == ScreenSize.XLARGE) {
-            navigationBar = new TabletSystemBar(context, density);
-        } else {
-            navigationBar = new NavigationBar(context, density,
-                    mNavigationBarOrientation);
-        }
+        NavigationBar navigationBar = new NavigationBar(context, density,
+                mNavigationBarOrientation);
         if (mNavigationBarOrientation == LinearLayout.VERTICAL) {
             navigationBar.setLayoutParams(new LinearLayout.LayoutParams(mNavigationBarSize,
                     LayoutParams.MATCH_PARENT));
