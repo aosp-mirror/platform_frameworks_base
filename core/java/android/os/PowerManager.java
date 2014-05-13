@@ -366,15 +366,6 @@ public final class PowerManager {
     }
 
     /**
-     * Returns true if the screen auto-brightness adjustment setting should
-     * be available in the UI.  This setting is experimental and disabled by default.
-     * @hide
-     */
-    public static boolean useScreenAutoBrightnessAdjustmentFeature() {
-        return SystemProperties.getBoolean("persist.power.useautobrightadj", false);
-    }
-
-    /**
      * Returns true if the twilight service should be used to adjust screen brightness
      * policy.  This setting is experimental and disabled by default.
      * @hide
