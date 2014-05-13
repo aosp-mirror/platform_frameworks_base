@@ -82,7 +82,7 @@ public interface SharedPreferences {
         
         /**
          * Set a set of String values in the preferences editor, to be written
-         * back once {@link #commit} is called.
+         * back once {@link #commit} or {@link #apply} is called.
          * 
          * @param key The name of the preference to modify.
          * @param values The set of new values for the preference.  Passing {@code null}
