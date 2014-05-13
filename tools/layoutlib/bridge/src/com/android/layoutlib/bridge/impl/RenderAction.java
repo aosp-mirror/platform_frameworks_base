@@ -30,6 +30,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
+import com.android.resources.ScreenOrientation;
 import com.android.resources.ScreenSize;
 
 import android.content.res.Configuration;
@@ -346,6 +347,23 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         // never run in compat mode:
         config.compatScreenWidthDp = config.screenWidthDp;
         config.compatScreenHeightDp = config.screenHeightDp;
+
+        ScreenOrientation orientation = hardwareConfig.getOrientation();
+        if (orientation != null) {
+            switch (orientation) {
+            case PORTRAIT:
+                config.orientation = Configuration.ORIENTATION_PORTRAIT;
+                break;
+            case LANDSCAPE:
+                config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+                break;
+            case SQUARE:
+                config.orientation = Configuration.ORIENTATION_SQUARE;
+                break;
+            }
+        } else {
+            config.orientation = Configuration.ORIENTATION_UNDEFINED;
+        }
 
         // TODO: fill in more config info.
 
