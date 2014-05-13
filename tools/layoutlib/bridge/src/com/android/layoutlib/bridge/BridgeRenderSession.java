@@ -64,6 +64,11 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
+    public List<ViewInfo> getSystemRootViews() {
+        return mSession.getSystemViewInfos();
+    }
+
+    @Override
     public Map<String, String> getDefaultProperties(Object viewObject) {
         return mSession.getDefaultProperties(viewObject);
     }
