@@ -469,9 +469,16 @@ public class Build {
         public static final int KITKAT = 19;
 
         /**
-         * Android 4.5: KitKat for watches, snacks on the run.
+         * Android 4.4W: KitKat for watches, snacks on the run.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>{@link android.app.AlertDialog} might not have a default background if the theme does
+         * not specify one.</li>
+         * </ul>
          */
-        public static final int KITKAT_WATCH = CUR_DEVELOPMENT; // STOPSHIP: update API level
+        public static final int KITKAT_WATCH = 20;
     }
     
     /** The type of build, like "user" or "eng". */
