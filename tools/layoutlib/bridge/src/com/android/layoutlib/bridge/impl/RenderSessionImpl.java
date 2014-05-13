@@ -184,7 +184,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         SessionParams params = getParams();
         BridgeContext context = getContext();
 
-        context.getIWindowManager().setHasNavBar(params.getHardwareConfig().hasSoftwareButtons());
 
         RenderResources resources = getParams().getResources();
         DisplayMetrics metrics = getContext().getMetrics();
