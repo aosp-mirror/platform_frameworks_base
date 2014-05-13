@@ -70,6 +70,9 @@ public:
     Layer* createRenderLayer(int width, int height);
     Layer* createTextureLayer();
 
+    ANDROID_API static void setTextureAtlas(const sp<GraphicBuffer>& buffer,
+            int64_t* map, size_t mapSize);
+
 private:
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
     void prepareTree(TreeInfo& info);

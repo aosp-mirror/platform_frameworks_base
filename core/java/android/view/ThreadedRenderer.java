@@ -19,7 +19,11 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.Trace;
+import android.util.Log;
 import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -65,6 +69,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private Choreographer mChoreographer;
 
     ThreadedRenderer(boolean translucent) {
+        AtlasInitializer.sInstance.init();
+
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
@@ -292,8 +298,43 @@ public class ThreadedRenderer extends HardwareRenderer {
         }
     }
 
-    /** @hide */
-    public static native void postToRenderThread(Runnable runnable);
+    private static class AtlasInitializer {
+        static AtlasInitializer sInstance = new AtlasInitializer();
+
+        private boolean mInitialized = false;
+
+        private AtlasInitializer() {}
+
+        synchronized void init() {
+            if (mInitialized) return;
+            IBinder binder = ServiceManager.getService("assetatlas");
+            if (binder == null) return;
+
+            IAssetAtlas atlas = IAssetAtlas.Stub.asInterface(binder);
+            try {
+                if (atlas.isCompatible(android.os.Process.myPpid())) {
+                    GraphicBuffer buffer = atlas.getBuffer();
+                    if (buffer != null) {
+                        long[] map = atlas.getMap();
+                        if (map != null) {
+                            nSetAtlas(buffer, map);
+                            mInitialized = true;
+                        }
+                        // If IAssetAtlas is not the same class as the IBinder
+                        // we are using a remote service and we can safely
+                        // destroy the graphic buffer
+                        if (atlas.getClass() != binder.getClass()) {
+                            buffer.destroy();
+                        }
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Could not acquire atlas", e);
+            }
+        }
+    }
+
+    private static native void nSetAtlas(GraphicBuffer buffer, long[] map);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
