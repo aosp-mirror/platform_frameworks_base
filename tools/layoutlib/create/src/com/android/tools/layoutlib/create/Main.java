@@ -89,7 +89,7 @@ public class Main {
         try {
             CreateInfo info = new CreateInfo();
             Set<String> excludeClasses = getExcludedClasses(info);
-            AsmGenerator agen = new AsmGenerator(log, osDestJar[0], info);
+            AsmGenerator agen = new AsmGenerator(log, osDestJar, info);
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
                     new String[] {                          // derived from
