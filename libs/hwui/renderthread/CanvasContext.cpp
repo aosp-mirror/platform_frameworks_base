@@ -98,6 +98,8 @@ public:
 
     bool enableDirtyRegions(EGLSurface surface);
 
+    void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
+
 private:
     GlobalContext();
     // GlobalContext is never destroyed, method is purposely not implemented
@@ -118,6 +120,10 @@ private:
     bool mCanSetDirtyRegions;
 
     EGLSurface mCurrentSurface;
+
+    sp<GraphicBuffer> mAtlasBuffer;
+    int64_t* mAtlasMap;
+    size_t mAtlasMapSize;
 };
 
 GlobalContext* GlobalContext::sContext = 0;
@@ -135,7 +141,9 @@ GlobalContext::GlobalContext()
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mRequestDirtyRegions(load_dirty_regions_property())
-        , mCurrentSurface(EGL_NO_SURFACE) {
+        , mCurrentSurface(EGL_NO_SURFACE)
+        , mAtlasMap(NULL)
+        , mAtlasMapSize(0) {
     mCanSetDirtyRegions = mRequestDirtyRegions;
     ALOGD("Render dirty regions requested: %s", mRequestDirtyRegions ? "true" : "false");
 }
@@ -201,9 +209,28 @@ void GlobalContext::createContext() {
         "Failed to create context, error = %s", egl_error_str());
 }
 
+void GlobalContext::setTextureAtlas(const sp<GraphicBuffer>& buffer,
+        int64_t* map, size_t mapSize) {
+
+    // Already initialized
+    if (mAtlasBuffer.get()) {
+        ALOGW("Multiple calls to setTextureAtlas!");
+        delete map;
+        return;
+    }
+
+    mAtlasBuffer = buffer;
+    mAtlasMap = map;
+    mAtlasMapSize = mapSize;
+
+    if (hasContext()) {
+        usePBufferSurface();
+        initAtlas();
+    }
+}
+
 void GlobalContext::initAtlas() {
-    // TODO implement
-    // For now just run without an atlas
+    Caches::getInstance().assetAtlas.init(mAtlasBuffer, mAtlasMap, mAtlasMapSize);
 }
 
 void GlobalContext::usePBufferSurface() {
@@ -531,6 +558,11 @@ void CanvasContext::requireGlContext() {
     } else {
         mGlobalContext->usePBufferSurface();
     }
+}
+
+void CanvasContext::setTextureAtlas(const sp<GraphicBuffer>& buffer,
+        int64_t* map, size_t mapSize) {
+    GlobalContext::get()->setTextureAtlas(buffer, map, mapSize);
 }
 
 } /* namespace renderthread */

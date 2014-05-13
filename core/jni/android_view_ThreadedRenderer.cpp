@@ -26,8 +26,11 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
+#include "android_view_GraphicBuffer.h"
+
 #include <Animator.h>
 #include <RenderNode.h>
+#include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
@@ -65,6 +68,26 @@ private:
 
     JavaVM* mVm;
     jobject mRunnable;
+};
+
+class SetAtlasTask : public RenderTask {
+public:
+    SetAtlasTask(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size)
+            : mBuffer(buffer)
+            , mMap(map)
+            , mMapSize(size) {
+    }
+
+    virtual void run() {
+        CanvasContext::setTextureAtlas(mBuffer, mMap, mMapSize);
+        mMap = 0;
+        delete this;
+    }
+
+private:
+    sp<GraphicBuffer> mBuffer;
+    int64_t* mMap;
+    size_t mMapSize;
 };
 
 class OnFinishedEvent {
@@ -127,9 +150,18 @@ private:
     std::vector<OnFinishedEvent> mOnFinishedEvents;
 };
 
-static void android_view_ThreadedRenderer_postToRenderThread(JNIEnv* env, jobject clazz,
-        jobject jrunnable) {
-    RenderTask* task = new JavaTask(env, jrunnable);
+static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
+        jobject graphicBuffer, jlongArray atlasMapArray) {
+    sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
+    jsize len = env->GetArrayLength(atlasMapArray);
+    if (len <= 0) {
+        ALOGW("Failed to initialize atlas, invalid map length: %d", len);
+        return;
+    }
+    int64_t* map = new int64_t[len];
+    env->GetLongArrayRegion(atlasMapArray, 0, len, map);
+
+    SetAtlasTask* task = new SetAtlasTask(buffer, map, len);
     RenderThread::getInstance().queue(task);
 }
 
@@ -275,7 +307,7 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "postToRenderThread", "(Ljava/lang/Runnable;)V",   (void*) android_view_ThreadedRenderer_postToRenderThread },
+    { "nSetAtlas", "(Landroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
