@@ -107,11 +107,10 @@ import java.util.Map;
 
 /**
  * Class implementing the render session.
- *
+ * <p/>
  * A session is a stateful representation of a layout file. It is initialized with data coming
  * through the {@link Bridge} API to inflate the layout. Further actions and rendering can then
  * be done on the layout.
- *
  */
 public class RenderSessionImpl extends RenderAction<SessionParams> {
 
@@ -178,7 +177,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     @Override
     public Result init(long timeout) {
         Result result = super.init(timeout);
-        if (result.isSuccess() == false) {
+        if (!result.isSuccess()) {
             return result;
         }
 
@@ -234,10 +233,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             SessionParams params = getParams();
             HardwareConfig hardwareConfig = params.getHardwareConfig();
             BridgeContext context = getContext();
-            ActionBarLayout actionBar = null;
 
             // the view group that receives the window background.
-            ViewGroup backgroundView = null;
+            ViewGroup backgroundView;
 
             if (mWindowIsFloating || params.isForceNoDecor()) {
                 backgroundView = mViewRoot = mContentRoot = new FrameLayout(context);
@@ -269,7 +267,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         CustomBar navigationBar = createNavigationBar(context,
                                 hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
                         topLayout.addView(navigationBar);
-                    } catch (XmlPullParserException e) {
+                    } catch (XmlPullParserException ignored) {
 
                     }
                 }
@@ -316,7 +314,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         StatusBar statusBar = createStatusBar(context,
                                 hardwareConfig.getDensity());
                         topLayout.addView(statusBar);
-                    } catch (XmlPullParserException e) {
+                    } catch (XmlPullParserException ignored) {
 
                     }
                 }
@@ -333,20 +331,16 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
-                    try {
-                        actionBar = createActionBar(context, params);
-                        backgroundLayout.addView(actionBar);
-                        actionBar.createMenuPopup();
-                        mContentRoot = actionBar.getContentRoot();
-                    } catch (XmlPullParserException e) {
-
-                    }
+                    ActionBarLayout actionBar = createActionBar(context, params);
+                    backgroundLayout.addView(actionBar);
+                    actionBar.createMenuPopup();
+                    mContentRoot = actionBar.getContentRoot();
                 } else if (mTitleBarSize > 0) {
                     try {
                         TitleBar titleBar = createTitleBar(context,
                                 hardwareConfig.getDensity(), params.getAppLabel());
                         backgroundLayout.addView(titleBar);
-                    } catch (XmlPullParserException e) {
+                    } catch (XmlPullParserException ignored) {
 
                     }
                 }
@@ -368,7 +362,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         CustomBar navigationBar = createNavigationBar(context,
                                 hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
                         topLayout.addView(navigationBar);
-                    } catch (XmlPullParserException e) {
+                    } catch (XmlPullParserException ignored) {
 
                     }
                 }
@@ -393,7 +387,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             postInflateProcess(view, params.getProjectCallback());
 
             // get the background drawable
-            if (mWindowBackground != null && backgroundView != null) {
+            if (mWindowBackground != null) {
                 Drawable d = ResourceHelper.getDrawable(mWindowBackground, context);
                 backgroundView.setBackground(d);
             }
@@ -470,6 +464,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                     // first measure the full layout, with EXACTLY to get the size of the
                     // content as it is inside the decor/dialog
+                    @SuppressWarnings("deprecation")
                     Pair<Integer, Integer> exactMeasure = measureView(
                             mViewRoot, mContentRoot.getChildAt(0),
                             mMeasuredScreenWidth, MeasureSpec.EXACTLY,
@@ -477,6 +472,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                     // now measure the content only using UNSPECIFIED (where applicable, based on
                     // the rendering mode). This will give us the size the content needs.
+                    @SuppressWarnings("deprecation")
                     Pair<Integer, Integer> result = measureView(
                             mContentRoot, mContentRoot.getChildAt(0),
                             mMeasuredScreenWidth, widthMeasureSpecMode,
@@ -552,7 +548,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     mCanvas.setDensity(hardwareConfig.getDensity().getDpiValue());
                 }
 
-                if (freshRender && newImage == false) {
+                if (freshRender && !newImage) {
                     Graphics2D gc = mImage.createGraphics();
                     gc.setComposite(AlphaComposite.Src);
 
@@ -598,6 +594,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @param heightMode the MeasureSpec mode to use for the height.
      * @return the measured width/height if measuredView is non-null, null otherwise.
      */
+    @SuppressWarnings("deprecation")  // For the use of Pair
     private Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
             int width, int widthMode, int height, int heightMode) {
         int w_spec = MeasureSpec.makeMeasureSpec(width, widthMode);
@@ -628,7 +625,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         BridgeContext context = getContext();
 
         // find the animation file.
-        ResourceValue animationResource = null;
+        ResourceValue animationResource;
         int animationId = 0;
         if (isFrameworkAnimation) {
             animationResource = context.getRenderResources().getFrameworkResource(
@@ -718,7 +715,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         // add it to the parentView in the correct location
         Result result = addView(parentView, child, index);
-        if (result.isSuccess() == false) {
+        if (!result.isSuccess()) {
             return result;
         }
 
@@ -788,13 +785,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     public void run() {
                         Result result = moveView(previousParent, newParentView, childView, index,
                                 params);
-                        if (result.isSuccess() == false) {
+                        if (!result.isSuccess()) {
                             listener.done(result);
                         }
 
                         // ready to do the work, acquire the scene.
                         result = acquire(250);
-                        if (result.isSuccess() == false) {
+                        if (!result.isSuccess()) {
                             listener.done(result);
                             return;
                         }
@@ -852,7 +849,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
 
         Result result = moveView(previousParent, newParentView, childView, index, layoutParams);
-        if (result.isSuccess() == false) {
+        if (!result.isSuccess()) {
             return result;
         }
 
@@ -986,7 +983,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
 
         Result result = removeView(parent, childView);
-        if (result.isSuccess() == false) {
+        if (!result.isSuccess()) {
             return result;
         }
 
@@ -1014,7 +1011,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
 
     private void findBackground(RenderResources resources) {
-        if (getParams().isBgColorOverridden() == false) {
+        if (!getParams().isBgColorOverridden()) {
             mWindowBackground = resources.findItemInTheme("windowBackground",
                     true /*isFrameworkAttr*/);
             if (mWindowBackground != null) {
@@ -1031,7 +1028,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         boolean windowFullscreen = getBooleanThemeValue(resources,
                 "windowFullscreen", false /*defaultValue*/);
 
-        if (windowFullscreen == false && mWindowIsFloating == false) {
+        if (!windowFullscreen && !mWindowIsFloating) {
             // default value
             mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
 
@@ -1085,7 +1082,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             boolean windowNoTitle = getBooleanThemeValue(resources,
                     "windowNoTitle", false /*defaultValue*/);
 
-            if (windowNoTitle == false) {
+            if (!windowNoTitle) {
 
                 // default size of the window title bar
                 mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
@@ -1112,7 +1109,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     private void findNavigationBar(RenderResources resources, DisplayMetrics metrics) {
-        if (hasSoftwareButtons() && mWindowIsFloating == false) {
+        if (hasSoftwareButtons() && !mWindowIsFloating) {
 
             // default value
             mNavigationBarSize = 48; // ??
@@ -1126,15 +1123,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 int shortSize = hardwareConfig.getScreenHeight();
 
                 // compute in dp
-                int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / hardwareConfig.getDensity().getDpiValue();
+                int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT /
+                        hardwareConfig.getDensity().getDpiValue();
 
-                if (shortSizeDp < 600) {
-                    // 0-599dp: "phone" UI with bar on the side
-                    barOnBottom = false;
-                } else {
-                    // 600+dp: "tablet" UI with bar on the bottom
-                    barOnBottom = true;
-                }
+                // 0-599dp: "phone" UI with bar on the side
+                // 600+dp: "tablet" UI with bar on the bottom
+                barOnBottom = shortSizeDp >= 600;
             }
 
             if (barOnBottom) {
@@ -1185,13 +1179,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Post process on a view hierachy that was just inflated.
-     * <p/>At the moment this only support TabHost: If {@link TabHost} is detected, look for the
+     * Post process on a view hierarchy that was just inflated.
+     * <p/>
+     * At the moment this only supports TabHost: If {@link TabHost} is detected, look for the
      * {@link TabWidget}, and the corresponding {@link FrameLayout} and make new tabs automatically
      * based on the content of the {@link FrameLayout}.
      * @param view the root view to process.
      * @param projectCallback callback to the project.
      */
+    @SuppressWarnings("deprecation")  // For the use of Pair
     private void postInflateProcess(View view, IProjectCallback projectCallback)
             throws PostInflateException {
         if (view instanceof TabHost) {
@@ -1294,7 +1290,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     "TabHost requires a TabWidget with id \"android:id/tabs\".\n");
         }
 
-        if ((v instanceof TabWidget) == false) {
+        if (!(v instanceof TabWidget)) {
             throw new PostInflateException(String.format(
                     "TabHost requires a TabWidget with id \"android:id/tabs\".\n" +
                     "View found with id 'tabs' is '%s'", v.getClass().getCanonicalName()));
@@ -1303,12 +1299,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         v = tabHost.findViewById(android.R.id.tabcontent);
 
         if (v == null) {
-            // TODO: see if we can fake tabs even without the FrameLayout (same below when the framelayout is empty)
+            // TODO: see if we can fake tabs even without the FrameLayout (same below when the frameLayout is empty)
+            //noinspection SpellCheckingInspection
             throw new PostInflateException(
                     "TabHost requires a FrameLayout with id \"android:id/tabcontent\".");
         }
 
-        if ((v instanceof FrameLayout) == false) {
+        if (!(v instanceof FrameLayout)) {
+            //noinspection SpellCheckingInspection
             throw new PostInflateException(String.format(
                     "TabHost requires a FrameLayout with id \"android:id/tabcontent\".\n" +
                     "View found with id 'tabcontent' is '%s'", v.getClass().getCanonicalName()));
@@ -1316,7 +1314,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         FrameLayout content = (FrameLayout)v;
 
-        // now process the content of the framelayout and dynamically create tabs for it.
+        // now process the content of the frameLayout and dynamically create tabs for it.
         final int count = content.getChildCount();
 
         // this must be called before addTab() so that the TabHost searches its TabWidget
@@ -1334,13 +1332,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         }
                     });
             tabHost.addTab(spec);
-            return;
         } else {
-            // for each child of the framelayout, add a new TabSpec
+            // for each child of the frameLayout, add a new TabSpec
             for (int i = 0 ; i < count ; i++) {
                 View child = content.getChildAt(i);
                 String tabSpec = String.format("tab_spec%d", i+1);
                 int id = child.getId();
+                @SuppressWarnings("deprecation")
                 Pair<ResourceType, String> resource = projectCallback.resolveResourceId(id);
                 String name;
                 if (resource != null) {
@@ -1569,8 +1567,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     /**
      * Creates the action bar. Also queries the project callback for missing information.
      */
-    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params)
-            throws XmlPullParserException {
+    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params) {
         ActionBarLayout actionBar = new ActionBarLayout(context, params);
         actionBar.setLayoutParams(new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
