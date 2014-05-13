@@ -2704,18 +2704,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateKeyguardState() {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardStatusView.setVisibility(View.VISIBLE);
-            mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
-
             mNotificationPanel.closeQs();
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
-            mKeyguardBottomArea.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);
         }
         mSettingsContainer.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
-        mHeader.setKeyguardShowing(mState == StatusBarState.KEYGUARD);
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mHeader.setKeyguardShowing(true);
+        } else {
+            mKeyguardBottomArea.setVisibility(View.GONE);
+            mHeader.setKeyguardShowing(false);
+        }
 
         updateStackScrollerState();
         updatePublicMode();
@@ -2841,9 +2844,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * If secure with redaction: Show bouncer, go to unlocked shade.
      *
-     * <p>If secure without redaction: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
-     *
-     * <p>Otherwise go directly to unlocked shade.</p>
+     * <p>If secure without redaction or no security: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
      *
      * @param expandView The view to expand after going to the shade.
      */
@@ -2855,13 +2856,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(mCurrentUserId)) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
-        } else if (mStatusBarKeyguardViewManager.isSecure()) {
+        } else {
             mNotificationPanel.animateNextTopPaddingChange();
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState();
-        } else {
-            mLeaveOpenOnKeyguardHide = true;
-            mStatusBarKeyguardViewManager.dismiss();
         }
     }
 
