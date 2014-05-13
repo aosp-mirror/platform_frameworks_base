@@ -143,6 +143,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.ViewRootImpl#isInTouchMode",
         "android.view.WindowManagerGlobal#getWindowManagerService",
         "android.view.inputmethod.InputMethodManager#getInstance",
+        "android.view.MenuInflater#registerMenu",
+        "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
     };
