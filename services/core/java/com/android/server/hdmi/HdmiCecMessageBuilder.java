@@ -230,6 +230,40 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Text View On&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildTextViewOn(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_TEXT_VIEW_ON);
+    }
+
+    /**
+     * Build &lt;Active Source&gt; command.
+     *
+     * @param src source address of command
+     * @param physicalAddress physical address of the device to become active
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildActiveSource(int src, int physicalAddress) {
+        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_ACTIVE_SOURCE,
+                physicalAddressToParam(physicalAddress));
+    }
+
+    /**
+     * Build &lt;Give Device Power Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildGiveDevicePowerStatus(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS);
+    }
+
+    /**
      * Build a {@link HdmiCecMessage} without extra parameter.
      *
      * @param src source address of command
@@ -252,5 +286,12 @@ public class HdmiCecMessageBuilder {
      */
     private static HdmiCecMessage buildCommand(int src, int dest, int opcode, byte[] params) {
         return new HdmiCecMessage(src, dest, opcode, params);
+    }
+
+    private static byte[] physicalAddressToParam(int physicalAddress) {
+        return new byte[] {
+                (byte) (physicalAddress >> 8),
+                (byte) (physicalAddress & 0xFF)
+        };
     }
 }

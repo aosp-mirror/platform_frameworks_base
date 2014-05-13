@@ -12837,8 +12837,23 @@ package android.hardware.hdmi {
   }
 
   public final class HdmiControlManager {
+    method public void addHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
     method public android.hardware.hdmi.HdmiTvClient getTvClient();
+    method public void removeHotplugeEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
+  }
+
+  public static abstract interface HdmiControlManager.HotplugEventListener {
+    method public abstract void onReceived(android.hardware.hdmi.HdmiHotplugEvent);
+  }
+
+  public final class HdmiHotplugEvent implements android.os.Parcelable {
+    ctor public HdmiHotplugEvent(int, boolean);
+    method public int describeContents();
+    method public int getPort();
+    method public boolean isConnected();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class HdmiPlaybackClient {

@@ -18,18 +18,30 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.IHdmiControlService;
+import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
 
+
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -39,6 +51,9 @@ import java.util.Locale;
 public final class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
 
+    // TODO: Rename the permission to HDMI_CONTROL.
+    private static final String PERMISSION = "android.permission.HDMI_CEC";
+
     // A thread to handle synchronous IO of CEC and MHL control service.
     // Since all of CEC and MHL HAL interfaces processed in short time (< 200ms)
     // and sparse call it shares a thread to handle IO operations.
@@ -47,6 +62,21 @@ public final class HdmiControlService extends SystemService {
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
     private final LinkedList<FeatureAction> mActions = new LinkedList<>();
+
+    // Used to synchronize the access to the service.
+    private final Object mLock = new Object();
+
+    // Type of logical devices hosted in the system.
+    @GuardedBy("mLock")
+    private final int[] mLocalDevices;
+
+    // List of listeners registered by callers that want to get notified of
+    // hotplug events.
+    private final ArrayList<IHdmiHotplugEventListener> mHotplugEventListeners = new ArrayList<>();
+
+    // List of records for hotplug event listener to handle the the caller killed in action.
+    private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
+            new ArrayList<>();
 
     @Nullable
     private HdmiCecController mCecController;
@@ -63,6 +93,8 @@ public final class HdmiControlService extends SystemService {
 
     public HdmiControlService(Context context) {
         super(context);
+        mLocalDevices = getContext().getResources().getIntArray(
+                com.android.internal.R.array.config_hdmiCecLogicalDeviceType);
     }
 
     @Override
@@ -70,8 +102,7 @@ public final class HdmiControlService extends SystemService {
         mIoThread.start();
         mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
-            mCecController.initializeLocalDevices(getContext().getResources()
-                    .getIntArray(com.android.internal.R.array.config_hdmiCecLogicalDeviceType));
+            mCecController.initializeLocalDevices(mLocalDevices);
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
@@ -80,6 +111,9 @@ public final class HdmiControlService extends SystemService {
         if (mMhlController == null) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
+
+        // TODO: Publish the BinderService
+        // publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
     }
 
     /**
@@ -304,6 +338,97 @@ public final class HdmiControlService extends SystemService {
             sendCecCommand(command);
         } else {
             Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
+        }
+    }
+
+    // Record class that monitors the event of the caller of being killed. Used to clean up
+    // the listener list and record list accordingly.
+    private final class HotplugEventListenerRecord implements IBinder.DeathRecipient {
+        private final IHdmiHotplugEventListener mListener;
+
+        public HotplugEventListenerRecord(IHdmiHotplugEventListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mHotplugEventListenerRecords.remove(this);
+                mHotplugEventListeners.remove(mListener);
+            }
+        }
+    }
+
+    private void enforceAccessPermission() {
+        getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
+    }
+
+    private final class BinderService extends IHdmiControlService.Stub {
+        @Override
+        public int[] getSupportedTypes() {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                return mLocalDevices;
+            }
+        }
+
+        @Override
+        public void oneTouchPlay(IHdmiControlCallback callback) {
+            enforceAccessPermission();
+            // TODO: Post a message for HdmiControlService#oneTouchPlay()
+        }
+
+        @Override
+        public void queryDisplayStatus(IHdmiControlCallback callback) {
+            enforceAccessPermission();
+            // TODO: Post a message for HdmiControlService#queryDisplayStatus()
+        }
+
+        @Override
+        public void addHotplugEventListener(IHdmiHotplugEventListener listener) {
+            enforceAccessPermission();
+            // TODO: Post a message for HdmiControlService#addHotplugEventListener()
+        }
+
+        @Override
+        public void removeHotplugEventListener(IHdmiHotplugEventListener listener) {
+            enforceAccessPermission();
+            // TODO: Post a message for HdmiControlService#removeHotplugEventListener()
+        }
+    }
+
+    private void oneTouchPlay(IHdmiControlCallback callback) {
+        // TODO: Create a new action
+    }
+
+    private void queryDisplayStatus(IHdmiControlCallback callback) {
+        // TODO: Create a new action
+    }
+
+    private void addHotplugEventListener(IHdmiHotplugEventListener listener) {
+        HotplugEventListenerRecord record = new HotplugEventListenerRecord(listener);
+        try {
+            listener.asBinder().linkToDeath(record, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Listener already died");
+            return;
+        }
+        synchronized (mLock) {
+            mHotplugEventListenerRecords.add(record);
+            mHotplugEventListeners.add(listener);
+        }
+    }
+
+    private void removeHotplugEventListener(IHdmiHotplugEventListener listener) {
+        synchronized (mLock) {
+            for (HotplugEventListenerRecord record : mHotplugEventListenerRecords) {
+                if (record.mListener.asBinder() == listener.asBinder()) {
+                    listener.asBinder().unlinkToDeath(record, 0);
+                    mHotplugEventListenerRecords.remove(record);
+                    break;
+                }
+            }
+            mHotplugEventListeners.remove(listener);
         }
     }
 }
