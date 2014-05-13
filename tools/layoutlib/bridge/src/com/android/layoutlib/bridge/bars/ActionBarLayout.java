@@ -27,6 +27,7 @@ import com.android.ide.common.rendering.api.SystemViewCookie;
 import com.android.internal.R;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.util.Predicate;
+import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuBuilderAccessor;
 import com.android.internal.view.menu.MenuItemImpl;
@@ -181,8 +182,9 @@ public class ActionBarLayout extends LinearLayout {
             Predicate<View> overflowMenuButtonTest = new Predicate<View>() {
                 @Override
                 public boolean apply(View view) {
-                    return view.getClass().getName().equals("com.android.internal.view.menu." +
-                            "ActionMenuPresenter$OverflowMenuButton");
+                    ViewGroup.LayoutParams lp = view.getLayoutParams();
+                    return lp instanceof ActionMenuView.LayoutParams &&
+                            ((ActionMenuView.LayoutParams) lp).isOverflowButton;
                 }
             };
             View overflowMenu = null;
