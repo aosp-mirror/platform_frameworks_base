@@ -44,6 +44,7 @@ import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -300,6 +301,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0 && featureId == FEATURE_ACTION_BAR) {
             throw new AndroidRuntimeException(
                     "You cannot combine swipe dismissal and the action bar.");
+        }
+
+        if (featureId == FEATURE_INDETERMINATE_PROGRESS &&
+                getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            throw new AndroidRuntimeException("You cannot use indeterminate progress on a watch.");
         }
         return super.requestFeature(featureId);
     }
