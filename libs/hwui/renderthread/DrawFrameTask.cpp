@@ -138,7 +138,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         }
     }
     // If prepareTextures is false, we ran out of texture cache space
-    return !info.out.hasFunctors && info.prepareTextures;
+    return info.prepareTextures;
 }
 
 void DrawFrameTask::unblockUiThread() {
