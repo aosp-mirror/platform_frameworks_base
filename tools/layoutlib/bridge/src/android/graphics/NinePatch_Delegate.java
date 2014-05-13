@@ -159,7 +159,7 @@ public final class NinePatch_Delegate {
     /*package*/ static void nativeDraw(int canvas_instance, RectF loc, int bitmap_instance,
             byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
-                (int) loc.left, (int) loc.top, (int) loc.width(), (int) loc.height(),
+                (int) loc.left, (int) loc.top, (int) loc.right, (int) loc.bottom,
                 bitmap_instance, c, paint_instance_or_null,
                 destDensity, srcDensity);
     }
@@ -168,7 +168,7 @@ public final class NinePatch_Delegate {
     /*package*/ static void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
             byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
-                loc.left, loc.top, loc.width(), loc.height(),
+                loc.left, loc.top, loc.right, loc.bottom,
                 bitmap_instance, c, paint_instance_or_null,
                 destDensity, srcDensity);
     }
