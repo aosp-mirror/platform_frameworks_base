@@ -3070,10 +3070,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static int axisFromString(String symbolicName) {
         if (symbolicName.startsWith(LABEL_PREFIX)) {
             symbolicName = symbolicName.substring(LABEL_PREFIX.length());
-        }
-        int axis = nativeAxisFromString(symbolicName);
-        if (axis >= 0) {
-            return axis;
+            int axis = nativeAxisFromString(symbolicName);
+            if (axis >= 0) {
+                return axis;
+            }
         }
         try {
             return Integer.parseInt(symbolicName, 10);
