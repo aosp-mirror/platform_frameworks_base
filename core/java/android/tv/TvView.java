@@ -347,7 +347,9 @@ public class TvView extends SurfaceView {
         public void onSessionCreated(Session session) {
             if (this != mSessionCallback) {
                 // This callback is obsolete.
-                session.release();
+                if (session != null) {
+                    session.release();
+                }
                 return;
             }
             mSession = session;
