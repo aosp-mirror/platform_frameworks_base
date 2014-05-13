@@ -249,6 +249,11 @@ public class NotificationPanelView extends PanelView implements
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                trackMovement(event);
+                if (mTracking) {
+                    flingWithCurrentVelocity();
+                    mTracking = false;
+                }
                 mIntercepting = false;
                 break;
         }
@@ -262,6 +267,13 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpanded) {
             super.requestDisallowInterceptTouchEvent(disallowIntercept);
         }
+    }
+
+    private void flingWithCurrentVelocity() {
+        float vel = getCurrentVelocity();
+
+        // TODO: Better logic whether we should expand or not.
+        flingSettings(vel, vel > 0);
     }
 
     @Override
@@ -313,12 +325,7 @@ public class NotificationPanelView extends PanelView implements
                     mTracking = false;
                     mTrackingPointer = -1;
                     trackMovement(event);
-
-                    float vel = getCurrentVelocity();
-
-                    // TODO: Better logic whether we should expand or not.
-                    flingSettings(vel, vel > 0);
-
+                    flingWithCurrentVelocity();
                     if (mVelocityTracker != null) {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
