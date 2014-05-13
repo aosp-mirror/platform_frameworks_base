@@ -19,6 +19,8 @@ package android.net;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Identifies the Network.
@@ -34,6 +36,32 @@ public class Network implements Parcelable {
 
     public Network(Network that) {
         this.netId = that.netId;
+    }
+
+    /**
+     * Operates the same as {@code InetAddress.getAllByName} except that host
+     * resolution is done on this network.
+     *
+     * @param host the hostname or literal IP string to be resolved.
+     * @return the array of addresses associated with the specified host.
+     * @throws UnknownHostException if the address lookup fails.
+     */
+    public InetAddress[] getAllByName(String host) throws UnknownHostException {
+        return InetAddress.getAllByNameOnNet(host, netId);
+    }
+
+    /**
+     * Operates the same as {@code InetAddress.getByName} except that host
+     * resolution is done on this network.
+     *
+     * @param host
+     *            the hostName to be resolved to an address or {@code null}.
+     * @return the {@code InetAddress} instance representing the host.
+     * @throws UnknownHostException
+     *             if the address lookup fails.
+     */
+    public InetAddress getByName(String host) throws UnknownHostException {
+        return InetAddress.getByNameOnNet(host, netId);
     }
 
     // implement the Parcelable interface
