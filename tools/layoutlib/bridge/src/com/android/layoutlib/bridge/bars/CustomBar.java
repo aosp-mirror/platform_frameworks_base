@@ -274,7 +274,7 @@ public abstract class CustomBar extends LinearLayout {
                     TypedValue out = new TypedValue();
                     if (ResourceHelper.parseFloatAttribute("textSize", textSize.getValue(), out,
                             true /*requireUnit*/)) {
-                        textView.setTextSize(
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                                 out.getDimension(bridgeContext.getResources().getDisplayMetrics()));
                     }
                 }
