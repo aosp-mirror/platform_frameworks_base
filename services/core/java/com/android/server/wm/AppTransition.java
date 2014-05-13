@@ -679,7 +679,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                             int appWidth, int appHeight, int orientation,
-                            Rect containingFrame, Rect contentInsets, Configuration configuration) {
+                            Rect containingFrame, Rect contentInsets) {
         Animation a;
         if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimation(mNextAppTransitionPackage, enter ?
@@ -700,15 +700,9 @@ public class AppTransition implements Dump {
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
-            boolean useAlternateThumbnailAnimation = (configuration.smallestScreenWidthDp < 600);
-            if (useAlternateThumbnailAnimation) {
-                a = createAlternateThumbnailEnterExitAnimationLocked(
-                        getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
-                        transit, containingFrame, contentInsets);
-            } else {
-                a = createThumbnailEnterExitAnimationLocked(getThumbnailTransitionState(enter),
-                        appWidth, appHeight, transit);
-            }
+            a = createAlternateThumbnailEnterExitAnimationLocked(
+                    getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
+                    transit, containingFrame, contentInsets);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
