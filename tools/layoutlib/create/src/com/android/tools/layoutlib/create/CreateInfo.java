@@ -112,6 +112,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.Build#getString",
         "android.view.Choreographer#getRefreshRate",
         "android.view.Display#updateDisplayInfoLocked",
+        "android.view.Display#getWindowManager",
+        "android.text.format.Time#format1",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#isInEditMode",
