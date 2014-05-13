@@ -20,6 +20,7 @@ package android.app.admin;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
@@ -78,6 +79,7 @@ interface IDevicePolicyManager {
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList, int userHandle);
     ComponentName getGlobalProxyAdmin(int userHandle);
+    void setRecommendedGlobalProxy(in ComponentName admin, in ProxyInfo proxyInfo);
 
     int setStorageEncryption(in ComponentName who, boolean encrypt, int userHandle);
     boolean getStorageEncryption(in ComponentName who, int userHandle);
