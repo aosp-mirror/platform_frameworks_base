@@ -3404,7 +3404,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 }
                                 if (incrementalDeltaY > 0) {
-                                    mEdgeGlowTop.onPull((float) overscroll / getHeight(),
+                                    mEdgeGlowTop.onPull((float) -overscroll / getHeight(),
                                             (float) x / getWidth());
                                     if (!mEdgeGlowBottom.isFinished()) {
                                         mEdgeGlowBottom.onRelease();

@@ -22,14 +22,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Xfermode;
-import android.util.Log;
-import com.android.internal.R;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
+import android.util.FloatMath;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -62,12 +58,9 @@ public class EdgeEffect {
     // Time it will take before a pulled glow begins receding in ms
     private static final int PULL_TIME = 167;
 
-    // Time it will take in ms for a pulled glow to decay to partial strength before release
-    private static final int PULL_DECAY_TIME = 1000;
-
     private static final float MAX_ALPHA = 1.f;
 
-    private static final float MAX_GLOW_HEIGHT = 1.5f;
+    private static final float MAX_GLOW_SCALE = 2.f;
 
     private static final float PULL_GLOW_BEGIN = 0.f;
 
@@ -78,7 +71,9 @@ public class EdgeEffect {
 
     private static final float EPSILON = 0.001f;
 
-    private static final float SIN_45 = (float) Math.sin(Math.PI / 4);
+    private static final double ANGLE = Math.PI / 6;
+    private static final float SIN = (float) Math.sin(ANGLE);
+    private static final float COS = (float) Math.cos(ANGLE);
 
     private float mGlowAlpha;
     private float mGlowScaleY;
@@ -114,6 +109,7 @@ public class EdgeEffect {
     private final RectF mArcRect = new RectF();
     private final Paint mPaint = new Paint();
     private float mRadius;
+    private float mBaseGlowHeight;
     private float mDisplacement = 0.5f;
     private float mTargetDisplacement = 0.5f;
 
@@ -128,7 +124,7 @@ public class EdgeEffect {
         final int themeColor = a.getColor(
                 com.android.internal.R.styleable.EdgeEffect_colorPrimaryLight, 0xff666666);
         a.recycle();
-        mPaint.setColor((themeColor & 0xffffff) | 0x66000000);
+        mPaint.setColor((themeColor & 0xffffff) | 0x33000000);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         mInterpolator = new DecelerateInterpolator();
@@ -141,10 +137,11 @@ public class EdgeEffect {
      * @param height Effect height in pixels
      */
     public void setSize(int width, int height) {
-        final float r = width * 0.5f / SIN_45;
-        final float y = SIN_45 * r;
+        final float r = width * 0.75f / SIN;
+        final float y = COS * r;
         final float h = r - y;
         mRadius = r;
+        mBaseGlowHeight = h;
 
         mBounds.set(mBounds.left, mBounds.top, width, (int) Math.min(height, h));
     }
@@ -214,21 +211,18 @@ public class EdgeEffect {
 
         mPullDistance += deltaDistance;
 
+        final float absdd = Math.abs(deltaDistance);
         mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
-                mGlowAlpha +
-                        (Math.abs(deltaDistance) * PULL_DISTANCE_ALPHA_GLOW_FACTOR));
+                mGlowAlpha + (absdd * PULL_DISTANCE_ALPHA_GLOW_FACTOR));
 
-        float glowChange = Math.abs(deltaDistance);
-        if (deltaDistance > 0 && mPullDistance < 0) {
-            glowChange = -glowChange;
-        }
         if (mPullDistance == 0) {
-            mGlowScaleY = 0;
-        }
+            mGlowScaleY = mGlowScaleYStart = 0;
+        } else {
+            final float scale = Math.max(0, 1 - 1 /
+                    FloatMath.sqrt(Math.abs(mPullDistance) * mBounds.height()) - 0.3f) / 0.7f;
 
-        // Do not allow glow to get larger than MAX_GLOW_HEIGHT.
-        mGlowScaleY = mGlowScaleYStart = Math.min(MAX_GLOW_HEIGHT, Math.max(
-                0, mGlowScaleY + glowChange * PULL_DISTANCE_GLOW_FACTOR));
+            mGlowScaleY = mGlowScaleYStart = scale;
+        }
 
         mGlowAlphaFinish = mGlowAlpha;
         mGlowScaleYFinish = mGlowScaleY;
@@ -311,19 +305,17 @@ public class EdgeEffect {
         final float y = mBounds.height();
         final float centerY = y - mRadius;
         final float centerX = mBounds.centerX();
+
         mArcRect.set(centerX - mRadius, centerY - mRadius, centerX + mRadius, centerY + mRadius);
         canvas.scale(1.f, Math.min(mGlowScaleY, 1.f), centerX, 0);
 
         final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
-        float translateX = mBounds.width() * displacement;
-        float translateY = 0;
-        if (mGlowScaleY > 1.f) {
-            translateY = (mGlowScaleY - 1.f) * mBounds.height();
-        }
+        float translateX = mBounds.width() * displacement / 2;
+
         canvas.clipRect(Float.MIN_VALUE, mBounds.top,
                 Float.MAX_VALUE, Float.MAX_VALUE);
-        canvas.translate(translateX, translateY);
-        canvas.drawArc(mArcRect, 0, 180, true, mPaint);
+        canvas.translate(translateX, 0);
+        canvas.drawArc(mArcRect, 45, 90, true, mPaint);
         canvas.restoreToCount(count);
 
         boolean oneLastFrame = false;
@@ -341,7 +333,7 @@ public class EdgeEffect {
      * @return The maximum height of the edge effect
      */
     public int getMaxHeight() {
-        return (int) (mBounds.height() * MAX_GLOW_HEIGHT + 0.5f);
+        return (int) (mBounds.height() * MAX_GLOW_SCALE + 0.5f);
     }
 
     private void update() {
@@ -369,16 +361,7 @@ public class EdgeEffect {
                     mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL:
-                    mState = STATE_PULL_DECAY;
-                    mStartTime = AnimationUtils.currentAnimationTimeMillis();
-                    mDuration = PULL_DECAY_TIME;
-
-                    mGlowAlphaStart = mGlowAlpha;
-                    mGlowScaleYStart = mGlowScaleY;
-
-                    // After pull, the glow should fade to nothing.
-                    mGlowAlphaFinish = 0.f;
-                    mGlowScaleYFinish = 0.f;
+                    // Hold in this state until explicitly released.
                     break;
                 case STATE_PULL_DECAY:
                     mState = STATE_RECEDE;
