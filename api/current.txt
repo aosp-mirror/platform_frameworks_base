@@ -15548,7 +15548,7 @@ package android.media.session {
     method public void addCallback(android.media.session.Session.Callback);
     method public void addCallback(android.media.session.Session.Callback, android.os.Handler);
     method public void connect(android.media.session.RouteInfo, android.media.session.RouteOptions);
-    method public void disconnect(android.media.session.RouteInfo);
+    method public void disconnect();
     method public android.media.session.SessionToken getSessionToken();
     method public android.media.session.TransportPerformer getTransportPerformer();
     method public boolean isActive();
@@ -15558,6 +15558,11 @@ package android.media.session {
     method public void setActive(boolean);
     method public void setFlags(int);
     method public void setRouteOptions(java.util.List<android.media.session.RouteOptions>);
+    field public static final int DISCONNECT_REASON_PROVIDER_DISCONNECTED = 2; // 0x2
+    field public static final int DISCONNECT_REASON_ROUTE_CHANGED = 3; // 0x3
+    field public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5; // 0x5
+    field public static final int DISCONNECT_REASON_SESSION_DISCONNECTED = 4; // 0x4
+    field public static final int DISCONNECT_REASON_USER_STOPPING = 1; // 0x1
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
   }

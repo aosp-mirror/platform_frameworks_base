@@ -31,6 +31,7 @@ oneway interface ISessionCallback {
     void onMediaButton(in Intent mediaButtonIntent);
     void onRequestRouteChange(in RouteInfo route);
     void onRouteConnected(in RouteInfo route, in RouteOptions options);
+    void onRouteDisconnected(in RouteInfo route, int reason);
     void onRouteStateChange(int state);
     void onRouteEvent(in RouteEvent event);
 

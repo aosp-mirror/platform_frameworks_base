@@ -58,12 +58,16 @@ public class MediaRouteProviderProxy {
     private final int mUserId;
     // Interfaces declared in the manifest
     private final ArrayList<String> mInterfaces = new ArrayList<String>();
-    private final ArrayList<RouteConnectionRecord> mConnections = new ArrayList<RouteConnectionRecord>();
+    private final ArrayList<RouteConnectionRecord> mConnections
+            = new ArrayList<RouteConnectionRecord>();
+    // The sessions that have a route from this provider selected
+    private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
     private final Handler mHandler = new Handler();
 
     private Intent mBindIntent;
     private IRouteProvider mBinder;
     private boolean mRunning;
+    private boolean mPaused;
     private boolean mInterested;
     private boolean mBound;
     private int mRetryCount;
@@ -81,6 +85,12 @@ public class MediaRouteProviderProxy {
         }
         mBindIntent = new Intent(RouteProviderService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mComponentName);
+    }
+
+    public void destroy() {
+        stop();
+        mSessions.clear();
+        updateBinding();
     }
 
     /**
@@ -236,6 +246,19 @@ public class MediaRouteProviderProxy {
         return mId;
     }
 
+    public void addSession(MediaSessionRecord session) {
+        mSessions.add(session);
+    }
+
+    public void removeSession(MediaSessionRecord session) {
+        mSessions.remove(session);
+        updateBinding();
+    }
+
+    public int getSessionCount() {
+        return mSessions.size();
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mId + " " + this);
         String indent = prefix + "  ";
@@ -257,8 +280,10 @@ public class MediaRouteProviderProxy {
         }
     }
 
+    // We want to bind as long as we're interested in this provider or there are
+    // sessions connected to it.
     private boolean shouldBind() {
-        return mRunning && mInterested;
+        return (mRunning && mInterested) || (!mSessions.isEmpty());
     }
 
     private void bind() {

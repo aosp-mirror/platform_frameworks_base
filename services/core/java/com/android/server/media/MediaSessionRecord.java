@@ -113,6 +113,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     // End TransportPerformer fields
 
     private boolean mIsActive = false;
+    private boolean mDestroyed = false;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, MediaSessionService service, Handler handler) {
@@ -220,10 +221,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     public void selectRoute(RouteInfo route) {
         synchronized (mLock) {
             if (route != mRoute) {
-                if (mConnection != null) {
-                    mConnection.disconnect();
-                    mConnection = null;
-                }
+                disconnect(Session.DISCONNECT_REASON_ROUTE_CHANGED);
             }
             mRoute = route;
         }
@@ -261,14 +259,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     public boolean setRouteConnected(RouteInfo route, RouteOptions request,
             RouteConnectionRecord connection) {
         synchronized (mLock) {
+            if (mDestroyed) {
+                Log.i(TAG, "setRouteConnected: session has been destroyed");
+                connection.disconnect();
+                return false;
+            }
             if (mRoute == null || !TextUtils.equals(route.getId(), mRoute.getId())) {
                 Log.w(TAG, "setRouteConnected: connected route is stale");
-                // TODO figure out disconnection path
+                connection.disconnect();
                 return false;
             }
             if (request != mRequest) {
                 Log.w(TAG, "setRouteConnected: connection request is stale");
-                // TODO figure out disconnection path
+                connection.disconnect();
                 return false;
             }
             mConnection = connection;
@@ -284,7 +287,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @return True if the session is active, false otherwise.
      */
     public boolean isActive() {
-        return mIsActive;
+        return mIsActive && !mDestroyed;
     }
 
     /**
@@ -307,6 +310,30 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return false;
     }
 
+    /**
+     * @return True if this session is currently connected to a route.
+     */
+    public boolean isConnected() {
+        return mConnection != null;
+    }
+
+    public void disconnect(int reason) {
+        synchronized (mLock) {
+            if (!mDestroyed) {
+                disconnectLocked(reason);
+            }
+        }
+    }
+
+    private void disconnectLocked(int reason) {
+        if (mConnection != null) {
+            mConnection.setListener(null);
+            mConnection.disconnect();
+            mConnection = null;
+            pushDisconnected(reason);
+        }
+    }
+
     public boolean isTransportControlEnabled() {
         return hasFlag(Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
@@ -316,6 +343,28 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mService.sessionDied(this);
     }
 
+    /**
+     * Finish cleaning up this session, including disconnecting if connected and
+     * removing the death observer from the callback binder.
+     */
+    public void onDestroy() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            if (isConnected()) {
+                disconnectLocked(Session.DISCONNECT_REASON_SESSION_DESTROYED);
+            }
+            mRoute = null;
+            mRequest = null;
+            mDestroyed = true;
+        }
+    }
+
+    public ISessionCallback getCallback() {
+        return mSessionCb.mCb;
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mTag + " " + this);
 
@@ -323,7 +372,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "ownerPid=" + mOwnerPid + ", ownerUid=" + mOwnerUid
                 + ", userId=" + mUserId);
         pw.println(indent + "info=" + mSessionInfo.toString());
-        pw.println(indent + "published=" + mIsActive);
+        pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
@@ -356,12 +405,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return "size=" + fields + ", title=" + title;
     }
 
-    private void onDestroy() {
-        mService.destroySession(this);
+    private void pushDisconnected(int reason) {
+        synchronized (mLock) {
+            mSessionCb.sendRouteDisconnected(reason);
+        }
     }
 
     private void pushPlaybackStateUpdate() {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
             for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
                 ISessionControllerCallback cb = mControllerCallbacks.get(i);
                 try {
@@ -376,6 +430,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private void pushMetadataUpdate() {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
             for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
                 ISessionControllerCallback cb = mControllerCallbacks.get(i);
                 try {
@@ -390,6 +447,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private void pushRouteUpdate() {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
             for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
                 ISessionControllerCallback cb = mControllerCallbacks.get(i);
                 try {
@@ -404,6 +464,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private void pushEvent(String event, Bundle data) {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
             for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
                 ISessionControllerCallback cb = mControllerCallbacks.get(i);
                 try {
@@ -417,6 +480,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private void pushRouteCommand(RouteCommand command, ResultReceiver cb) {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
             if (mRoute == null || !TextUtils.equals(command.getRouteInfo(), mRoute.getId())) {
                 if (cb != null) {
                     cb.send(RouteInterface.RESULT_ROUTE_IS_STALE, null);
@@ -470,14 +536,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void disconnect() {
-            // TODO
+            MediaSessionRecord.this.disconnect(Session.DISCONNECT_REASON_PROVIDER_DISCONNECTED);
         }
     };
 
     private final class SessionStub extends ISession.Stub {
         @Override
         public void destroy() {
-            onDestroy();
+            mService.destroySession(MediaSessionRecord.this);
         }
 
         @Override
@@ -554,6 +620,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void disconnectFromRoute(RouteInfo route) {
+            if (route != null && mRoute != null
+                    && TextUtils.equals(route.getId(), mRoute.getId())) {
+                disconnect(Session.DISCONNECT_REASON_SESSION_DISCONNECTED);
+            }
+        }
+
+        @Override
         public void setRouteOptions(List<RouteOptions> options) throws RemoteException {
             mRequests.clear();
             for (int i = options.size() - 1; i >= 0; i--) {
@@ -618,6 +692,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onRouteConnected(mRoute, mRequest);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendRouteStateChange.", e);
+            }
+        }
+
+        public void sendRouteDisconnected(int reason) {
+            try {
+                mCb.onRouteDisconnected(mRoute, reason);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in sendRouteDisconnected");
             }
         }
 

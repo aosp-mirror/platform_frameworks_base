@@ -86,10 +86,39 @@ public final class Session {
      */
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
 
+    /**
+     * Indicates the session was disconnected because the user that the session
+     * belonged to is stopping.
+     */
+    public static final int DISCONNECT_REASON_USER_STOPPING = 1;
+
+    /**
+     * Indicates the session was disconnected because the provider disconnected
+     * the route.
+     */
+    public static final int DISCONNECT_REASON_PROVIDER_DISCONNECTED = 2;
+
+    /**
+     * Indicates the session was disconnected because the route has changed.
+     */
+    public static final int DISCONNECT_REASON_ROUTE_CHANGED = 3;
+
+    /**
+     * Indicates the session was disconnected because the session owner
+     * requested it disconnect.
+     */
+    public static final int DISCONNECT_REASON_SESSION_DISCONNECTED = 4;
+
+    /**
+     * Indicates the session was disconnected because it was destroyed.
+     */
+    public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
+
     private static final int MSG_MEDIA_BUTTON = 1;
     private static final int MSG_COMMAND = 2;
     private static final int MSG_ROUTE_CHANGE = 3;
     private static final int MSG_ROUTE_CONNECTED = 4;
+    private static final int MSG_ROUTE_DISCONNECTED = 5;
 
     private static final String KEY_COMMAND = "command";
     private static final String KEY_EXTRAS = "extras";
@@ -302,11 +331,15 @@ public final class Session {
     /**
      * Disconnect from the current route. After calling you will be switched
      * back to the default route.
-     *
-     * @param route The route to disconnect from.
      */
-    public void disconnect(RouteInfo route) {
-        // TODO
+    public void disconnect() {
+        if (mRoute != null) {
+            try {
+                mBinder.disconnectFromRoute(mRoute.getRouteInfo());
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error disconnecting from route");
+            }
+        }
     }
 
     /**
@@ -406,6 +439,16 @@ public final class Session {
         }
     }
 
+    private void postRouteDisconnected(RouteInfo route, int reason) {
+        synchronized (mLock) {
+            if (mRoute != null && TextUtils.equals(mRoute.getRouteInfo().getId(), route.getId())) {
+                for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                    mCallbacks.get(i).post(MSG_ROUTE_DISCONNECTED, mRoute, reason);
+                }
+            }
+        }
+    }
+
     /**
      * Receives commands or updates from controllers and routes. An app can
      * specify what commands and buttons it supports by setting them on the
@@ -467,6 +510,11 @@ public final class Session {
          * <p>
          * Valid reasons are:
          * <ul>
+         * <li>{@link #DISCONNECT_REASON_USER_STOPPING}</li>
+         * <li>{@link #DISCONNECT_REASON_PROVIDER_DISCONNECTED}</li>
+         * <li>{@link #DISCONNECT_REASON_ROUTE_CHANGED}</li>
+         * <li>{@link #DISCONNECT_REASON_SESSION_DISCONNECTED}</li>
+         * <li>{@link #DISCONNECT_REASON_SESSION_DESTROYED}</li>
          * </ul>
          *
          * @param route The route that disconnected
@@ -516,6 +564,14 @@ public final class Session {
             Session session = mMediaSession.get();
             if (session != null) {
                 session.postRouteConnected(route, options);
+            }
+        }
+
+        @Override
+        public void onRouteDisconnected(RouteInfo route, int reason) {
+            Session session = mMediaSession.get();
+            if (session != null) {
+                session.postRouteDisconnected(route, reason);
             }
         }
 
@@ -668,12 +724,19 @@ public final class Session {
                     case MSG_ROUTE_CONNECTED:
                         mCallback.onRouteConnected((Route) msg.obj);
                         break;
+                    case MSG_ROUTE_DISCONNECTED:
+                        mCallback.onRouteDisconnected((Route) msg.obj, msg.arg1);
+                        break;
                 }
             }
         }
 
         public void post(int what, Object obj) {
             obtainMessage(what, obj).sendToTarget();
+        }
+
+        public void post(int what, Object obj, int arg1) {
+            obtainMessage(what, arg1, 0, obj).sendToTarget();
         }
     }
 

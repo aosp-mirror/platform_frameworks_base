@@ -19,7 +19,6 @@ package com.android.server.media;
 import android.media.session.PlaybackState;
 import android.media.session.Session;
 import android.os.UserHandle;
-import android.text.TextUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -49,6 +48,8 @@ public class MediaSessionStack {
 
     private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
 
+    private MediaSessionRecord mGlobalPrioritySession;
+
     private MediaSessionRecord mCachedButtonReceiver;
     private MediaSessionRecord mCachedDefault;
     private ArrayList<MediaSessionRecord> mCachedActiveList;
@@ -61,6 +62,9 @@ public class MediaSessionStack {
      */
     public void addSession(MediaSessionRecord record) {
         mSessions.add(record);
+        if ((record.getFlags() & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+            mGlobalPrioritySession = record;
+        }
         clearCache();
     }
 
@@ -71,6 +75,9 @@ public class MediaSessionStack {
      */
     public void removeSession(MediaSessionRecord record) {
         mSessions.remove(record);
+        if (record == mGlobalPrioritySession) {
+            mGlobalPrioritySession = null;
+        }
         clearCache();
     }
 
@@ -156,6 +163,9 @@ public class MediaSessionStack {
      * @return The default media button session or null.
      */
     public MediaSessionRecord getDefaultMediaButtonSession(int userId) {
+        if (mGlobalPrioritySession != null && mGlobalPrioritySession.isActive()) {
+            return mGlobalPrioritySession;
+        }
         if (mCachedButtonReceiver != null) {
             return mCachedButtonReceiver;
         }
