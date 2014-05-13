@@ -199,13 +199,18 @@ float CanvasPropertyPaintAnimator::getValue() const {
     return -1;
 }
 
+static uint8_t to_uint8(float value) {
+    int c = (int) (value + .5f);
+    return static_cast<uint8_t>( c < 0 ? 0 : c > 255 ? 255 : c );
+}
+
 void CanvasPropertyPaintAnimator::setValue(float value) {
     switch (mField) {
     case STROKE_WIDTH:
         mProperty->value.setStrokeWidth(value);
         return;
     case ALPHA:
-        mProperty->value.setAlpha(value);
+        mProperty->value.setAlpha(to_uint8(value));
         return;
     }
     LOG_ALWAYS_FATAL("Unknown field %d", (int) mField);
