@@ -153,6 +153,7 @@ public class WifiScanner {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(band);
             dest.writeInt(periodInMs);
+            dest.writeInt(reportEvents);
             dest.writeInt(channels.length);
 
             for (int i = 0; i < channels.length; i++) {
@@ -170,6 +171,7 @@ public class WifiScanner {
                         ScanSettings settings = new ScanSettings();
                         settings.band = in.readInt();
                         settings.periodInMs = in.readInt();
+                        settings.reportEvents = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
@@ -198,9 +200,49 @@ public class WifiScanner {
     }
 
     /** scan result with information elements from beacons */
-    public static class FullScanResult {
+    public static class FullScanResult implements Parcelable {
         public ScanResult result;
         public InformationElement informationElements[];
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            result.writeToParcel(dest, flags);
+            dest.writeInt(informationElements.length);
+            for (int i = 0; i < informationElements.length; i++) {
+                dest.writeInt(informationElements[i].id);
+                dest.writeInt(informationElements[i].bytes.length);
+                dest.writeByteArray(informationElements[i].bytes);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<FullScanResult> CREATOR =
+                new Creator<FullScanResult>() {
+                    public FullScanResult createFromParcel(Parcel in) {
+                        FullScanResult result = new FullScanResult();
+                        result.result = ScanResult.CREATOR.createFromParcel(in);
+                        int n = in.readInt();
+                        result.informationElements = new InformationElement[n];
+                        for (int i = 0; i < n; i++) {
+                            result.informationElements[i] = new InformationElement();
+                            result.informationElements[i].id = in.readInt();
+                            int len = in.readInt();
+                            result.informationElements[i].bytes = new byte[len];
+                            in.readByteArray(result.informationElements[i].bytes);
+                        }
+
+                        return result;
+                    }
+
+                    public FullScanResult[] newArray(int size) {
+                        return new FullScanResult[size];
+                    }
+                };
     }
 
     /** @hide */
@@ -311,15 +353,69 @@ public class WifiScanner {
         public int low;                                            /* minimum RSSI */
         /** high signal threshold; more information at {@link ScanResult#level} */
         public int high;                                           /* maximum RSSI */
+        /** channel frequency (in KHz) where you may find this BSSID */
+        public int frequencyHint;
     }
 
     /** @hide */
-    public static class WifiChangeSettings {
+    public static class WifiChangeSettings implements Parcelable {
         public int rssiSampleSize;                          /* sample size for RSSI averaging */
         public int lostApSampleSize;                        /* samples to confirm AP's loss */
         public int unchangedSampleSize;                     /* samples to confirm no change */
         public int minApsBreachingThreshold;                /* change threshold to trigger event */
+        public int periodInMs;                              /* scan period in millisecond */
         public HotspotInfo[] hotspotInfos;
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(rssiSampleSize);
+            dest.writeInt(lostApSampleSize);
+            dest.writeInt(unchangedSampleSize);
+            dest.writeInt(minApsBreachingThreshold);
+            dest.writeInt(periodInMs);
+            dest.writeInt(hotspotInfos.length);
+            for (int i = 0; i < hotspotInfos.length; i++) {
+                HotspotInfo info = hotspotInfos[i];
+                dest.writeString(info.bssid);
+                dest.writeInt(info.low);
+                dest.writeInt(info.high);
+                dest.writeInt(info.frequencyHint);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<WifiChangeSettings> CREATOR =
+                new Creator<WifiChangeSettings>() {
+                    public WifiChangeSettings createFromParcel(Parcel in) {
+                        WifiChangeSettings settings = new WifiChangeSettings();
+                        settings.rssiSampleSize = in.readInt();
+                        settings.lostApSampleSize = in.readInt();
+                        settings.unchangedSampleSize = in.readInt();
+                        settings.minApsBreachingThreshold = in.readInt();
+                        settings.periodInMs = in.readInt();
+                        int len = in.readInt();
+                        settings.hotspotInfos = new HotspotInfo[len];
+                        for (int i = 0; i < len; i++) {
+                            HotspotInfo info = new HotspotInfo();
+                            info.bssid = in.readString();
+                            info.low = in.readInt();
+                            info.high = in.readInt();
+                            info.frequencyHint = in.readInt();
+                            settings.hotspotInfos[i] = info;
+                        }
+                        return settings;
+                    }
+
+                    public WifiChangeSettings[] newArray(int size) {
+                        return new WifiChangeSettings[size];
+                    }
+                };
+
     }
 
     /** configure WifiChange detection
@@ -328,6 +424,7 @@ public class WifiScanner {
      * @param unchangedSampleSize number of samples to confirm there are no changes
      * @param minApsBreachingThreshold minimum number of access points that need to be
      *                                 out of range to detect WifiChange
+     * @param periodInMs indicates period of scan to find changes
      * @param hotspotInfos access points to watch
      */
     public void configureWifiChange(
@@ -335,18 +432,21 @@ public class WifiScanner {
             int lostApSampleSize,                           /* samples to confirm AP's loss */
             int unchangedSampleSize,                        /* samples to confirm no change */
             int minApsBreachingThreshold,                   /* change threshold to trigger event */
+            int periodInMs,                                 /* period of scan */
             HotspotInfo[] hotspotInfos                      /* signal thresholds to crosss */
             )
     {
         validateChannel();
+
         WifiChangeSettings settings = new WifiChangeSettings();
         settings.rssiSampleSize = rssiSampleSize;
         settings.lostApSampleSize = lostApSampleSize;
         settings.unchangedSampleSize = unchangedSampleSize;
         settings.minApsBreachingThreshold = minApsBreachingThreshold;
+        settings.periodInMs = periodInMs;
         settings.hotspotInfos = hotspotInfos;
 
-        sAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
+        configureWifiChange(settings);
     }
 
     /**
@@ -416,6 +516,7 @@ public class WifiScanner {
                 dest.writeString(info.bssid);
                 dest.writeInt(info.low);
                 dest.writeInt(info.high);
+                dest.writeInt(info.frequencyHint);
             }
         }
 
@@ -432,6 +533,7 @@ public class WifiScanner {
                             info.bssid = in.readString();
                             info.low = in.readInt();
                             info.high = in.readInt();
+                            info.frequencyHint = in.readInt();
                             settings.hotspotInfos[i] = info;
                         }
                         return settings;

@@ -16826,7 +16826,7 @@ package android.net.wifi {
   }
 
   public class WifiScanner {
-    method public void configureWifiChange(int, int, int, int, android.net.wifi.WifiScanner.HotspotInfo[]);
+    method public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.HotspotInfo[]);
     method public void resetHotlist(android.net.wifi.WifiScanner.HotlistListener);
     method public void retrieveScanResults(boolean, android.net.wifi.WifiScanner.ScanListener);
     method public void setHotlist(android.net.wifi.WifiScanner.HotspotInfo[], int, android.net.wifi.WifiScanner.HotlistListener);
@@ -16858,8 +16858,10 @@ package android.net.wifi {
     field public int frequency;
   }
 
-  public static class WifiScanner.FullScanResult {
+  public static class WifiScanner.FullScanResult implements android.os.Parcelable {
     ctor public WifiScanner.FullScanResult();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
     field public android.net.wifi.WifiScanner.InformationElement[] informationElements;
     field public android.net.wifi.ScanResult result;
   }
@@ -16871,6 +16873,7 @@ package android.net.wifi {
   public static class WifiScanner.HotspotInfo {
     ctor public WifiScanner.HotspotInfo();
     field public java.lang.String bssid;
+    field public int frequencyHint;
     field public int high;
     field public int low;
   }
