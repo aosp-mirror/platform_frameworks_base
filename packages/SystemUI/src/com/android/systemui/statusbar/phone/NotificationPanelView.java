@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -52,8 +53,6 @@ public class NotificationPanelView extends PanelView implements
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int mNotificationTopPadding;
     private boolean mAnimateNextTopPaddingChange;
-
-    private Interpolator mExpansionInterpolator;
 
     private int mTrackingPointer;
     private VelocityTracker mVelocityTracker;
@@ -78,6 +77,7 @@ public class NotificationPanelView extends PanelView implements
     private int mStackScrollerIntrinsicPadding;
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
+    private FlingAnimationUtils mFlingAnimationUtils;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -115,8 +115,7 @@ public class NotificationPanelView extends PanelView implements
         mNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notifications_top_padding);
         mMinStackHeight = getResources().getDimensionPixelSize(R.dimen.collapsed_stack_height);
-        mExpansionInterpolator = AnimationUtils.loadInterpolator(
-                getContext(), android.R.interpolator.fast_out_slow_in);
+        mFlingAnimationUtils = new FlingAnimationUtils(getContext());
     }
 
     @Override
@@ -435,13 +434,9 @@ public class NotificationPanelView extends PanelView implements
         }
     }
     private void flingSettings(float vel, boolean expand) {
-
-        // TODO: Actually use velocity.
-
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
-        animator.setDuration(EXPANSION_ANIMATION_LENGTH);
-        animator.setInterpolator(mExpansionInterpolator);
+        mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
