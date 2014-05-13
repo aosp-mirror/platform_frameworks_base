@@ -2084,7 +2084,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     getConnectivityChangeDelay());
         }
         try {
-            mNetd.removeNetwork(thisNetId);
+//            mNetd.removeNetwork(thisNetId);
         } catch (Exception e) {
             loge("Exception removing network: " + e);
         } finally {
@@ -2388,7 +2388,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             int thisNetId = nextNetId();
             thisNet.setNetId(thisNetId);
             try {
-                mNetd.createNetwork(thisNetId, thisIface);
+//                mNetd.createNetwork(thisNetId, thisIface);
             } catch (Exception e) {
                 loge("Exception creating network :" + e);
                 teardown(thisNet);
@@ -2420,7 +2420,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             int thisNetId = nextNetId();
             thisNet.setNetId(thisNetId);
             try {
-                mNetd.createNetwork(thisNetId, thisIface);
+//                mNetd.createNetwork(thisNetId, thisIface);
             } catch (Exception e) {
                 loge("Exception creating network :" + e);
                 teardown(thisNet);
