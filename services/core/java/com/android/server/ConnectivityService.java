@@ -2834,44 +2834,39 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return;
         }
 
-        // TODO: add locking to get atomic snapshot
-        pw.println();
-        for (int i = 0; i < mNetTrackers.length; i++) {
-            final NetworkStateTracker nst = mNetTrackers[i];
-            if (nst != null) {
-                pw.println("NetworkStateTracker for " + getNetworkTypeName(i) + ":");
-                pw.increaseIndent();
-                if (nst.getNetworkInfo().isConnected()) {
-                    pw.println("Active network: " + nst.getNetworkInfo().
-                            getTypeName());
-                }
-                pw.println(nst.getNetworkInfo());
-                pw.println(nst.getLinkProperties());
-                pw.println(nst);
-                pw.println();
-                pw.decreaseIndent();
-            }
+        NetworkAgentInfo defaultNai = mNetworkForRequestId.get(mDefaultRequest.requestId);
+        pw.print("Active default network: ");
+        if (defaultNai == null) {
+            pw.println("none");
+        } else {
+            pw.println(defaultNai.network.netId);
         }
-
-        pw.print("Active default network: "); pw.println(getNetworkTypeName(mActiveDefaultNetwork));
         pw.println();
 
-        pw.println("Network Requester Pids:");
+        pw.println("Current Networks:");
         pw.increaseIndent();
-        for (int net : mPriorityList) {
-            String pidString = net + ": ";
-            for (Integer pid : mNetRequestersPids[net]) {
-                pidString = pidString + pid.toString() + ", ";
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            pw.println(nai.toString());
+            pw.increaseIndent();
+            pw.println("Requests:");
+            pw.increaseIndent();
+            for (int i = 0; i < nai.networkRequests.size(); i++) {
+                pw.println(nai.networkRequests.valueAt(i).toString());
             }
-            pw.println(pidString);
+            pw.decreaseIndent();
+            pw.println("Lingered:");
+            pw.increaseIndent();
+            for (NetworkRequest nr : nai.networkLingered) pw.println(nr.toString());
+            pw.decreaseIndent();
+            pw.decreaseIndent();
         }
-        pw.println();
         pw.decreaseIndent();
+        pw.println();
 
-        pw.println("FeatureUsers:");
+        pw.println("Network Requests:");
         pw.increaseIndent();
-        for (Object requester : mFeatureUsers) {
-            pw.println(requester.toString());
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            pw.println(nri.toString());
         }
         pw.println();
         pw.decreaseIndent();
