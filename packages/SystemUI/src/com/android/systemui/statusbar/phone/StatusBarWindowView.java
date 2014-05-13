@@ -103,6 +103,9 @@ public class StatusBarWindowView extends FrameLayout {
                     return mService.onMenuPressed();
                 }
         }
+        if (mService.interceptMediaKey(event)) {
+            return true;
+        }
         return super.dispatchKeyEvent(event);
     }
 

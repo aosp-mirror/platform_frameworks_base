@@ -68,6 +68,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -2765,6 +2766,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardViewMediatorCallback.userActivity();
         }
+    }
+
+    public boolean interceptMediaKey(KeyEvent event) {
+        return mState == StatusBarState.KEYGUARD
+                && mStatusBarKeyguardViewManager.interceptMediaKey(event);
     }
 
     public boolean onMenuPressed() {

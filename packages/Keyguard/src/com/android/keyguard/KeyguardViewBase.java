@@ -297,7 +297,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
      * @param event The key event
      * @return whether the event was consumed as a media key.
      */
-    private boolean interceptMediaKey(KeyEvent event) {
+    public boolean interceptMediaKey(KeyEvent event) {
         final int keyCode = event.getKeyCode();
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
