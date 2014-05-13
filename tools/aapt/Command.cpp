@@ -2035,10 +2035,16 @@ bail:
     return (result != NO_ERROR);
 }
 
-static status_t addResourcesToBuilder(const sp<AaptDir>& dir, const sp<ApkBuilder>& builder) {
+static status_t addResourcesToBuilder(const sp<AaptDir>& dir, const sp<ApkBuilder>& builder, bool ignoreConfig=false) {
     const size_t numDirs = dir->getDirs().size();
     for (size_t i = 0; i < numDirs; i++) {
-        status_t err = addResourcesToBuilder(dir->getDirs().valueAt(i), builder);
+        bool ignore = ignoreConfig;
+        const sp<AaptDir>& subDir = dir->getDirs().valueAt(i);
+        const char* dirStr = subDir->getLeaf().string();
+        if (!ignore && strstr(dirStr, "mipmap") == dirStr) {
+            ignore = true;
+        }
+        status_t err = addResourcesToBuilder(subDir, builder, ignore);
         if (err != NO_ERROR) {
             return err;
         }
@@ -2049,7 +2055,12 @@ static status_t addResourcesToBuilder(const sp<AaptDir>& dir, const sp<ApkBuilde
         sp<AaptGroup> gp = dir->getFiles().valueAt(i);
         const size_t numConfigs = gp->getFiles().size();
         for (size_t j = 0; j < numConfigs; j++) {
-            status_t err = builder->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
+            status_t err = NO_ERROR;
+            if (ignoreConfig) {
+                err = builder->getBaseSplit()->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
+            } else {
+                err = builder->addEntry(gp->getPath(), gp->getFiles().valueAt(j));
+            }
             if (err != NO_ERROR) {
                 fprintf(stderr, "Failed to add %s (%s) to builder.\n",
                         gp->getPath().string(), gp->getFiles()[j]->getPrintableSource().string());

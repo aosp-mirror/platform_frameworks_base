@@ -55,6 +55,10 @@ public:
         return mSplits;
     }
 
+    android::sp<ApkSplit> getBaseSplit() {
+        return mSplits[0];
+    }
+
     void print() const;
 
 private:
