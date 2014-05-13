@@ -386,8 +386,8 @@ public class MenuBuilder implements Menu {
     private MenuItem addInternal(int group, int id, int categoryOrder, CharSequence title) {
         final int ordering = getOrdering(categoryOrder);
         
-        final MenuItemImpl item = new MenuItemImpl(this, group, id, categoryOrder,
-                ordering, title, mDefaultShowAsAction);
+        final MenuItemImpl item = createNewMenuItem(group, id, categoryOrder, ordering, title,
+                mDefaultShowAsAction);
 
         if (mCurrentMenuInfo != null) {
             // Pass along the current menu info
@@ -399,7 +399,14 @@ public class MenuBuilder implements Menu {
         
         return item;
     }
-    
+
+    // Layoutlib overrides this method to return its custom implementation of MenuItemImpl
+    private MenuItemImpl createNewMenuItem(int group, int id, int categoryOrder, int ordering,
+            CharSequence title, int defaultShowAsAction) {
+        return new MenuItemImpl(this, group, id, categoryOrder, ordering, title,
+                defaultShowAsAction);
+    }
+
     public MenuItem add(CharSequence title) {
         return addInternal(0, 0, 0, title);
     }
