@@ -83,6 +83,7 @@ public class AsmAnalyzerTest {
                 "mock_android.dummy.InnerTest$MyStaticInnerClass",
                 "mock_android.dummy.InnerTest$NotStaticInner1",
                 "mock_android.dummy.InnerTest$NotStaticInner2",
+                "mock_android.util.EmptyArray",
                 "mock_android.view.View",
                 "mock_android.view.ViewGroup",
                 "mock_android.view.ViewGroup$LayoutParams",
@@ -217,15 +218,16 @@ public class AsmAnalyzerTest {
         TreeMap<String, ClassReader> in_deps = new TreeMap<String, ClassReader>();
         TreeMap<String, ClassReader> out_deps = new TreeMap<String, ClassReader>();
 
-        ClassReader cr = mAa.findClass("mock_android.widget.TableLayout", zipClasses, keep);
+        ClassReader cr = mAa.findClass("mock_android.widget.LinearLayout", zipClasses, keep);
         DependencyVisitor visitor = mAa.getVisitor(zipClasses, keep, new_keep, in_deps, out_deps);
 
         // get first level dependencies
         cr.accept(visitor, 0 /* flags */);
 
         assertArrayEquals(new String[] {
+                "mock_android.util.EmptyArray",
                 "mock_android.view.ViewGroup",
-                "mock_android.widget.TableLayout$LayoutParams",
+                "mock_android.widget.LinearLayout$LayoutParams",
             },
             out_deps.keySet().toArray());
 
@@ -255,7 +257,7 @@ public class AsmAnalyzerTest {
 
         assertArrayEquals(new String[] { }, out_deps.keySet().toArray());
         assertArrayEquals(new String[] {
-                "mock_android.widget.TableLayout",
+                "mock_android.widget.LinearLayout",
         }, keep.keySet().toArray());
     }
 }

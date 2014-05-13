@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package mock_android.widget;
+package mock_android.util;
 
-import mock_android.util.EmptyArray;
-import mock_android.view.ViewGroup;
+import java.lang.JavaClass;
 
-public class LinearLayout extends ViewGroup {
+public class EmptyArray {
 
-    Object[] mObjects = EmptyArray.OBJECT;
-    public class LayoutParams extends MarginLayoutParams {
-
-    }
-
+        public static final Object[] OBJECT = new Object[0];
 }
