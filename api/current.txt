@@ -505,6 +505,7 @@ package android {
     field public static final int excludeClass = 16843849; // 0x1010449
     field public static final int excludeFromRecents = 16842775; // 0x1010017
     field public static final int excludeId = 16843848; // 0x1010448
+    field public static final int excludeViewName = 16843860; // 0x1010454
     field public static final int exitFadeDuration = 16843533; // 0x101030d
     field public static final int expandableListPreferredChildIndicatorLeft = 16842834; // 0x1010052
     field public static final int expandableListPreferredChildIndicatorRight = 16842835; // 0x1010053
@@ -1127,6 +1128,7 @@ package android {
     field public static final int targetId = 16843740; // 0x10103dc
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
+    field public static final int targetViewName = 16843859; // 0x1010453
     field public static final int taskAffinity = 16842770; // 0x1010012
     field public static final int taskCloseEnterAnimation = 16842942; // 0x10100be
     field public static final int taskCloseExitAnimation = 16842943; // 0x10100bf
@@ -29054,6 +29056,7 @@ package android.transition {
     ctor public Transition();
     method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition addTarget(int);
+    method public android.transition.Transition addTarget(java.lang.String);
     method public android.transition.Transition addTarget(java.lang.Class);
     method public android.transition.Transition addTarget(android.view.View);
     method public boolean canRemoveViews();
@@ -29065,6 +29068,7 @@ package android.transition {
     method public android.transition.Transition excludeChildren(android.view.View, boolean);
     method public android.transition.Transition excludeChildren(java.lang.Class, boolean);
     method public android.transition.Transition excludeTarget(int, boolean);
+    method public android.transition.Transition excludeTarget(java.lang.String, boolean);
     method public android.transition.Transition excludeTarget(android.view.View, boolean);
     method public android.transition.Transition excludeTarget(java.lang.Class, boolean);
     method public long getDuration();
@@ -29075,12 +29079,16 @@ package android.transition {
     method public android.transition.TransitionPropagation getPropagation();
     method public long getStartDelay();
     method public java.util.List<java.lang.Integer> getTargetIds();
+    method public java.util.List<java.lang.Class> getTargetTypes();
+    method public java.util.List<java.lang.String> getTargetViewNames();
     method public java.util.List<android.view.View> getTargets();
     method public java.lang.String[] getTransitionProperties();
     method public android.transition.TransitionValues getTransitionValues(android.view.View, boolean);
     method public android.transition.Transition removeListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition removeTarget(int);
+    method public android.transition.Transition removeTarget(java.lang.String);
     method public android.transition.Transition removeTarget(android.view.View);
+    method public android.transition.Transition removeTarget(java.lang.Class);
     method public android.transition.Transition setDuration(long);
     method public void setEpicenterCallback(android.transition.Transition.EpicenterCallback);
     method public android.transition.Transition setInterpolator(android.animation.TimeInterpolator);
