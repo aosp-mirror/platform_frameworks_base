@@ -165,7 +165,8 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
-        if (passpoint != null) sb.append(passpoint.toString());
+        if (passpoint != null)
+            sb.append(", passpoint: [").append(passpoint.toString()).append("]");
 
         return sb.toString();
     }

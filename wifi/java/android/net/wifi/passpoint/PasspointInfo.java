@@ -182,16 +182,54 @@ public class PasspointInfo implements Parcelable {
 
     @Override
     public String toString() {
-        // TODO
-        return "PasspointInfo";
+        StringBuffer sb = new StringBuffer();
+        sb.append("BSSID: ").append(bssid);
+        if (venueName != null)
+            sb.append(" venueName: ").append(venueName);
+        if (networkAuthType != null)
+            sb.append(" networkAuthType: ").append(networkAuthType);
+        if (roamingConsortium != null)
+            sb.append(" roamingConsortium: ").append(roamingConsortium);
+        if (ipAddrTypeAvaibility != null)
+            sb.append(" ipAddrTypeAvaibility: ").append(ipAddrTypeAvaibility);
+        if (naiRealm != null)
+            sb.append(" naiRealm: ").append(naiRealm);
+        if (cellularNetwork != null)
+            sb.append(" cellularNetwork: ").append(cellularNetwork);
+        if (domainName != null)
+            sb.append(" domainName: ").append(domainName);
+        if (operatorFriendlyName != null)
+            sb.append(" operatorFriendlyName: ").append(operatorFriendlyName);
+        if (wanMetrics != null)
+            sb.append(" wanMetrics: ").append(wanMetrics);
+        if (connectionCapability != null)
+            sb.append(" connectionCapability: ").append(connectionCapability);
+        if (osuProviderList != null)
+            sb.append(" osuProviderList: (size=" + osuProviderList.size() + ")");
+        return sb.toString();
     }
 
     /** Implement the Parcelable interface {@hide} */
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        // TODO
         out.writeValue(bssid);
         out.writeValue(venueName);
+        out.writeValue(networkAuthType);
+        out.writeValue(roamingConsortium);
+        out.writeValue(ipAddrTypeAvaibility);
+        out.writeValue(naiRealm);
+        out.writeValue(cellularNetwork);
+        out.writeValue(domainName);
+        out.writeValue(operatorFriendlyName);
+        out.writeValue(wanMetrics);
+        out.writeValue(connectionCapability);
+        if (osuProviderList == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(osuProviderList.size());
+            for (PasspointOsuProvider osu : osuProviderList)
+                osu.writeToParcel(out, flags);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -205,11 +243,27 @@ public class PasspointInfo implements Parcelable {
             new Parcelable.Creator<PasspointInfo>() {
         @Override
         public PasspointInfo createFromParcel(Parcel in) {
-            PasspointInfo pi = new PasspointInfo();
-            pi.bssid = (String) in.readValue(String.class.getClassLoader());
-            pi.venueName = (String) in.readValue(String.class.getClassLoader());
-            // TODO
-            return pi;
+            PasspointInfo p = new PasspointInfo();
+            p.bssid = (String) in.readValue(String.class.getClassLoader());
+            p.venueName = (String) in.readValue(String.class.getClassLoader());
+            p.networkAuthType = (String) in.readValue(String.class.getClassLoader());
+            p.roamingConsortium = (String) in.readValue(String.class.getClassLoader());
+            p.ipAddrTypeAvaibility = (String) in.readValue(String.class.getClassLoader());
+            p.naiRealm = (String) in.readValue(String.class.getClassLoader());
+            p.cellularNetwork = (String) in.readValue(String.class.getClassLoader());
+            p.domainName = (String) in.readValue(String.class.getClassLoader());
+            p.operatorFriendlyName = (String) in.readValue(String.class.getClassLoader());
+            p.wanMetrics = (String) in.readValue(String.class.getClassLoader());
+            p.connectionCapability = (String) in.readValue(String.class.getClassLoader());
+            int n = in.readInt();
+            if (n > 0) {
+                p.osuProviderList = new ArrayList<PasspointOsuProvider>();
+                for (int i = 0; i < n; i++) {
+                    PasspointOsuProvider osu = PasspointOsuProvider.CREATOR.createFromParcel(in);
+                    p.osuProviderList.add(osu);
+                }
+            }
+            return p;
         }
 
         @Override

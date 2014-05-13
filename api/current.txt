@@ -17162,12 +17162,13 @@ package android.net.wifi.passpoint {
   public class PasspointManager {
     ctor public PasspointManager(android.content.Context, android.net.wifi.passpoint.IPasspointManager);
     method public boolean addCredential(android.net.wifi.passpoint.PasspointCredential);
-    method public boolean connect(android.net.wifi.passpoint.PasspointPolicy);
+    method public void connect(android.net.wifi.passpoint.PasspointPolicy);
     method public int getPasspointState();
     method public java.util.List<android.net.wifi.passpoint.PasspointCredential> getSavedCredentials();
     method public android.net.wifi.passpoint.PasspointManager.Channel initialize(android.content.Context, android.os.Looper, android.net.wifi.passpoint.PasspointManager.ChannelListener);
     method public boolean removeCredential(android.net.wifi.passpoint.PasspointCredential);
-    method public void requestOsuIcons(android.net.wifi.passpoint.PasspointManager.Channel, java.util.List<android.net.wifi.passpoint.PasspointOsuProvider>, android.net.wifi.passpoint.PasspointManager.ActionListener);
+    method public java.util.List<android.net.wifi.passpoint.PasspointPolicy> requestCredentialMatch(java.util.List<android.net.wifi.ScanResult>);
+    method public void requestOsuIcons(android.net.wifi.passpoint.PasspointManager.Channel, java.util.List<android.net.wifi.passpoint.PasspointOsuProvider>, int, android.net.wifi.passpoint.PasspointManager.ActionListener);
     method public boolean updateCredential(android.net.wifi.passpoint.PasspointCredential);
     field public static final int BUSY = 2; // 0x2
     field public static final int ERROR = 0; // 0x0
@@ -17199,14 +17200,18 @@ package android.net.wifi.passpoint {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int OSU_METHOD_OMADM = 0; // 0x0
     field public static final int OSU_METHOD_SOAP = 1; // 0x1
-    field public java.lang.String SSID;
+    field public static final int OSU_METHOD_UNKNOWN = -1; // 0xffffffff
     field public java.lang.String friendlyName;
     field public java.lang.Object icon;
     field public java.lang.String iconFileName;
+    field public int iconHeight;
+    field public java.lang.String iconType;
+    field public int iconWidth;
     field public int osuMethod;
     field public java.lang.String osuNai;
     field public java.lang.String osuService;
     field public java.lang.String serverUri;
+    field public java.lang.String ssid;
   }
 
   public class PasspointPolicy implements android.os.Parcelable {

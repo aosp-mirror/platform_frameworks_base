@@ -226,13 +226,13 @@ public class PasspointManager {
             synchronized(mAnqpRequestLock) { mAnqpRequest.add(sr); }
         }
 
-        private void anqpRequestFinish(PasspointInfo pi) {
-            Log.d(TAG, "anqpRequestFinish pi.bssid=" + pi.bssid);
+        private void anqpRequestFinish(PasspointInfo result) {
+            Log.d(TAG, "anqpRequestFinish pi.bssid=" + result.bssid);
             synchronized(mAnqpRequestLock) {
                 for (ScanResult sr : mAnqpRequest)
-                    if (sr.BSSID.equals(pi.bssid)) {
-                        Log.d(TAG, "find hit " + pi.bssid);
-                        sr.passpoint = pi;
+                    if (sr.BSSID.equals(result.bssid)) {
+                        Log.d(TAG, "find hit " + result.bssid);
+                        sr.passpoint = result;
                         mAnqpRequest.remove(sr);
                         Log.d(TAG, "mAnqpRequest.len=" + mAnqpRequest.size());
                         break;
@@ -268,8 +268,8 @@ public class PasspointManager {
                         break;
 
                     case REQUEST_ANQP_INFO_SUCCEEDED:
-                        PasspointInfo pi = (PasspointInfo) message.obj;
-                        anqpRequestFinish(pi);
+                        PasspointInfo result = (PasspointInfo) message.obj;
+                        anqpRequestFinish(result);
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -396,13 +396,17 @@ public class PasspointManager {
      */
     public void requestAnqpInfo(Channel c, List<ScanResult> requested, int mask,
             ActionListener listener) {
+        Log.d(TAG, "requestAnqpInfo start");
+        Log.d(TAG, "requested.size=" + requested.size());
         checkChannel(c);
         List<ScanResult> list = new ArrayList<ScanResult>();
         for (ScanResult sr : requested) if (sr.capabilities.contains("[HS20]")) {
             list.add(sr);
             c.anqpRequestStart(sr);
+            Log.d(TAG, "adding " + sr.BSSID);
         }
         int count = list.size();
+        Log.d(TAG, "after filter, count=" + count);
         if (count == 0) {
             if (DBG) Log.d(TAG, "ANQP info request contains no HS20 APs, skipped");
             listener.onSuccess();
@@ -411,6 +415,7 @@ public class PasspointManager {
         int key = c.putListener(listener, count);
         for (ScanResult sr : list)
             c.mAsyncChannel.sendMessage(REQUEST_ANQP_INFO, mask, key, sr);
+        Log.d(TAG, "requestAnqpInfo end");
     }
 
     /**
@@ -418,10 +423,21 @@ public class PasspointManager {
      *
      * @param c
      * @param requested
+     * @param resolution
      * @param listener
      */
     public void requestOsuIcons(Channel c, List<PasspointOsuProvider> requested,
-            ActionListener listener) {
+            int resolution, ActionListener listener) {
+    }
+
+    /**
+     * TODO: doc
+     *
+     * @param requested
+     * @return
+     */
+    public List<PasspointPolicy> requestCredentialMatch(List<ScanResult> requested) {
+        return null;
     }
 
     /* TODO: add credential APIs */
@@ -478,10 +494,8 @@ public class PasspointManager {
      * Select and connect to a Passpoint network.
      *
      * @param policy Selected Passpoint network, see {@link PasspointPolicy}
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean connect(PasspointPolicy policy) {
-        return true;
+    public void connect(PasspointPolicy selected) {
     }
 
     private static void checkChannel(Channel c) {
