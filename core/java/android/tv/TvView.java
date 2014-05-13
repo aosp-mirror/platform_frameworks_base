@@ -16,10 +16,10 @@
 
 package android.tv;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.tv.TvInputManager.Session;
 import android.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.tv.TvInputManager.SessionCreateCallback;
@@ -113,14 +113,14 @@ public class TvView extends SurfaceView {
      * If a TV input is already bound, the input will be unbound from this view and its session
      * will be released.
      *
-     * @param name TV input name will be bound to this view.
+     * @param inputId the id of TV input which will be bound to this view.
      * @param callback called when TV input is bound. The callback sends
      *        {@link TvInputManager.Session}
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void bindTvInput(ComponentName name, SessionCreateCallback callback) {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+    public void bindTvInput(String inputId, SessionCreateCallback callback) {
+        if (TextUtils.isEmpty(inputId)) {
+            throw new IllegalArgumentException("inputId cannot be null or an empty string");
         }
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
@@ -134,7 +134,7 @@ public class TvView extends SurfaceView {
         // is newly assigned for every bindTvInput call and compared with
         // MySessionCreateCallback.this.
         mSessionCreateCallback = new MySessionCreateCallback(callback);
-        mTvInputManager.createSession(name, mSessionCreateCallback, mHandler);
+        mTvInputManager.createSession(inputId, mSessionCreateCallback, mHandler);
     }
 
     /**

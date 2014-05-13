@@ -39,7 +39,7 @@ public final class TvInputInfo implements Parcelable {
     public TvInputInfo(ResolveInfo service) {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        mId = new ComponentName(si.packageName, si.name).flattenToShortString();
+        mId = generateInputIdForComponenetName(new ComponentName(si.packageName, si.name));
     }
 
     /**
@@ -75,7 +75,7 @@ public final class TvInputInfo implements Parcelable {
      * Loads the user-displayed label for this TV input service.
      *
      * @param pm Supplies a PackageManager used to load the TV input's resources.
-     * @return Returns a CharSequence containing the TV input's label. If the TV input does not have
+     * @return a CharSequence containing the TV input's label. If the TV input does not have
      *         a label, its name is returned.
      */
     public CharSequence loadLabel(PackageManager pm) {
@@ -125,6 +125,17 @@ public final class TvInputInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
         mService.writeToParcel(dest, flags);
+    }
+
+    /**
+     * Used to generate an input id from a ComponentName.
+     *
+     * @param name the component name for generating an input id.
+     * @return the generated input id for the given {@code name}.
+     * @hide
+     */
+    public static final String generateInputIdForComponenetName(ComponentName name) {
+        return name.flattenToShortString();
     }
 
     /**

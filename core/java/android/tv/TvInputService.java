@@ -60,7 +60,7 @@ public abstract class TvInputService extends Service {
      */
     public static final String SERVICE_INTERFACE = "android.tv.TvInputService";
 
-    private ComponentName mComponentName;
+    private String mId;
     private final Handler mHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
@@ -69,7 +69,8 @@ public abstract class TvInputService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mComponentName = new ComponentName(getPackageName(), getClass().getName());
+        mId = TvInputInfo.generateInputIdForComponenetName(
+                new ComponentName(getPackageName(), getClass().getName()));
     }
 
     @Override
@@ -82,7 +83,7 @@ public abstract class TvInputService extends Service {
                     // The first time a callback is registered, the service needs to report its
                     // availability status so that the system can know its initial value.
                     try {
-                        cb.onAvailabilityChanged(mComponentName, mAvailable);
+                        cb.onAvailabilityChanged(mId, mAvailable);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onAvailabilityChanged", e);
                     }
@@ -531,8 +532,7 @@ public abstract class TvInputService extends Service {
                     int n = mCallbacks.beginBroadcast();
                     try {
                         for (int i = 0; i < n; i++) {
-                            mCallbacks.getBroadcastItem(i).onAvailabilityChanged(mComponentName,
-                                    isAvailable);
+                            mCallbacks.getBroadcastItem(i).onAvailabilityChanged(mId, isAvailable);
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unexpected exception", e);

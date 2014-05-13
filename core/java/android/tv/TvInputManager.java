@@ -16,7 +16,6 @@
 
 package android.tv;
 
-import android.content.ComponentName;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
@@ -50,8 +49,8 @@ public final class TvInputManager {
     private final ITvInputManager mService;
 
     // A mapping from an input to the list of its TvInputListenerRecords.
-    private final Map<ComponentName, List<TvInputListenerRecord>> mTvInputListenerRecordsMap =
-            new HashMap<ComponentName, List<TvInputListenerRecord>>();
+    private final Map<String, List<TvInputListenerRecord>> mTvInputListenerRecordsMap =
+            new HashMap<String, List<TvInputListenerRecord>>();
 
     // A mapping from the sequence number of a session to its SessionCreateCallbackRecord.
     private final SparseArray<SessionCreateCallbackRecord> mSessionCreateCallbackRecordMap =
@@ -105,12 +104,11 @@ public final class TvInputManager {
         /**
          * This is called when the availability status of a given TV input is changed.
          *
-         * @param name {@link ComponentName} of {@link android.app.Service} that implements the
-         *            given TV input.
+         * @param inputId the id of the TV input.
          * @param isAvailable {@code true} if the given TV input is available to show TV programs.
          *            {@code false} otherwise.
          */
-        public void onAvailabilityChanged(ComponentName name, boolean isAvailable) {
+        public void onAvailabilityChanged(String inputId, boolean isAvailable) {
         }
     }
 
@@ -127,11 +125,11 @@ public final class TvInputManager {
             return mListener;
         }
 
-        public void postAvailabilityChanged(final ComponentName name, final boolean isAvailable) {
+        public void postAvailabilityChanged(final String inputId, final boolean isAvailable) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onAvailabilityChanged(name, isAvailable);
+                    mListener.onAvailabilityChanged(inputId, isAvailable);
                 }
             });
         }
@@ -145,7 +143,7 @@ public final class TvInputManager {
         mUserId = userId;
         mClient = new ITvInputClient.Stub() {
             @Override
-            public void onSessionCreated(ComponentName name, IBinder token, InputChannel channel,
+            public void onSessionCreated(String inputId, IBinder token, InputChannel channel,
                     int seq) {
                 synchronized (mSessionCreateCallbackRecordMap) {
                     SessionCreateCallbackRecord record = mSessionCreateCallbackRecordMap.get(seq);
@@ -163,16 +161,16 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onAvailabilityChanged(ComponentName name, boolean isAvailable) {
+            public void onAvailabilityChanged(String inputId, boolean isAvailable) {
                 synchronized (mTvInputListenerRecordsMap) {
-                    List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(name);
+                    List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
                     if (records == null) {
                         // Silently ignore - no listener is registered yet.
                         return;
                     }
                     int recordsCount = records.size();
                     for (int i = 0; i < recordsCount; i++) {
-                        records.get(i).postAvailabilityChanged(name, isAvailable);
+                        records.get(i).postAvailabilityChanged(inputId, isAvailable);
                     }
                 }
             }
@@ -195,24 +193,23 @@ public final class TvInputManager {
     /**
      * Returns the availability of a given TV input.
      *
-     * @param name {@link ComponentName} of {@link android.app.Service} that implements the given TV
-     *            input.
+     * @param inputId the id of the TV input.
      * @throws IllegalArgumentException if the argument is {@code null}.
      * @throws IllegalStateException If there is no {@link TvInputListener} registered on the given
      *             TV input.
      */
-    public boolean getAvailability(ComponentName name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+    public boolean getAvailability(String inputId) {
+        if (inputId == null) {
+            throw new IllegalArgumentException("id cannot be null");
         }
         synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(name);
+            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
             if (records == null || records.size() == 0) {
                 throw new IllegalStateException("At least one listener should be registered.");
             }
         }
         try {
-            return mService.getAvailability(mClient, name, mUserId);
+            return mService.getAvailability(mClient, inputId, mUserId);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -221,15 +218,14 @@ public final class TvInputManager {
     /**
      * Registers a {@link TvInputListener} for a given TV input.
      *
-     * @param name {@link ComponentName} of {@link android.app.Service} that implements the given TV
-     *            input.
+     * @param inputId the id of the TV input.
      * @param listener a listener used to monitor status of the given TV input.
      * @param handler a {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void registerListener(ComponentName name, TvInputListener listener, Handler handler) {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+    public void registerListener(String inputId, TvInputListener listener, Handler handler) {
+        if (inputId == null) {
+            throw new IllegalArgumentException("id cannot be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
@@ -238,12 +234,12 @@ public final class TvInputManager {
             throw new IllegalArgumentException("handler cannot be null");
         }
         synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(name);
+            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
             if (records == null) {
                 records = new ArrayList<TvInputListenerRecord>();
-                mTvInputListenerRecordsMap.put(name, records);
+                mTvInputListenerRecordsMap.put(inputId, records);
                 try {
-                    mService.registerCallback(mClient, name, mUserId);
+                    mService.registerCallback(mClient, inputId, mUserId);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -255,22 +251,21 @@ public final class TvInputManager {
     /**
      * Unregisters the existing {@link TvInputListener} for a given TV input.
      *
-     * @param name {@link ComponentName} of {@link android.app.Service} that implements the given TV
-     *            input.
+     * @param inputId the id of the TV input.
      * @param listener the existing listener to remove for the given TV input.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void unregisterListener(ComponentName name, final TvInputListener listener) {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+    public void unregisterListener(String inputId, final TvInputListener listener) {
+        if (inputId == null) {
+            throw new IllegalArgumentException("id cannot be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
         synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(name);
+            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
             if (records == null) {
-                Log.e(TAG, "No listener found for " + name.getClassName());
+                Log.e(TAG, "No listener found for " + inputId);
                 return;
             }
             for (Iterator<TvInputListenerRecord> it = records.iterator(); it.hasNext();) {
@@ -281,11 +276,11 @@ public final class TvInputManager {
             }
             if (records.isEmpty()) {
                 try {
-                    mService.unregisterCallback(mClient, name, mUserId);
+                    mService.unregisterCallback(mClient, inputId, mUserId);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 } finally {
-                    mTvInputListenerRecordsMap.remove(name);
+                    mTvInputListenerRecordsMap.remove(inputId);
                 }
             }
         }
@@ -298,16 +293,15 @@ public final class TvInputManager {
      * the given TV input.
      * </p>
      *
-     * @param name {@link ComponentName} of {@link android.app.Service} that implements the given TV
-     *            input.
+     * @param inputId the id of the TV input.
      * @param callback a callback used to receive the created session.
      * @param handler a {@link Handler} that the session creation will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void createSession(ComponentName name, final SessionCreateCallback callback,
+    public void createSession(String inputId, final SessionCreateCallback callback,
             Handler handler) {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+        if (inputId == null) {
+            throw new IllegalArgumentException("id cannot be null");
         }
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
@@ -320,7 +314,7 @@ public final class TvInputManager {
             int seq = mNextSeq++;
             mSessionCreateCallbackRecordMap.put(seq, record);
             try {
-                mService.createSession(mClient, name, seq, mUserId);
+                mService.createSession(mClient, inputId, seq, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

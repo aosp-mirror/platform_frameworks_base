@@ -26,6 +26,6 @@ import android.view.InputChannel;
  * @hide
  */
 oneway interface ITvInputClient {
-    void onSessionCreated(in ComponentName name, IBinder token, in InputChannel channel, int seq);
-    void onAvailabilityChanged(in ComponentName name, boolean isAvailable);
+    void onSessionCreated(in String inputId, IBinder token, in InputChannel channel, int seq);
+    void onAvailabilityChanged(in String inputId, boolean isAvailable);
 }
