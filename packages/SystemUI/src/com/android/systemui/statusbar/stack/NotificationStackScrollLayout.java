@@ -758,7 +758,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 final int range = getScrollRange();
                 if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
                     float currVelocity = mScroller.getCurrVelocity();
-                    if (currVelocity >= mMinimumVelocity * 20) {
+                    if (currVelocity >= mMinimumVelocity) {
                         mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
                     }
                 }
