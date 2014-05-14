@@ -196,6 +196,10 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
  * @param len the number of points of the polygon
  */
 bool ShadowTessellator::isClockwise(const Vector2* polygon, int len) {
+    if (len < 2 || polygon == NULL) {
+        ALOGW("Invalid polygon %p, length is %d @ isClockwise()", polygon, len);
+        return true;
+    }
     double sum = 0;
     double p1x = polygon[len - 1].x;
     double p1y = polygon[len - 1].y;
