@@ -44,6 +44,7 @@ import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -731,6 +732,13 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void addCrossProfileIntentsForPackage(String packageName, int sourceUserId,
             int targetUserId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    public Bitmap getUserIcon(int userId) {
         throw new UnsupportedOperationException();
     }
 }

@@ -19,8 +19,11 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.Slog;
@@ -127,6 +130,18 @@ public class ResolveInfo implements Parcelable {
     public String resolvePackageName;
 
     /**
+     * If not equal to UserHandle.USER_CURRENT, then the intent will be forwarded to this user.
+     * @hide
+     */
+    public int targetUserId;
+
+    /**
+     * If true, then loadIcon will return the icon of the target user.
+     * @hide
+     */
+    public boolean showTargetUserIcon;
+
+    /**
      * @hide Target comes from system process?
      */
     public boolean system;
@@ -202,6 +217,10 @@ public class ResolveInfo implements Parcelable {
                 return dr;
             }
         }
+        if (showTargetUserIcon) {
+            Bitmap bm = pm.getUserIcon(targetUserId);
+            return new BitmapDrawable(bm);
+        }
         return ci.loadIcon(pm);
     }
     
@@ -215,7 +234,9 @@ public class ResolveInfo implements Parcelable {
     public final int getIconResource() {
         if (icon != 0) return icon;
         final ComponentInfo ci = getComponentInfo();
-        if (ci != null) return ci.getIconResource();
+        if (ci != null && !showTargetUserIcon) {
+            return ci.getIconResource();
+        }
         return 0;
     }
 
@@ -250,6 +271,7 @@ public class ResolveInfo implements Parcelable {
     }
     
     public ResolveInfo() {
+        targetUserId = UserHandle.USER_CURRENT;
     }
 
     public ResolveInfo(ResolveInfo orig) {
@@ -266,6 +288,7 @@ public class ResolveInfo implements Parcelable {
         icon = orig.icon;
         resolvePackageName = orig.resolvePackageName;
         system = orig.system;
+        targetUserId = orig.targetUserId;
     }
 
     public String toString() {
@@ -285,6 +308,13 @@ public class ResolveInfo implements Parcelable {
         }
         sb.append(" m=0x");
         sb.append(Integer.toHexString(match));
+        if (targetUserId != UserHandle.USER_CURRENT) {
+            sb.append(" targetUserId=");
+            sb.append(targetUserId);
+        }
+        if (showTargetUserIcon) {
+            sb.append(" [showTargetUserIcon]");
+        }
         sb.append('}');
         return sb.toString();
     }
@@ -320,6 +350,8 @@ public class ResolveInfo implements Parcelable {
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
         dest.writeString(resolvePackageName);
+        dest.writeInt(targetUserId);
+        dest.writeInt(showTargetUserIcon ? 1 : 0);
         dest.writeInt(system ? 1 : 0);
     }
 
@@ -363,6 +395,8 @@ public class ResolveInfo implements Parcelable {
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
         resolvePackageName = source.readString();
+        targetUserId = source.readInt();
+        showTargetUserIcon = source.readInt() != 0;
         system = source.readInt() != 0;
     }
     
@@ -374,6 +408,13 @@ public class ResolveInfo implements Parcelable {
         }
 
         public final int compare(ResolveInfo a, ResolveInfo b) {
+            // We want to put the one targeted to another user at the end of the dialog.
+            if (a.targetUserId != UserHandle.USER_CURRENT) {
+                return 1;
+            }
+            if (b.targetUserId != UserHandle.USER_CURRENT) {
+                return -1;
+            }
             CharSequence  sa = a.loadLabel(mPM);
             if (sa == null) sa = a.activityInfo.name;
             CharSequence  sb = b.loadLabel(mPM);

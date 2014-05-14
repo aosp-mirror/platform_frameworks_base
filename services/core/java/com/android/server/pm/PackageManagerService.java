@@ -3577,9 +3577,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private ResolveInfo createForwardingResolveInfo(IntentFilter filter,
             int sourceUserId, int targetUserId) {
+        ResolveInfo forwardingResolveInfo = new ResolveInfo();
         String className;
         if (targetUserId == UserHandle.USER_OWNER) {
             className = FORWARD_INTENT_TO_USER_OWNER;
+            forwardingResolveInfo.showTargetUserIcon = true;
         } else {
             className = FORWARD_INTENT_TO_MANAGED_PROFILE;
         }
@@ -3587,13 +3589,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mAndroidApplication.packageName, className);
         ActivityInfo forwardingActivityInfo = getActivityInfo(forwardingActivityComponentName, 0,
                 sourceUserId);
-        ResolveInfo forwardingResolveInfo = new ResolveInfo();
         forwardingResolveInfo.activityInfo = forwardingActivityInfo;
         forwardingResolveInfo.priority = 0;
         forwardingResolveInfo.preferredOrder = 0;
         forwardingResolveInfo.match = 0;
         forwardingResolveInfo.isDefault = true;
         forwardingResolveInfo.filter = filter;
+        forwardingResolveInfo.targetUserId = targetUserId;
         return forwardingResolveInfo;
     }
 
