@@ -201,7 +201,7 @@ class AutomaticBrightnessController {
 
     public void updatePowerState(DisplayManagerInternal.DisplayPowerRequest request) {
         if (setScreenAutoBrightnessAdjustment(request.screenAutoBrightnessAdjustment)
-                || setLightSensorEnabled(request.wantLightSensorEnabled())) {
+                | setLightSensorEnabled(request.wantLightSensorEnabled())) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
     }
