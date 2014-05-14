@@ -462,12 +462,42 @@ public final class TvContract {
          * <p>
          * A value of 1 indicates the channel is included in the channel list that applications use
          * to browse channels, a value of 0 indicates the channel is not included in the list. If
-         * not specified, this value is set to 1 by default.
+         * not specified, this value is set to 1 (browsable) by default.
          * </p><p>
          * Type: INTEGER (boolean)
          * </p>
          */
         public static final String COLUMN_BROWSABLE = "browsable";
+
+        /**
+         * The flag indicating whether this TV channel is searchable or not.
+         * <p>
+         * In some regions, it is not allowed to surface search results for a given channel without
+         * broadcaster's consent. This is used to impose such restriction. A value of 1 indicates
+         * the channel is searchable and can be included in search results, a value of 0 indicates
+         * the channel and its TV programs are hidden from search. If not specified, this value is
+         * set to 1 (searchable) by default.
+         * </p>
+         * <p>
+         * Type: INTEGER (boolean)
+         * </p>
+         */
+        public static final String COLUMN_SEARCHABLE = "searchable";
+
+        /**
+         * The flag indicating whether this TV channel is locked or not.
+         * <p>
+         * This is primarily used for alternative parental control to prevent unauthorized users
+         * from watching the current channel regardless of the content rating. A value of 1
+         * indicates the channel is locked and the user is required to enter passcode to unlock it
+         * in order to watch the current program from the channel, a value of 0 indicates the
+         * channel is not locked thus the user is not prompted to enter passcode If not specified,
+         * this value is set to 0 (not locked) by default.
+         * </p><p>
+         * Type: INTEGER (boolean)
+         * </p>
+         */
+        public static final String COLUMN_LOCKED = "locked";
 
         /**
          * Generic data used by individual TV input services.
@@ -544,6 +574,33 @@ public final class TvContract {
         public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
 
         /**
+         * The comma-separated genre string of this TV program.
+         * <p>
+         * Use the same language appeared in the underlying broadcast standard, if applicable. (For
+         * example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, use one of the
+         * following genres:
+         * <ul>
+         *     <li>Family/Kids</li>
+         *     <li>Sports</li>
+         *     <li>Shopping</li>
+         *     <li>Movies</li>
+         *     <li>Comedy</li>
+         *     <li>Travel</li>
+         *     <li>Drama</li>
+         *     <li>Education</li>
+         *     <li>Animal/Wildlife</li>
+         *     <li>News</li>
+         *     <li>Gaming</li>
+         *     <li>Others</li>
+         * </ul>
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_GENRE = "genre";
+
+        /**
          * The description of this TV program that is displayed to the user by default.
          * <p>
          * The maximum length of this field is 256 characters.
@@ -564,6 +621,17 @@ public final class TvContract {
          * </p>
          */
         public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+
+        /**
+         * The comma-separated audio languages of this TV program.
+         * <p>
+         * This is used to describe available audio languages included in the program. Use
+         * 3-character language code as specified by ISO 639-2.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_AUDIO_LANGUAGE = "audio_language";
 
         /**
          * Generic data used by TV input services.
