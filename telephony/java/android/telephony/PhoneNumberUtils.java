@@ -1492,6 +1492,10 @@ public class PhoneNumberUtils
      * @return the normalized number.
      */
     public static String normalizeNumber(String phoneNumber) {
+        if (TextUtils.isEmpty(phoneNumber)) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
         int len = phoneNumber.length();
         for (int i = 0; i < len; i++) {
