@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.res.Configuration;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -48,7 +50,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if (mController == null) return;
-        mController.setRotationLocked(mState.value);
+        mController.setRotationLocked(!mState.value);
     }
 
     @Override
@@ -56,7 +58,19 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         if (mController == null) return;
         final boolean rotationLocked = mController.isRotationLocked();
         state.visible = mController.isRotationLockAffordanceVisible();
-        state.value = !rotationLocked;
+        if (state.value != rotationLocked) {
+            state.value = rotationLocked;
+            final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(rotationLocked
+                    ? R.drawable.ic_rotate_locked_anim
+                    : R.drawable.ic_rotate_unlocked_anim);
+            state.icon = d;
+            mUiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    d.start();
+                }
+            });
+        }
         if (rotationLocked) {
             final int lockOrientation = mController.getRotationLockOrientation();
             final int label = lockOrientation == Configuration.ORIENTATION_PORTRAIT
@@ -64,11 +78,15 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                     : lockOrientation == Configuration.ORIENTATION_LANDSCAPE
                     ? R.string.quick_settings_rotation_locked_landscape_label
                     : R.string.quick_settings_rotation_locked_label;
-            state.iconId = R.drawable.ic_qs_rotation_lock;
             state.label = mContext.getString(label);
+            if (state.icon == null) {
+                state.icon = mContext.getDrawable(R.drawable.ic_rotate_24_15);
+            }
         } else {
-            state.iconId = R.drawable.ic_qs_rotation;
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
+            if (state.icon == null) {
+                state.icon = mContext.getDrawable(R.drawable.ic_rotate_24_01);
+            }
         }
     }
 
