@@ -311,8 +311,9 @@ public interface IActivityManager extends IInterface {
     public void finishHeavyWeightApp() throws RemoteException;
 
     public boolean convertFromTranslucent(IBinder token) throws RemoteException;
-    public boolean convertToTranslucent(IBinder token) throws RemoteException;
+    public boolean convertToTranslucent(IBinder token, ActivityOptions options) throws RemoteException;
     public void notifyActivityDrawn(IBinder token) throws RemoteException;
+    public ActivityOptions getActivityOptions(IBinder token) throws RemoteException;
 
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
     public boolean isImmersive(IBinder token) throws RemoteException;
@@ -739,4 +740,5 @@ public interface IActivityManager extends IInterface {
     int IS_IN_LOCK_TASK_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+216;
     int SET_RECENTS_ACTIVITY_VALUES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
     int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
+    int GET_ACTIVITY_OPTIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+219;
 }

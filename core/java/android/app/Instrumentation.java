@@ -1036,10 +1036,10 @@ public class Instrumentation {
             IllegalAccessException {
         Activity activity = (Activity)clazz.newInstance();
         ActivityThread aThread = null;
-        activity.attach(context, aThread, this, token, application, intent,
+        activity.attach(context, aThread, this, token, 0, application, intent,
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
-                new Configuration());
+                new Configuration(), null);
         return activity;
     }
 

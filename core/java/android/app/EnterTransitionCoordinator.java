@@ -121,7 +121,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
                             mActivity.convertFromTranslucent();
                         }
                     }
-                });
+                }, null);
                 Drawable background = getDecor().getBackground();
                 if (background != null) {
                     window.setBackgroundDrawable(null);
@@ -230,7 +230,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator
                 public void onTranslucentConversionComplete(boolean drawComplete) {
                     fadeOutBackground();
                 }
-            });
+            }, null);
         } else {
             fadeOutBackground();
         }

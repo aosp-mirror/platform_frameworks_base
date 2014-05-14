@@ -152,11 +152,10 @@ public abstract class ApplicationThreadNative extends Binder
             ParcelFileDescriptor profileFd = data.readInt() != 0
                     ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean autoStopProfiler = data.readInt() != 0;
-            Bundle resumeArgs = data.readBundle();
             scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo,
                     voiceInteractor, procState, state, persistentState,
                     ri, pi, notResumed, isForward, profileName, profileFd,
-                    autoStopProfiler, resumeArgs);
+                    autoStopProfiler);
             return true;
         }
         
@@ -737,8 +736,7 @@ class ApplicationThreadProxy implements IApplicationThread {
             IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
-            Bundle resumeArgs)
+            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -764,7 +762,6 @@ class ApplicationThreadProxy implements IApplicationThread {
             data.writeInt(0);
         }
         data.writeInt(autoStopProfiler ? 1 : 0);
-        data.writeBundle(resumeArgs);
         mRemote.transact(SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

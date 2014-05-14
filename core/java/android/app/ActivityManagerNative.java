@@ -1547,9 +1547,25 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case CONVERT_TO_TRANSLUCENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            boolean converted = convertToTranslucent(token);
+            final Bundle bundle;
+            if (data.readInt() == 0) {
+                bundle = null;
+            } else {
+                bundle = data.readBundle();
+            }
+            final ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+            boolean converted = convertToTranslucent(token, options);
             reply.writeNoException();
             reply.writeInt(converted ? 1 : 0);
+            return true;
+        }
+
+        case GET_ACTIVITY_OPTIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            final ActivityOptions options = getActivityOptions(token);
+            reply.writeNoException();
+            reply.writeBundle(options == null ? null : options.toBundle());
             return true;
         }
 
@@ -4074,18 +4090,38 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public boolean convertToTranslucent(IBinder token)
+    public boolean convertToTranslucent(IBinder token, ActivityOptions options)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
+        if (options == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(1);
+            data.writeBundle(options.toBundle());
+        }
         mRemote.transact(CONVERT_TO_TRANSLUCENT_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    public ActivityOptions getActivityOptions(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(GET_ACTIVITY_OPTIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Bundle bundle = reply.readBundle();
+        ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+        data.recycle();
+        reply.recycle();
+        return options;
     }
 
     public void setImmersive(IBinder token, boolean immersive)

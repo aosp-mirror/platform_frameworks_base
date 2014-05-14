@@ -347,7 +347,7 @@ final class ActivityRecord {
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified, ActivityStackSupervisor supervisor,
-            ActivityContainer container) {
+            ActivityContainer container, Bundle options) {
         service = _service;
         appToken = new Token(this);
         info = aInfo;
@@ -378,6 +378,9 @@ final class ActivityRecord {
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
         mInitialActivityContainer = container;
+        if (options != null) {
+            pendingOptions = new ActivityOptions(options);
+        }
 
         // This starts out true, since the initial state of an activity
         // is that we have everything, and we shouldn't never consider it
@@ -710,6 +713,9 @@ final class ActivityRecord {
                                 pendingOptions.getStartY()
                                         + pendingOptions.getThumbnail().getHeight()));
                     }
+                    break;
+                default:
+                    Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);
                     break;
             }
             pendingOptions = null;
