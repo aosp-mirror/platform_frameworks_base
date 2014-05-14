@@ -16,18 +16,17 @@
 
 package android.service.notification;
 
+import android.annotation.PrivateApi;
 import android.annotation.SdkConstant;
 import android.app.INotificationManager;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-
-import java.util.Comparator;
-import java.util.HashMap;
 
 /**
  * A service that receives calls from the system when new notifications are posted or removed.
@@ -52,6 +51,9 @@ public abstract class NotificationListenerService extends Service {
     private String[] mNotificationKeys;
 
     private INotificationManager mNoMan;
+
+    /** Only valid after a successful call to (@link registerAsService}. */
+    private int mCurrentUser;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -265,6 +267,42 @@ public abstract class NotificationListenerService extends Service {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Directly register this service with the Notification Manager.
+     *
+     * <p>Only system services may use this call. It will fail for non-system callers.
+     * Apps should ask the user to add their listener in Settings.
+     *
+     * @param componentName the component that will consume the notification information
+     * @param currentUser the user to use as the stream filter
+     * @hide
+     */
+    @PrivateApi
+    public void registerAsSystemService(ComponentName componentName, int currentUser)
+            throws RemoteException {
+        if (mWrapper == null) {
+            mWrapper = new INotificationListenerWrapper();
+        }
+        INotificationManager noMan = getNotificationInterface();
+        noMan.registerListener(mWrapper, componentName, currentUser);
+        mCurrentUser = currentUser;
+    }
+
+    /**
+     * Directly unregister this service from the Notification Manager.
+     *
+     * <P>This method will fail for listeners that were not registered
+     * with (@link registerAsService).
+     * @hide
+     */
+    @PrivateApi
+    public void unregisterAsSystemService() throws RemoteException {
+        if (mWrapper != null) {
+            INotificationManager noMan = getNotificationInterface();
+            noMan.unregisterListener(mWrapper, mCurrentUser);
+        }
     }
 
     private class INotificationListenerWrapper extends INotificationListener.Stub {
