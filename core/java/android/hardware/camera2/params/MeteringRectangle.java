@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import android.util.Size;
 import static com.android.internal.util.Preconditions.*;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**

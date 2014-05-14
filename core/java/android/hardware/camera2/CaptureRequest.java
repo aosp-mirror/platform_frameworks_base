@@ -19,6 +19,7 @@ package android.hardware.camera2;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Rational;
 import android.view.Surface;
 
 import java.util.HashSet;
@@ -169,7 +170,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * @param in The parcel from which the object should be read
      * @hide
      */
-    public void readFromParcel(Parcel in) {
+    private void readFromParcel(Parcel in) {
         mSettings.readFromParcel(in);
 
         mSurfaceSet.clear();
@@ -965,8 +966,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <p>When a jpeg image capture is issued, the thumbnail size selected should have
      * the same aspect ratio as the jpeg image.</p>
      */
-    public static final Key<android.hardware.camera2.Size> JPEG_THUMBNAIL_SIZE =
-            new Key<android.hardware.camera2.Size>("android.jpeg.thumbnailSize", android.hardware.camera2.Size.class);
+    public static final Key<android.util.Size> JPEG_THUMBNAIL_SIZE =
+            new Key<android.util.Size>("android.jpeg.thumbnailSize", android.util.Size.class);
 
     /**
      * <p>The ratio of lens focal length to the effective
@@ -1518,12 +1519,4 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
 }

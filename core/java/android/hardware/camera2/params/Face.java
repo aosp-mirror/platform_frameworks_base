@@ -15,10 +15,13 @@
  */
 
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureResult;
 
 /**
  * Describes a face detected in an image.

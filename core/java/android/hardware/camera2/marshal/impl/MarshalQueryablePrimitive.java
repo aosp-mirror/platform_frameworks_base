@@ -15,11 +15,11 @@
  */
 package android.hardware.camera2.marshal.impl;
 
-import android.hardware.camera2.Rational;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
 import android.hardware.camera2.utils.TypeReference;
+import android.util.Rational;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
 import static android.hardware.camera2.marshal.MarshalHelpers.*;

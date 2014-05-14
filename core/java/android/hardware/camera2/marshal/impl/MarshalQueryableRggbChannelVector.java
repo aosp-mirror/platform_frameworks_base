@@ -15,9 +15,9 @@
  */
 package android.hardware.camera2.marshal.impl;
 
-import android.hardware.camera2.RggbChannelVector;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
+import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.utils.TypeReference;
 
 import java.nio.ByteBuffer;

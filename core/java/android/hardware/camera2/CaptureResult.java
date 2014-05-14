@@ -17,6 +17,8 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.params.Face;
+import android.util.Rational;
 
 /**
  * <p>The results of a single image capture from the image sensor.</p>
@@ -1512,8 +1514,8 @@ public final class CaptureResult extends CameraMetadata {
      * <p>When a jpeg image capture is issued, the thumbnail size selected should have
      * the same aspect ratio as the jpeg image.</p>
      */
-    public static final Key<android.hardware.camera2.Size> JPEG_THUMBNAIL_SIZE =
-            new Key<android.hardware.camera2.Size>("android.jpeg.thumbnailSize", android.hardware.camera2.Size.class);
+    public static final Key<android.util.Size> JPEG_THUMBNAIL_SIZE =
+            new Key<android.util.Size>("android.jpeg.thumbnailSize", android.util.Size.class);
 
     /**
      * <p>The ratio of lens focal length to the effective
@@ -2060,6 +2062,16 @@ public final class CaptureResult extends CameraMetadata {
             new Key<byte[]>("android.statistics.faceScores", byte[].class);
 
     /**
+     * <p>List of the faces detected through camera face detection
+     * in this result.</p>
+     * <p>Only available if {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} <code>!=</code> OFF.</p>
+     *
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     */
+    public static final Key<android.hardware.camera2.params.Face[]> STATISTICS_FACES =
+            new Key<android.hardware.camera2.params.Face[]>("android.statistics.faces", android.hardware.camera2.params.Face[].class);
+
+    /**
      * <p>The shading map is a low-resolution floating-point map
      * that lists the coefficients used to correct for vignetting, for each
      * Bayer color channel.</p>
@@ -2425,27 +2437,4 @@ public final class CaptureResult extends CameraMetadata {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
-
-    /**
-     * <p>
-     * List of the {@link Face Faces} detected through camera face detection
-     * in this result.
-     * </p>
-     * <p>
-     * Only available if {@link #STATISTICS_FACE_DETECT_MODE} {@code !=}
-     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_OFF OFF}.
-     * </p>
-     *
-     * @see Face
-     */
-    public static final Key<Face[]> STATISTICS_FACES =
-            new Key<Face[]>("android.statistics.faces", Face[].class);
 }
