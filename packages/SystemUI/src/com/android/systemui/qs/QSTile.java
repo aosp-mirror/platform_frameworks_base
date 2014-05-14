@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -225,7 +226,7 @@ public abstract class QSTile<TState extends State> implements Disposable {
     public static class State {
         public boolean visible;
         public int iconId;
-        public VectorDrawable icon;
+        public Drawable icon;
         public String label;
         public String contentDescription;
 
