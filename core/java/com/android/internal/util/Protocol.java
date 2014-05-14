@@ -57,5 +57,6 @@ public class Protocol {
     public static final int BASE_NETWORK_STATE_TRACKER                              = 0x00070000;
     public static final int BASE_CONNECTIVITY_SERVICE                               = 0x00080000;
     public static final int BASE_NETWORK_AGENT                                      = 0x00081000;
+    public static final int BASE_NETWORK_MONITOR                                    = 0x00082000;
     //TODO: define all used protocols
 }

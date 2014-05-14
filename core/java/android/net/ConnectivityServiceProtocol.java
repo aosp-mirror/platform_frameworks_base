@@ -67,43 +67,4 @@ public class ConnectivityServiceProtocol {
          */
         public static final int CMD_CANCEL_REQUEST = BASE + 1;
     }
-
-    /**
-     * TODO - move to NetworkMonitor and document
-     */
-    public static class NetworkMonitorProtocol {
-        private NetworkMonitorProtocol() {}
-        /**
-         * Inform NetworkMonitor that their network is connected.
-         * Initiates Network Validation.
-         */
-        public static final int CMD_NETWORK_CONNECTED = BASE + 200;
-
-        /**
-         * Inform ConnectivityService that the network is validated.
-         * obj = NetworkAgent
-         */
-        public static final int EVENT_NETWORK_VALIDATED = BASE + 201;
-
-        /**
-         * Inform NetworkMonitor to linger a network.  The Monitor should
-         * start a timer and/or start watching for zero live connections while
-         * moving towards LINGER_COMPLETE.  After the Linger period expires
-         * (or other events mark the end of the linger state) the LINGER_COMPLETE
-         * event should be sent to ConnectivityService and ConnectivityService
-         * will shut down the network, telling the corresponding NetworkAgent
-         * to disconnect.  If a CMD_NETWORK_CONNECTED happens before the LINGER completes
-         * it indicates further desire to keep the network alive and so
-         * the LINGER is aborted.
-         * TODO - figure out who manages/does this simple state machine
-         */
-        public static final int CMD_NETWORK_LINGER = BASE + 202;
-
-        /**
-         * Inform ConnectivityService that the network LINGER period has
-         * expired.
-         * obj = NetworkAgent
-         */
-        public static final int EVENT_NETWORK_LINGER_COMPLETE = BASE + 203;
-    }
 }
