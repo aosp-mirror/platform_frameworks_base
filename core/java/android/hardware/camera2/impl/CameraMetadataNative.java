@@ -23,16 +23,33 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.Face;
-import android.hardware.camera2.Rational;
+import android.hardware.camera2.marshal.Marshaler;
+import android.hardware.camera2.marshal.MarshalQueryable;
+import android.hardware.camera2.marshal.MarshalRegistry;
+import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
+import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
+import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
+import android.hardware.camera2.marshal.impl.MarshalQueryableMeteringRectangle;
+import android.hardware.camera2.marshal.impl.MarshalQueryableNativeByteToInteger;
+import android.hardware.camera2.marshal.impl.MarshalQueryableParcelable;
+import android.hardware.camera2.marshal.impl.MarshalQueryablePrimitive;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRange;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRect;
+import android.hardware.camera2.marshal.impl.MarshalQueryableReprocessFormatsMap;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRggbChannelVector;
+import android.hardware.camera2.marshal.impl.MarshalQueryableSize;
+import android.hardware.camera2.marshal.impl.MarshalQueryableSizeF;
+import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration;
+import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
+import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -89,7 +106,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         nativeWriteToParcel(dest);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Key<T> key) {
         T value = getOverride(key);
@@ -169,275 +185,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         mMetadataPtr = 0; // set it to 0 again to prevent eclipse from making this field final
     }
 
-    private static int getTypeSize(int nativeType) {
-        switch(nativeType) {
-            case TYPE_BYTE:
-                return 1;
-            case TYPE_INT32:
-            case TYPE_FLOAT:
-                return 4;
-            case TYPE_INT64:
-            case TYPE_DOUBLE:
-            case TYPE_RATIONAL:
-                return 8;
-        }
-
-        throw new UnsupportedOperationException("Unknown type, can't get size "
-                + nativeType);
-    }
-
-    private static Class<?> getExpectedType(int nativeType) {
-        switch(nativeType) {
-            case TYPE_BYTE:
-                return Byte.TYPE;
-            case TYPE_INT32:
-                return Integer.TYPE;
-            case TYPE_FLOAT:
-                return Float.TYPE;
-            case TYPE_INT64:
-                return Long.TYPE;
-            case TYPE_DOUBLE:
-                return Double.TYPE;
-            case TYPE_RATIONAL:
-                return Rational.class;
-        }
-
-        throw new UnsupportedOperationException("Unknown type, can't map to Java type "
-                + nativeType);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> int packSingleNative(T value, ByteBuffer buffer, Class<T> type,
-            int nativeType, boolean sizeOnly) {
-
-        if (!sizeOnly) {
-            /**
-             * Rewrite types when the native type doesn't match the managed type
-             *  - Boolean -> Byte
-             *  - Integer -> Byte
-             */
-
-            if (nativeType == TYPE_BYTE && type == Boolean.TYPE) {
-                // Since a boolean can't be cast to byte, and we don't want to use putBoolean
-                boolean asBool = (Boolean) value;
-                byte asByte = (byte) (asBool ? 1 : 0);
-                value = (T) (Byte) asByte;
-            } else if (nativeType == TYPE_BYTE && type == Integer.TYPE) {
-                int asInt = (Integer) value;
-                byte asByte = (byte) asInt;
-                value = (T) (Byte) asByte;
-            } else if (type != getExpectedType(nativeType)) {
-                throw new UnsupportedOperationException("Tried to pack a type of " + type +
-                        " but we expected the type to be " + getExpectedType(nativeType));
-            }
-
-            if (nativeType == TYPE_BYTE) {
-                buffer.put((Byte) value);
-            } else if (nativeType == TYPE_INT32) {
-                buffer.putInt((Integer) value);
-            } else if (nativeType == TYPE_FLOAT) {
-                buffer.putFloat((Float) value);
-            } else if (nativeType == TYPE_INT64) {
-                buffer.putLong((Long) value);
-            } else if (nativeType == TYPE_DOUBLE) {
-                buffer.putDouble((Double) value);
-            } else if (nativeType == TYPE_RATIONAL) {
-                Rational r = (Rational) value;
-                buffer.putInt(r.getNumerator());
-                buffer.putInt(r.getDenominator());
-            }
-
-        }
-
-        return getTypeSize(nativeType);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> int packSingle(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        int size = 0;
-
-        if (type.isPrimitive() || type == Rational.class) {
-            size = packSingleNative(value, buffer, type, nativeType, sizeOnly);
-        } else if (type.isEnum()) {
-            size = packEnum((Enum)value, buffer, (Class<Enum>)type, nativeType, sizeOnly);
-        } else if (type.isArray()) {
-            size = packArray(value, buffer, type, nativeType, sizeOnly);
-        } else {
-            size = packClass(value, buffer, type, nativeType, sizeOnly);
-        }
-
-        return size;
-    }
-
-    private static <T extends Enum<T>> int packEnum(T value, ByteBuffer buffer, Class<T> type,
-            int nativeType, boolean sizeOnly) {
-
-        // TODO: add support for enums with their own values.
-        return packSingleNative(getEnumValue(value), buffer, Integer.TYPE, nativeType, sizeOnly);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> int packClass(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler == null) {
-            throw new IllegalArgumentException(String.format("Unknown Key type: %s", type));
-        }
-
-        return marshaler.marshal(value, buffer, nativeType, sizeOnly);
-    }
-
-    private static <T> int packArray(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        int size = 0;
-        int arrayLength = Array.getLength(value);
-
-        @SuppressWarnings("unchecked")
-        Class<Object> componentType = (Class<Object>)type.getComponentType();
-
-        for (int i = 0; i < arrayLength; ++i) {
-            size += packSingle(Array.get(value, i), buffer, componentType, nativeType, sizeOnly);
-        }
-
-        return size;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T unpackSingleNative(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        T val;
-
-        if (nativeType == TYPE_BYTE) {
-            val = (T) (Byte) buffer.get();
-        } else if (nativeType == TYPE_INT32) {
-            val = (T) (Integer) buffer.getInt();
-        } else if (nativeType == TYPE_FLOAT) {
-            val = (T) (Float) buffer.getFloat();
-        } else if (nativeType == TYPE_INT64) {
-            val = (T) (Long) buffer.getLong();
-        } else if (nativeType == TYPE_DOUBLE) {
-            val = (T) (Double) buffer.getDouble();
-        } else if (nativeType == TYPE_RATIONAL) {
-            val = (T) new Rational(buffer.getInt(), buffer.getInt());
-        } else {
-            throw new UnsupportedOperationException("Unknown type, can't unpack a native type "
-                + nativeType);
-        }
-
-        /**
-         * Rewrite types when the native type doesn't match the managed type
-         *  - Byte -> Boolean
-         *  - Byte -> Integer
-         */
-
-        if (nativeType == TYPE_BYTE && type == Boolean.TYPE) {
-            // Since a boolean can't be cast to byte, and we don't want to use getBoolean
-            byte asByte = (Byte) val;
-            boolean asBool = asByte != 0;
-            val = (T) (Boolean) asBool;
-        } else if (nativeType == TYPE_BYTE && type == Integer.TYPE) {
-            byte asByte = (Byte) val;
-            int asInt = asByte;
-            val = (T) (Integer) asInt;
-        } else if (type != getExpectedType(nativeType)) {
-            throw new UnsupportedOperationException("Tried to unpack a type of " + type +
-                    " but we expected the type to be " + getExpectedType(nativeType));
-        }
-
-        return val;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> T unpackSingle(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        if (type.isPrimitive() || type == Rational.class) {
-            return unpackSingleNative(buffer, type, nativeType);
-        }
-
-        if (type.isEnum()) {
-            return (T) unpackEnum(buffer, (Class<Enum>)type, nativeType);
-        }
-
-        if (type.isArray()) {
-            return unpackArray(buffer, type, nativeType);
-        }
-
-        T instance = unpackClass(buffer, type, nativeType);
-
-        return instance;
-    }
-
-    private static <T extends Enum<T>> T unpackEnum(ByteBuffer buffer, Class<T> type,
-            int nativeType) {
-        int ordinal = unpackSingleNative(buffer, Integer.TYPE, nativeType);
-        return getEnumFromValue(type, ordinal);
-    }
-
-    private static <T> T unpackClass(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler == null) {
-            throw new IllegalArgumentException("Unknown class type: " + type);
-        }
-
-        return marshaler.unmarshal(buffer, nativeType);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T unpackArray(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        Class<?> componentType = type.getComponentType();
-        Object array;
-
-        int elementSize = getTypeSize(nativeType);
-
-        MetadataMarshalClass<?> marshaler = getMarshaler(componentType, nativeType);
-        if (marshaler != null) {
-            elementSize = marshaler.getNativeSize(nativeType);
-        }
-
-        if (elementSize != MetadataMarshalClass.NATIVE_SIZE_DYNAMIC) {
-            int remaining = buffer.remaining();
-            int arraySize = remaining / elementSize;
-
-            if (VERBOSE) {
-                Log.v(TAG,
-                        String.format(
-                            "Attempting to unpack array (count = %d, element size = %d, bytes " +
-                            "remaining = %d) for type %s",
-                            arraySize, elementSize, remaining, type));
-            }
-
-            array = Array.newInstance(componentType, arraySize);
-            for (int i = 0; i < arraySize; ++i) {
-               Object elem = unpackSingle(buffer, componentType, nativeType);
-               Array.set(array, i, elem);
-            }
-        } else {
-            // Dynamic size, use an array list.
-            ArrayList<Object> arrayList = new ArrayList<Object>();
-
-            int primitiveSize = getTypeSize(nativeType);
-            while (buffer.remaining() >= primitiveSize) {
-                Object elem = unpackSingle(buffer, componentType, nativeType);
-                arrayList.add(elem);
-            }
-
-            array = arrayList.toArray((T[]) Array.newInstance(componentType, 0));
-        }
-
-        if (buffer.remaining() != 0) {
-            Log.e(TAG, "Trailing bytes (" + buffer.remaining() + ") left over after unpacking "
-                    + type);
-        }
-
-        return (T) array;
-    }
-
     private <T> T getBase(Key<T> key) {
         int tag = key.getTag();
         byte[] values = readValues(tag);
@@ -445,10 +192,9 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             return null;
         }
 
-        int nativeType = getNativeType(tag);
-
+        Marshaler<T> marshaler = getMarshalerForKey(key);
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        return unpackSingle(buffer, key.getType(), nativeType);
+        return marshaler.unmarshal(buffer);
     }
 
     // Need overwrite some metadata that has different definitions between native
@@ -632,19 +378,19 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         int tag = key.getTag();
 
         if (value == null) {
-            writeValues(tag, null);
+            // Erase the entry
+            writeValues(tag, /*src*/null);
             return;
-        }
+        } // else update the entry to a new value
 
-        int nativeType = getNativeType(tag);
-
-        int size = packSingle(value, null, key.getType(), nativeType, /* sizeOnly */true);
+        Marshaler<T> marshaler = getMarshalerForKey(key);
+        int size = marshaler.calculateMarshalSize(value);
 
         // TODO: Optimization. Cache the byte[] and reuse if the size is big enough.
         byte[] values = new byte[size];
 
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        packSingle(value, buffer, key.getType(), nativeType, /*sizeOnly*/false);
+        marshaler.marshal(value, buffer);
 
         writeValues(tag, values);
     }
@@ -870,125 +616,64 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         }
     }
 
-    private static final HashMap<Class<? extends Enum>, int[]> sEnumValues =
-            new HashMap<Class<? extends Enum>, int[]>();
     /**
-     * Register a non-sequential set of values to be used with the pack/unpack functions.
-     * This enables get/set to correctly marshal the enum into a value that is C-compatible.
+     * Get the marshaler compatible with the {@code key} and type {@code T}.
      *
-     * @param enumType The class for an enum
-     * @param values A list of values mapping to the ordinals of the enum
-     *
-     * @hide
+     * @throws UnsupportedOperationException
+     *          if the native/managed type combination for {@code key} is not supported
      */
-    public static <T extends Enum<T>> void registerEnumValues(Class<T> enumType, int[] values) {
-        if (enumType.getEnumConstants().length != values.length) {
-            throw new IllegalArgumentException(
-                    "Expected values array to be the same size as the enumTypes values "
-                            + values.length + " for type " + enumType);
-        }
-        if (VERBOSE) {
-            Log.v(TAG, "Registered enum values for type " + enumType + " values");
-        }
-
-        sEnumValues.put(enumType, values);
+    private static <T> Marshaler<T> getMarshalerForKey(Key<T> key) {
+        return MarshalRegistry.getMarshaler(key.getTypeReference(),
+                getNativeType(key.getTag()));
     }
 
-    /**
-     * Get the numeric value from an enum. This is usually the same as the ordinal value for
-     * enums that have fully sequential values, although for C-style enums the range of values
-     * may not map 1:1.
-     *
-     * @param enumValue Enum instance
-     * @return Int guaranteed to be ABI-compatible with the C enum equivalent
-     */
-    private static <T extends Enum<T>> int getEnumValue(T enumValue) {
-        int[] values;
-        values = sEnumValues.get(enumValue.getClass());
-
-        int ordinal = enumValue.ordinal();
-        if (values != null) {
-            return values[ordinal];
-        }
-
-        return ordinal;
-    }
-
-    /**
-     * Finds the enum corresponding to it's numeric value. Opposite of {@link #getEnumValue} method.
-     *
-     * @param enumType Class of the enum we want to find
-     * @param value The numeric value of the enum
-     * @return An instance of the enum
-     */
-    private static <T extends Enum<T>> T getEnumFromValue(Class<T> enumType, int value) {
-        int ordinal;
-
-        int[] registeredValues = sEnumValues.get(enumType);
-        if (registeredValues != null) {
-            ordinal = -1;
-
-            for (int i = 0; i < registeredValues.length; ++i) {
-                if (registeredValues[i] == value) {
-                    ordinal = i;
-                    break;
-                }
-            }
-        } else {
-            ordinal = value;
-        }
-
-        T[] values = enumType.getEnumConstants();
-
-        if (ordinal < 0 || ordinal >= values.length) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Argument 'value' (%d) was not a valid enum value for type %s "
-                                    + "(registered? %b)",
-                            value,
-                            enumType, (registeredValues != null)));
-        }
-
-        return values[ordinal];
-    }
-
-    static HashMap<Class<?>, MetadataMarshalClass<?>> sMarshalerMap = new
-            HashMap<Class<?>, MetadataMarshalClass<?>>();
-
-    private static <T> void registerMarshaler(MetadataMarshalClass<T> marshaler) {
-        sMarshalerMap.put(marshaler.getMarshalingClass(), marshaler);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> MetadataMarshalClass<T> getMarshaler(Class<T> type, int nativeType) {
-        MetadataMarshalClass<T> marshaler = (MetadataMarshalClass<T>) sMarshalerMap.get(type);
-
-        if (marshaler != null && !marshaler.isNativeTypeSupported(nativeType)) {
-            throw new UnsupportedOperationException("Unsupported type " + nativeType +
-                    " to be marshalled to/from a " + type);
-        }
-
-        return marshaler;
-    }
-
-    /**
-     * We use a class initializer to allow the native code to cache some field offsets
-     */
-    static {
-        nativeClassInit();
-
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void registerAllMarshalers() {
         if (VERBOSE) {
             Log.v(TAG, "Shall register metadata marshalers");
         }
 
-        // load built-in marshallers
-        registerMarshaler(new MetadataMarshalRect());
-        registerMarshaler(new MetadataMarshalSize());
-        registerMarshaler(new MetadataMarshalString());
+        MarshalQueryable[] queryList = new MarshalQueryable[] {
+                // marshalers for standard types
+                new MarshalQueryablePrimitive(),
+                new MarshalQueryableEnum(),
+                new MarshalQueryableArray(),
 
+                // pseudo standard types, that expand/narrow the native type into a managed type
+                new MarshalQueryableBoolean(),
+                new MarshalQueryableNativeByteToInteger(),
+
+                // marshalers for custom types
+                new MarshalQueryableRect(),
+                new MarshalQueryableSize(),
+                new MarshalQueryableSizeF(),
+                new MarshalQueryableString(),
+                new MarshalQueryableReprocessFormatsMap(),
+                new MarshalQueryableRange(),
+                new MarshalQueryableMeteringRectangle(),
+                new MarshalQueryableColorSpaceTransform(),
+                new MarshalQueryableStreamConfiguration(),
+                new MarshalQueryableStreamConfigurationDuration(),
+                new MarshalQueryableRggbChannelVector(),
+
+                // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
+                new MarshalQueryableParcelable(),
+        };
+
+        for (MarshalQueryable query : queryList) {
+            MarshalRegistry.registerMarshalQueryable(query);
+        }
         if (VERBOSE) {
             Log.v(TAG, "Registered metadata marshalers");
         }
+    }
+
+    static {
+        /*
+         * We use a class initializer to allow the native code to cache some field offsets
+         */
+        nativeClassInit();
+        registerAllMarshalers();
     }
 
 }

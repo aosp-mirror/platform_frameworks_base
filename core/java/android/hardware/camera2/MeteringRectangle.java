@@ -20,7 +20,7 @@ import static com.android.internal.util.Preconditions.*;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.camera2.impl.HashCodeHelpers;
+import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**
  * An immutable class to represent a rectangle {@code (x,y, width, height)} with an
@@ -186,10 +186,7 @@ public final class MeteringRectangle {
      */
     @Override
     public boolean equals(final Object other) {
-        if (other instanceof MeteringRectangle) {
-            return equals(other);
-        }
-        return false;
+        return other instanceof MeteringRectangle && equals((MeteringRectangle)other);
     }
 
     /**

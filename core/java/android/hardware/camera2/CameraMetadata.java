@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.utils.TypeReference;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -126,11 +127,13 @@ public abstract class CameraMetadata {
         return keyList;
     }
 
+    // TODO: make final or abstract
     public static class Key<T> {
 
         private boolean mHasTag;
         private int mTag;
         private final Class<T> mType;
+        private final TypeReference<T> mTypeReference;
         private final String mName;
 
         /**
@@ -144,6 +147,22 @@ public abstract class CameraMetadata {
             }
             mName = name;
             mType = type;
+            mTypeReference = TypeReference.createSpecializedTypeReference(type);
+        }
+
+        /**
+         * @hide
+         */
+        @SuppressWarnings("unchecked")
+        public Key(String name, TypeReference<T> typeReference) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (typeReference == null) {
+                throw new NullPointerException("TypeReference needs to be non-null");
+            }
+            mName = name;
+            mType = (Class<T>)typeReference.getRawType();
+            mTypeReference = typeReference;
         }
 
         public final String getName() {
@@ -152,11 +171,10 @@ public abstract class CameraMetadata {
 
         @Override
         public final int hashCode() {
-            return mName.hashCode();
+            return mName.hashCode() ^ mTypeReference.hashCode();
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public final boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -166,9 +184,8 @@ public abstract class CameraMetadata {
                 return false;
             }
 
-            Key lhs = (Key) o;
-
-            return mName.equals(lhs.mName) && mType.equals(lhs.mType);
+            Key<?> lhs = (Key<?>)o;
+            return mName.equals(lhs.mName) && mTypeReference.equals(lhs.mTypeReference);
         }
 
         /**
@@ -192,10 +209,28 @@ public abstract class CameraMetadata {
         }
 
         /**
+         * Get the raw class backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be erased.</p>
+         *
          * @hide
          */
         public final Class<T> getType() {
+            // TODO: remove this; other places should use #getTypeReference() instead
             return mType;
+        }
+
+        /**
+         * Get the type reference backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be retained.</p>
+         *
+         * @hide
+         */
+        public final TypeReference<T> getTypeReference() {
+            return mTypeReference;
         }
     }
 

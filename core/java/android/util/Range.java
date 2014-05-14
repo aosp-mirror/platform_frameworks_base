@@ -18,7 +18,7 @@ package android.util;
 
 import static com.android.internal.util.Preconditions.*;
 
-import android.hardware.camera2.impl.HashCodeHelpers;
+import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**
  * Immutable class for describing the range of two numeric values.

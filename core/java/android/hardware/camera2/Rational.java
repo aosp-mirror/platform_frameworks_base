@@ -91,14 +91,14 @@ public final class Rational {
      * <p>A reduced form of a Rational is calculated by dividing both the numerator and the
      * denominator by their greatest common divisor.</p>
      *
-     * <pre>
+     * <pre>{@code
      *      (new Rational(1, 2)).equals(new Rational(1, 2)) == true   // trivially true
      *      (new Rational(2, 3)).equals(new Rational(1, 2)) == false  // trivially false
      *      (new Rational(1, 2)).equals(new Rational(2, 4)) == true   // true after reduction
      *      (new Rational(0, 0)).equals(new Rational(0, 0)) == true   // NaN.equals(NaN)
      *      (new Rational(1, 0)).equals(new Rational(5, 0)) == true   // both are +infinity
      *      (new Rational(1, 0)).equals(new Rational(-1, 0)) == false // +infinity != -infinity
-     * </pre>
+     * }</pre>
      *
      * @param obj a reference to another object
      *
@@ -159,16 +159,15 @@ public final class Rational {
         return (float) mNumerator / (float) mDenominator;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
-        final long INT_MASK = 0xffffffffL;
+        // Bias the hash code for the first (2^16) values for both numerator and denominator
+        int numeratorFlipped = mNumerator << 16 | mNumerator >>> 16;
 
-        long asLong = INT_MASK & mNumerator;
-        asLong <<= 32;
-
-        asLong |= (INT_MASK & mDenominator);
-
-        return ((Long)asLong).hashCode();
+        return mDenominator ^ numeratorFlipped;
     }
 
     /**

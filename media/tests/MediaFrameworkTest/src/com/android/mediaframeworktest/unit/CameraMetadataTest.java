@@ -16,18 +16,30 @@
 
 package com.android.mediaframeworktest.unit;
 
-import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Range;
+import android.util.SizeF;
+import android.graphics.ImageFormat;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.ColorSpaceTransform;
 import android.hardware.camera2.Face;
+import android.hardware.camera2.MeteringRectangle;
 import android.hardware.camera2.Rational;
+import android.hardware.camera2.ReprocessFormatsMap;
+import android.hardware.camera2.RggbChannelVector;
 import android.hardware.camera2.Size;
+import android.hardware.camera2.StreamConfiguration;
+import android.hardware.camera2.StreamConfigurationDuration;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
+import android.hardware.camera2.utils.TypeReference;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
+import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -43,7 +55,6 @@ import java.nio.ByteOrder;
 public class CameraMetadataTest extends junit.framework.TestCase {
 
     CameraMetadataNative mMetadata;
-    Parcel mParcel;
 
     // Sections
     static final int ANDROID_COLOR_CORRECTION = 0;
@@ -64,15 +75,11 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     @Override
     public void setUp() {
         mMetadata = new CameraMetadataNative();
-        mParcel = Parcel.obtain();
     }
 
     @Override
     public void tearDown() throws Exception {
         mMetadata = null;
-
-        mParcel.recycle();
-        mParcel = null;
     }
 
     @SmallTest
@@ -130,10 +137,14 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @SmallTest
     public void testGetTypeFromTag() {
-        assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_MODE));
-        assertEquals(TYPE_RATIONAL, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
-        assertEquals(TYPE_FLOAT, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_GAINS));
-        assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_ANTIBANDING_MODE));
+        assertEquals(TYPE_BYTE,
+                CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_MODE));
+        assertEquals(TYPE_RATIONAL,
+                CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        assertEquals(TYPE_FLOAT,
+                CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_GAINS));
+        assertEquals(TYPE_BYTE,
+                CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_ANTIBANDING_MODE));
         assertEquals(TYPE_INT32,
                 CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION));
 
@@ -215,35 +226,163 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         assertEquals(1, mMetadata.getEntryCount());
     }
 
+    /**
+     * Format an array into a string with the {@code badIndex} highlighted with {@code **}.
+     *
+     * <p>Numbers are printed as hexadecimal values.</p>
+     *
+     * <p>Example: {@code "[hello, **world**]"} for a {@code string[]},
+     * or a {@code "[**0xFF**, 0xFF]"} for a {@code int[]}.</p>
+     */
+    private static <T> String formatArray(T array, int badIndex) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+
+        int len = Array.getLength(array);
+        for (int i = 0; i < len; ++i) {
+
+            Object elem = Array.get(array, i);
+
+            if (i == badIndex) {
+                builder.append("**");
+            }
+
+            if (elem instanceof Number) {
+                builder.append(String.format("%x", elem));
+            } else {
+                builder.append(elem);
+            }
+
+            if (i == badIndex) {
+                builder.append("**");
+            }
+
+            if (i != len - 1) {
+                builder.append(", ");
+            }
+        }
+
+        builder.append("]");
+
+        return builder.toString();
+    }
+
     private static <T> void assertArrayEquals(T expected, T actual) {
-        assertEquals(Array.getLength(expected), Array.getLength(actual));
+        if (!expected.getClass().isArray() || !actual.getClass().isArray()) {
+            throw new IllegalArgumentException("expected, actual must both be arrays");
+        }
+
+        assertEquals("Array lengths must be equal",
+                Array.getLength(expected), Array.getLength(actual));
 
         int len = Array.getLength(expected);
         for (int i = 0; i < len; ++i) {
-            assertEquals(Array.get(expected, i), Array.get(actual, i));
+
+            Object expectedElement = Array.get(expected, i);
+            Object actualElement = Array.get(actual, i);
+
+            if (!expectedElement.equals(actualElement)) {
+                fail(String.format(
+                        "element %d in array was not equal (expected %s, actual %s). "
+                                + "Arrays were: (expected %s, actual %s).",
+                                i, expectedElement, actualElement,
+                                formatArray(expected, i),
+                                formatArray(actual, i)));
+            }
         }
     }
 
-    private <T> void checkKeyGetAndSet(String keyStr, Class<T> type, T value) {
-        assertFalse("Use checkKeyGetAndSetArray to compare array Keys", type.isArray());
-
-        Key<T> key = new Key<T>(keyStr, type);
+    private <T> void checkKeyGetAndSet(String keyStr, TypeReference<T> typeToken, T expected,
+            boolean reuse) {
+        Key<T> key = new Key<T>(keyStr, typeToken);
         assertNull(mMetadata.get(key));
         mMetadata.set(key, null);
         assertNull(mMetadata.get(key));
-        mMetadata.set(key, value);
+        mMetadata.set(key, expected);
 
         T actual = mMetadata.get(key);
-        assertEquals(value, actual);
+
+        if (typeToken.getRawType().isArray()) {
+            assertArrayEquals(expected, actual);
+        } else {
+            assertEquals(expected, actual);
+        }
+
+        if (reuse) {
+            // reset the key incase we want to use it again
+            mMetadata.set(key, null);
+        }
     }
 
-    private <T> void checkKeyGetAndSetArray(String keyStr, Class<T> type, T value) {
-        assertTrue(type.isArray());
+    private <T> void checkKeyGetAndSet(String keyStr, TypeReference<T> typeToken, T expected) {
+        checkKeyGetAndSet(keyStr, typeToken, expected, /*reuse*/false);
+    }
 
-        Key<T> key = new Key<T>(keyStr, type);
+    private <T> void checkKeyGetAndSet(String keyStr, Class<T> type, T expected) {
+        checkKeyGetAndSet(keyStr, TypeReference.createSpecializedTypeReference(type), expected);
+    }
+
+    /**
+     * Ensure that the data survives a marshal/unmarshal round-trip;
+     * it must also be equal to the {@code expectedNative} byte array.
+     *
+     * <p>As a side-effect, the metadata value corresponding to the key is now set to
+     * {@code expected}.</p>
+     *
+     * @return key created with {@code keyName} and {@code T}
+     */
+    private <T> Key<T> checkKeyMarshal(String keyName, TypeReference<T> typeReference,
+            T expected, byte[] expectedNative) {
+        Key<T> key = new Key<T>(keyName, typeReference);
+
+        mMetadata.set(key, null);
         assertNull(mMetadata.get(key));
-        mMetadata.set(key, value);
-        assertArrayEquals(value, mMetadata.get(key));
+
+        // Write managed value -> make sure native bytes are what we expect
+        mMetadata.set(key, expected);
+
+        byte[] actualValues = mMetadata.readValues(key.getTag());
+        assertArrayEquals(expectedNative, actualValues);
+
+        // Write managed value -> make sure read-out managed value is what we expect
+        T actual = mMetadata.get(key);
+
+        if (typeReference.getRawType().isArray()) {
+            assertArrayEquals(expected, actual);
+        } else {
+            assertEquals(expected, actual);
+        }
+
+        // Write native bytes -> make sure read-out managed value is what we expect
+        mMetadata.writeValues(key.getTag(), expectedNative);
+        actual = mMetadata.get(key);
+
+        if (typeReference.getRawType().isArray()) {
+            assertArrayEquals(expected, actual);
+        } else {
+            assertEquals(expected, actual);
+        }
+
+        return key;
+    }
+
+    /**
+     * Ensure that the data survives a marshal/unmarshal round-trip;
+     * it must also be equal to the {@code expectedNative} byte array.
+     *
+     * <p>As a side-effect,
+     * the metadata value corresponding to the key is now set to {@code expected}.</p>
+     *
+     * @return key created with {@code keyName} and {@code T}
+     */
+    private <T> Key<T> checkKeyMarshal(String keyName, T expected, byte[] expectedNative) {
+        @SuppressWarnings("unchecked")
+        Class<T> expectedClass = (Class<T>) expected.getClass();
+        return checkKeyMarshal(keyName,
+                TypeReference.createSpecializedTypeReference(expectedClass),
+                expected,
+                expectedNative);
     }
 
     @SmallTest
@@ -280,36 +419,36 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     @SmallTest
     public void testReadWritePrimitiveArray() {
         // int32 (n)
-        checkKeyGetAndSetArray("android.sensor.info.sensitivityRange", int[].class,
+        checkKeyGetAndSet("android.sensor.info.sensitivityRange", int[].class,
                 new int[] {
                         0xC0FFEE, 0xDEADF00D
                 });
 
         // byte (n)
-        checkKeyGetAndSetArray("android.statistics.faceScores", byte[].class, new byte[] {
+        checkKeyGetAndSet("android.statistics.faceScores", byte[].class, new byte[] {
                 1, 2, 3, 4
         });
 
         // int64 (n)
-        checkKeyGetAndSetArray("android.scaler.availableProcessedMinDurations", long[].class,
+        checkKeyGetAndSet("android.scaler.availableProcessedMinDurations", long[].class,
                 new long[] {
                         0xABCD12345678FFFFL, 0x1234ABCD5678FFFFL, 0xFFFF12345678ABCDL
                 });
 
         // float (n)
-        checkKeyGetAndSetArray("android.lens.info.availableApertures", float[].class,
+        checkKeyGetAndSet("android.lens.info.availableApertures", float[].class,
                 new float[] {
                         Float.MAX_VALUE, Float.MIN_NORMAL, Float.MIN_VALUE
                 });
 
         // double (n) -- in particular double x 3
-        checkKeyGetAndSetArray("android.jpeg.gpsCoordinates", double[].class,
+        checkKeyGetAndSet("android.jpeg.gpsCoordinates", double[].class,
                 new double[] {
                         Double.MAX_VALUE, Double.MIN_NORMAL, Double.MIN_VALUE
                 });
 
         // rational (n) -- in particular rational x 9
-        checkKeyGetAndSetArray("android.sensor.calibrationTransform1", Rational[].class,
+        checkKeyGetAndSet("android.sensor.calibrationTransform1", Rational[].class,
                 new Rational[] {
                         new Rational(1, 2), new Rational(3, 4), new Rational(5, 6),
                         new Rational(7, 8), new Rational(9, 10), new Rational(10, 11),
@@ -321,13 +460,12 @@ public class CameraMetadataTest extends junit.framework.TestCase {
          */
 
         // bool (n) -- with TYPE_BYTE
-        checkKeyGetAndSetArray("android.control.aeLock", boolean[].class, new boolean[] {
+        checkKeyGetAndSet("android.control.aeLock", boolean[].class, new boolean[] {
                 true, false, true
         });
 
-
         // integer (n) -- with TYPE_BYTE
-        checkKeyGetAndSetArray("android.control.aeAvailableModes", int[].class, new int[] {
+        checkKeyGetAndSet("android.control.aeAvailableModes", int[].class, new int[] {
             1, 2, 3, 4
         });
     }
@@ -345,7 +483,6 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         AUTO
     }
 
-    // TODO: special values for the enum.
     private enum AvailableFormat {
         RAW_SENSOR,
         YV12,
@@ -366,7 +503,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 AeAntibandingMode.AUTO);
 
         // byte (n)
-        checkKeyGetAndSetArray("android.control.aeAvailableAntibandingModes",
+        checkKeyGetAndSet("android.control.aeAvailableAntibandingModes",
                 AeAntibandingMode[].class, new AeAntibandingMode[] {
                         AeAntibandingMode.OFF, AeAntibandingMode._50HZ, AeAntibandingMode._60HZ,
                         AeAntibandingMode.AUTO
@@ -376,7 +513,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
          * Stranger cases that don't use byte enums
          */
         // int (n)
-        checkKeyGetAndSetArray("android.scaler.availableFormats", AvailableFormat[].class,
+        checkKeyGetAndSet("android.scaler.availableFormats", AvailableFormat[].class,
                 new AvailableFormat[] {
                         AvailableFormat.RAW_SENSOR,
                         AvailableFormat.YV12,
@@ -389,7 +526,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @SmallTest
     public void testReadWriteEnumWithCustomValues() {
-        CameraMetadataNative.registerEnumValues(AeAntibandingMode.class, new int[] {
+        MarshalQueryableEnum.registerEnumValues(AeAntibandingMode.class, new int[] {
             0,
             10,
             20,
@@ -401,15 +538,12 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 AeAntibandingMode.AUTO);
 
         // byte (n)
-        checkKeyGetAndSetArray("android.control.aeAvailableAntibandingModes",
+        checkKeyGetAndSet("android.control.aeAvailableAntibandingModes",
                 AeAntibandingMode[].class, new AeAntibandingMode[] {
                         AeAntibandingMode.OFF, AeAntibandingMode._50HZ, AeAntibandingMode._60HZ,
                         AeAntibandingMode.AUTO
                 });
 
-        Key<AeAntibandingMode[]> aeAntibandingModeKey =
-                new Key<AeAntibandingMode[]>("android.control.aeAvailableAntibandingModes",
-                        AeAntibandingMode[].class);
         byte[] aeAntibandingModeValues = mMetadata.readValues(CameraMetadataNative
                 .getTag("android.control.aeAvailableAntibandingModes"));
         byte[] expectedValues = new byte[] { 0, 10, 20, 30 };
@@ -420,7 +554,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
          * Stranger cases that don't use byte enums
          */
         // int (n)
-        CameraMetadataNative.registerEnumValues(AvailableFormat.class, new int[] {
+        MarshalQueryableEnum.registerEnumValues(AvailableFormat.class, new int[] {
             0x20,
             0x32315659,
             0x11,
@@ -429,7 +563,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
             0x21,
         });
 
-        checkKeyGetAndSetArray("android.scaler.availableFormats", AvailableFormat[].class,
+        checkKeyGetAndSet("android.scaler.availableFormats", AvailableFormat[].class,
                 new AvailableFormat[] {
                         AvailableFormat.RAW_SENSOR,
                         AvailableFormat.YV12,
@@ -466,7 +600,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         checkKeyGetAndSet("android.jpeg.thumbnailSize", Size.class, new Size(123, 456));
 
         // int32 x 2 x n
-        checkKeyGetAndSetArray("android.scaler.availableJpegSizes", Size[].class, new Size[] {
+        checkKeyGetAndSet("android.scaler.availableJpegSizes", Size[].class, new Size[] {
             new Size(123, 456),
             new Size(0xDEAD, 0xF00D),
             new Size(0xF00, 0xB00)
@@ -474,16 +608,217 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     }
 
     @SmallTest
-    public void testReadWriteRectangle() {
+    public void testReadWriteRggbChannelVector() {
         // int32 x n
-        checkKeyGetAndSet("android.scaler.cropRegion", Rect.class, new Rect(10, 11, 1280, 1024));
+        checkKeyMarshal("android.colorCorrection.gains",
+                new RggbChannelVector(1.0f, 2.1f, 3.2f, 4.5f),
+                toByteArray(1.0f, 2.1f, 3.2f, 4.5f));
+
+        // int32 x 2 x n [pretend; actual is not array]
+        checkKeyMarshal("android.colorCorrection.gains",
+                new RggbChannelVector[] {
+                    new RggbChannelVector(1.0f, 2.0f, 3.0f, 4.0f),
+                    new RggbChannelVector(9.0f, 8.0f, 7.0f, 6.0f),
+                    new RggbChannelVector(1.3f, 5.5f, 2.4f, 6.7f),
+                }, toByteArray(
+                        1.0f, 2.0f, 3.0f, 4.0f,
+                        9.0f, 8.0f, 7.0f, 6.0f,
+                        1.3f, 5.5f, 2.4f, 6.7f
+                ));
+    }
+
+    @SmallTest
+    public void testReadWriteSizeF() {
+        // int32 x n
+        checkKeyMarshal("android.sensor.info.physicalSize",
+                new SizeF(123f, 456f),
+                toByteArray(123f, 456f));
 
         // int32 x 2 x n
-        checkKeyGetAndSetArray("android.statistics.faceRectangles", Rect[].class, new Rect[] {
+        checkKeyMarshal("android.sensor.info.physicalSize",
+                new SizeF[] {
+                    new SizeF(123f, 456f),
+                    new SizeF(1.234f, 4.567f),
+                    new SizeF(999.0f, 555.0f)
+                },
+                toByteArray(
+                        123f, 456f,
+                        1.234f, 4.567f,
+                        999.0f, 555.0f)
+        );
+    }
+
+    @SmallTest
+    public void testReadWriteRectangle() {
+        // int32 x n
+        checkKeyMarshal("android.scaler.cropRegion",
+                // x1, y1, x2, y2
+                new Rect(10, 11, 1280, 1024),
+                // x, y, width, height
+                toByteArray(10, 11, 1280 - 10, 1024 - 11));
+
+        // int32 x 2 x n  [actually not array, but we pretend it is]
+        checkKeyMarshal("android.scaler.cropRegion", new Rect[] {
             new Rect(110, 111, 11280, 11024),
             new Rect(210, 111, 21280, 21024),
             new Rect(310, 111, 31280, 31024)
-        });
+        }, toByteArray(
+                110, 111, 11280 - 110, 11024 - 111,
+                210, 111, 21280 - 210, 21024 - 111,
+                310, 111, 31280 - 310, 31024 - 111
+        ));
+    }
+
+    @SmallTest
+    public void testReadWriteMeteringRectangle() {
+        // int32 x 5 x area_count [but we pretend it's a single element]
+        checkKeyMarshal("android.control.aeRegions",
+                new MeteringRectangle(/*x*/1, /*y*/2, /*width*/100, /*height*/200, /*weight*/5),
+                /* xmin, ymin, xmax, ymax, weight */
+                toByteArray(1, 2, 1 + 100, 2 + 200, 5));
+
+        // int32 x 5 x area_count
+        checkKeyMarshal("android.control.afRegions",
+                new MeteringRectangle[] {
+                    new MeteringRectangle(/*x*/5, /*y*/6, /*width*/123, /*height*/456, /*weight*/7),
+                    new MeteringRectangle(/*x*/7, /*y*/8, /*width*/456, /*height*/999, /*weight*/6),
+                    new MeteringRectangle(/*x*/1, /*y*/2, /*width*/100, /*height*/200, /*weight*/5)
+                },
+                toByteArray(
+                        5, 6, 5 + 123, 6 + 456, 7,
+                        7, 8, 7 + 456, 8 + 999, 6,
+                        1, 2, 1 + 100, 2 + 200, 5
+        ));
+    }
+
+    @SmallTest
+    public void testReadWriteColorSpaceTransform() {
+        // rational x 3 x 3
+        checkKeyMarshal("android.colorCorrection.transform",
+                new ColorSpaceTransform(new Rational[] {
+                        new Rational(1, 2), new Rational(3, 4), new Rational(5, 6),
+                        new Rational(7, 8), new Rational(8, 9), new Rational(10, 11),
+                        new Rational(1, 5), new Rational(2, 8), new Rational(3, 9),
+                }),
+                toByteArray(
+                        1, 2, 3, 4, 5, 6,
+                        7, 8, 8, 9, 10, 11,
+                        1, 5, 2, 8, 3, 9));
+    }
+
+    @SmallTest
+    public void testReadWritePoint() {
+        // int32 x 2 [actually 'x n' but pretend it's a single value for now]
+        checkKeyMarshal("android.statistics.hotPixelMap",
+                new Point(1, 2),
+                toByteArray(1, 2));
+
+        // int32 x 2 x samples
+        checkKeyMarshal("android.statistics.hotPixelMap",
+                new Point[] {
+                    new Point(1, 2),
+                    new Point(3, 4),
+                    new Point(5, 6),
+                    new Point(7, 8),
+                },
+                toByteArray(
+                        1, 2,
+                        3, 4,
+                        5, 6,
+                        7, 8)
+        );
+    }
+
+    @SmallTest
+    public void testReadWritePointF() {
+        // float x 2 [actually 'x samples' but pretend it's a single value for now]
+        checkKeyMarshal(
+                "android.sensor.profileToneCurve",
+                new PointF(1.0f, 2.0f),
+                toByteArray(1.0f, 2.0f));
+
+        // float x 2 x samples
+        checkKeyMarshal("android.sensor.profileToneCurve",
+                new PointF[] {
+                    new PointF(1.0f, 2.0f),
+                    new PointF(3.0f, 4.0f),
+                    new PointF(5.0f, 6.0f),
+                    new PointF(7.0f, 8.0f),
+                },
+                toByteArray(
+                        1.0f, 2.0f,
+                        3.0f, 4.0f,
+                        5.0f, 6.0f,
+                        7.0f, 8.0f));
+    }
+
+    @SmallTest
+    public void testReadWriteRange() {
+        // int32 x 2
+        checkKeyMarshal("android.control.aeTargetFpsRange",
+                new TypeReference<Range<Integer>>() {{ }},
+                Range.create(123, 456),
+                toByteArray(123, 456));
+
+        // int64 x 2
+        checkKeyMarshal("android.sensor.info.exposureTimeRange",
+                new TypeReference<Range<Long>>() {{ }},
+                Range.create(123L, 456L),
+                toByteArray(123L, 456L));
+    }
+
+    @SmallTest
+    public void testReadWriteStreamConfiguration() {
+        // int32 x 4 x n
+        checkKeyMarshal("android.scaler.availableStreamConfigurations",
+                new StreamConfiguration[] {
+                    new StreamConfiguration(ImageFormat.YUV_420_888, 640, 480, /*input*/false),
+                    new StreamConfiguration(ImageFormat.RGB_565, 320, 240, /*input*/true),
+                },
+                toByteArray(
+                        ImageFormat.YUV_420_888, 640, 480, /*input*/0,
+                        ImageFormat.RGB_565, 320, 240, /*input*/1)
+        );
+    }
+
+    @SmallTest
+    public void testReadWriteStreamConfigurationDuration() {
+        // Avoid sign extending ints when converting to a long
+        final long MASK_UNSIGNED_INT = 0x00000000ffffffffL;
+
+        // int64 x 4 x n
+        checkKeyMarshal("android.scaler.availableMinFrameDurations",
+                new StreamConfigurationDuration[] {
+                    new StreamConfigurationDuration(
+                            ImageFormat.YUV_420_888, 640, 480, /*duration*/123L),
+                    new StreamConfigurationDuration(
+                            ImageFormat.RGB_565, 320, 240, /*duration*/345L),
+                },
+                toByteArray(
+                        ImageFormat.YUV_420_888 & MASK_UNSIGNED_INT, 640L, 480L, /*duration*/123L,
+                        ImageFormat.RGB_565 & MASK_UNSIGNED_INT, 320L, 240L, /*duration*/345L)
+        );
+    }
+
+
+    @SmallTest
+    public void testReadWriteReprocessFormatsMap() {
+
+        final int RAW_OPAQUE = 0x24;
+        final int RAW16 = ImageFormat.RAW_SENSOR;
+        final int YUV_420_888 = ImageFormat.YUV_420_888;
+        final int BLOB = 0x21;
+
+        int[] contents = new int[] {
+                RAW_OPAQUE, 3, RAW16, YUV_420_888, BLOB,
+                RAW16, 2, YUV_420_888, BLOB,
+        };
+
+        // int32 x n
+        checkKeyMarshal("android.scaler.availableInputOutputFormatsMap",
+                new ReprocessFormatsMap(contents),
+                toByteArray(contents)
+        );
     }
 
     @SmallTest
@@ -523,10 +858,6 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
         byte[] actualBytes2 = mMetadata.readValues(getTag(gpsProcessingMethodKeyArray.getName()));
         assertArrayEquals(gpsBytes, actualBytes2);
-    }
-
-    <T> void compareGeneric(T expected, T actual) {
-        assertEquals(expected, actual);
     }
 
     @SmallTest
@@ -691,7 +1022,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
      */
     private <T> void validateArrayMetadataReadWriteOverride(Key<T> key, T writeValues,
             T readValues, int tag) {
-        Class<T> type = key.getType();
+        Class<?> type = writeValues.getClass();
         if (!type.isArray()) {
             throw new IllegalArgumentException("This function expects an key with array type");
         } else if (type != int[].class && type != long[].class) {
@@ -736,5 +1067,21 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         T result = mMetadata.get(key);
         assertNotNull(key.getName() + " result shouldn't be null", result);
         assertArrayEquals(writeValues, result);
+    }
+
+    // TODO: move somewhere else
+    @SmallTest
+    public void testToByteArray() {
+        assertArrayEquals(new byte[] { 5, 0, 0, 0, 6, 0, 0, 0 },
+                toByteArray(5, 6));
+        assertArrayEquals(new byte[] { 5, 0, 6, 0, },
+                toByteArray((short)5, (short)6));
+        assertArrayEquals(new byte[] { (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
+                                        (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,},
+                toByteArray(~0, ~0));
+
+        assertArrayEquals(new byte[] { (byte)0xAB, (byte)0xFF, 0, 0,
+                0x0D, (byte)0xF0, (byte)0xAD, (byte)0xDE },
+                toByteArray(0xFFAB, 0xDEADF00D));
     }
 }
