@@ -26581,6 +26581,28 @@ package android.speech {
 
 package android.speech.tts {
 
+  public final class Markup implements android.os.Parcelable {
+    ctor public Markup();
+    ctor public Markup(java.lang.String);
+    ctor public Markup(android.speech.tts.Markup);
+    method public android.speech.tts.Markup addNestedMarkup(android.speech.tts.Markup);
+    method public int describeContents();
+    method public android.speech.tts.Markup getNestedMarkup(int);
+    method public java.util.List<android.speech.tts.Markup> getNestedMarkups();
+    method public java.lang.String getParameter(java.lang.String);
+    method public java.lang.String getPlainText();
+    method public java.lang.String getType();
+    method public static android.speech.tts.Markup markupFromString(java.lang.String) throws java.lang.IllegalArgumentException;
+    method public int nestedMarkupSize();
+    method public int parametersSize();
+    method public boolean removeNestedMarkup(android.speech.tts.Markup);
+    method public void removeParameter(java.lang.String);
+    method public android.speech.tts.Markup setParameter(java.lang.String, java.lang.String);
+    method public void setPlainText(java.lang.String);
+    method public void setType(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public final class RequestConfig {
     method public android.os.Bundle getAudioParams();
     method public android.speech.tts.VoiceInfo getVoice();
@@ -26643,9 +26665,10 @@ package android.speech.tts {
   }
 
   public final class SynthesisRequestV2 implements android.os.Parcelable {
-    ctor public SynthesisRequestV2(java.lang.String, java.lang.String, java.lang.String, android.os.Bundle, android.os.Bundle);
+    ctor public SynthesisRequestV2(android.speech.tts.Markup, java.lang.String, java.lang.String, android.os.Bundle, android.os.Bundle);
     method public int describeContents();
     method public android.os.Bundle getAudioParams();
+    method public android.speech.tts.Markup getMarkup();
     method public java.lang.String getText();
     method public java.lang.String getUtteranceId();
     method public java.lang.String getVoiceName();
@@ -26748,7 +26771,9 @@ package android.speech.tts {
     method public void queueAudio(android.net.Uri, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void queueSilence(long, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void queueSpeak(java.lang.String, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
+    method public void queueSpeak(android.speech.tts.Markup, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void queueSynthesizeToFile(java.lang.String, android.speech.tts.TextToSpeechClient.UtteranceId, java.io.File, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
+    method public void queueSynthesizeToFile(android.speech.tts.Markup, android.speech.tts.TextToSpeechClient.UtteranceId, java.io.File, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void stop();
   }
 
@@ -26820,6 +26845,85 @@ package android.speech.tts {
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
     method protected void onSynthesizeTextV2(android.speech.tts.SynthesisRequestV2, android.speech.tts.VoiceInfo, android.speech.tts.SynthesisCallback);
     method protected void onVoicesInfoChange();
+  }
+
+  public class Utterance {
+    ctor public Utterance();
+    method public android.speech.tts.Utterance append(android.speech.tts.Utterance.AbstractTts<? extends android.speech.tts.Utterance.AbstractTts<?>>);
+    method public android.speech.tts.Utterance append(java.lang.String);
+    method public android.speech.tts.Utterance append(int);
+    method public android.speech.tts.Markup createMarkup();
+    method public android.speech.tts.Utterance.AbstractTts<? extends android.speech.tts.Utterance.AbstractTts<?>> get(int);
+    method public android.speech.tts.Utterance setNoWarningOnFallback(boolean);
+    method public int size();
+    method public static android.speech.tts.Utterance utteranceFromString(java.lang.String) throws java.lang.IllegalArgumentException;
+    field public static final int ANIMACY_ANIMATE = 1; // 0x1
+    field public static final int ANIMACY_INANIMATE = 2; // 0x2
+    field public static final int ANIMACY_UNKNOWN = 0; // 0x0
+    field public static final int CASE_ABLATIVE = 4; // 0x4
+    field public static final int CASE_ACCUSATIVE = 2; // 0x2
+    field public static final int CASE_DATIVE = 3; // 0x3
+    field public static final int CASE_GENITIVE = 5; // 0x5
+    field public static final int CASE_INSTRUMENTAL = 8; // 0x8
+    field public static final int CASE_LOCATIVE = 7; // 0x7
+    field public static final int CASE_NOMINATIVE = 1; // 0x1
+    field public static final int CASE_UNKNOWN = 0; // 0x0
+    field public static final int CASE_VOCATIVE = 6; // 0x6
+    field public static final int GENDER_FEMALE = 3; // 0x3
+    field public static final int GENDER_MALE = 2; // 0x2
+    field public static final int GENDER_NEUTRAL = 1; // 0x1
+    field public static final int GENDER_UNKNOWN = 0; // 0x0
+    field public static final java.lang.String KEY_NO_WARNING_ON_FALLBACK = "no_warning_on_fallback";
+    field public static final int MULTIPLICITY_DUAL = 2; // 0x2
+    field public static final int MULTIPLICITY_PLURAL = 3; // 0x3
+    field public static final int MULTIPLICITY_SINGLE = 1; // 0x1
+    field public static final int MULTIPLICITY_UNKNOWN = 0; // 0x0
+    field public static final java.lang.String TYPE_UTTERANCE = "utterance";
+  }
+
+  public static abstract class Utterance.AbstractTts {
+    ctor protected Utterance.AbstractTts();
+    ctor protected Utterance.AbstractTts(android.speech.tts.Markup);
+    method public java.lang.String generatePlainText();
+    method public android.speech.tts.Markup getMarkup();
+    method protected java.lang.String getParameter(java.lang.String);
+    method public java.lang.String getPlainText();
+    method public java.lang.String getType();
+    method protected C removeParameter(java.lang.String);
+    method protected C setParameter(java.lang.String, java.lang.String);
+    method public C setPlainText(java.lang.String);
+    field protected android.speech.tts.Markup mMarkup;
+  }
+
+  public static abstract class Utterance.AbstractTtsSemioticClass extends android.speech.tts.Utterance.AbstractTts {
+    ctor protected Utterance.AbstractTtsSemioticClass();
+    ctor protected Utterance.AbstractTtsSemioticClass(android.speech.tts.Markup);
+    method public int getAnimacy();
+    method public int getCase();
+    method public int getGender();
+    method public int getMultiplicity();
+    method public C setAnimacy(int);
+    method public C setCase(int);
+    method public C setGender(int);
+    method public C setMultiplicity(int);
+  }
+
+  public static class Utterance.TtsCardinal extends android.speech.tts.Utterance.AbstractTtsSemioticClass {
+    ctor public Utterance.TtsCardinal();
+    ctor public Utterance.TtsCardinal(int);
+    ctor public Utterance.TtsCardinal(java.lang.String);
+    method public java.lang.String getInteger();
+    method public android.speech.tts.Utterance.TtsCardinal setInteger(int);
+    method public android.speech.tts.Utterance.TtsCardinal setInteger(java.lang.String);
+    field protected static final java.lang.String TYPE_CARDINAL = "cardinal";
+  }
+
+  public static class Utterance.TtsText extends android.speech.tts.Utterance.AbstractTtsSemioticClass {
+    ctor public Utterance.TtsText();
+    ctor public Utterance.TtsText(java.lang.String);
+    method public java.lang.String getText();
+    method public android.speech.tts.Utterance.TtsText setText(java.lang.String);
+    field protected static final java.lang.String TYPE_TEXT = "text";
   }
 
   public abstract class UtteranceProgressListener {

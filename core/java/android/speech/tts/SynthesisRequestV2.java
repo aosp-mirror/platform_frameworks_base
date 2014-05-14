@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.speech.tts.TextToSpeechClient.UtteranceId;
+import android.util.Log;
 
 /**
  * Service-side representation of a synthesis request from a V2 API client. Contains:
  * <ul>
- *   <li>The utterance to synthesize</li>
+ *   <li>The markup object to synthesize containing the utterance.</li>
  *   <li>The id of the utterance (String, result of {@link UtteranceId#toUniqueString()}</li>
  *   <li>The synthesis voice name (String, result of {@link VoiceInfo#getName()})</li>
  *   <li>Voice parameters (Bundle of parameters)</li>
@@ -16,8 +17,11 @@ import android.speech.tts.TextToSpeechClient.UtteranceId;
  * </ul>
  */
 public final class SynthesisRequestV2 implements Parcelable {
-    /** Synthesis utterance. */
-    private final String mText;
+
+    private static final String TAG = "SynthesisRequestV2";
+
+    /** Synthesis markup */
+    private final Markup mMarkup;
 
     /** Synthesis id. */
     private final String mUtteranceId;
@@ -34,9 +38,9 @@ public final class SynthesisRequestV2 implements Parcelable {
     /**
      * Constructor for test purposes.
      */
-    public SynthesisRequestV2(String text, String utteranceId, String voiceName,
+    public SynthesisRequestV2(Markup markup, String utteranceId, String voiceName,
             Bundle voiceParams, Bundle audioParams) {
-        this.mText = text;
+        this.mMarkup = markup;
         this.mUtteranceId = utteranceId;
         this.mVoiceName = voiceName;
         this.mVoiceParams = voiceParams;
@@ -49,15 +53,18 @@ public final class SynthesisRequestV2 implements Parcelable {
      * @hide
      */
     public SynthesisRequestV2(Parcel in) {
-        this.mText = in.readString();
+        this.mMarkup = (Markup) in.readValue(Markup.class.getClassLoader());
         this.mUtteranceId = in.readString();
         this.mVoiceName = in.readString();
         this.mVoiceParams = in.readBundle();
         this.mAudioParams = in.readBundle();
     }
 
-    SynthesisRequestV2(String text, String utteranceId, RequestConfig rconfig) {
-        this.mText = text;
+    /**
+     * Constructor to request the synthesis of a sentence.
+     */
+    SynthesisRequestV2(Markup markup, String utteranceId, RequestConfig rconfig) {
+        this.mMarkup = markup;
         this.mUtteranceId = utteranceId;
         this.mVoiceName = rconfig.getVoice().getName();
         this.mVoiceParams = rconfig.getVoiceParams();
@@ -71,7 +78,7 @@ public final class SynthesisRequestV2 implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mText);
+        dest.writeValue(mMarkup);
         dest.writeString(mUtteranceId);
         dest.writeString(mVoiceName);
         dest.writeBundle(mVoiceParams);
@@ -82,7 +89,18 @@ public final class SynthesisRequestV2 implements Parcelable {
      * @return the text which should be synthesized.
      */
     public String getText() {
-        return mText;
+        if (mMarkup.getPlainText() == null) {
+            Log.e(TAG, "Plaintext of markup is null.");
+            return "";
+        }
+        return mMarkup.getPlainText();
+    }
+
+    /**
+     * @return the markup which should be synthesized.
+     */
+    public Markup getMarkup() {
+        return mMarkup;
     }
 
     /**

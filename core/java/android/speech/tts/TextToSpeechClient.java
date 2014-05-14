@@ -512,7 +512,6 @@ public class TextToSpeechClient {
         }
     }
 
-
     /**
      * Connects the client to TTS service. This method returns immediately, and connects to the
      * service in the background.
@@ -876,7 +875,7 @@ public class TextToSpeechClient {
     private static final String ACTION_QUEUE_SPEAK_NAME = "queueSpeak";
 
     /**
-     * Speaks the string using the specified queuing strategy using current
+     * Speaks the string using the specified queuing strategy and the current
      * voice. This method is asynchronous, i.e. the method just adds the request
      * to the queue of TTS requests and then returns. The synthesis might not
      * have finished (or even started!) at the time when this method returns.
@@ -887,10 +886,33 @@ public class TextToSpeechClient {
      *            in {@link RequestCallbacks}.
      * @param config Synthesis request configuration. Can't be null. Has to contain a
      *            voice.
-     * @param callbacks Synthesis request callbacks. If null, default request
+     * @param callbacks Synthesis request callbacks. If null, the default request
      *            callbacks object will be used.
      */
     public void queueSpeak(final String utterance, final UtteranceId utteranceId,
+            final RequestConfig config,
+            final RequestCallbacks callbacks) {
+        queueSpeak(createMarkupFromString(utterance), utteranceId, config, callbacks);
+    }
+
+    /**
+     * Speaks the {@link Markup} (which can be constructed with {@link Utterance}) using
+     * the specified queuing strategy and the current voice. This method is
+     * asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even
+     * started!) at the time when this method returns.
+     *
+     * @param markup The Markup to be spoken. The written equivalent of the spoken
+     *            text should be no longer than 1000 characters.
+     * @param utteranceId Unique identificator used to track the synthesis progress
+     *            in {@link RequestCallbacks}.
+     * @param config Synthesis request configuration. Can't be null. Has to contain a
+     *            voice.
+     * @param callbacks Synthesis request callbacks. If null, the default request
+     *            callbacks object will be used.
+     */
+    public void queueSpeak(final Markup markup,
+            final UtteranceId utteranceId,
             final RequestConfig config,
             final RequestCallbacks callbacks) {
         runAction(new Action(ACTION_QUEUE_SPEAK_NAME) {
@@ -908,7 +930,7 @@ public class TextToSpeechClient {
 
                 int queueResult = service.speakV2(
                         getCallerIdentity(),
-                        new SynthesisRequestV2(utterance, utteranceId.toUniqueString(), config));
+                        new SynthesisRequestV2(markup, utteranceId.toUniqueString(), config));
                 if (queueResult != Status.SUCCESS) {
                     removeCallbackAndErr(utteranceId.toUniqueString(), queueResult);
                 }
@@ -931,10 +953,35 @@ public class TextToSpeechClient {
      * @param outputFile File to write the generated audio data to.
      * @param config Synthesis request configuration. Can't be null. Have to contain a
      *            voice.
-     * @param callbacks Synthesis request callbacks. If null, default request
+     * @param callbacks Synthesis request callbacks. If null, the default request
      *            callbacks object will be used.
      */
     public void queueSynthesizeToFile(final String utterance, final UtteranceId utteranceId,
+            final File outputFile, final RequestConfig config,
+            final RequestCallbacks callbacks) {
+        queueSynthesizeToFile(createMarkupFromString(utterance), utteranceId, outputFile, config, callbacks);
+    }
+
+    /**
+     * Synthesizes the given {@link Markup} (can be constructed with {@link Utterance})
+     * to a file using the specified parameters. This method is asynchronous, i.e. the
+     * method just adds the request to the queue of TTS requests and then returns. The
+     * synthesis might not have finished (or even started!) at the time when this method
+     * returns.
+     *
+     * @param markup The Markup that should be synthesized. The written equivalent of
+     *            the spoken text should be no longer than 1000 characters.
+     * @param utteranceId Unique identificator used to track the synthesis progress
+     *            in {@link RequestCallbacks}.
+     * @param outputFile File to write the generated audio data to.
+     * @param config Synthesis request configuration. Can't be null. Have to contain a
+     *            voice.
+     * @param callbacks Synthesis request callbacks. If null, the default request
+     *            callbacks object will be used.
+     */
+    public void queueSynthesizeToFile(
+            final Markup markup,
+            final UtteranceId utteranceId,
             final File outputFile, final RequestConfig config,
             final RequestCallbacks callbacks) {
         runAction(new Action(ACTION_QUEUE_SYNTHESIZE_TO_FILE) {
@@ -964,8 +1011,7 @@ public class TextToSpeechClient {
 
                     int queueResult = service.synthesizeToFileDescriptorV2(getCallerIdentity(),
                             fileDescriptor,
-                            new SynthesisRequestV2(utterance, utteranceId.toUniqueString(),
-                                    config));
+                            new SynthesisRequestV2(markup, utteranceId.toUniqueString(), config));
                     fileDescriptor.close();
                     if (queueResult != Status.SUCCESS) {
                         removeCallbackAndErr(utteranceId.toUniqueString(), queueResult);
@@ -979,6 +1025,13 @@ public class TextToSpeechClient {
                 }
             }
         });
+    }
+
+    private static Markup createMarkupFromString(String str) {
+        return new Utterance()
+            .append(new Utterance.TtsText(str))
+            .setNoWarningOnFallback(true)
+            .createMarkup();
     }
 
     private static final String ACTION_QUEUE_SILENCE_NAME = "queueSilence";

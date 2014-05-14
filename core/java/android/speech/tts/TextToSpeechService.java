@@ -352,6 +352,12 @@ public abstract class TextToSpeechService extends Service {
             params.putString(TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS, "true");
         }
 
+        String noWarning = request.getMarkup().getParameter(Utterance.KEY_NO_WARNING_ON_FALLBACK);
+        if (noWarning == null || noWarning.equals("false")) {
+            Log.w("TextToSpeechService", "The synthesis engine does not support Markup, falling " +
+                                         "back to the given plain text.");
+        }
+
         // Build V1 request
         SynthesisRequest requestV1 = new SynthesisRequest(request.getText(), params);
         Locale locale = selectedVoice.getLocale();
@@ -856,14 +862,53 @@ public abstract class TextToSpeechService extends Service {
             }
         }
 
+        /**
+         * Estimate of the character count equivalent of a Markup instance. Calculated
+         * by summing the characters of all Markups of type "text". Each other node
+         * is counted as a single character, as the character count of other nodes
+         * is non-trivial to calculate and we don't want to accept arbitrarily large
+         * requests.
+         */
+        private int estimateSynthesisLengthFromMarkup(Markup m) {
+            int size = 0;
+            if (m.getType() != null &&
+                m.getType().equals("text") &&
+                m.getParameter("text") != null) {
+                size += m.getParameter("text").length();
+            } else if (m.getType() == null ||
+                       !m.getType().equals("utterance")) {
+                size += 1;
+            }
+            for (Markup nested : m.getNestedMarkups()) {
+                size += estimateSynthesisLengthFromMarkup(nested);
+            }
+            return size;
+        }
+
         @Override
         public boolean isValid() {
-            if (mSynthesisRequest.getText() == null) {
-                Log.e(TAG, "null synthesis text");
+            if (mSynthesisRequest.getMarkup() == null) {
+                Log.e(TAG, "No markup in request.");
                 return false;
             }
-            if (mSynthesisRequest.getText().length() >= TextToSpeech.getMaxSpeechInputLength()) {
-                Log.w(TAG, "Text too long: " + mSynthesisRequest.getText().length() + " chars");
+            String type = mSynthesisRequest.getMarkup().getType();
+            if (type == null) {
+                Log.w(TAG, "Top level markup node should have type \"utterance\", not null");
+                return false;
+            } else if (!type.equals("utterance")) {
+                Log.w(TAG, "Top level markup node should have type \"utterance\" instead of " +
+                            "\"" + type + "\"");
+                return false;
+            }
+
+            int estimate = estimateSynthesisLengthFromMarkup(mSynthesisRequest.getMarkup());
+            if (estimate >= TextToSpeech.getMaxSpeechInputLength()) {
+                Log.w(TAG, "Text too long: estimated size of text was " + estimate + " chars.");
+                return false;
+            }
+
+            if (estimate <= 0) {
+                Log.e(TAG, "null synthesis text");
                 return false;
             }
 
