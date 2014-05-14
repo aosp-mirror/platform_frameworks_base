@@ -25,6 +25,15 @@ import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_DUMMY;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
+import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
+import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_CBS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.ConnectivityManager.TYPE_PROXY;
@@ -247,6 +256,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * abstractly.
      */
     private NetworkStateTracker mNetTrackers[];
+
+    /**
+     * Holds references to all NetworkAgentInfos claiming to support the legacy
+     * NetworkType.  We used to have a static set of of NetworkStateTrackers
+     * for each network type.  This is the new model.
+     * Supports synchronous inspection of state.
+     * These are built out at startup such that an unsupported network
+     * doesn't get an ArrayList instance, making this a tristate:
+     * unsupported, supported but not active and active.
+     */
+    private ArrayList<NetworkAgentInfo> mNetworkAgentInfoForType[];
 
     /* Handles captive portal check on a network */
     private CaptivePortalTracker mCaptivePortalTracker;
@@ -531,6 +551,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_networkTransitionTimeout);
 
+        mNetworkAgentInfoForType = (ArrayList<NetworkAgentInfo>[])
+                new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
+
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
         mCurrentLinkProperties = new LinkProperties[ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -585,6 +608,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             "radio " + n.radio + " in network type " + n.type);
                     continue;
                 }
+                mNetworkAgentInfoForType[n.type] = new ArrayList<NetworkAgentInfo>();
+
                 mNetConfigs[n.type] = n;
                 mNetworksDefined++;
             } catch(Exception e) {
@@ -871,11 +896,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * Check if UID should be blocked from using the network represented by the
      * given {@link NetworkStateTracker}.
      */
-    private boolean isNetworkBlocked(NetworkStateTracker tracker, int uid) {
-        final String iface = tracker.getLinkProperties().getInterfaceName();
-
+    private boolean isNetworkBlocked(int networkType, int uid) {
         final boolean networkCostly;
         final int uidRules;
+
+        LinkProperties lp = getLinkPropertiesForType(networkType);
+        final String iface = (lp == null ? "" : lp.getInterfaceName());
         synchronized (mRulesLock) {
             networkCostly = mMeteredIfaces.contains(iface);
             uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
@@ -892,11 +918,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     /**
      * Return a filtered {@link NetworkInfo}, potentially marked
      * {@link DetailedState#BLOCKED} based on
-     * {@link #isNetworkBlocked(NetworkStateTracker, int)}.
+     * {@link #isNetworkBlocked}.
      */
-    private NetworkInfo getFilteredNetworkInfo(NetworkStateTracker tracker, int uid) {
-        NetworkInfo info = tracker.getNetworkInfo();
-        if (isNetworkBlocked(tracker, uid)) {
+    private NetworkInfo getFilteredNetworkInfo(int networkType, int uid) {
+        NetworkInfo info = getNetworkInfoForType(networkType);
+        if (isNetworkBlocked(networkType, uid)) {
             // network is blocked; clone and override state
             info = new NetworkInfo(info);
             info.setDetailedState(DetailedState.BLOCKED, null, null);
@@ -919,6 +945,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         return getNetworkInfo(mActiveDefaultNetwork, uid);
+    }
+
+    // only called when the default request is satisfied
+    private void updateActiveDefaultNetwork(NetworkAgentInfo nai) {
+        if (nai != null) {
+            mActiveDefaultNetwork = nai.networkInfo.getType();
+        } else {
+            mActiveDefaultNetwork = TYPE_NONE;
+        }
     }
 
     /**
@@ -963,10 +998,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public NetworkInfo getActiveNetworkInfoUnfiltered() {
         enforceAccessPermission();
         if (isNetworkTypeValid(mActiveDefaultNetwork)) {
-            final NetworkStateTracker tracker = mNetTrackers[mActiveDefaultNetwork];
-            if (tracker != null) {
-                return tracker.getNetworkInfo();
-            }
+            return getNetworkInfoForType(mActiveDefaultNetwork);
         }
         return null;
     }
@@ -987,9 +1019,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private NetworkInfo getNetworkInfo(int networkType, int uid) {
         NetworkInfo info = null;
         if (isNetworkTypeValid(networkType)) {
-            final NetworkStateTracker tracker = mNetTrackers[networkType];
-            if (tracker != null) {
-                info = getFilteredNetworkInfo(tracker, uid);
+            if (getNetworkInfoForType(networkType) != null) {
+                info = getFilteredNetworkInfo(networkType, uid);
             }
         }
         return info;
@@ -1001,9 +1032,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkInfo> result = Lists.newArrayList();
         synchronized (mRulesLock) {
-            for (NetworkStateTracker tracker : mNetTrackers) {
-                if (tracker != null) {
-                    result.add(getFilteredNetworkInfo(tracker, uid));
+            for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
+                    networkType++) {
+                if (getNetworkInfoForType(networkType) != null) {
+                    result.add(getFilteredNetworkInfo(networkType, uid));
                 }
             }
         }
@@ -1013,7 +1045,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public boolean isNetworkSupported(int networkType) {
         enforceAccessPermission();
-        return (isNetworkTypeValid(networkType) && (mNetTrackers[networkType] != null));
+        return (isNetworkTypeValid(networkType) && (getNetworkInfoForType(networkType) != null));
     }
 
     /**
@@ -1033,25 +1065,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public LinkProperties getLinkProperties(int networkType) {
         enforceAccessPermission();
         if (isNetworkTypeValid(networkType)) {
-            final NetworkStateTracker tracker = mNetTrackers[networkType];
-            if (tracker != null) {
-                return tracker.getLinkProperties();
-            }
+            return getLinkPropertiesForType(networkType);
         }
         return null;
     }
 
+    // TODO - this should be ALL networks
     @Override
     public NetworkState[] getAllNetworkState() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkState> result = Lists.newArrayList();
         synchronized (mRulesLock) {
-            for (NetworkStateTracker tracker : mNetTrackers) {
-                if (tracker != null) {
-                    final NetworkInfo info = getFilteredNetworkInfo(tracker, uid);
-                    result.add(new NetworkState(
-                            info, tracker.getLinkProperties(), tracker.getNetworkCapabilities()));
+            for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
+                    networkType++) {
+                if (getNetworkInfoForType(networkType) != null) {
+                    final NetworkInfo info = getFilteredNetworkInfo(networkType, uid);
+                    final LinkProperties lp = getLinkPropertiesForType(networkType);
+                    final NetworkCapabilities netcap = getNetworkCapabilitiesForType(networkType);
+                    result.add(new NetworkState(info, lp, netcap));
                 }
             }
         }
@@ -1060,10 +1092,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private NetworkState getNetworkStateUnchecked(int networkType) {
         if (isNetworkTypeValid(networkType)) {
-            final NetworkStateTracker tracker = mNetTrackers[networkType];
-            if (tracker != null) {
-                return new NetworkState(tracker.getNetworkInfo(), tracker.getLinkProperties(),
-                        tracker.getNetworkCapabilities());
+            NetworkInfo info = getNetworkInfoForType(networkType);
+            if (info != null) {
+                return new NetworkState(info,
+                        getLinkPropertiesForType(networkType),
+                        getNetworkCapabilitiesForType(networkType));
             }
         }
         return null;
@@ -2308,7 +2341,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
         enforceConnectivityInternalPermission();
         if (DBG) log("captivePortalCheckCompleted: ni=" + info + " captive=" + isCaptivePortal);
-        mNetTrackers[info.getType()].captivePortalCheckCompleted(isCaptivePortal);
+//        mNetTrackers[info.getType()].captivePortalCheckCompleted(isCaptivePortal);
     }
 
     /**
@@ -3035,7 +3068,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
             } else {
                 loge("Error connecting NetworkAgent");
-                mNetworkAgentInfos.remove(msg.replyTo);
+                NetworkAgentInfo nai = mNetworkAgentInfos.remove(msg.replyTo);
+                try {
+                    mNetworkAgentInfoForType[nai.networkInfo.getType()].remove(nai);
+                } catch (NullPointerException e) {}
             }
         }
     }
@@ -3055,6 +3091,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
+            try {
+                mNetworkAgentInfoForType[nai.networkInfo.getType()].remove(nai);
+            } catch (NullPointerException e) {}
+
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
             final ArrayList<NetworkAgentInfo> toActivate = new ArrayList<NetworkAgentInfo>();
@@ -3082,6 +3122,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
                 removeDataActivityTracking(nai);
+                mActiveDefaultNetwork = ConnectivityManager.TYPE_NONE;
             }
             for (NetworkAgentInfo networkToActivate : toActivate) {
                 networkToActivate.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
@@ -3396,7 +3437,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         //    if (DBG) log("no change in condition - aborting");
         //    return;
         //}
-        NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
+        NetworkInfo networkInfo = getNetworkInfoForType(mActiveDefaultNetwork);
         if (networkInfo.isConnected() == false) {
             if (DBG) log("handleInetConditionHoldEnd: default network not connected - ignoring");
             return;
@@ -4652,11 +4693,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // otherwise launch browser with the intent directly.
         if (mIsProvisioningNetwork.get()) {
             if (DBG) log("handleMobileProvisioningAction: on prov network enable then launch");
-            mIsStartingProvisioning.set(true);
-            MobileDataStateTracker mdst = (MobileDataStateTracker)
-                    mNetTrackers[ConnectivityManager.TYPE_MOBILE];
-            mdst.setEnableFailFastMobileData(DctConstants.ENABLED);
-            mdst.enableMobileProvisioning(url);
+//            mIsStartingProvisioning.set(true);
+//            MobileDataStateTracker mdst = (MobileDataStateTracker)
+//                    mNetTrackers[ConnectivityManager.TYPE_MOBILE];
+//            mdst.setEnableFailFastMobileData(DctConstants.ENABLED);
+//            mdst.enableMobileProvisioning(url);
         } else {
             if (DBG) log("handleMobileProvisioningAction: not prov network");
             // Check for  apps that can handle provisioning first
@@ -4952,7 +4993,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public LinkQualityInfo getLinkQualityInfo(int networkType) {
         enforceAccessPermission();
-        if (isNetworkTypeValid(networkType)) {
+        if (isNetworkTypeValid(networkType) && mNetTrackers[networkType] != null) {
             return mNetTrackers[networkType].getLinkQualityInfo();
         } else {
             return null;
@@ -4962,7 +5003,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public LinkQualityInfo getActiveLinkQualityInfo() {
         enforceAccessPermission();
-        if (isNetworkTypeValid(mActiveDefaultNetwork)) {
+        if (isNetworkTypeValid(mActiveDefaultNetwork) &&
+                mNetTrackers[mActiveDefaultNetwork] != null) {
             return mNetTrackers[mActiveDefaultNetwork].getLinkQualityInfo();
         } else {
             return null;
@@ -5084,6 +5126,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
         if (VDBG) log("Got NetworkAgent Messenger");
         mNetworkAgentInfos.put(na.messenger, na);
+        try {
+            mNetworkAgentInfoForType[na.networkInfo.getType()].add(na);
+        } catch (NullPointerException e) {
+            loge("registered NetworkAgent for unsupported type: " + na);
+        }
         na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
         NetworkInfo networkInfo = na.networkInfo;
         na.networkInfo = null;
@@ -5280,6 +5327,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     sendUpdatedScoreToFactories(nr, newNetwork.currentScore);
                     if (mDefaultRequest.requestId == nr.requestId) {
                         isNewDefault = true;
+                        updateActiveDefaultNetwork(newNetwork);
                     }
                 }
             }
@@ -5344,6 +5392,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     (oldInfo == null ? "null" : oldInfo.getState()) +
                     " to " + state);
         }
+
         if (state == NetworkInfo.State.CONNECTED) {
             // TODO - check if we want it (optimization)
             try {
@@ -5413,6 +5462,36 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             getConnectivityChangeDelay());
                 }
             }
+        }
+    }
+
+    private LinkProperties getLinkPropertiesForType(int networkType) {
+        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
+        if (list == null) return null;
+        try {
+            return new LinkProperties(list.get(0).linkProperties);
+        } catch (IndexOutOfBoundsException e) {
+            return new LinkProperties();
+        }
+    }
+
+    private NetworkInfo getNetworkInfoForType(int networkType) {
+        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
+        if (list == null) return null;
+        try {
+            return new NetworkInfo(list.get(0).networkInfo);
+        } catch (IndexOutOfBoundsException e) {
+            return new NetworkInfo(networkType, 0, "Unknown", "");
+        }
+    }
+
+    private NetworkCapabilities getNetworkCapabilitiesForType(int networkType) {
+        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
+        if (list == null) return null;
+        try {
+            return new NetworkCapabilities(list.get(0).networkCapabilities);
+        } catch (IndexOutOfBoundsException e) {
+            return new NetworkCapabilities();
         }
     }
 }
