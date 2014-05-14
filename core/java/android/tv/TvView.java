@@ -31,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewRootImpl;
 
 /**
  * View playing TV
@@ -89,7 +90,10 @@ public class TvView extends SurfaceView {
             if (dispatchUnhandledInputEvent(event)) {
                 return;
             }
-            getViewRootImpl().dispatchUnhandledInputEvent(event);
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                viewRootImpl.dispatchUnhandledInputEvent(event);
+            }
         }
     };
 
