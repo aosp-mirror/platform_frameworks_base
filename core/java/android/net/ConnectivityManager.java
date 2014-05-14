@@ -534,38 +534,32 @@ public class ConnectivityManager {
     /**
      * Specifies the preferred network type.  When the device has more
      * than one type available the preferred network type will be used.
-     * Note that this made sense when we only had 2 network types,
-     * but with more and more default networks we need an array to list
-     * their ordering.  This will be deprecated soon.
      *
      * @param preference the network type to prefer over all others.  It is
      *         unspecified what happens to the old preferred network in the
      *         overall ordering.
+     * @Deprecated Functionality has been removed as it no longer makes sense,
+     *         with many more than two networks - we'd need an array to express
+     *         preference.  Instead we use dynamic network properties of
+     *         the networks to describe their precedence.
      */
     public void setNetworkPreference(int preference) {
-        try {
-            mService.setNetworkPreference(preference);
-        } catch (RemoteException e) {
-        }
     }
 
     /**
      * Retrieves the current preferred network type.
-     * Note that this made sense when we only had 2 network types,
-     * but with more and more default networks we need an array to list
-     * their ordering.  This will be deprecated soon.
      *
      * @return an integer representing the preferred network type
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * @Deprecated Functionality has been removed as it no longer makes sense,
+     *         with many more than two networks - we'd need an array to express
+     *         preference.  Instead we use dynamic network properties of
+     *         the networks to describe their precedence.
      */
     public int getNetworkPreference() {
-        try {
-            return mService.getNetworkPreference();
-        } catch (RemoteException e) {
-            return -1;
-        }
+        return -1;
     }
 
     /**
@@ -723,13 +717,14 @@ public class ConnectivityManager {
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
-    public boolean setRadios(boolean turnOn) {
-        try {
-            return mService.setRadios(turnOn);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
+// TODO - check for any callers and remove
+//    public boolean setRadios(boolean turnOn) {
+//        try {
+//            return mService.setRadios(turnOn);
+//        } catch (RemoteException e) {
+//            return false;
+//        }
+//    }
 
     /**
      * Tells a given networkType to set its radio power state as directed.
@@ -743,13 +738,14 @@ public class ConnectivityManager {
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
-    public boolean setRadio(int networkType, boolean turnOn) {
-        try {
-            return mService.setRadio(networkType, turnOn);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
+// TODO - check for any callers and remove
+//    public boolean setRadio(int networkType, boolean turnOn) {
+//        try {
+//            return mService.setRadio(networkType, turnOn);
+//        } catch (RemoteException e) {
+//            return false;
+//        }
+//    }
 
     /**
      * Tells the underlying networking system that the caller wants to
@@ -1594,4 +1590,81 @@ public class ConnectivityManager {
             mService.registerNetworkFactory(messenger);
         } catch (RemoteException e) { }
     }
+
+    /** {@hide} */
+    public void registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+            NetworkCapabilities nc, int score) {
+        try {
+            mService.registerNetworkAgent(messenger, ni, lp, nc, score);
+        } catch (RemoteException e) { }
+    }
+
+    /** Interface for NetworkRequest callbacks {@hide} */
+    public static class NetworkCallbacks {
+        public static final int PRECHECK     = 1;
+        public static final int AVAILABLE    = 2;
+        public static final int LOSING       = 3;
+        public static final int LOST         = 4;
+        public static final int UNAVAIL      = 5;
+        public static final int CAP_CHANGED  = 6;
+        public static final int PROP_CHANGED = 7;
+        public static final int CANCELED     = 8;
+
+        /**
+         * @hide
+         * Called whenever the framework connects to a network that it may use to
+         * satisfy this request
+         */
+        public void onPreCheck(NetworkRequest networkRequest, Network network) {}
+
+        /**
+         * Called when the framework connects and has validated the new network.
+         */
+        public void onAvailable(NetworkRequest networkRequest, Network network) {}
+
+        /**
+         * Called when the framework is losing the network.  Often paired with an
+         * onAvailable call with the new replacement network for graceful handover.
+         * This may not be called if we have a hard loss (loss without warning).
+         * This may be followed by either an onLost call or an onAvailable call for this
+         * network depending on if we lose or regain it.
+         */
+        public void onLosing(NetworkRequest networkRequest, Network network, int maxSecToLive) {}
+
+        /**
+         * Called when the framework has a hard loss of the network or when the
+         * graceful failure ends.  Note applications should only request this callback
+         * if the application is willing to track the Available and Lost callbacks
+         * together, else the application may think it has no network when it
+         * really does (A Avail, B Avail, A Lost..  still have B).
+         */
+        public void onLost(NetworkRequest networkRequest, Network network) {}
+
+        /**
+         * Called if no network is found in the given timeout time.  If no timeout is given,
+         * this will not be called.
+         */
+        public void onUnavailable(NetworkRequest networkRequest) {}
+
+        /**
+         * Called when the network the framework connected to for this request
+         * changes capabilities but still satisfies the stated need.
+         */
+        public void onCapabilitiesChanged(NetworkRequest networkRequest, Network network,
+                NetworkCapabilities networkCapabilities) {}
+
+        /**
+         * Called when the network the framework connected to for this request
+         * changes properties.
+         */
+        public void onPropertiesChanged(NetworkRequest networkRequest, Network network,
+                LinkProperties linkProperties) {}
+
+        /**
+         * Called when a CancelRequest call concludes and the registered callbacks will
+         * no longer be used.
+         */
+        public void onCanceled(NetworkRequest networkRequest) {}
+    }
+
 }
