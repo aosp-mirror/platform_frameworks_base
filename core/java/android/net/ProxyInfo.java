@@ -160,6 +160,8 @@ public class ProxyInfo implements Parcelable {
             }
             mExclusionList = source.getExclusionListAsString();
             mParsedExclusionList = source.mParsedExclusionList;
+        } else {
+            mPacFileUrl = Uri.EMPTY;
         }
     }
 
