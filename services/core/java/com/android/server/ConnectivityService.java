@@ -1908,9 +1908,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int thisNetId = mNetTrackers[prevNetType].getNetwork().netId;
 
         // Remove idletimer previously setup in {@code handleConnect}
-        if (mNetConfigs[prevNetType].isDefault()) {
-            removeDataActivityTracking(prevNetType);
-        }
+// Already in place in new function. This is dead code.
+//        if (mNetConfigs[prevNetType].isDefault()) {
+//            removeDataActivityTracking(prevNetType);
+//        }
 
         /*
          * If the disconnected network is not the active one, then don't report
@@ -1977,7 +1978,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         // do this before we broadcast the change
-        handleConnectivityChange(prevNetType, doReset);
+// Already done in new function. This is dead code.
+//        handleConnectivityChange(prevNetType, doReset);
 
         final Intent immediateIntent = new Intent(intent);
         immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
@@ -2246,7 +2248,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 teardown(thisNet);
                 return;
             }
-            setupDataActivityTracking(newNetType);
+// Already in place in new function. This is dead code.
+//            setupDataActivityTracking(newNetType);
             synchronized (ConnectivityService.this) {
                 // have a new default network, release the transition wakelock in a second
                 // if it's held.  The second pause is to allow apps to reconnect over the
@@ -2285,8 +2288,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         thisNet.setTeardownRequested(false);
-        updateMtuSizeSettings(thisNet);
-        handleConnectivityChange(newNetType, false);
+// Already in place in new function. This is dead code.
+//        updateMtuSizeSettings(thisNet);
+//        handleConnectivityChange(newNetType, false);
         sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
 
         // notify battery stats service about this network
