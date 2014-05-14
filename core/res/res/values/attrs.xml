@@ -955,18 +955,33 @@
         <!-- ============= -->
         <!-- Color palette -->
         <!-- ============= -->
-        <attr name="colorPrimaryDark" format="color" />
+        <eat-comment />
+
+        <!-- The primary branding color for the app. By default, this is the color applied to the
+             action bar background and framework controls (via colorControlActivated). -->
         <attr name="colorPrimary" format="color" />
+
+        <!-- Dark variant of the primary branding color. By default, this is the color applied to
+             the status bar (via statusBarColor) and navigation bar (via navigationBarColor). -->
+        <attr name="colorPrimaryDark" format="color" />
+
+        <!-- Light variant of the primary branding color. TODO: Not used? -->
         <attr name="colorPrimaryLight" format="color" />
+
+        <!-- Bright complement to the primary branding color. TODO: Not used? -->
         <attr name="colorAccent" format="color" />
 
+        <!-- The color applied to framework controls in their normal state. -->
         <attr name="colorControlNormal" format="color" />
+
+        <!-- The color applied to framework controls in their activated (ex. checked) state. -->
         <attr name="colorControlActivated" format="color" />
 
+        <!-- The color applied to framework buttons in their normal state. -->
         <attr name="colorButtonNormal" format="color" />
+
+        <!-- The color applied to framework buttons in their pressed state. -->
         <attr name="colorButtonPressed" format="color" />
-        <attr name="colorButtonNormalColored" format="color" />
-        <attr name="colorButtonPressedColored" format="color" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
