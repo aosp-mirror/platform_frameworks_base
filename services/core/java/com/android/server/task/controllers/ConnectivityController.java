@@ -25,6 +25,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.task.TaskManagerService;
 
@@ -32,21 +33,33 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * Handles changes in connectivity.
+ * We are only interested in metered vs. unmetered networks, and we're interested in them on a
+ * per-user basis.
  */
 public class ConnectivityController extends StateController {
     private static final String TAG = "TaskManager.Connectivity";
+    private static final boolean DEBUG = true;
 
     private final List<TaskStatus> mTrackedTasks = new LinkedList<TaskStatus>();
     private final BroadcastReceiver mConnectivityChangedReceiver =
             new ConnectivityChangedReceiver();
+    /** Singleton. */
+    private static ConnectivityController mSingleton;
 
     /** Track whether the latest active network is metered. */
     private boolean mMetered;
     /** Track whether the latest active network is connected. */
     private boolean mConnectivity;
 
-    public ConnectivityController(TaskManagerService service) {
+    public static synchronized ConnectivityController get(TaskManagerService taskManager) {
+        if (mSingleton == null) {
+            mSingleton = new ConnectivityController(taskManager);
+        }
+        return mSingleton;
+    }
+
+    private ConnectivityController(TaskManagerService service) {
         super(service);
         // Register connectivity changed BR.
         IntentFilter intentFilter = new IntentFilter();
@@ -56,7 +69,7 @@ public class ConnectivityController extends StateController {
     }
 
     @Override
-    public void maybeTrackTaskState(TaskStatus taskStatus) {
+    public synchronized void maybeStartTrackingTask(TaskStatus taskStatus) {
         if (taskStatus.hasConnectivityConstraint() || taskStatus.hasMeteredConstraint()) {
             taskStatus.connectivityConstraintSatisfied.set(mConnectivity);
             taskStatus.meteredConstraintSatisfied.set(mMetered);
@@ -65,20 +78,27 @@ public class ConnectivityController extends StateController {
     }
 
     @Override
-    public void removeTaskStateIfTracked(TaskStatus taskStatus) {
+    public synchronized void maybeStopTrackingTask(TaskStatus taskStatus) {
         mTrackedTasks.remove(taskStatus);
     }
 
     /**
-     *
+     * @param userId Id of the user for whom we are updating the connectivity state.
      */
-    private void updateTrackedTasks() {
+    private void updateTrackedTasks(int userId) {
+        boolean changed = false;
         for (TaskStatus ts : mTrackedTasks) {
+            if (ts.getUserId() != userId) {
+                continue;
+            }
             boolean prevIsConnected = ts.connectivityConstraintSatisfied.getAndSet(mConnectivity);
             boolean prevIsMetered = ts.meteredConstraintSatisfied.getAndSet(mMetered);
             if (prevIsConnected != mConnectivity || prevIsMetered != mMetered) {
-                    mStateChangedListener.onTaskStateChanged(ts);
+                    changed = true;
             }
+        }
+        if (changed) {
+            mStateChangedListener.onControllerStateChanged();
         }
     }
 
@@ -103,17 +123,20 @@ public class ConnectivityController extends StateController {
                         context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 final NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
                 // This broadcast gets sent a lot, only update if the active network has changed.
-                if (activeNetwork.getType() == networkType) {
+                if (activeNetwork != null && activeNetwork.getType() == networkType) {
+                    final int userid = context.getUserId();
                     mMetered = false;
                     mConnectivity =
                             !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
                     if (mConnectivity) {  // No point making the call if we know there's no conn.
                         mMetered = connManager.isActiveNetworkMetered();
                     }
-                    updateTrackedTasks();
+                    updateTrackedTasks(userid);
                 }
             } else {
-                Log.w(TAG, "Unrecognised action in intent: " + action);
+                if (DEBUG) {
+                    Slog.d(TAG, "Unrecognised action in intent: " + action);
+                }
             }
         }
     };

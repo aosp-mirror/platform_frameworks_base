@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.android.server.task.TaskManagerService;
 
@@ -54,8 +53,17 @@ public class TimeController extends StateController {
     private AlarmManager mAlarmService = null;
     /** List of tracked tasks, sorted asc. by deadline */
     private final List<TaskStatus> mTrackedTasks = new LinkedList<TaskStatus>();
+    /** Singleton. */
+    private static TimeController mSingleton;
 
-    public TimeController(TaskManagerService service) {
+    public static synchronized TimeController get(TaskManagerService taskManager) {
+        if (mSingleton == null) {
+            mSingleton = new TimeController(taskManager);
+        }
+        return mSingleton;
+    }
+
+    private TimeController(TaskManagerService service) {
         super(service);
         mTaskExpiredAlarmIntent =
                 PendingIntent.getBroadcast(mContext, 0 /* ignored */,
@@ -75,8 +83,8 @@ public class TimeController extends StateController {
      * list.
      */
     @Override
-    public synchronized void maybeTrackTaskState(TaskStatus task) {
-        if (task.hasTimingConstraint()) {
+    public synchronized void maybeStartTrackingTask(TaskStatus task) {
+        if (task.hasTimingDelayConstraint()) {
             ListIterator<TaskStatus> it = mTrackedTasks.listIterator(mTrackedTasks.size());
             while (it.hasPrevious()) {
                 TaskStatus ts = it.previous();
@@ -85,13 +93,13 @@ public class TimeController extends StateController {
                     it.remove();
                     it.add(task);
                     break;
-                } else if (ts.getLatestRunTime() < task.getLatestRunTime()) {
+                } else if (ts.getLatestRunTimeElapsed() < task.getLatestRunTimeElapsed()) {
                     // Insert
                     it.add(task);
                     break;
                 }
             }
-            maybeUpdateAlarms(task.getEarliestRunTime(), task.getLatestRunTime());
+            maybeUpdateAlarms(task.getEarliestRunTime(), task.getLatestRunTimeElapsed());
         }
     }
 
@@ -100,12 +108,12 @@ public class TimeController extends StateController {
      * so, update them.
      */
     @Override
-    public synchronized void removeTaskStateIfTracked(TaskStatus taskStatus) {
+    public synchronized void maybeStopTrackingTask(TaskStatus taskStatus) {
         if (mTrackedTasks.remove(taskStatus)) {
             if (mNextDelayExpiredElapsedMillis <= taskStatus.getEarliestRunTime()) {
                 handleTaskDelayExpired();
             }
-            if (mNextTaskExpiredElapsedMillis <= taskStatus.getLatestRunTime()) {
+            if (mNextTaskExpiredElapsedMillis <= taskStatus.getLatestRunTimeElapsed()) {
                 handleTaskDeadlineExpired();
             }
         }
@@ -140,10 +148,10 @@ public class TimeController extends StateController {
      * back and forth.
      */
     private boolean canStopTrackingTask(TaskStatus taskStatus) {
-        final long elapsedNowMillis = SystemClock.elapsedRealtime();
-        return taskStatus.timeConstraintSatisfied.get() &&
-                (taskStatus.getLatestRunTime() == Long.MAX_VALUE ||
-                        taskStatus.getLatestRunTime() < elapsedNowMillis);
+        return (!taskStatus.hasTimingDelayConstraint() ||
+                taskStatus.timeDelayConstraintSatisfied.get()) &&
+                (!taskStatus.hasDeadlineConstraint() ||
+                        taskStatus.deadlineConstraintSatisfied.get());
     }
 
     private void maybeUpdateAlarms(long delayExpiredElapsed, long deadlineExpiredElapsed) {
@@ -174,10 +182,10 @@ public class TimeController extends StateController {
         Iterator<TaskStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
             TaskStatus ts = it.next();
-            final long taskDeadline = ts.getLatestRunTime();
+            final long taskDeadline = ts.getLatestRunTimeElapsed();
 
             if (taskDeadline <= nowElapsedMillis) {
-                ts.timeConstraintSatisfied.set(true);
+                ts.deadlineConstraintSatisfied.set(true);
                 mStateChangedListener.onTaskDeadlineExpired(ts);
                 it.remove();
             } else {  // Sorted by expiry time, so take the next one and stop.
@@ -199,10 +207,12 @@ public class TimeController extends StateController {
         Iterator<TaskStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
             final TaskStatus ts = it.next();
+            if (!ts.hasTimingDelayConstraint()) {
+                continue;
+            }
             final long taskDelayTime = ts.getEarliestRunTime();
             if (taskDelayTime < nowElapsedMillis) {
-                ts.timeConstraintSatisfied.set(true);
-                mStateChangedListener.onTaskStateChanged(ts);
+                ts.timeDelayConstraintSatisfied.set(true);
                 if (canStopTrackingTask(ts)) {
                     it.remove();
                 }
@@ -212,6 +222,7 @@ public class TimeController extends StateController {
                 }
             }
         }
+        mStateChangedListener.onControllerStateChanged();
         maybeUpdateAlarms(nextDelayTime, Long.MAX_VALUE);
     }
 
