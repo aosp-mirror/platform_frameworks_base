@@ -410,31 +410,6 @@ interface ITelephony {
      */
     boolean nvResetConfig(int resetType);
 
-    /**
-     * Inform the phone about a new incoming third party call. The phone will bind to the service
-     * identified by component to handle the call.
-     * @param component the component that should handle the intent.
-     * @param callId the unique id of the call.
-     * @param callerDisplayName the name shown to the user. Normally this will be the caller's phone
-     *                          number.
-     */
-    void newIncomingThirdPartyCall(in ComponentName component, String callId,
-            String callerDisplayName);
-
-    /**
-     * Obtain the current state of Wi-Fi calling.
-     *
-     * @see android.telephony.TelephonyManager.WifiCallingChoices
-     */
-    int getWhenToMakeWifiCalls();
-
-    /**
-     * Set the current state of Wi-Fi calling.
-     *
-     * @see android.telephony.TelephonyManager.WifiCallingChoices
-     */
-    void setWhenToMakeWifiCalls(int state);
-
     /*
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
