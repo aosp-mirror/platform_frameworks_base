@@ -36,8 +36,20 @@ public final class Rect implements Parcelable {
     public int right;
     public int bottom;
 
-    private static final Pattern FLATTENED_PATTERN = Pattern.compile(
+    /**
+     * A helper class for flattened rectange pattern recognition. A separate
+     * class to avoid an initialization dependency on a regular expression
+     * causing Rect to not be initializable with an ahead-of-time compilation
+     * scheme.
+     */
+    private static final class UnflattenHelper {
+        private static final Pattern FLATTENED_PATTERN = Pattern.compile(
             "(-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+)");
+
+        static Matcher getMatcher(String str) {
+            return FLATTENED_PATTERN.matcher(str);
+        }
+    }
 
     /**
      * Create a new empty Rect. All coordinates are initialized to 0.
@@ -152,7 +164,7 @@ public final class Rect implements Parcelable {
      * or null if the string is not of that form.
      */
     public static Rect unflattenFromString(String str) {
-        Matcher matcher = FLATTENED_PATTERN.matcher(str);
+        Matcher matcher = UnflattenHelper.getMatcher(str);
         if (!matcher.matches()) {
             return null;
         }
