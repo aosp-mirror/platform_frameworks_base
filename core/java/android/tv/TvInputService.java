@@ -489,7 +489,7 @@ public abstract class TvInputService extends Service {
                     }
                 }
             }
-            if (mOverlayView == null) {
+            if (mOverlayView == null || !mOverlayView.isAttachedToWindow()) {
                 return Session.DISPATCH_NOT_HANDLED;
             }
             if (!mOverlayView.hasWindowFocus()) {
