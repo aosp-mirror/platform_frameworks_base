@@ -2486,26 +2486,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        // Update 464xlat state.
-        NetworkStateTracker tracker = mNetTrackers[netType];
-        if (mClat.requiresClat(netType, tracker)) {
-
-            // If the connection was previously using clat, but is not using it now, stop the clat
-            // daemon. Normally, this happens automatically when the connection disconnects, but if
-            // the disconnect is not reported, or if the connection's LinkProperties changed for
-            // some other reason (e.g., handoff changes the IP addresses on the link), it would
-            // still be running. If it's not running, then stopping it is a no-op.
-            if (Nat464Xlat.isRunningClat(curLp) && !Nat464Xlat.isRunningClat(newLp)) {
-                mClat.stopClat();
-            }
-            // If the link requires clat to be running, then start the daemon now.
-            if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
-                mClat.startClat(tracker);
-            } else {
-                mClat.stopClat();
-            }
-        }
-
         // TODO: Temporary notifying upstread change to Tethering.
         //       @see bug/4455071
         /** Notify TetheringService if interface name has been changed. */
@@ -3073,7 +3053,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             notifyNetworkCallbacks(nai, NetworkCallbacks.LOST);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
-            mNetworkAgentInfos.remove(nai);
+            mNetworkAgentInfos.remove(msg.replyTo);
+            updateClat(null, nai.linkProperties, nai);
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
             final ArrayList<NetworkAgentInfo> toActivate = new ArrayList<NetworkAgentInfo>();
@@ -5121,6 +5102,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 //        }
         updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId);
+        updateClat(newLp, oldLp, networkAgent);
+    }
+
+    private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo na) {
+        // Update 464xlat state.
+        if (mClat.requiresClat(na)) {
+
+            // If the connection was previously using clat, but is not using it now, stop the clat
+            // daemon. Normally, this happens automatically when the connection disconnects, but if
+            // the disconnect is not reported, or if the connection's LinkProperties changed for
+            // some other reason (e.g., handoff changes the IP addresses on the link), it would
+            // still be running. If it's not running, then stopping it is a no-op.
+            if (Nat464Xlat.isRunningClat(oldLp) && !Nat464Xlat.isRunningClat(newLp)) {
+                mClat.stopClat();
+            }
+            // If the link requires clat to be running, then start the daemon now.
+            if (newLp != null && na.networkInfo.isConnected()) {
+                mClat.startClat(na);
+            } else {
+                mClat.stopClat();
+            }
+        }
     }
 
     private void updateInterfaces(LinkProperties newLp, LinkProperties oldLp, int netId) {
