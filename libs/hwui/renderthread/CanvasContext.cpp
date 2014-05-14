@@ -31,11 +31,10 @@
 
 #define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
 #define GLES_VERSION 2
+#define USE_TEXTURE_ATLAS false
 
-#ifdef USE_OPENGL_RENDERER
 // Android-specific addition that is used to show when frames began in systrace
 EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
-#endif
 
 namespace android {
 namespace uirenderer {
@@ -230,7 +229,9 @@ void GlobalContext::setTextureAtlas(const sp<GraphicBuffer>& buffer,
 }
 
 void GlobalContext::initAtlas() {
-    Caches::getInstance().assetAtlas.init(mAtlasBuffer, mAtlasMap, mAtlasMapSize);
+    if (USE_TEXTURE_ATLAS) {
+        Caches::getInstance().assetAtlas.init(mAtlasBuffer, mAtlasMap, mAtlasMapSize);
+    }
 }
 
 void GlobalContext::usePBufferSurface() {
