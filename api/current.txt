@@ -24006,25 +24006,32 @@ package android.provider {
   }
 
   public static abstract interface TvContract.BaseTvColumns implements android.provider.BaseColumns {
-    field public static final java.lang.String PACKAGE_NAME = "package_name";
+    field public static final java.lang.String COLUMN_PACKAGE_NAME = "package_name";
   }
 
   public static final class TvContract.Channels implements android.provider.TvContract.BaseTvColumns {
-    field public static final java.lang.String BROWSABLE = "browsable";
+    field public static final java.lang.String COLUMN_BROWSABLE = "browsable";
+    field public static final java.lang.String COLUMN_DATA = "data";
+    field public static final java.lang.String COLUMN_DESCRIPTION = "description";
+    field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
+    field public static final java.lang.String COLUMN_DISPLAY_NUMBER = "display_number";
+    field public static final java.lang.String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
+    field public static final java.lang.String COLUMN_SERVICE_ID = "service_id";
+    field public static final java.lang.String COLUMN_SERVICE_NAME = "service_name";
+    field public static final java.lang.String COLUMN_SERVICE_TYPE = "service_type";
+    field public static final java.lang.String COLUMN_TRANSPORT_STREAM_ID = "transport_stream_id";
+    field public static final java.lang.String COLUMN_TYPE = "type";
+    field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.android.tv.channels";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.com.android.tv.channels";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String DATA = "data";
-    field public static final java.lang.String DESCRIPTION = "description";
-    field public static final java.lang.String DISPLAY_NAME = "display_name";
-    field public static final java.lang.String DISPLAY_NUMBER = "display_number";
-    field public static final java.lang.String SERVICE_NAME = "service_name";
-    field public static final java.lang.String TRANSPORT_STREAM_ID = "transport_stream_id";
-    field public static final java.lang.String TYPE = "type";
+    field public static final int SERVICE_TYPE_OTHER = 0; // 0x0
+    field public static final int SERVICE_TYPE_RADIO = 2; // 0x2
+    field public static final int SERVICE_TYPE_TV = 1; // 0x1
     field public static final int TYPE_1SEG = 263168; // 0x40400
-    field public static final int TYPE_ATSC = 196608; // 0x30000
-    field public static final int TYPE_ATSC_2_0 = 196609; // 0x30001
-    field public static final int TYPE_ATSC_M_H = 196864; // 0x30100
+    field public static final int TYPE_ATSC_C = 197120; // 0x30200
+    field public static final int TYPE_ATSC_M_H = 197120; // 0x30200
+    field public static final int TYPE_ATSC_T = 196608; // 0x30000
     field public static final int TYPE_CMMB = 327936; // 0x50100
     field public static final int TYPE_DTMB = 327680; // 0x50000
     field public static final int TYPE_DVB_C = 131584; // 0x20200
@@ -24043,21 +24050,20 @@ package android.provider {
     field public static final int TYPE_PASSTHROUGH = 65536; // 0x10000
     field public static final int TYPE_S_DMB = 393472; // 0x60100
     field public static final int TYPE_T_DMB = 393216; // 0x60000
-    field public static final java.lang.String VERSION_NUMBER = "version_number";
   }
 
   public static final class TvContract.Programs implements android.provider.TvContract.BaseTvColumns {
-    field public static final java.lang.String CHANNEL_ID = "channel_id";
+    field public static final java.lang.String COLUMN_CHANNEL_ID = "channel_id";
+    field public static final java.lang.String COLUMN_DATA = "data";
+    field public static final java.lang.String COLUMN_DESCRIPTION = "description";
+    field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
+    field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
+    field public static final java.lang.String COLUMN_TITLE = "title";
+    field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.android.tv.programs";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.com.android.tv.programs";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String DATA = "data";
-    field public static final java.lang.String DESCRIPTION = "description";
-    field public static final java.lang.String END_TIME_UTC_MILLIS = "end_time_utc_millis";
-    field public static final java.lang.String LONG_DESCRIPTION = "long_description";
-    field public static final java.lang.String START_TIME_UTC_MILLIS = "start_time_utc_millis";
-    field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String VERSION_NUMBER = "version_number";
   }
 
   public class UserDictionary {
