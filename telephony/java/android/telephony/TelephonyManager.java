@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.PrivateApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -66,6 +67,20 @@ public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
     private static ITelephonyRegistry sRegistry;
+
+    /**
+     * The allowed states of Wi-Fi calling.
+     *
+     * @hide
+     */
+    public interface WifiCallingChoices {
+        /** Always use Wi-Fi calling */
+        static final int ALWAYS_USE = 0;
+        /** Ask the user whether to use Wi-Fi on every call */
+        static final int ASK_EVERY_TIME = 1;
+        /** Never use Wi-Fi calling */
+        static final int NEVER_USE = 2;
+    }
 
     private final HashMap<CallStateListener,Listener> mListeners
             = new HashMap<CallStateListener,Listener>();
@@ -1736,6 +1751,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Inform the phone about a new incoming third party call. The phone will bind to the service
+     * identified by component to handle the call.
+     * @param component the component that should handle the intent.
+     * @param callId the unique id of the call. This id is passed to the service via {@link
+     *               ThirdPartyCallService#incomingCallAttach incomingCallAttach}.
+     * @param callerDisplayName the name shown to the user. Normally this will be the caller's phone
+     *                          number.
+     */
+    public void newIncomingThirdPartyCall(ComponentName component, String callId,
+            String callerDisplayName) {
+        try {
+            getITelephony().newIncomingThirdPartyCall(component, callId, callerDisplayName);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
      * Returns the MMS user agent.
      */
     public String getMmsUserAgent() {
@@ -1758,12 +1791,15 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return The logical channel id which is negative on error.
      */
     public int iccOpenLogicalChannel(String AID) {
         try {
-          return getITelephony().iccOpenLogicalChannel(AID);
+            return getITelephony().iccOpenLogicalChannel(AID);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1775,13 +1811,16 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
     public boolean iccCloseLogicalChannel(int channel) {
         try {
-          return getITelephony().iccCloseLogicalChannel(channel);
+            return getITelephony().iccCloseLogicalChannel(channel);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1792,6 +1831,9 @@ public class TelephonyManager {
      * Transmit an APDU to the ICC card over a logical channel.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -1808,8 +1850,30 @@ public class TelephonyManager {
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
-          return getITelephony().iccTransmitApduLogicalChannel(channel, cla,
-                  instruction, p1, p2, p3, data);
+            return getITelephony().iccTransmitApduLogicalChannel(channel, cla,
+                    instruction, p1, p2, p3, data);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return "";
+    }
+
+    /**
+     * Send ENVELOPE to the SIM and return the response.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
+     * @param content String containing SAT/USAT response in hexadecimal
+     *                format starting with command tag. See TS 102 223 for
+     *                details.
+     * @return The APDU response from the ICC card, with the last 4 bytes
+     *         being the status word. If the command fails, returns an empty
+     *         string.
+     */
+    public String sendEnvelopeWithStatus(String content) {
+        try {
+            return getITelephony().sendEnvelopeWithStatus(content);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1893,6 +1957,33 @@ public class TelephonyManager {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
         }
         return false;
+    }
+
+    /*
+     * Obtain the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public int getWhenToMakeWifiCalls() {
+        try {
+            return getITelephony().getWhenToMakeWifiCalls();
+        } catch (RemoteException ex) {
+            return WifiCallingChoices.NEVER_USE;
+        }
+    }
+
+    /**
+     * Set the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public void setWhenToMakeWifiCalls(int state) {
+        try {
+            getITelephony().setWhenToMakeWifiCalls(state);
+        } catch (RemoteException ex) {
+        }
     }
 
     /**

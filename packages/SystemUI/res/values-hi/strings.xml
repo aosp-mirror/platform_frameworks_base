@@ -78,7 +78,6 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"हाल ही के ऐप्स"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"खोजें"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
-    <string name="accessibility_phone_button" msgid="6738112589538563574">"फ़ोन"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
@@ -205,22 +204,8 @@
     <string name="quick_settings_inversion_label" msgid="1666358784283020762">"रंग व्युत्क्रम मोड"</string>
     <string name="quick_settings_contrast_label" msgid="3319507551689108692">"उन्नत कंट्रास्ट मोड"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"रंग सुधार मोड"</string>
-    <string name="recents_empty_message" msgid="2269156590813544104">"हाल ही का"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"एप्‍लिकेशन जानकारी"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"खोज"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"नेटवर्क को\nमॉनीटर किया जा सकता है"</string>
     <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-  <plurals name="zen_mode_notification_title">
-    <item quantity="one" msgid="7809876956258040354">"सूचना छिपी हुई है"</item>
-    <item quantity="other" msgid="7388721375827338153">"%d सूचनाएं छिपी हुई हैं"</item>
-  </plurals>
-    <string name="zen_mode_notification_text" msgid="8336623711388065713">"दिखाने के लिए स्पर्श करें"</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"परेशान न करें"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"%d और"</item>
-  </plurals>
-    <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए पुन: टैप करें"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करने के लिए ऊपर स्वाइप करें"</string>
 </resources>

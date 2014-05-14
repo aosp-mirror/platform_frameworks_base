@@ -84,6 +84,7 @@ public interface RILConstants {
     int GSM_PHONE = 1;
     int CDMA_PHONE = 2;
     int SIP_PHONE  = 3;
+    int THIRD_PARTY_PHONE = 4;
 
     int LTE_ON_CDMA_UNKNOWN = -1;
     int LTE_ON_CDMA_FALSE = 0;

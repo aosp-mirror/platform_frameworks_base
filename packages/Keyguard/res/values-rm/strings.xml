@@ -20,8 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (719438068451601849) -->
-    <skip />
     <!-- no translation found for keyguard_password_enter_pin_code (3037685796058495017) -->
     <skip />
     <!-- no translation found for keyguard_password_enter_puk_code (3035856550289724338) -->

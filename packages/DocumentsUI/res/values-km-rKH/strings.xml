@@ -29,7 +29,6 @@
     <string name="menu_save" msgid="2394743337684426338">"រក្សាទុក"</string>
     <string name="menu_share" msgid="3075149983979628146">"ចែករំលែក​"</string>
     <string name="menu_delete" msgid="8138799623850614177">"លុប"</string>
-    <string name="menu_select" msgid="8711270657353563424">"ជ្រើស \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="mode_selected_count" msgid="459111894725594625">"បាន​ជ្រើស <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"តាម​ឈ្មោះ"</string>
     <string name="sort_date" msgid="586080032956151448">"តាម​កាលបរិច្ឆេទ​បាន​កែប្រែ"</string>

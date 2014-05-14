@@ -34,9 +34,4 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Bahasa Slovenia"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Bahasa Turki"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Bahasa Ukraine"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Bahasa Arab"</string>
-    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Bahasa Greek"</string>
-    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Bahasa Ibrani"</string>
-    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Bahasa Lithuania"</string>
-    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Bahasa Sepanyol (Latin)"</string>
 </resources>

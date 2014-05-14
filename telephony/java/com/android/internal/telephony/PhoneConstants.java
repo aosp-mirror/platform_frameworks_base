@@ -57,6 +57,7 @@ public class PhoneConstants {
     public static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
     public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
     public static final int PHONE_TYPE_SIP = RILConstants.SIP_PHONE;
+    public static final int PHONE_TYPE_THIRD_PARTY = RILConstants.THIRD_PARTY_PHONE;
 
     // Modes for LTE_ON_CDMA
     public static final int LTE_ON_CDMA_UNKNOWN = RILConstants.LTE_ON_CDMA_UNKNOWN;

@@ -302,18 +302,30 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteDisplayProvider.aidl \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
-	media/java/android/media/routeprovider/IRouteConnection.aidl \
-	media/java/android/media/routeprovider/IRouteProvider.aidl \
-	media/java/android/media/routeprovider/IRouteProviderCallback.aidl \
-	media/java/android/media/session/ISessionController.aidl \
-	media/java/android/media/session/ISessionControllerCallback.aidl \
-	media/java/android/media/session/ISession.aidl \
-	media/java/android/media/session/ISessionCallback.aidl \
-	media/java/android/media/session/ISessionManager.aidl \
+        media/java/android/media/routeprovider/IRouteConnection.aidl \
+        media/java/android/media/routeprovider/IRouteProvider.aidl \
+        media/java/android/media/routeprovider/IRouteProviderCallback.aidl \
+        media/java/android/media/session/ISessionController.aidl \
+        media/java/android/media/session/ISessionControllerCallback.aidl \
+        media/java/android/media/session/ISession.aidl \
+        media/java/android/media/session/ISessionCallback.aidl \
+        media/java/android/media/session/ISessionManager.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallService.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceAdapter.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceProvider.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceSelector.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallServiceSelectorAdapter.aidl \
+	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
+	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyListener.aidl \
+	telephony/java/com/android/internal/telephony/IThirdPartyCallListener.aidl \
+	telephony/java/com/android/internal/telephony/IThirdPartyCallProvider.aidl \
+	telephony/java/com/android/internal/telephony/IThirdPartyCallSendDtmfCallback.aidl \
+	telephony/java/com/android/internal/telephony/IThirdPartyCallService.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \

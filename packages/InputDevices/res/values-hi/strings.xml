@@ -34,9 +34,4 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"स्लोवेनियाई"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"तुर्की"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"यूक्रेनियाई"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"अरबी"</string>
-    <string name="keyboard_layout_greek" msgid="7289253560162386040">"ग्रीक"</string>
-    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"हिब्रू"</string>
-    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"लिथुआनियाई"</string>
-    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"स्पेनिश (लैटिन)"</string>
 </resources>

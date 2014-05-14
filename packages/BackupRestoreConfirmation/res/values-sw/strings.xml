@@ -18,17 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Kuhifadhi kikamilifu"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Kurejesha kila kitu"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Ombi la kuhifadhi nakala rudufu kamili za data kwenye eneo kazi la kompyuta iliyounganishwa limewasilishwa. Ungependa shughuli hii ufanyike?\n\n Ikiwa sio wewe uliyewasilisha ombi hili, usikubali shughuli hii iendelee."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Chelezo kamili la data iliyounganishwa kwenye eneo kazi la kompyuta limeombwa. Unataka kuruhusu hii kutendeka?\n\n Ikiwa hukuomba chelezo mwenyewe, usikubali uendeshaji kuendelea."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Hifadhi nakala ya data yangu"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Usicheleze"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Kurejesha kamili kwa data nzima kutoka kwa eneo kazi la kompyuta lililounganishwa limeombwa. Unataka kuruhusu hii kutendeka?\n\n Ikiwa hukuweza kurejesha upya mwenyewe, usiruhusu uendeshaji huu kuendelea. Hii itaweka upya data yoyote iliyo kwenye kifaa hiki sasa!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Rejesha upya data yangu"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Usirejeshe upya"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Tafadhali ingiza nenosiri unalotumia kuhifadhi nakala rudufu hapo chini:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Tafadhali ingiza nenosiri lako la chelezo hapo chini:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Tafadhali ingiza nenosiri la usimbaji fiche wa kifaa chako hapo chini."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Tafadhali ingiza nenosiri lako la msimbo fiche hapo chini. Pia litatumika kusimba fiche jalidi ya hifadhi."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Tafadhali ingiza nenosiri la kutumia katika kusimba nakala rudufu kamili za data kwa njia fiche. Ikiwa hii itawachwa wazi, nenosiri lako la sasa litatumika:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba kwa njia fiche nakala rudufu za data, ingiza nenosiri lililo hapo chini:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Tafadhali ingiza nenosiri la kutumia kwa usimbaji fiche wa chelezo ya data kamili. Ikiwa hii itawachwa wazi, nenosiri lako la sasa litatumika:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba fiche data nzima ya kucheleza, ingiza nenosiri la hapo chini:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ikiwa data iliyorejeshwa upya, tafadhali ingiza nenosiri lililo hapo chini:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Inaanza kuhifadhi..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Imemaliza kuhifadhi"</string>

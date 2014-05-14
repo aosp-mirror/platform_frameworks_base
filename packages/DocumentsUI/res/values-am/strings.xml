@@ -29,7 +29,6 @@
     <string name="menu_save" msgid="2394743337684426338">"አስቀምጥ"</string>
     <string name="menu_share" msgid="3075149983979628146">"አጋራ"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ሰርዝ"</string>
-    <string name="menu_select" msgid="8711270657353563424">"«<xliff:g id="DIRECTORY">^1</xliff:g>»ን ይምረጡ"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ተመርጠዋል"</string>
     <string name="sort_name" msgid="9183560467917256779">"በስም"</string>
     <string name="sort_date" msgid="586080032956151448">"በተለወጠበት ቀን"</string>

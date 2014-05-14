@@ -20,7 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="719438068451601849">"Verrouillage du clavier"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le NIP."</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Entrez le code PUK et le nouveau NIP de la carte SIM"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Code PUK de la carte SIM"</string>

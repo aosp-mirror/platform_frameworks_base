@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"文件"</string>
-    <string name="title_open" msgid="4353228937663917801">"開啟檔案"</string>
+    <string name="title_open" msgid="4353228937663917801">"開啟工具"</string>
     <string name="title_save" msgid="2433679664882857999">"儲存至"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"建立資料夾"</string>
     <string name="menu_grid" msgid="6878021334497835259">"格狀檢視"</string>
@@ -29,7 +29,6 @@
     <string name="menu_save" msgid="2394743337684426338">"儲存"</string>
     <string name="menu_share" msgid="3075149983979628146">"共用"</string>
     <string name="menu_delete" msgid="8138799623850614177">"刪除"</string>
-    <string name="menu_select" msgid="8711270657353563424">"選取「<xliff:g id="DIRECTORY">^1</xliff:g>」"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 個項目"</string>
     <string name="sort_name" msgid="9183560467917256779">"依名稱"</string>
     <string name="sort_date" msgid="586080032956151448">"依修改日期"</string>
@@ -39,7 +38,7 @@
     <string name="save_error" msgid="6167009778003223664">"無法儲存文件"</string>
     <string name="create_error" msgid="3735649141335444215">"無法建立資料夾"</string>
     <string name="query_error" msgid="1222448261663503501">"無法查詢文件"</string>
-    <string name="root_recent" msgid="4470053704320518133">"最近存取過"</string>
+    <string name="root_recent" msgid="4470053704320518133">"最近使用過的項目"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"可用空間：<xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"儲存空間服務"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"捷徑"</string>
@@ -48,7 +47,7 @@
     <string name="pref_advanced_devices" msgid="903257239609301276">"顯示進階裝置"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"顯示檔案大小"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"顯示裝置大小"</string>
-    <string name="empty" msgid="7858882803708117596">"沒有任何項目"</string>
+    <string name="empty" msgid="7858882803708117596">"沒有項目"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"無法開啟檔案"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>

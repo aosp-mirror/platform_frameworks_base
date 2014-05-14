@@ -27,9 +27,8 @@
     <string name="menu_settings" msgid="6008033148948428823">"Ρυθμίσεις"</string>
     <string name="menu_open" msgid="432922957274920903">"Άνοιγμα"</string>
     <string name="menu_save" msgid="2394743337684426338">"Αποθήκευση"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Κοινοποίηση"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Κοινή χρήση"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Διαγραφή"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Επιλογή \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Επιλέχθηκαν <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Κατά όνομα"</string>
     <string name="sort_date" msgid="586080032956151448">"Κατά ημερομηνία τροποποίησης"</string>
@@ -51,5 +50,5 @@
     <string name="empty" msgid="7858882803708117596">"Δεν υπάρχουν στοιχεία"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Δεν είναι δυνατό το άνοιγμα του αρχείου"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Δεν είναι δυνατή η διαγραφή ορισμένων εγγράφων"</string>
-    <string name="share_via" msgid="8966594246261344259">"Κοινοποίηση μέσω"</string>
+    <string name="share_via" msgid="8966594246261344259">"Κοινή χρήση μέσω"</string>
 </resources>

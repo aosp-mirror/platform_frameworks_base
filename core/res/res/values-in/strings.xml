@@ -27,17 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> hari"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> hari <xliff:g id="HOURS">%2$d</xliff:g> jam"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> hari <xliff:g id="HOURS">%2$d</xliff:g> jam"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> jam"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> mnt"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> mnt"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt <xliff:g id="SECONDS">%2$d</xliff:g> dtk"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt <xliff:g id="SECONDS">%2$d</xliff:g> dtk"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> dtk"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> dtk"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Tanpa judul&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -146,7 +135,6 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkron"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g> penghapusan."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Penyimpanan tablet penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"Penyimpanan arloji penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Penyimpanan di ponsel penuh. Hapus sebagian file untuk mengosongkan ruang."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Jaringan mungkin dipantau"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Oleh pihak ketiga yang tidak dikenal"</string>
@@ -164,7 +152,6 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering nyala"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sedang mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet Anda akan dimatikan."</string>
-    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Arloji Anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ponsel Anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Anda ingin mematikannya?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reboot ke mode aman"</string>
@@ -184,12 +171,9 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode pesawat"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode pesawat AKTIF"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode pesawat MATI"</string>
-    <string name="global_action_settings" msgid="1756531602592545966">"Setelan"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Pribadi"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Kantor"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Layanan berbayar"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Lakukan hal yang dapat dikenai biaya."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Pesan Anda"</string>
@@ -272,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"mencopot pemasangan pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ubah rute panggilan keluar"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Memungkinkan aplikasi melihat nomor yang dihubungi saat melakukan panggilan keluar dengan opsi untuk mengalihkan panggilan ke nomor lain atau membatalkan panggilan sepenuhnya."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Memungkinkan aplikasi memproses panggilan keluar dan mengubah nomor yang akan dipanggil. Izin ini memungkinkan aplikasi memantau, mengalihkan, atau mencegah panggilan keluar."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"terima pesan teks (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Memungkinkan aplikasi menerima dan memproses pesan SMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"terima pesan teks (MMS)"</string>
@@ -331,12 +315,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Mengizinkan apl mengambil konten jendela aktif. Apl berbahaya dapat mengambil seluruh konten jendela dan memeriksa semua teksnya kecuali sandi."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktifkan aksesibilitas untuk sementara"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Memungkinkan aplikasi mengaktifkan aksesibilitas pada perangkat untuk sementara. Aplikasi berbahaya dapat mengaktifkan aksesibilitas tanpa izin pengguna."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"mengambil token jendela"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Memungkinkan aplikasi mengambil token jendela. Aplikasi berbahaya dapat melakukan interaksi yang tidak sah dengan jendela aplikasi dengan meniru sistem."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"mengambil statistik bingkai"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Memungkinkan aplikasi mengumpulkan statistik bingkai. Aplikasi berbahaya dapat mengamati statistik bingkai jendela dari aplikasi lain."</string>
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"mengambil info jendela"</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Mengizinkan aplikasi mengambil informasi tentang jendela dari pengelola jendela. Aplikasi berbahaya dapat mengambil informasi yang ditujukan untuk penggunaan sistem internal."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"memfilter acara"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Mengizinkan aplikasi mendaftarkan filter masukan yang memfilter streaming semua acara pengguna sebelum acara dikirimkan. Aplikasi berbahaya dapat mengontrol UI sistem tanpa campur tangan pengguna."</string>
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"memperbesar tampilan"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Izinkan aplikasi memperbesar konten tampilan. Aplikasi berbahaya dapat mengubah konten tampilan dengan merender perangkat menjadi tidak dapat digunakan."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"penghentian sebagian"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Letakkan pengelola aktivitas dalam kondisi mati. Tidak melakukan penonaktifan penuh."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"cegah pergantian aplikasi"</string>
@@ -351,8 +335,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Mengizinkan apl menyiarkan pemberitahuan bahwa pesan SMS telah diterima. Apl berbahaya dapat menggunakan ini untuk memalsukan pesan SMS masuk."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"kirim siaran WAP-PUSH-diterima"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Mengizinkan apl menyiarkan pemberitahuan bahwa pesan WAP PUSH telah diterima. Apl berbahaya dapat menggunakan ini untuk memalsukan penerimaan pesan MMS atau diam-diam mengganti konten laman web apa pun dengan varian berbahaya."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"mengirim siaran beri skor jaringan"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Memungkinkan aplikasi menyiarkan pemberitahuan bahwa jaringan perlu diberi skor. Tidak pernah diperlukan untuk aplikasi normal."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"batasi jumlah dari proses yang berjalan"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Mengizinkan apl mengontrol jumlah maksimum proses yang akan berjalan. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"paksa aplikasi latar belakang agar menutup"</string>
@@ -400,14 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan Vpn. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"mengikat ke wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu wallpaper. Tidak pernah diperlukan oleh apl normal."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"mengikat ke pemicu interaksi suara"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan interaksi suara. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"mengikat ke layar jarak jauh"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Mengizinkan pemegang mengikat ke antarmuka tingkat atas dari layar jarak jauh. Tidak pernah diperlukan untuk aplikasi normal."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"mengikat ke layanan widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan widget. Tidak pernah diperlukan oleh apl normal."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"mengikat ke layanan penyedia rute"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Memungkinkan pemegang mengikat ke penyedia rute terdaftar mana pun. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan admin perangkat"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Mengizinkan pemegang mengirimkan tujuan kepada administrator perangkat. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"mengikat ke masukan TV"</string>
@@ -447,8 +425,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Mengizinkan apl menggunakan pengawasandi media apa pun yang terpasang guna mengawasandikan media untuk diputar."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"kelola kredensial tepercaya"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Izinkan aplikasi memasang dan mencopot pemasangan sertifikat CA sebagai kredensial tepercaya."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"menjalankan aplikasi selama waktu nganggur"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Izin ini memungkinkan sistem Android menjalankan aplikasi di latar belakang saat perangkat tidak digunakan."</string>
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"mengikat ke layanan yang sedang menganggur"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Izin ini memungkinkan sistem Android mengikat layanan waktu menganggur aplikasi."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber daya yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, file dalam /dev. Izin ini berpotensi memengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnosis khusus perangkat keras oleh pabrikan atau operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"mengaktifkan atau menonaktifkan komponen apl"</string>
@@ -486,8 +464,6 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Memungkinkan aplikasi membaca informasi profil pribadi yang tersimpan di perangkat Anda, misalnya nama dan informasi kontak Anda. Ini artinya aplikasi dapat mengenali dan mengirim informasi profil Anda ke orang lain."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"ubah kartu kontak Anda"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Memungkinkan aplikasi mengubah atau menambah informasi profil pribadi yang tersimpan di perangkat Anda, seperti nama dan informasi kontak. Ini berarti aplikasi tersebut dapat mengenali Anda dan mengirim informasi profil Anda ke orang lain."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"sensor tubuh (misal: monitor detak jantung)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Memungkinkan aplikasi mengakses data dari sensor yang Anda gunakan untuk mengukur yang terjadi di dalam tubuh, misalnya detak jantung."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"membaca aliran sosial Anda"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Memungkinkan aplikasi mengakses dan menyinkronkan pembaruan sosial dari Anda dan teman. Hati-hati ketika berbagi informasi -- izin ini memungkinkan aplikasi membaca komunikasi antara Anda dan teman di jejaring sosial, terlepas dari kerahasiaan. Catatan: izin ini tidak dapat diberlakukan di semua jejaring sosial."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"menulis ke aliran sosial Anda"</string>
@@ -589,8 +565,6 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Mengizinkan apl mengontrol fitur telepon perangkat. Apl dengan izin ini dapat mengalihkan jaringan, menyalakan dan mematikan radio ponsel, dan melakukan hal serupa lainnya tanpa pernah memberi tahu Anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca identitas dan status ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"membaca keadaan ponsel dengan akurat"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Memungkinkan aplikasi mengakses keadaan ponsel dengan akurat. Izin ini memungkinkan aplikasi menentukan status panggilan yang sebenarnya, apakah panggilan sedang aktif atau di latar belakang, kegagalan panggilan, status sambungan data yang akurat, dan kegagalan sambungan data."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"cegah tablet dari tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Mengizinkan apl mencegah tablet tidur."</string>
@@ -658,9 +632,6 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Memungkinkan aplikasi menyambungkan ponsel ke dan memutus ponsel dari jaringan WiMAX."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"memberi skor jaringan"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Memungkinkan aplikasi menilai jaringan dan memengaruhi jaringan mana yang sebaiknya dipilih tablet."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Memungkinkan aplikasi menilai jaringan dan memengaruhi jaringan mana yang sebaiknya dipilih ponsel."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"sandingkan dengan perangkat Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di tablet, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di ponsel, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
@@ -714,16 +685,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan penyedia ketentuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"memanggil aplikasi konfigurasi yang disediakan operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Memungkinkan pemegang meminta aplikasi konfigurasi yang disediakan operator. Tidak pernah diperlukan aplikasi normal."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"mendengar untuk observasi kondisi jaringan"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Memungkinkan aplikasi mendengar untuk observasi kondisi jaringan. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"mengubah kalibrasi perangkat masukan"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Memungkinkan aplikasi mengubah parameter kalibrasi layar sentuh. Tidak diperlukan oleh aplikasi normal."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"mengakses sertifikat DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Memungkinkan aplikasi menyediakan dan menggunakan sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrol panjang dan karakter yang diizinkan dalam sandi pembuka layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>
@@ -1016,7 +981,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka laman ini."</string>
-    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke papan klip."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke clipboard."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"spasi"</string>
@@ -1356,10 +1321,6 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Mengizinkan aplikasi mengakses pengaman penyimpanan aman."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Kontrol untuk menampilkan dan menyembunyikan pengaman"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Izinkan aplikasi untuk mengontrol pengaman."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Dengarkan perubahan status kepercayaan."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Mengizinkan aplikasi mendengarkan perubahan dalam status kepercayaan."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Ikat ke layanan agen kepercayaan"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Mengizinkan aplikasi mengikat ke layanan agen kepercayaan."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Berinteraksi dengan sistem pemulihan dan pembaruan"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Mengizinkan aplikasi berinteraksi dengan sistem pemulihan dan pembaruan sistem."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mengontrol perbesar/perkecil"</string>
@@ -1386,7 +1347,6 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ubah wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Pendengar pemberitahuan"</string>
-    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Penyedia ketentuan"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN diaktifkan"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN diaktifkan oleh <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Sentuh untuk mengelola jaringan."</string>

@@ -26430,6 +26430,217 @@ package android.system {
 
 }
 
+package android.telecomm {
+
+  public final class CallAudioState implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static int ROUTE_ALL;
+    field public static int ROUTE_BLUETOOTH;
+    field public static int ROUTE_EARPIECE;
+    field public static int ROUTE_SPEAKER;
+    field public static int ROUTE_WIRED_HEADSET;
+    field public static int ROUTE_WIRED_OR_EARPIECE;
+    field public final boolean isMuted;
+    field public final int route;
+    field public final int supportedRouteMask;
+  }
+
+  public class CallCapabilities {
+    ctor public CallCapabilities();
+    field public static final int ADD_CALL = 16; // 0x10
+    field public static final int ALL = 511; // 0x1ff
+    field public static final int CONNECTION_HANDOFF = 256; // 0x100
+    field public static final int GENERIC_CONFERENCE = 128; // 0x80
+    field public static final int HOLD = 1; // 0x1
+    field public static final int MERGE_CALLS = 4; // 0x4
+    field public static final int MUTE = 64; // 0x40
+    field public static final int RESPOND_VIA_TEXT = 32; // 0x20
+    field public static final int SUPPORT_HOLD = 2; // 0x2
+    field public static final int SWAP_CALLS = 8; // 0x8
+  }
+
+  public final class CallInfo implements android.os.Parcelable {
+    ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
+    method public int describeContents();
+    method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
+    method public android.os.Bundle getExtras();
+    method public android.telecomm.GatewayInfo getGatewayInfo();
+    method public android.net.Uri getHandle();
+    method public java.lang.String getId();
+    method public android.net.Uri getOriginalHandle();
+    method public android.telecomm.CallState getState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CallNumberPresentation extends java.lang.Enum {
+    method public static android.telecomm.CallNumberPresentation valueOf(java.lang.String);
+    method public static final android.telecomm.CallNumberPresentation[] values();
+    enum_constant public static final android.telecomm.CallNumberPresentation ALLOWED;
+    enum_constant public static final android.telecomm.CallNumberPresentation PAYPHONE;
+    enum_constant public static final android.telecomm.CallNumberPresentation RESTRICTED;
+    enum_constant public static final android.telecomm.CallNumberPresentation UNKNOWN;
+  }
+
+  public abstract class CallService extends android.app.Service {
+    ctor public CallService();
+    method public abstract void abort(java.lang.String);
+    method public abstract void answer(java.lang.String);
+    method public abstract void call(android.telecomm.CallInfo);
+    method public abstract void disconnect(java.lang.String);
+    method protected final android.telecomm.CallServiceAdapter getAdapter();
+    method public final android.os.IBinder getBinder();
+    method public abstract void hold(java.lang.String);
+    method public abstract void isCompatibleWith(android.telecomm.CallInfo);
+    method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
+    method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void playDtmfTone(java.lang.String, char);
+    method public abstract void reject(java.lang.String);
+    method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
+    method public abstract void stopDtmfTone(java.lang.String);
+    method public abstract void unhold(java.lang.String);
+  }
+
+  public final class CallServiceAdapter {
+    method public void handleFailedOutgoingCall(java.lang.String, java.lang.String);
+    method public void handleSuccessfulOutgoingCall(java.lang.String);
+    method public void notifyIncomingCall(android.telecomm.CallInfo);
+    method public void setActive(java.lang.String);
+    method public void setDialing(java.lang.String);
+    method public void setDisconnected(java.lang.String, int, java.lang.String);
+    method public void setIsCompatibleWith(java.lang.String, boolean);
+    method public void setOnHold(java.lang.String);
+    method public void setRinging(java.lang.String);
+  }
+
+  public final class CallServiceDescriptor implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getCallServiceId();
+    method public int getNetworkType();
+    method public android.content.ComponentName getServiceComponent();
+    method public static android.telecomm.CallServiceDescriptor.Builder newBuilder(android.content.Context);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_MOBILE = 4; // 0x4
+    field public static final int FLAG_PSTN = 2; // 0x2
+    field public static final int FLAG_WIFI = 1; // 0x1
+  }
+
+  public static class CallServiceDescriptor.Builder {
+    method public android.telecomm.CallServiceDescriptor build();
+    method public android.telecomm.CallServiceDescriptor.Builder setCallService(java.lang.Class<? extends android.telecomm.CallService>);
+    method public android.telecomm.CallServiceDescriptor.Builder setNetworkType(int);
+  }
+
+  public final class CallServiceLookupResponse {
+    method public void setCallServiceDescriptors(java.util.List<android.telecomm.CallServiceDescriptor>);
+  }
+
+  public abstract class CallServiceProvider extends android.app.Service {
+    ctor protected CallServiceProvider();
+    method public abstract void lookupCallServices(android.telecomm.CallServiceLookupResponse);
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public abstract class CallServiceSelector extends android.app.Service {
+    ctor protected CallServiceSelector();
+    method protected final void cancelOutgoingCall(android.telecomm.CallInfo);
+    method protected final android.telecomm.CallServiceSelectorAdapter getAdapter();
+    method protected final java.util.Collection<android.telecomm.CallInfo> getCalls();
+    method protected void onAdapterAttached(android.telecomm.CallServiceSelectorAdapter);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>);
+  }
+
+  public final class CallServiceSelectorAdapter {
+    method public void cancelOutgoingCall(java.lang.String);
+    method public void setHandoffInfo(java.lang.String, android.net.Uri, android.os.Bundle);
+    method public void setSelectedCallServices(java.lang.String, java.util.List<android.telecomm.CallServiceDescriptor>);
+  }
+
+  public final class CallState extends java.lang.Enum {
+    method public static android.telecomm.CallState valueOf(java.lang.String);
+    method public static final android.telecomm.CallState[] values();
+    enum_constant public static final android.telecomm.CallState ACTIVE;
+    enum_constant public static final android.telecomm.CallState DIALING;
+    enum_constant public static final android.telecomm.CallState DISCONNECTED;
+    enum_constant public static final android.telecomm.CallState NEW;
+    enum_constant public static final android.telecomm.CallState ON_HOLD;
+    enum_constant public static final android.telecomm.CallState POST_DIAL;
+    enum_constant public static final android.telecomm.CallState POST_DIAL_WAIT;
+    enum_constant public static final android.telecomm.CallState RINGING;
+  }
+
+  public class GatewayInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.net.Uri getGatewayHandle();
+    method public java.lang.String getGatewayProviderPackageName();
+    method public android.net.Uri getOriginalHandle();
+    method public boolean isEmpty();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class InCallAdapter {
+    method public void answerCall(java.lang.String);
+    method public void disconnectCall(java.lang.String);
+    method public void handoffCall(java.lang.String);
+    method public void holdCall(java.lang.String);
+    method public void mute(boolean);
+    method public void playDtmfTone(java.lang.String, char);
+    method public void postDialContinue(java.lang.String);
+    method public void rejectCall(java.lang.String);
+    method public void setAudioRoute(int);
+    method public void stopDtmfTone(java.lang.String);
+    method public void unholdCall(java.lang.String);
+  }
+
+  public final class InCallCall implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCapabilities();
+    method public long getConnectTimeMillis();
+    method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
+    method public int getDisconnectCause();
+    method public android.telecomm.GatewayInfo getGatewayInfo();
+    method public android.net.Uri getHandle();
+    method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();
+    method public java.lang.String getId();
+    method public android.telecomm.CallState getState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class InCallService extends android.app.Service {
+    ctor protected InCallService();
+    method protected abstract void addCall(android.telecomm.InCallCall);
+    method protected final android.telecomm.InCallAdapter getAdapter();
+    method protected void onAdapterAttached(android.telecomm.InCallAdapter);
+    method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract void setPostDial(java.lang.String, java.lang.String);
+    method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
+    method protected abstract void updateCall(android.telecomm.InCallCall);
+  }
+
+  public final class TelecommConstants {
+    ctor public TelecommConstants();
+    field public static final java.lang.String ACTION_CALL_SERVICE;
+    field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
+    field public static final java.lang.String ACTION_CALL_SERVICE_SELECTOR;
+    field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+    field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
+    field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
+    field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
+    field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
+    field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
+    field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
+  }
+
+}
+
 package android.telephony {
 
   public final class CellIdentityCdma implements android.os.Parcelable {
@@ -26576,6 +26787,50 @@ package android.telephony {
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class DisconnectCause {
+    method public static java.lang.String toString(int);
+    field public static final int BUSY = 4; // 0x4
+    field public static final int CALL_BARRED = 20; // 0x14
+    field public static final int CDMA_ACCESS_BLOCKED = 35; // 0x23
+    field public static final int CDMA_ACCESS_FAILURE = 32; // 0x20
+    field public static final int CDMA_DROP = 27; // 0x1b
+    field public static final int CDMA_INTERCEPT = 28; // 0x1c
+    field public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 26; // 0x1a
+    field public static final int CDMA_NOT_EMERGENCY = 34; // 0x22
+    field public static final int CDMA_PREEMPTED = 33; // 0x21
+    field public static final int CDMA_REORDER = 29; // 0x1d
+    field public static final int CDMA_RETRY_ORDER = 31; // 0x1f
+    field public static final int CDMA_SO_REJECT = 30; // 0x1e
+    field public static final int CONGESTION = 5; // 0x5
+    field public static final int CS_RESTRICTED = 22; // 0x16
+    field public static final int CS_RESTRICTED_EMERGENCY = 24; // 0x18
+    field public static final int CS_RESTRICTED_NORMAL = 23; // 0x17
+    field public static final int ERROR_UNSPECIFIED = 36; // 0x24
+    field public static final int FDN_BLOCKED = 21; // 0x15
+    field public static final int ICC_ERROR = 19; // 0x13
+    field public static final int INCOMING_MISSED = 1; // 0x1
+    field public static final int INCOMING_REJECTED = 16; // 0x10
+    field public static final int INVALID_CREDENTIALS = 10; // 0xa
+    field public static final int INVALID_NUMBER = 7; // 0x7
+    field public static final int LIMIT_EXCEEDED = 15; // 0xf
+    field public static final int LOCAL = 3; // 0x3
+    field public static final int LOST_SIGNAL = 14; // 0xe
+    field public static final int MAXIMUM_VALID_VALUE = 36; // 0x24
+    field public static final int MINIMUM_VALID_VALUE = 0; // 0x0
+    field public static final int MMI = 6; // 0x6
+    field public static final int NORMAL = 2; // 0x2
+    field public static final int NOT_DISCONNECTED = 0; // 0x0
+    field public static final int NOT_VALID = -1; // 0xffffffff
+    field public static final int NUMBER_UNREACHABLE = 8; // 0x8
+    field public static final int OUT_OF_NETWORK = 11; // 0xb
+    field public static final int OUT_OF_SERVICE = 18; // 0x12
+    field public static final int POWER_OFF = 17; // 0x11
+    field public static final int SERVER_ERROR = 12; // 0xc
+    field public static final int SERVER_UNREACHABLE = 9; // 0x9
+    field public static final int TIMED_OUT = 13; // 0xd
+    field public static final int UNOBTAINABLE_NUMBER = 25; // 0x19
   }
 
   public class NeighboringCellInfo implements android.os.Parcelable {
@@ -26820,12 +27075,15 @@ package android.telephony {
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
+    method public int getWhenToMakeWifiCalls();
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
     method public int iccOpenLogicalChannel(java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
+    method public void newIncomingThirdPartyCall(android.content.ComponentName, java.lang.String, java.lang.String);
+    method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
@@ -26871,6 +27129,37 @@ package android.telephony {
     field public static final int SIM_STATE_PUK_REQUIRED = 3; // 0x3
     field public static final int SIM_STATE_READY = 5; // 0x5
     field public static final int SIM_STATE_UNKNOWN = 0; // 0x0
+  }
+
+  public class ThirdPartyCallListener {
+    ctor public ThirdPartyCallListener(com.android.internal.telephony.IThirdPartyCallListener);
+    method public void onCallEnded(int);
+    method public void onCallEstablished();
+    method public void onCallProviderAttached(android.telephony.ThirdPartyCallProvider);
+    method public void onRingingStarted();
+    field public static final int CALL_END_INCOMING_MISSED = 2; // 0x2
+    field public static final int CALL_END_NORMAL = 1; // 0x1
+    field public static final int CALL_END_OTHER = 3; // 0x3
+  }
+
+  public class ThirdPartyCallProvider {
+    ctor public ThirdPartyCallProvider();
+    method public void hangup();
+    method public void incomingCallAccept();
+    method public void mute(boolean);
+    method public void sendDtmf(char, android.telephony.ThirdPartyCallSendDtmfCallback);
+  }
+
+  public class ThirdPartyCallSendDtmfCallback {
+    ctor public ThirdPartyCallSendDtmfCallback(com.android.internal.telephony.IThirdPartyCallSendDtmfCallback);
+    method public void onSendDtmfCompleted();
+  }
+
+  public class ThirdPartyCallService {
+    ctor public ThirdPartyCallService();
+    method public android.os.IBinder getBinder();
+    method public void incomingCallAttach(android.telephony.ThirdPartyCallListener, java.lang.String);
+    method public void outgoingCallInitiate(android.telephony.ThirdPartyCallListener, java.lang.String);
   }
 
 }
@@ -36797,6 +37086,28 @@ package android.widget {
     method public void setOnZoomOutClickListener(android.view.View.OnClickListener);
     method public void setZoomSpeed(long);
     method public void show();
+  }
+
+}
+
+package com.android.internal.telephony {
+
+  public abstract interface IThirdPartyCallListener implements android.os.IInterface {
+    method public abstract void onCallEnded(int) throws android.os.RemoteException;
+    method public abstract void onCallEstablished() throws android.os.RemoteException;
+    method public abstract void onCallProviderAttached(com.android.internal.telephony.IThirdPartyCallProvider) throws android.os.RemoteException;
+    method public abstract void onRingingStarted() throws android.os.RemoteException;
+  }
+
+  public abstract interface IThirdPartyCallProvider implements android.os.IInterface {
+    method public abstract void hangup() throws android.os.RemoteException;
+    method public abstract void incomingCallAccept() throws android.os.RemoteException;
+    method public abstract void mute(boolean) throws android.os.RemoteException;
+    method public abstract void sendDtmf(char, com.android.internal.telephony.IThirdPartyCallSendDtmfCallback) throws android.os.RemoteException;
+  }
+
+  public abstract interface IThirdPartyCallSendDtmfCallback implements android.os.IInterface {
+    method public abstract void onSendDtmfCompleted() throws android.os.RemoteException;
   }
 
 }

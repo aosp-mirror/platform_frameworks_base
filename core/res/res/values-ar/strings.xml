@@ -27,17 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"تيرابايت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"بيتابايت"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> يوم"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة <xliff:g id="MINUTES">%2$d</xliff:g> دقيقة"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة <xliff:g id="MINUTES">%2$d</xliff:g> دقيقة"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة <xliff:g id="SECONDS">%2$d</xliff:g> ثانية"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة <xliff:g id="SECONDS">%2$d</xliff:g> ثانية"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بلا عنوان&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -146,7 +135,6 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"مزامنة"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"عمليات حذف <xliff:g id="CONTENT_TYPE">%s</xliff:g> كثيرة للغاية."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"قد تكون الشبكة مراقبة"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"بواسطة جهة خارجية غير معلومة"</string>
@@ -164,7 +152,6 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
-    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"سيتم إيقاف المشاهدة."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"سيتم إيقاف تشغيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"إعادة تشغيل في الوضع الآمن"</string>
@@ -184,12 +171,9 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"وضع الطائرة"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"وضع الطائرة قيد التشغيل"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"وضع الطائرة متوقف"</string>
-    <string name="global_action_settings" msgid="1756531602592545966">"الإعدادات"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"عمل"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"يمكنك تنفيذ إجراءات يمكن أن تكلفك مالاً."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"رسائلك"</string>
@@ -272,7 +256,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"إزالة الاختصارات"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"للسماح للتطبيق بإزالة اختصارات من الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"إعادة توجيه المكالمات الصادرة"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"للسماح للتطبيق بالاطلاع على الرقم الذي يتم الاتصال به عند إجراء مكالمة صادرة مع وجود الخيار لإعادة توجيه المكالمة إلى رقم آخر أو إنهاء المكالمة تمامًا."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"للسماح للتطبيق بمعالجة المكالمات الصادرة وتغيير الرقم المطلوب. يتيح هذا الإذن للتطبيق مراقبة المكالمات الصادرة أو إعادة توجيهها أو منعها."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"‏تلقي رسائل نصية (رسائل قصيرة SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏للسماح للتطبيق بتلقي ومعالجة الرسائل القصيرة SMS. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها إلى جهازك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"تلقي رسائل نصية (رسائل وسائط متعددة)"</string>
@@ -331,12 +315,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"للسماح للتطبيق باسترداد محتوى النافذة النشطة. يمكن للبرامج الضارة استرداد محتوى النافذة بالكامل وفحص جميع النصوص الموجودة بها باستثناء كلمات المرور."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"تمكين إمكانية الدخول مؤقتًا"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"يتيح لتطبيق تمكين إمكانية الدخول مؤقتًا بالجهاز. قد تتيح التطبيقات الضارة تمكين إمكانية الدخول بدون موافقة المستخدم."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"استرداد النافذة التي تم التقاطها"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"يتيح للتطبيق استعادة النافذة التي تم التقاطها. وقد تتمكن التطبيقات الضارة من تنفيذ تفاعل غير مصرح به مع نافذة التطبيق التي تنتحل صفة النظام."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"استرداد الإحصاءات الإطارية"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"يتيح للتطبيق جمع إحصاءات إطارية. وقد تتمكن التطبيقات الضارة من رصد الإحصاءات الإطارية للنوافذ من تطبيقات أخرى."</string>
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"استرداد معلومات النوافذ"</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"للسماح لأحد التطبيقات باستعادة معلومات حول النوافذ من مدير النوافذ. يمكن أن تستعيد التطبيقات الضارة معلومات الغرض منها استخدام النظام الداخلي."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"تصفية الأحداث"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"للسماح لأحد التطبيقات بتسجيل فلتر إدخال يعمل على تصفية مجموعة البث من جميع أحداث المستخدمين قبل إرسالها. يمكن أن يتحكم برنامج ضار في واجهة المستخدم النظام دون تدخل المستخدم."</string>
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"تكبير الشاشة"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"للسماح للتطبيق بتكبير محتوى شاشة. قد تؤدي التطبيقات الضارة إلى نقل محتوى الشاشة بطريقة تعرض الجهاز في وضع غير قابل للاستخدام."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"لوضع مدير الأنشطة في حالة إيقاف التشغيل. لا يتم تنفيذ إيقاف تشغيل كامل."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
@@ -351,8 +335,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏للسماح للتطبيق ببث إشعار باستلام رسالة قصيرة SMS. قد تستخدم التطبيقات الضارة هذا لتزييف الرسائل القصيرة SMS الواردة."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏إرسال بث WAP-PUSH المستلم"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏للسماح للتطبيق ببث إشعار باستلام رسالة WAP PUSH. يمكن أن تستخدم التطبيقات الضارة هذا لتزيف استلام رسالة وسائط متعددة أو لاستبدال محتوى أي صفحة ويب بمتغيرات ضارة بشكل غير ملحوظ."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"إرسال بث الشبكات التي تم تقييمها"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"السماح للتطبيق لكي يبث إشعارًا يفيد بأنه يلزم تقييم الشبكات. لا يلزم ذلك مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"تحديد عدد العمليات قيد التشغيل"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"للسماح للتطبيق بالتحكم في الحد الأقصى لعدد العمليات التي سيتم تشغيلها. غير مطلوب على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"فرض إغلاق تطبيقات الخلفية"</string>
@@ -400,14 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"‏للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة الشبكة الظاهرية الخاصة (VPN). لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"الالتزام بخلفية ما"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"الربط بخدمة التفاعل الصوتي"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة التفاعل الصوتي. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"الربط بالشاشة عن بُعد"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للعرض عن بُعد. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"الالتزام بخدمة أداة"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة الأداة. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"الربط مع خدمة مزود طريق"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"للسماح لحامل البطاقة الربط مع أي مزود طريق مسجل. لا يجب استخدامه على الإطلاق مع التطبيقات العادية."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"التفاعل مع مشرف الجهاز"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"للسماح للمالك بإرسال الأهداف إلى أحد مشرفي الجهاز. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"الالتزام بإدخال التلفزيون"</string>
@@ -447,8 +425,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"السماح للتطبيق باستخدام أي برنامج فك تشفير وسائط مثبت لفك التشفير من أجل التشغيل."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"إدارة بيانات الاعتماد الموثوقة"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏السماح للتطبيق بتثبيت شهادات CA وإلغاء تثبيتها باعتبارها بيانات اعتماد محل ثقة."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"تشغيل التطبيق أثناء وقت الخمول"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية في حين أن الجهاز ليس قيد الاستخدام."</string>
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"الالتزام بالخدمات الخاملة"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"‏يتيح هذا الإذن لنظام Android الارتباط بخدمات وضع الخمول لأحد التطبيقات."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"قراءة/كتابة إلى الموارد المملوكة بواسطة التشخيص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏للسماح للتطبيق بالقراءة والكتابة إلى أي مورد مملوك بواسطة مجموعة التشخيصات؛ على سبيل المثال، الملفات في /dev. من المحتمل أن يؤثر ذلك في استقرار النظام وأمانه. يجب ألا يستخدم ذلك سوى للتشخيصات الخاصة بالنظام من قِبل المصنِّع أو المشغِّل."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"تمكين مكونات التطبيق أو تعطيلها"</string>
@@ -486,8 +464,6 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"للسماح للتطبيق بقراءة المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"تعديل بطاقة جهة الاتصال الخاصة"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"للسماح للتطبيق بتغيير المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز أو الإضافة إليها، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تستخدمها لقياس ما يجري داخل جسمك، مثل معدل ضربات القلب."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"قراءة المشاركات الاجتماعية"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"للسماح للتطبيق بالدخول إلى التحديثات الاجتماعية منك ومن أصدقائك ومزامنتها. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق قراءة عمليات التواصل بينك وبين أصدقائك على الشبكات الاجتماعية، بغض النظر عن مدى السرية. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"كتابة إلى المشاركات الاجتماعية"</string>
@@ -589,8 +565,6 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"للسماح للتطبيق بالتحكم في ميزات الهاتف بالجهاز. يمكن لأحد التطبيقات بهذا الإذن تبديل الشبكات وتشغيل لاسلكي الهاتف وإيقاف تشغيله وما إلى ذلك بدون إعلامك على الإطلاق."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"قراءة حالات الهاتف الدقيقة"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"للسماح للتطبيق بالوصول إلى حالات الهاتف الدقيقة. يتيح هذا الإذن للتطبيق تحديد حالة المكالمة الفعلية، سواء أكانت مكالمة نشطة أم في الخلفية، وإخفاق الاتصال، وحالة اتصال البيانات الدقيقة، وإخفاق اتصال البيانات."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"منع الهاتف من الدخول في وضع السكون"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"للسماح للتطبيق بمنع الجهاز اللوحي من الانتقال إلى وضع السكون."</string>
@@ -658,9 +632,6 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغيير حالة WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏للسماح للتطبيق بتوصيل الجهاز اللوحي بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏للسماح للتطبيق بتوصيل الهاتف بشبكات WiMAX وقطع اتصاله بها."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"تقييم الشبكات"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"للسماح للتطبيق بترتيب الشبكات وتحديد تلك الشبكات التي من المفضل أن يستخدمها الجهاز اللوحي."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"للسماح للتطبيق بترتيب الشبكات وتحديد تلك الشبكات التي من المفضل أن يستخدمها الهاتف."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"الاتصال بأجهزة بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"للسماح للتطبيق بعرض تهيئة البلوتوث على الجهاز اللوحي وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"للسماح للتطبيق بعرض تهيئة البلوتوث على الهاتف وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
@@ -714,16 +685,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"يتيح للتطبيق استرجاع الإشعارات وفحصها ومسحها، بما في ذلك تلك التي نشرتها تطبيقات أخرى."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"الربط بخدمة تلقّي الإشعارات الصوتية"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"يتيح للمالك الربط بواجهة المستوى العلوي لخدمة تلقّي الإشعارات الصوتية. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"الربط بخدمة موفر الحالة"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة موفر الحالة. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"استدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"للسماح للمالك باستدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"الاستماع إلى ملاحظات حول أحوال الشبكة"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"للسماح للتطبيق بالاستماع إلى ملاحظات حول أحوال الشبكة. لا حاجة إلى هذا مع التطبيقات العادية."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"تغيير معايرة أجهزة الإدخال"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"يتيح للتطبيق إمكانية تعديل معلمات المعايرة في شاشة اللمس. يجب عدم اللجوء إليه مع التطبيقات العادية."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏الدخول إلى شهادات DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏للسماح لأحد التطبيقات بتقديم شهادات DRM واستخدامها. لا يجب أن يكون ذلك لازمًا مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"يمكنك التحكم في الطول والأحرف المسموح بها في كلمات مرور إلغاء تأمين الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>
@@ -1356,10 +1321,6 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"السماح لأحد التطبيقات بالدخول إلى التخزين المحمي بقفل المفاتيح."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"التحكم في عرض وإخفاء قفل المفاتيح"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"للسماح لأحد التطبيقات بالتحكم في قفل المفاتيح."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"معرفة تغييرات حالة الاعتماد."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"للسماح للتطبيق بالتعرف على التغييرات في حالة الاعتماد."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"الالتزام بخدمة الوكيل المعتمد"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"للسماح لأحد التطبيقات بالالتزام بخدمة الوكيل المعتمد."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"التفاعل مع نظام التحديث والاسترداد"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"للسماح للتطبيق بالتفاعل مع نظام الاسترداد وتحديثات النظام."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
@@ -1386,7 +1347,6 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
-    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"موفر الحالة"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏تم تنشيط الشبكة الظاهرية الخاصة (VPN)"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏تم تنشيط VPN بواسطة <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"المس لإدارة الشبكة."</string>
