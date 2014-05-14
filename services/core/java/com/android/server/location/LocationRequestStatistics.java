@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class LocationRequestStatistics {
     private static final String TAG = "LocationStats";
 
-    // Maps package name nad provider to location request statistics.
+    // Maps package name and provider to location request statistics.
     public final HashMap<PackageProviderKey, PackageStatistics> statistics
             = new HashMap<PackageProviderKey, PackageStatistics>();
 
