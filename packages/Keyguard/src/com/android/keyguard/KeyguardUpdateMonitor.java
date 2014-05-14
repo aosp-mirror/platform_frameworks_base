@@ -99,6 +99,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SCREEN_TURNED_ON = 319;
     private static final int MSG_SCREEN_TURNED_OFF = 320;
     private static final int MSG_NFC_UNLOCK = 321;
+    private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -111,6 +112,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
+    private boolean mBouncer;
     private boolean mBootCompleted;
 
     // Device provisioning state
@@ -155,7 +157,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     handleRingerModeChange(msg.arg1);
                     break;
                 case MSG_PHONE_STATE_CHANGED:
-                    handlePhoneStateChanged((String)msg.obj);
+                    handlePhoneStateChanged((String) msg.obj);
                     break;
                 case MSG_CLOCK_VISIBILITY_CHANGED:
                     handleClockVisibilityChanged();
@@ -167,7 +169,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     handleDevicePolicyManagerStateChanged();
                     break;
                 case MSG_USER_SWITCHING:
-                    handleUserSwitching(msg.arg1, (IRemoteCallback)msg.obj);
+                    handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
                     break;
                 case MSG_USER_SWITCH_COMPLETE:
                     handleUserSwitchComplete(msg.arg1);
@@ -177,6 +179,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_KEYGUARD_VISIBILITY_CHANGED:
                     handleKeyguardVisibilityChanged(msg.arg1);
+                    break;
+                case MSG_KEYGUARD_BOUNCER_CHANGED:
+                    handleKeyguardBouncerChanged(msg.arg1);
                     break;
                 case MSG_BOOT_COMPLETED:
                     handleBootCompleted();
@@ -887,6 +892,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
+     * Handle {@link #MSG_KEYGUARD_BOUNCER_CHANGED}
+     * @see #sendKeyguardBouncerChanged(boolean)
+     */
+    private void handleKeyguardBouncerChanged(int bouncer) {
+        if (DEBUG) Log.d(TAG, "handleKeyguardBouncerChanged(" + bouncer + ")");
+        boolean isBouncer = (bouncer == 1);
+        mBouncer = isBouncer;
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onKeyguardBouncerChanged(isBouncer);
+            }
+        }
+    }
+
+    /**
      * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
      */
     private void handleReportEmergencyCallAction() {
@@ -900,6 +921,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean isKeyguardVisible() {
         return mKeyguardIsVisible;
+    }
+
+    /**
+     * @return if the keyguard is currently in bouncer mode.
+     */
+    public boolean isKeyguardBouncer() {
+        return mBouncer;
     }
 
     public boolean isSwitchingUser() {
@@ -1018,6 +1046,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (DEBUG) Log.d(TAG, "sendKeyguardVisibilityChanged(" + showing + ")");
         Message message = mHandler.obtainMessage(MSG_KEYGUARD_VISIBILITY_CHANGED);
         message.arg1 = showing ? 1 : 0;
+        message.sendToTarget();
+    }
+
+    /**
+     * @see #handleKeyguardBouncerChanged(int)
+     */
+    public void sendKeyguardBouncerChanged(boolean showingBouncer) {
+        if (DEBUG) Log.d(TAG, "sendKeyguardBouncerChanged(" + showingBouncer + ")");
+        Message message = mHandler.obtainMessage(MSG_KEYGUARD_BOUNCER_CHANGED);
+        message.arg1 = showingBouncer ? 1 : 0;
         message.sendToTarget();
     }
 

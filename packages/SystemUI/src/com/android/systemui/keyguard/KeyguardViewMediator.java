@@ -807,7 +807,6 @@ public class KeyguardViewMediator extends SystemUI {
      */
     public void setOccluded(boolean isOccluded) {
         if (DEBUG) Log.d(TAG, "setOccluded " + isOccluded);
-        mUpdateMonitor.sendKeyguardVisibilityChanged(!isOccluded);
         mHandler.removeMessages(SET_OCCLUDED);
         Message msg = mHandler.obtainMessage(SET_OCCLUDED, (isOccluded ? 1 : 0), 0);
         mHandler.sendMessage(msg);

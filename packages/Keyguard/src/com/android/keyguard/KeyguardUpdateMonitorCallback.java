@@ -87,6 +87,12 @@ public class KeyguardUpdateMonitorCallback {
     }
 
     /**
+     * Called when the keyguard enters or leaves bouncer mode.
+     * @param bouncer if true, keyguard is now in bouncer mode.
+     */
+    public void onKeyguardBouncerChanged(boolean bouncer) { }
+
+    /**
      * Called when visibility of lockscreen clock changes, such as when
      * obscured by a widget.
      */

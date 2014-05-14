@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 
 /**
@@ -50,6 +51,12 @@ public class StatusBarKeyguardViewManager {
     private KeyguardBouncer mBouncer;
     private boolean mShowing;
     private boolean mOccluded;
+
+    private boolean mFirstUpdate = true;
+    private boolean mLastShowing;
+    private boolean mLastOccluded;
+    private boolean mLastBouncerShowing;
+    private boolean mLastBouncerDismissible;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -208,21 +215,48 @@ public class StatusBarKeyguardViewManager {
 
     private void updateStates() {
         int vis = mContainer.getSystemUiVisibility();
-        boolean bouncerDismissable = mBouncer.isShowing() && !mBouncer.needsFullscreenBouncer();
-        if (bouncerDismissable || !mShowing) {
-            mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
-        } else {
-            mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
-        }
-        if (mPhoneStatusBar.getNavigationBarView() != null) {
-            if (!(mShowing && !mOccluded) || mBouncer.isShowing()) {
-                mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+        boolean showing = mShowing;
+        boolean occluded = mOccluded;
+        boolean bouncerShowing = mBouncer.isShowing();
+        boolean bouncerDismissible = bouncerShowing && !mBouncer.needsFullscreenBouncer();
+
+        if ((bouncerDismissible || !showing) != (mLastBouncerDismissible || !mLastShowing)
+                || mFirstUpdate) {
+            if (bouncerDismissible || !showing) {
+                mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
             } else {
-                mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
+                mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
             }
         }
-        mStatusBarWindowManager.setBouncerShowing(mBouncer.isShowing());
-        mPhoneStatusBar.setBouncerShowing(mBouncer.isShowing());
+        if ((!(showing && !occluded) || bouncerShowing)
+                != (!(mLastShowing && !mLastOccluded) || mLastBouncerShowing) || mFirstUpdate) {
+            if (mPhoneStatusBar.getNavigationBarView() != null) {
+                if (!(showing && !occluded) || bouncerShowing) {
+                    mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+                } else {
+                    mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
+                }
+            }
+        }
+
+        if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
+            mStatusBarWindowManager.setBouncerShowing(bouncerShowing);
+            mPhoneStatusBar.setBouncerShowing(bouncerShowing);
+        }
+
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
+            updateMonitor.sendKeyguardVisibilityChanged(showing && !occluded);
+        }
+        if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
+            updateMonitor.sendKeyguardBouncerChanged(bouncerShowing);
+        }
+
+        mFirstUpdate = false;
+        mLastShowing = showing;
+        mLastOccluded = occluded;
+        mLastBouncerShowing = bouncerShowing;
+        mLastBouncerDismissible = bouncerDismissible;
     }
 
     public boolean onMenuPressed() {
