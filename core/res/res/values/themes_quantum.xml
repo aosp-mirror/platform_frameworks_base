@@ -377,9 +377,6 @@ please see themes_device_defaults.xml.
         <item name="colorControlActivated">?attr/colorPrimary</item>
         <item name="colorButtonNormal">@color/quantum_grey_700</item>
         <item name="colorButtonPressed">@color/quantum_grey_500</item>
-        <!-- TODO: Remove these attrs and move into button style. -->
-        <item name="colorButtonNormalColored">?attr/colorPrimary</item>
-        <item name="colorButtonPressedColored">?attr/colorPrimaryLight</item>
     </style>
 
     <!-- Quantum Paper theme (light version). -->
