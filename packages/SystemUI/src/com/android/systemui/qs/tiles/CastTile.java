@@ -74,19 +74,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         mHost.collapsePanels();
-
-        final Dialog[] dialog = new Dialog[1];
-        dialog[0] = MediaRouteDialogPresenter.createDialog(mContext,
-                MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
-                new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog[0].dismiss();
-                mHost.startSettingsActivity(WIFI_DISPLAY_SETTINGS);
-            }
-        });
-        dialog[0].getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-        dialog[0].show();
+        mUiHandler.post(mShowDialog);
     }
 
     @Override
@@ -118,6 +106,24 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
             info.connecting = connecting;
             info.connectedRouteName = connectedRouteName;
             refreshState(info);
+        }
+    };
+
+    private final Runnable mShowDialog = new Runnable() {
+        private Dialog mDialog;
+        @Override
+        public void run() {
+            mDialog = MediaRouteDialogPresenter.createDialog(mContext,
+                    MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
+                    new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDialog.dismiss();
+                    mHost.startSettingsActivity(WIFI_DISPLAY_SETTINGS);
+                }
+            });
+            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+            mDialog.show();
         }
     };
 }

@@ -58,7 +58,7 @@ public class BugreportTile extends QSTile<QSTile.State> {
     @Override
     protected void handleClick() {
         mHost.collapsePanels();
-        showBugreportDialog();
+        mUiHandler.post(mShowDialog);
     }
 
     @Override
@@ -69,35 +69,38 @@ public class BugreportTile extends QSTile<QSTile.State> {
         state.label = mContext.getString(com.android.internal.R.string.bugreport_title);
     }
 
-    private void showBugreportDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setPositiveButton(com.android.internal.R.string.report, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    // Add a little delay before executing, to give the
-                    // dialog a chance to go away before it takes a
-                    // screenshot.
-                    mHandler.postDelayed(new Runnable() {
-                        @Override public void run() {
-                            try {
-                                ActivityManagerNative.getDefault().requestBugReport();
-                            } catch (RemoteException e) {
+    private final Runnable mShowDialog = new Runnable() {
+        @Override
+        public void run() {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setPositiveButton(com.android.internal.R.string.report, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        // Add a little delay before executing, to give the
+                        // dialog a chance to go away before it takes a
+                        // screenshot.
+                        mHandler.postDelayed(new Runnable() {
+                            @Override public void run() {
+                                try {
+                                    ActivityManagerNative.getDefault().requestBugReport();
+                                } catch (RemoteException e) {
+                                }
                             }
-                        }
-                    }, 500);
+                        }, 500);
+                    }
                 }
+            });
+            builder.setMessage(com.android.internal.R.string.bugreport_message);
+            builder.setTitle(com.android.internal.R.string.bugreport_title);
+            builder.setCancelable(true);
+            final Dialog dialog = builder.create();
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            try {
+                WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+            } catch (RemoteException e) {
             }
-        });
-        builder.setMessage(com.android.internal.R.string.bugreport_message);
-        builder.setTitle(com.android.internal.R.string.bugreport_title);
-        builder.setCancelable(true);
-        final Dialog dialog = builder.create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        try {
-            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
-        } catch (RemoteException e) {
+            dialog.show();
         }
-        dialog.show();
-    }
+    };
 }

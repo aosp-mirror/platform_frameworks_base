@@ -52,6 +52,7 @@ public abstract class QSTile<TState extends State> implements Disposable {
     protected final Host mHost;
     protected final Context mContext;
     protected final H mHandler;
+    protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
 
     private Callback mCallback;
     protected final TState mState = newTileState();
