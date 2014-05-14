@@ -420,7 +420,7 @@ public class NetworkInfo implements Parcelable {
     @Override
     public String toString() {
         synchronized (this) {
-            StringBuilder builder = new StringBuilder("NetworkInfo: ");
+            StringBuilder builder = new StringBuilder("[");
             builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
             append("], state: ").append(mState).append("/").append(mDetailedState).
             append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
@@ -429,7 +429,8 @@ public class NetworkInfo implements Parcelable {
             append(", failover: ").append(mIsFailover).
             append(", isAvailable: ").append(mIsAvailable).
             append(", isConnectedToProvisioningNetwork: ").
-                    append(mIsConnectedToProvisioningNetwork);
+            append(mIsConnectedToProvisioningNetwork).
+            append("]");
             return builder.toString();
         }
     }

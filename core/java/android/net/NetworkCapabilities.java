@@ -323,6 +323,6 @@ public final class NetworkCapabilities implements Parcelable {
         String dnBand = ((mLinkDownBandwidthKbps > 0) ? " LinkDnBandwidth>=" +
                 mLinkDownBandwidthKbps + "Kbps" : "");
 
-        return "NetworkCapabilities: [" + transports + capabilities + upBand + dnBand + "]";
+        return "[" + transports + capabilities + upBand + dnBand + "]";
     }
 }
