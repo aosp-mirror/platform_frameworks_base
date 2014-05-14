@@ -75,7 +75,7 @@ To get these packages for your SDK, continue to
 <div class="sidebox-wrapper">
 <div class="sidebox">
 <h2>App Translations in Google Play</h2>
-<p>Google Play <a href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">App
+<p>Google Play <a href="{@docRoot}distribute/tools/localization-checklist.html#gp-trans">App 
 Translation Service</a> is available in the Developer Console to help you
 localize your app for a global user base. You can browse qualified vendors, get
 estimates, upload strings for translation, and then import the translations directly
@@ -99,7 +99,7 @@ the correct locations under <code>res/values</code>, so that
 localization works instantly.</p>
 
 <p>For more information about translation services in Google Play, see <a
-href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">Purchase
+href="{@docRoot}distribute/tools/localization-checklist.html#gp-trans">Purchase
 professional translations through the Developer Console</a>.</p>
 
 <p>To install the ADT Translation Manager Plugin follow these steps:</p>
@@ -129,7 +129,7 @@ the software can't be established, click <strong>OK</strong>.</p></li>
 <ul>
 <li>The full ADT Plugin must be installed in your Eclipse environment before you install the ADT Translation Manager Plugin.</li>
 <li>ADT Translation Manager Plugin is designed for use with the translation services offered through the Google Play Developer Console. It is not designed for general purpose import/export of strings. </li>
-<li>To use the plugin, you must <a href="{@docRoot}distribute/googleplay/publish/register.html">set up a Developer Console account</a>. </li>
+<li>To use the plugin, you must <a href="{@docRoot}distribute/googleplay/start.html">set up a Developer Console account</a>. </li>
 <li>Currently, translation services are available through the Developer Console only as part of a pilot program. To use the plugin, you must first sign up for the pilot program by visiting the Developer Console.</li>
 <li>If you downloaded ADT as part of the SDK ADT bundle, you may encounter an error when attempting to download the ADT Translation Manager Plugin from the remote repository. In that case, open the <strong>Install New
 Software</strong>, uncheck "Contact all update sites during install to find required software" at the bottom and try again. </li>

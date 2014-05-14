@@ -7,32 +7,29 @@ excludeFromSuggestions=true
 bring your first-class educational content into schools across the United
 States, and to a broader international audience in the future. </p>
 
-<div class="vspace size-1">
-  &nbsp;
-</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-    <h4>
-      For Developers
-    </h4>
-    <p>
+<div style="margin:0 0 20px 0;" class="clearfloat dynamic-grid">
+  <div style="width:48%; margin-right:2%; float:left;">
+
+    <h3>
+      FOR DEVELOPERS
+    </h3>
+ <p>
 Whether you have an existing educational app or are developing a fresh idea that
 will unlock learning in the classroom &mdash; sign up to receive information about
-the upcoming launch of Google Play for Education. To get your apps ready, read our
-<a href="{@docRoot}distribute/googleplay/edu/guidelines.html">guidelines</a> for building
-educational apps.</p>
-    </p><a href="http://developer.android.com/edu/signup">Developer Sign Up »</a>
+Google Play for Education. To get your apps ready, read our
+<a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">guidelines for building
+educational apps</a>.</p>
+    </p><a href="http://developer.android.com/edu/signup">Developer Sign Up »</a>    </p>
   </div>
-  <div class="layout-content-col span-6">
-    <h4>
-      For Educators
-    </h4>
-    <p>
+
+  <div style="width:48%; margin-left:2%; float:left;">
+
+    <h3>
+      FOR EDUCATORS
+    </h3>
+     <p>
 If you're a school or system interested in tablets and Google Play for Education,
 complete the expression of interest form at <a href="http://www.google.com/edu/android">www.google.com/edu/android</a>.
-  </p><a href="http://www.google.com/edu/android">School Interest Form »</a>
-  </div>
+  </p><a href="http://www.google.com/edu/android">School Interest Form »</a>  </div>
 </div>
-
-

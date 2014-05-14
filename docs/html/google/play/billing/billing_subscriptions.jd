@@ -1,6 +1,10 @@
-page.title=Subscriptions
+page.title=Google Play In-App Subscriptions
 parent.title=In-app Billing
 parent.link=index.html
+page.metaDescription=Subscriptions let you sell content or features in your app with automated, recurring billing.
+page.image=/images/play_dev.jpg
+page.tags="inapp, iap, billing"
+meta.tags="monetization, inappbilling, subscriptions"
 @jd:body
 
 <div id="qv-wrapper">

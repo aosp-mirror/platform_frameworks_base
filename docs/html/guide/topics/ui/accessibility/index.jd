@@ -1,5 +1,9 @@
 page.title=Accessibility
 parent.title=User Interface
+page.metaDescription=How to make your apps accessible to users with visual, physical, or other limitations. Robust support will increase your app's user base.
+
+page.tags="accessibility"
+page.image=/design/media/accessibility_contentdesc.png
 parent.link=../index.html
 @jd:body
 

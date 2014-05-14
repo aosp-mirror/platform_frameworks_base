@@ -1,0 +1,368 @@
+page.title=Developer Stories: The Opportunity of Android Tablets
+meta.tags="google play, developer story, journal, tablets, pure"
+pdage.metaDescription=Developers are investing in a full tablet experience for their apps and seeing those investments pay off big.
+page.image=/images/distribute/rememberthemilk.png
+
+@jd:body
+
+
+<p>"More" and more, developers are investing in a full tablet experience
+for their apps and are seeing those investments pay off big. The increased
+screen area on tablets opens up a world of possibilities, allowing for more
+engagement with the user &mdash; which can mean an increase in usage as well as
+more monetization opportunities. And with the growing wave of Android tablets that
+continue to hit the market, it’s an important piece of any developer’s mobile
+offering. </p>
+
+<p>Here are some stories from developers who are seeing real results as they
+expand their offering to include Android tablets.</p>
+
+
+<div style="margin-bottom:2em;" id="rememberthemilk"><!-- START STORY -->
+
+<h3>Remember The Milk: Lifting installs with tablet design</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "http://lh3.ggpht.com/xmnal18taauP2mjQFEhr1PhcItQ_W32IRuaD86IoL2U_4E-mfeKiliKtkISgOuA6Ln9n=w124">
+          
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+  
+
+    <h5>About the app</h5> 
+    
+    
+    <ul>
+      <li><a href="http://play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">Remember The Milk</a></li>
+      <li>A feature-packed to-do list app; never forget the milk (or anything else) again</li>
+    </ul>
+
+    <h5>Tablet Results</h5> 
+
+    <ul>
+      <li>83% jump in tablet installs following update </li>
+      <li>Nexus 7 is most popular Android device for app </li>
+      <li>Single APK for phones and tablets</li>
+      </ul>
+    
+    <div style="padding:.5em 0 0 1em;">
+      <a href="http://play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">
+        <img alt="Android app on Google Play"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+      </a>
+      
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+    <p style="margin-top:0;margin-bottom:12px;">When the Android tablet guidelines
+      came out in 2012, the team at Remember The Milk had already been thinking about
+      a redesign for their <a href="http://play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">feature-packed
+      to-do list app</a>. Omar Kilani, Co-founder of Remember The Milk, explains how
+      <a href="http://blog.rememberthemilk.com/2013/04/the-all-new-remember-the-milk-for-android-and-tablets-too/">updating</a>
+      their app to meet the tablet guidelines lead to an 83% jump in tablet installs: </p>
+
+    <p>“We took this as an opportunity to think about how we were going to approach
+      Android tablets differently from a user experience perspective. The guidelines
+      were a helpful resource, and with the extra screen real estate tablets afford,
+      users have the opportunity to see all of their data in context and drill down
+      on more items. All of this is accomplished using a single APK on Play, even though
+      the phone and tablet versions each capture completely different use cases for us.”</p>
+
+    <p>“In the month after updating, we saw our tablet installs on Google Play jump 83%,
+      and the Nexus 7 is now the most popular Android device amongst our users. For us,
+      designing for tablets was an investment that has really paid off.”</p>
+
+    <p>The team also came out with a number of other goodies &mdash; including a new set of
+      widgets and richer notifications, and more ways to provide an immersive experience
+      for their users.</p>
+  </div>
+
+  <div style="clear:both;margin-top:30px;width:auto;">
+  
+    <img src="{@docRoot}images/distribute/rememberthemilk.png">
+
+    <div style="width:600px;margin-top:0px;padding:0 90px;">
+      <p class="image-caption"><span style="font-weight:500;">Tablet redesign led to lift
+      in installs</span>: Following the redesign of the Android app, in part to meet the tablet
+      design criteria, Remember The Milk saw an 83% increase in tablet installs.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+
+<div style="margin-bottom:2em;" id="mint"><!-- START STORY -->
+
+<h3>Mint: More screen real estate = more engagement</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "https://lh5.ggpht.com/0xAIZJ1uE05b4RHNHgBBTIH6nRdPTY660T104xY7O2GbHXwab6YVmpU5yYg8yacfBg=w124">
+          
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+  
+
+    <h5>About the app</h5> 
+    
+    
+    <ul>
+ <li><a href="http://play.google.com/store/apps/details?id=com.mint">Mint.com Personal Finance</a> by Intuit Inc.</li>
+      <li>Financial management app targeting 7- to 10-inch tablets and phones</li>
+    </ul>
+
+    <h5>Tablet Results</h5> 
+
+    <ul>
+      <li>Able to offer richer UI features</li>
+      <li>Much higher user engagement</li>
+      <li>Longer sessions &mdash; more Android tablet users have sessions longer than 5 minutes</li>
+      </ul>
+    
+    <div style="padding:.5em 0 0 1em;">
+<a href="http://play.google.com/store/apps/details?id=com.mint">
+  <img alt="Android app on Google Play"
+       src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+</a>
+      
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+    <p style="margin-top:0;margin-bottom:12px;">When Intuit was thinking about
+expanding their Mint mobile offering to include a version optimized for Android
+tablets, they knew that taking the layout that worked for phones and simply
+showing an enlarged version wouldn’t take full advantage of the opportunities
+that tablets afford.</p>
+    
+    <p>“We knew we had a lot more real estate, and we wanted to provide a more
+immersive experience for our users” said Ken Sun, Intuit Group Product Manager
+at Mint.</p>
+
+<p>Intuit’s Mint app, which has a 4-star rating on Google Play, brings a number
+of features to Android tablets that aren’t available for phones, including a
+more visual presentation of personal financial data.</p>
+
+<p>“Whereas our app for phones is used throughout the day for quick sessions,
+we’ve seen a larger percentage of our tablet usage happen in the evening, for
+much longer sessions,” said Sun. “People are doing a lot more than just checking
+their spending. They’re looking at historical trends, re-categorizing
+transactions, analyzing the data and setting financial goals for the future
+&mdash; digging much deeper and being more thoughtful. One example is how much
+users are interacting with their own budgets in the tablet app.  Customer budget
+operations (view, edit, drill-down, etc.) are 7x higher on Android tablets than
+they are on phones.”</p>
+
+<p>Fifty percent more Android tablet users have Mint sessions of 5 minutes or
+longer than they do on phones.  “We’ve found that phone usage is indicative of a
+customer’s regular financial check-in, while tablet usage points towards more
+analysis and interaction with that customer’s personal financial data.  This is
+the sort of immersive engagement experience we were looking for; the tablet and
+phone apps serve as great complements to each other."</p>
+  </div>
+
+  <div style="clear:both;margin-top:40px;width:auto;">
+  
+    <img src="{@docRoot}images/distribute/mint.png">
+
+    <div style="width:600px;margin-top:0px;padding:0 90px;">
+      <p class="image-caption"><span style="font-weight:500;">Making the most of tablet screens</span>: Mint used the extra screen area on tablets to offer quick access to additional tools and information.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+
+<div style="margin:3em auto"><!-- START STORY -->
+
+
+<h3>TinyCo: Monetization opportunities abound on tablets</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 30px 20px;" src=
+            "https://lh6.ggpht.com/QTy7lOGRTS58NW4XEeym2sxpWKDmRNod_n3kBrHlqTRIyzIv2gkw8DfwiR4GIAdxiHw=w124">
+
+          
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+
+    <h5>About the app</h5> 
+
+    <ul>
+                <li><a href="http://play.google.com/store/apps/details?id=com.tinyco.village">Tiny Village</a> by TinyCo</li>
+            <li>Game targeting 7- to 10-inch tablets and phones</li>
+    </ul>
+
+    <h5>Tablet Results</h5> 
+
+    <ul>
+      <li>35% higher average revenue per paying user (ARPPU)</li>
+      <li>Consistent increase in user retention</li>
+      <li>3x increase in downloads to Android tablets in the last 6 months</li>
+    </ul>
+    
+    <div style="padding:.5em 0 0 1em;">
+<a href="http://play.google.com/store/apps/details?id=com.tinyco.village">
+  <img alt="Android app on Google Play"
+       src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+</a>
+      
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+    <p style="margin-top:0;margin-bottom:12px;">
+    
+<p>Over a year ago, app developer TinyCo, makers of a suite of games such as
+Tiny Monsters, decided to prioritize launching across multiple platforms
+effectively. They chose Android as one of their primary launch platforms because
+of its large installed base and global reach. They also knew that the growing
+base of Android tablet users represented a huge opportunity.</p>
+    
+    <p>Tiny Village was their first title to take advantage of the strategy, and
+it proved to be a winning one &mdash; especially in terms of Android
+tablets.</p>
+    
+    <p> “With continued optimization of the gameplay experience and a genuine
+commitment to our Android offering through our Griffin engine, all of our
+metrics started to rise,” said Rajeev Nagpal, Head of Product at TinyCo. In
+fact, they’ve seen Android tablet downloads more than triple in the last six
+months.</p>
+
+    <p>One of the first things they noticed about usage of Tiny Village on
+tablets was an increase in average revenue per paying user (ARPPU)&mdash;about 35%
+higher than on smaller-screen devices such as phones. Additionally, average
+revenue per user ARPU is now about 35% higher as well. “The game is just much
+more immersive on tablet.”</p>
+
+    <p>In addition to an increase in monetization metrics, they’ve also seen a
+consistent increase in retention over other platforms. “These are really
+important metrics for games &mdash; if you can get users to both stay around
+longer and spend more while they’re there, you have a recipe for success.”</p>
+  </div>
+
+  <div style="clear:both;margin-top:40px;width:auto;">
+  
+    <img src="{@docRoot}images/distribute/tinyvillage.png">
+
+    <div style="width:600px;margin-top:0px;padding:0 90px;">
+      <p class="image-caption"><span style="font-weight:500;">More monetization
+on tablets</span>: On Android tablets TinyCo has seen higher ARPPU and user
+retention than on phones.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+
+<div style="margin-bottom:2em;"><!-- START STORY -->
+
+<h3>Instapaper: Riding the growing wave of Android tablets</h3>
+
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "https://lh3.ggpht.com/30KKcrIFO8V_wRfhnHaI9l0CLH_orIVFE7Xywtr9TBxAf0hi2BaZkKyBOs63Yfavpg=w124">
+
+          
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+  
+  
+  
+
+    <h5>About the app</h5> 
+    <ul>
+                <li><a href="http://play.google.com/store/apps/details?id=com.instapaper.android">Instapaper</a> by Mobelux</li>
+      <li>Content-browsing utility that targets 7- to 10-inch tablets and phones</li>
+    </ul>
+
+    <h5>Tablet Results</h5> 
+
+    <ul>
+      <li>Tablets are now 50% of the app's installed base.</li>
+    </ul>
+    
+    <div style="padding:.5em 0 0 1em;">
+<a href="http://play.google.com/store/apps/details?id=com.instapaper.android">
+  <img alt="Android app on Google Play"
+       src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+</a>
+      
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+    <p style="margin-top:0;margin-bottom:12px;">Instapaper for Android is an app
+for saving web content to read later. Developer Mobelux decided that creating a
+great UI for Android tablet users would be an essential part of their initial launch
+plan.</p>
+    
+    <p>The app launched at the beginning of the summer of 2012, just in time to
+take advantage of a new tide of Android tablets, including the <span
+style="white-space:nowrap;">Nexus 7</span> tablet. The app has since seen huge
+popularity among tablet users, in particular, on Nexus 7. On the day that
+pre-orders of Nexus 7 began arriving, Mobelux saw a 600% jump in downloads of
+its app on Google Play.</p>
+
+    <p>“We saw a promising new set of Android tablets about to hit the market
+and wanted to position ourselves to be ready for them” said Jeff Rock of
+Mobelux. “It was a market that others were hesitant to explore, but the decision
+to prioritize tablets has paid off very well for us.”</p>
+
+    <p>Since that initial 600% jump in downloads, Instapaper for Android has
+continued to see a successful run on Android tablets. In fact, Android tablets
+now represent about 50% of their installed base. “With more and more Android
+tablets coming online, we’re excited to see how our investment in Android
+tablets continues to pay off.”</p>
+  </div>
+
+  <div style="clear:both;margin-top:40px;width:auto;">
+  
+    <img src="{@docRoot}images/distribute/instapaper.png">
+
+    <div style="width:600px;margin-top:0px;padding:0 90px;">
+      <p class="image-caption"><span style="font-weight:500;">Popular with
+tablet users</span>: A great tablet UI and browsing convenience make Instapaper
+popular with Android tablet users.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+
+

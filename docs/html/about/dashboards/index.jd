@@ -1,4 +1,7 @@
 page.title=Dashboards
+page.metaDescription=page.metaDescription=Charts that give you an overview of device characteristics and platform versions that are active in the Android ecosystem.
+page.tags="android, dashboard, platforms, versions"
+meta.tags="ecosystem, versions, whatsnew"
 @jd:body
 
 <style>
@@ -22,7 +25,7 @@ tr th.total {
 <div class="sidebox">
 <h2>Google Play Install Stats</h2>
 <p>The Google Play Developer Console also provides <a
-href="{@docRoot}distribute/googleplay/about/distribution.html#stats">detailed statistics</a>
+href="{@docRoot}distribute/googleplay/developer-console.html#app-stats">detailed statistics</a>
 about your users' devices. Those stats may help you prioritize the device profiles for which
 you optimize your app.</p>
 </div>

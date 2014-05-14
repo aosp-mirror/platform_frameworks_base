@@ -689,7 +689,7 @@ the device.</td>
   <td>The application requires landscape orientation.</td>
   <td rowspan="2">
      <p>For example, if your app requires portrait orientation, you should declare
-<code>&lt;uses-feature android:name="android.hardware.screen.portrait"/></code> so that only devices
+<code>&lt;uses-feature android:name="android.hardware.screen.portrait"/&gt;</code> so that only devices
 that support portrait orientation (whether always or by user choice) can install your app. If your
 application <em>supports</em> both orientations, then you don't need to declare either.</p>
     <p>Both orientations are assumed <em>not required</em>, by default, so your app may be installed
