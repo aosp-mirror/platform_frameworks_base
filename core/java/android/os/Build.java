@@ -83,7 +83,8 @@ public class Build {
      *
      * @hide
      */
-    public static final String[] SUPPORTED_ABIS = getString("ro.product.cpu.abilist").split(",");
+    public static final String[] SUPPORTED_ABIS = SystemProperties.get("ro.product.cpu.abilist")
+            .split(",");
 
     /**
      * An ordered list of <b>32 bit</b> ABIs supported by this device. The most preferred ABI
@@ -93,8 +94,8 @@ public class Build {
      *
      * @hide
      */
-    public static final String[] SUPPORTED_32_BIT_ABIS = getString("ro.product.cpu.abilist32")
-            .split(",");
+    public static final String[] SUPPORTED_32_BIT_ABIS =
+            SystemProperties.get("ro.product.cpu.abilist32").split(",");
 
     /**
      * An ordered list of <b>64 bit</b> ABIs supported by this device. The most preferred ABI
@@ -104,8 +105,8 @@ public class Build {
      *
      * @hide
      */
-    public static final String[] SUPPORTED_64_BIT_ABIS = getString("ro.product.cpu.abilist64")
-            .split(",");
+    public static final String[] SUPPORTED_64_BIT_ABIS =
+            SystemProperties.get("ro.product.cpu.abilist64").split(",");
 
 
     /** Various version strings. */
