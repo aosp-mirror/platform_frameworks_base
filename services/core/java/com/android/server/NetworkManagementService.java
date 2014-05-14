@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
@@ -2155,9 +2156,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setPermission(boolean internal, boolean changeNetState, int[] uids) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "permission", "set");
-        if (internal) cmd.appendArg("CI");
-        if (changeNetState) cmd.appendArg("CNS");
+        final Command cmd = new Command("network", "permission", "user", "set");
+        if (internal) cmd.appendArg(CONNECTIVITY_INTERNAL);
+        if (changeNetState) cmd.appendArg(CHANGE_NETWORK_STATE);
         for (int i=0; i<uids.length; i++) {
             cmd.appendArg(uids[i]);
         }
@@ -2173,7 +2174,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void clearPermission(int[] uids) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "permission", "clear");
+        final Command cmd = new Command("network", "permission", "user", "clear");
         for (int i=0; i<uids.length; i++) {
             cmd.appendArg(uids[i]);
         }
