@@ -49,7 +49,7 @@ public class IdleController extends StateController {
     private static Object sCreationLock = new Object();
     private static volatile IdleController sController;
 
-    public IdleController getController(TaskManagerService service) {
+    public static IdleController get(TaskManagerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new IdleController(service);
@@ -67,7 +67,7 @@ public class IdleController extends StateController {
      * StateController interface
      */
     @Override
-    public void maybeTrackTaskState(TaskStatus taskStatus) {
+    public void maybeStartTrackingTask(TaskStatus taskStatus) {
         if (taskStatus.hasIdleConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.add(taskStatus);
@@ -77,7 +77,7 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void removeTaskStateIfTracked(TaskStatus taskStatus) {
+    public void maybeStopTrackingTask(TaskStatus taskStatus) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.remove(taskStatus);
         }
@@ -90,9 +90,9 @@ public class IdleController extends StateController {
         synchronized (mTrackedTasks) {
             for (TaskStatus task : mTrackedTasks) {
                 task.idleConstraintSatisfied.set(isIdle);
-                mStateChangedListener.onTaskStateChanged(task);
             }
         }
+        mStateChangedListener.onControllerStateChanged();
     }
 
     /**

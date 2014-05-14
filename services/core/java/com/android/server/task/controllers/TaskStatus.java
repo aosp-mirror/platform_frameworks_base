@@ -18,7 +18,6 @@ package com.android.server.task.controllers;
 
 import android.app.task.Task;
 import android.content.ComponentName;
-import android.content.pm.PackageParser;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -39,65 +38,67 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TaskStatus {
     final Task task;
-    final int taskId;
     final int uId;
-    final Bundle extras;
 
+    /** At reschedule time we need to know whether to update task on disk. */
+    final boolean persisted;
+
+    // Constraints.
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean timeConstraintSatisfied = new AtomicBoolean();
+    final AtomicBoolean timeDelayConstraintSatisfied = new AtomicBoolean();
+    final AtomicBoolean deadlineConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean idleConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean meteredConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean connectivityConstraintSatisfied = new AtomicBoolean();
 
-    private final boolean hasChargingConstraint;
-    private final boolean hasTimingConstraint;
-    private final boolean hasIdleConstraint;
-    private final boolean hasMeteredConstraint;
-    private final boolean hasConnectivityConstraint;
-
+    /**
+     * Earliest point in the future at which this task will be eligible to run. A value of 0
+     * indicates there is no delay constraint. See {@link #hasTimingDelayConstraint()}.
+     */
     private long earliestRunTimeElapsedMillis;
+    /**
+     * Latest point in the future at which this task must be run. A value of {@link Long#MAX_VALUE}
+     * indicates there is no deadline constraint. See {@link #hasDeadlineConstraint()}.
+     */
     private long latestRunTimeElapsedMillis;
+
+    private final int numFailures;
 
     /** Provide a handle to the service that this task will be run on. */
     public int getServiceToken() {
         return uId;
     }
 
-    /** Generate a TaskStatus object for a given task and uid. */
-    // TODO: reimplement this to reuse these objects instead of creating a new one each time?
-    public static TaskStatus getForTaskAndUser(Task task, int userId, int uId) {
-        return new TaskStatus(task, userId, uId);
-    }
-
-    /** Set up the state of a newly scheduled task. */
-    TaskStatus(Task task, int userId, int uId) {
+    /** Create a newly scheduled task. */
+    public TaskStatus(Task task, int uId, boolean persisted) {
         this.task = task;
-        this.taskId = task.getTaskId();
-        this.extras = task.getExtras();
         this.uId = uId;
+        this.numFailures = 0;
+        this.persisted = persisted;
 
-        hasChargingConstraint = task.isRequireCharging();
-        hasIdleConstraint = task.isRequireDeviceIdle();
-
+        final long elapsedNow = SystemClock.elapsedRealtime();
         // Timing constraints
         if (task.isPeriodic()) {
-            long elapsedNow = SystemClock.elapsedRealtime();
             earliestRunTimeElapsedMillis = elapsedNow;
             latestRunTimeElapsedMillis = elapsedNow + task.getIntervalMillis();
-            hasTimingConstraint = true;
-        } else if (task.getMinLatencyMillis() != 0L || task.getMaxExecutionDelayMillis() != 0L) {
-            earliestRunTimeElapsedMillis = task.getMinLatencyMillis() > 0L ?
-                    task.getMinLatencyMillis() : Long.MAX_VALUE;
-            latestRunTimeElapsedMillis = task.getMaxExecutionDelayMillis() > 0L ?
-                    task.getMaxExecutionDelayMillis() : Long.MAX_VALUE;
-            hasTimingConstraint = true;
         } else {
-            hasTimingConstraint = false;
+            earliestRunTimeElapsedMillis = task.hasEarlyConstraint() ?
+                    elapsedNow + task.getMinLatencyMillis() : 0L;
+            latestRunTimeElapsedMillis = task.hasLateConstraint() ?
+                    elapsedNow + task.getMaxExecutionDelayMillis() : Long.MAX_VALUE;
         }
+    }
 
-        // Networking constraints
-        hasMeteredConstraint = task.getNetworkCapabilities() == Task.NetworkType.UNMETERED;
-        hasConnectivityConstraint = task.getNetworkCapabilities() == Task.NetworkType.ANY;
+    public TaskStatus(TaskStatus rescheduling, long newEarliestRuntimeElapsed,
+                      long newLatestRuntimeElapsed, int backoffAttempt) {
+        this.task = rescheduling.task;
+
+        this.uId = rescheduling.getUid();
+        this.persisted = rescheduling.isPersisted();
+        this.numFailures = backoffAttempt;
+
+        earliestRunTimeElapsedMillis = newEarliestRuntimeElapsed;
+        latestRunTimeElapsedMillis = newLatestRuntimeElapsed;
     }
 
     public Task getTask() {
@@ -105,7 +106,11 @@ public class TaskStatus {
     }
 
     public int getTaskId() {
-        return taskId;
+        return task.getId();
+    }
+
+    public int getNumFailures() {
+        return numFailures;
     }
 
     public ComponentName getServiceComponent() {
@@ -121,52 +126,60 @@ public class TaskStatus {
     }
 
     public Bundle getExtras() {
-        return extras;
+        return task.getExtras();
     }
 
-    boolean hasConnectivityConstraint() {
-        return hasConnectivityConstraint;
+    public boolean hasConnectivityConstraint() {
+        return task.getNetworkCapabilities() == Task.NetworkType.ANY;
     }
 
-    boolean hasMeteredConstraint() {
-        return hasMeteredConstraint;
+    public boolean hasMeteredConstraint() {
+        return task.getNetworkCapabilities() == Task.NetworkType.UNMETERED;
     }
 
-    boolean hasChargingConstraint() {
-        return hasChargingConstraint;
+    public boolean hasChargingConstraint() {
+        return task.isRequireCharging();
     }
 
-    boolean hasTimingConstraint() {
-        return hasTimingConstraint;
+    public boolean hasTimingDelayConstraint() {
+        return earliestRunTimeElapsedMillis != 0L;
     }
 
-    boolean hasIdleConstraint() {
-        return hasIdleConstraint;
+    public boolean hasDeadlineConstraint() {
+        return latestRunTimeElapsedMillis != Long.MAX_VALUE;
     }
 
-    long getEarliestRunTime() {
+    public boolean hasIdleConstraint() {
+        return task.isRequireDeviceIdle();
+    }
+
+    public long getEarliestRunTime() {
         return earliestRunTimeElapsedMillis;
     }
 
-    long getLatestRunTime() {
+    public long getLatestRunTimeElapsed() {
         return latestRunTimeElapsedMillis;
     }
 
+    public boolean isPersisted() {
+        return persisted;
+    }
     /**
-     * @return whether this task is ready to run, based on its requirements.
+     * @return Whether or not this task is ready to run, based on its requirements.
      */
     public synchronized boolean isReady() {
-        return (!hasChargingConstraint || chargingConstraintSatisfied.get())
-                && (!hasTimingConstraint || timeConstraintSatisfied.get())
-                && (!hasConnectivityConstraint || connectivityConstraintSatisfied.get())
-                && (!hasMeteredConstraint || meteredConstraintSatisfied.get())
-                && (!hasIdleConstraint || idleConstraintSatisfied.get());
+        return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
+                && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
+                && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
+                && (!hasMeteredConstraint() || meteredConstraintSatisfied.get())
+                && (!hasIdleConstraint() || idleConstraintSatisfied.get())
+                && (!hasDeadlineConstraint() || deadlineConstraintSatisfied.get());
     }
 
     @Override
     public int hashCode() {
         int result = getServiceComponent().hashCode();
-        result = 31 * result + taskId;
+        result = 31 * result + task.getId();
         result = 31 * result + uId;
         return result;
     }
@@ -177,14 +190,14 @@ public class TaskStatus {
         if (!(o instanceof TaskStatus)) return false;
 
         TaskStatus that = (TaskStatus) o;
-        return ((taskId == that.taskId)
+        return ((task.getId() == that.task.getId())
                 && (uId == that.uId)
                 && (getServiceComponent().equals(that.getServiceComponent())));
     }
 
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("Task "); pw.println(taskId);
+        pw.print(prefix); pw.print("Task "); pw.println(task.getId());
         pw.print(prefix); pw.print("uid="); pw.println(uId);
         pw.print(prefix); pw.print("component="); pw.println(task.getService());
     }

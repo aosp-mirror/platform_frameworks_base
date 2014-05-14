@@ -42,10 +42,10 @@ public abstract class StateController {
      * Also called when updating a task, so implementing controllers have to be aware of
      * preexisting tasks.
      */
-    public abstract void maybeTrackTaskState(TaskStatus taskStatus);
+    public abstract void maybeStartTrackingTask(TaskStatus taskStatus);
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
-    public abstract void removeTaskStateIfTracked(TaskStatus taskStatus);
+    public abstract void maybeStopTrackingTask(TaskStatus taskStatus);
 
 }

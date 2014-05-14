@@ -5356,13 +5356,13 @@ package android.app.task {
     method public int describeContents();
     method public int getBackoffPolicy();
     method public android.os.Bundle getExtras();
+    method public int getId();
     method public long getInitialBackoffMillis();
     method public long getIntervalMillis();
     method public long getMaxExecutionDelayMillis();
     method public long getMinLatencyMillis();
     method public int getNetworkCapabilities();
     method public android.content.ComponentName getService();
-    method public int getTaskId();
     method public boolean isPeriodic();
     method public boolean isRequireCharging();
     method public boolean isRequireDeviceIdle();
@@ -5375,7 +5375,7 @@ package android.app.task {
     field public static final int LINEAR = 0; // 0x0
   }
 
-  public final class Task.Builder {
+  public static final class Task.Builder {
     ctor public Task.Builder(int, android.content.ComponentName);
     method public android.app.task.Task build();
     method public android.app.task.Task.Builder setBackoffCriteria(long, int);
@@ -5389,8 +5389,9 @@ package android.app.task {
   }
 
   public static abstract interface Task.NetworkType {
-    field public static final int ANY = 0; // 0x0
-    field public static final int UNMETERED = 1; // 0x1
+    field public static final int ANY = 1; // 0x1
+    field public static final int NONE = 0; // 0x0
+    field public static final int UNMETERED = 2; // 0x2
   }
 
   public abstract class TaskManager {
@@ -5399,8 +5400,8 @@ package android.app.task {
     method public abstract void cancelAll();
     method public abstract java.util.List<android.app.task.Task> getAllPendingTasks();
     method public abstract int schedule(android.app.task.Task);
-    field public static final int RESULT_INVALID_PARAMETERS = -1; // 0xffffffff
-    field public static final int RESULT_OVER_QUOTA = -2; // 0xfffffffe
+    field public static final int RESULT_FAILURE = 0; // 0x0
+    field public static final int RESULT_SUCCESS = 1; // 0x1
   }
 
   public class TaskParams implements android.os.Parcelable {
