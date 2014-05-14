@@ -547,12 +547,13 @@ public class ConnectivityManager {
      * @param preference the network type to prefer over all others.  It is
      *         unspecified what happens to the old preferred network in the
      *         overall ordering.
-     * @deprecated Functionality has been removed as it no longer makes sense,
-     *         with many more than two networks - we'd need an array to express
-     *         preference.  Instead we use dynamic network properties of
-     *         the networks to describe their precedence.
      */
     public void setNetworkPreference(int preference) {
+        // TODO - deprecate with:
+        // @deprecated Functionality has been removed as it no longer makes sense,
+        //         with many more than two networks - we'd need an array to express
+        //         preference.  Instead we use dynamic network properties of
+        //         the networks to describe their precedence.
     }
 
     /**
@@ -562,12 +563,13 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     * @deprecated Functionality has been removed as it no longer makes sense,
-     *         with many more than two networks - we'd need an array to express
-     *         preference.  Instead we use dynamic network properties of
-     *         the networks to describe their precedence.
      */
     public int getNetworkPreference() {
+        // TODO - deprecate with:
+        // @deprecated Functionality has been removed as it no longer makes sense,
+        //         with many more than two networks - we'd need an array to express
+        //         preference.  Instead we use dynamic network properties of
+        //         the networks to describe their precedence.
         return -1;
     }
 
