@@ -26,6 +26,9 @@ public class NotificationComparator
     @Override
     public int compare(NotificationManagerService.NotificationRecord lhs,
             NotificationManagerService.NotificationRecord rhs) {
+        if (lhs.isRecentlyIntrusive() != rhs.isRecentlyIntrusive()) {
+            return lhs.isRecentlyIntrusive() ? -1 : 1;
+        }
         final int leftScore = lhs.sbn.getScore();
         final int rightScore = rhs.sbn.getScore();
         if (leftScore != rightScore) {

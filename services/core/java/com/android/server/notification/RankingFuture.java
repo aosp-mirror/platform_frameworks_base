@@ -64,8 +64,8 @@ public abstract class RankingFuture
 
     @Override
     public int compareTo(Delayed another) {
-        return Long.compare(getDelay(TimeUnit.MICROSECONDS),
-                another.getDelay(TimeUnit.MICROSECONDS));
+        return Long.compare(getDelay(TimeUnit.MILLISECONDS),
+                another.getDelay(TimeUnit.MILLISECONDS));
     }
 
     @Override

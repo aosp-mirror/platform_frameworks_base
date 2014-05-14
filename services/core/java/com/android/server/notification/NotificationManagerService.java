@@ -457,7 +457,11 @@ public class NotificationManagerService extends SystemService {
         final StatusBarNotification sbn;
         SingleNotificationStats stats;
         IBinder statusBarKey;
+
+        // These members are used by NotificationSignalExtractors
+        // to communicate with the ranking module.
         private float mContactAffinity;
+        private boolean mRecentlyIntrusive;
 
         NotificationRecord(StatusBarNotification sbn)
         {
@@ -547,6 +551,14 @@ public class NotificationManagerService extends SystemService {
 
         public float getContactAffinity() {
             return mContactAffinity;
+        }
+
+        public boolean isRecentlyIntrusive() {
+            return mRecentlyIntrusive;
+        }
+
+        public void setRecentlyIntusive(boolean recentlyIntrusive) {
+            mRecentlyIntrusive = recentlyIntrusive;
         }
     }
 
