@@ -2698,10 +2698,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static int keyCodeFromString(String symbolicName) {
         if (symbolicName.startsWith(LABEL_PREFIX)) {
             symbolicName = symbolicName.substring(LABEL_PREFIX.length());
-        }
-        int keyCode = nativeKeyCodeFromString(symbolicName);
-        if (keyCode > 0) {
-            return keyCode;
+            int keyCode = nativeKeyCodeFromString(symbolicName);
+            if (keyCode > 0) {
+                return keyCode;
+            }
         }
         try {
             return Integer.parseInt(symbolicName, 10);
