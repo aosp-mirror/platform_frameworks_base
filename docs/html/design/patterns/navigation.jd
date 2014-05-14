@@ -1,5 +1,6 @@
 page.title=Navigation with Back and Up
 page.tags="navigation","activity","task","up navigation","back navigation"
+page.image=/design/media/navigation_between_siblings_gmail.png
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}training/implementing-navigation/index.html">
