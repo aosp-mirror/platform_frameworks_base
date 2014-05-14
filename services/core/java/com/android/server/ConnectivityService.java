@@ -5088,6 +5088,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         LinkProperties newLp = networkAgent.linkProperties;
         int netId = networkAgent.network.netId;
 
+        updateInterfaces(newLp, oldLp, netId);
         updateMtu(newLp, oldLp);
         // TODO - figure out what to do for clat
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
@@ -5096,6 +5097,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId);
     }
+
+    private void updateInterfaces(LinkProperties newLp, LinkProperties oldLp, int netId) {
+        CompareResult<String> interfaceDiff = new CompareResult<String>();
+        if (oldLp != null) {
+            interfaceDiff = oldLp.compareAllInterfaceNames(newLp);
+        } else if (newLp != null) {
+            interfaceDiff.added = newLp.getAllInterfaceNames();
+        }
+        for (String iface : interfaceDiff.added) {
+            try {
+                mNetd.addInterfaceToNetwork(iface, netId);
+            } catch (Exception e) {
+                loge("Exception adding interface: " + e);
+            }
+        }
+        for (String iface : interfaceDiff.removed) {
+            try {
+                mNetd.removeInterfaceFromNetwork(iface, netId);
+            } catch (Exception e) {
+                loge("Exception removing interface: " + e);
+            }
+        }
+    }
+
     private void updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
         CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
         if (oldLp != null) {
@@ -5300,8 +5325,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (state == NetworkInfo.State.CONNECTED) {
             // TODO - check if we want it (optimization)
             try {
-                mNetd.createNetwork(networkAgent.network.netId,
-                        networkAgent.linkProperties.getInterfaceName());
+                mNetd.createNetwork(networkAgent.network.netId);
             } catch (Exception e) {
                 loge("Error creating Network " + networkAgent.network.netId);
             }

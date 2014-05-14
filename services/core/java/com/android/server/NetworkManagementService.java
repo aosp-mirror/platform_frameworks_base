@@ -1938,11 +1938,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void createNetwork(int netId, String iface) {
+    public void createNetwork(int netId) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("network", "create", netId, iface);
+            mConnector.execute("network", "create", netId);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1954,6 +1954,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         try {
             mConnector.execute("network", "destroy", netId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addInterfaceToNetwork(String iface, int netId) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "addiface", netId, iface);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void removeInterfaceFromNetwork(String iface, int netId) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("network", "removeiface", netId, iface);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

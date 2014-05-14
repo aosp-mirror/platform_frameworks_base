@@ -642,6 +642,35 @@ public class LinkProperties implements Parcelable {
         return result;
     }
 
+    /**
+     * Compares all interface names in this LinkProperties with another
+     * LinkProperties, examining both the the base link and all stacked links.
+     *
+     * @param target a LinkProperties with the new list of interface names
+     * @return the differences between the interface names.
+     * @hide
+     */
+    public CompareResult<String> compareAllInterfaceNames(LinkProperties target) {
+        /*
+         * Duplicate the interface names into removed, we will be removing
+         * interface names which are common between this and target
+         * leaving the interface names that are different. And interface names which
+         * are in target but not in this are placed in added.
+         */
+        CompareResult<String> result = new CompareResult<String>();
+
+        result.removed = getAllInterfaceNames();
+        result.added.clear();
+        if (target != null) {
+            for (String r : target.getAllInterfaceNames()) {
+                if (! result.removed.remove(r)) {
+                    result.added.add(r);
+                }
+            }
+        }
+        return result;
+    }
+
 
     @Override
     /**
