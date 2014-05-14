@@ -644,14 +644,26 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * devices or game controllers, especially if no other input mode is
      * available. */
     public static final int KEYCODE_PAIRING         = 225;
+    /** Key code constant: Media Top Menu key.
+     * Goes to the top of media menu. */
+    public static final int KEYCODE_MEDIA_TOP_MENU  = 226;
+    /** Key code constant: '11' key. */
+    public static final int KEYCODE_11              = 227;
+    /** Key code constant: '12' key. */
+    public static final int KEYCODE_12              = 228;
+    /** Key code constant: Last Channel key.
+     * Goes to the last viewed channel. */
+    public static final int KEYCODE_LAST_CHANNEL    = 229;
+    /** Key code constant: TV data service key.
+     * Displays data services like weather, sports. */
+    public static final int KEYCODE_TV_DATA_SERVICE = 230;
 
-    private static final int LAST_KEYCODE = KEYCODE_PAIRING;
+    private static final int LAST_KEYCODE = KEYCODE_TV_DATA_SERVICE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
     //  frameworks/native/include/android/keycodes.h
-    //  frameworks/base/include/androidfw/InputEventAttributes.h
-    //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
+    //  frameworks/native/include/input/InputEventLabels.h
     //  frameworks/base/core/res/res/values/attrs.xml
     //  emulator?
     //  LAST_KEYCODE

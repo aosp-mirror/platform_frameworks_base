@@ -30664,6 +30664,7 @@ package android.view {
     field public static final int SOURCE_CLASS_TRACKBALL = 4; // 0x4
     field public static final int SOURCE_DPAD = 513; // 0x201
     field public static final int SOURCE_GAMEPAD = 1025; // 0x401
+    field public static final int SOURCE_HDMI = 33554433; // 0x2000001
     field public static final int SOURCE_JOYSTICK = 16777232; // 0x1000010
     field public static final int SOURCE_KEYBOARD = 257; // 0x101
     field public static final int SOURCE_MOUSE = 8194; // 0x2002
@@ -30832,6 +30833,8 @@ package android.view {
     field public static final deprecated int FLAG_WOKE_HERE = 1; // 0x1
     field public static final int KEYCODE_0 = 7; // 0x7
     field public static final int KEYCODE_1 = 8; // 0x8
+    field public static final int KEYCODE_11 = 227; // 0xe3
+    field public static final int KEYCODE_12 = 228; // 0xe4
     field public static final int KEYCODE_2 = 9; // 0x9
     field public static final int KEYCODE_3 = 10; // 0xa
     field public static final int KEYCODE_3D_MODE = 206; // 0xce
@@ -30951,6 +30954,7 @@ package android.view {
     field public static final int KEYCODE_KATAKANA_HIRAGANA = 215; // 0xd7
     field public static final int KEYCODE_L = 40; // 0x28
     field public static final int KEYCODE_LANGUAGE_SWITCH = 204; // 0xcc
+    field public static final int KEYCODE_LAST_CHANNEL = 229; // 0xe5
     field public static final int KEYCODE_LEFT_BRACKET = 71; // 0x47
     field public static final int KEYCODE_M = 41; // 0x29
     field public static final int KEYCODE_MANNER_MODE = 205; // 0xcd
@@ -30966,6 +30970,7 @@ package android.view {
     field public static final int KEYCODE_MEDIA_RECORD = 130; // 0x82
     field public static final int KEYCODE_MEDIA_REWIND = 89; // 0x59
     field public static final int KEYCODE_MEDIA_STOP = 86; // 0x56
+    field public static final int KEYCODE_MEDIA_TOP_MENU = 226; // 0xe2
     field public static final int KEYCODE_MENU = 82; // 0x52
     field public static final int KEYCODE_META_LEFT = 117; // 0x75
     field public static final int KEYCODE_META_RIGHT = 118; // 0x76
@@ -31038,6 +31043,7 @@ package android.view {
     field public static final int KEYCODE_T = 48; // 0x30
     field public static final int KEYCODE_TAB = 61; // 0x3d
     field public static final int KEYCODE_TV = 170; // 0xaa
+    field public static final int KEYCODE_TV_DATA_SERVICE = 230; // 0xe6
     field public static final int KEYCODE_TV_INPUT = 178; // 0xb2
     field public static final int KEYCODE_TV_POWER = 177; // 0xb1
     field public static final int KEYCODE_U = 49; // 0x31

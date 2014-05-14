@@ -1669,6 +1669,11 @@
         <enum name="KEYCODE_MEDIA_SLEEP" value="223" />
         <enum name="KEYCODE_MEDIA_WAKEUP" value="224" />
         <enum name="KEYCODE_PAIRING" value="225" />
+        <enum name="KEYCODE_MEDIA_TOP_MENU" value="226" />
+        <enum name="KEYCODE_11" value="227" />
+        <enum name="KEYCODE_12" value="228" />
+        <enum name="KEYCODE_LAST_CHANNEL" value="229" />
+        <enum name="KEYCODE_TV_DATA_SERVICE" value="230" />
     </attr>
 
     <!-- ***************************************************************** -->
