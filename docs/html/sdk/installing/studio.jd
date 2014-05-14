@@ -312,11 +312,6 @@ the Android SDK Manager.</p>
 </div>
 
 
-<p>Also note that due to the update to Android Gradle Plugin 0.6, you will encounter errors when opening
-existing projects. See the <a href="#Troubleshooting">Troubleshooting</a> notes below for
-information about how to resolve them.</p>
-
-
 <h2 id="Installing">Installing Android Studio</h2>
 <p>Android Studio requires JDK 6 or greater (JRE alone is not sufficient). To check if you
 have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
@@ -491,8 +486,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
     <li>Android Gradle plug-in updated to 0.5.0.
       <p class="caution"><strong>Caution:</strong> This new version is not backwards compatible.
       When opening a project that uses an older version of the plug-in, Studio will show an error
-      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong> See <a
-      href="#Troubleshooting">Troubleshooting</a> below for details.</p>
+      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong></p>
       <p>The updated Gradle plug-in includes the following changes:</p>
       <ul>
         <li>Fixed IDE model to contain the output file even if it's customized through the DSL. Also
@@ -566,65 +560,7 @@ Check for updates</strong>).</p>
 
 <h2 id="Troubleshooting">Troubleshooting</h2>
 
-
-<div class="figure" style="width:330px">
-<img src="{@docRoot}images/tools/studio_error_gradle5.png" width="330"/>
-<p class="img-caption"><strong>Figure 1.</strong> Error dialog when opening an existing project.</p>
-</div>
-
-<h3>Error: Gradle project refresh failed</h3>
-
-<p>Android Studio 0.2.0 has updated the Gradle plug-in to 0.5.0, which is not backwards compatible.
-When opening a project that uses an older version of the plug-in, Studio will display the error
-shown in figure 1 in the upper right corner of the IDE.
-To resolve the error, you must change the version of the Android Gradle plug-in to 0.5.0.</p>
-
-<ol>
-  <li>Click the link in the error dialog <strong>Search in build.gradle files</strong>. If the dialog
-is no longer visible, click <strong>Event Log</strong>
-<img src="{@docRoot}images/tools/studio_error_eventlog.png"
-style="vertical-align:bottom;margin:0;height:19px"/> in the bottom-right corner of the IDE,
-then click <strong>Search in build.gradle files</strong>.</li>
-  <li>Double-click the line under the <em>build.gradle</em> usage. For example:
-  <strong>classpath 'com.android.tools.build:gradle:0.4</strong>. This opens the project
-  <code>build.gradle</code> file.</li>
-  <li>Edit the <code>classpath</code> to change the gradle version to <code>0.5.+</code>.
-  For example:
-  <pre class="no-pretty-print">
-dependencies {
-  classpath 'com.android.tools.build:gradle:<strong>0.5.+</strong>'
-}
-</pre>
-  </li>
-  <li>Save the file and rebuild your project.</li>
-</ol>
-
-
-
-<div class="figure" style="width:330px">
-<img src="{@docRoot}images/tools/studio_error_supportlib.png" width="330"/>
-<p class="img-caption"><strong>Figure 2.</strong> Error dialog when creating a new project
-or opening a project using the support library.</p>
-</div>
-
-<h3>Error: Failed to import Gradle project</h3>
-
-<p>If, after updating to Android Studio 0.2.x and creating or opening a project, you receive an
-error stating <em>"Could not find any version that matches
-com.android.support:support-v4:13.0.+"</em>, then you must install the <strong>Android Support
-Repository</strong>. This was likely caused because you're pointing Android Studio to an external
-Android SDK location that does not have the new Maven repository included with Android Studio
-0.2.x. This new Maven repository is used by the new build system for the Support Library, instead
-of using the Support Library JAR files, so must be present in the SDK.</p>
-
-
-<ol>
-  <li>Open the <strong>Android SDK Manager</strong>.</li>
-  <li>Expand the <strong>Extras</strong> directory
-and install <strong>Android Support Repository</strong>.</li>
-</ol>
-
-<p>If you've encountered other problems in Android Studio, look at the following page
+<p>If you encounter problems in Android Studio, look at the following page
 for possible resolutions to known issues: <a href="http://tools.android.com/knownissues"
 >http://tools.android.com/knownissues</a>.</p>
 
