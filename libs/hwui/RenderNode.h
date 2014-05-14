@@ -82,6 +82,22 @@ class DrawDisplayListOp;
  */
 class RenderNode : public VirtualLightRefBase {
 public:
+    enum DirtyPropertyMask {
+        GENERIC         = 1 << 1,
+        TRANSLATION_X   = 1 << 2,
+        TRANSLATION_Y   = 1 << 3,
+        TRANSLATION_Z   = 1 << 4,
+        SCALE_X         = 1 << 5,
+        SCALE_Y         = 1 << 6,
+        ROTATION        = 1 << 7,
+        ROTATION_X      = 1 << 8,
+        ROTATION_Y      = 1 << 9,
+        X               = 1 << 10,
+        Y               = 1 << 11,
+        Z               = 1 << 12,
+        ALPHA           = 1 << 13,
+    };
+
     ANDROID_API RenderNode();
     ANDROID_API virtual ~RenderNode();
 
@@ -123,6 +139,14 @@ public:
         }
     }
 
+    bool isPropertyFieldDirty(DirtyPropertyMask field) const {
+        return mDirtyPropertyFields & field;
+    }
+
+    void setPropertyFieldsDirty(uint32_t fields) {
+        mDirtyPropertyFields |= fields;
+    }
+
     const RenderProperties& properties() {
         return mProperties;
     }
@@ -136,7 +160,6 @@ public:
     }
 
     RenderProperties& mutateStagingProperties() {
-        mNeedsPropertiesSync = true;
         return mStagingProperties;
     }
 
@@ -152,6 +175,7 @@ public:
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+        animator->onAttached(this);
         mStagingAnimators.insert(animator);
         mNeedsAnimatorsSync = true;
     }
@@ -227,7 +251,7 @@ private:
 
     String8 mName;
 
-    bool mNeedsPropertiesSync;
+    uint32_t mDirtyPropertyFields;
     RenderProperties mProperties;
     RenderProperties mStagingProperties;
 

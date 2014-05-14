@@ -21,7 +21,6 @@ import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.SparseIntArray;
-import android.util.TimeUtils;
 
 import com.android.internal.util.VirtualRefBasePtr;
 import com.android.internal.view.animation.FallbackLUTInterpolator;
@@ -72,10 +71,6 @@ public final class RenderNodeAnimator {
         put(ViewPropertyAnimator.ALPHA, ALPHA);
     }};
 
-    // Keep in sync DeltaValueType in Animator.h
-    public static final int DELTA_TYPE_ABSOLUTE = 0;
-    public static final int DELTA_TYPE_DELTA = 1;
-
     private VirtualRefBasePtr mNativePtr;
 
     private RenderNode mTarget;
@@ -86,22 +81,21 @@ public final class RenderNodeAnimator {
         return sViewPropertyAnimatorMap.get(viewProperty);
     }
 
-    public RenderNodeAnimator(int property, int deltaType, float deltaValue) {
+    public RenderNodeAnimator(int property, float finalValue) {
         init(nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
-                property, deltaType, deltaValue));
+                property, finalValue));
     }
 
-    public RenderNodeAnimator(CanvasProperty<Float> property, int deltaType, float deltaValue) {
+    public RenderNodeAnimator(CanvasProperty<Float> property, float finalValue) {
         init(nCreateCanvasPropertyFloatAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
-                property.getNativeContainer(), deltaType, deltaValue));
+                property.getNativeContainer(), finalValue));
     }
 
-    public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField,
-            int deltaType, float deltaValue) {
+    public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField, float finalValue) {
         init(nCreateCanvasPropertyPaintAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
-                property.getNativeContainer(), paintField, deltaType, deltaValue));
+                property.getNativeContainer(), paintField, finalValue));
     }
 
     private void init(long ptr) {
@@ -182,11 +176,11 @@ public final class RenderNodeAnimator {
     }
 
     private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            int property, int deltaValueType, float deltaValue);
+            int property, float deltaValue);
     private static native long nCreateCanvasPropertyFloatAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            long canvasProperty, int deltaValueType, float deltaValue);
+            long canvasProperty, float deltaValue);
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            long canvasProperty, int paintField, int deltaValueType, float deltaValue);
+            long canvasProperty, int paintField, float deltaValue);
     private static native void nSetDuration(long nativePtr, int duration);
     private static native int nGetDuration(long nativePtr);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);

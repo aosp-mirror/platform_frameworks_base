@@ -109,26 +109,27 @@ public class CirclePropActivity extends Activity {
             mToggle = !mToggle;
 
             mRunningAnimations.add(new RenderNodeAnimator(
-                    mX, RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 400.0f : 200.0f));
+                    mX, mToggle ? 400.0f : 200.0f));
 
             mRunningAnimations.add(new RenderNodeAnimator(
-                    mY, RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 600.0f : 200.0f));
+                    mY, mToggle ? 600.0f : 200.0f));
 
             mRunningAnimations.add(new RenderNodeAnimator(
-                    mRadius, RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 250.0f : 150.0f));
+                    mRadius, mToggle ? 250.0f : 150.0f));
 
             mRunningAnimations.add(new RenderNodeAnimator(
                     mPaint, RenderNodeAnimator.PAINT_ALPHA,
-                    RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 64.0f : 255.0f));
+                    mToggle ? 64.0f : 255.0f));
 
             mRunningAnimations.add(new RenderNodeAnimator(
                     mPaint, RenderNodeAnimator.PAINT_STROKE_WIDTH,
-                    RenderNodeAnimator.DELTA_TYPE_ABSOLUTE, mToggle ? 5.0f : 60.0f));
+                    mToggle ? 5.0f : 60.0f));
 
             TimeInterpolator interp = new OvershootInterpolator(3.0f);
             for (int i = 0; i < mRunningAnimations.size(); i++) {
                 RenderNodeAnimator anim = mRunningAnimations.get(i);
                 anim.setInterpolator(interp);
+                anim.setDuration(1000);
                 anim.start(this);
             }
 

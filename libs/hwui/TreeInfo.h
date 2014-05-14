@@ -21,12 +21,12 @@
 namespace android {
 namespace uirenderer {
 
-class BaseAnimator;
+class BaseRenderNodeAnimator;
 class AnimationListener;
 
 class AnimationHook {
 public:
-    virtual void callOnFinished(BaseAnimator* animator, AnimationListener* listener) = 0;
+    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) = 0;
 protected:
     ~AnimationHook() {}
 };
