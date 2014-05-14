@@ -1751,24 +1751,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Inform the phone about a new incoming third party call. The phone will bind to the service
-     * identified by component to handle the call.
-     * @param component the component that should handle the intent.
-     * @param callId the unique id of the call. This id is passed to the service via {@link
-     *               ThirdPartyCallService#incomingCallAttach incomingCallAttach}.
-     * @param callerDisplayName the name shown to the user. Normally this will be the caller's phone
-     *                          number.
-     */
-    public void newIncomingThirdPartyCall(ComponentName component, String callId,
-            String callerDisplayName) {
-        try {
-            getITelephony().newIncomingThirdPartyCall(component, callId, callerDisplayName);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
      * Returns the MMS user agent.
      */
     public String getMmsUserAgent() {
@@ -1926,33 +1908,6 @@ public class TelephonyManager {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
         }
         return false;
-    }
-
-    /*
-     * Obtain the current state of Wi-Fi calling.
-     *
-     * @hide
-     * @see android.telephony.TelephonyManager.WifiCallingChoices
-     */
-    public int getWhenToMakeWifiCalls() {
-        try {
-            return getITelephony().getWhenToMakeWifiCalls();
-        } catch (RemoteException ex) {
-            return WifiCallingChoices.NEVER_USE;
-        }
-    }
-
-    /**
-     * Set the current state of Wi-Fi calling.
-     *
-     * @hide
-     * @see android.telephony.TelephonyManager.WifiCallingChoices
-     */
-    public void setWhenToMakeWifiCalls(int state) {
-        try {
-            getITelephony().setWhenToMakeWifiCalls(state);
-        } catch (RemoteException ex) {
-        }
     }
 
     /**
