@@ -57,9 +57,6 @@ DisplayListData* DisplayListRenderer::finishRecording() {
 }
 
 void DisplayListRenderer::setViewport(int width, int height) {
-    // TODO: DisplayListRenderer shouldn't have a projection matrix, as it should never be used
-    mProjectionMatrix.loadOrtho(0, width, height, 0, -1, 1);
-
     initializeViewport(width, height);
 }
 

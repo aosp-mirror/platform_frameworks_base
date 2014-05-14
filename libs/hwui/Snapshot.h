@@ -65,17 +65,16 @@ public:
          * Indicates that this snapshot is a special type of layer
          * backed by an FBO. This flag only makes sense when the
          * flag kFlagIsLayer is also set.
+         *
+         * Viewport has been modified to fit the new Fbo, and must be
+         * restored when this snapshot is restored.
          */
         kFlagIsFboLayer = 0x4,
-        /**
-         * Indicates that this snapshot has changed the ortho matrix.
-         */
-        kFlagDirtyOrtho = 0x8,
         /**
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x10
+        kFlagFboTarget = 0x8,
     };
 
     /**
@@ -125,6 +124,14 @@ public:
      */
     void resetTransform(float x, float y, float z);
 
+    void initializeViewport(int width, int height) {
+        mViewportData.initialize(width, height);
+    }
+
+    int getViewportWidth() const { return mViewportData.mWidth; }
+    int getViewportHeight() const { return mViewportData.mHeight; }
+    const Matrix4& getOrthoMatrix() const { return mViewportData.mOrthoMatrix; }
+
     /**
      * Indicates whether this snapshot should be ignored. A snapshot
      * is typicalled ignored if its layer is invisible or empty.
@@ -171,21 +178,6 @@ public:
      * invisible but this flag is not passed to subsequent snapshots.
      */
     bool empty;
-
-    /**
-     * Current viewport.
-     */
-    Rect viewport;
-
-    /**
-     * Height of the framebuffer the snapshot is rendering into.
-     */
-    int height;
-
-    /**
-     * Contains the previous ortho matrix.
-     */
-    mat4 orthoMatrix;
 
     /**
      * Local transformation. Holds the current translation, scale and
@@ -236,6 +228,27 @@ public:
     void dump() const;
 
 private:
+    struct ViewportData {
+        ViewportData() : mWidth(0), mHeight() {}
+        void initialize(int width, int height) {
+            mWidth = width;
+            mHeight = height;
+            mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
+        }
+
+        /*
+         * Width and height of current viewport.
+         *
+         * The viewport is always defined to be (0, 0, width, height).
+         */
+        int mWidth;
+        int mHeight;
+        /**
+         * Contains the current orthographic, projection matrix.
+         */
+        mat4 mOrthoMatrix;
+    };
+
     void ensureClipRegion();
     void copyClipRectFromRegion();
 
@@ -246,6 +259,7 @@ private:
     Rect mLocalClip; // don't use directly, call getLocalClip() which initializes this
 
     SkRegion mClipRegionRoot;
+    ViewportData mViewportData;
 
 }; // class Snapshot
 

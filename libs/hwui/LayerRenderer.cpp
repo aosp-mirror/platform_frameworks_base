@@ -40,7 +40,7 @@ LayerRenderer::~LayerRenderer() {
 }
 
 void LayerRenderer::setViewport(int width, int height) {
-    initViewport(width, height);
+    initializeViewport(width, height);
 }
 
 status_t LayerRenderer::prepareDirty(float left, float top, float right, float bottom,

@@ -162,18 +162,12 @@ void OpenGLRenderer::initProperties() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setViewport(int width, int height) {
-    initViewport(width, height);
+    initializeViewport(width, height);
 
     glDisable(GL_DITHER);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glEnableVertexAttribArray(Program::kBindingPosition);
-}
-
-void OpenGLRenderer::initViewport(int width, int height) {
-    mProjectionMatrix.loadOrtho(0, width, height, 0, -1, 1);
-
-    initializeViewport(width, height);
 }
 
 void OpenGLRenderer::setupFrameState(float left, float top,
@@ -244,7 +238,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
-        mCaches.setScissor(left, currentSnapshot()->height - bottom, right - left, bottom - top);
+        mCaches.setScissor(left, getViewportHeight() - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         return DrawGlInfo::kStatusDrew;
     }
@@ -270,7 +264,7 @@ void OpenGLRenderer::startTilingCurrentClip(bool opaque) {
             clip = &(snapshot->layer->clipRect);
         }
 
-        startTiling(*clip, snapshot->height, opaque);
+        startTiling(*clip, getViewportHeight(), opaque);
     }
 }
 
@@ -333,7 +327,7 @@ void OpenGLRenderer::interrupt() {
 
 void OpenGLRenderer::resume() {
     const Snapshot* snapshot = currentSnapshot();
-    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
+    glViewport(0, 0, getViewportWidth(), getViewportHeight());
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
     debugOverdraw(true, false);
 
@@ -354,9 +348,8 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::resumeAfterLayer() {
-    const Snapshot* snapshot = currentSnapshot();
-    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+    glViewport(0, 0, getViewportWidth(), getViewportHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, currentSnapshot()->fbo);
     debugOverdraw(true, false);
 
     mCaches.resetScissor();
@@ -381,8 +374,8 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.clipRight = clip.right;
     info.clipBottom = clip.bottom;
     info.isLayer = hasLayer();
-    info.width = currentSnapshot()->viewport.getWidth();
-    info.height = currentSnapshot()->height;
+    info.width = getViewportWidth();
+    info.height = getViewportHeight();
     currentTransform()->copyTo(&info.transform[0]);
 
     bool dirtyClip = mDirtyClip;
@@ -437,7 +430,7 @@ void OpenGLRenderer::renderOverdraw() {
         const Rect* clip = &mTilingClip;
 
         mCaches.enableScissor();
-        mCaches.setScissor(clip->left, firstSnapshot()->height - clip->bottom,
+        mCaches.setScissor(clip->left, firstSnapshot()->getViewportHeight() - clip->bottom,
                 clip->right - clip->left, clip->bottom - clip->top);
 
         // 1x overdraw
@@ -621,14 +614,12 @@ void OpenGLRenderer::flushLayerUpdates() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
-    bool restoreOrtho = removed.flags & Snapshot::kFlagDirtyOrtho;
+    bool restoreViewport = removed.flags & Snapshot::kFlagIsFboLayer;
     bool restoreClip = removed.flags & Snapshot::kFlagClipSet;
     bool restoreLayer = removed.flags & Snapshot::kFlagIsLayer;
 
-    if (restoreOrtho) {
-        const Rect& r = restored.viewport;
-        glViewport(r.left, r.top, r.right, r.bottom);
-        mProjectionMatrix.load(removed.orthoMatrix); // TODO: should ortho be stored in 'restored'?
+    if (restoreViewport) {
+        glViewport(0, 0, getViewportWidth(), getViewportHeight());
     }
 
     if (restoreClip) {
@@ -671,7 +662,7 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
         // When the layer is not an FBO, we may use glCopyTexImage so we
         // need to make sure the layer does not extend outside the bounds
         // of the framebuffer
-        if (!bounds.intersect(currentSnapshot()->previous->viewport)) {
+        if (!bounds.intersect(Rect(0, 0, getViewportWidth(), getViewportHeight()))) {
             bounds.setEmpty();
         } else if (fboLayer) {
             clip.set(bounds);
@@ -719,7 +710,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         if (!currentSnapshot()->isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
-            mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+            mSnapshot->initializeViewport(bounds.getWidth(), bounds.getHeight());
         }
     }
 
@@ -831,8 +822,9 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
                 layer->setEmpty(false);
             }
 
-            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
-                    mSnapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                    bounds.left, getViewportHeight() - bounds.bottom,
+                    bounds.getWidth(), bounds.getHeight());
 
             // Enqueue the buffer coordinates to clear the corresponding region later
             mLayers.push(new Rect(bounds));
@@ -847,14 +839,11 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     layer->setFbo(mCaches.fboCache.get());
 
     mSnapshot->region = &mSnapshot->layer->region;
-    mSnapshot->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer |
-            Snapshot::kFlagDirtyOrtho;
+    mSnapshot->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
     mSnapshot->fbo = layer->getFbo();
     mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
-    mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-    mSnapshot->height = bounds.getHeight();
-    mSnapshot->orthoMatrix.load(mProjectionMatrix);
+    mSnapshot->initializeViewport(bounds.getWidth(), bounds.getHeight());
 
     endTiling();
     debugOverdraw(false, false);
@@ -884,7 +873,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     // Change the ortho projection
     glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
 
-    mProjectionMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -1419,7 +1407,7 @@ void OpenGLRenderer::setScissorFromClip() {
     Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();
 
-    if (mCaches.setScissor(clip.left, currentSnapshot()->height - clip.bottom,
+    if (mCaches.setScissor(clip.left, getViewportHeight() - clip.bottom,
             clip.getWidth(), clip.getHeight())) {
         mDirtyClip = false;
     }
@@ -1694,12 +1682,14 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
     }
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
-    if (!ignoreTransform) {
-        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, *currentTransform(), offset);
-        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *currentTransform());
-    } else {
-        mCaches.currentProgram->set(mProjectionMatrix, mModelViewMatrix, mat4::identity(), offset);
-        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
+    const Matrix4& transformMatrix = ignoreTransform ? Matrix4::identity() : *currentTransform();
+    mCaches.currentProgram->set(mSnapshot->getOrthoMatrix(), mModelViewMatrix, transformMatrix, offset);
+    if (dirty && mTrackDirtyRegions) {
+        if (!ignoreTransform) {
+            dirtyLayer(left, top, right, bottom, *currentTransform());
+        } else {
+            dirtyLayer(left, top, right, bottom);
+        }
     }
 }
 
