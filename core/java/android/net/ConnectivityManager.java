@@ -547,7 +547,7 @@ public class ConnectivityManager {
      * @param preference the network type to prefer over all others.  It is
      *         unspecified what happens to the old preferred network in the
      *         overall ordering.
-     * @Deprecated Functionality has been removed as it no longer makes sense,
+     * @deprecated Functionality has been removed as it no longer makes sense,
      *         with many more than two networks - we'd need an array to express
      *         preference.  Instead we use dynamic network properties of
      *         the networks to describe their precedence.
@@ -562,7 +562,7 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     * @Deprecated Functionality has been removed as it no longer makes sense,
+     * @deprecated Functionality has been removed as it no longer makes sense,
      *         with many more than two networks - we'd need an array to express
      *         preference.  Instead we use dynamic network properties of
      *         the networks to describe their precedence.
