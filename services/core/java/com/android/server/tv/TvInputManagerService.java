@@ -204,10 +204,12 @@ public final class TvInputManagerService extends SystemService {
                         Slog.e(TAG, "error in unregisterCallback", e);
                     }
                 }
-                serviceState.mClients.clear();
+                serviceState.mClientTokens.clear();
                 mContext.unbindService(serviceState.mConnection);
             }
             userState.serviceStateMap.clear();
+
+            userState.clientStateMap.clear();
 
             mUserStates.remove(userId);
         }
@@ -273,7 +275,7 @@ public final class TvInputManagerService extends SystemService {
             }
             serviceState.mReconnecting = false;
         }
-        boolean isStateEmpty = serviceState.mClients.isEmpty()
+        boolean isStateEmpty = serviceState.mClientTokens.isEmpty()
                 && serviceState.mSessionTokens.isEmpty();
         if (serviceState.mService == null && !isStateEmpty && userId == mCurrentUserId) {
             // This means that the service is not yet connected but its state indicates that we
@@ -304,10 +306,22 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    private ClientState createClientStateLocked(IBinder clientToken, int userId) {
+        UserState userState = getUserStateLocked(userId);
+        ClientState clientState = new ClientState(clientToken, userId);
+        try {
+            clientToken.linkToDeath(clientState, 0);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Client is already died.");
+        }
+        userState.clientStateMap.put(clientToken, clientState);
+        return clientState;
+    }
+
     private void createSessionInternalLocked(ITvInputService service, final IBinder sessionToken,
             final int userId) {
-        final SessionState sessionState =
-                getUserStateLocked(userId).sessionStateMap.get(sessionToken);
+        final UserState userState = getUserStateLocked(userId);
+        final SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
             Slog.d(TAG, "createSessionInternalLocked(inputId=" + sessionState.mInputId + ")");
         }
@@ -333,6 +347,14 @@ public final class TvInputManagerService extends SystemService {
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Session is already died.");
                         }
+
+                        IBinder clientToken = sessionState.mClient.asBinder();
+                        ClientState clientState = userState.clientStateMap.get(clientToken);
+                        if (clientState == null) {
+                            clientState = createClientStateLocked(clientToken, userId);
+                        }
+                        clientState.mSessionTokens.add(sessionState.mSessionToken);
+
                         sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId,
                                 sessionToken, channels[0], sessionState.mSeq, userId);
                     }
@@ -423,7 +445,16 @@ public final class TvInputManagerService extends SystemService {
             mLogHandler.obtainMessage(LogHandler.MSG_CLOSE_ENTRY, args).sendToTarget();
         }
 
-        // Also remove the session token from the session token list of the current service.
+        // Also remove the session token from the session token list of the current client and
+        // service.
+        ClientState clientState = userState.clientStateMap.get(sessionState.mClient.asBinder());
+        if (clientState != null) {
+            clientState.mSessionTokens.remove(sessionToken);
+            if (clientState.isEmpty()) {
+                userState.clientStateMap.remove(sessionState.mClient.asBinder());
+            }
+        }
+
         ServiceState serviceState = userState.serviceStateMap.get(sessionState.mInputId);
         if (serviceState != null) {
             serviceState.mSessionTokens.remove(sessionToken);
@@ -431,11 +462,45 @@ public final class TvInputManagerService extends SystemService {
         updateServiceConnectionLocked(sessionState.mInputId, userId);
     }
 
+    private void unregisterCallbackInternalLocked(IBinder clientToken, String inputId,
+            int userId) {
+        UserState userState = getUserStateLocked(userId);
+        ClientState clientState = userState.clientStateMap.get(clientToken);
+        if (clientState != null) {
+            clientState.mInputIds.remove(inputId);
+            if (clientState.isEmpty()) {
+                userState.clientStateMap.remove(clientToken);
+            }
+        }
+
+        ServiceState serviceState = userState.serviceStateMap.get(inputId);
+        if (serviceState == null) {
+            return;
+        }
+
+        // Remove this client from the client list and unregister the callback.
+        serviceState.mClientTokens.remove(clientToken);
+        if (!serviceState.mClientTokens.isEmpty()) {
+            // We have other clients who want to keep the callback. Do this later.
+            return;
+        }
+        if (serviceState.mService == null || serviceState.mCallback == null) {
+            return;
+        }
+        try {
+            serviceState.mService.unregisterCallback(serviceState.mCallback);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "error in unregisterCallback", e);
+        } finally {
+            serviceState.mCallback = null;
+            updateServiceConnectionLocked(inputId, userId);
+        }
+    }
+
     private void broadcastServiceAvailabilityChangedLocked(ServiceState serviceState) {
-        for (IBinder iBinder : serviceState.mClients) {
-            ITvInputClient client = ITvInputClient.Stub.asInterface(iBinder);
+        for (IBinder clientToken : serviceState.mClientTokens) {
             try {
-                client.onAvailabilityChanged(
+                ITvInputClient.Stub.asInterface(clientToken).onAvailabilityChanged(
                         serviceState.mTvInputInfo.getId(), serviceState.mAvailable);
             } catch (RemoteException e) {
                 Slog.e(TAG, "error in onAvailabilityChanged", e);
@@ -498,10 +563,19 @@ public final class TvInputManagerService extends SystemService {
                                 userState.inputMap.get(inputId), resolvedUserId);
                         userState.serviceStateMap.put(inputId, serviceState);
                     }
-                    IBinder iBinder = client.asBinder();
-                    if (!serviceState.mClients.contains(iBinder)) {
-                        serviceState.mClients.add(iBinder);
+                    IBinder clientToken = client.asBinder();
+                    if (!serviceState.mClientTokens.contains(clientToken)) {
+                        serviceState.mClientTokens.add(clientToken);
                     }
+
+                    ClientState clientState = userState.clientStateMap.get(clientToken);
+                    if (clientState == null) {
+                        clientState = createClientStateLocked(clientToken, resolvedUserId);
+                    }
+                    if (!clientState.mInputIds.contains(inputId)) {
+                        clientState.mInputIds.add(inputId);
+                    }
+
                     if (serviceState.mService != null) {
                         if (serviceState.mCallback != null) {
                             // We already handled.
@@ -529,29 +603,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
-                    ServiceState serviceState = userState.serviceStateMap.get(inputId);
-                    if (serviceState == null) {
-                        return;
-                    }
-
-                    // Remove this client from the client list and unregister the callback.
-                    serviceState.mClients.remove(client.asBinder());
-                    if (!serviceState.mClients.isEmpty()) {
-                        // We have other clients who want to keep the callback. Do this later.
-                        return;
-                    }
-                    if (serviceState.mService == null || serviceState.mCallback == null) {
-                        return;
-                    }
-                    try {
-                        serviceState.mService.unregisterCallback(serviceState.mCallback);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unregisterCallback", e);
-                    } finally {
-                        serviceState.mCallback = null;
-                        updateServiceConnectionLocked(inputId, resolvedUserId);
-                    }
+                    unregisterCallbackInternalLocked(client.asBinder(), inputId, resolvedUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -582,8 +634,8 @@ public final class TvInputManagerService extends SystemService {
 
                     // Create a new session token and a session state.
                     IBinder sessionToken = new Binder();
-                    SessionState sessionState = new SessionState(
-                            sessionToken, inputId, client, seq, callingUid, resolvedUserId);
+                    SessionState sessionState = new SessionState(sessionToken, inputId, client,
+                            seq, callingUid, resolvedUserId);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
@@ -835,6 +887,10 @@ public final class TvInputManagerService extends SystemService {
         // A mapping from the TV input id to its TvInputInfo.
         private final Map<String, TvInputInfo> inputMap = new HashMap<String,TvInputInfo>();
 
+        // A mapping from the token of a client to its state.
+        private final Map<IBinder, ClientState> clientStateMap =
+                new HashMap<IBinder, ClientState>();
+
         // A mapping from the name of a TV input service to its state.
         private final Map<String, ServiceState> serviceStateMap =
                 new HashMap<String, ServiceState>();
@@ -844,9 +900,46 @@ public final class TvInputManagerService extends SystemService {
                 new HashMap<IBinder, SessionState>();
     }
 
+    private final class ClientState implements IBinder.DeathRecipient {
+        private final List<String> mInputIds = new ArrayList<String>();
+        private final List<IBinder> mSessionTokens = new ArrayList<IBinder>();
+
+        private IBinder mClientToken;
+        private final int mUserId;
+
+        ClientState(IBinder clientToken, int userId) {
+            mClientToken = clientToken;
+            mUserId = userId;
+        }
+
+        public boolean isEmpty() {
+            return mInputIds.isEmpty() && mSessionTokens.isEmpty();
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                UserState userState = getUserStateLocked(mUserId);
+                // DO NOT remove the client state of clientStateMap in this method. It will be
+                // removed in releaseSessionLocked() or unregisterCallbackInternalLocked().
+                ClientState clientState = userState.clientStateMap.get(mClientToken);
+                if (clientState != null) {
+                    while (clientState.mSessionTokens.size() > 0) {
+                        releaseSessionLocked(
+                                clientState.mSessionTokens.get(0), Process.SYSTEM_UID, mUserId);
+                    }
+                    while (clientState.mInputIds.size() > 0) {
+                        unregisterCallbackInternalLocked(
+                                mClientToken, clientState.mInputIds.get(0), mUserId);
+                    }
+                }
+                mClientToken = null;
+            }
+        }
+    }
+
     private final class ServiceState {
-        // TODO: need to implement DeathRecipient for clients.
-        private final List<IBinder> mClients = new ArrayList<IBinder>();
+        private final List<IBinder> mClientTokens = new ArrayList<IBinder>();
         private final List<IBinder> mSessionTokens = new ArrayList<IBinder>();
         private final ServiceConnection mConnection;
         private final TvInputInfo mTvInputInfo;
@@ -869,13 +962,13 @@ public final class TvInputManagerService extends SystemService {
         private final int mSeq;
         private final int mCallingUid;
         private final int mUserId;
-        private final IBinder mToken;
+        private final IBinder mSessionToken;
         private ITvInputSession mSession;
         private Uri mLogUri;
 
-        private SessionState(IBinder token, String inputId, ITvInputClient client, int seq,
+        private SessionState(IBinder sessionToken, String inputId, ITvInputClient client, int seq,
                 int callingUid, int userId) {
-            mToken = token;
+            mSessionToken = sessionToken;
             mInputId = inputId;
             mClient = client;
             mSeq = seq;
@@ -894,7 +987,7 @@ public final class TvInputManagerService extends SystemService {
                         Slog.e(TAG, "error in onSessionReleased", e);
                     }
                 }
-                removeSessionStateLocked(mToken, mUserId);
+                removeSessionStateLocked(mSessionToken, mUserId);
             }
         }
     }
@@ -918,7 +1011,7 @@ public final class TvInputManagerService extends SystemService {
                 serviceState.mService = ITvInputService.Stub.asInterface(service);
 
                 // Register a callback, if we need to.
-                if (!serviceState.mClients.isEmpty() && serviceState.mCallback == null) {
+                if (!serviceState.mClientTokens.isEmpty() && serviceState.mCallback == null) {
                     serviceState.mCallback = new ServiceCallback(mUserId);
                     try {
                         serviceState.mService.registerCallback(serviceState.mCallback);
