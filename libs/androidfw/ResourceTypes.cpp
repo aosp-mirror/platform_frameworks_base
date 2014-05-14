@@ -102,7 +102,7 @@ static status_t validate_chunk(const ResChunk_header* chunk,
     if (headerSize >= minSize) {
         if (headerSize <= size) {
             if (((headerSize|size)&0x3) == 0) {
-                if ((ssize_t)size <= (dataEnd-((const uint8_t*)chunk))) {
+                if ((size_t)size <= (size_t)(dataEnd-((const uint8_t*)chunk))) {
                     return NO_ERROR;
                 }
                 ALOGW("%s data size 0x%x extends beyond resource end %p.",
