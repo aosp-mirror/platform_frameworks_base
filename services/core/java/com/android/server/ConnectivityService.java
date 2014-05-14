@@ -4176,7 +4176,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             CheckMp.Params params =
                     new CheckMp.Params(checkMp.getDefaultUrl(), timeOutMs, cb);
             if (DBG) log("checkMobileProvisioning: params=" + params);
-            checkMp.execute(params);
+            // TODO: Reenable when calls to the now defunct
+            //       MobileDataStateTracker.isProvisioningNetwork() are removed.
+            //       This code should be moved to the Telephony code.
+            // checkMp.execute(params);
         } finally {
             Binder.restoreCallingIdentity(token);
             if (DBG) log("checkMobileProvisioning: X");
