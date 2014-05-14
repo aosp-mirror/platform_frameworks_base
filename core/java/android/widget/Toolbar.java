@@ -734,13 +734,13 @@ public class Toolbar extends ViewGroup {
         addCustomViewsWithGravity(mTempViews, Gravity.LEFT);
         final int leftViewsCount = mTempViews.size();
         for (int i = 0; i < leftViewsCount; i++) {
-            left = layoutChildLeft(getChildAt(i), left);
+            left = layoutChildLeft(mTempViews.get(i), left);
         }
 
         addCustomViewsWithGravity(mTempViews, Gravity.RIGHT);
         final int rightViewsCount = mTempViews.size();
         for (int i = 0; i < rightViewsCount; i++) {
-            right = layoutChildRight(getChildAt(i), right);
+            right = layoutChildRight(mTempViews.get(i), right);
         }
 
         // Centered views try to center with respect to the whole bar, but views pinned
@@ -759,7 +759,7 @@ public class Toolbar extends ViewGroup {
 
         final int centerViewsCount = mTempViews.size();
         for (int i = 0; i < centerViewsCount; i++) {
-            centerLeft = layoutChildLeft(getChildAt(i), centerLeft);
+            centerLeft = layoutChildLeft(mTempViews.get(i), centerLeft);
         }
         mTempViews.clear();
     }
@@ -778,18 +778,20 @@ public class Toolbar extends ViewGroup {
     private int layoutChildLeft(View child, int left) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         left += lp.leftMargin;
-        int top = getChildTop(child);
-        child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
-        left += lp.rightMargin;
+        final int top = getChildTop(child);
+        final int childWidth = child.getMeasuredWidth();
+        child.layout(left, top, left + childWidth, top + child.getMeasuredHeight());
+        left += childWidth + lp.rightMargin;
         return left;
     }
 
     private int layoutChildRight(View child, int right) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         right -= lp.rightMargin;
-        int top = getChildTop(child);
-        child.layout(right - child.getMeasuredWidth(), top, right, top + child.getMeasuredHeight());
-        right -= lp.leftMargin;
+        final int top = getChildTop(child);
+        final int childWidth = child.getMeasuredWidth();
+        child.layout(right - childWidth, top, right, top + child.getMeasuredHeight());
+        right -= childWidth + lp.leftMargin;
         return right;
     }
 
