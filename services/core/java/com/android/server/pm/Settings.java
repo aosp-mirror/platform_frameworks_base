@@ -59,6 +59,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -527,8 +528,11 @@ final class Settings {
                             // original default value is true), or we are being
                             // asked to install for all users, or this is the
                             // user we are installing for.
+                            // In this context all users (USER_ALL) implies an adb install,
+                            // so we additionally check whether that is allowed for this user.
                             final boolean installed = installUser == null
-                                    || installUser.getIdentifier() == UserHandle.USER_ALL
+                                    || (installUser.getIdentifier() == UserHandle.USER_ALL
+                                            && (!isUnknownSourcesDisallowed(user.id)))
                                     || installUser.getIdentifier() == user.id;
                             p.setUserState(user.id, COMPONENT_ENABLED_STATE_DEFAULT,
                                     installed,
@@ -593,7 +597,10 @@ final class Settings {
                 List<UserInfo> users = getAllUsers();
                 if (users != null) {
                     for (UserInfo user : users) {
-                        if (installUser.getIdentifier() == UserHandle.USER_ALL
+                        // Installing for USER_ALL implies an adb install, so we
+                        // additionally check whether that is allowed for this user.
+                        if ((installUser.getIdentifier() == UserHandle.USER_ALL
+                                        && (!isUnknownSourcesDisallowed(user.id)))
                                 || installUser.getIdentifier() == user.id) {
                             boolean installed = p.getInstalled(user.id);
                             if (!installed) {
@@ -606,6 +613,12 @@ final class Settings {
             }
         }
         return p;
+    }
+
+    boolean isUnknownSourcesDisallowed(int userId) {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        return um.getUserRestrictions(new UserHandle(userId)).getBoolean(
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false);
     }
 
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
