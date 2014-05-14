@@ -48,8 +48,7 @@ class AutomaticBrightnessController {
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
     // If true, enables the use of the screen auto-brightness adjustment setting.
-    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT =
-            PowerManager.useScreenAutoBrightnessAdjustmentFeature();
+    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT = true;
 
     // The maximum range of gamma adjustment possible using the screen
     // auto-brightness adjustment setting.
