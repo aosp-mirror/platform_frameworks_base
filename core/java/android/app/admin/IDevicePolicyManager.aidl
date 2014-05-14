@@ -133,4 +133,7 @@ interface IDevicePolicyManager {
     void setLockTaskComponents(in ComponentName[] components);
     ComponentName[] getLockTaskComponents();
     boolean isLockTaskPermitted(in ComponentName component);
+
+    void setGlobalSetting(in ComponentName who, in String setting, in String value);
+    void setSecureSetting(in ComponentName who, in String setting, in String value);
 }

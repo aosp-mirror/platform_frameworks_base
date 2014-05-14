@@ -5062,6 +5062,7 @@ package android.app.admin {
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
+    method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
     method public void setLockTaskComponents(android.content.ComponentName[]) throws java.lang.SecurityException;
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
@@ -5077,6 +5078,7 @@ package android.app.admin {
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
     method public void setProfileEnabled(android.content.ComponentName);
+    method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
