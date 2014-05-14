@@ -2703,31 +2703,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        if (!isLinkDefault) {
-            // handle DNS routes
-            if (routesChanged) {
-                // routes changed - remove all old dns entries and add new
-                if (curLp != null) {
-                    for (InetAddress oldDns : curLp.getDnses()) {
-                        removeRouteToAddress(curLp, oldDns);
-                    }
-                }
-                if (newLp != null) {
-                    for (InetAddress newDns : newLp.getDnses()) {
-                        addRouteToAddress(newLp, newDns, exempt);
-                    }
-                }
-            } else {
-                // no change in routes, check for change in dns themselves
-                for (InetAddress oldDns : dnsDiff.removed) {
-                    removeRouteToAddress(curLp, oldDns);
-                }
-                for (InetAddress newDns : dnsDiff.added) {
-                    addRouteToAddress(newLp, newDns, exempt);
-                }
-            }
-        }
-
         for (RouteInfo r :  routeDiff.added) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
                 addRoute(newLp, r, TO_DEFAULT_TABLE, exempt);
