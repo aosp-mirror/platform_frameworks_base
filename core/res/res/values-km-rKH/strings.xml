@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​​ការ​ទទួល​សារ​ SMS ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​​ដើម្បី​​បន្លំ​សារ SMS ចូល។"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ផ្ញើ​ការ​ប្រកាស​បាន​ទទួល​ WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​ថា​បាន​ទទួល​សារ WAP PUSH ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​​ក្លែង​​បង្កាន់ដៃ​សារ MMS ឬ​ជំនួស​មាតិកា​ទំព័រ​បណ្ដាញ​ណាមួយ​ស្ងាត់​ៗ​​​ដោយ​អ្វី​ដែល​ក្លែងក្លាយ។"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ផ្ញើ​ពិន្ទុ​ការ​ប្រកាស​បណ្ដាញ"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូនដំណឹង​ដែល​បណ្ដាញ​តម្រូវ​ឲ្យ​ដាក់​ពិន្ទុ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា។"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"កំណត់​ចំនួន​ដំណើរការ​ដែល​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ចំនួន​ដំណើរការ​អតិបរមា​ដែល​នឹង​ដំណើរការ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"បង្ខំ​​ឲ្យ​បិទ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>

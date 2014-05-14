@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite que la aplicación emita una notificación cuando se haya recibido un mensaje SMS. Las aplicaciones malintencionadas pueden usar este permiso para falsificar mensajes SMS entrantes."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar emisión recibida mediante mensaje WAP PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite que la aplicación envíe una notificación cuando se haya recibido un mensaje WAP PUSH. Las aplicaciones malintencionadas pueden usar este permiso para falsificar la recepción de un mensaje MMS o para reemplazar sin aviso el contenido de cualquier página web con variantes malintencionadas."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"enviar notificaciones sobre la puntuación de las redes"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permite que la aplicación emita una notificación que la red necesita para recibir una puntuación. Las aplicaciones normales no necesitan nunca este permiso."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar el número de procesos en ejecución"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite que la aplicación controle el número máximo de procesos que se ejecutarán. No es necesario nunca para las aplicaciones normales."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forzar el cierre de aplicaciones en segundo plano"</string>

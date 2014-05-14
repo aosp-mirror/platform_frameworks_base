@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Mengizinkan apl menyiarkan pemberitahuan bahwa pesan SMS telah diterima. Apl berbahaya dapat menggunakan ini untuk memalsukan pesan SMS masuk."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"kirim siaran WAP-PUSH-diterima"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Mengizinkan apl menyiarkan pemberitahuan bahwa pesan WAP PUSH telah diterima. Apl berbahaya dapat menggunakan ini untuk memalsukan penerimaan pesan MMS atau diam-diam mengganti konten laman web apa pun dengan varian berbahaya."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"mengirim siaran beri skor jaringan"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Memungkinkan aplikasi menyiarkan pemberitahuan bahwa jaringan perlu diberi skor. Tidak pernah diperlukan untuk aplikasi normal."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"batasi jumlah dari proses yang berjalan"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Mengizinkan apl mengontrol jumlah maksimum proses yang akan berjalan. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"paksa aplikasi latar belakang agar menutup"</string>

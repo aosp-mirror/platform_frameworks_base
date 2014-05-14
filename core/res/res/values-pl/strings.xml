@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Pozwala aplikacji na wysyłanie powiadomienia, że została odebrana wiadomość SMS. Złośliwe aplikacje mogą to wykorzystać do fałszowania przychodzących wiadomości SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"wysyłanie transmisji informującej o otrzymaniu wiadomości WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Pozwala aplikacji na nadanie powiadomienia o odebraniu wiadomości WAP PUSH. Złośliwe aplikacje mogą to wykorzystać do fałszowania potwierdzenia odbioru wiadomości MMS lub do niezauważalnego podmieniania zawartości dowolnej strony internetowej jej szkodliwymi wariantami."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"rozsyłanie informacji o ocenie sieci"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Pozwala aplikacji na wysłanie powiadomienia, że sieci wymagają oceny. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ograniczanie liczby uruchomionych procesów"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Pozwala aplikacji na kontrolowanie maksymalnej liczby uruchamianych procesów. Nigdy niewykorzystywane przez normalne aplikacje."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"wymuszanie zamknięcia aplikacji w tle"</string>

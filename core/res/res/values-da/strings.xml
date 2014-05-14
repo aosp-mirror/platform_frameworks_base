@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillader, at appen kan udsende en underretning om, at der er modtaget en sms-besked. Ondsindede apps kan bruge dette til at simulere indgående sms-beskeder."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"send WAP-PUSH-modtaget udsendelse"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillader, at appen kan udsende en underretning om, at der er modtaget en WAP PUSH-besked. Ondsindede apps kan bruge dette til at simulere modtagelse af mms-beskeder eller i det skjulte erstatte indholdet på en webside med ondsindede varianter."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"sende underretninger om bedømmelse af netværk"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Tillader, at appen kan udsende en underretning om, at netværket skal bedømmes. Dette er aldrig nødvendigt for almindelige apps."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begræns antallet af kørende processer"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillader, at appen kan kontrollere det maksimale antal kørende processer. Dette er aldrig nødvendigt til normale apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinge baggrundsapps til at lukke"</string>

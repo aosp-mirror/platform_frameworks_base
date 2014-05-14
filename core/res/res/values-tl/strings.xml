@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Pinapayagan ang app na mag-broadcast ng isang notification na natanggap ang isang mensaheng SMS. Maaari itong gamitin ng nakakahamak na apps upang dayain ang papasok na mga mensaheng SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ipadala ang WAP-PUSH-natanggap na pag-broadcast"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Pinapayagan ang app na mag-broadcast ng isang notification na natanggap ang isang mensaheng WAP PUSH. Maaari itong gamitin ng nakakahamak na apps upang dayain ang pagtanggap ng mensaheng MMS o upang tahimik na palitan ang nilalaman ng anumang webpage ng mga nakakahamak na variant."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"magpadala ng broadcast ng mga network ng score"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Nagbibigay-daan sa app na mag-broadcast ng notification na kailangang ma-score ng mga network. Hindi kailanman kinakailangan para sa mga normal na app."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitahan ang numero ng mga tumatakbong proseso"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Pinapayagan ang app na kontrolin ang maximum na bilang ng mga proseso na tatakbo. Hindi kailanman kinakailangan para sa normal na apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"pwersahin ang mga app sa background na magsara"</string>

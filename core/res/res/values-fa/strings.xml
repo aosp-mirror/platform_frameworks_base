@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏به برنامه اجازه می‎دهد تا اعلان دریافت پیام کوتاه را پخش کند. برنامه‎های مخرب می‎توانند از این برای جعل پیام‌های کوتاه ورودی استفاده کنند."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏ارسال پخش دریافت شده توسط WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏به برنامه اجازه می‎دهد تا اعلانی را پخش کند که پیام WAP PUSH دریافت کرده است. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا دریافت پیام MMS را جعل کنند یا محتوای هر صفحهٔ وب را با انواع مخرب جایگزین کنند."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ارسال اعلان پخش برای امتیازبندی شبکه‌ها"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"به برنامه اجازه می‌دهد تا اعلانی پخش کند که شبکه‌ها باید امتیازبندی شوند. هرگز برای برنامه‌های عادی مورد نیاز نیست."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"محدود کردن تعداد فرآیندهای در حال اجرا"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"‏به برنامه اجازه می‎دهد تا حداکثر تعداد پردازشهایی را که اجرا خواهد شد کنترل کند. هرگز برای برنامه‎های عادی لازم نیست."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"بستن اجباری برنامه‌های پس‌زمینه"</string>

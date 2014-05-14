@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permet à l\'application d\'envoyer une notification indiquant la réception d\'un message texte. Des applications malveillantes peuvent utiliser cette fonctionnalité pour créer de faux messages entrants."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"envoyer une diffusion de réception de WAP par poussée"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permet à l\'application d\'envoyer une notification indiquant la réception d\'un message WAP par poussée. Des applications malveillantes peuvent utiliser cette fonctionnalité pour créer de faux messages multimédias entrants ou pour remplacer le contenu d\'une page Web par du contenu malveillant."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"diffuser le classement des réseaux"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Autorise l\'application à diffuser une notification signalant que les réseaux doivent être évalués. Cela n\'est jamais nécessaire pour les applications normales."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"restreindre le nombre de processus en cours d\'exécution"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permet à l\'application de définir le nombre maximal de processus devant s\'exécuter. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forcer la fermeture des applications en arrière-plan"</string>

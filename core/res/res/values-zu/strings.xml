@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ivumela uhlelo lokusebenza ukuthi isakaze isaziso sokuthi umyalezo we-SMS utholakele. Izuhlelo lokusebenza ezinobungozi zingasebenzisa lokhu ukufoja imiyalezo ye-SMS engenayo."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"thumela umsakazo otholwe nge-WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ivumela uhlelo lokusebenza ukuthi isakaze isaziso sokuthi umyalezo we-WAP PUSH utholakele. Izuhlelo lokusebenza ezinobungozi zingasebenzisa lokhu ukufoja ukutholakala kwemiyalezo ye-S noma zisuse okuqukethwe kwanoma iliphi ikhasi lewebhu eliqukethe okunobungozi."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"thumela ukusakaza kwamanethiwekhi ayisikolo"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Ivumela uhlelo lokusebenza ukusakaza isaziso sokuthi amanethiwekhi adinga isikolo. Awadingeki kuzinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"khawula inani lezinqubo ezisebenzayo"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ivumela uhlelo lokusebenza ukuthi ilawule isibalo esikhulu sezinto eziqhubekayo eziyosebenza. Ayidingakeli izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"phoqa izinhlelo zokusebenza ezingemuva ukuthi zivaleke"</string>

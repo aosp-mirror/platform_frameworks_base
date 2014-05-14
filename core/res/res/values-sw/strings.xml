@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Huruhusu programu kutangaza taarifa kwamba ujumbe wa SMS umeingia. Programu hasidi zinaweza kutumia hii kubuni SMS zinazoingia."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"tuma tangazo lililopokewa la MSUKUMO WA WAP"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Inaruhusu programu kutangaza taarifa kwamba ujumbe wa WAP PUSH umepokewa. Programu hasidi zinaweza kutumia hii kubuni risiti ya ujumbe wa MMS au polepole kubadilisha maudhui yoyote ya ukurasa wa tovuti na vibadala vibovu."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"tuma tangazo la alama za mitandao"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Huruhusu programu kutangaza arifa kuwa mitandao inafaa kupewa alama. Haihitajiki kamwe kwa programu za kawaida."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"zuia idadi ya michakato inayoendeshwa"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Inaruhusu programu kudhibiti upeo wa idadi ya michakato ambayo itaendeshwa. Kamwe hazihitajiki kwa programu za kwaida."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"lazimisha programu za usuli kufunga"</string>

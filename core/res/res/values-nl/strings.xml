@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Hiermee kan de app een melding verzenden dat een sms\'je is ontvangen. Schadelijke apps kunnen dit gebruiken om inkomende sms\'jes te vervalsen."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"melding over ontvangen WAP-PUSH-bericht verzenden"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Hiermee kan de app een melding verzenden dat een WAP PUSH-bericht is ontvangen. Schadelijke apps kunnen dit gebruiken om de ontvangst van MMS-berichten te vervalsen of de inhoud van een webpagina ongemerkt te vervangen door schadelijke varianten."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"melding verzenden dat netwerken een score moeten krijgen"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Hiermee kan de app een melding uitzenden dat netwerken een score moeten krijgen. Nooit vereist voor normale apps."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"aantal actieve processen beperken"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Hiermee kan de app het maximale aantal processen beheren dat kan worden uitgevoerd. Nooit nodig voor normale apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"achtergrondapps gedwongen stoppen"</string>

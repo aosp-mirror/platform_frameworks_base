@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าได้รับข้อความ SMS แล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปลอมข้อความ SMS ที่เข้ามา"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ส่งการกระจายข้อมูลว่าได้รับ WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าได้รับข้อความ WAP PUSH แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปลอมการแจ้งรับข้อความ MMS หรือแอบเปลี่ยนเนื้อหาในหน้าเว็บโดยใช้ตัวแปรที่เป็นอันตราย"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ส่งเผยแพร่การให้คะแนนเครือข่าย"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"อนุญาตให้แอปนี้เผยแพร่ข้อมูลการแจ้งเตือนว่าเครือข่ายจะต้องผ่านการให้คะแนน ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"จำกัดจำนวนกระบวนการที่กำลังทำงาน"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"อนุญาตให้แอปพลิเคชันควบคุมจำนวนสูงสุดของกระบวนการที่จะเรียกใช้ ไม่จำเป็นต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"บังคับปิดแอปพลิเคชันในพื้นหลัง"</string>

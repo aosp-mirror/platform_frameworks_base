@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Membenarkan apl untuk menyiarkan pemberitahuan bahawa mesej SMS telah diterima. Apl hasad boleh menggunakannya untuk memalsukan mesej SMS masuk."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"hantar siaran WAP-TOLAK-diterima"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Membenarkan apl untuk menyiarkan pemberitahuan bahawa mesej WAP PUSH telah diterima. Apl hasad boleh menggunakannya untuk memalsukan penerimaan mesej MMS atau secara diam-diam menggantikan kandungan mana-mana laman web dengan varian hasad."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"hantar siaran markah rangkaian"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Membenarkan apl menyiarkan pemberitahuan bahawa rangkaian perlu diberi markah. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"hadkan bilangan proses yang dijalankan"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Membenarkan apl untuk mengawal bilangan maksimum proses yang akan berlangsung. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"memaksa apl latar belakang untuk menutup"</string>

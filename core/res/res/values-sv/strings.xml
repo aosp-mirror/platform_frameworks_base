@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillåter att appen sänder ut en avisering när SMS tas emot. Skadliga appar kan använda detta för att förfalska inkommande SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"skicka WAP-PUSH-mottagen sändning"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillåter att appen skickar ett meddelande om att ett WAP PUSH-meddelande har tagits emot. Skadliga appar kan använda detta för att förfalska mottagning av MMS eller för att obemärkt byta ut innehållet på en webbsida mot skadligt innehåll."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"skicka betyg som nätverk skickar"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Tillåter att appen skickar ett meddelande om att nätverket måste betygsättas. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begränsa antalet processer som körs"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillåter att appen styr högsta antalet processer som körs. Behövs inte för vanliga appar."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinga bakgrundsappar att avslutas"</string>

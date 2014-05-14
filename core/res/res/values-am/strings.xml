@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ኤስ ኤም ኤስ መልዕክት መቀበሉን ማሳወቂያ እንዲያሰራጭ ለመተግበሪያው ይፈቅዳሉ፡፡ መጪ ኤስ ኤም ኤስ መልዕክቶችን አመሳስሎ በማቅረብ  ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"የWAP-PUSH ደርስዋል ስርጭት ላክ"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"የWAP PUSH መልዕክት እንደተቀበለ ማሳወቂያ ለማሰራጨት ለመተግበሪያው ይፈቅዳሉ፡፡ ኤም ኤም ኤስ መልዕክት መቀበልን ለማስመሰል ወይም በተንኮል አዘል መሰሎች ለማንኛውም የድር ገፅ ይዘት በዝምታ ለመተካት ተንኮል አዘል መተግበሪያዎች ሊጠቀሙበት ይችላሉ፡፡"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ለአውታረ መረቦች የነጥብ ስጥ ስርጭት ይልካል"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"መተግበሪያው አውታረ መረቦች ነጥብ እንዲያዝለት የሚፈልጉት አንድ ማሳወቂያ እንዲያሰራጭ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"የአሂድ ሂደቶችን ቁጥር ወስን"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"የሚሄዱ ሂደቶችን የመጨረሻ ቁጥር ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ለመደበኛ መተግበሪያዎች መቼም አያስፈልግም፡፡"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"የጀርባ መተግበሪያዎች እንዲዘጉ አስገድዳቸው"</string>

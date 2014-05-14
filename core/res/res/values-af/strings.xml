@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Laat die program toe om \'n kennisgewing uit te saai dat \'n SMS-boodskap ontvang is. Kwaadwillige programme kan dit dalk gebruik om inkomende SMS-boodskappe na te maak."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"stuur WAP-PUSH-ontvange uitsending"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Laat die program toe om \'n kennisgewing uit te saai dat \'n WAP PUSH-boodskap ontvang is. Kwaadwillige programme kan dit dalk gebruik om MMS-boodskap-ontvangsbewyse na te maak of die inhoud van enige webbladsy stilweg te vervang met kwaadwillige variante."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"stuur uitsending vir netwerktelling"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Laat die program toe om \'n kennisgewing uit te saai dat netwerke tellings moet kry. Nooit vir normale programme nodig nie."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"beperk hoeveelheid lopende prosesse"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Laat die program toe om die maksimum getal prosesse te beheer wat sal loop. Nooit nodig vir normale programme nie."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"dwing agtergrondprogramme om te sluit"</string>

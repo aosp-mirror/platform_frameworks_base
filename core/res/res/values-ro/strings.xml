@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj SMS. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trimitere mesaj difuzat primit prin WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj WAP PUSH. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor MMS sau pentru a înlocui fără a vă înştiinţa conţinutul oricărei pagini web cu variante rău intenţionate."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"trimiteți transmisia cu rețelele punctate"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permite aplicației să transmită o notificare de care rețelele au nevoie pentru a fi punctate. Nu este necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitare număr de procese în derulare"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite aplicaţiei să controleze numărul maxim de procese care vor rula. Nu este niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forţează închiderea aplicaţiilor de fundal"</string>

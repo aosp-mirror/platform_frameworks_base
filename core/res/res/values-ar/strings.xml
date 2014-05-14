@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏للسماح للتطبيق ببث إشعار باستلام رسالة قصيرة SMS. قد تستخدم التطبيقات الضارة هذا لتزييف الرسائل القصيرة SMS الواردة."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏إرسال بث WAP-PUSH المستلم"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏للسماح للتطبيق ببث إشعار باستلام رسالة WAP PUSH. يمكن أن تستخدم التطبيقات الضارة هذا لتزيف استلام رسالة وسائط متعددة أو لاستبدال محتوى أي صفحة ويب بمتغيرات ضارة بشكل غير ملحوظ."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"إرسال بث الشبكات التي تم تقييمها"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"السماح للتطبيق لكي يبث إشعارًا يفيد بأنه يلزم تقييم الشبكات. لا يلزم ذلك مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"تحديد عدد العمليات قيد التشغيل"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"للسماح للتطبيق بالتحكم في الحد الأقصى لعدد العمليات التي سيتم تشغيلها. غير مطلوب على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"فرض إغلاق تطبيقات الخلفية"</string>

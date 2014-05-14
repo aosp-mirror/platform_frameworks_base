@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Omogućuje aplikaciji emitiranje obavijesti da je primljena SMS poruka. Zlonamjerne aplikacije mogu to upotrijebiti za krivotvorenje dolaznih SMS poruka."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"slanje WAP-PUSH-primljenih prijenosa"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Omogućuje aplikaciji emitiranje obavijesti da je primljena WAP PUSH poruka. Zlonamjerne aplikacije mogu to upotrijebiti da bi krivotvorile prijem MMS poruka ili da bi potajno zamijenile sadržaj bilo koje web-stranice zlonamjernim varijantama."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"slanje obavijesti za ocjenjivanje mreža"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Aplikaciji omogućuje emitiranje obavijesti da se mreža treba ocijeniti. Nije potrebno za normalne aplikacije."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ograničavanje broja pokrenutih postupaka"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Omogućuje aplikaciji upravljanje maksimalnim brojem postupaka koji će biti pokrenuti. Nikada nije potrebno za uobičajene aplikacije."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"prisilno zatvaranje pozadinskih aplikacija"</string>

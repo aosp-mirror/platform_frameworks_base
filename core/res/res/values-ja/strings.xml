@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"SMSメッセージの受信通知の配信をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、受信SMSメッセージが偽造される恐れがあります。"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH受信ブロードキャストの送信"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"WAP PUSHメッセージの受信通知を配信することをアプリに許可します。この許可を悪意のあるアプリに利用されると、MMSメッセージの受信確認が偽造されたりウェブページのコンテンツが悪意のあるコンテンツに密かに置き換えられたりする恐れがあります。"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ネットワークスコアのブロードキャスト送信"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"ネットワークのスコアリングが必要であるという通知をブロードキャスト送信することをアプリに許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"実行中のプロセスの数を制限"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"実行するプロセスの上限数を制御することをアプリに許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"バックグラウンドのアプリの強制終了"</string>

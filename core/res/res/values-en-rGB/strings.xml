@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Allows the app to broadcast a notification that an SMS message has been received. Malicious apps may use this to forge incoming SMS messages."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"send WAP-PUSH-received broadcast"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Allows the app to broadcast a notification that a WAP PUSH message has been received. Malicious apps may use this to forge MMS message receipt or to silently replace the content of any web page with malicious variants."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"send score networks broadcast"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Allows the app to broadcast a notification that networks need to be scored. Never needed for normal apps."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limit number of running processes"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Allows the app to control the maximum number of processes that will run. Never needed for normal apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"force background apps to close"</string>

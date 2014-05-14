@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"允許應用程式在收到短訊時發出通知。惡意應用程式可能會藉此偽造外來短訊。"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"傳送可由 WAP PUSH 接收的廣播"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"允許應用程式在收到 WAP PUSH 訊息時發送通知。惡意應用程式可能會藉此偽造 MMS 訊息回條或私自以惡意內容更換網頁。"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"傳送網絡計分廣播"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"允許應用程式廣播網絡需要計分的通知，但一般應用程式並不需要使用。"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"執行程序數目上限"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"允許應用程式控制可執行程序的數量上限 (不建議一般應用程式使用)。"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"強制關閉背景應用程式"</string>

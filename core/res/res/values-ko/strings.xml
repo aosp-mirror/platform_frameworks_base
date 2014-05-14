@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"앱이 SMS 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 허용합니다. 이 경우 악성 앱이 수신된 SMS 메시지를 위조할 수 있습니다."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-수신 브로드캐스트 보내기"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"앱이 WAP PUSH 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 허용합니다. 이 경우 악성 앱이 MMS 메시지를 받은 것처럼 위장하거나 웹페이지의 콘텐츠를 악성 콘텐츠로 몰래 바꿀 수 있습니다."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"네트워크 점수화 브로드캐스트 전송"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"네트워크를 점수화할 필요가 있다는 알림을 앱이 브로드캐스트할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"실행 중인 프로세스 수 제한"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"앱이 실행할 최대 프로세스 수를 제어할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"백그라운드 앱 강제 종료"</string>

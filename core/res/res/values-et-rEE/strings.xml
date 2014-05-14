@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Võimaldab rakendusel edastada teatise SMS-sõnumi vastuvõtmise kohta. Pahatahtlikud rakendused võivad seda kasutada sissetulevate SMS-sõnumite võltsimiseks."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"saada WAP-PUSH-vastuvõetud saateid"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Võimaldab rakendusel edastada teatise WAP PUSH-sõnumi vastuvõtmise kohta. Pahatahtlikud rakendused võivad seda kasutada MMS-sõnumite vastuvõtmise võltsimiseks või mis tahes veebilehe sisu salaja asendamiseks pahatahtlikuga."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"võrkude levi hinnangu saatmine"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Lubab rakendusel levitada märguannet, et võrke tuleb hinnata. Seda ei ole kunagi vaja tavapäraste rakenduste puhul."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"piira töötavate protsesside arvu"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Võimaldab rakendusel juhtida töötavate protsesside maksimaalset arvu. Tavarakenduste puhul pole seda vaja."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"sundige taustarakendused sulguma"</string>

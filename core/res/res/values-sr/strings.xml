@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Дозвољава апликацији да емитује обавештење да је SMS порука примљена. Злонамерне апликације на тај начин могу да фалсификују долазне SMS поруке."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"слање примљених PUSH емитовања преко WAP-а"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб-странице уносом злонамерног садржаја."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"шаљи обавештења о тестирању мрежа"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Омогућава апликацији да емитује обавештење да је потребно тестирање мрежа. Никада није потребно за стандардне апликације."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничење броја покренутих процеса"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозвољава апликацији да управља максималним бројем процеса који ће моћи да се покрену. Никада није потребна уобичајеним апликацијама."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"принудно затварање позадинских апликација"</string>
@@ -967,7 +965,7 @@
     <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише следеће:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Напусти ову страницу"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Затвори ову страницу"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Остани на овој страници"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nДа ли стварно желите да напустите ову страницу?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Потврда"</string>

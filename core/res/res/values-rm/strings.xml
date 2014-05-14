@@ -544,10 +544,6 @@
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trametter in broadcast retschavì da WAP-PUSH"</string>
     <!-- no translation found for permdesc_broadcastWapPush (4783402525039442729) -->
     <skip />
-    <!-- no translation found for permlab_broadcastScoreNetworks (6432008366605475024) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastScoreNetworks (7652980974435077828) -->
-    <skip />
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar il dumber maximal da process exequids"</string>
     <!-- no translation found for permdesc_setProcessLimit (7318061314040879542) -->
     <skip />

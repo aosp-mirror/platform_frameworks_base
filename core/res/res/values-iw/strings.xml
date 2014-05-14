@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"‏מאפשר לאפליקציה לשדר התראה על כך שהתקבלה הודעת SMS. אפליקציות זדוניות עלולות להשתמש בכך כדי לזייף הודעות SMS נכנסות."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"‏שלח שידור שהתקבל באמצעות WAP-PUSH"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"‏מאפשר לאפליקציה לשדר התראה על כך שהתקבלה הודעה מסוג WAP PUSH. אפליקציות זדוניות עלולות להשתמש בכך כדי לזייף קבלה של הודעות MMS או כדי להחליף בחשאי את התוכן של דף אינטרנט כלשהו בגירסאות זדוניות."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"שלח שידור לדירוג רשתות"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"מאפשר לאפליקציה לשדר התראה על כדי שיש לדרג את הרשתות. לא בשימוש עבור אפליקציות רגילות."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"הגבל את מספר התהליכים הפועלים"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"מאפשר לאפליקציה לשלוט על המספר המרבי של תהליכים שיפעלו. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"אילוץ סגירה של אפליקציות ברקע"</string>

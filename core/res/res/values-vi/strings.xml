@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Cho phép ứng dụng truyền phát thông báo cho biết đã nhận được tin nhắn SMS. Ứng dụng độc hại có thể sử dụng quyền này để giả mạo tin nhắn SMS đến."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"gửi truyền phát WAP-PUSH nhận được"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Cho phép ứng dụng truyền phát thông báo cho biết rằng đã nhận được tin nhắn WAP PUSH. Ứng dụng độc hại có thể sử dụng quyền này để giả mạo xác nhận đã nhận được tin nhắn MMS hoặc ngầm thay thế nội dung của bất kỳ trang web nào bằng các biến thể độc hại."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"gửi chương trình phát mạng điểm số"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Cho phép ứng dụng truyền thông báo rằng các mạng cần để được tính điểm. Không bao giờ cần cho ứng dụng thông thường."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"giới hạn số quá trình đang chạy"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Cho phép ứng dụng kiểm soát số quy trình tối đa sẽ chạy. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"buộc ứng dụng nền đóng"</string>

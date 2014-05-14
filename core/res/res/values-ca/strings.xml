@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permet que l\'aplicació difongui una notificació en què s\'indiqui que s\'ha rebut un missatge SMS. Les aplicacions malicioses poden fer servir aquesta funció per falsificar els missatges SMS entrants."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar una difusió de tipus WAP-PUSH-received"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permet que l\'aplicació difongui una notificació que indica que s\'ha rebut un missatge d\'inserció WAP. Les aplicacions malicioses poden utilitzar-ho per falsificar la recepció dels missatges MMS o per substituir silenciosament el contingut d\'una pàgina web per variants malicioses."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"enviar l\'emissió de la puntuació de les xarxes"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Permet que l\'aplicació emeti una notificació necessària perquè les xarxes rebin una puntuació. No es necessita mai per a les aplicacions normals."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar el nombre de processos en execució"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permet que l\'aplicació controli el nombre màxim de processos que s\'executaran. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"com fer que es tanquin les aplicacions en segon pla"</string>

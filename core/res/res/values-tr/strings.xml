@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Uygulamaya, SMS mesajı alındığına dair bildirim yayınlama izni verir. Kötü amaçlı uygulamalar sahte SMS mesajları göndermek için bunu kullanabilir."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH ile alınan yayın gönder"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Uygulamaya, WAP PUSH mesajı alındığına dair bildirim yayınlama izni verir. Kötü amaçlı uygulamalar sahte MMS bildirimleri oluşturmak veya bir web sayfasının içeriğini sessiz şekilde zararlı öğelerle değiştirmek için bunu kullanabilir."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"ağları puanlama yayını gönderme"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Uygulamaya, ağların puanlanması gerektiği bildirimini yayınlama izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"çalışan işlem sayısını sınırla"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Uygulamaya, çalışacak süreçlerin azami sayısını denetleme izni verir. Normal uygulamalar için gerekli değildir."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"arka plan uygulamaları kapanmaya zorla"</string>

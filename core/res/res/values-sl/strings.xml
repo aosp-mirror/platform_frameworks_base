@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Programu omogoča oddajo obvestila o prejetih sporočilih SMS. Zlonamerni programi lahko to uporabijo za ponarejanje dohodnih SMS-ov."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"pošiljanje oddaje, prejete s potisnim sporočilom WAP"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Programu omogoča oddajo obvestila, da je bilo potisno sporočilo WAP prejeto. Zlonamerni programi lahko to uporabijo za ponarejanje potrdila o prejemu sporočila MMS ali za neopazno menjavo vsebine poljubne spletne strani z zlonamernimi različicami."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"pošiljanje oddaj o ocenjevanju omrežij"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Aplikaciji dovoli oddajo obvestila, da je treba omrežja oceniti. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"omejevanje števila izvajajočih se procesov"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Programu omogoča nadzor največjega števila postopkov, ki se bodo izvajali. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"vsiljeno zapiranje aplikacij v ozadju"</string>

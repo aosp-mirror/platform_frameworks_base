@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"允许应用广播一条有关已收到短信的通知。恶意应用可能借此伪造接到的短信。"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"发送 WAP-PUSH 收到的广播"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"允许应用广播一条有关已收到 WAP PUSH 短信的通知。恶意应用可能借此伪造短信接收，或在后台将任意网页的内容替换为恶意内容。"</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"发送网络评分广播通知"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"允许应用广播“需要为网络评分”的通知。普通应用绝不需要此权限。"</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"限制运行的进程个数"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"允许应用控制将运行的进程数上限。普通应用绝不需要此权限。"</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"强制关闭后台应用"</string>

@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Umožňuje aplikaci vysílat oznámení o přijetí zprávy SMS. Škodlivé aplikace mohou toto oprávnění použít k vytváření falešných příchozích zpráv SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"odeslání vysílání typu WAP-PUSH-received"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Umožňuje aplikaci vysílat oznámení o přijetí zprávy WAP PUSH. Škodlivé aplikace mohou toto oprávnění použít k vytváření falešných přijatých zpráv MMS nebo utajenému nahrazení obsahu libovolné webové stránky jejich škodlivými variantami."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"odeslání skóre vysílaných sítěmi"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Umožňuje aplikaci vysílat oznámení, že je třeba zadat skóre sítí. Běžné aplikace toto oprávnění nepotřebují."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"omezení počtu spuštěných procesů"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Umožňuje aplikaci řídit maximální počet spuštěných procesů. Běžné aplikace toto oprávnění nikdy nepotřebují."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"vynucení zavření aplikací na pozadí"</string>

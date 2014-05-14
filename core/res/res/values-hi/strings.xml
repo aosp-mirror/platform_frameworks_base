@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ऐप्स  को वह सूचना प्रसारित करने देता है जो SMS संदेश ने प्राप्त की है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली इनकमिंग संदेश गढ़ने के लिए कर सकते हैं."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-प्राप्त प्रसारण भेजें"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ऐप्स  को वह सूचना प्रसारित करने देता है जो WAP PUSH संदेश को प्राप्त हुआ है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली MMS संदेश प्राप्त करने या किसी वेबपृष्ठ की सामग्री को दुर्भावनापूर्ण दूसरे रूप से चुपचाप प्रतिस्थापित करने के लिए कर सकते हैं."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"स्कोर नेटवर्क प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"ऐप्स को यह सूचना प्रसारित करने देती है कि नेटवर्क को स्कोर किए जाने की आवश्यकता है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"चल रही प्रक्रियाओं की संख्‍या सीमित करें"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ऐप्स  को चलाई जाने वाली अधिकतम प्रक्रियाओं को नियंत्रित करने देता है. सामान्य ऐप्स  के लिए कभी आवश्यक नहीं होती."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"पृष्ठभूमि ऐप्स को बलपूर्वक बंद करें"</string>

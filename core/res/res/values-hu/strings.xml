@@ -351,8 +351,6 @@
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Lehetővé teszi az alkalmazás számára értesítés küldését SMS érkezéséről. A rosszindulatú alkalmazások beérkező SMS-ek hamisítására használhatják fel ezt."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH alapú üzenetek küldése"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Lehetővé teszi az alkalmazás számára értesítés küldését WAP PUSH üzenet érkezése esetén. A rosszindulatú alkalmazások arra használhatják ezt, hogy MMS-kézbesítési jelentést hamisítsanak, vagy hogy a háttérben rosszindulatú variánssal cseréljék le bármelyik weboldal tartalmát."</string>
-    <string name="permlab_broadcastScoreNetworks" msgid="6432008366605475024">"hálózatpontozási értesítés küldése"</string>
-    <string name="permdesc_broadcastScoreNetworks" msgid="7652980974435077828">"Lehetővé teszi, hogy az alkalmazás szétküldjön egy értesítést, amely szerint a hálózatokat pontozni kell. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"futó folyamatok számának korlátozása"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Lehetővé teszi az alkalmazás számára a futtatható folyamatok maximális számának vezérlését. Soha nem lehet rá szüksége a normál alkalmazásoknak."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"háttéralkalmazások leállításának kényszerítése"</string>
