@@ -163,9 +163,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         nextConnBroadcast.get();
 
         // verify that both routes were added and DNS was flushed
-        verify(mNetManager).addRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V4));
-        verify(mNetManager).addRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V6));
-        verify(mNetManager).flushNetworkDnsCache(mMobile.tracker.getNetwork().netId);
+        int mobileNetId = mMobile.tracker.getNetwork().netId;
+        verify(mNetManager).addRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V4));
+        verify(mNetManager).addRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V6));
+        verify(mNetManager).flushNetworkDnsCache(mobileNetId);
 
     }
 
@@ -200,10 +201,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         nextConnBroadcast.get();
 
         // verify that wifi routes added, and teardown requested
-        verify(mNetManager).addRoute(eq(WIFI_IFACE), eq(WIFI_ROUTE_V4));
-        verify(mNetManager).addRoute(eq(WIFI_IFACE), eq(WIFI_ROUTE_V6));
-        verify(mNetManager).flushNetworkDnsCache(mWifi.tracker.getNetwork().netId);
+        int wifiNetId = mWifi.tracker.getNetwork().netId;
+        verify(mNetManager).addRoute(eq(wifiNetId), eq(WIFI_ROUTE_V4));
+        verify(mNetManager).addRoute(eq(wifiNetId), eq(WIFI_ROUTE_V6));
+        verify(mNetManager).flushNetworkDnsCache(wifiNetId);
         verify(mMobile.tracker).teardown();
+
+        int mobileNetId = mMobile.tracker.getNetwork().netId;
 
         reset(mNetManager, mMobile.tracker);
 
@@ -216,8 +220,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
         nextConnBroadcast.get();
 
-        verify(mNetManager).removeRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V4));
-        verify(mNetManager).removeRoute(eq(MOBILE_IFACE), eq(MOBILE_ROUTE_V6));
+        verify(mNetManager).removeRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V4));
+        verify(mNetManager).removeRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V6));
 
     }
 
