@@ -17,11 +17,9 @@
 package com.android.server.pm;
 
 import android.app.AppGlobals;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
@@ -157,10 +155,26 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         }
     }
 
+    /**
+     * Checks if the user is enabled.
+     */
+    private boolean isUserEnabled(UserHandle user) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            UserInfo targetUserInfo = mUm.getUserInfo(user.getIdentifier());
+            return targetUserInfo != null && targetUserInfo.isEnabled();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     @Override
     public List<ResolveInfo> getLauncherActivities(String packageName, UserHandle user)
             throws RemoteException {
         ensureInUserProfiles(user, "Cannot retrieve activities for unrelated profile " + user);
+        if (!isUserEnabled(user)) {
+            return new ArrayList<ResolveInfo>();
+        }
 
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -179,6 +193,9 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     public ResolveInfo resolveActivity(Intent intent, UserHandle user)
             throws RemoteException {
         ensureInUserProfiles(user, "Cannot resolve activity for unrelated profile " + user);
+        if (!isUserEnabled(user)) {
+            return null;
+        }
 
         long ident = Binder.clearCallingIdentity();
         try {
@@ -193,6 +210,10 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     public boolean isPackageEnabled(String packageName, UserHandle user)
             throws RemoteException {
         ensureInUserProfiles(user, "Cannot check package for unrelated profile " + user);
+        if (!isUserEnabled(user)) {
+            return false;
+        }
+
         long ident = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -207,6 +228,10 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     public boolean isActivityEnabled(ComponentName component, UserHandle user)
             throws RemoteException {
         ensureInUserProfiles(user, "Cannot check component for unrelated profile " + user);
+        if (!isUserEnabled(user)) {
+            return false;
+        }
+
         long ident = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -221,6 +246,9 @@ public class LauncherAppsService extends ILauncherApps.Stub {
     public void startActivityAsUser(ComponentName component, Rect sourceBounds,
             Bundle opts, UserHandle user) throws RemoteException {
         ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+        if (!isUserEnabled(user)) {
+            throw new IllegalStateException("Cannot start activity for disabled profile "  + user);
+        }
 
         Intent launchIntent = new Intent(Intent.ACTION_MAIN);
         launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -228,7 +256,6 @@ public class LauncherAppsService extends ILauncherApps.Stub {
         launchIntent.setSourceBounds(sourceBounds);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final int callingUserId = UserHandle.getCallingUserId();
         long ident = Binder.clearCallingIdentity();
         try {
             mContext.startActivityAsUser(launchIntent, opts, user);
