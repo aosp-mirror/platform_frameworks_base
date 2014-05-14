@@ -697,6 +697,38 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             jniThrowException(env, "java/lang/RuntimeException",
                     "Not allowed to write file descriptors here");
             break;
+        case -EBADF:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Bad file descriptor");
+            break;
+        case -ENFILE:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "File table overflow");
+            break;
+        case -EMFILE:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Too many open files");
+            break;
+        case -EFBIG:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "File too large");
+            break;
+        case -ENOSPC:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "No space left on device");
+            break;
+        case -ESPIPE:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Illegal seek");
+            break;
+        case -EROFS:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Read-only file system");
+            break;
+        case -EMLINK:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Too many links");
+            break;
         default:
             ALOGE("Unknown binder error code. 0x%" PRIx32, err);
             String8 msg;

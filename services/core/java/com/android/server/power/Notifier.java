@@ -190,14 +190,14 @@ final class Notifier {
                         + ", workSource=" + newWorkSource);
             }
             try {
-                mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag, monitorType,
-                        newWorkSource, newOwnerPid, newTag, newHistoryTag,
+                mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag, historyTag,
+                        monitorType, newWorkSource, newOwnerPid, newTag, newHistoryTag,
                         newMonitorType, unimportantForLogging);
             } catch (RemoteException ex) {
                 // Ignore
             }
         } else {
-            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource);
+            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource, historyTag);
             onWakeLockAcquired(newFlags, newTag, newPackageName, newOwnerUid, newOwnerPid,
                     newWorkSource, newHistoryTag);
         }
@@ -207,7 +207,7 @@ final class Notifier {
      * Called when a wake lock is released.
      */
     public void onWakeLockReleased(int flags, String tag, String packageName,
-            int ownerUid, int ownerPid, WorkSource workSource) {
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockReleased: flags=" + flags + ", tag=\"" + tag
                     + "\", packageName=" + packageName
@@ -218,9 +218,10 @@ final class Notifier {
         try {
             final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
             if (workSource != null) {
-                mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag, monitorType);
+                mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag, historyTag,
+                        monitorType);
             } else {
-                mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag, monitorType);
+                mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag, historyTag, monitorType);
                 mAppOps.finishOperation(AppOpsManager.getToken(mAppOps),
                         AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
             }
