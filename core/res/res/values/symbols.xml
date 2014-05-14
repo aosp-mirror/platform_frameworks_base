@@ -1630,6 +1630,7 @@
   <java-symbol type="string" name="wifi_display_notification_disconnect" />
   <java-symbol type="style" name="Theme.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Micro.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.Leanback.Dialog.Alert" />
   <java-symbol type="style" name="Theme.Toast" />
   <java-symbol type="xml" name="storage_list" />
   <java-symbol type="bool" name="config_dreamsSupported" />

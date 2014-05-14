@@ -1790,6 +1790,7 @@
         <attr name="bottomMedium" format="reference|color" />
         <attr name="centerMedium" format="reference|color" />
         <attr name="layout" />
+        <attr name="buttonPanelSideLayout" format="reference" />
         <attr name="listLayout" format="reference" />
         <attr name="multiChoiceItemLayout" format="reference" />
         <attr name="singleChoiceItemLayout" format="reference" />

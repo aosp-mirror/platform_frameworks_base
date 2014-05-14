@@ -107,6 +107,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.date_picker_dialog, null);
         setView(view);
+        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
         mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
         mDatePicker.init(year, monthOfYear, dayOfMonth, this);
         updateTitle(year, monthOfYear, dayOfMonth);

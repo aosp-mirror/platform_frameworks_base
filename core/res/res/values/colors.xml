@@ -120,6 +120,9 @@
 
     <color name="micro_text_light">#434343</color>
 
+    <color name="leanback_dark_gray">#ff333333</color>
+    <color name="leanback_light_gray">#ff888888</color>
+
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 

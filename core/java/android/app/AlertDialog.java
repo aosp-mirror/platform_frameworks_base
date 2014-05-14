@@ -92,6 +92,18 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * the device's default alert theme with a light background.
      */
     public static final int THEME_DEVICE_DEFAULT_LIGHT = 5;
+
+    /**
+     * No layout hint.
+     * @hide
+     */
+    public static final int LAYOUT_HINT_NONE = 0;
+
+    /**
+     * Hint layout to the side.
+     * @hide
+     */
+    public static final int LAYOUT_HINT_SIDE = 1;
     
     protected AlertDialog(Context context) {
         this(context, resolveDialogTheme(context, 0), true);
@@ -205,6 +217,14 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public void setView(View view, int viewSpacingLeft, int viewSpacingTop, int viewSpacingRight,
             int viewSpacingBottom) {
         mAlert.setView(view, viewSpacingLeft, viewSpacingTop, viewSpacingRight, viewSpacingBottom);
+    }
+
+    /**
+     * Internal api to allow hinting for the best button panel layout.
+     * @hide
+     */
+    void setButtonPanelLayoutHint(int layoutHint) {
+        mAlert.setButtonPanelLayoutHint(layoutHint);
     }
 
     /**
