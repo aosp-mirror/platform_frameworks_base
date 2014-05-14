@@ -31,6 +31,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -69,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 101;
+    private static final int DATABASE_VERSION = 102;
 
     private Context mContext;
     private int mUserHandle;
@@ -1614,6 +1615,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 101;
         }
 
+        if (upgradeVersion == 101) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadSetting(stmt, Settings.Global.DEVICE_NAME, getDefaultDeviceName());
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 102;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2342,6 +2360,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     R.integer.def_heads_up_enabled);
 
+            loadSetting(stmt, Settings.Global.DEVICE_NAME, getDefaultDeviceName());
+
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();
@@ -2397,5 +2417,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (c != null) c.close();
         }
         return defaultValue;
+    }
+
+    private String getDefaultDeviceName() {
+        return mContext.getResources().getString(R.string.def_device_name, Build.BRAND,
+                Build.MODEL);
     }
 }

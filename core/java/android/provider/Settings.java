@@ -6147,6 +6147,13 @@ public final class Settings {
         /** @hide */ public static final int HEADS_UP_ON = 1;
 
         /**
+         * The name of the device
+         *
+         * @hide
+         */
+        public static final String DEVICE_NAME = "device_name";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
