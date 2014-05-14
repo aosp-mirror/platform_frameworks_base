@@ -124,6 +124,10 @@ interface IDevicePolicyManager {
     void addForwardingIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearForwardingIntentFilters(in ComponentName admin);
 
+    boolean setApplicationBlocked(in ComponentName admin, in String packageName, boolean blocked);
+    int setApplicationsBlocked(in ComponentName admin, in Intent intent, boolean blocked);
+    boolean isApplicationBlocked(in ComponentName admin, in String packageName);
+
     void enableSystemApp(in ComponentName admin, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in Intent intent);
 

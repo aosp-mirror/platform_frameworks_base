@@ -3384,6 +3384,93 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean setApplicationBlocked(ComponentName who, String packageName,
+            boolean blocked) {
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                return pm.setApplicationBlockedSettingAsUser(packageName, blocked, callingUserId);
+            } catch (RemoteException re) {
+                // shouldn't happen
+                Slog.e(LOG_TAG, "Failed to setApplicationBlockedSetting", re);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public int setApplicationsBlocked(ComponentName who, Intent intent, boolean blocked) {
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                List<ResolveInfo> activitiesToEnable = pm.queryIntentActivities(intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        PackageManager.GET_DISABLED_COMPONENTS
+                                | PackageManager.GET_UNINSTALLED_PACKAGES,
+                        callingUserId);
+
+                if (DBG) Slog.d(LOG_TAG, "Enabling activities: " + activitiesToEnable);
+                int numberOfAppsUnblocked = 0;
+                if (activitiesToEnable != null) {
+                    for (ResolveInfo info : activitiesToEnable) {
+                        if (info.activityInfo != null) {
+                            numberOfAppsUnblocked++;
+                            pm.setApplicationBlockedSettingAsUser(info.activityInfo.packageName,
+                                    blocked, callingUserId);
+                        }
+                    }
+                }
+                return numberOfAppsUnblocked;
+            } catch (RemoteException re) {
+                // shouldn't happen
+                Slog.e(LOG_TAG, "Failed to setApplicationsBlockedSettingsWithIntent", re);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public boolean isApplicationBlocked(ComponentName who, String packageName) {
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                return pm.getApplicationBlockedSettingAsUser(packageName, callingUserId);
+            } catch (RemoteException re) {
+                // shouldn't happen
+                Slog.e(LOG_TAG, "Failed to getApplicationBlockedSettingAsUser", re);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+            return false;
+        }
+    }
+
+    @Override
     public void enableSystemApp(ComponentName who, String packageName) {
         synchronized (this) {
             if (who == null) {

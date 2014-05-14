@@ -5053,6 +5053,7 @@ package android.app.admin {
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
+    method public boolean isApplicationBlocked(android.content.ComponentName, java.lang.String);
     method public boolean isDeviceOwnerApp(java.lang.String);
     method public boolean isLockTaskPermitted(android.content.ComponentName);
     method public boolean isProfileOwnerApp(java.lang.String);
@@ -5060,7 +5061,9 @@ package android.app.admin {
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
+    method public boolean setApplicationBlocked(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
+    method public int setApplicationsBlocked(android.content.ComponentName, android.content.Intent, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
     method public void setLockTaskComponents(android.content.ComponentName[]) throws java.lang.SecurityException;
