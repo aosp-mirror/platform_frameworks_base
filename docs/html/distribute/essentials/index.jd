@@ -1,0 +1,34 @@
+page.title=Essentials for a Successful App
+meta.tags="landing, quality"
+page.tags="guidelines", "tablet", "quality"
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  A focus on quality should be part of your entire app delivery process: from
+  initial concept through app and UI design, coding and testing and onto a
+  process of monitoring feedback and making improvement after launch.
+</p>
+
+<div class="dynamic-grid">
+<div class="resource-widget resource-flow-layout landing col-16"
+  data-query="collection:distribute/essentials"
+  data-cardSizes="6x6"
+  data-maxResults="6">
+</div>
+
+<h3>Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-16"
+  data-query="type:blog+tag:quality"
+  data-cardSizes="6x3"
+  data-maxResults="3">
+</div>
+<div class="resource-widget resource-flow-layout col-16"
+  data-query="type:youtube+tag:appquality"
+  data-cardSizes="6x3"
+  data-maxResults="3">
+</div>
+</div>

@@ -1,0 +1,330 @@
+page.title=Developer Stories: Localization in Google Play
+meta.tags="google play, developer story, localization, global"
+page.tags="stories", "video", "case study"
+page.image=/images/distribute/zombie-ragdoll-n5-land.jpg
+page.metaDescription=Hear from Android developers who have successfully used the Google Play App Translation Service.
+
+@jd:body
+
+<p>
+  As you build your app and distribute it across the world through Google Play,
+  localization becomes an increasingly important tool to reach more users.
+  Localization involves a <a href=
+  "{@docRoot}distribute/googleplay/publish/localizing.html">variety of tasks</a>, but
+  most important is creating quality translations of your app's UI strings and
+  marketing materials.
+</p>
+
+<p>
+  Managing the translation process across multiple languages can be a
+  challenge, especially if you need to locate translators on your own. That’s
+  why Google Play offers the App Translation Service right from the Developer
+  Console. It's a single place where you can go to source professional
+  translators, get cost estimates, and then send your strings and other
+  materials for translation.
+</p>
+
+<p>
+  Here are some stories from developers who have used Google Play's App Translation
+  Service to localize their apps and the results they've seen as they've
+  expand their offerings beyond a single language.
+</p>
+
+<!-- START STORY -->
+
+<div style="margin-bottom:2em;padding-top:10px;" id="zombieragdoll">
+
+<h3 style="line-height:1.25em">Zombie Ragdoll: Improved user engagement<br /> with localized versions</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "https://lh4.ggpht.com/m-Ew8c8C_nGctbP6PSPGOaVNnGFryReOE2yHXJ9Z6Prk1nsDyx5w5TmWfg-P5N3HypA=w124">
+
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+
+    <h5>About the app</h5>
+
+    <ul>
+      <li><a href="https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll">Zombie Ragdoll</a></li>
+      <li>A fun zombie-based physics game</li>
+    </ul>
+
+    <h5>Localization Results</h5>
+
+    <ul>
+      <li>Increased engagement because of appeal of the localized version</li>
+      <li>80% of installs came from users of non-English languages</li>
+      </ul>
+
+    <div style="padding:.5em 0 0 1em;">
+      <a href="https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll">
+        <img alt="Android app on Google Play"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+      </a>
+
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+
+<p>
+  The 2013 Google I/O talks about <a href=
+  "https://developers.google.com/events/io/sessions/326345917">Building Android
+  Apps for a Global Audience</a> and <a href=
+  "https://developers.google.com/events/io/sessions/326455375">What’s New for
+  Developers in Google Play</a> inspired developers at RV AppStudios to go global
+  from very beginning for their new game, Zombie Ragdoll. They launched Zombie
+  Ragdoll in August 2013, localized into 20 languages.
+</p>
+
+<p>
+  They quickly saw the impact of their decision to ship simultaneously in
+  multiple languages through increased non-English installs and improved
+  engagement with users worldwide. In addition, they started getting
+  significant usage in countries where their apps had not been as popular
+  before. They are seeing great traction in countries like Vietnam, Russia,
+  Philippines and Thailand.
+</p>
+
+<p>
+  Vivek Dave, founder of RV AppStudios, credits the success of Zombie Ragdoll
+  to localization:
+</p>
+
+<p>
+  "The value of localization is clear, it helps discoverability and helps
+  connect with the users in other countries. So when the localization
+  opportunity arose, we immediately jumped on it. Android is worldwide, and we
+  would be severely limiting ourselves if we focused on English as the only
+  language.
+</p>
+
+<p>
+  "The App Translation Service offered in the Google Play Developer Console is
+  extremely easy to use and the pricing is very attractive. Developers with
+  limited localization experience can easily create, upload, and translate
+  their app."
+</p>
+
+
+<p>
+  RV AppStudios not only localizes the text within the game, but also localizes
+  the game assets to a specific country/culture. Dave says, “Users want a
+  personalized experience, and by offering a localized game with translation of
+  text and graphic assets, we believe users will connect at a much deeper level
+  with the game.”
+</p>
+
+
+  <div style="margin-top:8px;float:left;margin-right:24px;">
+    <img src="{@docRoot}images/distribute/zombie-ragdoll-n5-land.jpg" style="width:470px;">
+  </div>
+
+
+    <div style="margin-top:128px;">
+      <p class="img-caption"><strong>Hindi version of Zombie Ragdoll</strong>:
+      Localized screenshots and videos in the app's Google Play listing go a
+      long way toward increasing the number of installs.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+<!-- START STORY -->
+
+<div style="margin-bottom:2em;padding-top:18px;clear:both;" id="sayhichat">
+
+<h3>SayHi Chat: Install growth and user engagement<br />
+  from professional translations</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "https://lh5.ggpht.com/qiL6CF1Hktz618T3mbGrxvm_OoeheQ78FgG7zr90C2MCRiz4IDQsbKuHT4xQGiWEU8o=w124">
+
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+
+    <h5>About the app</h5>
+
+    <ul>
+      <li><a href="https://play.google.com/store/apps/details?id=com.unearby.sayhi">SayHi Chat,
+      Love, Meet, Dating</a></li>
+      <li>A social app to help you find people nearby</li>
+    </ul>
+
+    <h5>Localization Results</h5>
+
+    <ul>
+      <li>120% growth in language installs for new languages added</li>
+      <li>~20% increase in revenue and ~50% increase in User Reviews in the new
+        languages</li>
+      </ul>
+
+    <div style="padding:.5em 0 0 1em;">
+      <a href="https://play.google.com/store/apps/details?id=com.unearby.sayhi">
+        <img alt="Android app on Google Play"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+      </a>
+
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+
+<p>
+  The SayHi Chat app started out only in Japanese, Chinese and English. It soon
+  became one of the most popular apps in Japan, Hong Kong, and Taiwan. The
+  SayHi team realized it was time to launch in more languages, as the language
+  barrier was restricting how fast SayHi could grow globally. </p>
+
+  <p>Yan Shi, senior
+  developer at SayHi, says: "We checked Google Analytics for our DAU and user
+  growth numbers in each country, we also looked at total Android and iOS users
+  in those markets before finalizing our next set of languages.
+</p>
+
+  <div style="margin-top:8px;float:left;width:270px;">
+    <img src="{@docRoot}images/distribute/hichat-n5-port.jpg" style="width:240px;margin-right:48px;">
+  </div>
+
+<p>
+  SayHi used the App Translation Service to launch in 13 additional languages
+  in August 2013 and immediately saw 120% increase in install rates. In
+  addition, they are seeing their app ranked in Top 10 apps in countries like
+  Poland and Italy.
+</p>
+
+<p>Notably, they saw steady growth in Spain after replacing their previous
+  non-professional Spanish translation with a professional one produced through
+  the App Translation Service.</p>
+
+<p>
+  Yan Shi adds, “The App Translation Service is really easy to use and
+  the completion time for translation requests is very good.”
+</p>
+
+    <div style="width:600px;margin-top:98px;padding:0;">
+      <p class="img-caption"><strong>Arabic version of SayHi Chat</strong>:
+        User engagement increased significantly with
+        the localized version.</p>
+    </div>
+
+  </div>
+</div> <!-- END STORY -->
+
+
+<div style="margin-bottom:2em;clear:both;padding-top:18px;" id="g4a"><!-- START STORY -->
+
+<h3 style="line-spacing:1.25em;">G4A Indian Rummy: Benefitting from ease-of-use and<br /> fast turnaround time</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "https://lh4.ggpht.com/IxSyQgO0LWzPRoLfCrER06-0kr6aMAa2azF7eNYB30EBZAGOLYJUZulknPockbTlDYU=w124">
+
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+
+    <h5>About the app</h5>
+
+    <ul>
+      <li><a href="https://play.google.com/store/apps/details?id=org.games4all.android.games.indianrummy.prod">G4A Indian Rummy</a></li>
+      <li>A card game in which the players try to form sets and sequences of cards</li>
+    </ul>
+
+    <h5>Localization Results</h5>
+
+    <ul>
+      <li>Double the number of users in French and German languages</li>
+      <li>300% increase in user engagement with localized version</li>
+      </ul>
+
+    <div style="padding:.5em 0 0 1em;">
+      <a href="https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll">
+        <img alt="Android app on Google Play"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" />
+      </a>
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+
+<p>
+  Games4All (G4A) is the developer of Indian Rummy and a variety of games that
+  they distribute broadly to users around the world. After noticing that
+  certain apps had become especially popular in specific countries, they
+  decided to localize those apps. Initially they used a local agency to do
+  the translation and got great results &mdash; the number of users in
+  that language increased tremendously when they released the localized
+  version.
+</p>
+
+<p>
+  Building on that success, G4A expanded their localization goals but
+  found that translation quality varied across their vendors and costs limited the
+  language/game combinations they could try. That's when G4A decided to try the
+  App Translation Service.
+</p>
+
+<p>
+  Founder Pieter Olivier says, "When we heard that the App Translation
+  Service was available in the Developer Console, we jumped at the opportunity.
+  We've now been using the App Translation Service for several months and found
+  that the cost per translation is much lower than with local companies and the
+  process is much easier."
+</p>
+
+<p>So far, G4A has translated the game Indian Rummy into five languages through
+   the App Translation Service.</p>
+
+<p>
+  Olivier continues, "The first thing we did was convert all of our texts into
+  the strings.xml format. After that using the service was extremely easy and
+  straightforward. In contrast, our previous experiences with translation
+  agencies were much more difficult: files often required extensive conversion
+  operations to make them usable, and turnaround times varied wildly.
+</p>
+
+<p>
+  "With the App Translation Service, the turnaround time is usually measured in
+  days instead of weeks that we were used to with traditional translation
+  agencies."
+</p>
+
+  <div style="margin-top:14px;float:left;margin-right:24px;">
+    <img src="{@docRoot}images/distribute/indian-rummy-n4-land.jpg" style="width:470px;">
+  </div>
+
+    <div style="margin-top:158px;">
+      <p class="img-caption"><strong>Dutch
+      version of Indian Rummy</strong>: Making slight changes to games rules based on
+      local nuances was key to success of the game.</p>
+    </div>
+
+  </div>
+
+
+
+</div> <!-- END STORY -->

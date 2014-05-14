@@ -1,0 +1,513 @@
+page.title=Education Guidelines
+page.metaDescription=These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.
+page.image=/distribute/images/edu-guidelines.jpg
+Xnonavpage=true
+
+@jd:body
+
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Guidelines</h2>
+<ol>
+<li><a href="#basic-reqts">Basic Requirements</a></li>
+<li><a href="#monetizing-ads">Monetizing and Ads</a></li>
+<li><a href="#e-value">Educational Value</a></li>
+<li><a href="#quality">App Quality</a></li>
+<li><a href="#related-resources">Related Resources</a></li>
+</ol>
+
+<h2>
+  Testing
+</h2>
+
+<ol>
+  <li>
+    <a href="#test-environment">Setting Up a Test Environment</a>
+  </li>
+</ol>
+
+</div></div>
+
+<div style="margin:0 0 1em 0;">
+  <img src="{@docRoot}distribute/images/edu-guidelines.jpg" style=
+  "width:274px;">
+</div>
+
+<p>
+  These guidelines and requirements help you develop great apps for students,
+  which offer compelling content and an intuitive user experience on Android
+  tablets.
+</p>
+
+<p>
+  You’ll also need to ensure that your apps comply with the terms of the
+  <a href=
+  "https://play.google.com/about/developer-distribution-agreement-addendum.html">
+  Google Play for Education Addendum</a>, <a href=
+  "http://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Program Policies</a>, and <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html">Developer
+  Distribution Agreement</a>.
+</p>
+
+<div class="headerLine clearfloat">
+  <h1 id="basic-reqts">
+    Basic Requirements
+  </h1>
+
+  <hr>
+</div>
+
+<p>
+  To participate, your apps must be designed for the K-12 market. The basic
+  requirements that your apps must meet are:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Apps and the ads they contain must not collect personally identifiable
+      information, other than user credentials or data required to operate and
+      improve the app.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Apps must not use student data for purposes unrelated to its educational
+      function.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Apps must have a content rating of "Everyone" or "Low Maturity" (apps
+      with a "Medium Maturity" rating are allowed, if they have that rating
+      solely because they allow communication between students).
+    </p>
+  </li>
+
+  <li>
+    <p>
+      App content, including ads displayed by the app, must be consistent with
+      the app's maturity rating. The app must not display any "offensive"
+      content, as described in the <a href=
+      "http://play.google.com/about/developer-content-policy.html">Google Play
+      Developer Program Policies</a> and <a href=
+      "https://support.google.com/googleplay/android-developer/answer/188189">content-rating
+      guidelines</a>.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Apps must comply with the Children’s Online Privacy Protection Act and
+      all other applicable laws and regulations.
+    </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h1 id="monetizing-ads">
+    Monetizing and Ads
+  </h1>
+
+  <hr>
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-edu-monetize.png">
+</div>
+
+<p>
+  In-app purchase is currently not supported with Google Play for Education, so
+  a student device will block any transactions. To avoid confusion, be sure to
+  remove any in-app purchase buttons and related UI elements from your apps.
+  We’re investigating additional purchase mechanisms to enable more flexible
+  pricing models for developers and schools.
+</p>
+
+<p>
+  If your apps are priced In Google Play for Education, you must allow Google
+  Play to offer teachers limited free trials before purchase (you provide this
+  through business terms only, no development work is needed.)
+</p>
+
+<p>
+  You can only choose not to remove in-app purchasing from your apps where all
+  content and services are sold through Google Play for Education using In-app
+  Billing. If you choose not to remove In-app Billing features, ensure that:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Users can access your apps’ core functionality for a classroom setting
+      without an in-app purchase.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      In-app purchases are clearly identifiable in your UI.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      You declare the use of in-app purchases at <a href=
+      "{@docRoot}distribute/googleplay/edu/start.html#publish">opt-in</a>.
+    </p>
+  </li>
+</ul>
+
+<p>
+  For each app that you publish, you can set a single price that applies to
+  both Google Play and Google Play for Education. You can’t set a different
+  price for a given app (based on a single package name) in Google Play for
+  Education.
+</p>
+
+<p>
+  If your apps display ads, you should disable the display of ads if possible,
+  or ensure that:
+</p>
+
+<ul>
+  <li>Ads are not distracting for students or teachers (this includes
+  Flash-based ads, video ads, and ads that flash or move)
+  </li>
+
+  <li>Interstitial ads are not served in the app
+  </li>
+
+  <li>Ad walls do not appear in the app UI
+  </li>
+
+  <li>Ads do not occupy a significant portion of the screen
+  </li>
+
+  <li>Ads content does not exceed the maturity rating of the app.
+  </li>
+
+  <li>
+    <p>
+      You declare the use of ads at <a href=
+      "{@docRoot}distribute/googleplay/edu/start.html#publish">opt-in</a>.
+    </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h1 id="e-value">
+    Educational Value
+  </h1>
+
+  <hr>
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-e-value.png" class="border-img">
+</div>
+
+<p>
+  Apps submitted to Google Play for Education will be evaluated by a
+  third-party educator network, which will review them based on alignment with
+  <a href="http://www.corestandards.org/">Common Core Standards</a> and other
+  educational considerations. This will help make your content more
+  discoverable for teachers and administrators as they browse by grade level,
+  subject, core curriculum, and other parameters.
+</p>
+
+<p>
+  Apps with highest educational value will have these characteristics:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Designed for use in K-12 classrooms.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Aligned with a common core standard or support common-core learning.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Simple, easy to use, and intuitive for the grade levels the apps are
+      targeting. Apps are relatively easy to navigate without teacher guidance.
+      Not distracting or overwhelming to students.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Enjoyable and interactive. Apps are engaging to students and lets them
+      control their experience.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Versatile. Apps have features that make them useful for more than one
+      classroom function or lesson throughout the school year.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Supports the "4Cs":
+    </p>
+
+    <ul>
+      <li>
+        <p>
+          <em>Creativity</em> &mdash; Allows students to create in order to
+          express understanding of the learning objectives, and try new
+          approaches, innovation, and invention to get things done.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          <em>Critical thinking</em> &mdash; Allows students to look at
+          problems in a new way, linking learning across subjects and
+          disciplines.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          <em>Collaboration</em> &mdash; Allows students and (if appropriate)
+          educators to work together to reach a goal.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          <em>Communication</em> &mdash; Allows students to comprehend,
+          critique and share thoughts, questions, ideas, and solutions.
+        </p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  As you design and develop your apps, make sure they offer high educational
+  value by addressing as many of these characteristics as possible.
+</p>
+
+<div class="headerLine">
+  <h1 id="quality">
+    App Quality
+  </h1>
+
+  <hr>
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-edu-quality.png">
+</div>
+
+<p>
+  Your apps should be designed to perform well and look great on Android
+  tablets, and they should offer the best user experience possible.
+</p>
+
+<p>
+  High quality apps are engaging, intuitive, and offer compelling content.
+  Google Play for Education will highlight high-quality apps for easy discovery
+  in the store. Here are some recommendations for making your app easy for
+  students and teachers to enjoy:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Meet the Core Quality Guidelines:
+    </p>
+
+    <ul>
+      <li>
+        <p>
+          Follow <a href="{@docRoot}design/index.html">Android Design
+          Guidelines</a>. Pay special attention to the sections on <a href=
+          "{@docRoot}design/patterns/actionbar.html">Action Bar</a>, <a href=
+          "{@docRoot}design/patterns/navigation.html">Navigation</a>, and
+          <a href="{@docRoot}design/patterns/pure-android.html">Pure
+          Android</a>.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Test your apps against the <a href=
+          "{@docRoot}distribute/essentials/quality/core.html">Core Quality
+          Guidelines</a>.
+        </p>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      Meet the Tablet App Quality guidelines:
+    </p>
+
+    <ul>
+      <li>
+        <p>
+          Follow our best practices for tablet app development.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Review the <a href=
+          "{@docRoot}distribute/essentials/quality/tablets.html">Tablet App
+          Quality</a> guidelines and <a href=
+          "http://android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html">
+          blog post on designing for tablets.</a>
+        </p>
+
+        <ul>
+          <li>Check your Optimization Tips in the <a href=
+          "https://play.google.com/apps/publish/">Developer Console</a> (if
+          you've already uploaded your apps.)
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <p>
+          Strive for simplicity and highest usability for students:
+        </p>
+
+        <ul>
+          <li>
+            <p>
+              Design your app so that teachers and students can use all the
+              capabilities of your app without having to sign-in to multiple
+              accounts and remember multiple passwords.
+            </p>
+          </li>
+
+          <li>
+            <p>
+              Every student or teacher using a Google Play for Education tablet
+              will already be signed in with a Google account on the device.
+              You can take advantage of that to provide a simple, seamless
+              sign-in experience in your app. A recommended approach is to use
+              <a href="{@docRoot}google/play-services/auth.html">Google OAuth 2
+              authorization</a> through Google Play Services.
+            </p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h1 id="test-environment">
+    Test Environment
+  </h1>
+
+  <hr>
+</div>
+
+<p>
+  To test your app and assess it against the guidelines in this document, it's
+  recommended that you <a href=
+  "{@docRoot}distribute/essentials/quality/tablets.html#test-environment">set
+  up a test environment</a> that replicates the actual environment in which
+  students and teachers will run your app.
+</p>
+
+<h3>
+  Test conditions
+</h3>
+
+<p>
+  Make sure to test your apps under conditions that simulate those of schools.
+  For example, Google Play for Education lets administrators <a href=
+  "https://support.google.com/a/answer/182442?hl=en">control or disable certain
+  capabilities</a> for students, so it's good to test your app with those
+  capabilities disabled. Below are some conditions to test your apps for, to
+  ensure best results in the Google Play for Education environment:
+</p>
+
+<ul>
+  <li>
+    <p>
+      <em>Android version</em> &mdash; Test the apps on devices running Android
+      4.2. Google Play for Education devices will be running Android 4.2 or
+      higher (API level 17+).
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <em>Proxy server</em> &mdash; Test the apps in a network environment that
+      uses proxies. Many schools use proxies.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <em>No location services</em> &mdash; Test the apps to make sure they
+      work properly with location services disabled. Many schools will disable
+      location services for student devices.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <em>No In-app Billing</em> &mdash; Test the apps to make sure they work
+      properly without access to In-app Billing. In-app purchases are blocked
+      on Google Play for Education devices.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <em>No Bluetooth</em> &mdash; Test the apps to make sure they work
+      properly when Bluetooth is disabled. Many schools will disable Bluetooth
+      on student devices.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <em>No access to network</em> &mdash; Test the app to make sure it works
+      properly when the device cannot connect to the internet.
+    </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+<h1>Related Resources</h1><hr>
+</div>
+
+<div class="dynamic-grid">
+<h3>FOR DEVELOPERS</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:distribute/essentials/eduessentials/developers"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x3,6x3,6x3"
+    data-maxResults="6"></div>
+
+<h3>FOR TEACHERS AND EDUCATORS</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:distribute/essentials/eduessentials/educators"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x3,6x3,6x3"
+    data-maxResults="3"></div>
+</div>
