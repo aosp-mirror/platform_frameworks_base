@@ -8,6 +8,10 @@ previous.link=screen-planning.html
 next.title=Providing Descendant and Lateral Navigation
 next.link=descendant-lateral.html
 
+meta.tags="multiple screens"
+page.metaDescription=Designing an intuitive, effective navigation for tablets and other devices.
+page.image=/images/training/app-navigation-multiple-sizes-strategy-stack.png
+
 @jd:body
 
 <div id="tb-wrapper">

@@ -1,0 +1,36 @@
+page.title=Monetize
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  There are many ways to make money with your apps on Google Play, and we offer
+  a variety of tools to make it easy. Take advantage of Google Play’s
+  phenomenal growth by using one or more of the business models available.
+</p>
+
+<p>
+  To get started, set up your <a href=
+  "{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant Account</a>
+  from your Developer Console. This will not only help you get paid, but also
+  help you track where your money is coming from.
+</p>
+
+<div class="dynamic-grid">
+
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/monetize"
+    data-cardSizes="6x6"
+    data-maxResults="9">
+  </div>
+
+<h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="tag:monetizing"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x3"
+    data-maxResults="6">
+  </div>
+</div>
