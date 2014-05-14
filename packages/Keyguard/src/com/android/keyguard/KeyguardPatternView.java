@@ -231,15 +231,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.setOnPatternListener(null);
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        if (hasWindowFocus) {
-            // when timeout dialog closes we want to update our state
-            reset();
-        }
-    }
-
     private class UnlockPatternListener implements LockPatternView.OnPatternListener {
 
         public void onPatternStart() {
