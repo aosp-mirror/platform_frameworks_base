@@ -174,7 +174,7 @@ easier.
         <item name="actionBarTabTextStyle">@style/Widget.DeviceDefault.ActionBar.TabText</item>
         <item name="actionModeStyle">@style/Widget.DeviceDefault.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.DeviceDefault.ActionButton.CloseMode</item>
-        <item name="actionBarStyle">@style/Widget.DeviceDefault.ActionBar</item>
+        <item name="actionBarStyle">@style/Widget.DeviceDefault.ActionBar.Solid</item>
         <item name="actionModePopupWindowStyle">@style/Widget.DeviceDefault.PopupWindow.ActionMode</item>
 
         <item name="buttonBarStyle">@style/DeviceDefault.ButtonBar</item>
@@ -435,7 +435,7 @@ easier.
         <item name="actionBarTabTextStyle">@style/Widget.DeviceDefault.Light.ActionBar.TabText</item>
         <item name="actionModeStyle">@style/Widget.DeviceDefault.Light.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.DeviceDefault.Light.ActionButton.CloseMode</item>
-        <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar</item>
+        <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid</item>
         <item name="actionModePopupWindowStyle">@style/Widget.DeviceDefault.Light.PopupWindow.ActionMode</item>
 
         <item name="buttonBarStyle">@style/DeviceDefault.Light.ButtonBar</item>
@@ -469,18 +469,7 @@ easier.
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
     inverse color profile. -->
-    <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Quantum.Light.DarkActionBar" >
-        <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid.Inverse</item>
-        <item name="actionDropDownStyle">@style/Widget.DeviceDefault.Spinner.DropDown.ActionBar</item>
-        <item name="actionButtonStyle">@style/Widget.DeviceDefault.ActionButton</item>
-        <item name="actionOverflowButtonStyle">@style/Widget.DeviceDefault.ActionButton.Overflow</item>
-        <item name="actionBarTabStyle">@style/Widget.DeviceDefault.Light.ActionBar.TabView.Inverse</item>
-        <item name="actionBarTabBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.TabBar.Inverse</item>
-        <item name="actionBarTabTextStyle">@style/Widget.DeviceDefault.Light.ActionBar.TabText.Inverse</item>
-        <item name="actionModeStyle">@style/Widget.DeviceDefault.Light.ActionMode.Inverse</item>
-        <item name="actionModeCloseButtonStyle">@style/Widget.DeviceDefault.ActionButton.CloseMode</item>
-        <item name="actionModePopupWindowStyle">@style/Widget.DeviceDefault.PopupWindow.ActionMode</item>
-    </style>
+    <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Quantum.Light.DarkActionBar" />
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Quantum.Light.NoActionBar"  />

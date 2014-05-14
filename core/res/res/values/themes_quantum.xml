@@ -303,8 +303,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Quantum.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height_quantum</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.PopupWindow.ActionMode</item>
-        <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
+        <item name="actionBarWidgetTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
+        <item name="actionBarTheme">@null</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -646,8 +646,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Quantum.Light.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height_quantum</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.Light.PopupWindow.ActionMode</item>
-        <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.Quantum.Light.ActionBarWidget</item>
+        <item name="actionBarWidgetTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
+        <item name="actionBarTheme">@null</item>
         <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
@@ -718,29 +718,93 @@ please see themes_device_defaults.xml.
         <item name="colorButtonPressed">@color/quantum_grey_500</item>
     </style>
 
-    <style name="ThemeOverlay" />
-    <style name="ThemeOverlay.Quantum" />
-    <style name="ThemeOverlay.Quantum.Light" />
-
-    <!-- Variant of the quantum theme that replaces the activated control color
-         (which by default is identical to the action bar background color) with
-         the normal control color . -->
-    <style name="ThemeOverlay.Quantum.ActionBarWidget">
-        <item name="colorControlActivated">?attr/colorControlNormal</item>
-    </style>
-
-    <!-- Variant of the quantum (light) theme that replaces the activated control
-         color (which by default is identical to the action bar background color)
-         with the normal control color . -->
-    <style name="ThemeOverlay.Quantum.Light.ActionBarWidget">
-        <item name="colorControlActivated">?attr/colorControlNormal</item>
-    </style>
-
     <!-- Variant of the quantum (light) theme that has a solid (opaque) action bar
          with an inverse color profile. The dark action bar sharply stands out against
          the light content. -->
     <style name="Theme.Quantum.Light.DarkActionBar">
-        <!-- TODO -->
+        <item name="actionBarWidgetTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Quantum.Dark</item>
+    </style>
+
+    <style name="ThemeOverlay" />
+    <style name="ThemeOverlay.Quantum" />
+
+    <!-- Theme overlay that replaces colors with their light versions but preserves
+         the value of colorAccent, colorPrimary and its variants. -->
+    <style name="ThemeOverlay.Quantum.Light">
+        <item name="colorForeground">@color/bright_foreground_quantum_light</item>
+        <item name="colorForegroundInverse">@color/bright_foreground_quantum_dark</item>
+        <item name="colorBackground">@color/background_quantum_light</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_quantum_light</item>
+
+        <item name="textColorPrimary">@color/primary_text_quantum_light</item>
+        <item name="textColorPrimaryInverse">@color/primary_text_quantum_dark</item>
+        <item name="textColorSecondary">@color/secondary_text_quantum_light</item>
+        <item name="textColorSecondaryInverse">@color/secondary_text_quantum_dark</item>
+        <item name="textColorTertiary">@color/tertiary_text_quantum_light</item>
+        <item name="textColorTertiaryInverse">@color/tertiary_text_quantum_dark</item>
+        <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_quantum_light</item>
+        <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_quantum_dark</item>
+        <item name="textColorHint">@color/hint_foreground_quantum_light</item>
+        <item name="textColorHintInverse">@color/hint_foreground_quantum_dark</item>
+        <item name="textColorHighlight">@color/highlighted_text_quantum_light</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_quantum_dark</item>
+        <item name="textColorLink">@color/quantum_teal_500</item>
+        <item name="textColorLinkInverse">@color/quantum_teal_500</item>
+        <item name="textColorSearchUrl">@color/search_url_text_quantum_light</item>
+        <item name="textColorAlertDialogListItem">@color/primary_text_quantum_light</item>
+
+        <item name="textCheckMark">@drawable/indicator_check_mark_light</item>
+        <item name="textCheckMarkInverse">@drawable/indicator_check_mark_dark</item>
+
+        <item name="windowBackground">@color/background_quantum_light</item>
+
+        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
+        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
+
+        <item name="colorButtonNormal">@color/quantum_grey_100</item>
+    </style>
+
+    <!-- Theme overlay that replaces colors with their dark versions but preserves
+         the value of colorAccent, colorPrimary and its variants. -->
+    <style name="ThemeOverlay.Quantum.Dark">
+        <item name="colorForeground">@color/bright_foreground_quantum_dark</item>
+        <item name="colorForegroundInverse">@color/bright_foreground_quantum_light</item>
+        <item name="colorBackground">@color/background_quantum_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_quantum_dark</item>
+
+        <item name="textColorPrimary">@color/primary_text_quantum_dark</item>
+        <item name="textColorPrimaryInverse">@color/primary_text_quantum_light</item>
+        <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_quantum_dark</item>
+        <item name="textColorSecondary">@color/secondary_text_quantum_dark</item>
+        <item name="textColorSecondaryInverse">@color/secondary_text_quantum_light</item>
+        <item name="textColorTertiary">@color/tertiary_text_quantum_dark</item>
+        <item name="textColorTertiaryInverse">@color/tertiary_text_quantum_light</item>
+        <item name="textColorHint">@color/hint_foreground_quantum_dark</item>
+        <item name="textColorHintInverse">@color/hint_foreground_quantum_light</item>
+        <item name="textColorHighlight">@color/highlighted_text_quantum_dark</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_quantum_light</item>
+        <item name="textColorLink">@color/quantum_teal_500</item>
+        <item name="textColorLinkInverse">@color/quantum_teal_500</item>
+        <item name="textColorSearchUrl">@color/search_url_text_quantum_dark</item>
+        <item name="textColorAlertDialogListItem">@color/primary_text_quantum_dark</item>
+
+        <item name="textCheckMark">@drawable/indicator_check_mark_dark</item>
+        <item name="textCheckMarkInverse">@drawable/indicator_check_mark_light</item>
+
+        <item name="windowBackground">@color/background_quantum_dark</item>
+
+        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
+        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
+
+        <item name="colorButtonNormal">@color/quantum_grey_700</item>
+    </style>
+
+    <!-- Theme overlay that replaces the activated control color (which by default
+         is identical to the action bar background color) with the normal control
+         color. -->
+    <style name="ThemeOverlay.Quantum.ActionBarWidget">
+        <item name="colorControlActivated">?attr/colorControlNormal</item>
     </style>
 
     <!-- Variant of the quantum (dark) theme with no action bar. -->

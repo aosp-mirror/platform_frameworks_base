@@ -2269,6 +2269,12 @@
   <public type="style" name="Theme.Quantum.Light.NoActionBar.TranslucentDecor" />
   <public type="style" name="Theme.Quantum.Light.Panel" />
 
+  <public type="style" name="ThemeOverlay" />
+  <public type="style" name="ThemeOverlay.Quantum" />
+  <public type="style" name="ThemeOverlay.Quantum.Light" />
+  <public type="style" name="ThemeOverlay.Quantum.Dark" />
+  <public type="style" name="ThemeOverlay.Quantum.ActionBarWidget" />
+
   <public type="style" name="Widget.Quantum" />
   <public type="style" name="Widget.Quantum.ActionBar" />
   <public type="style" name="Widget.Quantum.ActionBar.Solid" />
