@@ -1146,12 +1146,22 @@ public final class Pm {
     }
 
     private void runUninstall() {
-        int unInstallFlags = PackageManager.DELETE_ALL_USERS;
+        int unInstallFlags = 0;
+        int userId = UserHandle.USER_ALL;
 
         String opt;
         while ((opt=nextOption()) != null) {
             if (opt.equals("-k")) {
                 unInstallFlags |= PackageManager.DELETE_KEEP_DATA;
+            } else if (opt.equals("--user")) {
+                String param = nextArg();
+                if (isNumber(param)) {
+                    userId = Integer.parseInt(param);
+                } else {
+                    showUsage();
+                    System.err.println("Error: Invalid user: " + param);
+                    return;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
@@ -1164,7 +1174,34 @@ public final class Pm {
             showUsage();
             return;
         }
-        boolean result = deletePackage(pkg, unInstallFlags);
+
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_OWNER;
+            unInstallFlags |= PackageManager.DELETE_ALL_USERS;
+        } else {
+            PackageInfo info;
+            try {
+                info = mPm.getPackageInfo(pkg, 0, userId);
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(PM_NOT_RUNNING_ERR);
+                return;
+            }
+            if (info == null) {
+                System.err.println("Failure - not installed for " + userId);
+                return;
+            }
+            final boolean isSystem =
+                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+            // If we are being asked to delete a system app for just one
+            // user set flag so it disables rather than reverting to system
+            // version of the app.
+            if (isSystem) {
+                unInstallFlags |= PackageManager.DELETE_SYSTEM_APP;
+            }
+        }
+
+        boolean result = deletePackage(pkg, unInstallFlags, userId);
         if (result) {
             System.out.println("Success");
         } else {
@@ -1172,10 +1209,10 @@ public final class Pm {
         }
     }
 
-    private boolean deletePackage(String pkg, int unInstallFlags) {
+    private boolean deletePackage(String pkg, int unInstallFlags, int userId) {
         PackageDeleteObserver obs = new PackageDeleteObserver();
         try {
-            mPm.deletePackageAsUser(pkg, obs, UserHandle.USER_OWNER, unInstallFlags);
+            mPm.deletePackageAsUser(pkg, obs, userId, unInstallFlags);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -1571,7 +1608,7 @@ public final class Pm {
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
         System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
         System.err.println("                  [--originating-uri <URI>] [--referrer <URI>] PATH");
-        System.err.println("       pm uninstall [-k] PACKAGE");
+        System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
@@ -1585,7 +1622,7 @@ public final class Pm {
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
         System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
-        System.err.println("       pm create-user [--relatedTo USER_ID] [--managed] USER_NAME");
+        System.err.println("       pm create-user [--profileOf USER_ID] [--managed] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
         System.err.println("");
