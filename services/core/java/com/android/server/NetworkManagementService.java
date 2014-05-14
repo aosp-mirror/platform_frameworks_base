@@ -897,16 +897,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final LinkAddress la = route.getDestination();
         cmd.appendArg(la.getAddress().getHostAddress());
         cmd.appendArg(la.getNetworkPrefixLength());
-
-        if (route.getGateway() == null) {
-            if (la.getAddress() instanceof Inet4Address) {
-                cmd.appendArg("0.0.0.0");
-            } else {
-                cmd.appendArg("::0");
-            }
-        } else {
-            cmd.appendArg(route.getGateway().getHostAddress());
-        }
+        cmd.appendArg(route.getGateway().getHostAddress());
 
         try {
             mConnector.execute(cmd);
@@ -2081,35 +2072,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void addRouteForNetId(RouteInfo routeInfo) {
-        modifyRouteForNetId(routeInfo, ADD);
+    public void addRouteForNetId(int netId, RouteInfo routeInfo) {
+        modifyRouteForNetId(netId, routeInfo, ADD);
     }
 
     @Override
-    public void removeRouteForNetId(RouteInfo routeInfo) {
-        modifyRouteForNetId(routeInfo, REMOVE);
+    public void removeRouteForNetId(int netId, RouteInfo routeInfo) {
+        modifyRouteForNetId(netId, routeInfo, REMOVE);
     }
 
-    private void modifyRouteForNetId(RouteInfo routeInfo, String action) {
+    private void modifyRouteForNetId(int netId, RouteInfo routeInfo, String action) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "route", action);
+        final Command cmd = new Command("network", "route", action, netId);
 
         // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
         final LinkAddress la = routeInfo.getDestination();
         cmd.appendArg(la.getAddress().getHostAddress());
         cmd.appendArg(la.getNetworkPrefixLength());
-
-        if (routeInfo.getGateway() == null) {
-            if (la.getAddress() instanceof Inet4Address) {
-                cmd.appendArg("0.0.0.0");
-            } else {
-                cmd.appendArg("::0");
-            }
-        } else {
-            cmd.appendArg(routeInfo.getGateway().getHostAddress());
-        }
-
+        cmd.appendArg(routeInfo.getGateway().getHostAddress());
         cmd.appendArg(routeInfo.getInterface());
 
         try {
@@ -2120,35 +2101,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void addLegacyRouteForNetId(RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId(routeInfo, uid, ADD);
+    public void addLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId(netId, routeInfo, uid, ADD);
     }
 
     @Override
-    public void removeLegacyRouteForNetId(RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId(routeInfo, uid, REMOVE);
+    public void removeLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId(netId, routeInfo, uid, REMOVE);
     }
 
-    private void modifyLegacyRouteForNetId(RouteInfo routeInfo, int uid, String action) {
+    private void modifyLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid, String action) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "legacy", uid, "route", action);
+        final Command cmd = new Command("network", "legacy", uid, "route", action, netId);
 
         // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
         final LinkAddress la = routeInfo.getDestination();
         cmd.appendArg(la.getAddress().getHostAddress());
         cmd.appendArg(la.getNetworkPrefixLength());
-
-        if (routeInfo.getGateway() == null) {
-            if (la.getAddress() instanceof Inet4Address) {
-                cmd.appendArg("0.0.0.0");
-            } else {
-                cmd.appendArg("::0");
-            }
-        } else {
-            cmd.appendArg(routeInfo.getGateway().getHostAddress());
-        }
-
+        cmd.appendArg(routeInfo.getGateway().getHostAddress());
         cmd.appendArg(routeInfo.getInterface());
 
         try {
