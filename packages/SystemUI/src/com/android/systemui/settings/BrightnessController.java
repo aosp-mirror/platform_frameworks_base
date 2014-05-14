@@ -193,7 +193,7 @@ public class BrightnessController implements ToggleSlider.Listener {
             }
         } else {
             final float adj = value / (BRIGHTNESS_ADJ_RESOLUTION / 2f) - 1;
-            setBrignessAdj(adj);
+            setBrightnessAdj(adj);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
                     public void run() {
@@ -223,7 +223,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         }
     }
 
-    private void setBrignessAdj(float adj) {
+    private void setBrightnessAdj(float adj) {
         try {
             mPower.setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(adj);
         } catch (RemoteException ex) {
@@ -246,7 +246,7 @@ public class BrightnessController implements ToggleSlider.Listener {
                     Settings.System.SCREEN_BRIGHTNESS_MODE,
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                     UserHandle.USER_CURRENT);
-            mAutomatic = automatic != 0;
+            mAutomatic = automatic != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
             updateIcon(mAutomatic);
         } else {
             mControl.setChecked(false);
