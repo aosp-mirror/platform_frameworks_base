@@ -373,16 +373,15 @@ interface ITelephony {
             int p1, int p2, int p3, String data);
 
     /**
-     * Send ENVELOPE to the SIM and returns the response.
+     * Send ENVELOPE to the SIM, after processing a proactive command sent by
+     * the SIM.
      *
      * @param contents  String containing SAT/USAT response in hexadecimal
      *                  format starting with command tag. See TS 102 223 for
      *                  details.
-     * @return The APDU response from the ICC card, with the last 4 bytes
-     *         being the status word. If the command fails, returns an empty
-     *         string.
+     * @return The APDU response from the ICC card.
      */
-    String sendEnvelopeWithStatus(String content);
+    String sendEnvelope(String content);
 
     /**
      * Read one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
