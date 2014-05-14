@@ -24,8 +24,6 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
-import libcore.util.Objects;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
@@ -58,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -1550,7 +1549,7 @@ public final class InputMethodManager {
             }
             if (DEBUG) Log.d(TAG, "updateCursor");
             mTmpCursorRect.set(left, top, right, bottom);
-            if (!Objects.equal(mCursorRect, mTmpCursorRect)) {
+            if (!Objects.equals(mCursorRect, mTmpCursorRect)) {
                 try {
                     if (DEBUG) Log.v(TAG, "CURSOR CHANGE: " + mCurMethod);
                     mCursorRect.set(mTmpCursorRect);
@@ -1581,7 +1580,7 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            if (Objects.equal(mCursorAnchorInfo, cursorAnchorInfo)) {
+            if (Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
                 Log.w(TAG, "Ignoring redundant updateCursorAnchorInfo: info=" + cursorAnchorInfo);
                 return;
             }
