@@ -143,8 +143,9 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void animateNextTopPaddingChange() {
+    public void animateToFullShade() {
         mAnimateNextTopPaddingChange = true;
+        mNotificationStackScroller.goToFullShade();
         requestLayout();
     }
 

@@ -30,6 +30,7 @@ public class AmbientState {
     private View mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
+    private int mSpeedBumpIndex = -1;
 
     public int getScrollY() {
         return mScrollY;
@@ -85,5 +86,13 @@ public class AmbientState {
 
     public float getOverScrollAmount(boolean top) {
         return top ? mOverScrollTopAmount : mOverScrollBottomAmount;
+    }
+
+    public int getSpeedBumpIndex() {
+        return mSpeedBumpIndex;
+    }
+
+    public void setSpeedBumpIndex(int speedBumpIndex) {
+        mSpeedBumpIndex = speedBumpIndex;
     }
 }

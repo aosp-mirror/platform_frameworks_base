@@ -39,6 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
@@ -126,6 +127,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mActivateNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
+    private SpeedBumpView mSpeedBumpView;
+    private boolean mIsExpansionChanging;
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -242,6 +245,22 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateContentHeight();
         updateScrollPositionIfNecessary();
         requestChildrenUpdate();
+    }
+
+    public void updateSpeedBumpIndex(int newIndex) {
+        int currentIndex = indexOfChild(mSpeedBumpView);
+
+        // If we are currently layouted before the new speed bump index, we have to decrease it.
+        boolean validIndex = newIndex > 0;
+        if (newIndex > getChildCount() - 1) {
+            validIndex = false;
+            newIndex = -1;
+        }
+        if (validIndex && currentIndex != newIndex) {
+            changeViewPosition(mSpeedBumpView, newIndex);
+        }
+        updateSpeedBump(validIndex);
+        mAmbientState.setSpeedBumpIndex(newIndex);
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -1044,6 +1063,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         mCurrentStackScrollState.removeViewStateForView(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         updateScrollStateForRemovedChild(child);
+        generateRemoveAnimation(child);
+    }
+
+    private void generateRemoveAnimation(View child) {
         if (mIsExpanded) {
 
             if (!mChildrenToAddAnimated.contains(child)) {
@@ -1120,7 +1143,9 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void changeViewPosition(View child, int newIndex) {
         if (child != null && child.getParent() == this) {
-            // TODO: handle this
+            removeView(child);
+            addView(child, newIndex);
+            // TODO: handle events
         }
     }
 
@@ -1362,10 +1387,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onExpansionStarted() {
+        mIsExpansionChanging = true;
         mStackScrollAlgorithm.onExpansionStarted(mCurrentStackScrollState);
     }
 
     public void onExpansionStopped() {
+        mIsExpansionChanging = false;
         mStackScrollAlgorithm.onExpansionStopped();
     }
 
@@ -1374,6 +1401,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (!isExpanded) {
             mOwnScrollY = 0;
+            mSpeedBumpView.collapse();
         }
     }
 
@@ -1430,6 +1458,34 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mListener != null) {
             mListener.onChildLocationsChanged(this);
         }
+    }
+
+    public void setSpeedBumpView(SpeedBumpView speedBumpView) {
+        mSpeedBumpView = speedBumpView;
+        addView(speedBumpView);
+    }
+
+    private void updateSpeedBump(boolean visible) {
+        int newVisibility = visible ? VISIBLE : GONE;
+        int oldVisibility = mSpeedBumpView.getVisibility();
+        if (newVisibility != oldVisibility) {
+            mSpeedBumpView.setVisibility(newVisibility);
+            if (visible) {
+                mSpeedBumpView.collapse();
+                // Make invisible to ensure that the appear animation is played.
+                mSpeedBumpView.setInvisible();
+                if (!mIsExpansionChanging) {
+                    generateAddAnimation(mSpeedBumpView);
+                }
+            } else {
+                mSpeedBumpView.performVisibilityAnimation(false);
+                generateRemoveAnimation(mSpeedBumpView);
+            }
+        }
+    }
+
+    public void goToFullShade() {
+        updateSpeedBump(true);
     }
 
     /**

@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -634,6 +635,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.addView(mKeyguardIconOverflowContainer);
 
+        SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
+                        R.layout.status_bar_notification_speed_bump, mStackScroller, false);
+        mStackScroller.setSpeedBumpView(speedBump);
+
         mExpandedContents = mStackScroller;
 
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
@@ -1150,7 +1155,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ArrayList<View> toRemove = new ArrayList<View>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
-            if (!toShow.contains(child) && child != mKeyguardIconOverflowContainer) {
+            if (!toShow.contains(child) && child instanceof ExpandableNotificationRow) {
                 toRemove.add(child);
             }
         }
@@ -2722,7 +2727,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setBarState(StatusBarState.SHADE);
         if (mLeaveOpenOnKeyguardHide) {
             mLeaveOpenOnKeyguardHide = false;
-            mNotificationPanel.animateNextTopPaddingChange();
+            mNotificationPanel.animateToFullShade();
         } else {
             instantCollapseNotificationPanel();
         }
@@ -2894,7 +2899,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
         } else {
-            mNotificationPanel.animateNextTopPaddingChange();
+            mNotificationPanel.animateToFullShade();
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState();
         }

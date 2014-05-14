@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.SpeedBumpView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -167,11 +168,48 @@ public class StackScrollState {
                         clipHeight,
                         (int) (newHeight - (previousNotificationStart - newYTranslation)));
 
-                previousNotificationStart = newYTranslation + child.getClipTopAmount();
-                previousNotificationEnd = newNotificationEnd;
-                previousNotificationIsSwiped = child.getTranslationX() != 0;
+                if (!child.isTransparent()) {
+                    // Only update the previous values if we are not transparent,
+                    // otherwise we would clip to a transparent view.
+                    previousNotificationStart = newYTranslation + child.getClipTopAmount();
+                    previousNotificationEnd = newNotificationEnd;
+                    previousNotificationIsSwiped = child.getTranslationX() != 0;
+                }
+
+                if(child instanceof SpeedBumpView) {
+                    performSpeedBumpAnimation(i, (SpeedBumpView) child, newNotificationEnd,
+                            newYTranslation);
+                }
             }
         }
+    }
+
+    private void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, float speedBumpEnd,
+            float speedBumpStart) {
+        View nextChild = getNextChildNotGone(i);
+        if (nextChild != null) {
+            ViewState nextState = getViewStateForView(nextChild);
+            boolean startIsAboveNext = nextState.yTranslation > speedBumpStart;
+            speedBump.animateDivider(startIsAboveNext);
+
+            // handle expanded case
+            if (speedBump.isExpanded()) {
+                boolean endIsAboveNext = nextState.yTranslation > speedBumpEnd;
+                speedBump.animateExplanationText(endIsAboveNext);
+            }
+
+        }
+    }
+
+    private View getNextChildNotGone(int childIndex) {
+        int childCount = mHostView.getChildCount();
+        for (int i = childIndex + 1; i < childCount; i++) {
+            View child = mHostView.getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                return child;
+            }
+        }
+        return null;
     }
 
     /**

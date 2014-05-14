@@ -877,6 +877,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row = row;
         entry.row.setHeightRange(mRowMinHeight, mRowMaxHeight);
         entry.row.setOnActivatedListener(this);
+        entry.row.setIsBelowSpeedBump(isBelowSpeedBump(entry.notification));
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
@@ -1039,8 +1040,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
-        updateRowStates();
         updateNotificationIcons();
+        updateRowStates();
     }
 
     private void addNotificationViews(IBinder key, StatusBarNotification notification) {
@@ -1060,6 +1061,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
         int n = mNotificationData.size();
         int visibleNotifications = 0;
+        int speedBumpIndex = -1;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
@@ -1087,6 +1089,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.row.setVisibility(View.VISIBLE);
                 visibleNotifications++;
             }
+            if (entry.row.getVisibility() != View.GONE && speedBumpIndex == -1
+                    && entry.row.isBelowSpeedBump() ) {
+                speedBumpIndex = n - 1 - i;
+            }
         }
 
         if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
@@ -1094,6 +1100,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
+
+        mStackScroller.updateSpeedBumpIndex(speedBumpIndex);
     }
 
     private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
@@ -1309,7 +1317,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.row.setOnClickListener(null);
         }
+        boolean wasBelow = entry.row.isBelowSpeedBump();
+        boolean nowBelow = isBelowSpeedBump(notification);
+        if (wasBelow != nowBelow) {
+            entry.row.setIsBelowSpeedBump(nowBelow);
+        }
         entry.row.notifyContentUpdated();
+    }
+
+    private boolean isBelowSpeedBump(StatusBarNotification notification) {
+        return notification.getNotification().priority ==
+                Notification.PRIORITY_MIN;
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {

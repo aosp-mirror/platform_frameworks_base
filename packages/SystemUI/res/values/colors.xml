@@ -58,6 +58,18 @@
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff666666</color>
 
+    <!-- The color of the red speed bump dot -->
+    <color name="speed_bump_dot_red">#ffd50000</color>
+
+    <!-- The color of the blue speed bump dot -->
+    <color name="speed_bump_dot_blue">#ff2962ff</color>
+
+    <!-- The color of the yellow speed bump dot -->
+    <color name="speed_bump_dot_yellow">#ffffd600</color>
+
+    <!-- The color of the green speed bump dot -->
+    <color name="speed_bump_dot_green">#ff00c853</color>
+
     <!-- The default recents task bar background color. -->
     <color name="recents_task_bar_default_background_color">#e6444444</color>
     <!-- The default recents task bar text color. -->
