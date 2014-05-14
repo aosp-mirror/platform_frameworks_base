@@ -1303,6 +1303,7 @@
   <java-symbol type="anim" name="dock_right_enter" />
   <java-symbol type="anim" name="dock_right_exit" />
 
+  <java-symbol type="array" name="config_hdmiCecLogicalDeviceType" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />
