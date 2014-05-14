@@ -3403,6 +3403,7 @@ package android.app {
   public class ActivityManager {
     method public boolean clearApplicationUserData();
     method public void dumpPackageState(java.io.FileDescriptor, java.lang.String);
+    method public java.util.List<android.app.ActivityManager.AppTask> getAppTasks();
     method public android.content.pm.ConfigurationInfo getDeviceConfigurationInfo();
     method public int getLargeMemoryClass();
     method public int getLauncherLargeIconDensity();
@@ -3429,6 +3430,11 @@ package android.app {
     field public static final int MOVE_TASK_WITH_HOME = 1; // 0x1
     field public static final int RECENT_IGNORE_UNAVAILABLE = 2; // 0x2
     field public static final int RECENT_WITH_EXCLUDED = 1; // 0x1
+  }
+
+  public static class ActivityManager.AppTask {
+    method public void finishAndRemoveTask();
+    method public android.app.ActivityManager.RecentTaskInfo getTaskInfo();
   }
 
   public static class ActivityManager.MemoryInfo implements android.os.Parcelable {

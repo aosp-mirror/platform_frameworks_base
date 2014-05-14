@@ -506,6 +506,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_APP_TASKS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            List<IAppTask> list = getAppTasks();
+            reply.writeNoException();
+            int N = list != null ? list.size() : -1;
+            reply.writeInt(N);
+            int i;
+            for (i=0; i<N; i++) {
+                IAppTask task = list.get(i);
+                reply.writeStrongBinder(task.asBinder());
+            }
+            return true;
+        }
+
         case GET_TASKS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int maxNum = data.readInt();
@@ -2683,6 +2697,26 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
+    public List<IAppTask> getAppTasks() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_APP_TASKS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        ArrayList<IAppTask> list = null;
+        int N = reply.readInt();
+        if (N >= 0) {
+            list = new ArrayList<IAppTask>();
+            while (N > 0) {
+                IAppTask task = IAppTask.Stub.asInterface(reply.readStrongBinder());
+                list.add(task);
+                N--;
+            }
+        }
+        data.recycle();
+        reply.recycle();
+        return list;
+    }
     public List getTasks(int maxNum, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2698,7 +2732,7 @@ class ActivityManagerProxy implements IActivityManager
             while (N > 0) {
                 ActivityManager.RunningTaskInfo info =
                         ActivityManager.RunningTaskInfo.CREATOR
-                        .createFromParcel(reply);
+                                .createFromParcel(reply);
                 list.add(info);
                 N--;
             }

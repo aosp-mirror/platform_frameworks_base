@@ -52,6 +52,7 @@ import android.util.Slog;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -474,7 +475,7 @@ public class ActivityManager {
     }
 
     /**
-     * Information you can set and retrieve about the current activity within Recents.
+     * Information you can set and retrieve about the current activity within the recent task list.
      */
     public static class RecentsActivityValues implements Parcelable {
         public CharSequence label;
@@ -879,7 +880,29 @@ public class ActivityManager {
             readFromParcel(source);
         }
     }
-    
+
+    /**
+     * Get the list of tasks associated with the calling application.
+     *
+     * @return The list of tasks associated with the application making this call.
+     * @throws SecurityException
+     */
+    public List<ActivityManager.AppTask> getAppTasks() {
+        ArrayList<AppTask> tasks = new ArrayList<AppTask>();
+        List<IAppTask> appTasks;
+        try {
+            appTasks = ActivityManagerNative.getDefault().getAppTasks();
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return null;
+        }
+        int numAppTasks = appTasks.size();
+        for (int i = 0; i < numAppTasks; i++) {
+            tasks.add(new AppTask(appTasks.get(i)));
+        }
+        return tasks;
+    }
+
     /**
      * Return a list of the tasks that are currently running, with
      * the most recent being first and older ones after in order.  Note that
@@ -2380,6 +2403,44 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().isInLockTaskMode();
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * The AppTask allows you to manage your own application's tasks.
+     * See {@link android.app.ActivityManager#getAppTasks()}
+     */
+    public static class AppTask {
+        private IAppTask mAppTaskImpl;
+
+        /** @hide */
+        public AppTask(IAppTask task) {
+            mAppTaskImpl = task;
+        }
+
+        /**
+         * Finishes all activities in this task and removes it from the recent tasks list.
+         */
+        public void finishAndRemoveTask() {
+            try {
+                mAppTaskImpl.finishAndRemoveTask();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+            }
+        }
+
+        /**
+         * Get the RecentTaskInfo associated with this task.
+         *
+         * @return The RecentTaskInfo for this task, or null if the task no longer exists.
+         */
+        public RecentTaskInfo getTaskInfo() {
+            try {
+                return mAppTaskImpl.getTaskInfo();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+                return null;
+            }
         }
     }
 }

@@ -112,6 +112,7 @@ public interface IActivityManager extends IInterface {
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
+    public List<IAppTask> getAppTasks() throws RemoteException;
     public List<RunningTaskInfo> getTasks(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
@@ -741,4 +742,5 @@ public interface IActivityManager extends IInterface {
     int SET_RECENTS_ACTIVITY_VALUES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+217;
     int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
     int GET_ACTIVITY_OPTIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+219;
+    int GET_APP_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+220;
 }
