@@ -1,4 +1,7 @@
 page.title=Supporting Different Densities
+page.metaDescription=Providing sets of layouts and drawable resources for specific ranges of device screens.
+meta.tags="multiple screens"
+
 parent.title=Designing for Multiple Screens
 parent.link=index.html
 

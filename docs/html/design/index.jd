@@ -1,5 +1,7 @@
 page.title=Design
 page.viewport_width=970
+section.landing=true
+meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
 header.hide=1
 footer.hide=1
 @jd:body

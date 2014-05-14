@@ -81,7 +81,7 @@ redirects:
   to: /guide/components/aidl.html
 
 - from: /guide/publishing/publishing.html
-  to: /distribute/googleplay/publish/preparing.html
+  to: /distribute/tools/launch-checklist.html
 
 - from: /guide/publishing/...
   to: /tools/publishing/...

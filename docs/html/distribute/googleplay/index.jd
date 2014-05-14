@@ -1,0 +1,45 @@
+page.title=Google Play
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+ <p>
+  The premier store for distributing Android apps and games, with global reach
+  and <span style="white-space:nowrap;">tools to
+  help you gain traction in the marketplace.</span>
+</p>
+
+<div class="dynamic-grid">
+
+  <h3>Overview</h3>
+
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/gp/gplanding"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+  <h3>Google Play for Education</h3>
+
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/gp/gpfelanding"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+  <h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:youtube+tag:growth"
+    data-cardSizes="6x3"
+    data-maxResults="3">
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:googleplay"
+    data-cardSizes="6x3"
+    data-maxResults="3">
+  </div>
+
+</div>
