@@ -24015,7 +24015,9 @@ package android.provider {
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
     field public static final java.lang.String COLUMN_DISPLAY_NUMBER = "display_number";
+    field public static final java.lang.String COLUMN_LOCKED = "locked";
     field public static final java.lang.String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
+    field public static final java.lang.String COLUMN_SEARCHABLE = "searchable";
     field public static final java.lang.String COLUMN_SERVICE_ID = "service_id";
     field public static final java.lang.String COLUMN_SERVICE_NAME = "service_name";
     field public static final java.lang.String COLUMN_SERVICE_TYPE = "service_type";
@@ -24053,10 +24055,12 @@ package android.provider {
   }
 
   public static final class TvContract.Programs implements android.provider.TvContract.BaseTvColumns {
+    field public static final java.lang.String COLUMN_AUDIO_LANGUAGE = "audio_language";
     field public static final java.lang.String COLUMN_CHANNEL_ID = "channel_id";
     field public static final java.lang.String COLUMN_DATA = "data";
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
+    field public static final java.lang.String COLUMN_GENRE = "genre";
     field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
     field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
     field public static final java.lang.String COLUMN_TITLE = "title";
