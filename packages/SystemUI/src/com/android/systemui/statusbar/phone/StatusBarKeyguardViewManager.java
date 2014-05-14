@@ -220,6 +220,7 @@ public class StatusBarKeyguardViewManager {
                 mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
             }
         }
+        mStatusBarWindowManager.setBouncerShowing(mBouncer.isShowing());
         mPhoneStatusBar.setBouncerShowing(mBouncer.isShowing());
     }
 

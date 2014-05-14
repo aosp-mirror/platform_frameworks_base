@@ -111,7 +111,8 @@ public class StatusBarWindowManager {
     }
 
     private void applyFocusableFlag(State state) {
-        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput) {
+        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
+                && state.bouncerShowing) {
             mLp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || state.statusBarFocusable) {
@@ -196,6 +197,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setBouncerShowing(boolean showing) {
+        mCurrentState.bouncerShowing = showing;
+        apply(mCurrentState);
+    }
+
     /**
      * @param state The {@link StatusBarState} of the status bar.
      */
@@ -211,6 +217,7 @@ public class StatusBarWindowManager {
         boolean statusBarExpanded;
         boolean statusBarFocusable;
         long keyguardUserActivityTimeout;
+        boolean bouncerShowing;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.
