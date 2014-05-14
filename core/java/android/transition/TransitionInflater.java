@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  * This class inflates scenes and transitions from resource files.
@@ -40,6 +41,10 @@ import java.util.ArrayList;
  * and {@link android.R.styleable#TransitionManager}.
  */
 public class TransitionInflater {
+    private static final String MATCH_INSTANCE = "instance";
+    private static final String MATCH_VIEW_NAME = "viewName";
+    private static final String MATCH_ID = "id";
+    private static final String MATCH_ITEM_ID = "itemId";
 
     private Context mContext;
 
@@ -266,6 +271,33 @@ public class TransitionInflater {
         }
     }
 
+    private int[] parseMatchOrder(String matchOrderString) {
+        StringTokenizer st = new StringTokenizer(matchOrderString, ",");
+        int matches[] = new int[st.countTokens()];
+        int index = 0;
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken().trim();
+            if (MATCH_ID.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ID;
+            } else if (MATCH_INSTANCE.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_INSTANCE;
+            } else if (MATCH_VIEW_NAME.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_VIEW_NAME;
+            } else if (MATCH_ITEM_ID.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ITEM_ID;
+            } else if (token.isEmpty()) {
+                int[] smallerMatches = new int[matches.length - 1];
+                System.arraycopy(matches, 0, smallerMatches, 0, index);
+                matches = smallerMatches;
+                index--;
+            } else {
+                throw new RuntimeException("Unknown match type in matchOrder: '" + token + "'");
+            }
+            index++;
+        }
+        return matches;
+    }
+
     private Transition loadTransition(Transition transition, AttributeSet attrs)
             throws Resources.NotFoundException {
 
@@ -283,6 +315,11 @@ public class TransitionInflater {
                 a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
         if (resID > 0) {
             transition.setInterpolator(AnimationUtils.loadInterpolator(mContext, resID));
+        }
+        String matchOrder =
+                a.getString(com.android.internal.R.styleable.Transition_matchOrder);
+        if (matchOrder != null) {
+            transition.setMatchOrder(parseMatchOrder(matchOrder));
         }
         a.recycle();
         return transition;

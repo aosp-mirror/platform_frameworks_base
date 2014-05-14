@@ -24,7 +24,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -108,6 +107,40 @@ public abstract class Transition implements Cloneable {
     private static final String LOG_TAG = "Transition";
     static final boolean DBG = false;
 
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by View instance.
+     */
+    public static final int MATCH_INSTANCE = 0x1;
+    private static final int MATCH_FIRST = MATCH_INSTANCE;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by
+     * {@link android.view.View#getViewName()}. Null names will not be matched.
+     */
+    public static final int MATCH_VIEW_NAME = 0x2;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by
+     * {@link android.view.View#getId()}. Negative IDs will not be matched.
+     */
+    public static final int MATCH_ID = 0x3;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by the {@link android.widget.Adapter}
+     * item id. When {@link android.widget.Adapter#hasStableIds()} returns false, no match
+     * will be made for items.
+     */
+    public static final int MATCH_ITEM_ID = 0x4;
+
+    private static final int MATCH_LAST = MATCH_ITEM_ID;
+
+    private static final int[] DEFAULT_MATCH_ORDER = {
+        MATCH_VIEW_NAME,
+        MATCH_INSTANCE,
+        MATCH_ID,
+        MATCH_ITEM_ID,
+    };
+
     private String mName = getClass().getName();
 
     long mStartDelay = -1;
@@ -127,6 +160,7 @@ public abstract class Transition implements Cloneable {
     private TransitionValuesMaps mStartValues = new TransitionValuesMaps();
     private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
     TransitionSet mParent = null;
+    private int[] mMatchOrder = DEFAULT_MATCH_ORDER;
 
     // Per-animator information used for later canceling when future transitions overlap
     private static ThreadLocal<ArrayMap<Animator, AnimationInfo>> sRunningAnimators =
@@ -338,6 +372,53 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
+     * Sets the order in which Transition matches View start and end values.
+     * <p>
+     * The default behavior is to match first by {@link android.view.View#getViewName()},
+     * then by View instance, then by {@link android.view.View#getId()} and finally
+     * by its item ID if it is in a direct child of ListView. The caller can
+     * choose to have only some or all of the values of {@link #MATCH_INSTANCE},
+     * {@link #MATCH_VIEW_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}. Only
+     * the match algorithms supplied will be used to determine whether Views are the
+     * the same in both the start and end Scene. Views that do not match will be considered
+     * as entering or leaving the Scene.
+     * </p>
+     * @param matches A list of zero or more of {@link #MATCH_INSTANCE},
+     *                {@link #MATCH_VIEW_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}.
+     *                If none are provided, then the default match order will be set.
+     */
+    public void setMatchOrder(int... matches) {
+        if (matches == null || matches.length == 0) {
+            mMatchOrder = DEFAULT_MATCH_ORDER;
+        } else {
+            for (int i = 0; i < matches.length; i++) {
+                int match = matches[i];
+                if (!isValidMatch(match)) {
+                    throw new IllegalArgumentException("matches contains invalid value");
+                }
+                if (alreadyContains(matches, i)) {
+                    throw new IllegalArgumentException("matches contains a duplicate value");
+                }
+            }
+            mMatchOrder = matches.clone();
+        }
+    }
+
+    private static boolean isValidMatch(int match) {
+        return (match >= MATCH_FIRST && match <= MATCH_LAST);
+    }
+
+    private static boolean alreadyContains(int[] array, int searchIndex) {
+        int value = array[searchIndex];
+        for (int i = 0; i < searchIndex; i++) {
+            if (array[i] == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Match start/end values by View instance. Adds matched values to startValuesList
      * and endValuesList and removes them from unmatchedStart and unmatchedEnd.
      */
@@ -464,6 +545,37 @@ public abstract class Transition implements Cloneable {
         }
     }
 
+    private void matchStartAndEnd(TransitionValuesMaps startValues,
+            TransitionValuesMaps endValues,
+            ArrayList<TransitionValues> startValuesList,
+            ArrayList<TransitionValues> endValuesList) {
+        ArrayMap<View, TransitionValues> unmatchedStart =
+                new ArrayMap<View, TransitionValues>(startValues.viewValues);
+        ArrayMap<View, TransitionValues> unmatchedEnd =
+                new ArrayMap<View, TransitionValues>(endValues.viewValues);
+
+        for (int i = 0; i < mMatchOrder.length; i++) {
+            switch (mMatchOrder[i]) {
+                case MATCH_INSTANCE:
+                    matchInstances(startValuesList, endValuesList, unmatchedStart, unmatchedEnd);
+                    break;
+                case MATCH_VIEW_NAME:
+                    matchNames(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
+                            startValues.nameValues, endValues.nameValues);
+                    break;
+                case MATCH_ID:
+                    matchIds(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
+                            startValues.idValues, endValues.idValues);
+                    break;
+                case MATCH_ITEM_ID:
+                    matchItemIds(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
+                            startValues.itemIdValues, endValues.itemIdValues);
+                    break;
+            }
+        }
+        addUnmatched(startValuesList, endValuesList, unmatchedStart, unmatchedEnd);
+    }
+
     /**
      * This method, essentially a wrapper around all calls to createAnimator for all
      * possible target views, is called with the entire set of start/end
@@ -480,21 +592,9 @@ public abstract class Transition implements Cloneable {
         if (DBG) {
             Log.d(LOG_TAG, "createAnimators() for " + this);
         }
-        ArrayMap<View, TransitionValues> unmatchedStart =
-                new ArrayMap<View, TransitionValues>(startValues.viewValues);
-        ArrayMap<View, TransitionValues> unmatchedEnd =
-                new ArrayMap<View, TransitionValues>(endValues.viewValues);
-
         ArrayList<TransitionValues> startValuesList = new ArrayList<TransitionValues>();
         ArrayList<TransitionValues> endValuesList = new ArrayList<TransitionValues>();
-        matchNames(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
-                startValues.nameValues, endValues.nameValues);
-        matchInstances(startValuesList, endValuesList, unmatchedStart, unmatchedEnd);
-        matchIds(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
-                startValues.idValues, endValues.idValues);
-        matchItemIds(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
-                startValues.itemIdValues, endValues.itemIdValues);
-        addUnmatched(startValuesList, endValuesList, unmatchedStart, unmatchedEnd);
+        matchStartAndEnd(startValues, endValues, startValuesList, endValuesList);
 
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
         long minStartDelay = Long.MAX_VALUE;
