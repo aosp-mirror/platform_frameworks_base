@@ -437,19 +437,17 @@ public:
 
     ANDROID_API void updateMatrix();
 
-    ANDROID_API void updateClipPath();
-
-    // signals that mComputedFields.mClipPath is up to date, and should be used for clipping
     bool hasClippingPath() const {
-        return mPrimitiveFields.mOutline.willClip() || mPrimitiveFields.mRevealClip.willClip();
+        return mPrimitiveFields.mRevealClip.willClip();
     }
 
     const SkPath* getClippingPath() const {
-        return hasClippingPath() ? mComputedFields.mClipPath : NULL;
+        return mPrimitiveFields.mRevealClip.getPath();
     }
 
     SkRegion::Op getClippingPathOp() const {
-        return mComputedFields.mClipPathOp;
+        return mPrimitiveFields.mRevealClip.isInverseClip()
+                ? SkRegion::kDifference_Op : SkRegion::kIntersect_Op;
     }
 
     Outline& mutableOutline() {
@@ -505,8 +503,6 @@ private:
         SkMatrix* mTransformMatrix;
 
         Sk3DView mTransformCamera;
-        SkPath* mClipPath; // TODO: remove this, create new ops for efficient/special case clipping
-        SkRegion::Op mClipPathOp;
     } mComputedFields;
 };
 

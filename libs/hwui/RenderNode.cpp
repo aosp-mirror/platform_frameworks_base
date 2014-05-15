@@ -238,9 +238,8 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
     }
 
     if (CC_UNLIKELY(properties().hasClippingPath())) {
-        // TODO: optimize for round rect/circle clipping
-        const SkPath* path = properties().getClippingPath();
-        ClipPathOp* op = new (handler.allocator()) ClipPathOp(path, SkRegion::kIntersect_Op);
+        ClipPathOp* op = new (handler.allocator()) ClipPathOp(
+                properties().getClippingPath(), properties().getClippingPathOp());
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 }
