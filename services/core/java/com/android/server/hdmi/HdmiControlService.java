@@ -21,12 +21,15 @@ import android.content.Context;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Locale;
 
 /**
@@ -41,11 +44,22 @@ public final class HdmiControlService extends SystemService {
     // and sparse call it shares a thread to handle IO operations.
     private final HandlerThread mIoThread = new HandlerThread("Hdmi Control Io Thread");
 
+    // A collection of FeatureAction.
+    // Note that access to this collection should happen in service thread.
+    private final LinkedList<FeatureAction> mActions = new LinkedList<>();
+
     @Nullable
     private HdmiCecController mCecController;
 
     @Nullable
     private HdmiMhlController mMhlController;
+
+    // Whether ARC is "enabled" or not.
+    // TODO: it may need to hold lock if it's accessed from others.
+    private boolean mArcStatusEnabled = false;
+
+    // Handler running on service thread. It's used to run a task in service thread.
+    private Handler mHandler = new Handler();
 
     public HdmiControlService(Context context) {
         super(context);
@@ -83,35 +97,83 @@ public final class HdmiControlService extends SystemService {
      * <p>Declared as package-private.
      */
     Looper getServiceLooper() {
-        return Looper.myLooper();
+        return mHandler.getLooper();
     }
 
     /**
-     * Add a new {@link FeatureAction} to the action queue.
+     * Add and start a new {@link FeatureAction} to the action queue.
      *
-     * @param action {@link FeatureAction} to add
+     * @param action {@link FeatureAction} to add and start
      */
-    void addAction(FeatureAction action) {
-        // TODO: Implement this.
+    void addAndStartAction(final FeatureAction action) {
+        // TODO: may need to check the number of stale actions.
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                mActions.add(action);
+                action.start();
+            }
+        });
     }
-
 
     /**
      * Remove the given {@link FeatureAction} object from the action queue.
      *
-     * @param action {@link FeatureAction} to add
+     * @param action {@link FeatureAction} to remove
      */
-    void removeAction(FeatureAction action) {
-        // TODO: Implement this.
+    void removeAction(final FeatureAction action) {
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                mActions.remove(action);
+            }
+        });
+    }
+
+    // Remove all actions matched with the given Class type.
+    private <T extends FeatureAction> void removeAction(final Class<T> clazz) {
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                Iterator<FeatureAction> iter = mActions.iterator();
+                while (iter.hasNext()) {
+                    FeatureAction action = iter.next();
+                    if (action.getClass().equals(clazz)) {
+                        action.clear();
+                        mActions.remove(action);
+                    }
+                }
+            }
+        });
+    }
+
+    private void runOnServiceThread(Runnable runnable) {
+        mHandler.post(runnable);
+    }
+
+    /**
+     * Change ARC status into the given {@code enabled} status.
+     *
+     * @return {@code true} if ARC was in "Enabled" status
+     */
+    boolean setArcStatus(boolean enabled) {
+        boolean oldStatus = mArcStatusEnabled;
+        // 1. Enable/disable ARC circuit.
+        // TODO: call set_audio_return_channel of hal interface.
+
+        // 2. Update arc status;
+        mArcStatusEnabled = enabled;
+        return oldStatus;
     }
 
     /**
      * Transmit a CEC command to CEC bus.
      *
      * @param command CEC command to send out
+     * @return {@code true} if succeeds to send command
      */
-    void sendCecCommand(HdmiCecMessage command) {
-        mCecController.sendCommand(command);
+    boolean sendCecCommand(HdmiCecMessage command) {
+        return mCecController.sendCommand(command);
     }
 
     /**
@@ -142,12 +204,48 @@ public final class HdmiControlService extends SystemService {
             case HdmiCec.MESSAGE_GET_CEC_VERSION:
                 handleGetCecVersion(message);
                 return true;
+            case HdmiCec.MESSAGE_INITIATE_ARC:
+                handleInitiateArc(message);
+                return true;
+            case HdmiCec.MESSAGE_TERMINATE_ARC:
+                handleTerminateArc(message);
+                return true;
             // TODO: Add remaining system information query such as
             // <Give Device Power Status> and <Request Active Source> handler.
             default:
                 Slog.w(TAG, "Unsupported cec command:" + message.toString());
                 return false;
         }
+    }
+
+    /**
+     * Called when a new hotplug event is issued.
+     *
+     * @param port hdmi port number where hot plug event issued.
+     * @param connected whether to be plugged in or not
+     */
+    void onHotplug(int portNo, boolean connected) {
+        // TODO: Start "RequestArcInitiationAction" if ARC port.
+    }
+
+    private void handleInitiateArc(HdmiCecMessage message){
+        // In case where <Initiate Arc> is started by <Request ARC Initiation>
+        // need to clean up RequestArcInitiationAction.
+        removeAction(RequestArcInitiationAction.class);
+        SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
+                message.getDestination(), message.getSource(), true);
+        addAndStartAction(action);
+    }
+
+    private void handleTerminateArc(HdmiCecMessage message) {
+        // In case where <Terminate Arc> is started by <Request ARC Termination>
+        // need to clean up RequestArcInitiationAction.
+        // TODO: check conditions of power status by calling is_connected api
+        // to be added soon.
+        removeAction(RequestArcTerminationAction.class);
+        SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
+                message.getDestination(), message.getSource(), false);
+        addAndStartAction(action);
     }
 
     private void handleGetCecVersion(HdmiCecMessage message) {

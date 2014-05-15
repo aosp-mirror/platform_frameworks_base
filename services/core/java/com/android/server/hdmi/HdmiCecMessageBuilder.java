@@ -186,6 +186,50 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Request Arc Initiation&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRequestArcInitiation(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_REQUEST_ARC_INITIATION);
+    }
+
+    /**
+     * Build &lt;Request Arc Termination&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRequestArcTermination(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_REQUEST_ARC_TERMINATION);
+    }
+
+    /**
+     * Build &lt;Report Arc Initiated&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportArcInitiated(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_ARC_INITIATED);
+    }
+
+    /**
+     * Build &lt;Report Arc Terminated&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportArcTerminated(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_ARC_TERMINATED);
+    }
+
+    /**
      * Build a {@link HdmiCecMessage} without extra parameter.
      *
      * @param src source address of command

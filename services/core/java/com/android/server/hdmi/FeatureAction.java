@@ -118,6 +118,11 @@ abstract class FeatureAction {
          * @param delayMillis amount of delay for the timer
          */
         void sendTimerMessage(int state, long delayMillis);
+
+        /**
+         * Removes any pending timer message.
+         */
+        void clearTimerMessage();
     }
 
     private class ActionTimerHandler extends Handler implements ActionTimer {
@@ -129,6 +134,11 @@ abstract class FeatureAction {
         @Override
         public void sendTimerMessage(int state, long delayMillis) {
             sendMessageDelayed(obtainMessage(MSG_TIMEOUT, state), delayMillis);
+        }
+
+        @Override
+        public void clearTimerMessage() {
+            removeMessages(MSG_TIMEOUT);
         }
 
         @Override
@@ -154,15 +164,26 @@ abstract class FeatureAction {
         mActionTimer.sendTimerMessage(state, delayMillis);
     }
 
-    protected final void sendCommand(HdmiCecMessage cmd) {
-        mService.sendCecCommand(cmd);
+    protected final boolean sendCommand(HdmiCecMessage cmd) {
+        return mService.sendCecCommand(cmd);
+    }
+
+    /**
+     * Clean up action's state.
+     *
+     * <p>Declared as package-private. Only {@link HdmiControlService} can access it.
+     */
+    void clear() {
+        mState = STATE_NONE;
+        // Clear all timers.
+        mActionTimer.clearTimerMessage();
     }
 
     /**
      * Finish up the action. Reset the state, and remove itself from the action queue.
      */
     protected void finish() {
-        mState = STATE_NONE;
+        clear();
         removeAction(this);
     }
 
