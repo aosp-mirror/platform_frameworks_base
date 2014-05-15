@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.animation.TimeAnimator.TimeListener;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -218,7 +219,7 @@ public class PanelView extends FrameLayout {
     };
 
     private float mVel, mAccel;
-    protected int mMaxPanelHeight = 0;
+    protected int mMaxPanelHeight = -1;
     private String mViewName;
     private float mInitialTouchY;
     private float mInitialTouchX;
@@ -617,7 +618,8 @@ public class PanelView extends FrameLayout {
 
         // Did one of our children change size?
         int newHeight = getMeasuredHeight();
-        if (newHeight != mMaxPanelHeight) {
+        if (newHeight > mMaxPanelHeight) {
+            // we only adapt the max height if it's bigger
             mMaxPanelHeight = newHeight;
             // If the user isn't actively poking us, let's rubberband to the content
             if (!mTracking && !mTimeAnimator.isStarted()
@@ -695,6 +697,12 @@ public class PanelView extends FrameLayout {
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mMaxPanelHeight = -1;
+    }
+
     protected void onHeightUpdated(float expandedHeight) {
         requestLayout();
     }
@@ -706,6 +714,7 @@ public class PanelView extends FrameLayout {
      * @return the default implementation simply returns the maximum height.
      */
     protected int getMaxPanelHeight() {
+        mMaxPanelHeight = Math.max(mMaxPanelHeight, getHeight());
         return mMaxPanelHeight;
     }
 
