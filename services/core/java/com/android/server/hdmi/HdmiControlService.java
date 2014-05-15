@@ -54,7 +54,10 @@ public final class HdmiControlService extends SystemService {
     @Override
     public void onStart() {
         mCecController = HdmiCecController.create(this);
-        if (mCecController == null) {
+        if (mCecController != null) {
+            mCecController.initializeLocalDevices(getContext().getResources()
+                    .getIntArray(com.android.internal.R.array.config_hdmiCecLogicalDeviceType));
+        } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
 
