@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
      limitations under the License.
 -->
 
-<Chronometer android:id="@+id/chronometer" xmlns:android="http://schemas.android.com/apk/res/android"
-    android:textAppearance="@style/TextAppearance.StatusBar.Quantum.EventContent.Time"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_weight="0"
-    android:singleLine="true"
-    android:gravity="center"
-    android:paddingStart="8dp"
-    />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@id/background" android:drawable="@color/transparent">
+    </item>
+    <item android:id="@id/secondaryProgress">
+        <scale android:scaleWidth="100%"
+            android:drawable="@color/notification_media_progress" />
+    </item>
+    <item android:id="@id/progress">
+        <scale android:scaleWidth="100%"
+            android:drawable="@color/notification_media_progress" />
+    </item>
+</layer-list>

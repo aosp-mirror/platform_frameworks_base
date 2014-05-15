@@ -299,6 +299,10 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.StatusBar.Quantum.EventContent.Emphasis">
         <item name="android:textColor">#66000000</item>
     </style>
+    <style name="Widget.StatusBar.Quantum.ProgressBar"
+           parent="Widget.Quantum.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/notification_quantum_media_progress</item>
+    </style>
 
     <style name="Widget.StatusBar.Quantum.ProgressBar"
            parent="Widget.Quantum.Light.ProgressBar.Horizontal">

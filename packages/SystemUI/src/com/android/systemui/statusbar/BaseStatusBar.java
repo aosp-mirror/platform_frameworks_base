@@ -446,7 +446,23 @@ public abstract class BaseStatusBar extends SystemUI implements
                         com.android.internal.R.drawable.notification_bg,
                         com.android.internal.R.drawable.notification_bg_dim);
             }
+        } else {
+            // Using platform templates
+            final int color = sbn.getNotification().color;
+            if (isMediaNotification(entry)) {
+                entry.row.setBackgroundResourceIds(
+                        com.android.internal.R.drawable.notification_quantum_bg,
+                        color,
+                        com.android.internal.R.drawable.notification_quantum_bg_dim,
+                        color);
+            }
         }
+    }
+
+    private boolean isMediaNotification(NotificationData.Entry entry) {
+        // TODO: confirm that there's a valid media key
+        return entry.expandedBig != null &&
+               entry.expandedBig.findViewById(com.android.internal.R.id.media_action_area) != null;
     }
 
     private void startApplicationDetailsActivity(String packageName) {

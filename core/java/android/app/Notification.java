@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
+import android.media.session.MediaSessionToken;
 import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Build;
@@ -686,6 +687,11 @@ public class Notification implements Parcelable
      * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
      */
     public static final String EXTRA_TEXT_LINES = "android.textLines";
+
+    /**
+     * {@link #extras} key: A string representing the name of the specific
+     * {@link android.app.Notification.Style} used to create this notification.
+     */
     public static final String EXTRA_TEMPLATE = "android.template";
 
     /**
@@ -724,6 +730,13 @@ public class Notification implements Parcelable
      * URI used for this purpose must require no permissions to read the image data.
      */
     public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
+
+    /**
+     * {@link #extras} key: A
+     * {@link android.media.session.MediaSessionToken} associated with a
+     * {@link android.app.Notification.MediaStyle} notification.
+     */
+    public static final String EXTRA_MEDIA_SESSION = "android.mediaSession";
 
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.
@@ -2298,14 +2311,12 @@ public class Notification implements Parcelable
 
             int N = mActions.size();
             if (N > 0) {
-                // Log.d("Notification", "has actions: " + mContentText);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 big.setViewVisibility(R.id.action_divider, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 big.removeAllViews(R.id.actions);
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
-                    //Log.d("Notification", "adding action " + i + ": " + mActions.get(i).title);
                     big.addView(R.id.actions, button);
                 }
             }
@@ -3012,6 +3023,144 @@ public class Notification implements Parcelable
             wip.bigContentView = makeBigContentView();
 
             return wip;
+        }
+    }
+
+    /**
+     * Notification style for media playback notifications.
+     *
+     * In the expanded form, {@link Notification#bigContentView}, up to 5
+     * {@link Notification.Action}s specified with
+     * {@link Notification.Builder#addAction(int, CharSequence, PendingIntent) addAction} will be
+     * shown as icon-only pushbuttons, suitable for transport controls. The Bitmap given to
+     * {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap) setLargeIcon()} will be
+     * treated as album artwork.
+     *
+     * Unlike the other styles provided here, MediaStyle can also modify the standard-size
+     * {@link Notification#contentView}; by providing action indices to
+     * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
+     * in the standard view alongside the usual content.
+     *
+     * Finally, if you attach a {@link android.media.session.MediaSessionToken} using
+     * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSessionToken)},
+     * the System UI can identify this as a notification representing an active media session
+     * and respond accordingly (by showing album artwork in the lockscreen, for example).
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.Builder()
+     *     .setSmallIcon(R.drawable.ic_stat_player)
+     *     .setContentTitle(&quot;Track title&quot;)     // these three lines are optional
+     *     .setContentText(&quot;Artist - Album&quot;)   // if you use
+     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token, true)
+     *     .setMediaSession(mySession, true)
+     *     .setStyle(<b>new Notification.MediaStyle()</b>)
+     *     .build();
+     * </pre>
+     *
+     * @see Notification#bigContentView
+     */
+    public static class MediaStyle extends Style {
+        static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 2;
+        static final int MAX_MEDIA_BUTTONS = 5;
+
+        private int[] mActionsToShowInCompact = null;
+        private MediaSessionToken mToken;
+
+        public MediaStyle() {
+        }
+
+        public MediaStyle(Builder builder) {
+            setBuilder(builder);
+        }
+
+        /**
+         * Request up to 2 actions (by index in the order of addition) to be shown in the compact
+         * notification view.
+         */
+        public MediaStyle setShowActionsInCompactView(int...actions) {
+            mActionsToShowInCompact = actions;
+            return this;
+        }
+
+        /**
+         * Attach a {@link android.media.session.MediaSessionToken} to this Notification to provide
+         * additional playback information and control to the SystemUI.
+         */
+        public MediaStyle setMediaSession(MediaSessionToken token) {
+            mToken = token;
+            return this;
+        }
+
+        @Override
+        public Notification buildStyled(Notification wip) {
+            wip.contentView = makeMediaContentView();
+            wip.bigContentView = makeMediaBigContentView();
+
+            return wip;
+        }
+
+        /** @hide */
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+
+            if (mToken != null) {
+                extras.putParcelable(EXTRA_MEDIA_SESSION, mToken);
+            }
+        }
+
+        private RemoteViews generateMediaActionButton(Action action) {
+            final boolean tombstone = (action.actionIntent == null);
+            RemoteViews button = new RemoteViews(mBuilder.mContext.getPackageName(),
+                    R.layout.notification_quantum_media_action);
+            button.setImageViewResource(R.id.action0, action.icon);
+            if (!tombstone) {
+                button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
+            }
+            button.setContentDescription(R.id.action0, action.title);
+            return button;
+        }
+
+        private RemoteViews makeMediaContentView() {
+            RemoteViews view = mBuilder.applyStandardTemplate(
+                    R.layout.notification_template_quantum_media, true /* 1U */);
+
+            final int numActions = mBuilder.mActions.size();
+            final int N = mActionsToShowInCompact == null
+                    ? 0
+                    : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
+            if (N > 0) {
+                view.removeAllViews(R.id.actions);
+                for (int i = 0; i < N; i++) {
+                    if (i >= numActions) {
+                        throw new IllegalArgumentException(String.format(
+                                "setShowActionsInCompactView: action %d out of bounds (max %d)",
+                                i, numActions - 1));
+                    }
+
+                    final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
+                    final RemoteViews button = generateMediaActionButton(action);
+                    view.addView(R.id.actions, button);
+                }
+            }
+            return view;
+        }
+
+        private RemoteViews makeMediaBigContentView() {
+            RemoteViews big = mBuilder.applyStandardTemplate(
+                    R.layout.notification_template_quantum_big_media, false);
+
+            final int N = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
+            if (N > 0) {
+                big.removeAllViews(R.id.actions);
+                for (int i=0; i<N; i++) {
+                    final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i));
+                    big.addView(R.id.actions, button);
+                }
+            }
+            return big;
         }
     }
 }

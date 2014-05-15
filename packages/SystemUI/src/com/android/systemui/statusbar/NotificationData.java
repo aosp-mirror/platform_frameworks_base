@@ -36,7 +36,7 @@ public class NotificationData {
         public View expanded; // the inflated RemoteViews
         public View expandedPublic; // for insecure lockscreens
         public ImageView largeIcon;
-        private View expandedBig;
+        public View expandedBig;
         private boolean interruption;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {

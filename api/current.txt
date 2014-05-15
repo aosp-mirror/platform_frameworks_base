@@ -4456,6 +4456,7 @@ package android.app {
     field public static final java.lang.String EXTRA_INFO_TEXT = "android.infoText";
     field public static final java.lang.String EXTRA_LARGE_ICON = "android.largeIcon";
     field public static final java.lang.String EXTRA_LARGE_ICON_BIG = "android.largeIcon.big";
+    field public static final java.lang.String EXTRA_MEDIA_SESSION = "android.mediaSession";
     field public static final java.lang.String EXTRA_PEOPLE = "android.people";
     field public static final java.lang.String EXTRA_PICTURE = "android.picture";
     field public static final java.lang.String EXTRA_PROGRESS = "android.progress";
@@ -4622,6 +4623,14 @@ package android.app {
     method public android.app.Notification.InboxStyle addLine(java.lang.CharSequence);
     method public android.app.Notification.InboxStyle setBigContentTitle(java.lang.CharSequence);
     method public android.app.Notification.InboxStyle setSummaryText(java.lang.CharSequence);
+  }
+
+  public static class Notification.MediaStyle extends android.app.Notification.Style {
+    ctor public Notification.MediaStyle();
+    ctor public Notification.MediaStyle(android.app.Notification.Builder);
+    method public android.app.Notification buildStyled(android.app.Notification);
+    method public android.app.Notification.MediaStyle setMediaSession(android.media.session.MediaSessionToken);
+    method public android.app.Notification.MediaStyle setShowActionsInCompactView(int...);
   }
 
   public static abstract class Notification.Style {
