@@ -52,18 +52,21 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
     public void testBuilder() throws Exception {
         final int SELECTION_START = 30;
         final int SELECTION_END = 40;
-        final int CANDIDATES_START = 32;
-        final int CANDIDATES_END = 33;
+        final int COMPOSING_TEXT_START = 32;
+        final String COMPOSING_TEXT = "test";
         final float INSERTION_MARKER_HORIZONTAL = 10.5f;
         final float INSERTION_MARKER_TOP = 100.1f;
         final float INSERTION_MARKER_BASELINE = 110.4f;
         final float INSERTION_MARKER_BOTOM = 111.0f;
+        final int CHAR_INDEX = 32;
+        final char CHAR_VALUE = 'X';
+        final char DEFAULT_CHAR_VALUE = '!';
         Matrix TRANSFORM_MATRIX = new Matrix(Matrix.IDENTITY_MATRIX);
         TRANSFORM_MATRIX.setScale(10.0f, 20.0f);
 
         final CursorAnchorInfoBuilder builder = new CursorAnchorInfoBuilder();
         builder.setSelectionRange(SELECTION_START, SELECTION_END)
-                .setCandidateRange(CANDIDATES_START, CANDIDATES_END)
+                .setComposingText(COMPOSING_TEXT_START, COMPOSING_TEXT)
                 .setInsertionMarkerLocation(INSERTION_MARKER_HORIZONTAL, INSERTION_MARKER_TOP,
                         INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM)
                 .setMatrix(TRANSFORM_MATRIX);
@@ -77,8 +80,8 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final CursorAnchorInfo info = builder.build();
         assertEquals(SELECTION_START, info.getSelectionStart());
         assertEquals(SELECTION_END, info.getSelectionEnd());
-        assertEquals(CANDIDATES_START, info.getCandidatesStart());
-        assertEquals(CANDIDATES_END, info.getCandidatesEnd());
+        assertEquals(COMPOSING_TEXT_START, info.getComposingTextStart());
+        assertEquals(COMPOSING_TEXT, info.getComposingText());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info.getInsertionMarkerBaseline());
@@ -93,8 +96,8 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final CursorAnchorInfo info2 = builder.build();
         assertEquals(SELECTION_START, info2.getSelectionStart());
         assertEquals(SELECTION_END, info2.getSelectionEnd());
-        assertEquals(CANDIDATES_START, info2.getCandidatesStart());
-        assertEquals(CANDIDATES_END, info2.getCandidatesEnd());
+        assertEquals(COMPOSING_TEXT_START, info2.getComposingTextStart());
+        assertEquals(COMPOSING_TEXT, info2.getComposingText());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info2.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info2.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info2.getInsertionMarkerBaseline());
@@ -111,8 +114,8 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final CursorAnchorInfo info3 = cloneViaParcel(info2);
         assertEquals(SELECTION_START, info3.getSelectionStart());
         assertEquals(SELECTION_END, info3.getSelectionEnd());
-        assertEquals(CANDIDATES_START, info3.getCandidatesStart());
-        assertEquals(CANDIDATES_END, info3.getCandidatesEnd());
+        assertEquals(COMPOSING_TEXT_START, info3.getComposingTextStart());
+        assertEquals(COMPOSING_TEXT, info3.getComposingText());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info3.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info3.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info3.getInsertionMarkerBaseline());
@@ -128,13 +131,12 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final CursorAnchorInfo uninitializedInfo = builder.build();
         assertEquals(-1, uninitializedInfo.getSelectionStart());
         assertEquals(-1, uninitializedInfo.getSelectionEnd());
-        assertEquals(-1, uninitializedInfo.getCandidatesStart());
-        assertEquals(-1, uninitializedInfo.getCandidatesEnd());
+        assertEquals(-1, uninitializedInfo.getComposingTextStart());
+        assertNull(uninitializedInfo.getComposingText());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerHorizontal());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerTop());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBottom());
-        assertEquals(Matrix.IDENTITY_MATRIX, uninitializedInfo.getMatrix());
     }
 
     @SmallTest

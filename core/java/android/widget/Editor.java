@@ -3041,8 +3041,7 @@ public class Editor {
             builder.reset();
 
             final int selectionStart = mTextView.getSelectionStart();
-            final int selectionEnd = mTextView.getSelectionEnd();
-            builder.setSelectionRange(mTextView.getSelectionStart(), mTextView.getSelectionEnd());
+            builder.setSelectionRange(selectionStart, mTextView.getSelectionEnd());
 
             // Construct transformation matrix from view local coordinates to screen coordinates.
             mViewToScreenMatrix.set(mTextView.getMatrix());
@@ -3055,17 +3054,24 @@ public class Editor {
             final float viewportToContentVerticalOffset =
                     mTextView.viewportToContentVerticalOffset();
 
-            if (mTextView.getText() instanceof Spannable) {
-                final Spannable sp = (Spannable) mTextView.getText();
-                int compositionStart = EditableInputConnection.getComposingSpanStart(sp);
-                int compositionEnd = EditableInputConnection.getComposingSpanEnd(sp);
-                if (compositionEnd < compositionStart) {
-                    final int temp = compositionEnd;
-                    compositionEnd = compositionStart;
-                    compositionStart = temp;
+            final CharSequence text = mTextView.getText();
+            if (text instanceof Spannable) {
+                final Spannable sp = (Spannable) text;
+                int composingTextStart = EditableInputConnection.getComposingSpanStart(sp);
+                int composingTextEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                if (composingTextEnd < composingTextStart) {
+                    final int temp = composingTextEnd;
+                    composingTextEnd = composingTextStart;
+                    composingTextStart = temp;
                 }
-                builder.setCandidateRange(compositionStart, compositionEnd);
-                for (int offset = compositionStart; offset < compositionEnd; offset++) {
+                final boolean hasComposingText =
+                        (0 <= composingTextStart) && (composingTextStart < composingTextEnd);
+                if (hasComposingText) {
+                    final CharSequence composingText = text.subSequence(composingTextStart,
+                            composingTextEnd);
+                    builder.setComposingText(composingTextStart, composingText);
+                }
+                for (int offset = composingTextStart; offset < composingTextEnd; offset++) {
                     if (offset < 0) {
                         continue;
                     }

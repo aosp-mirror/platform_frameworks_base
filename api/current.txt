@@ -33574,9 +33574,9 @@ package android.view.inputmethod {
   public final class CursorAnchorInfo implements android.os.Parcelable {
     ctor public CursorAnchorInfo(android.os.Parcel);
     method public int describeContents();
-    method public int getCandidatesEnd();
-    method public int getCandidatesStart();
     method public android.graphics.RectF getCharacterRect(int);
+    method public java.lang.String getComposingText();
+    method public int getComposingTextStart();
     method public float getInsertionMarkerBaseline();
     method public float getInsertionMarkerBottom();
     method public float getInsertionMarkerHorizontal();
@@ -33593,7 +33593,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder addCharacterRect(int, float, float, float, float);
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setCandidateRange(int, int);
+    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setComposingText(int, java.lang.CharSequence);
     method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setInsertionMarkerLocation(float, float, float, float);
     method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setSelectionRange(int, int);

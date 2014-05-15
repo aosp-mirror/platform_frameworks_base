@@ -35,8 +35,12 @@ import java.util.Objects;
 public final class CursorAnchorInfo implements Parcelable {
     private final int mSelectionStart;
     private final int mSelectionEnd;
-    private final int mCandidatesStart;
-    private final int mCandidatesEnd;
+
+    private final int mComposingTextStart;
+    /**
+     * The text, tracked as a composing region.
+     */
+    private final String mComposingText;
 
     /**
      * Horizontal position of the insertion marker, in the local coordinates that will be
@@ -83,8 +87,8 @@ public final class CursorAnchorInfo implements Parcelable {
     public CursorAnchorInfo(final Parcel source) {
         mSelectionStart = source.readInt();
         mSelectionEnd = source.readInt();
-        mCandidatesStart = source.readInt();
-        mCandidatesEnd = source.readInt();
+        mComposingTextStart = source.readInt();
+        mComposingText = source.readString();
         mInsertionMarkerHorizontal = source.readFloat();
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
@@ -104,8 +108,8 @@ public final class CursorAnchorInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mSelectionStart);
         dest.writeInt(mSelectionEnd);
-        dest.writeInt(mCandidatesStart);
-        dest.writeInt(mCandidatesEnd);
+        dest.writeInt(mComposingTextStart);
+        dest.writeString(mComposingText);
         dest.writeFloat(mInsertionMarkerHorizontal);
         dest.writeFloat(mInsertionMarkerTop);
         dest.writeFloat(mInsertionMarkerBaseline);
@@ -119,14 +123,17 @@ public final class CursorAnchorInfo implements Parcelable {
     @Override
     public int hashCode(){
         // TODO: Improve the hash function.
-        final float floatHash = mSelectionStart + mSelectionEnd + mCandidatesStart + mCandidatesEnd
-                + mInsertionMarkerHorizontal + mInsertionMarkerTop + mInsertionMarkerBaseline
-                + mInsertionMarkerBottom;
+        final float floatHash = mInsertionMarkerHorizontal + mInsertionMarkerTop
+                + mInsertionMarkerBaseline + mInsertionMarkerBottom;
         int hash = floatHash > 0 ? (int) floatHash : (int)(-floatHash);
-        if (mCharacterRects != null) {
-            hash += mCharacterRects.hashCode();
-        }
-        hash += mMatrix.hashCode();
+        hash *= 31;
+        hash += mSelectionStart + mSelectionEnd + mComposingTextStart;
+        hash *= 31;
+        hash += Objects.hashCode(mComposingText);
+        hash *= 31;
+        hash += Objects.hashCode(mCharacterRects);
+        hash *= 31;
+        hash += Objects.hashCode(mMatrix);
         return hash;
     }
 
@@ -147,8 +154,10 @@ public final class CursorAnchorInfo implements Parcelable {
         }
         if (mSelectionStart != that.mSelectionStart
                 || mSelectionEnd != that.mSelectionEnd
-                || mCandidatesStart != that.mCandidatesStart
-                || mCandidatesEnd != that.mCandidatesEnd) {
+                || mComposingTextStart != that.mComposingTextStart) {
+            return false;
+        }
+        if (!Objects.equals(mComposingTextStart, that.mComposingTextStart)) {
             return false;
         }
         if (!Objects.equals(mCharacterRects, that.mCharacterRects)) {
@@ -163,13 +172,14 @@ public final class CursorAnchorInfo implements Parcelable {
     @Override
     public String toString() {
         return "SelectionInfo{mSelection=" + mSelectionStart + "," + mSelectionEnd
-                + " mCandiadtes=" + mCandidatesStart + "," + mCandidatesEnd
+                + " mComposingTextStart=" + mComposingTextStart
+                + " mComposingText=" + Objects.toString(mComposingText)
                 + " mInsertionMarkerHorizontal=" + mInsertionMarkerHorizontal
                 + " mInsertionMarkerTop=" + mInsertionMarkerTop
                 + " mInsertionMarkerBaseline=" + mInsertionMarkerBaseline
                 + " mInsertionMarkerBottom=" + mInsertionMarkerBottom
-                + " mCharacterRects=" + (mCharacterRects != null ? mCharacterRects : "null")
-                + " mMatrix=" + mMatrix
+                + " mCharacterRects=" + Objects.toString(mCharacterRects)
+                + " mMatrix=" + Objects.toString(mMatrix)
                 + "}";
     }
 
@@ -190,16 +200,23 @@ public final class CursorAnchorInfo implements Parcelable {
         private int mSelectionEnd = -1;
 
         /**
-         * Sets the text range of the composition string. Calling this can be skipped if there is
-         * no composition.
+         * Sets the text range of the composing text. Calling this can be skipped if there is
+         * no composing text.
+         * @param index index where the composing text starts.
+         * @param composingText the entire composing text.
          */
-        public CursorAnchorInfoBuilder setCandidateRange(final int start, final int end) {
-            mCandidateStart = start;
-            mCandidateEnd = end;
+        public CursorAnchorInfoBuilder setComposingText(final int index,
+                final CharSequence composingText) {
+            mComposingTextStart = index;
+            if (composingText == null) {
+                mComposingText = null;
+            } else {
+                mComposingText = composingText.toString();
+            }
             return this;
         }
-        private int mCandidateStart = -1;
-        private int mCandidateEnd = -1;
+        private int mComposingTextStart = -1;
+        private String mComposingText = null;
 
         /**
          * Sets the location of the text insertion point (zero width cursor) as a rectangle in
@@ -297,8 +314,8 @@ public final class CursorAnchorInfo implements Parcelable {
         public void reset() {
             mSelectionStart = -1;
             mSelectionEnd = -1;
-            mCandidateStart = -1;
-            mCandidateEnd = -1;
+            mComposingTextStart = -1;
+            mComposingText = null;
             mInsertionMarkerHorizontal = Float.NaN;
             mInsertionMarkerTop = Float.NaN;
             mInsertionMarkerBaseline = Float.NaN;
@@ -313,8 +330,8 @@ public final class CursorAnchorInfo implements Parcelable {
     private CursorAnchorInfo(final CursorAnchorInfoBuilder builder) {
         mSelectionStart = builder.mSelectionStart;
         mSelectionEnd = builder.mSelectionEnd;
-        mCandidatesStart = builder.mCandidateStart;
-        mCandidatesEnd = builder.mCandidateEnd;
+        mComposingTextStart = builder.mComposingTextStart;
+        mComposingText = builder.mComposingText;
         mInsertionMarkerHorizontal = builder.mInsertionMarkerHorizontal;
         mInsertionMarkerTop = builder.mInsertionMarkerTop;
         mInsertionMarkerBaseline = builder.mInsertionMarkerBaseline;
@@ -341,19 +358,19 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
-     * Returns the index where the composition starts.
-     * @return -1 if there is no composition.
+     * Returns the index where the composing text starts.
+     * @return -1 if there is no composing text.
      */
-    public int getCandidatesStart() {
-        return mCandidatesStart;
+    public int getComposingTextStart() {
+        return mComposingTextStart;
     }
 
     /**
-     * Returns the index where the composition ends.
-     * @return -1 if there is no composition.
+     * Returns the entire composing text.
+     * @return null if there is no composition.
      */
-    public int getCandidatesEnd() {
-        return mCandidatesEnd;
+    public String getComposingText() {
+        return mComposingText;
     }
 
     /**
