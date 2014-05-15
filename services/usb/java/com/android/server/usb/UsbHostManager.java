@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import android.alsa.AlsaCardsParser;
+import android.alsa.AlsaDevicesParser;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbConfiguration;
@@ -29,8 +31,6 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.alsascan.AlsaCardsParser;
-import com.android.alsascan.AlsaDevicesParser;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;

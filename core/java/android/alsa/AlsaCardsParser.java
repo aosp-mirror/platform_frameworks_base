@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.alsascan;
+package android.alsa;
 
 import android.util.Slog;
 import java.io.BufferedReader;
