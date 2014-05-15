@@ -1064,14 +1064,17 @@ public class Paint {
         mNativeTypeface = typefaceNative;
         return typeface;
     }
-    
+
     /**
      * Get the paint's rasterizer (or null).
      * <p />
      * The raster controls/modifies how paths/text are turned into alpha masks.
      *
      * @return         the paint's rasterizer (or null)
+     *
+     *  @deprecated Rasterizer is not supported by either the HW or PDF backends.
      */
+    @Deprecated
     public Rasterizer getRasterizer() {
         return mRasterizer;
     }
@@ -1085,7 +1088,10 @@ public class Paint {
      * @param rasterizer May be null. The new rasterizer to be installed in
      *                   the paint.
      * @return           rasterizer
+     *
+     *  @deprecated Rasterizer is not supported by either the HW or PDF backends.
      */
+    @Deprecated
     public Rasterizer setRasterizer(Rasterizer rasterizer) {
         long rasterizerNative = 0;
         if (rasterizer != null) {
@@ -1095,7 +1101,7 @@ public class Paint {
         mRasterizer = rasterizer;
         return rasterizer;
     }
-    
+
     /**
      * This draws a shadow layer below the main layer, with the specified
      * offset and color, and blur radius. If radius is 0, then the shadow

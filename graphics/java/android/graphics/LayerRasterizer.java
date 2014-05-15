@@ -16,11 +16,12 @@
 
 package android.graphics;
 
+@Deprecated
 public class LayerRasterizer extends Rasterizer {
     public LayerRasterizer() {
         native_instance = nativeConstructor();
     }
-    
+
     /** Add a new layer (above any previous layers) to the rasterizer.
         The layer will extract those fields that affect the mask from
         the specified paint, but will not retain a reference to the paint

@@ -10092,7 +10092,7 @@ package android.graphics {
     enum_constant public static final android.graphics.Interpolator.Result NORMAL;
   }
 
-  public class LayerRasterizer extends android.graphics.Rasterizer {
+  public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
     method public void addLayer(android.graphics.Paint);
@@ -10252,7 +10252,7 @@ package android.graphics {
     method public int getHinting();
     method public android.graphics.MaskFilter getMaskFilter();
     method public android.graphics.PathEffect getPathEffect();
-    method public android.graphics.Rasterizer getRasterizer();
+    method public deprecated android.graphics.Rasterizer getRasterizer();
     method public android.graphics.Shader getShader();
     method public android.graphics.Paint.Cap getStrokeCap();
     method public android.graphics.Paint.Join getStrokeJoin();
@@ -10303,7 +10303,7 @@ package android.graphics {
     method public void setLinearText(boolean);
     method public android.graphics.MaskFilter setMaskFilter(android.graphics.MaskFilter);
     method public android.graphics.PathEffect setPathEffect(android.graphics.PathEffect);
-    method public android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
+    method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
     method public android.graphics.Shader setShader(android.graphics.Shader);
     method public void setShadowLayer(float, float, float, int);
     method public void setStrikeThruText(boolean);
@@ -10612,7 +10612,7 @@ package android.graphics {
     ctor public RadialGradient(float, float, float, int, int, android.graphics.Shader.TileMode);
   }
 
-  public class Rasterizer {
+  public deprecated class Rasterizer {
     ctor public Rasterizer();
   }
 

@@ -21,6 +21,7 @@
 
 package android.graphics;
 
+@Deprecated
 public class Rasterizer {
 
     protected void finalize() throws Throwable {
