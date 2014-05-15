@@ -53,7 +53,7 @@ class PackageSettingBase extends GrantedPermissions {
     File resourcePath;
     String resourcePathString;
     String nativeLibraryPathString;
-    String requiredCpuAbiString;
+    String cpuAbiString;
     long timeStamp;
     long firstInstallTime;
     long lastUpdateTime;
@@ -81,11 +81,11 @@ class PackageSettingBase extends GrantedPermissions {
     /* package name of the app that installed this package */
     String installerPackageName;
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, String requiredCpuAbiString, int pVersionCode, int pkgFlags) {
+            String nativeLibraryPathString, String cpuAbiString, int pVersionCode, int pkgFlags) {
         super(pkgFlags);
         this.name = name;
         this.realName = realName;
-        init(codePath, resourcePath, nativeLibraryPathString, requiredCpuAbiString, pVersionCode);
+        init(codePath, resourcePath, nativeLibraryPathString, cpuAbiString, pVersionCode);
     }
 
     /**
@@ -102,7 +102,7 @@ class PackageSettingBase extends GrantedPermissions {
         resourcePath = base.resourcePath;
         resourcePathString = base.resourcePathString;
         nativeLibraryPathString = base.nativeLibraryPathString;
-        requiredCpuAbiString = base.requiredCpuAbiString;
+        cpuAbiString = base.cpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
@@ -136,7 +136,7 @@ class PackageSettingBase extends GrantedPermissions {
         this.resourcePath = resourcePath;
         this.resourcePathString = resourcePath.toString();
         this.nativeLibraryPathString = nativeLibraryPathString;
-        this.requiredCpuAbiString = requiredCpuAbiString;
+        this.cpuAbiString = requiredCpuAbiString;
         this.versionCode = pVersionCode;
     }
 
@@ -167,7 +167,7 @@ class PackageSettingBase extends GrantedPermissions {
         grantedPermissions = base.grantedPermissions;
         gids = base.gids;
 
-        requiredCpuAbiString = base.requiredCpuAbiString;
+        cpuAbiString = base.cpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
