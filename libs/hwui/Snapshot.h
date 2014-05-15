@@ -229,7 +229,7 @@ public:
 
 private:
     struct ViewportData {
-        ViewportData() : mWidth(0), mHeight() {}
+        ViewportData() : mWidth(0), mHeight(0) {}
         void initialize(int width, int height) {
             mWidth = width;
             mHeight = height;
