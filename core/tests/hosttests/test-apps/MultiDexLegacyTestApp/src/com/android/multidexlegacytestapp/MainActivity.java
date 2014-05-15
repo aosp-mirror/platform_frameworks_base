@@ -17,7 +17,6 @@ package com.android.multidexlegacytestapp;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.multidex.MultiDex;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -36,9 +35,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate");
-        MultiDex.install(getApplicationContext());
-        Log.i(TAG, "Multi dex installation done.");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         int value = getValue();
@@ -92,6 +88,10 @@ public class MainActivity extends Activity {
                 + instanceFieldNotInited + instanceFieldInited + staticField
                 + IntermediateClass.get() + Referenced.get(instanceFieldNotInited);
         return value;
+    }
+
+    public int getAnnotation2Value() {
+        return ((AnnotationWithEnum2) TestApplication.annotation2).value().get();
     }
 
 }
