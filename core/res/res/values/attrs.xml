@@ -2477,7 +2477,7 @@
              when doing an Activity transition. Typically, the elements inside a
              ViewGroup are each transitioned from the scene individually. The default
              for a ViewGroup is false unless it has a background. See
-             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
+             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.app.Activity,
              android.view.View, String)} for more information. Corresponds to
              {@link android.view.ViewGroup#setTransitionGroup(boolean)}.-->
         <attr name="transitionGroup" format="boolean" />

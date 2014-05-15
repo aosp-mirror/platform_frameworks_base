@@ -17,18 +17,18 @@
 package android.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.transition.Transition;
-import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.View;
 import android.view.Window;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +108,12 @@ public class ActivityOptions {
     private static final String KEY_TRANSITION_COMPLETE_LISTENER
             = "android:transitionCompleteListener";
 
+    private static final String KEY_TRANSITION_IS_RETURNING = "android:transitionIsReturning";
+    private static final String KEY_TRANSITION_SHARED_ELEMENTS = "android:sharedElementNames";
+    private static final String KEY_LOCAL_SHARED_ELEMENTS = "android:localSharedElementNames";
+    private static final String KEY_RESULT_DATA = "android:resultData";
+    private static final String KEY_RESULT_CODE = "android:resultCode";
+
     /** @hide */
     public static final int ANIM_NONE = 0;
     /** @hide */
@@ -131,7 +137,12 @@ public class ActivityOptions {
     private int mStartWidth;
     private int mStartHeight;
     private IRemoteCallback mAnimationStartedListener;
-    private ResultReceiver mExitReceiver;
+    private ResultReceiver mTransitionReceiver;
+    private boolean mIsReturning;
+    private ArrayList<String> mSharedElementNames;
+    private ArrayList<String> mLocalSharedElementNames;
+    private Intent mResultData;
+    private int mResultCode;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -334,7 +345,7 @@ public class ActivityOptions {
      * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
-     * @param window The window containing shared elements.
+     * @param activity The Activity whose window contains the shared elements.
      * @param sharedElement The View to transition to the started Activity. sharedElement must
      *                      have a non-null sharedElementName.
      * @param sharedElementName The shared element name as used in the target Activity. This may
@@ -344,40 +355,70 @@ public class ActivityOptions {
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
-    public static ActivityOptions makeSceneTransitionAnimation(Window window,
+    public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             View sharedElement, String sharedElementName) {
-        return makeSceneTransitionAnimation(window,
-                new SharedElementMappingListener(sharedElement, sharedElementName));
+        return makeSceneTransitionAnimation(activity, Pair.create(sharedElement, sharedElementName));
     }
 
     /**
      * Create an ActivityOptions to transition between Activities using cross-Activity scene
      * animations. This method carries the position of multiple shared elements to the started
-     * Activity. The position of the first element in the value returned from
-     * {@link android.app.ActivityOptions.ActivityTransitionListener#getSharedElementsMapping()}
+     * Activity. The position of the first element in sharedElements
      * will be used as the epicenter for the exit Transition. The position of the associated
      * shared element in the launched Activity will be the epicenter of its entering Transition.
      *
      * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
-     * @param window The window containing shared elements.
-     * @param listener The listener to use to monitor activity transition events.
+     * @param activity The Activity whose window contains the shared elements.
+     * @param sharedElements The names of the shared elements to transfer to the called
+     *                       Activity and their associated Views. The Views must each have
+     *                       a unique shared element name.
      * @return Returns a new ActivityOptions object that you can use to
      *         supply these options as the options Bundle when starting an activity.
      *         Returns null if the Window does not have {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
-    public static ActivityOptions makeSceneTransitionAnimation(Window window,
-            ActivityTransitionListener listener) {
-        if (!window.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+    public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
+            Pair<View, String>... sharedElements) {
+        if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
             return null;
         }
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
-        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(window, listener);
-        opts.mExitReceiver = exit;
+
+        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> mappedNames = new ArrayList<String>();
+
+        if (sharedElements != null) {
+            for (int i = 0; i < sharedElements.length; i++) {
+                Pair<View, String> sharedElement = sharedElements[i];
+                names.add(sharedElement.second);
+                mappedNames.add(sharedElement.first.getViewName());
+            }
+        }
+
+        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(activity, names, names,
+                mappedNames, false);
+        opts.mTransitionReceiver = exit;
+        opts.mSharedElementNames = names;
+        opts.mLocalSharedElementNames = mappedNames;
+        opts.mIsReturning = false;
+        return opts;
+    }
+
+    /** @hide */
+    public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
+            ExitTransitionCoordinator exitCoordinator, ArrayList<String> sharedElementNames,
+            int resultCode, Intent resultData) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mAnimationType = ANIM_SCENE_TRANSITION;
+        opts.mSharedElementNames = sharedElementNames;
+        opts.mTransitionReceiver = exitCoordinator;
+        opts.mIsReturning = true;
+        opts.mResultCode = resultCode;
+        opts.mResultData = resultData;
         return opts;
     }
 
@@ -413,7 +454,12 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mExitReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER);
+                mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER);
+                mIsReturning = opts.getBoolean(KEY_TRANSITION_IS_RETURNING, false);
+                mSharedElementNames = opts.getStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS);
+                mLocalSharedElementNames = opts.getStringArrayList(KEY_LOCAL_SHARED_ELEMENTS);
+                mResultData = opts.getParcelable(KEY_RESULT_DATA);
+                mResultCode = opts.getInt(KEY_RESULT_CODE);
                 break;
         }
     }
@@ -470,15 +516,15 @@ public class ActivityOptions {
 
     /** @hide */
     public void dispatchActivityStopped() {
-        if (mExitReceiver != null) {
-            mExitReceiver.send(ActivityTransitionCoordinator.MSG_ACTIVITY_STOPPED, null);
+        if (mTransitionReceiver != null) {
+            mTransitionReceiver.send(ActivityTransitionCoordinator.MSG_ACTIVITY_STOPPED, null);
         }
     }
 
     /** @hide */
     public void dispatchStartExit() {
-        if (mExitReceiver != null) {
-            mExitReceiver.send(ActivityTransitionCoordinator.MSG_START_EXIT_TRANSITION, null);
+        if (mTransitionReceiver != null) {
+            mTransitionReceiver.send(ActivityTransitionCoordinator.MSG_START_EXIT_TRANSITION, null);
         }
     }
 
@@ -493,19 +539,37 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public void setReturning() {
+        mIsReturning = true;
+    }
+
+    /** @hide */
+    public boolean isReturning() {
+        return mIsReturning;
+    }
+
+    /** @hide */
+    public ArrayList<String> getSharedElementNames() {
+        return mSharedElementNames;
+    }
+
+    /** @hide */
+    public ArrayList<String> getLocalSharedElementNames() { return mLocalSharedElementNames; }
+
+    /** @hide */
+    public ResultReceiver getResultReceiver() { return mTransitionReceiver; }
+
+    /** @hide */
+    public int getResultCode() { return mResultCode; }
+
+    /** @hide */
+    public Intent getResultData() { return mResultData; }
+
+    /** @hide */
     public static void abort(Bundle options) {
         if (options != null) {
             (new ActivityOptions(options)).abort();
         }
-    }
-
-    /** @hide */
-    public EnterTransitionCoordinator createEnterActivityTransition(Activity activity) {
-        EnterTransitionCoordinator coordinator = null;
-        if (mAnimationType == ANIM_SCENE_TRANSITION) {
-            coordinator = new EnterTransitionCoordinator(activity, mExitReceiver);
-        }
-        return coordinator;
     }
 
     /**
@@ -517,7 +581,12 @@ public class ActivityOptions {
         if (otherOptions.mPackageName != null) {
             mPackageName = otherOptions.mPackageName;
         }
-        mExitReceiver = null;
+        mTransitionReceiver = null;
+        mSharedElementNames = null;
+        mLocalSharedElementNames = null;
+        mIsReturning = false;
+        mResultData = null;
+        mResultCode = 0;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
                 mAnimationType = otherOptions.mAnimationType;
@@ -562,9 +631,14 @@ public class ActivityOptions {
                 break;
             case ANIM_SCENE_TRANSITION:
                 mAnimationType = otherOptions.mAnimationType;
-                mExitReceiver = otherOptions.mExitReceiver;
+                mTransitionReceiver = otherOptions.mTransitionReceiver;
+                mSharedElementNames = otherOptions.mSharedElementNames;
+                mLocalSharedElementNames = otherOptions.mLocalSharedElementNames;
+                mIsReturning = otherOptions.mIsReturning;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
+                mResultData = otherOptions.mResultData;
+                mResultCode = otherOptions.mResultCode;
                 break;
         }
     }
@@ -608,9 +682,14 @@ public class ActivityOptions {
                 break;
             case ANIM_SCENE_TRANSITION:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
-                if (mExitReceiver != null) {
-                    b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mExitReceiver);
+                if (mTransitionReceiver != null) {
+                    b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mTransitionReceiver);
                 }
+                b.putBoolean(KEY_TRANSITION_IS_RETURNING, mIsReturning);
+                b.putStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS, mSharedElementNames);
+                b.putStringArrayList(KEY_LOCAL_SHARED_ELEMENTS, mLocalSharedElementNames);
+                b.putParcelable(KEY_RESULT_DATA, mResultData);
+                b.putInt(KEY_RESULT_CODE, mResultCode);
                 break;
         }
         return b;
@@ -630,126 +709,4 @@ public class ActivityOptions {
         return null;
     }
 
-    /**
-     * Listener provided in
-     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
-     * android.app.ActivityOptions.ActivityTransitionListener)} or in
-     * {@link android.app.Activity#setActivityTransitionListener(
-     * android.app.ActivityOptions.ActivityTransitionListener)} to monitor the Activity transitions.
-     * The events can be used to customize or override Activity Transition behavior.
-     */
-    public static class ActivityTransitionListener {
-        /**
-         * Called when the enter Transition is ready to start, but hasn't started yet. If
-         * {@link android.view.Window#getEnterTransition()} is non-null,
-         * The entering views will be {@link View#INVISIBLE}.
-         */
-        public void onEnterReady() {}
-
-        /**
-         * Called when the remote exiting transition completes.
-         */
-        public void onRemoteExitComplete() {}
-
-        /**
-         * Called when the start state for shared elements is captured on enter.
-         *
-         * @param sharedElementNames The names of the shared elements that were accepted into
-         *                           the View hierarchy.
-         * @param sharedElements The shared elements that are part of the View hierarchy.
-         * @param sharedElementSnapshots The Views containing snap shots of the shared element
-         *                               from the launching Window. These elements will not
-         *                               be part of the scene, but will be positioned relative
-         *                               to the Window decor View.
-         */
-        public void onCaptureSharedElementStart(List<String> sharedElementNames,
-                List<View> sharedElements, List<View> sharedElementSnapshots) {}
-
-        /**
-         * Called when the end state for shared elements is captured on enter.
-         *
-         * @param sharedElementNames The names of the shared elements that were accepted into
-         *                           the View hierarchy.
-         * @param sharedElements The shared elements that are part of the View hierarchy.
-         * @param sharedElementSnapshots The Views containing snap shots of the shared element
-         *                               from the launching Window. These elements will not
-         *                               be part of the scene, but will be positioned relative
-         *                               to the Window decor View.
-         */
-        public void onCaptureSharedElementEnd(List<String> sharedElementNames,
-                List<View> sharedElements, List<View> sharedElementSnapshots) {}
-
-        /**
-         * Called when the enter Transition has been started.
-         * @param sharedElementNames The names of shared elements that were transferred.
-         * @param sharedElements The shared elements that were transferred.
-         */
-        public void onStartEnterTransition(List<String> sharedElementNames,
-                List<View> sharedElements) {}
-
-        /**
-         * Called when the exit Transition has been started.
-         * @param sharedElementNames The names of all shared elements that will be transferred.
-         * @param sharedElements All shared elements that will be transferred.
-         */
-        public void onStartExitTransition(List<String> sharedElementNames,
-                List<View> sharedElements) {}
-
-        /**
-         * Called when the exiting shared element transition completes.
-         */
-        public void onSharedElementExitTransitionComplete() {}
-
-        /**
-         * Called on exit when the shared element has been transferred.
-         * @param sharedElementNames The names of all shared elements that were transferred.
-         * @param sharedElements All shared elements that will were transferred.
-         */
-        public void onSharedElementTransferred(List<String> sharedElementNames,
-                List<View> sharedElements) {}
-
-        /**
-         * Called when the exit transition has completed.
-         */
-        public void onExitTransitionComplete() {}
-
-        /**
-         * Returns a mapping from a View in the View hierarchy to the shared element name used
-         * in the call. This is called twice -- once when the view is
-         * entering and again when it exits. A null return value indicates that the
-         * View hierachy can be trusted without any remapping.
-         * @return A map from a View in the hierarchy to the shared element name used in the
-         * call.
-         */
-        public Pair<View, String>[] getSharedElementsMapping() { return null; }
-
-        /**
-         * Returns <code>true</code> if the ActivityTransitionListener will handle removing
-         * rejected shared elements from the scene. If <code>false</code> is returned, a default
-         * animation will be used to remove the rejected shared elements from the scene.
-         *
-         * @param rejectedSharedElements Views containing visual information of shared elements
-         *                               that are not part of the entering scene. These Views
-         *                               are positioned relative to the Window decor View.
-         * @return <code>false</code> if the default animation should be used to remove the
-         * rejected shared elements from the scene or <code>true</code> if the listener provides
-         * custom handling.
-         */
-        public boolean handleRejectedSharedElements(List<View> rejectedSharedElements) {
-            return false;
-        }
-    }
-
-    private static class SharedElementMappingListener extends ActivityTransitionListener {
-        Pair<View, String>[] mSharedElementsMapping = new Pair[1];
-
-        public SharedElementMappingListener(View view, String name) {
-            mSharedElementsMapping[0] = Pair.create(view, name);
-        }
-
-        @Override
-        public Pair<View, String>[] getSharedElementsMapping() {
-            return mSharedElementsMapping;
-        }
-    }
 }

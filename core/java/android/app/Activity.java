@@ -777,8 +777,9 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
-    private ActivityOptions mCalledActivityOptions;
-    private EnterTransitionCoordinator mEnterTransitionCoordinator;
+
+    private ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
+    SharedElementListener mTransitionListener = new SharedElementListener();
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -1100,9 +1101,6 @@ public class Activity extends ContextThemeWrapper
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
         }
-        if (mEnterTransitionCoordinator != null) {
-            mEnterTransitionCoordinator.readyToEnter();
-        }
         mCalled = true;
     }
 
@@ -1149,12 +1147,6 @@ public class Activity extends ContextThemeWrapper
         }
 
         getApplication().dispatchActivityStarted(this);
-
-        final ActivityOptions activityOptions = getActivityOptions();
-        if (activityOptions != null &&
-                activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-            mEnterTransitionCoordinator = activityOptions.createEnterActivityTransition(this);
-        }
     }
 
     /**
@@ -1204,7 +1196,6 @@ public class Activity extends ContextThemeWrapper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
-        mCalledActivityOptions = null;
         mCalled = true;
     }
 
@@ -1279,6 +1270,7 @@ public class Activity extends ContextThemeWrapper
     final void performSaveInstanceState(Bundle outState) {
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
+        mActivityTransitionState.saveState(outState);
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState);
     }
 
@@ -1549,10 +1541,7 @@ public class Activity extends ContextThemeWrapper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
-        if (mCalledActivityOptions != null) {
-            mCalledActivityOptions.dispatchActivityStopped();
-            mCalledActivityOptions = null;
-        }
+        mActivityTransitionState.onStop();
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
@@ -3650,7 +3639,7 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(Intent intent, int requestCode) {
         Bundle options = null;
         if (mWindow.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            options = ActivityOptions.makeSceneTransitionAnimation(mWindow, null).toBundle();
+            options = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
         }
         startActivityForResult(intent, requestCode, options);
     }
@@ -3691,9 +3680,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         if (options != null) {
-            ActivityOptions activityOptions = new ActivityOptions(options);
-            activityOptions.dispatchStartExit();
-            mCalledActivityOptions = activityOptions;
+            mActivityTransitionState.startExitOutTransition(this, options);
         }
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
@@ -4559,13 +4546,10 @@ public class Activity extends ContextThemeWrapper
      * to reverse its exit Transition. When the exit Transition completes,
      * {@link #finish()} is called. If no entry Transition was used, finish() is called
      * immediately and the Activity exit Transition is run.
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
-     * android.app.ActivityOptions.ActivityTransitionListener)
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(Activity, android.util.Pair[])
      */
     public void finishWithTransition() {
-        if (mEnterTransitionCoordinator != null) {
-            mEnterTransitionCoordinator.startExit();
-        } else {
+        if (!mActivityTransitionState.startExitBackTransition(this)) {
             finish();
         }
     }
@@ -4640,6 +4624,27 @@ public class Activity extends ContextThemeWrapper
      * @see #setResult(int)
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+
+    /**
+     * Called when an activity you launched with an activity transition exposes this
+     * Activity through a returning activity transition, giving you the resultCode
+     * and any additional data from it. This method will only be called if the activity
+     * set a result code other than {@link #RESULT_CANCELED} and it supports activity
+     * transitions with {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * <p>The purpose of this function is to let the called Activity send a hint about
+     * its state so that this underlying Activity can prepare to be exposed. A call to
+     * this method does not guarantee that the called Activity has or will be exiting soon.
+     * It only indicates that it will expose this Activity's Window and it has
+     * some data to pass to prepare it.</p>
+     *
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     */
+    protected void onActivityReenter(int resultCode, Intent data) {
     }
 
     /**
@@ -5246,7 +5251,8 @@ public class Activity extends ContextThemeWrapper
      * This call has no effect on non-translucent activities or on activities with the
      * {@link android.R.attr#windowIsFloating} attribute.
      *
-     * @see #convertToTranslucent(TranslucentConversionListener)
+     * @see #convertToTranslucent(android.app.Activity.TranslucentConversionListener,
+     * ActivityOptions)
      * @see TranslucentConversionListener
      *
      * @hide
@@ -5544,18 +5550,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.view.Window,
-     * android.app.ActivityOptions.ActivityTransitionListener)} was used to start an Activity,
-     * the Window will be triggered to enter with a Transition. <code>listener</code> allows
-     * The Activity to listen to events of the entering transition and control the mapping of
-     * shared elements. This requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
+     * android.view.View, String)} was used to start an Activity, <var>listener</var>
+     * will be called to handle shared elements. This requires
+     * {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      *
-     * @param listener Used to listen to events in the entering transition.
+     * @param listener Used to manipulate how shared element transitions function.
      */
-    public void setActivityTransitionListener(ActivityOptions.ActivityTransitionListener listener) {
-        if (mEnterTransitionCoordinator != null) {
-            mEnterTransitionCoordinator.setActivityTransitionListener(listener);
+    public void setSharedElementListener(SharedElementListener listener) {
+        if (listener == null) {
+            listener = new SharedElementListener();
         }
+        mTransitionListener = listener;
     }
 
     // ------------------ Internal API ------------------
@@ -5621,19 +5627,23 @@ public class Activity extends ContextThemeWrapper
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
+        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
     }
 
     final void performCreate(Bundle icicle) {
         onCreate(icicle);
+        mActivityTransitionState.readState(icicle);
         performCreateCommon();
     }
 
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         onCreate(icicle, persistentState);
+        mActivityTransitionState.readState(icicle);
         performCreateCommon();
     }
 
     final void performStart() {
+        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
@@ -5656,6 +5666,7 @@ public class Activity extends ContextThemeWrapper
                 lm.doReportStart();
             }
         }
+        mActivityTransitionState.enterReady(this);
     }
     
     final void performRestart() {

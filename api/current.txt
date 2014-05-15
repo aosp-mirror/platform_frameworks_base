@@ -3257,6 +3257,7 @@ package android.app {
     method public boolean navigateUpToFromChild(android.app.Activity, android.content.Intent);
     method public void onActionModeFinished(android.view.ActionMode);
     method public void onActionModeStarted(android.view.ActionMode);
+    method protected void onActivityReenter(int, android.content.Intent);
     method protected void onActivityResult(int, int, android.content.Intent);
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
@@ -3335,7 +3336,6 @@ package android.app {
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setActionBar(android.widget.Toolbar);
-    method public void setActivityTransitionListener(android.app.ActivityOptions.ActivityTransitionListener);
     method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
     method public void setContentView(android.view.View);
@@ -3357,6 +3357,7 @@ package android.app {
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
     method public final void setSecondaryProgress(int);
+    method public void setSharedElementListener(android.app.SharedElementListener);
     method public void setTitle(java.lang.CharSequence);
     method public void setTitle(int);
     method public deprecated void setTitleColor(int);
@@ -3576,26 +3577,11 @@ package android.app {
   public class ActivityOptions {
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
-    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.view.Window, android.view.View, java.lang.String);
-    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.view.Window, android.app.ActivityOptions.ActivityTransitionListener);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, java.lang.String);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View, java.lang.String>...);
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
-  }
-
-  public static class ActivityOptions.ActivityTransitionListener {
-    ctor public ActivityOptions.ActivityTransitionListener();
-    method public android.util.Pair<android.view.View, java.lang.String>[] getSharedElementsMapping();
-    method public boolean handleRejectedSharedElements(java.util.List<android.view.View>);
-    method public void onCaptureSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
-    method public void onCaptureSharedElementStart(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
-    method public void onEnterReady();
-    method public void onExitTransitionComplete();
-    method public void onRemoteExitComplete();
-    method public void onSharedElementExitTransitionComplete();
-    method public void onSharedElementTransferred(java.util.List<java.lang.String>, java.util.List<android.view.View>);
-    method public void onStartEnterTransition(java.util.List<java.lang.String>, java.util.List<android.view.View>);
-    method public void onStartExitTransition(java.util.List<java.lang.String>, java.util.List<android.view.View>);
   }
 
   public class AlarmManager {
@@ -4819,6 +4805,14 @@ package android.app {
     field public static final int START_REDELIVER_INTENT = 3; // 0x3
     field public static final int START_STICKY = 1; // 0x1
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
+  }
+
+  public class SharedElementListener {
+    ctor public SharedElementListener();
+    method public void handleRejectedSharedElements(java.util.List<android.view.View>);
+    method public void remapSharedElements(java.util.List<java.lang.String>, java.util.Map<java.lang.String, android.view.View>);
+    method public void setSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
+    method public void setSharedElementStart(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
   }
 
   public deprecated class TabActivity extends android.app.ActivityGroup {

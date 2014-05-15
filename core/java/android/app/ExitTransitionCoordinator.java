@@ -15,11 +15,20 @@
  */
 package android.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.transition.Transition;
-import android.util.Pair;
+import android.transition.TransitionManager;
 import android.view.View;
-import android.view.Window;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 
@@ -30,142 +39,245 @@ import java.util.ArrayList;
  */
 class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "ExitTransitionCoordinator";
+    private static final long MAX_WAIT_MS = 1500;
 
-    /**
-     * The Views that have exited and need to be restored to VISIBLE when returning to the
-     * normal state.
-     */
-    private ArrayList<View> mTransitioningViews;
-
-    /**
-     * Has the exit started? We don't want to accidentally exit multiple times.
-     */
-    private boolean mExitStarted;
-
-    /**
-     * Has the called Activity's ResultReceiver been set?
-     */
-    private boolean mIsResultReceiverSet;
-
-    /**
-     * Has the exit transition completed? If so, we can notify as soon as the ResultReceiver
-     * has been set.
-     */
     private boolean mExitComplete;
 
-    /**
-     * Has the shared element transition completed? If so, we can notify as soon as the
-     * ResultReceiver has been set.
-     */
-    private Bundle mSharedElements;
+    private Bundle mSharedElementBundle;
 
-    /**
-     * Has the shared element transition completed?
-     */
-    private boolean mSharedElementsComplete;
+    private boolean mExitNotified;
 
-    public ExitTransitionCoordinator(Window window,
-            ActivityOptions.ActivityTransitionListener listener) {
-        super(window);
-        setActivityTransitionListener(listener);
+    private boolean mSharedElementNotified;
+
+    private Activity mActivity;
+
+    private boolean mIsBackgroundReady;
+
+    private boolean mIsReturning;
+
+    private boolean mIsCanceled;
+
+    private Handler mHandler;
+
+    public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
+            ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
+        super(activity.getWindow(), names, accepted, mapped, activity.mTransitionListener);
+        mIsReturning = isReturning;
+        mIsBackgroundReady = !mIsReturning;
+        mActivity = activity;
     }
 
     @Override
-    protected void onSetResultReceiver() {
-        mIsResultReceiverSet = true;
-        notifyCompletions();
-    }
-
-    @Override
-    protected void onPrepareRestore() {
-        makeTransitioningViewsInvisible();
-        setEnteringViews(mTransitioningViews);
-        mTransitioningViews = null;
-        super.onPrepareRestore();
-    }
-
-    @Override
-    protected void onTakeSharedElements(ArrayList<String> sharedElementNames, Bundle state) {
-        super.onTakeSharedElements(sharedElementNames, state);
-        clearConnections();
-    }
-
-    @Override
-    protected void onActivityStopped() {
-        if (getViewsTransition() != null) {
-            setViewVisibility(mTransitioningViews, View.VISIBLE);
-        }
-        super.onActivityStopped();
-    }
-
-    @Override
-    protected void sharedElementTransitionComplete(Bundle bundle) {
-        mSharedElements = bundle;
-        mSharedElementsComplete = true;
-        notifyCompletions();
-    }
-
-    @Override
-    protected void onExitTransitionEnd() {
-        mExitComplete = true;
-        notifyCompletions();
-        super.onExitTransitionEnd();
-    }
-
-    private void notifyCompletions() {
-        if (mIsResultReceiverSet && mSharedElementsComplete) {
-            if (mSharedElements != null) {
-                notifySharedElementTransitionComplete(mSharedElements);
-                mSharedElements = null;
-            }
-            if (mExitComplete) {
-                notifyExitTransitionComplete();
-            }
+    protected void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case MSG_SET_REMOTE_RECEIVER:
+                mResultReceiver = resultData.getParcelable(KEY_REMOTE_RECEIVER);
+                if (mIsCanceled) {
+                    mResultReceiver.send(MSG_CANCEL, null);
+                    mResultReceiver = null;
+                } else {
+                    if (mHandler != null) {
+                        mHandler.removeMessages(MSG_CANCEL);
+                    }
+                    notifyComplete();
+                }
+                break;
+            case MSG_HIDE_SHARED_ELEMENTS:
+                if (!mIsCanceled) {
+                    hideSharedElements();
+                }
+                break;
+            case MSG_START_EXIT_TRANSITION:
+                startExit();
+                break;
+            case MSG_ACTIVITY_STOPPED:
+                setViewVisibility(mTransitioningViews, View.VISIBLE);
+                setViewVisibility(mSharedElements, View.VISIBLE);
+                break;
         }
     }
 
-    @Override
+    private void hideSharedElements() {
+        setViewVisibility(mSharedElements, View.INVISIBLE);
+    }
+
     public void startExit() {
-        if (!mExitStarted) {
-            mExitStarted = true;
-            setSharedElements();
-            startExitTransition(getSharedElementNames());
+        beginTransition();
+        setViewVisibility(mTransitioningViews, View.INVISIBLE);
+    }
+
+    public void startExit(int resultCode, Intent data) {
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                mIsCanceled = true;
+                mActivity.finish();
+                mActivity = null;
+            }
+        };
+        mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+        if (getDecor().getBackground() == null) {
+            ColorDrawable black = new ColorDrawable(0xFF000000);
+            black.setAlpha(0);
+            getWindow().setBackgroundDrawable(black);
+            black.setAlpha(255);
         }
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
+                mAllSharedElementNames, resultCode, data);
+        mActivity.convertToTranslucent(new Activity.TranslucentConversionListener() {
+            @Override
+            public void onTranslucentConversionComplete(boolean drawComplete) {
+                if (!mIsCanceled) {
+                    fadeOutBackground();
+                }
+            }
+        }, options);
+        startExit();
+    }
+
+    private void fadeOutBackground() {
+        ObjectAnimator animator = ObjectAnimator.ofInt(getDecor().getBackground(),
+                "alpha", 0);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIsBackgroundReady = true;
+                notifyComplete();
+            }
+        });
+        animator.setDuration(FADE_BACKGROUND_DURATION_MS);
+        animator.start();
+    }
+
+    private void beginTransition() {
+        Transition sharedElementTransition = configureTransition(getSharedElementTransition());
+        Transition viewsTransition = configureTransition(getViewsTransition());
+        viewsTransition = addTargets(viewsTransition, mTransitioningViews);
+        if (sharedElementTransition == null) {
+            sharedElementTransitionComplete();
+        } else {
+            sharedElementTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    sharedElementTransitionComplete();
+                }
+            });
+        }
+        if (viewsTransition == null) {
+            exitTransitionComplete();
+        } else {
+            viewsTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    exitTransitionComplete();
+                }
+            });
+        }
+
+        Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
+        TransitionManager.beginDelayedTransition(getDecor(), transition);
+    }
+
+    private void exitTransitionComplete() {
+        mExitComplete = true;
+        notifyComplete();
+    }
+
+    protected boolean isReadyToNotify() {
+        return mSharedElementBundle != null && mResultReceiver != null && mIsBackgroundReady;
+    }
+
+    private void sharedElementTransitionComplete() {
+        Bundle bundle = new Bundle();
+        int[] tempLoc = new int[2];
+        for (int i = 0; i < mSharedElementNames.size(); i++) {
+            View sharedElement = mSharedElements.get(i);
+            String name = mSharedElementNames.get(i);
+            captureSharedElementState(sharedElement, name, bundle, tempLoc);
+        }
+        mSharedElementBundle = bundle;
+        notifyComplete();
+    }
+
+    protected void notifyComplete() {
+        if (isReadyToNotify()) {
+            if (!mSharedElementNotified) {
+                mSharedElementNotified = true;
+                mResultReceiver.send(MSG_TAKE_SHARED_ELEMENTS, mSharedElementBundle);
+            }
+            if (!mExitNotified && mExitComplete) {
+                mExitNotified = true;
+                mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
+                mResultReceiver = null; // done talking
+                if (mIsReturning) {
+                    mActivity.finish();
+                    mActivity.overridePendingTransition(0, 0);
+                }
+                mActivity = null;
+            }
+        }
+    }
+
+    /**
+     * Captures placement information for Views with a shared element name for
+     * Activity Transitions.
+     *
+     * @param view           The View to capture the placement information for.
+     * @param name           The shared element name in the target Activity to apply the placement
+     *                       information for.
+     * @param transitionArgs Bundle to store shared element placement information.
+     * @param tempLoc        A temporary int[2] for capturing the current location of views.
+     */
+    private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
+            int[] tempLoc) {
+        Bundle sharedElementBundle = new Bundle();
+        view.getLocationOnScreen(tempLoc);
+        float scaleX = view.getScaleX();
+        sharedElementBundle.putInt(KEY_SCREEN_X, tempLoc[0]);
+        int width = Math.round(view.getWidth() * scaleX);
+        sharedElementBundle.putInt(KEY_WIDTH, width);
+
+        float scaleY = view.getScaleY();
+        sharedElementBundle.putInt(KEY_SCREEN_Y, tempLoc[1]);
+        int height = Math.round(view.getHeight() * scaleY);
+        sharedElementBundle.putInt(KEY_HEIGHT, height);
+
+        sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);
+
+        if (view instanceof ImageView) {
+            ImageView imageView = (ImageView) view;
+            int scaleTypeInt = scaleTypeToInt(imageView.getScaleType());
+            sharedElementBundle.putInt(KEY_SCALE_TYPE, scaleTypeInt);
+            if (imageView.getScaleType() == ImageView.ScaleType.MATRIX) {
+                float[] matrix = new float[9];
+                imageView.getImageMatrix().getValues(matrix);
+                sharedElementBundle.putFloatArray(KEY_IMAGE_MATRIX, matrix);
+            }
+        }
+
+        transitionArgs.putBundle(name, sharedElementBundle);
+    }
+
+    private static int scaleTypeToInt(ImageView.ScaleType scaleType) {
+        for (int i = 0; i < SCALE_TYPE_VALUES.length; i++) {
+            if (scaleType == SCALE_TYPE_VALUES[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
     protected Transition getViewsTransition() {
-        if (!getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            return null;
-        }
         return getWindow().getExitTransition();
     }
 
-    @Override
     protected Transition getSharedElementTransition() {
-        if (!getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            return null;
-        }
         return getWindow().getSharedElementExitTransition();
-    }
-
-    private void makeTransitioningViewsInvisible() {
-        if (getViewsTransition() != null) {
-            setViewVisibility(mTransitioningViews, View.INVISIBLE);
-        }
-    }
-
-    @Override
-    protected void onStartExitTransition(ArrayList<View> exitingViews) {
-        mTransitioningViews = new ArrayList<View>();
-        if (exitingViews != null) {
-            mTransitioningViews.addAll(exitingViews);
-        }
-        mTransitioningViews.addAll(getSharedElements());
-    }
-
-    @Override
-    protected boolean allowOverlappingTransitions() {
-        return getWindow().getAllowExitTransitionOverlap();
     }
 }
