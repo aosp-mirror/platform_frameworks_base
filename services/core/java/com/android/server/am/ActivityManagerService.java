@@ -32,6 +32,7 @@ import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
+import android.app.IAppTask;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.os.BatteryStats;
@@ -7019,6 +7020,33 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     @Override
+    public List<IAppTask> getAppTasks() {
+        int callingUid = Binder.getCallingUid();
+        long ident = Binder.clearCallingIdentity();
+        synchronized(this) {
+            ArrayList<IAppTask> list = new ArrayList<IAppTask>();
+            try {
+                if (localLOGV) Slog.v(TAG, "getAppTasks");
+
+                final int N = mRecentTasks.size();
+                for (int i = 0; i < N; i++) {
+                    TaskRecord tr = mRecentTasks.get(i);
+                    // Skip tasks that are not created by the caller
+                    if (tr.creatorUid == callingUid) {
+                        ActivityManager.RecentTaskInfo taskInfo =
+                                createRecentTaskInfoFromTaskRecord(tr);
+                        AppTaskImpl taskImpl = new AppTaskImpl(taskInfo.persistentId, callingUid);
+                        list.add(taskImpl);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return list;
+        }
+    }
+
+    @Override
     public List<RunningTaskInfo> getTasks(int maxNum, int flags) {
         final int callingUid = Binder.getCallingUid();
         ArrayList<RunningTaskInfo> list = new ArrayList<RunningTaskInfo>();
@@ -7044,6 +7072,66 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     TaskRecord getMostRecentTask() {
         return mRecentTasks.get(0);
+    }
+
+    /**
+     * Creates a new RecentTaskInfo from a TaskRecord.
+     */
+    private ActivityManager.RecentTaskInfo createRecentTaskInfoFromTaskRecord(TaskRecord tr) {
+        ActivityManager.RecentTaskInfo rti
+                = new ActivityManager.RecentTaskInfo();
+        rti.id = tr.numActivities > 0 ? tr.taskId : -1;
+        rti.persistentId = tr.taskId;
+        rti.baseIntent = new Intent(tr.getBaseIntent());
+        rti.origActivity = tr.origActivity;
+        rti.description = tr.lastDescription;
+        rti.stackId = tr.stack.mStackId;
+        rti.userId = tr.userId;
+
+        // Traverse upwards looking for any break between main task activities and
+        // utility activities.
+        final ArrayList<ActivityRecord> activities = tr.mActivities;
+        int activityNdx;
+        final int numActivities = activities.size();
+        for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
+             ++activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            if (r.intent != null &&
+                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                            != 0) {
+                break;
+            }
+        }
+        if (activityNdx > 0) {
+            // Traverse downwards starting below break looking for set label, icon.
+            // Note that if there are activities in the task but none of them set the
+            // recent activity values, then we do not fall back to the last set
+            // values in the TaskRecord.
+            rti.activityValues = new ActivityManager.RecentsActivityValues();
+            for (--activityNdx; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.activityValues != null) {
+                    if (rti.activityValues.label == null) {
+                        rti.activityValues.label = r.activityValues.label;
+                        tr.lastActivityValues.label = r.activityValues.label;
+                    }
+                    if (rti.activityValues.icon == null) {
+                        rti.activityValues.icon = r.activityValues.icon;
+                        tr.lastActivityValues.icon = r.activityValues.icon;
+                    }
+                    if (rti.activityValues.colorPrimary == 0) {
+                        rti.activityValues.colorPrimary = r.activityValues.colorPrimary;
+                        tr.lastActivityValues.colorPrimary = r.activityValues.colorPrimary;
+                    }
+                }
+            }
+        } else {
+            // If there are no activity records in this task, then we use the last
+            // resolved values
+            rti.activityValues =
+                    new ActivityManager.RecentsActivityValues(tr.lastActivityValues);
+        }
+        return rti;
     }
 
     @Override
@@ -7102,62 +7190,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                             continue;
                         }
                     }
-                    ActivityManager.RecentTaskInfo rti
-                            = new ActivityManager.RecentTaskInfo();
-                    rti.id = tr.numActivities > 0 ? tr.taskId : -1;
-                    rti.persistentId = tr.taskId;
-                    rti.baseIntent = new Intent(
-                            tr.intent != null ? tr.intent : tr.affinityIntent);
+
+                    ActivityManager.RecentTaskInfo rti = createRecentTaskInfoFromTaskRecord(tr);
                     if (!detailed) {
                         rti.baseIntent.replaceExtras((Bundle)null);
-                    }
-                    rti.origActivity = tr.origActivity;
-                    rti.description = tr.lastDescription;
-                    rti.stackId = tr.stack.mStackId;
-                    rti.userId = tr.userId;
-
-                    // Traverse upwards looking for any break between main task activities and
-                    // utility activities.
-                    final ArrayList<ActivityRecord> activities = tr.mActivities;
-                    int activityNdx;
-                    final int numActivities = activities.size();
-                    for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
-                            ++activityNdx) {
-                        final ActivityRecord r = activities.get(activityNdx);
-                        if (r.intent != null &&
-                                (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                                        != 0) {
-                            break;
-                        }
-                    }
-                    if (activityNdx > 0) {
-                        // Traverse downwards starting below break looking for set label, icon.
-                        // Note that if there are activities in the task but none of them set the
-                        // recent activity values, then we do not fall back to the last set
-                        // values in the TaskRecord.
-                        rti.activityValues = new ActivityManager.RecentsActivityValues();
-                        for (--activityNdx; activityNdx >= 0; --activityNdx) {
-                            final ActivityRecord r = activities.get(activityNdx);
-                            if (r.activityValues != null) {
-                                if (rti.activityValues.label == null) {
-                                    rti.activityValues.label = r.activityValues.label;
-                                    tr.lastActivityValues.label = r.activityValues.label;
-                                }
-                                if (rti.activityValues.icon == null) {
-                                    rti.activityValues.icon = r.activityValues.icon;
-                                    tr.lastActivityValues.icon = r.activityValues.icon;
-                                }
-                                if (rti.activityValues.colorPrimary == 0) {
-                                    rti.activityValues.colorPrimary = r.activityValues.colorPrimary;
-                                    tr.lastActivityValues.colorPrimary = r.activityValues.colorPrimary;
-                                }
-                            }
-                        }
-                    } else {
-                        // If there are no activity records in this task, then we use the last
-                        // resolved values
-                        rti.activityValues =
-                                new ActivityManager.RecentsActivityValues(tr.lastActivityValues);
                     }
 
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
@@ -17172,6 +17208,71 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void wakingUp() {
             ActivityManagerService.this.wakingUp();
+        }
+    }
+
+    /**
+     * An implementation of IAppTask, that allows an app to manage its own tasks via
+     * {@link android.app.ActivityManager#AppTask}.  We keep track of the callingUid to ensure that
+     * only the process that calls getAppTasks() can call the AppTask methods.
+     */
+    class AppTaskImpl extends IAppTask.Stub {
+        private int mTaskId;
+        private int mCallingUid;
+
+        public AppTaskImpl(int taskId, int callingUid) {
+            mTaskId = taskId;
+            mCallingUid = callingUid;
+        }
+
+        @Override
+        public void finishAndRemoveTask() {
+            // Ensure that we are called from the same process that created this AppTask
+            if (mCallingUid != Binder.getCallingUid()) {
+                Slog.w(TAG, "finishAndRemoveTask: caller " + mCallingUid
+                        + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
+                return;
+            }
+
+            synchronized (ActivityManagerService.this) {
+                long origId = Binder.clearCallingIdentity();
+                try {
+                    TaskRecord tr = recentTaskForIdLocked(mTaskId);
+                    if (tr != null) {
+                        // Only kill the process if we are not a new document
+                        int flags = tr.getBaseIntent().getFlags();
+                        boolean isDocument = (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
+                                Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                        removeTaskByIdLocked(mTaskId,
+                                !isDocument ? ActivityManager.REMOVE_TASK_KILL_PROCESS : 0);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+            }
+        }
+
+        @Override
+        public ActivityManager.RecentTaskInfo getTaskInfo() {
+            // Ensure that we are called from the same process that created this AppTask
+            if (mCallingUid != Binder.getCallingUid()) {
+                Slog.w(TAG, "finishAndRemoveTask: caller " + mCallingUid
+                        + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
+                return null;
+            }
+
+            synchronized (ActivityManagerService.this) {
+                long origId = Binder.clearCallingIdentity();
+                try {
+                    TaskRecord tr = recentTaskForIdLocked(mTaskId);
+                    if (tr != null) {
+                        return createRecentTaskInfoFromTaskRecord(tr);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                return null;
+            }
         }
     }
 }

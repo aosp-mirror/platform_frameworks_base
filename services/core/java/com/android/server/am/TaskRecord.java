@@ -154,6 +154,11 @@ final class TaskRecord extends ThumbnailHolder {
         }
     }
 
+    /** Returns the intent for the root activity for this task */
+    Intent getBaseIntent() {
+        return intent != null ? intent : affinityIntent;
+    }
+
     /** Returns the first non-finishing activity from the root. */
     ActivityRecord getRootActivity() {
         for (int i = 0; i < mActivities.size(); i++) {
