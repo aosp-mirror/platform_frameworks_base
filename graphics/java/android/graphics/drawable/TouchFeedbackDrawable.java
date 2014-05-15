@@ -291,7 +291,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         final int[] themeAttrs = state.mTouchThemeAttrs;
         if (themeAttrs != null) {
             final TypedArray a = t.resolveAttributes(
-                    themeAttrs, R.styleable.TouchFeedbackDrawable, 0, 0);
+                    themeAttrs, R.styleable.TouchFeedbackDrawable);
             updateStateFromTypedArray(a);
             a.recycle();
         }

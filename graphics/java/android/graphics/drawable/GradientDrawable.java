@@ -1053,7 +1053,7 @@ public class GradientDrawable extends Drawable {
         final int[] themeAttrs = state.mThemeAttrs;
         if (themeAttrs != null) {
             final TypedArray a = t.resolveAttributes(
-                    themeAttrs, R.styleable.GradientDrawable, 0, 0);
+                    themeAttrs, R.styleable.GradientDrawable);
             updateStateFromTypedArray(a);
             a.recycle();
 
@@ -1123,37 +1123,37 @@ public class GradientDrawable extends Drawable {
         TypedArray a;
 
         if (state.mAttrSize != null) {
-            a = t.resolveAttributes(state.mAttrSize, R.styleable.GradientDrawableSize, 0, 0);
+            a = t.resolveAttributes(state.mAttrSize, R.styleable.GradientDrawableSize);
             // TODO: updateGradientDrawableSize(a);
             a.recycle();
         }
 
         if (state.mAttrGradient != null) {
-            a = t.resolveAttributes(state.mAttrGradient, R.styleable.GradientDrawableGradient, 0, 0);
+            a = t.resolveAttributes(state.mAttrGradient, R.styleable.GradientDrawableGradient);
             // TODO: updateGradientDrawableGradient(a);
             a.recycle();
         }
 
         if (state.mAttrSolid != null) {
-            a = t.resolveAttributes(state.mAttrSolid, R.styleable.GradientDrawableSolid, 0, 0);
+            a = t.resolveAttributes(state.mAttrSolid, R.styleable.GradientDrawableSolid);
             // TODO: updateGradientDrawableSolid(a);
             a.recycle();
         }
 
         if (state.mAttrStroke != null) {
-            a = t.resolveAttributes(state.mAttrStroke, R.styleable.GradientDrawableStroke, 0, 0);
+            a = t.resolveAttributes(state.mAttrStroke, R.styleable.GradientDrawableStroke);
             // TODO: updateGradientDrawableStroke(a);
             a.recycle();
         }
 
         if (state.mAttrCorners != null) {
-            a = t.resolveAttributes(state.mAttrCorners, R.styleable.DrawableCorners, 0, 0);
+            a = t.resolveAttributes(state.mAttrCorners, R.styleable.DrawableCorners);
             // TODO: updateDrawableCorners(a);
             a.recycle();
         }
 
         if (state.mAttrPadding != null) {
-            a = t.resolveAttributes(state.mAttrPadding, R.styleable.GradientDrawablePadding, 0, 0);
+            a = t.resolveAttributes(state.mAttrPadding, R.styleable.GradientDrawablePadding);
             // TODO: updateGradientDrawablePadding(a);
             a.recycle();
         }
