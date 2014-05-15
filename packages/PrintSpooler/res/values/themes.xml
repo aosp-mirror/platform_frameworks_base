@@ -16,15 +16,6 @@
 
 <resources>
 
-    <style name="PrintJobConfigActivityTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowSoftInputMode">stateAlwaysHidden|adjustResize</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:colorBackgroundCacheHint">@android:color/transparent</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
     <style name="SelectPrinterActivityTheme" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:actionBarStyle">@style/SelectPrinterActivityActionBarStyle</item>
     </style>

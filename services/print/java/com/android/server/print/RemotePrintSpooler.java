@@ -44,7 +44,7 @@ import libcore.io.IoUtils;
 
 /**
  * This represents the remote print spooler as a local object to the
- * PrintManagerSerivce. It is responsible to connecting to the remote
+ * PrintManagerService. It is responsible to connecting to the remote
  * spooler if needed, to make the timed remote calls, to handle
  * remote exceptions, and to bind/unbind to the remote instance as
  * needed.
@@ -99,7 +99,7 @@ final class RemotePrintSpooler {
         mClient = new PrintSpoolerClient(this);
         mIntent = new Intent();
         mIntent.setComponent(new ComponentName("com.android.printspooler",
-                "com.android.printspooler.PrintSpoolerService"));
+                "com.android.printspooler.model.PrintSpoolerService"));
     }
 
     public final List<PrintJobInfo> getPrintJobInfos(ComponentName componentName, int state,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.printspooler;
+package com.android.printspooler.ui;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,7 +57,7 @@ import libcore.io.IoUtils;
  * This class is responsible for loading printers by doing discovery
  * and merging the discovered printers with the previously used ones.
  */
-public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
+public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     private static final String LOG_TAG = "FusedPrintersProvider";
 
     private static final boolean DEBUG = false;
@@ -192,7 +192,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             for (int i = 0; i < favoriteCount; i++) {
                 printerIds.add(mFavoritePrinters.get(i).getId());
             }
-            mDiscoverySession.startPrinterDisovery(printerIds);
+            mDiscoverySession.startPrinterDiscovery(printerIds);
             List<PrinterInfo> printers = mDiscoverySession.getPrinters();
             if (!printers.isEmpty()) {
                 updatePrinters(printers, mFavoritePrinters);
@@ -281,7 +281,9 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 mDiscoverySession.stopPrinterStateTracking(mTrackedPrinter);
             }
             mTrackedPrinter = printerId;
-            mDiscoverySession.startPrinterStateTracking(printerId);
+            if (printerId != null) {
+                mDiscoverySession.startPrinterStateTracking(printerId);
+            }
         }
     }
 
@@ -514,7 +516,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             }
 
             private List<PrinterInfo> doReadPrinterHistory() {
-                FileInputStream in = null;
+                final FileInputStream in;
                 try {
                     in = mStatePersistFile.openRead();
                 } catch (FileNotFoundException fnfe) {
@@ -641,7 +643,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 }
                 return true;
             }
-        };
+        }
 
         private final class WriteTask extends AsyncTask<List<PrinterInfo>, Void, Void> {
             @Override
@@ -703,6 +705,6 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                     IoUtils.closeQuietly(out);
                 }
             }
-        };
+        }
     }
 }

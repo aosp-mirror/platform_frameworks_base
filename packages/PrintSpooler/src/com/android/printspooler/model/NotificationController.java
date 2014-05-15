@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.printspooler;
+package com.android.printspooler.model;
 
 import android.app.Notification;
 import android.app.Notification.InboxStyle;
@@ -38,6 +38,8 @@ import android.print.PrintManager;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.android.printspooler.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +47,7 @@ import java.util.List;
  * This class is responsible for updating the print notifications
  * based on print job state transitions.
  */
-public class NotificationController {
+final class NotificationController {
     public static final boolean DEBUG = false;
 
     public static final String LOG_TAG = "NotificationController";

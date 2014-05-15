@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.printspooler;
+package com.android.printspooler.util;
 
 import android.content.Context;
 import android.print.PrintAttributes.MediaSize;
 import android.util.ArrayMap;
+
+import com.android.printspooler.R;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -26,9 +28,13 @@ import java.util.Map;
 /**
  * Utility functions and classes for dealing with media sizes.
  */
-public class MediaSizeUtils {
+public final class MediaSizeUtils {
 
     private static Map<MediaSize, String> sMediaSizeToStandardMap;
+
+    private MediaSizeUtils() {
+        /* do nothing - hide constructor */
+    }
 
     /**
      * Gets the default media size for the current locale.

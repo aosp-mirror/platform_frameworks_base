@@ -24,4 +24,6 @@ LOCAL_PACKAGE_NAME := PrintSpooler
 
 LOCAL_JAVA_LIBRARIES := framework-base
 
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4
+
 include $(BUILD_PACKAGE)

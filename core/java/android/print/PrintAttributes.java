@@ -151,6 +151,105 @@ public final class PrintAttributes implements Parcelable {
         mColorMode = colorMode;
     }
 
+    /**
+     * Gets whether this print attributes are in portrait orientation,
+     * which is the media size is in portrait and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return Whether this print attributes are in portrait.
+     *
+     * @hide
+     */
+    public boolean isPortrait() {
+        return mMediaSize.isPortrait();
+    }
+
+    /**
+     * Gets a new print attributes instance which is in portrait orientation,
+     * which is the media size is in portrait and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return New instance in portrait orientation if this one is in
+     * landscape, otherwise this instance.
+     *
+     * @hide
+     */
+    public PrintAttributes asPortrait() {
+        if (isPortrait()) {
+            return this;
+        }
+
+        PrintAttributes attributes = new PrintAttributes();
+
+        // Rotate the media size.
+        attributes.setMediaSize(getMediaSize().asPortrait());
+
+        // Rotate the resolution.
+        Resolution oldResolution = getResolution();
+        Resolution newResolution = new Resolution(
+                oldResolution.getId(),
+                oldResolution.getLabel(),
+                oldResolution.getVerticalDpi(),
+                oldResolution.getHorizontalDpi());
+        attributes.setResolution(newResolution);
+
+        // Rotate the physical margins.
+        Margins oldMinMargins = getMinMargins();
+        Margins newMinMargins = new Margins(
+                oldMinMargins.getBottomMils(),
+                oldMinMargins.getLeftMils(),
+                oldMinMargins.getTopMils(),
+                oldMinMargins.getRightMils());
+        attributes.setMinMargins(newMinMargins);
+
+        attributes.setColorMode(getColorMode());
+
+        return attributes;
+    }
+
+    /**
+     * Gets a new print attributes instance which is in landscape orientation,
+     * which is the media size is in landscape and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return New instance in landscape orientation if this one is in
+     * portrait, otherwise this instance.
+     *
+     * @hide
+     */
+    public PrintAttributes asLandscape() {
+        if (!isPortrait()) {
+            return this;
+        }
+
+        PrintAttributes attributes = new PrintAttributes();
+
+        // Rotate the media size.
+        attributes.setMediaSize(getMediaSize().asLandscape());
+
+        // Rotate the resolution.
+        Resolution oldResolution = getResolution();
+        Resolution newResolution = new Resolution(
+                oldResolution.getId(),
+                oldResolution.getLabel(),
+                oldResolution.getVerticalDpi(),
+                oldResolution.getHorizontalDpi());
+        attributes.setResolution(newResolution);
+
+        // Rotate the physical margins.
+        Margins oldMinMargins = getMinMargins();
+        Margins newMargins = new Margins(
+                oldMinMargins.getTopMils(),
+                oldMinMargins.getRightMils(),
+                oldMinMargins.getBottomMils(),
+                oldMinMargins.getLeftMils());
+        attributes.setMinMargins(newMargins);
+
+        attributes.setColorMode(getColorMode());
+
+        return attributes;
+    }
+
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         if (mMediaSize != null) {

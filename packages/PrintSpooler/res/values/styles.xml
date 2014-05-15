@@ -16,13 +16,6 @@
 
 <resources>
 
-    <style name="PrintOptionTitleTextAppearance">
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/print_option_title</item>
-    </style>
-
     <style name="PrintOptionSpinnerStyle">
         <item name="android:paddingTop">0dip</item>
         <item name="android:paddingBottom">0dip</item>
@@ -30,7 +23,7 @@
     </style>
 
     <style name="PrintOptionEditTextStyle">
-         <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+
          <item name="android:singleLine">true</item>
          <item name="android:ellipsize">end</item>
     </style>
