@@ -417,6 +417,12 @@ public class WifiConfiguration implements Parcelable {
     public int autoJoinStatus;
 
     /**
+     * Set if the configuration was self added by the framework
+     * @hide
+     */
+    public boolean selfAdded;
+
+    /**
      * @hide
      * Indicate that a WifiConfiguration is temporary and should not be saved
      * nor considered by AutoJoin.
@@ -498,6 +504,8 @@ public class WifiConfiguration implements Parcelable {
         proxySettings = ProxySettings.UNASSIGNED;
         linkProperties = new LinkProperties();
         autoJoinStatus = AUTO_JOIN_ENABLED;
+        selfAdded = false;
+        ephemeral = false;
     }
 
     /**
@@ -849,6 +857,7 @@ public class WifiConfiguration implements Parcelable {
             }
             mCachedConfigKey = null; //force null configKey
             autoJoinStatus = source.autoJoinStatus;
+            selfAdded = source.selfAdded;
 
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
@@ -886,6 +895,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(dhcpServer);
         dest.writeString(defaultGwMacAddress);
         dest.writeInt(autoJoinStatus);
+        dest.writeInt(selfAdded ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -920,7 +930,7 @@ public class WifiConfiguration implements Parcelable {
                 config.dhcpServer = in.readString();
                 config.defaultGwMacAddress = in.readString();
                 config.autoJoinStatus = in.readInt();
-
+                config.selfAdded = in.readInt() != 0;
                 return config;
             }
 
