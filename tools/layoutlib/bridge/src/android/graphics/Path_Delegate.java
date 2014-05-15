@@ -318,16 +318,6 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addRect(long nPath, RectF rect, int dir) {
-        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
-        if (pathDelegate == null) {
-            return;
-        }
-
-        pathDelegate.addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static void native_addRect(long nPath,
             float left, float top, float right, float bottom, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
@@ -339,14 +329,15 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addOval(long nPath, RectF oval, int dir) {
+    /*package*/ static void native_addOval(long nPath, float left, float top, float right,
+            float bottom, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
         pathDelegate.mPath.append(new Ellipse2D.Float(
-                oval.left, oval.top, oval.width(), oval.height()), false);
+                left, top, right - left, bottom - top), false);
     }
 
     @LayoutlibDelegate

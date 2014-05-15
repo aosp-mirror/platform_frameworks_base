@@ -757,7 +757,8 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_drawRoundRect(long nativeCanvas,
-            final RectF rect, final float rx, final float ry, long paint) {
+            final float left, final float top, final float right, final float bottom,
+            final float rx, final float ry, long paint) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -769,16 +770,16 @@ public final class Canvas_Delegate {
                         if (style == Paint.Style.FILL.nativeInt ||
                                 style == Paint.Style.FILL_AND_STROKE.nativeInt) {
                             graphics.fillRoundRect(
-                                    (int)rect.left, (int)rect.top,
-                                    (int)rect.width(), (int)rect.height(),
+                                    (int)left, (int)top,
+                                    (int)(right - left), (int)(bottom - top),
                                     (int)rx, (int)ry);
                         }
 
                         if (style == Paint.Style.STROKE.nativeInt ||
                                 style == Paint.Style.FILL_AND_STROKE.nativeInt) {
                             graphics.drawRoundRect(
-                                    (int)rect.left, (int)rect.top,
-                                    (int)rect.width(), (int)rect.height(),
+                                    (int)left, (int)top,
+                                    (int)(right - left), (int)(bottom - top),
                                     (int)rx, (int)ry);
                         }
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,29 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import java.util.Map;
 
 /**
- * Delegate implementing the native methods of android.os.Build
+ * Delegate implementing the native methods of android.os.SystemProperties
  *
- * Through the layoutlib_create tool, the original native methods of Build have been replaced
- * by calls to methods of the same name in this delegate class.
+ * Through the layoutlib_create tool, the original native methods of SystemProperties have been
+ * replaced by calls to methods of the same name in this delegate class.
  *
  * Because it's a stateless class to start with, there's no need to keep a {@link DelegateManager}
  * around to map int to instance of the delegate.
- *
  */
-public class Build_Delegate {
+public class SystemProperties_Delegate {
 
     @LayoutlibDelegate
-    /*package*/ static String getString(String property) {
+    /*package*/ static String native_get(String key) {
+        return native_get(key, "");
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String native_get(String key, String def) {
         Map<String, String> properties = Bridge.getPlatformProperties();
-        String value = properties.get(property);
+        String value = properties.get(key);
         if (value != null) {
             return value;
         }
 
-        return Build.UNKNOWN;
+        return def;
     }
-
 }
