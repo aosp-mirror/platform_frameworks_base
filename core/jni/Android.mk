@@ -5,6 +5,7 @@ LOCAL_CFLAGS += -DHAVE_CONFIG_H -DKHTML_NO_EXCEPTIONS -DGKWQ_NO_JAVA
 LOCAL_CFLAGS += -DNO_SUPPORT_JS_BINDING -DQT_NO_WHEELEVENT -DKHTML_NO_XBL
 LOCAL_CFLAGS += -U__APPLE__
 LOCAL_CFLAGS += -Wno-unused-parameter -Wno-int-to-pointer-cast
+LOCAL_CFLAGS += -Wno-non-virtual-dtor
 LOCAL_CFLAGS += -Wno-maybe-uninitialized -Wno-parentheses
 LOCAL_CPPFLAGS += -Wno-conversion-null
 
@@ -125,6 +126,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
 	android/graphics/pdf/PdfDocument.cpp \
+	android/graphics/pdf/PdfRenderer.cpp \
 	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
 	android_media_AudioTrack.cpp \
@@ -169,6 +171,9 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
+	external/pdfrenderer/core/include/fpdfapi \
+	external/pdfrenderer/core/include/fpdfdoc \
+	external/pdfrenderer/fpdfsdk/include \
 	external/skia/src/core \
 	external/skia/src/effects \
 	external/skia/src/images \
@@ -222,6 +227,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libharfbuzz_ng \
 	libz \
 	libaudioutils \
+	libpdfrenderer \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
