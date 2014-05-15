@@ -125,6 +125,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/audiomanagertwo" />
+        <CheckBox
+            android:id="@+id/useVirtualCallCheckBox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/useVirtualCallCheckText" />
             
     </LinearLayout>
 

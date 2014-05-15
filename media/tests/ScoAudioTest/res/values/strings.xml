@@ -10,5 +10,5 @@
     <string name="tts_speak">Speak TTS</string>
     <string name="tts_to_file">TTS to file</string>
     <string name="audiomanagertwo">Use different AudioManager for starting SCO</string>
-    
+    <string name="useVirtualCallCheckText">Use Virtual Call</string>
 </resources>
