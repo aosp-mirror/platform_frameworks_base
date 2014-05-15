@@ -78,6 +78,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
+    private int mStatusBarMinHeight;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -116,6 +117,8 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.notifications_top_padding);
         mMinStackHeight = getResources().getDimensionPixelSize(R.dimen.collapsed_stack_height);
         mFlingAnimationUtils = new FlingAnimationUtils(getContext());
+        mStatusBarMinHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
     }
 
     @Override
@@ -520,7 +523,9 @@ public class NotificationPanelView extends PanelView implements
             int notificationMarginBottom = mStackScrollerContainer.getPaddingBottom();
             int emptyBottomMargin = notificationMarginBottom
                     + mNotificationStackScroller.getEmptyBottomMargin();
-            return maxPanelHeight - emptyBottomMargin;
+            int maxHeight = maxPanelHeight - emptyBottomMargin;
+            maxHeight = Math.max(maxHeight, mStatusBarMinHeight);
+            return maxHeight;
         }
         return super.getMaxPanelHeight();
     }
