@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.graphics.drawable.AnimationDrawable;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -56,16 +58,28 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean locationEnabled =  mController.isLocationEnabled();
         state.visible = true;
-        state.value = locationEnabled;
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_location);
+        if (state.value != locationEnabled) {
+            state.value = locationEnabled;
+            final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(locationEnabled
+                    ? R.drawable.ic_location_on_anim
+                    : R.drawable.ic_location_off_anim);
+            state.icon = d;
+            mUiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    d.start();
+                }
+            });
+        }
+        //state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_location);
         if (locationEnabled) {
-            state.iconId = R.drawable.ic_qs_location_on;
+            if (state.icon == null) state.iconId = R.drawable.ic_location_24_01;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,
                     mContext.getString(R.string.accessibility_desc_on));
         } else {
-            state.iconId = R.drawable.ic_qs_location_off;
+            if (state.icon == null) state.iconId = R.drawable.ic_location_24_11;
             state.label = mContext.getString(R.string.quick_settings_location_off_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,
