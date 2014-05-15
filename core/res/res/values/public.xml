@@ -2174,6 +2174,10 @@
   <public type="attr" name="windowDrawsSystemBarBackgrounds" />
   <public type="attr" name="statusBarColor"/>
   <public type="attr" name="navigationBarColor"/>
+  <public type="attr" name="contentInsetStart" />
+  <public type="attr" name="contentInsetEnd" />
+  <public type="attr" name="contentInsetLeft" />
+  <public type="attr" name="contentInsetRight" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

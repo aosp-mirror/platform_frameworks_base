@@ -417,6 +417,10 @@ package android {
     field public static final int content = 16843355; // 0x101025b
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
+    field public static final int contentInsetEnd = 16843861; // 0x1010455
+    field public static final int contentInsetLeft = 16843862; // 0x1010456
+    field public static final int contentInsetRight = 16843863; // 0x1010457
+    field public static final int contentInsetStart = 16843860; // 0x1010454
     field public static final int controlX1 = 16843799; // 0x1010417
     field public static final int controlX2 = 16843801; // 0x1010419
     field public static final int controlY1 = 16843800; // 0x1010418
@@ -36952,6 +36956,10 @@ package android.widget {
     ctor public Toolbar(android.content.Context, android.util.AttributeSet);
     ctor public Toolbar(android.content.Context, android.util.AttributeSet, int);
     ctor public Toolbar(android.content.Context, android.util.AttributeSet, int, int);
+    method public int getContentInsetEnd();
+    method public int getContentInsetLeft();
+    method public int getContentInsetRight();
+    method public int getContentInsetStart();
     method public android.graphics.drawable.Drawable getLogo();
     method public java.lang.CharSequence getLogoDescription();
     method public android.view.Menu getMenu();
@@ -36960,6 +36968,8 @@ package android.widget {
     method public java.lang.CharSequence getTitle();
     method public void inflateMenu(int);
     method protected void onLayout(boolean, int, int, int, int);
+    method public void setContentInsetsAbsolute(int, int);
+    method public void setContentInsetsRelative(int, int);
     method public void setLogo(int);
     method public void setLogo(android.graphics.drawable.Drawable);
     method public void setLogoDescription(int);

@@ -268,7 +268,7 @@ public class WindowDecorActionBar extends ActionBar implements
             if (getNavigationMode() == NAVIGATION_MODE_TABS) {
                 tabScroller.setVisibility(View.VISIBLE);
                 if (mOverlayLayout != null) {
-                    mOverlayLayout.requestFitSystemWindows();
+                    mOverlayLayout.requestApplyInsets();
                 }
             } else {
                 tabScroller.setVisibility(View.GONE);

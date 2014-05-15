@@ -6655,6 +6655,10 @@
         <attr name="titleMarginEnd" format="dimension" />
         <attr name="titleMarginTop" format="dimension" />
         <attr name="titleMarginBottom" format="dimension" />
+        <attr name="contentInsetStart" format="dimension" />
+        <attr name="contentInsetEnd" format="dimension" />
+        <attr name="contentInsetLeft" format="dimension" />
+        <attr name="contentInsetRight" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar_LayoutParams">

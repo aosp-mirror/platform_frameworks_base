@@ -88,10 +88,13 @@ public class Toolbar extends ViewGroup {
 
     private int mTitleTextAppearance;
     private int mSubtitleTextAppearance;
+
     private int mTitleMarginStart;
     private int mTitleMarginEnd;
     private int mTitleMarginTop;
     private int mTitleMarginBottom;
+
+    private final RtlSpacingHelper mContentInsets = new RtlSpacingHelper();
 
     private int mGravity = Gravity.START | Gravity.CENTER_VERTICAL;
 
@@ -135,8 +138,8 @@ public class Toolbar extends ViewGroup {
         mTitleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0);
         mSubtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0);
         mGravity = a.getInteger(R.styleable.Toolbar_gravity, mGravity);
-        mTitleMarginStart = mTitleMarginEnd = Math.max(0, a.getDimensionPixelOffset(
-                R.styleable.Toolbar_titleMargins, -1));
+        mTitleMarginStart = mTitleMarginEnd = mTitleMarginTop = mTitleMarginBottom =
+                a.getDimensionPixelOffset(R.styleable.Toolbar_titleMargins, 0);
 
         final int marginStart = a.getDimensionPixelOffset(R.styleable.Toolbar_titleMarginStart, -1);
         if (marginStart >= 0) {
@@ -159,6 +162,24 @@ public class Toolbar extends ViewGroup {
             mTitleMarginBottom = marginBottom;
         }
 
+        final int contentInsetStart =
+                a.getDimensionPixelOffset(R.styleable.Toolbar_contentInsetStart,
+                        RtlSpacingHelper.UNDEFINED);
+        final int contentInsetEnd =
+                a.getDimensionPixelOffset(R.styleable.Toolbar_contentInsetEnd,
+                        RtlSpacingHelper.UNDEFINED);
+        final int contentInsetLeft =
+                a.getDimensionPixelSize(R.styleable.Toolbar_contentInsetLeft, 0);
+        final int contentInsetRight =
+                a.getDimensionPixelSize(R.styleable.Toolbar_contentInsetRight, 0);
+
+        mContentInsets.setAbsolute(contentInsetLeft, contentInsetRight);
+
+        if (contentInsetStart != RtlSpacingHelper.UNDEFINED ||
+                contentInsetEnd != RtlSpacingHelper.UNDEFINED) {
+            mContentInsets.setRelative(contentInsetStart, contentInsetEnd);
+        }
+
         final CharSequence title = a.getText(R.styleable.Toolbar_title);
         if (!TextUtils.isEmpty(title)) {
             setTitle(title);
@@ -169,6 +190,12 @@ public class Toolbar extends ViewGroup {
             setSubtitle(title);
         }
         a.recycle();
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        mContentInsets.setDirection(layoutDirection == LAYOUT_DIRECTION_RTL);
     }
 
     /**
@@ -489,6 +516,122 @@ public class Toolbar extends ViewGroup {
         mOnMenuItemClickListener = listener;
     }
 
+    /**
+     * Set the content insets for this toolbar relative to layout direction.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @param contentInsetStart Content inset for the toolbar starting edge
+     * @param contentInsetEnd Content inset for the toolbar ending edge
+     *
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    public void setContentInsetsRelative(int contentInsetStart, int contentInsetEnd) {
+        mContentInsets.setRelative(contentInsetStart, contentInsetEnd);
+    }
+
+    /**
+     * Get the starting content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The starting content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    public int getContentInsetStart() {
+        return mContentInsets.getStart();
+    }
+
+    /**
+     * Get the ending content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The ending content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    public int getContentInsetEnd() {
+        return mContentInsets.getEnd();
+    }
+
+    /**
+     * Set the content insets for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @param contentInsetLeft Content inset for the toolbar's left edge
+     * @param contentInsetRight Content inset for the toolbar's right edge
+     *
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    public void setContentInsetsAbsolute(int contentInsetLeft, int contentInsetRight) {
+        mContentInsets.setAbsolute(contentInsetLeft, contentInsetRight);
+    }
+
+    /**
+     * Get the left content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The left content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetRight()
+     */
+    public int getContentInsetLeft() {
+        return mContentInsets.getLeft();
+    }
+
+    /**
+     * Get the right content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The right content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     */
+    public int getContentInsetRight() {
+        return mContentInsets.getRight();
+    }
+
     private void ensureNavButtonView() {
         if (mNavButtonView == null) {
             mNavButtonView = new ImageButton(getContext(), null, R.attr.borderlessButtonStyle);
@@ -522,21 +665,27 @@ public class Toolbar extends ViewGroup {
 
         // System views measure first.
 
+        int navWidth = 0;
         if (shouldLayout(mNavButtonView)) {
             measureChildWithMargins(mNavButtonView, widthMeasureSpec, width, heightMeasureSpec, 0);
-            width += mNavButtonView.getMeasuredWidth() + getHorizontalMargins(mNavButtonView);
+            navWidth = mNavButtonView.getMeasuredWidth() + getHorizontalMargins(mNavButtonView);
             height = Math.max(height, mNavButtonView.getMeasuredHeight() +
                     getVerticalMargins(mNavButtonView));
             childState = combineMeasuredStates(childState, mNavButtonView.getMeasuredState());
         }
 
+        width += Math.max(getContentInsetStart(), navWidth);
+
+        int menuWidth = 0;
         if (shouldLayout(mMenuView)) {
             measureChildWithMargins(mMenuView, widthMeasureSpec, width, heightMeasureSpec, 0);
-            width += mMenuView.getMeasuredWidth() + getHorizontalMargins(mMenuView);
+            menuWidth = mMenuView.getMeasuredWidth() + getHorizontalMargins(mMenuView);
             height = Math.max(height, mMenuView.getMeasuredHeight() +
                     getVerticalMargins(mMenuView));
             childState = combineMeasuredStates(childState, mMenuView.getMeasuredState());
         }
+
+        width += Math.max(getContentInsetEnd(), menuWidth);
 
         if (shouldLayout(mLogoView)) {
             measureChildWithMargins(mLogoView, widthMeasureSpec, width, heightMeasureSpec, 0);
@@ -626,6 +775,9 @@ public class Toolbar extends ViewGroup {
                 right = layoutChildRight(mMenuView, right);
             }
         }
+
+        left = Math.max(left, getContentInsetLeft());
+        right = Math.min(right, width - paddingRight - getContentInsetRight());
 
         if (shouldLayout(mLogoView)) {
             if (isRtl) {
