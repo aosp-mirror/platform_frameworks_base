@@ -66,7 +66,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     public VolumePreference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
 
     public void setStreamType(int streamType) {
