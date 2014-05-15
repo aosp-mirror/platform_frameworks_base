@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package android.os;
-import android.util.AndroidException;
+package android.content.pm;
 
-/**
- * Parent exception for all Binder remote-invocation errors
- */
-public class RemoteException extends AndroidException {
-    public RemoteException() {
-        super();
-    }
+import android.content.pm.IPackageInstallObserver2;
+import android.os.ParcelFileDescriptor;
 
-    public RemoteException(String message) {
-        super(message);
-    }
+/** {@hide} */
+interface IPackageInstallerSession {
+    void updateProgress(int progress);
 
-    /** {@hide} */
-    public RuntimeException rethrowAsRuntimeException() {
-        throw new RuntimeException(this);
-    }
+    ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes);
+
+    void install(in IPackageInstallObserver2 observer);
+    void destroy();
 }

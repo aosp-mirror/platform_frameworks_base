@@ -32,9 +32,11 @@ import javax.crypto.spec.IvParameterSpec;
 /**
  * Represents encryption parameters used to read a container.
  *
+ * @deprecated encrypted containers are legacy.
  * @hide
  */
 @PrivateApi
+@Deprecated
 public class ContainerEncryptionParams implements Parcelable {
     protected static final String TAG = "ContainerEncryptionParams";
 

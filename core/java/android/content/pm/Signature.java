@@ -31,8 +31,10 @@ import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 
 /**
- * Opaque, immutable representation of a signature associated with an
+ * Opaque, immutable representation of a signing certificate associated with an
  * application package.
+ * <p>
+ * This class name is slightly misleading, since it's not actually a signature.
  */
 public class Signature implements Parcelable {
     private final byte[] mSignature;

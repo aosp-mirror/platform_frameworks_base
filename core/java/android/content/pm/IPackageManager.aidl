@@ -26,6 +26,7 @@ import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
@@ -450,4 +451,6 @@ interface IPackageManager {
 
     boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked, int userId);
     boolean getApplicationBlockedSettingAsUser(String packageName, int userId);
+
+    IPackageInstaller getPackageInstaller();
 }
