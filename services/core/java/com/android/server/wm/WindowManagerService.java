@@ -2806,18 +2806,10 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean configChanged;
         boolean surfaceChanged = false;
         boolean animating;
+        boolean hasStatusBarPermission =
+                mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                        == PackageManager.PERMISSION_GRANTED;
 
-        // if they don't have this permission, mask out the status bar bits
-        int systemUiVisibility = 0;
-        if (attrs != null) {
-            systemUiVisibility = (attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility);
-            if ((systemUiVisibility & StatusBarManager.DISABLE_MASK) != 0) {
-                if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
-                }
-            }
-        }
         long origId = Binder.clearCallingIdentity();
 
         synchronized(mWindowMap) {
@@ -2832,12 +2824,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mRequestedWidth = requestedWidth;
                 win.mRequestedHeight = requestedHeight;
             }
-            if (attrs != null && seq == win.mSeq) {
-                win.mSystemUiVisibility = systemUiVisibility;
-            }
 
             if (attrs != null) {
                 mPolicy.adjustWindowParamsLw(attrs);
+            }
+
+            // if they don't have the permission, mask out the status bar bits
+            int systemUiVisibility = 0;
+            if (attrs != null) {
+                systemUiVisibility = (attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility);
+                if ((systemUiVisibility & StatusBarManager.DISABLE_MASK) != 0) {
+                    if (!hasStatusBarPermission) {
+                        systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+                    }
+                }
+            }
+
+            if (attrs != null && seq == win.mSeq) {
+                win.mSystemUiVisibility = systemUiVisibility;
             }
 
             winAnimator.mSurfaceDestroyDeferred =

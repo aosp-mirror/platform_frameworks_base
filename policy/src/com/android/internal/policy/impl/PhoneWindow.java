@@ -38,9 +38,7 @@ import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.SwipeDismissLayout;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.app.ActivityOptions;
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -49,6 +47,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -56,22 +55,15 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.transition.ChangeBounds;
-import android.transition.Explode;
-import android.transition.Fade;
-import android.transition.MoveImage;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
-import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
-import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -98,7 +90,6 @@ import android.view.ViewManager;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.ViewStub;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -113,8 +104,6 @@ import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Android-specific Window.
@@ -213,6 +202,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mFrameResource = 0;
 
     private int mTextColor = 0;
+    private int mStatusBarColor = 0;
+    private int mNavigationBarColor = 0;
 
     private CharSequence mTitle = null;
 
@@ -1987,7 +1978,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
+    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker,
+            View.OnSystemUiVisibilityChangeListener {
         /* package */int mDefaultOpacity = PixelFormat.OPAQUE;
 
         /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -2016,6 +2008,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private View mStatusGuard;
         // View added at runtime to draw under the navigation bar area
         private View mNavigationGuard;
+
+        private View mStatusColorView;
+        private View mNavigationColorView;
+
+        private int mLastTopInset = 0;
+        private int mLastBottomInset = 0;
+        private int mLastSystemUiVisibility = 0;
+
 
         public DecorView(Context context, int featureId) {
             super(context);
@@ -2582,8 +2582,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        public void onSystemUiVisibilityChange(int visible) {
+            mLastSystemUiVisibility = visible;
+            updateColorViews(null /* insets */);
+        }
+
+        @Override
         protected boolean fitSystemWindows(Rect insets) {
             mFrameOffsets.set(insets);
+            updateColorViews(insets);
             updateStatusGuard(insets);
             updateNavigationGuard(insets);
             if (getForeground() != null) {
@@ -2595,6 +2602,52 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean isTransitionGroup() {
             return false;
+        }
+
+        private void updateColorViews(Rect insets) {
+            if (mIsFloating || !ActivityManager.isHighEndGfx()) {
+                // No colors on floating windows or low end devices :(
+                return;
+            }
+            if (insets != null) {
+                mLastTopInset = insets.top;
+                mLastBottomInset = insets.bottom;
+            }
+            mStatusColorView = updateColorViewInt(mStatusColorView,
+                    SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
+                    mStatusBarColor, mLastTopInset, Gravity.TOP);
+            mNavigationColorView = updateColorViewInt(mNavigationColorView,
+                    SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
+                    mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM);
+        }
+
+        private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,
+                int color, int height, int verticalGravity) {
+            boolean show = height > 0 && (mLastSystemUiVisibility & systemUiHideFlag) == 0
+                    && (getAttributes().flags & translucentFlag) == 0
+                    && (color & Color.BLACK) != 0
+                    && (getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+
+            if (view == null) {
+                if (show) {
+                    view = new View(mContext);
+                    view.setBackgroundColor(color);
+                    addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, height,
+                            Gravity.START | verticalGravity));
+                }
+            } else {
+                int vis = show ? VISIBLE : INVISIBLE;
+                view.setVisibility(vis);
+                if (show) {
+                    LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                    if (lp.height != height) {
+                        lp.height = height;
+                        view.setLayoutParams(lp);
+                    }
+                    view.setBackgroundColor(color);
+                }
+            }
+            return view;
         }
 
         private void updateStatusGuard(Rect insets) {
@@ -2616,9 +2669,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                 mStatusGuard = new View(mContext);
                                 mStatusGuard.setBackgroundColor(mContext.getResources()
                                         .getColor(R.color.input_method_navigation_guard));
-                                addView(mStatusGuard, new LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mlp.topMargin,
-                                        Gravity.START | Gravity.TOP));
+                                addView(mStatusGuard, indexOfChild(mStatusColorView),
+                                        new LayoutParams(LayoutParams.MATCH_PARENT, mlp.topMargin,
+                                                Gravity.START | Gravity.TOP));
                             } else {
                                 LayoutParams lp = (LayoutParams) mStatusGuard.getLayoutParams();
                                 if (lp.height != mlp.topMargin) {
@@ -2663,7 +2716,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mNavigationGuard = new View(mContext);
                     mNavigationGuard.setBackgroundColor(mContext.getResources()
                             .getColor(R.color.input_method_navigation_guard));
-                    addView(mNavigationGuard, new LayoutParams(
+                    addView(mNavigationGuard, indexOfChild(mNavigationColorView), new LayoutParams(
                             LayoutParams.MATCH_PARENT, insets.bottom,
                             Gravity.START | Gravity.BOTTOM));
                 } else {
@@ -3009,6 +3062,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final int targetSdk = context.getApplicationInfo().targetSdkVersion;
         final boolean targetPreHoneycomb = targetSdk < android.os.Build.VERSION_CODES.HONEYCOMB;
         final boolean targetPreIcs = targetSdk < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+        final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.L;
         final boolean targetHcNeedsOptions = context.getResources().getBoolean(
                 com.android.internal.R.bool.target_honeycomb_needs_options_menu);
         final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
@@ -3018,7 +3072,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         } else {
             clearFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
         }
-        
+
+        // Non-floating windows on high end devices must put up decor beneath the system bars and
+        // therefore must know about visibility changes of those.
+        if (!mIsFloating && ActivityManager.isHighEndGfx()) {
+            if (!targetPreL && a.getBoolean(
+                    com.android.internal.R.styleable.Window_windowDrawsSystemBarBackgrounds,
+                    false)) {
+                setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                        FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
+            }
+            decor.setOnSystemUiVisibilityChangeListener(decor);
+        }
+        mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
+        mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.HONEYCOMB) {
             if (a.getBoolean(
@@ -3520,6 +3588,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             installDecor();
         }
         return (mLeftIconView = (ImageView)findViewById(com.android.internal.R.id.left_icon));
+    }
+
+    @Override
+    protected void dispatchWindowAttributesChanged(WindowManager.LayoutParams attrs) {
+        super.dispatchWindowAttributesChanged(attrs);
+        if (mDecor != null) {
+            mDecor.updateColorViews(null /* insets */);
+        }
     }
 
     private ProgressBar getCircularProgressBar(boolean shouldInstallDecor) {

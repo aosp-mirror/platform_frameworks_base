@@ -642,9 +642,7 @@ public abstract class Window {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.width = width;
         attrs.height = height;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -661,9 +659,7 @@ public abstract class Window {
     {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.gravity = gravity;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -675,9 +671,7 @@ public abstract class Window {
     public void setType(int type) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.type = type;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -700,9 +694,7 @@ public abstract class Window {
             attrs.format = mDefaultWindowFormat;
             mHaveWindowFormat = false;
         }
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -715,9 +707,7 @@ public abstract class Window {
     public void setWindowAnimations(int resId) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.windowAnimations = resId;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -735,9 +725,7 @@ public abstract class Window {
         } else {
             mHasSoftInputMode = false;
         }
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
     
     /**
@@ -793,14 +781,19 @@ public abstract class Window {
             attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
         }
         mForcedWindowFlags |= mask;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     private void setPrivateFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.privateFlags = (attrs.privateFlags & ~mask) | (flags & mask);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * {@hide}
+     */
+    protected void dispatchWindowAttributesChanged(WindowManager.LayoutParams attrs) {
         if (mCallback != null) {
             mCallback.onWindowAttributesChanged(attrs);
         }
@@ -818,9 +811,7 @@ public abstract class Window {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.dimAmount = amount;
         mHaveDimAmount = true;
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(attrs);
-        }
+        dispatchWindowAttributesChanged(attrs);
     }
 
     /**
@@ -835,9 +826,7 @@ public abstract class Window {
      */
     public void setAttributes(WindowManager.LayoutParams a) {
         mWindowAttributes.copyFrom(a);
-        if (mCallback != null) {
-            mCallback.onWindowAttributesChanged(mWindowAttributes);
-        }
+        dispatchWindowAttributesChanged(mWindowAttributes);
     }
 
     /**
@@ -1269,9 +1258,7 @@ public abstract class Window {
         if (!mHaveWindowFormat) {
             final WindowManager.LayoutParams attrs = getAttributes();
             attrs.format = format;
-            if (mCallback != null) {
-                mCallback.onWindowAttributesChanged(attrs);
-            }
+            dispatchWindowAttributesChanged(attrs);
         }
     }
 
