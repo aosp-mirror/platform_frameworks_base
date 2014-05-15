@@ -22,74 +22,71 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO: doc
- */
-public class PasspointInfo implements Parcelable {
+/** @hide */
+public class WifiPasspointInfo implements Parcelable {
 
     /** TODO doc */
-    public static final int ANQP_CAPABILITY             = 1 << 0;
+    public static final int ANQP_CAPABILITY = 1 << 0;
 
     /** TODO doc */
-    public static final int VENUE_NAME                  = 1 << 1;
+    public static final int VENUE_NAME = 1 << 1;
 
     /** TODO doc */
-    public static final int NETWORK_AUTH_TYPE           = 1 << 2;
+    public static final int NETWORK_AUTH_TYPE = 1 << 2;
 
     /** TODO doc */
-    public static final int ROAMING_CONSORTIUM          = 1 << 3;
+    public static final int ROAMING_CONSORTIUM = 1 << 3;
 
     /** TODO doc */
-    public static final int IP_ADDR_TYPE_AVAILABILITY   = 1 << 4;
+    public static final int IP_ADDR_TYPE_AVAILABILITY = 1 << 4;
 
     /** TODO doc */
-    public static final int NAI_REALM                   = 1 << 5;
+    public static final int NAI_REALM = 1 << 5;
 
     /** TODO doc */
-    public static final int CELLULAR_NETWORK            = 1 << 6;
+    public static final int CELLULAR_NETWORK = 1 << 6;
 
     /** TODO doc */
-    public static final int DOMAIN_NAME                 = 1 << 7;
+    public static final int DOMAIN_NAME = 1 << 7;
 
     /** TODO doc */
-    public static final int HOTSPOT_CAPABILITY          = 1 << 8;
+    public static final int HOTSPOT_CAPABILITY = 1 << 8;
 
     /** TODO doc */
-    public static final int OPERATOR_FRIENDLY_NAME      = 1 << 9;
+    public static final int OPERATOR_FRIENDLY_NAME = 1 << 9;
 
     /** TODO doc */
-    public static final int WAN_METRICS                 = 1 << 10;
+    public static final int WAN_METRICS = 1 << 10;
 
     /** TODO doc */
-    public static final int CONNECTION_CAPABILITY       = 1 << 11;
+    public static final int CONNECTION_CAPABILITY = 1 << 11;
 
     /** TODO doc */
-    public static final int OSU_PROVIDER                = 1 << 12;
+    public static final int OSU_PROVIDER = 1 << 12;
 
     /** TODO doc */
     public static final int PRESET_CRED_MATCH =
             ANQP_CAPABILITY |
-            HOTSPOT_CAPABILITY |
-            NAI_REALM |
-            CELLULAR_NETWORK |
-            DOMAIN_NAME;
+                    HOTSPOT_CAPABILITY |
+                    NAI_REALM |
+                    CELLULAR_NETWORK |
+                    DOMAIN_NAME;
 
     /** TODO doc */
     public static final int PRESET_ALL =
             ANQP_CAPABILITY |
-            VENUE_NAME |
-            NETWORK_AUTH_TYPE |
-            ROAMING_CONSORTIUM |
-            IP_ADDR_TYPE_AVAILABILITY |
-            NAI_REALM |
-            CELLULAR_NETWORK |
-            DOMAIN_NAME |
-            HOTSPOT_CAPABILITY |
-            OPERATOR_FRIENDLY_NAME |
-            WAN_METRICS |
-            CONNECTION_CAPABILITY |
-            OSU_PROVIDER;
-
+                    VENUE_NAME |
+                    NETWORK_AUTH_TYPE |
+                    ROAMING_CONSORTIUM |
+                    IP_ADDR_TYPE_AVAILABILITY |
+                    NAI_REALM |
+                    CELLULAR_NETWORK |
+                    DOMAIN_NAME |
+                    HOTSPOT_CAPABILITY |
+                    OPERATOR_FRIENDLY_NAME |
+                    WAN_METRICS |
+                    CONNECTION_CAPABILITY |
+                    OSU_PROVIDER;
 
     /** TODO doc */
     public String bssid;
@@ -125,16 +122,15 @@ public class PasspointInfo implements Parcelable {
     public String connectionCapability;
 
     /** TODO doc */
-    public List<PasspointOsuProvider> osuProviderList;
-
+    public List<WifiPasspointOsuProvider> osuProviderList;
 
     /** default constructor @hide */
-    public PasspointInfo() {
-//        osuProviderList = new ArrayList<OsuProvider>();
+    public WifiPasspointInfo() {
+        //        osuProviderList = new ArrayList<OsuProvider>();
     }
 
     /** copy constructor @hide */
-    public PasspointInfo(PasspointInfo source) {
+    public WifiPasspointInfo(WifiPasspointInfo source) {
         // TODO
         bssid = source.bssid;
         venueName = source.venueName;
@@ -148,9 +144,9 @@ public class PasspointInfo implements Parcelable {
         wanMetrics = source.wanMetrics;
         connectionCapability = source.connectionCapability;
         if (source.osuProviderList != null) {
-            osuProviderList = new ArrayList<PasspointOsuProvider>();
-            for (PasspointOsuProvider osu : source.osuProviderList)
-                osuProviderList.add(new PasspointOsuProvider(osu));
+            osuProviderList = new ArrayList<WifiPasspointOsuProvider>();
+            for (WifiPasspointOsuProvider osu : source.osuProviderList)
+                osuProviderList.add(new WifiPasspointOsuProvider(osu));
         }
     }
 
@@ -163,20 +159,34 @@ public class PasspointInfo implements Parcelable {
      */
     public static String toAnqpSubtypes(int mask) {
         StringBuilder sb = new StringBuilder();
-        if ((mask & ANQP_CAPABILITY) != 0) sb.append("257,");
-        if ((mask & VENUE_NAME) != 0) sb.append("258,");
-        if ((mask & NETWORK_AUTH_TYPE) != 0) sb.append("260,");
-        if ((mask & ROAMING_CONSORTIUM) != 0) sb.append("261,");
-        if ((mask & IP_ADDR_TYPE_AVAILABILITY) != 0) sb.append("262,");
-        if ((mask & NAI_REALM) != 0) sb.append("263,");
-        if ((mask & CELLULAR_NETWORK) != 0) sb.append("264,");
-        if ((mask & DOMAIN_NAME) != 0) sb.append("268,");
-        if ((mask & HOTSPOT_CAPABILITY) != 0) sb.append("hs20:2,");
-        if ((mask & OPERATOR_FRIENDLY_NAME) != 0) sb.append("hs20:3,");
-        if ((mask & WAN_METRICS) != 0) sb.append("hs20:4,");
-        if ((mask & CONNECTION_CAPABILITY) != 0) sb.append("hs20:5,");
-        if ((mask & OSU_PROVIDER) != 0) sb.append("hs20:8,");
-        if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
+        if ((mask & ANQP_CAPABILITY) != 0)
+            sb.append("257,");
+        if ((mask & VENUE_NAME) != 0)
+            sb.append("258,");
+        if ((mask & NETWORK_AUTH_TYPE) != 0)
+            sb.append("260,");
+        if ((mask & ROAMING_CONSORTIUM) != 0)
+            sb.append("261,");
+        if ((mask & IP_ADDR_TYPE_AVAILABILITY) != 0)
+            sb.append("262,");
+        if ((mask & NAI_REALM) != 0)
+            sb.append("263,");
+        if ((mask & CELLULAR_NETWORK) != 0)
+            sb.append("264,");
+        if ((mask & DOMAIN_NAME) != 0)
+            sb.append("268,");
+        if ((mask & HOTSPOT_CAPABILITY) != 0)
+            sb.append("hs20:2,");
+        if ((mask & OPERATOR_FRIENDLY_NAME) != 0)
+            sb.append("hs20:3,");
+        if ((mask & WAN_METRICS) != 0)
+            sb.append("hs20:4,");
+        if ((mask & CONNECTION_CAPABILITY) != 0)
+            sb.append("hs20:5,");
+        if ((mask & OSU_PROVIDER) != 0)
+            sb.append("hs20:8,");
+        if (sb.length() > 0)
+            sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
@@ -227,7 +237,7 @@ public class PasspointInfo implements Parcelable {
             out.writeInt(0);
         } else {
             out.writeInt(osuProviderList.size());
-            for (PasspointOsuProvider osu : osuProviderList)
+            for (WifiPasspointOsuProvider osu : osuProviderList)
                 osu.writeToParcel(out, flags);
         }
     }
@@ -239,36 +249,37 @@ public class PasspointInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Parcelable.Creator<PasspointInfo> CREATOR =
-            new Parcelable.Creator<PasspointInfo>() {
-        @Override
-        public PasspointInfo createFromParcel(Parcel in) {
-            PasspointInfo p = new PasspointInfo();
-            p.bssid = (String) in.readValue(String.class.getClassLoader());
-            p.venueName = (String) in.readValue(String.class.getClassLoader());
-            p.networkAuthType = (String) in.readValue(String.class.getClassLoader());
-            p.roamingConsortium = (String) in.readValue(String.class.getClassLoader());
-            p.ipAddrTypeAvaibility = (String) in.readValue(String.class.getClassLoader());
-            p.naiRealm = (String) in.readValue(String.class.getClassLoader());
-            p.cellularNetwork = (String) in.readValue(String.class.getClassLoader());
-            p.domainName = (String) in.readValue(String.class.getClassLoader());
-            p.operatorFriendlyName = (String) in.readValue(String.class.getClassLoader());
-            p.wanMetrics = (String) in.readValue(String.class.getClassLoader());
-            p.connectionCapability = (String) in.readValue(String.class.getClassLoader());
-            int n = in.readInt();
-            if (n > 0) {
-                p.osuProviderList = new ArrayList<PasspointOsuProvider>();
-                for (int i = 0; i < n; i++) {
-                    PasspointOsuProvider osu = PasspointOsuProvider.CREATOR.createFromParcel(in);
-                    p.osuProviderList.add(osu);
+    public static final Parcelable.Creator<WifiPasspointInfo> CREATOR =
+            new Parcelable.Creator<WifiPasspointInfo>() {
+                @Override
+                public WifiPasspointInfo createFromParcel(Parcel in) {
+                    WifiPasspointInfo p = new WifiPasspointInfo();
+                    p.bssid = (String) in.readValue(String.class.getClassLoader());
+                    p.venueName = (String) in.readValue(String.class.getClassLoader());
+                    p.networkAuthType = (String) in.readValue(String.class.getClassLoader());
+                    p.roamingConsortium = (String) in.readValue(String.class.getClassLoader());
+                    p.ipAddrTypeAvaibility = (String) in.readValue(String.class.getClassLoader());
+                    p.naiRealm = (String) in.readValue(String.class.getClassLoader());
+                    p.cellularNetwork = (String) in.readValue(String.class.getClassLoader());
+                    p.domainName = (String) in.readValue(String.class.getClassLoader());
+                    p.operatorFriendlyName = (String) in.readValue(String.class.getClassLoader());
+                    p.wanMetrics = (String) in.readValue(String.class.getClassLoader());
+                    p.connectionCapability = (String) in.readValue(String.class.getClassLoader());
+                    int n = in.readInt();
+                    if (n > 0) {
+                        p.osuProviderList = new ArrayList<WifiPasspointOsuProvider>();
+                        for (int i = 0; i < n; i++) {
+                            WifiPasspointOsuProvider osu = WifiPasspointOsuProvider.CREATOR
+                                    .createFromParcel(in);
+                            p.osuProviderList.add(osu);
+                        }
+                    }
+                    return p;
                 }
-            }
-            return p;
-        }
 
-        @Override
-        public PasspointInfo[] newArray(int size) {
-            return new PasspointInfo[size];
-        }
-    };
+                @Override
+                public WifiPasspointInfo[] newArray(int size) {
+                    return new WifiPasspointInfo[size];
+                }
+            };
 }

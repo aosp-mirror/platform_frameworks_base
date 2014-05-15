@@ -17027,9 +17027,11 @@ package android.net.wifi {
   }
 
   public static final class WifiEnterpriseConfig.Eap {
+    field public static final int AKA = 5; // 0x5
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3
+    field public static final int SIM = 4; // 0x4
     field public static final int TLS = 1; // 0x1
     field public static final int TTLS = 2; // 0x2
   }
@@ -17425,108 +17427,23 @@ package android.net.wifi.p2p.nsd {
 
 package android.net.wifi.passpoint {
 
-  public abstract interface IPasspointManager implements android.os.IInterface {
-    method public abstract android.os.Messenger getMessenger() throws android.os.RemoteException;
-    method public abstract int getPasspointState() throws android.os.RemoteException;
-  }
-
-  public class PasspointCredential implements android.os.Parcelable {
-    ctor public PasspointCredential();
+  public class WifiPasspointCredential implements android.os.Parcelable {
+    ctor public WifiPasspointCredential(java.lang.String, android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
+    method public java.lang.String getClientCertPath();
+    method public int getEapMethod();
+    method public java.lang.String getFqdn();
+    method public java.lang.String getImsi();
+    method public java.lang.String getRealm();
+    method public java.lang.String getUserName();
     method public void writeToParcel(android.os.Parcel, int);
   }
 
-  public class PasspointInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int ANQP_CAPABILITY = 1; // 0x1
-    field public static final int CELLULAR_NETWORK = 64; // 0x40
-    field public static final int CONNECTION_CAPABILITY = 2048; // 0x800
-    field public static final int DOMAIN_NAME = 128; // 0x80
-    field public static final int HOTSPOT_CAPABILITY = 256; // 0x100
-    field public static final int IP_ADDR_TYPE_AVAILABILITY = 16; // 0x10
-    field public static final int NAI_REALM = 32; // 0x20
-    field public static final int NETWORK_AUTH_TYPE = 4; // 0x4
-    field public static final int OPERATOR_FRIENDLY_NAME = 512; // 0x200
-    field public static final int OSU_PROVIDER = 4096; // 0x1000
-    field public static final int PRESET_ALL = 8191; // 0x1fff
-    field public static final int PRESET_CRED_MATCH = 481; // 0x1e1
-    field public static final int ROAMING_CONSORTIUM = 8; // 0x8
-    field public static final int VENUE_NAME = 2; // 0x2
-    field public static final int WAN_METRICS = 1024; // 0x400
-    field public java.lang.String bssid;
-    field public java.lang.String cellularNetwork;
-    field public java.lang.String connectionCapability;
-    field public java.lang.String domainName;
-    field public java.lang.String ipAddrTypeAvaibility;
-    field public java.lang.String naiRealm;
-    field public java.lang.String networkAuthType;
-    field public java.lang.String operatorFriendlyName;
-    field public java.util.List osuProviderList;
-    field public java.lang.String roamingConsortium;
-    field public java.lang.String venueName;
-    field public java.lang.String wanMetrics;
-  }
-
-  public class PasspointManager {
-    ctor public PasspointManager(android.content.Context, android.net.wifi.passpoint.IPasspointManager);
-    method public boolean addCredential(android.net.wifi.passpoint.PasspointCredential);
-    method public void connect(android.net.wifi.passpoint.PasspointPolicy);
-    method public int getPasspointState();
-    method public java.util.List<android.net.wifi.passpoint.PasspointCredential> getSavedCredentials();
-    method public android.net.wifi.passpoint.PasspointManager.Channel initialize(android.content.Context, android.os.Looper, android.net.wifi.passpoint.PasspointManager.ChannelListener);
-    method public boolean removeCredential(android.net.wifi.passpoint.PasspointCredential);
-    method public java.util.List<android.net.wifi.passpoint.PasspointPolicy> requestCredentialMatch(java.util.List<android.net.wifi.ScanResult>);
-    method public void requestOsuIcons(android.net.wifi.passpoint.PasspointManager.Channel, java.util.List<android.net.wifi.passpoint.PasspointOsuProvider>, int, android.net.wifi.passpoint.PasspointManager.ActionListener);
-    method public boolean updateCredential(android.net.wifi.passpoint.PasspointCredential);
-    field public static final int BUSY = 2; // 0x2
-    field public static final int ERROR = 0; // 0x0
-    field public static final java.lang.String PASSPOINT_CRED_CHANGED_ACTION = "android.net.wifi.passpoint.CRED_CHANGE";
-    field public static final int PASSPOINT_STATE_ACCESS = 3; // 0x3
-    field public static final java.lang.String PASSPOINT_STATE_CHANGED_ACTION = "android.net.wifi.passpoint.STATE_CHANGE";
-    field public static final int PASSPOINT_STATE_DISABLED = 1; // 0x1
-    field public static final int PASSPOINT_STATE_DISCOVERY = 2; // 0x2
-    field public static final int PASSPOINT_STATE_PROVISION = 4; // 0x4
-    field public static final int PASSPOINT_STATE_UNKNOWN = 0; // 0x0
-    field public static final int WIFI_DISABLED = 1; // 0x1
-  }
-
-  public static abstract interface PasspointManager.ActionListener {
-    method public abstract void onFailure(int);
-    method public abstract void onSuccess();
-  }
-
-  public static class PasspointManager.Channel {
-  }
-
-  public static abstract interface PasspointManager.ChannelListener {
-    method public abstract void onChannelDisconnected();
-  }
-
-  public class PasspointOsuProvider implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int OSU_METHOD_OMADM = 0; // 0x0
-    field public static final int OSU_METHOD_SOAP = 1; // 0x1
-    field public static final int OSU_METHOD_UNKNOWN = -1; // 0xffffffff
-    field public java.lang.String friendlyName;
-    field public java.lang.Object icon;
-    field public java.lang.String iconFileName;
-    field public int iconHeight;
-    field public java.lang.String iconType;
-    field public int iconWidth;
-    field public int osuMethod;
-    field public java.lang.String osuNai;
-    field public java.lang.String osuService;
-    field public java.lang.String serverUri;
-    field public java.lang.String ssid;
-  }
-
-  public class PasspointPolicy implements android.os.Parcelable {
-    ctor public PasspointPolicy();
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
+  public class WifiPasspointManager {
+    method public boolean addCredential(android.net.wifi.passpoint.WifiPasspointCredential);
+    method public java.util.List<android.net.wifi.passpoint.WifiPasspointCredential> getSavedCredentials();
+    method public boolean removeCredential(android.net.wifi.passpoint.WifiPasspointCredential);
+    method public boolean updateCredential(android.net.wifi.passpoint.WifiPasspointCredential);
   }
 
 }

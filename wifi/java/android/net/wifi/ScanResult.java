@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
-import android.net.wifi.passpoint.PasspointInfo;
-import android.net.wifi.passpoint.PasspointManager;
+import android.net.wifi.passpoint.WifiPasspointInfo;
+import android.net.wifi.passpoint.WifiPasspointManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -80,10 +80,10 @@ public class ScanResult implements Parcelable {
 
     /**
      * Passpoint ANQP information. This is not fetched automatically.
-     * Use {@link PasspointManager#requestAnqpInfo} to request ANQP info.
+     * Use {@link WifiPasspointManager#requestAnqpInfo} to request ANQP info.
      * {@hide}
      */
-    public PasspointInfo passpoint;
+    public WifiPasspointInfo passpoint;
 
     /**
      * {@hide}
@@ -132,7 +132,7 @@ public class ScanResult implements Parcelable {
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
             if (source.passpoint != null)
-                passpoint = new PasspointInfo(source.passpoint);
+                passpoint = new WifiPasspointInfo(source.passpoint);
         }
     }
 
@@ -219,7 +219,7 @@ public class ScanResult implements Parcelable {
                     in.readInt()
                 );
                 if (in.readInt() == 1) {
-                    sr.passpoint = PasspointInfo.CREATOR.createFromParcel(in);
+                    sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }
                 return sr;
             }

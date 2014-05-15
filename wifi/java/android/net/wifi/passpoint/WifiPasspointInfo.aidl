@@ -16,4 +16,4 @@
 
 package android.net.wifi.passpoint;
 
-parcelable PasspointPolicy;
+parcelable WifiPasspointInfo;

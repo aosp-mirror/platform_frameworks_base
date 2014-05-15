@@ -2352,11 +2352,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.wifi.passpoint.PasspointManager} for handling management of
+     * android.net.wifi.passpoint.WifiPasspointManager} for handling management of
      * Wi-Fi passpoint access.
      *
      * @see #getSystemService
-     * @see android.net.wifi.passpoint.PasspointManager
+     * @see android.net.wifi.passpoint.WifiPasspointManager
      */
     public static final String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
 
