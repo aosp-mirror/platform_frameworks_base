@@ -48,4 +48,15 @@
 
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">384dp</dimen>
+
+    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
+         max value is used when no notifications are displaying, and the min value is when the
+         highest possible number of notifications are showing. -->
+    <fraction name="keyguard_clock_y_fraction_max">34%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">25%</fraction>
+
+    <!-- The margin between the clock and the notifications on Keyguard. See
+         keyguard_clock_height_fraction_* for the difference between min and max.-->
+    <dimen name="keyguard_clock_notifications_margin_min">32dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">32dp</dimen>
 </resources>
