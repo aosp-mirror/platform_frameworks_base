@@ -224,6 +224,5 @@ public class PanelBar extends FrameLayout {
 
     public void onTrackingStopped(PanelView panel) {
         mTracking = false;
-        panelExpansionChanged(panel, panel.getExpandedFraction());
     }
 }

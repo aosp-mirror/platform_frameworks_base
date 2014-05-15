@@ -77,12 +77,6 @@ public class PanelHolder extends FrameLayout {
                         event.getActionMasked(), (int) event.getX(), (int) event.getY());
             }
         }
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                PanelBar.LOG("PanelHolder got touch in open air, closing panels");
-                mBar.collapseAllPanels(true);
-                break;
-        }
         return false;
     }
 
