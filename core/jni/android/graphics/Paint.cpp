@@ -106,16 +106,33 @@ public:
         *dst = *src;
     }
 
+    // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
+    static const uint32_t sFilterBitmapFlag = 0x02;
+
     static jint getFlags(JNIEnv* env, jobject paint) {
         NPE_CHECK_RETURN_ZERO(env, paint);
-        int result;
-        result = GraphicsJNI::getNativePaint(env, paint)->getFlags();
+        SkPaint* nativePaint = GraphicsJNI::getNativePaint(env, paint);
+        uint32_t result = nativePaint->getFlags();
+        result &= ~sFilterBitmapFlag; // Filtering no longer stored in this bit. Mask away.
+        if (nativePaint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
+            result |= sFilterBitmapFlag;
+        }
         return static_cast<jint>(result);
     }
 
     static void setFlags(JNIEnv* env, jobject paint, jint flags) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setFlags(flags);
+        SkPaint* nativePaint = GraphicsJNI::getNativePaint(env, paint);
+        // Instead of modifying 0x02, change the filter level.
+        nativePaint->setFilterLevel(flags & sFilterBitmapFlag
+                ? SkPaint::kLow_FilterLevel
+                : SkPaint::kNone_FilterLevel);
+        // Don't pass through filter flag, which is no longer stored in paint's flags.
+        flags &= ~sFilterBitmapFlag;
+        // Use the existing value for 0x02.
+        const uint32_t existing0x02Flag = nativePaint->getFlags() & sFilterBitmapFlag;
+        flags |= existing0x02Flag;
+        nativePaint->setFlags(flags);
     }
 
     static jint getHinting(JNIEnv* env, jobject paint) {
@@ -298,7 +315,7 @@ public:
 
     static jlong setRasterizer(JNIEnv* env, jobject clazz, jlong objHandle, jlong rasterizerHandle) {
         SkPaint* obj = reinterpret_cast<SkPaint*>(objHandle);
-        SkRasterizer* rasterizer = reinterpret_cast<SkRasterizer*>(rasterizerHandle);
+        SkAutoTUnref<SkRasterizer> rasterizer(GraphicsJNI::refNativeRasterizer(rasterizerHandle));
         return reinterpret_cast<jlong>(obj->setRasterizer(rasterizer));
     }
 
