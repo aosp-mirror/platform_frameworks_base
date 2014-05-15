@@ -31,13 +31,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /*package*/ class ZygoteStartFailedEx extends Exception {
-    /**
-     * Something prevented the zygote process startup from happening normally
-     */
+    ZygoteStartFailedEx(String s) {
+        super(s);
+    }
 
-    ZygoteStartFailedEx() {};
-    ZygoteStartFailedEx(String s) {super(s);}
-    ZygoteStartFailedEx(Throwable cause) {super(cause);}
+    ZygoteStartFailedEx(Throwable cause) {
+        super(cause);
+    }
+
+    ZygoteStartFailedEx(String s, Throwable cause) {
+        super(s, cause);
+    }
 }
 
 /**
@@ -46,9 +50,15 @@ import java.util.List;
 public class Process {
     private static final String LOG_TAG = "Process";
 
-    private static final String ZYGOTE_SOCKET = "zygote";
+    /**
+     * @hide for internal use only.
+     */
+    public static final String ZYGOTE_SOCKET = "zygote";
 
-    private static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
+    /**
+     * @hide for internal use only.
+     */
+    public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
 
     /**
      * Defines the UID/GID under which system code runs.
@@ -338,8 +348,10 @@ public class Process {
 
     /**
      * State for communicating with the zygote process.
+     *
+     * @hide for internal use only.
      */
-    static class ZygoteState {
+    public static class ZygoteState {
         final LocalSocket socket;
         final DataInputStream inputStream;
         final BufferedWriter writer;
@@ -355,55 +367,26 @@ public class Process {
             this.abiList = abiList;
         }
 
-        static ZygoteState connect(String socketAddress, int tries) throws ZygoteStartFailedEx {
-            LocalSocket zygoteSocket = null;
+        public static ZygoteState connect(String socketAddress) throws IOException {
             DataInputStream zygoteInputStream = null;
             BufferedWriter zygoteWriter = null;
+            final LocalSocket zygoteSocket = new LocalSocket();
 
-            /*
-             * See bug #811181: Sometimes runtime can make it up before zygote.
-             * Really, we'd like to do something better to avoid this condition,
-             * but for now just wait a bit...
-             *
-             * TODO: This bug was filed in 2007. Get rid of this code. The zygote
-             * forks the system_server so it shouldn't be possible for the zygote
-             * socket to be brought up after the system_server is.
-             */
-            for (int i = 0; i < tries; i++) {
-                if (i > 0) {
-                    try {
-                        Log.i(LOG_TAG, "Zygote not up yet, sleeping...");
-                        Thread.sleep(ZYGOTE_RETRY_MILLIS);
-                    } catch (InterruptedException ex) {
-                        throw new ZygoteStartFailedEx(ex);
-                    }
-                }
+            try {
+                zygoteSocket.connect(new LocalSocketAddress(socketAddress,
+                        LocalSocketAddress.Namespace.RESERVED));
 
+                zygoteInputStream = new DataInputStream(zygoteSocket.getInputStream());
+
+                zygoteWriter = new BufferedWriter(new OutputStreamWriter(
+                        zygoteSocket.getOutputStream()), 256);
+            } catch (IOException ex) {
                 try {
-                    zygoteSocket = new LocalSocket();
-                    zygoteSocket.connect(new LocalSocketAddress(socketAddress,
-                            LocalSocketAddress.Namespace.RESERVED));
-
-                    zygoteInputStream = new DataInputStream(zygoteSocket.getInputStream());
-
-                    zygoteWriter = new BufferedWriter(new OutputStreamWriter(
-                            zygoteSocket.getOutputStream()), 256);
-                    break;
-                } catch (IOException ex) {
-                    if (zygoteSocket != null) {
-                        try {
-                            zygoteSocket.close();
-                        } catch (IOException ex2) {
-                            Log.e(LOG_TAG,"I/O exception on close after exception", ex2);
-                        }
-                    }
-
-                    zygoteSocket = null;
+                    zygoteSocket.close();
+                } catch (IOException ignore) {
                 }
-            }
 
-            if (zygoteSocket == null) {
-                throw new ZygoteStartFailedEx("connect failed");
+                throw ex;
             }
 
             String abiListString = getAbiList(zygoteWriter, zygoteInputStream);
@@ -417,7 +400,7 @@ public class Process {
             return abiList.contains(abi);
         }
 
-        void close() {
+        public void close() {
             try {
                 socket.close();
             } catch (IOException ex) {
@@ -503,27 +486,22 @@ public class Process {
      * @throws ZygoteStartFailedEx if the query failed.
      */
     private static String getAbiList(BufferedWriter writer, DataInputStream inputStream)
-            throws ZygoteStartFailedEx {
-        try {
+            throws IOException {
+        // Each query starts with the argument count (1 in this case)
+        writer.write("1");
+        // ... followed by a new-line.
+        writer.newLine();
+        // ... followed by our only argument.
+        writer.write("--query-abi-list");
+        writer.newLine();
+        writer.flush();
 
-            // Each query starts with the argument count (1 in this case)
-            writer.write("1");
-            // ... followed by a new-line.
-            writer.newLine();
-            // ... followed by our only argument.
-            writer.write("--query-abi-list");
-            writer.newLine();
-            writer.flush();
+        // The response is a length prefixed stream of ASCII bytes.
+        int numBytes = inputStream.readInt();
+        byte[] bytes = new byte[numBytes];
+        inputStream.readFully(bytes);
 
-            // The response is a length prefixed stream of ASCII bytes.
-            int numBytes = inputStream.readInt();
-            byte[] bytes = new byte[numBytes];
-            inputStream.readFully(bytes);
-
-            return new String(bytes, StandardCharsets.US_ASCII);
-        } catch (IOException ioe) {
-            throw new ZygoteStartFailedEx(ioe);
-        }
+        return new String(bytes, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -677,30 +655,16 @@ public class Process {
     }
 
     /**
-     * Returns the number of times we attempt a connection to the zygote. We
-     * sleep for {@link #ZYGOTE_RETRY_MILLIS} milliseconds between each try.
-     *
-     * This could probably be removed, see TODO in {@code ZygoteState#connect}.
-     */
-    private static int getNumTries(ZygoteState state) {
-        // Retry 10 times for the first connection to each zygote.
-        if (state == null) {
-            return 11;
-        }
-
-        // This means the connection has already been established, but subsequently
-        // closed, possibly due to an IOException. We retry just once if that's the
-        // case.
-        return 1;
-    }
-
-    /**
      * Tries to open socket to Zygote process if not already open. If
      * already open, does nothing.  May block and retry.
      */
     private static ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
         if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
-            primaryZygoteState = ZygoteState.connect(ZYGOTE_SOCKET, getNumTries(primaryZygoteState));
+            try {
+                primaryZygoteState = ZygoteState.connect(ZYGOTE_SOCKET);
+            } catch (IOException ioe) {
+                throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
+            }
         }
 
         if (primaryZygoteState.matches(abi)) {
@@ -709,8 +673,11 @@ public class Process {
 
         // The primary zygote didn't match. Try the secondary.
         if (secondaryZygoteState == null || secondaryZygoteState.isClosed()) {
-            secondaryZygoteState = ZygoteState.connect(SECONDARY_ZYGOTE_SOCKET,
-                    getNumTries(secondaryZygoteState));
+            try {
+            secondaryZygoteState = ZygoteState.connect(SECONDARY_ZYGOTE_SOCKET);
+            } catch (IOException ioe) {
+                throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
+            }
         }
 
         if (secondaryZygoteState.matches(abi)) {
