@@ -140,6 +140,34 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
     }
 
     @SmallTest
+    public void testMatrixIsCopied() throws Exception {
+        final Matrix MATRIX1 = new Matrix();
+        MATRIX1.setTranslate(10.0f, 20.0f);
+        final Matrix MATRIX2 = new Matrix();
+        MATRIX2.setTranslate(110.0f, 120.0f);
+        final Matrix MATRIX3 = new Matrix();
+        MATRIX3.setTranslate(210.0f, 220.0f);
+        final Matrix matrix = new Matrix();
+        final CursorAnchorInfoBuilder builder = new CursorAnchorInfoBuilder();
+
+        matrix.set(MATRIX1);
+        builder.setMatrix(matrix);
+        matrix.postRotate(90.0f);
+
+        final CursorAnchorInfo firstInstance = builder.build();
+        assertEquals(MATRIX1, firstInstance.getMatrix());
+        matrix.set(MATRIX2);
+        builder.setMatrix(matrix);
+        final CursorAnchorInfo secondInstance = builder.build();
+        assertEquals(MATRIX1, firstInstance.getMatrix());
+        assertEquals(MATRIX2, secondInstance.getMatrix());
+
+        matrix.set(MATRIX3);
+        assertEquals(MATRIX1, firstInstance.getMatrix());
+        assertEquals(MATRIX2, secondInstance.getMatrix());
+    }
+
+    @SmallTest
     public void testBuilderAdd() throws Exception {
         // A negative index should be rejected.
         try {
