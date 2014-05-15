@@ -4989,6 +4989,15 @@
         <attr name="startDelay" format="integer" />
         <!-- Interpolator to be used in the animations spawned by this transition. -->
         <attr name="interpolator" />
+        <!-- The match order to use for the transition. This is a comma-separated
+             list of values, containing one or more of the following:
+             id, itemId, viewName, instance. These correspond to
+             {@link android.transition.Transition#MATCH_ID},
+             {@link android.transition.Transition#MATCH_ITEM_ID},
+             {@link android.transition.Transition#MATCH_VIEW_NAME}, and
+             {@link android.transition.Transition#MATCH_INSTANCE}, respectively.
+             This corresponds to {@link android.transition.Transition#setMatchOrder(int...)}. -->
+        <attr name="matchOrder" format="string" />
     </declare-styleable>
 
     <!-- Use <code>fade</code>as the root tag of the XML resource that
