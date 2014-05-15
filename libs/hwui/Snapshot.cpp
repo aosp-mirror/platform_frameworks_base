@@ -34,7 +34,6 @@ Snapshot::Snapshot()
         , fbo(0)
         , invisible(false)
         , empty(false)
-        , height(0)
         , alpha(1.0f) {
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
@@ -53,9 +52,8 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , fbo(s->fbo)
         , invisible(s->invisible)
         , empty(false)
-        , viewport(s->viewport)
-        , height(s->height)
-        , alpha(s->alpha) {
+        , alpha(s->alpha)
+        , mViewportData(s->mViewportData) {
 
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
@@ -215,7 +213,7 @@ bool Snapshot::isIgnored() const {
 
 void Snapshot::dump() const {
     ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
-            this, flags, previous.get(), height, isIgnored(), clipRegion && !clipRegion->isEmpty());
+            this, flags, previous.get(), getViewportHeight(), isIgnored(), clipRegion && !clipRegion->isEmpty());
     ALOGD("  ClipRect (at %p) %.1f %.1f %.1f %.1f",
             clipRect, clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
     ALOGD("  Transform (at %p):", transform);

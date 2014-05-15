@@ -46,6 +46,11 @@ public:
     virtual status_t prepare(bool opaque) {
         return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
     }
+
+    /**
+     * Initialize the first snapshot, computing the projection matrix,
+     * and stores the dimensions of the render target.
+     */
     void initializeViewport(int width, int height);
     void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom);
 

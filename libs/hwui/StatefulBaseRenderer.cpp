@@ -38,9 +38,7 @@ void StatefulBaseRenderer::initializeSaveStack(float clipLeft, float clipTop,
 void StatefulBaseRenderer::initializeViewport(int width, int height) {
     mWidth = width;
     mHeight = height;
-
-    mFirstSnapshot->height = height;
-    mFirstSnapshot->viewport.set(0, 0, width, height);
+    mFirstSnapshot->initializeViewport(width, height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

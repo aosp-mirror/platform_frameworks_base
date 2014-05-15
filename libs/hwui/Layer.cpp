@@ -214,7 +214,7 @@ void Layer::defer() {
     DeferStateStruct deferredState(*deferredList, *renderer,
             RenderNode::kReplayFlag_ClipChildren);
 
-    renderer->initViewport(width, height);
+    renderer->initializeViewport(width, height);
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 

@@ -254,8 +254,8 @@ public:
         return mSnapshot->clipRegion->isEmpty();
     }
 
-    int getViewportWidth() { return currentSnapshot()->viewport.getWidth(); }
-    int getViewportHeight() { return currentSnapshot()->viewport.getHeight(); }
+    int getViewportWidth() { return currentSnapshot()->getViewportWidth(); }
+    int getViewportHeight() { return currentSnapshot()->getViewportHeight(); }
 
     /**
      * Scales the alpha on the current snapshot. This alpha value will be modulated
@@ -353,12 +353,6 @@ public:
 #endif
 
 protected:
-    /**
-     * Computes the projection matrix, initialize the first snapshot
-     * and stores the dimensions of the render target.
-     */
-    void initViewport(int width, int height);
-
     /**
      * Perform the setup specific to a frame. This method does not
      * issue any OpenGL commands.
@@ -929,9 +923,6 @@ private:
      * NULL, the texture could not be found and/or allocated.
      */
     Texture* getTexture(const SkBitmap* bitmap);
-
-    // Ortho matrix used for projection in shaders
-    mat4 mProjectionMatrix;
 
     /**
      * Model-view matrix used to position/size objects
