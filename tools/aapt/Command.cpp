@@ -1423,7 +1423,7 @@ int doDump(Bundle* bundle)
                                         " service '%s': %s\n", serviceName.string(), error.string());
                             }
                         } else if (bundle->getIncludeMetaData() && tag == "meta-data") {
-                            String8 metaDataName = getAttribute(tree, NAME_ATTR, &error);
+                            String8 metaDataName = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
                             if (error != "") {
                                 fprintf(stderr, "ERROR getting 'android:name' attribute for "
                                         "meta-data:%s\n", error.string());
