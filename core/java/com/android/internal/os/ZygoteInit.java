@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.LocalServerSocket;
 import android.opengl.EGL14;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Process;
 import android.os.SystemClock;
@@ -505,7 +506,7 @@ public class ZygoteInit {
     /**
      * Prepare the arguments and fork for the system server process.
      */
-    private static boolean startSystemServer()
+    private static boolean startSystemServer(String abiList, String socketName)
             throws MethodAndArgsCaller, RuntimeException {
         long capabilities = posixCapabilitiesAsBits(
             OsConstants.CAP_BLOCK_SUSPEND,
@@ -553,6 +554,10 @@ public class ZygoteInit {
 
         /* For child process */
         if (pid == 0) {
+            if (hasSecondZygote(abiList)) {
+                waitForSecondaryZygote(socketName);
+            }
+
             handleSystemServerProcess(parsedArgs);
         }
 
@@ -615,7 +620,7 @@ public class ZygoteInit {
             Trace.setTracingEnabled(false);
 
             if (startSystemServer) {
-                startSystemServer();
+                startSystemServer(abiList, socketName);
             }
 
             Log.i(TAG, "Accepting command socket connections");
@@ -628,6 +633,36 @@ public class ZygoteInit {
             Log.e(TAG, "Zygote died with exception", ex);
             closeServerSocket();
             throw ex;
+        }
+    }
+
+    /**
+     * Return {@code true} if this device configuration has another zygote.
+     *
+     * We determine this by comparing the device ABI list with this zygotes
+     * list. If this zygote supports all ABIs this device supports, there won't
+     * be another zygote.
+     */
+    private static boolean hasSecondZygote(String abiList) {
+        return !SystemProperties.get("ro.product.cpu.abilist").equals(abiList);
+    }
+
+    private static void waitForSecondaryZygote(String socketName) {
+        String otherZygoteName = Process.ZYGOTE_SOCKET.equals(socketName) ?
+                Process.SECONDARY_ZYGOTE_SOCKET : Process.ZYGOTE_SOCKET;
+        while (true) {
+            try {
+                final Process.ZygoteState zs = Process.ZygoteState.connect(otherZygoteName);
+                zs.close();
+                break;
+            } catch (IOException ioe) {
+                Log.w(TAG, "Got error connecting to zygote, retrying. msg= " + ioe.getMessage());
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
         }
     }
 
