@@ -119,7 +119,6 @@ static void android_view_RenderNode_setOutlineRoundRect(JNIEnv* env,
         jint right, jint bottom, jfloat radius) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom, radius);
-    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
@@ -127,21 +126,18 @@ static void android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
     renderNode->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath);
-    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setOutlineEmpty(JNIEnv* env,
         jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutableOutline().setEmpty();
-    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setClipToOutline(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jboolean clipToOutline) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutableOutline().setShouldClip(clipToOutline);
-    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setRevealClip(JNIEnv* env,
@@ -150,7 +146,6 @@ static void android_view_RenderNode_setRevealClip(JNIEnv* env,
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutableRevealClip().set(
             shouldClip, inverseClip, x, y, radius);
-    renderNode->mutateStagingProperties().updateClipPath();
 }
 
 static void android_view_RenderNode_setAlpha(JNIEnv* env,
