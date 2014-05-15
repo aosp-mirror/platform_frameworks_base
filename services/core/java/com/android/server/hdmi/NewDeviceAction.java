@@ -71,7 +71,8 @@ final class NewDeviceAction extends FeatureAction {
     @Override
     public boolean start() {
         sendCommand(
-                buildCommand(mSourceAddress, mDeviceLogicalAddress, HdmiCec.MESSAGE_GET_OSD_NAME));
+                HdmiCecMessageBuilder.buildGetOsdNameCommand(mSourceAddress,
+                        mDeviceLogicalAddress));
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
         addTimer(mState, TIMEOUT_MS);
         return true;
@@ -132,8 +133,8 @@ final class NewDeviceAction extends FeatureAction {
     }
 
     private void requestVendorId() {
-        sendCommand(buildCommand(mSourceAddress, mDeviceLogicalAddress,
-                HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID));
+        sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress,
+                mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
     }
 
