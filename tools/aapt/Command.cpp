@@ -453,7 +453,7 @@ String8 getComponentName(String8 &pkgName, String8 &componentName) {
     return retStr;
 }
 
-static void printCompatibleScreens(ResXMLTree& tree) {
+static void printCompatibleScreens(ResXMLTree& tree, String8* outError) {
     size_t len;
     ResXMLTree::event_code_t code;
     int depth = 0;
@@ -471,7 +471,12 @@ static void printCompatibleScreens(ResXMLTree& tree) {
             continue;
         }
         depth++;
-        String8 tag(tree.getElementName(&len));
+        const char16_t* ctag16 = tree.getElementName(&len);
+        if (ctag16 == NULL) {
+            *outError = "failed to get XML element name (bad string pool)";
+            return;
+        }
+        String8 tag(ctag16);
         if (tag == "screen") {
             int32_t screenSize = getIntegerAttribute(tree,
                     SCREEN_SIZE_ATTR, NULL, -1);
@@ -536,7 +541,12 @@ Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool 
     while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code == ResXMLTree::END_TAG) {
             depth--;
-            String8 tag(tree.getElementName(&len));
+            const char16_t* ctag16 = tree.getElementName(&len);
+            if (ctag16 == NULL) {
+                *outError = "failed to get XML element name (bad string pool)";
+                return Vector<String8>();
+            }
+            String8 tag(ctag16);
 
             if (depth == 0 && tag == serviceTagName) {
                 withinApduService = false;
@@ -544,7 +554,12 @@ Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool 
 
         } else if (code == ResXMLTree::START_TAG) {
             depth++;
-            String8 tag(tree.getElementName(&len));
+            const char16_t* ctag16 = tree.getElementName(&len);
+            if (ctag16 == NULL) {
+                *outError = "failed to get XML element name (bad string pool)";
+                return Vector<String8>();
+            }
+            String8 tag(ctag16);
 
             if (depth == 1) {
                 if (tag == serviceTagName) {
@@ -711,7 +726,12 @@ int doDump(Bundle* bundle)
                     continue;
                 }
                 depth++;
-                String8 tag(tree.getElementName(&len));
+                const char16_t* ctag16 = tree.getElementName(&len);
+                if (ctag16 == NULL) {
+                    fprintf(stderr, "ERROR: failed to get XML element name (bad string pool)\n");
+                    goto bail;
+                }
+                String8 tag(ctag16);
                 //printf("Depth %d tag %s\n", depth, tag.string());
                 if (depth == 1) {
                     if (tag != "manifest") {
@@ -970,7 +990,13 @@ int doDump(Bundle* bundle)
                     continue;
                 }
                 depth++;
-                String8 tag(tree.getElementName(&len));
+
+                const char16_t* ctag16 = tree.getElementName(&len);
+                if (ctag16 == NULL) {
+                    fprintf(stderr, "ERROR: failed to get XML element name (bad string pool)\n");
+                    goto bail;
+                }
+                String8 tag(ctag16);
                 //printf("Depth %d,  %s\n", depth, tag.string());
                 if (depth == 1) {
                     if (tag != "manifest") {
@@ -1297,7 +1323,12 @@ int doDump(Bundle* bundle)
                                 goto bail;
                         }
                     } else if (tag == "compatible-screens") {
-                        printCompatibleScreens(tree);
+                        printCompatibleScreens(tree, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting compatible screens: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
                         depth--;
                     } else if (tag == "package-verifier") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
