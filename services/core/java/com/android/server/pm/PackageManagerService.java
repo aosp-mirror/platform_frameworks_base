@@ -161,7 +161,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -2274,7 +2273,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.dataDir =
                         getDataPathForPackage(packageName, 0).getPath();
                 pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
-                pkg.applicationInfo.requiredCpuAbi = ps.requiredCpuAbiString;
+                pkg.applicationInfo.cpuAbi = ps.cpuAbiString;
             }
             return generatePackageInfo(pkg, flags, userId);
         }
@@ -4704,8 +4703,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private String getAppInstructionSet(ApplicationInfo info) {
         String instructionSet = getPreferredInstructionSet();
 
-        if (info.requiredCpuAbi != null) {
-            instructionSet = VMRuntime.getInstructionSet(info.requiredCpuAbi);
+        if (info.cpuAbi != null) {
+            instructionSet = VMRuntime.getInstructionSet(info.cpuAbi);
         }
 
         return instructionSet;
@@ -4714,8 +4713,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private String getAppInstructionSetFromSettings(PackageSetting ps) {
         String instructionSet = getPreferredInstructionSet();
 
-        if (ps.requiredCpuAbiString != null) {
-            instructionSet = VMRuntime.getInstructionSet(ps.requiredCpuAbiString);
+        if (ps.cpuAbiString != null) {
+            instructionSet = VMRuntime.getInstructionSet(ps.cpuAbiString);
         }
 
         return instructionSet;
@@ -5103,7 +5102,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLPw(pkg, origPackage, realName, suid, destCodeFile,
                     destResourceFile, pkg.applicationInfo.nativeLibraryDir,
-                    pkg.applicationInfo.requiredCpuAbi,
+                    pkg.applicationInfo.cpuAbi,
                     pkg.applicationInfo.flags, user, false);
             if (pkgSetting == null) {
                 Slog.w(TAG, "Creating application package " + pkg.packageName + " failed");
@@ -5431,9 +5430,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // We've successfully copied native libraries across, so we make a
                             // note of what ABI we're using
                             if (copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                                pkg.applicationInfo.requiredCpuAbi = Build.SUPPORTED_ABIS[copyRet];
+                                pkg.applicationInfo.cpuAbi = Build.SUPPORTED_ABIS[copyRet];
                             } else {
-                                pkg.applicationInfo.requiredCpuAbi = null;
+                                pkg.applicationInfo.cpuAbi = null;
                             }
                         } catch (IOException e) {
                             Slog.e(TAG, "Unable to copy native libraries", e);
@@ -5451,12 +5450,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
                         final int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
                         if (abi >= 0) {
-                            pkg.applicationInfo.requiredCpuAbi = Build.SUPPORTED_ABIS[abi];
+                            pkg.applicationInfo.cpuAbi = Build.SUPPORTED_ABIS[abi];
                         } else if (abi == PackageManager.NO_NATIVE_LIBRARIES) {
                             // Note that (non upgraded) system apps will not have any native
                             // libraries bundled in their APK, but we're guaranteed not to be
                             // such an app at this point.
-                            pkg.applicationInfo.requiredCpuAbi = null;
+                            pkg.applicationInfo.cpuAbi = null;
                         } else {
                             mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                             return null;
@@ -5966,8 +5965,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         String requiredInstructionSet = null;
         PackageSetting requirer = null;
         for (PackageSetting ps : packagesForUser) {
-            if (ps.requiredCpuAbiString != null) {
-                final String instructionSet = VMRuntime.getInstructionSet(ps.requiredCpuAbiString);
+            if (ps.cpuAbiString != null) {
+                final String instructionSet = VMRuntime.getInstructionSet(ps.cpuAbiString);
                 if (requiredInstructionSet != null) {
                     if (!instructionSet.equals(requiredInstructionSet)) {
                         // We have a mismatch between instruction sets (say arm vs arm64).
@@ -5995,11 +5994,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (requiredInstructionSet != null) {
             for (PackageSetting ps : packagesForUser) {
-                if (ps.requiredCpuAbiString == null) {
-                    ps.requiredCpuAbiString = requirer.requiredCpuAbiString;
+                if (ps.cpuAbiString == null) {
+                    ps.cpuAbiString = requirer.cpuAbiString;
                     if (ps.pkg != null) {
-                        ps.pkg.applicationInfo.requiredCpuAbi = requirer.requiredCpuAbiString;
-                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + ps.requiredCpuAbiString);
+                        ps.pkg.applicationInfo.cpuAbi = requirer.cpuAbiString;
+                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + ps.cpuAbiString);
                         if (doDexOpt) {
                             performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true);
                             mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
@@ -6102,15 +6101,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Assume that the bundled native libraries always correspond to the
         // most preferred 32 or 64 bit ABI.
         if (lib64.exists()) {
-            pkg.applicationInfo.requiredCpuAbi = Build.SUPPORTED_64_BIT_ABIS[0];
-            pkgSetting.requiredCpuAbiString = Build.SUPPORTED_64_BIT_ABIS[0];
+            pkg.applicationInfo.cpuAbi = Build.SUPPORTED_64_BIT_ABIS[0];
+            pkgSetting.cpuAbiString = Build.SUPPORTED_64_BIT_ABIS[0];
         } else if (lib.exists()) {
-            pkg.applicationInfo.requiredCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
-            pkgSetting.requiredCpuAbiString = Build.SUPPORTED_32_BIT_ABIS[0];
+            pkg.applicationInfo.cpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
+            pkgSetting.cpuAbiString = Build.SUPPORTED_32_BIT_ABIS[0];
         } else {
             // This is the case where the app has no native code.
-            pkg.applicationInfo.requiredCpuAbi = null;
-            pkgSetting.requiredCpuAbiString = null;
+            pkg.applicationInfo.cpuAbi = null;
+            pkgSetting.cpuAbiString = null;
         }
     }
 
