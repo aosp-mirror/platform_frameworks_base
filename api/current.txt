@@ -417,10 +417,10 @@ package android {
     field public static final int content = 16843355; // 0x101025b
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
-    field public static final int contentInsetEnd = 16843861; // 0x1010455
-    field public static final int contentInsetLeft = 16843862; // 0x1010456
-    field public static final int contentInsetRight = 16843863; // 0x1010457
-    field public static final int contentInsetStart = 16843860; // 0x1010454
+    field public static final int contentInsetEnd = 16843864; // 0x1010458
+    field public static final int contentInsetLeft = 16843865; // 0x1010459
+    field public static final int contentInsetRight = 16843866; // 0x101045a
+    field public static final int contentInsetStart = 16843863; // 0x1010457
     field public static final int controlX1 = 16843799; // 0x1010417
     field public static final int controlX2 = 16843801; // 0x1010419
     field public static final int controlY1 = 16843800; // 0x1010418
