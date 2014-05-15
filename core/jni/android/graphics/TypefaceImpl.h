@@ -18,6 +18,8 @@
 #ifndef ANDROID_TYPEFACE_IMPL_H
 #define ANDROID_TYPEFACE_IMPL_H
 
+#include "jni.h"  // for jlong, eventually remove
+#include "SkTypeface.h"
 #include <androidfw/AssetManager.h>
 
 #ifdef USE_MINIKIN
@@ -50,6 +52,10 @@ TypefaceImpl* TypefaceImpl_createFromName(const char* name, SkTypeface::Style st
 TypefaceImpl* TypefaceImpl_createFromFile(const char* filename);
 
 TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset);
+
+// When we remove the USE_MINIKIN ifdef, probably a good idea to move the casting
+// (from jlong to FontFamily*) to the caller in Typeface.cpp.
+TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size);
 
 void TypefaceImpl_unref(TypefaceImpl* face);
 

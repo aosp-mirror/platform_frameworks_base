@@ -51,6 +51,12 @@
 #include <RenderNode.h>
 #include <CanvasProperty.h>
 
+#ifdef USE_MINIKIN
+#include <minikin/Layout.h>
+#include "MinikinSkia.h"
+#include "MinikinUtils.h"
+#endif
+
 #include <TextLayout.h>
 #include <TextLayoutCache.h>
 
@@ -661,8 +667,58 @@ static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
     return 0;
 }
 
+#ifdef USE_MINIKIN
+static void renderTextLayout(OpenGLRenderer* renderer, Layout* layout,
+    jfloat x, jfloat y, SkPaint* paint) {
+    size_t nGlyphs = layout->nGlyphs();
+    float* pos = new float[nGlyphs * 2];
+    uint16_t* glyphs = new uint16_t[nGlyphs];
+    SkTypeface* lastFace = 0;
+    SkTypeface* skFace = 0;
+    size_t start = 0;
+    MinikinRect b;
+    layout->getBounds(&b);
+    android::uirenderer::Rect bounds(b.mLeft, b.mTop, b.mRight, b.mBottom);
+    bounds.translate(x, y);
+    float totalAdvance = layout->getAdvance();
+
+    for (size_t i = 0; i < nGlyphs; i++) {
+        MinikinFontSkia* mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
+        skFace = mfs->GetSkTypeface();
+        glyphs[i] = layout->getGlyphId(i);
+        pos[2 * i] = SkFloatToScalar(layout->getX(i));
+        pos[2 * i + 1] = SkFloatToScalar(layout->getY(i));
+        if (i > 0 && skFace != lastFace) {
+            paint->setTypeface(lastFace);
+            size_t glyphsCount = i - start;
+            int bytesCount = glyphsCount * sizeof(jchar);
+            renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
+                x, y, pos + 2 * start, paint, totalAdvance, bounds);
+            start = i;
+        }
+        lastFace = skFace;
+    }
+    if (skFace != NULL) {
+        paint->setTypeface(skFace);
+        size_t glyphsCount = nGlyphs - start;
+        int bytesCount = glyphsCount * sizeof(jchar);
+        renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
+            x, y, pos + 2 * start, paint, totalAdvance, bounds);
+    }
+    delete[] glyphs;
+    delete[] pos;
+}
+#endif
+
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
-        jfloat x, jfloat y, int flags, SkPaint* paint) {
+        jfloat x, jfloat y, int flags, SkPaint* paint, TypefaceImpl* typeface) {
+#ifdef USE_MINIKIN
+    Layout layout;
+    MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+    layout.doLayout(text, count);
+    x += xOffsetForTextAlign(paint, layout.getAdvance());
+    renderTextLayout(renderer, &layout, x, y, paint);
+#else
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
             text, 0, count, count, flags);
     if (value == NULL) {
@@ -680,6 +736,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
             x, y, positions, paint, totalAdvance, bounds);
+#endif
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
@@ -698,7 +755,14 @@ static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int co
 
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
-        int flags, SkPaint* paint) {
+        int flags, SkPaint* paint, TypefaceImpl* typeface) {
+#ifdef USE_MINIKIN
+    Layout layout;
+    MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+    layout.doLayout(text + start, count);
+    x += xOffsetForTextAlign(paint, layout.getAdvance());
+    renderTextLayout(renderer, &layout, x, y, paint);
+#else
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
             text, start, count, contextCount, flags);
     if (value == NULL) {
@@ -716,27 +780,30 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
             x, y, positions, paint, totalAdvance, bounds);
+#endif
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jcharArray text, jint index, jint count,
-        jfloat x, jfloat y, jint flags, jlong paintPtr) {
+        jfloat x, jfloat y, jint flags, jlong paintPtr, jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
-    renderText(renderer, textArray + index, count, x, y, flags, paint);
+    renderText(renderer, textArray + index, count, x, y, flags, paint, typeface);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
 static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jstring text, jint start, jint end,
-        jfloat x, jfloat y, jint flags, jlong paintPtr) {
+        jfloat x, jfloat y, jint flags, jlong paintPtr, jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     const jchar* textArray = env->GetStringChars(text, NULL);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
-    renderText(renderer, textArray + start, end - start, x, y, flags, paint);
+    renderText(renderer, textArray + start, end - start, x, y, flags, paint, typeface);
     env->ReleaseStringChars(text, textArray);
 }
 
@@ -769,28 +836,30 @@ static void android_view_GLES20Canvas_drawTextOnPath(JNIEnv* env, jobject clazz,
 static void android_view_GLES20Canvas_drawTextRunArray(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jcharArray text, jint index, jint count,
         jint contextIndex, jint contextCount, jfloat x, jfloat y, jint dirFlags,
-        jlong paintPtr) {
+        jlong paintPtr, jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
     renderTextRun(renderer, textArray + contextIndex, index - contextIndex,
-            count, contextCount, x, y, dirFlags, paint);
+            count, contextCount, x, y, dirFlags, paint, typeface);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
  }
 
 static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jstring text, jint start, jint end,
         jint contextStart, int contextEnd, jfloat x, jfloat y, jint dirFlags,
-        jlong paintPtr) {
+        jlong paintPtr, jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     const jchar* textArray = env->GetStringChars(text, NULL);
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
     renderTextRun(renderer, textArray + contextStart, start - contextStart,
-            count, contextCount, x, y, dirFlags, paint);
+            count, contextCount, x, y, dirFlags, paint, typeface);
     env->ReleaseStringChars(text, textArray);
 }
 
@@ -1028,16 +1097,16 @@ static JNINativeMethod gMethods[] = {
     { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
     { "nResetPaintFilter",  "(J)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },
 
-    { "nDrawText",          "(J[CIIFFIJ)V",    (void*) android_view_GLES20Canvas_drawTextArray },
-    { "nDrawText",          "(JLjava/lang/String;IIFFIJ)V",
+    { "nDrawText",          "(J[CIIFFIJJ)V",   (void*) android_view_GLES20Canvas_drawTextArray },
+    { "nDrawText",          "(JLjava/lang/String;IIFFIJJ)V",
             (void*) android_view_GLES20Canvas_drawText },
 
     { "nDrawTextOnPath",    "(J[CIIJFFIJ)V",   (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
     { "nDrawTextOnPath",    "(JLjava/lang/String;IIJFFIJ)V",
             (void*) android_view_GLES20Canvas_drawTextOnPath },
 
-    { "nDrawTextRun",       "(J[CIIIIFFIJ)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
-    { "nDrawTextRun",       "(JLjava/lang/String;IIIIFFIJ)V",
+    { "nDrawTextRun",       "(J[CIIIIFFIJJ)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
+    { "nDrawTextRun",       "(JLjava/lang/String;IIIIFFIJJ)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
 
     { "nDrawPosText",       "(J[CII[FJ)V",     (void*) android_view_GLES20Canvas_drawPosTextArray },

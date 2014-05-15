@@ -8,6 +8,7 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
+#include "TypefaceImpl.h"
 #include <jni.h>
 
 class SkBitmapRegionDecoder;
@@ -46,6 +47,7 @@ public:
 
     static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static SkPaint*  getNativePaint(JNIEnv*, jobject paint);
+    static android::TypefaceImpl* getNativeTypeface(JNIEnv*, jobject paint);
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
     static SkPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);

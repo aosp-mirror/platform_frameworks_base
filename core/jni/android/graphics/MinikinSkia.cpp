@@ -16,7 +16,6 @@
 
 #include <SkTypeface.h>
 #include <SkPaint.h>
-#include <SkFP.h>
 
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
@@ -44,19 +43,35 @@ bool MinikinFontSkia::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
     return !!glyph;
 }
 
+static void MinikinFontSkia_SetSkiaPaint(SkTypeface* typeface, SkPaint* skPaint, const MinikinPaint& paint) {
+    skPaint->setTypeface(typeface);
+    skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    // TODO: set more paint parameters from Minikin
+    skPaint->setTextSize(paint.size);
+}
+
 float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
     const MinikinPaint &paint) const {
-    SkPaint skpaint;
-    skpaint.setTypeface(mTypeface);
-    skpaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-    // TODO: set more paint parameters from Minikin
-    skpaint.setTextSize(paint.size);
+    SkPaint skPaint;
     uint16_t glyph16 = glyph_id;
     SkScalar skWidth;
+    MinikinFontSkia_SetSkiaPaint(mTypeface, &skPaint, paint);
+    skPaint.getTextWidths(&glyph16, sizeof(glyph16), &skWidth, NULL);
+    ALOGD("width for typeface %d glyph %d = %f", mTypeface->uniqueID(), glyph_id, skWidth);
+    return skWidth;
+}
+
+void MinikinFontSkia::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
+    const MinikinPaint& paint) const {
+    SkPaint skPaint;
+    uint16_t glyph16 = glyph_id;
     SkRect skBounds;
-    skpaint.getTextWidths(&glyph16, sizeof(glyph16), &skWidth, &skBounds);
-    // TODO: get bounds information
-    return SkScalarToFP(skWidth);
+    MinikinFontSkia_SetSkiaPaint(mTypeface, &skPaint, paint);
+    skPaint.getTextWidths(&glyph16, sizeof(glyph16), NULL, &skBounds);
+    bounds->mLeft = skBounds.fLeft;
+    bounds->mTop = skBounds.fTop;
+    bounds->mRight = skBounds.fRight;
+    bounds->mBottom = skBounds.fBottom;
 }
 
 bool MinikinFontSkia::GetTable(uint32_t tag, uint8_t *buf, size_t *size) {

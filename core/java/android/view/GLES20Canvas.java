@@ -1127,14 +1127,15 @@ class GLES20Canvas extends HardwareCanvas {
 
         int modifiers = setupModifiers(paint);
         try {
-            nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint);
+            nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint,
+                paint.mNativeTypeface);
         } finally {
             if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
         }
     }
     
     private static native void nDrawText(long renderer, char[] text, int index, int count,
-            float x, float y, int bidiFlags, long paint);
+            float x, float y, int bidiFlags, long paint, long typeface);
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
@@ -1143,7 +1144,7 @@ class GLES20Canvas extends HardwareCanvas {
             if (text instanceof String || text instanceof SpannedString ||
                     text instanceof SpannableString) {
                 nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
-                        paint.mNativePaint);
+                        paint.mNativePaint, paint.mNativeTypeface);
             } else if (text instanceof GraphicsOperations) {
                 ((GraphicsOperations) text).drawText(this, start, end, x, y,
                                                          paint);
@@ -1151,7 +1152,7 @@ class GLES20Canvas extends HardwareCanvas {
                 char[] buf = TemporaryBuffer.obtain(end - start);
                 TextUtils.getChars(text, start, end, buf, 0);
                 nDrawText(mRenderer, buf, 0, end - start, x, y,
-                        paint.mBidiFlags, paint.mNativePaint);
+                        paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
                 TemporaryBuffer.recycle(buf);
             }
         } finally {
@@ -1167,21 +1168,22 @@ class GLES20Canvas extends HardwareCanvas {
 
         int modifiers = setupModifiers(paint);
         try {
-            nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint);
+            nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint,
+                paint.mNativeTypeface);
         } finally {
             if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
         }
     }
 
     private static native void nDrawText(long renderer, String text, int start, int end,
-            float x, float y, int bidiFlags, long paint);
+            float x, float y, int bidiFlags, long paint, long typeface);
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
         int modifiers = setupModifiers(paint);
         try {
             nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags,
-                    paint.mNativePaint);
+                    paint.mNativePaint, paint.mNativeTypeface);
         } finally {
             if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
         }
@@ -1235,14 +1237,14 @@ class GLES20Canvas extends HardwareCanvas {
         int modifiers = setupModifiers(paint);
         try {
             nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, dir,
-                    paint.mNativePaint);
+                    paint.mNativePaint, paint.mNativeTypeface);
         } finally {
             if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
         }
     }
 
     private static native void nDrawTextRun(long renderer, char[] text, int index, int count,
-            int contextIndex, int contextCount, float x, float y, int dir, long nativePaint);
+            int contextIndex, int contextCount, float x, float y, int dir, long nativePaint, long nativeTypeface);
 
     @Override
     public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
@@ -1257,7 +1259,7 @@ class GLES20Canvas extends HardwareCanvas {
             if (text instanceof String || text instanceof SpannedString ||
                     text instanceof SpannableString) {
                 nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
-                        contextEnd, x, y, flags, paint.mNativePaint);
+                        contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
             } else if (text instanceof GraphicsOperations) {
                 ((GraphicsOperations) text).drawTextRun(this, start, end,
                         contextStart, contextEnd, x, y, flags, paint);
@@ -1267,7 +1269,7 @@ class GLES20Canvas extends HardwareCanvas {
                 char[] buf = TemporaryBuffer.obtain(contextLen);
                 TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
                 nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
-                        x, y, flags, paint.mNativePaint);
+                        x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
                 TemporaryBuffer.recycle(buf);
             }
         } finally {
@@ -1276,7 +1278,7 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native void nDrawTextRun(long renderer, String text, int start, int end,
-            int contextStart, int contextEnd, float x, float y, int flags, long nativePaint);
+            int contextStart, int contextEnd, float x, float y, int flags, long nativePaint, long nativeTypeface);
 
     @Override
     public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,

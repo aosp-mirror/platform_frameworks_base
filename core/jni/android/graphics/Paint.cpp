@@ -36,6 +36,12 @@
 #include "utils/Blur.h"
 #include "TextLayout.h"
 
+#ifdef USE_MINIKIN
+#include <minikin/Layout.h>
+#include "MinikinSkia.h"
+#include "MinikinUtils.h"
+#endif
+
 // temporary for debugging
 #include <Caches.h>
 #include <utils/Log.h>
@@ -494,8 +500,16 @@ public:
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = 0;
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        layout.doLayout(textArray + index, count);
+        result = layout.getAdvance();
+#else
         TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
                 bidiFlags, NULL /* dont need all advances */, &result);
+#endif
 
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
@@ -520,8 +534,16 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        layout.doLayout(textArray + start, count);
+        width = layout.getAdvance();
+#else
         TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
                 bidiFlags, NULL /* dont need all advances */, &width);
+#endif
 
         env->ReleaseStringChars(text, textArray);
         return width;
@@ -540,15 +562,23 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        layout.doLayout(textArray, textLength);
+        width = layout.getAdvance();
+#else
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
                 bidiFlags, NULL /* dont need all advances */, &width);
+#endif
 
         env->ReleaseStringChars(text, textArray);
         return width;
     }
 
-    static int dotextwidths(JNIEnv* env, SkPaint* paint, const jchar text[], int count, jfloatArray widths,
-            jint bidiFlags) {
+    static int dotextwidths(JNIEnv* env, SkPaint* paint, TypefaceImpl* typeface, const jchar text[], int count,
+            jfloatArray widths, jint bidiFlags) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
@@ -568,27 +598,36 @@ public:
         AutoJavaFloatArray autoWidths(env, widths, count);
         jfloat* widthsArray = autoWidths.ptr();
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        layout.doLayout(text, count);
+        layout.getAdvances(widthsArray);
+#else
         TextLayout::getTextRunAdvances(paint, text, 0, count, count,
                 bidiFlags, widthsArray, NULL /* dont need totalAdvance */);
+#endif
 
         return count;
     }
 
-    static jint getTextWidths___CIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jcharArray text,
+    static jint getTextWidths___CIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jcharArray text,
             jint index, jint count, jint bidiFlags, jfloatArray widths) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        count = dotextwidths(env, paint, textArray + index, count, widths, bidiFlags);
+        count = dotextwidths(env, paint, typeface, textArray + index, count, widths, bidiFlags);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
                                       JNI_ABORT);
         return count;
     }
 
-    static jint getTextWidths__StringIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jstring text,
+    static jint getTextWidths__StringIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jstring text,
             jint start, jint end, jint bidiFlags, jfloatArray widths) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        int count = dotextwidths(env, paint, textArray + start, end - start, widths, bidiFlags);
+        int count = dotextwidths(env, paint, typeface, textArray + start, end - start, widths, bidiFlags);
         env->ReleaseStringChars(text, textArray);
         return count;
     }
@@ -634,7 +673,7 @@ public:
         return count;
     }
 
-    static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text,
+    static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, TypefaceImpl* typeface, const jchar *text,
                                     jint start, jint count, jint contextCount, jint flags,
                                     jfloatArray advances, jint advancesIndex) {
         NPE_CHECK_RETURN_ZERO(env, paint);
@@ -657,8 +696,16 @@ public:
         jfloat* advancesArray = new jfloat[count];
         jfloat totalAdvance = 0;
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        layout.doLayout(text + start, count);
+        layout.getAdvances(advancesArray);
+        totalAdvance = layout.getAdvance();
+#else
         TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
                                        advancesArray, &totalAdvance);
+#endif
 
         if (advances != NULL) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
@@ -668,22 +715,26 @@ public:
     }
 
     static jfloat getTextRunAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle,
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
             jint flags, jfloatArray advances, jint advancesIndex) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextIndex,
+        jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextIndex,
                 index - contextIndex, count, contextCount, flags, advances, advancesIndex);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
     static jfloat getTextRunAdvances__StringIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle,
             jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
             jfloatArray advances, jint advancesIndex) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextStart,
+        jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, flags,
                 advances, advancesIndex);
         env->ReleaseStringChars(text, textArray);
@@ -954,11 +1005,11 @@ static JNINativeMethod methods[] = {
     {"native_measureText","(Ljava/lang/String;III)F", (void*) SkPaintGlue::measureText_StringIII},
     {"native_breakText","([CIIFI[F)I", (void*) SkPaintGlue::breakTextC},
     {"native_breakText","(Ljava/lang/String;ZFI[F)I", (void*) SkPaintGlue::breakTextS},
-    {"native_getTextWidths","(J[CIII[F)I", (void*) SkPaintGlue::getTextWidths___CIII_F},
-    {"native_getTextWidths","(JLjava/lang/String;III[F)I", (void*) SkPaintGlue::getTextWidths__StringIII_F},
-    {"native_getTextRunAdvances","(J[CIIIII[FI)F",
+    {"native_getTextWidths","(JJ[CIII[F)I", (void*) SkPaintGlue::getTextWidths___CIII_F},
+    {"native_getTextWidths","(JJLjava/lang/String;III[F)I", (void*) SkPaintGlue::getTextWidths__StringIII_F},
+    {"native_getTextRunAdvances","(JJ[CIIIII[FI)F",
         (void*) SkPaintGlue::getTextRunAdvances___CIIIII_FI},
-    {"native_getTextRunAdvances","(JLjava/lang/String;IIIII[FI)F",
+    {"native_getTextRunAdvances","(JJLjava/lang/String;IIIII[FI)F",
         (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FI},
 
 

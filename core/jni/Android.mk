@@ -95,6 +95,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/CanvasProperty.cpp \
 	android/graphics/ColorFilter.cpp \
 	android/graphics/DrawFilter.cpp \
+	android/graphics/FontFamily.cpp \
 	android/graphics/CreateJavaOutputStreamAdaptor.cpp \
 	android/graphics/Graphics.cpp \
 	android/graphics/HarfBuzzNGFaceSkia.cpp \
@@ -231,7 +232,8 @@ ifeq ($(USE_MINIKIN), true)
 	LOCAL_CFLAGS += -DUSE_MINIKIN
 	LOCAL_C_INCLUDES += frameworks/minikin/include \
 		external/freetype/include
-	LOCAL_SRC_FILES += 	android/graphics/MinikinSkia.cpp
+	LOCAL_SRC_FILES += 	android/graphics/MinikinSkia.cpp \
+		android/graphics/MinikinUtils.cpp
 # note: the freetype include is spurious; minikin itself probably
 # shouldn't depend on it
 	LOCAL_SHARED_LIBRARIES += libminikin libstlport

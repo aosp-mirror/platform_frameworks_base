@@ -30,6 +30,7 @@
 #ifdef USE_MINIKIN
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
+#include "MinikinUtils.h"
 #endif
 
 #include "TextLayout.h"
@@ -820,7 +821,7 @@ public:
     }
 
 #ifdef USE_MINIKIN
-    static void drawGlyphsToSkia(SkCanvas *canvas, SkPaint *paint, Layout *layout, float x, float y) {
+    static void drawGlyphsToSkia(SkCanvas* canvas, SkPaint* paint, Layout* layout, float x, float y) {
         size_t nGlyphs = layout->nGlyphs();
         uint16_t *glyphs = new uint16_t[nGlyphs];
         SkPoint *pos = new SkPoint[nGlyphs];
@@ -865,15 +866,7 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
-        layout.setFontCollection(resolvedFace->fFontCollection);
-        FontStyle style = resolvedFace->fStyle;
-        char css[256];
-        sprintf(css, "font-size: %d; font-weight: %d; font-style: %s",
-            (int)paint->getTextSize(),
-            style.getWeight() * 100,
-            style.getItalic() ? "italic" : "normal");
-        layout.setProperties(css);
+        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
         layout.doLayout(textArray + start, count);
         drawGlyphsToSkia(canvas, paint, &layout, x, y);
 #else

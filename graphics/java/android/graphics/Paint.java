@@ -1655,12 +1655,12 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_getTextWidths(mNativePaint, text, index, count, mBidiFlags, widths);
+            return native_getTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
-        int res = native_getTextWidths(mNativePaint, text, index, count, mBidiFlags, widths);
+        int res = native_getTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
         setTextSize(oldSize);
         for (int i=0; i<res; i++) {
             widths[i] *= mInvCompatScaling;
@@ -1737,12 +1737,12 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_getTextWidths(mNativePaint, text, start, end, mBidiFlags, widths);
+            return native_getTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
-        int res = native_getTextWidths(mNativePaint, text, start, end, mBidiFlags, widths);
+        int res = native_getTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
         setTextSize(oldSize);
         for (int i=0; i<res; i++) {
             widths[i] *= mInvCompatScaling;
@@ -1832,13 +1832,13 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return native_getTextRunAdvances(mNativePaint, chars, index, count,
+            return native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
                     contextIndex, contextCount, flags, advances, advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
-        float res = native_getTextRunAdvances(mNativePaint, chars, index, count,
+        float res = native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
                 contextIndex, contextCount, flags, advances, advancesIndex);
         setTextSize(oldSize);
 
@@ -1963,13 +1963,13 @@ public class Paint {
         }
 
         if (!mHasCompatScaling) {
-            return native_getTextRunAdvances(mNativePaint, text, start, end,
+            return native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
                     contextStart, contextEnd, flags, advances, advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
-        float totalAdvance = native_getTextRunAdvances(mNativePaint, text, start, end,
+        float totalAdvance = native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
                 contextStart, contextEnd, flags, advances, advancesIndex);
         setTextSize(oldSize);
 
@@ -2234,19 +2234,19 @@ public class Paint {
     private static native void native_setTextLocale(long native_object,
                                                     String locale);
 
-    private static native int native_getTextWidths(long native_object,
+    private static native int native_getTextWidths(long native_object, long native_typeface,
                             char[] text, int index, int count, int bidiFlags, float[] widths);
-    private static native int native_getTextWidths(long native_object,
+    private static native int native_getTextWidths(long native_object, long native_typeface,
                             String text, int start, int end, int bidiFlags, float[] widths);
 
     private static native int native_getTextGlyphs(long native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, char[] glyphs);
 
-    private static native float native_getTextRunAdvances(long native_object,
+    private static native float native_getTextRunAdvances(long native_object, long native_typeface,
             char[] text, int index, int count, int contextIndex, int contextCount,
             int flags, float[] advances, int advancesIndex);
-    private static native float native_getTextRunAdvances(long native_object,
+    private static native float native_getTextRunAdvances(long native_object, long native_typeface,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, float[] advances, int advancesIndex);
 

@@ -20,6 +20,10 @@
  * being, that choice is hidden under the USE_MINIKIN compile-time flag.
  */
 
+#define LOG_TAG "TypefaceImpl"
+
+#include "jni.h"  // for jlong, remove when being passed proper type
+
 #include "SkStream.h"
 #include "SkTypeface.h"
 
@@ -146,6 +150,19 @@ TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
     return createFromSkTypeface(face);
 }
 
+TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
+    ALOGD("createFromFamilies size=%d", size);
+    std::vector<FontFamily *>familyVec;
+    for (size_t i = 0; i < size; i++) {
+        FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
+        familyVec.push_back(family);
+    }
+    TypefaceImpl* result = new TypefaceImpl;
+    result->fFontCollection = new FontCollection(familyVec);
+    result->fStyle = FontStyle();  // TODO: improve
+    return result;
+}
+
 void TypefaceImpl_unref(TypefaceImpl* face) {
     delete face;
 }
@@ -187,6 +204,11 @@ TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
     stream->unref();
 
     return face;
+}
+
+TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
+    // Should never be called in non-Minikin builds
+    return 0;
 }
 
 void TypefaceImpl_unref(TypefaceImpl* face) {
