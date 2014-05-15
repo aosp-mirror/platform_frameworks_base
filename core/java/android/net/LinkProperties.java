@@ -89,7 +89,6 @@ public class LinkProperties implements Parcelable {
     }
 
     public LinkProperties() {
-        clear();
     }
 
     // copy constructor instead of clone
