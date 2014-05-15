@@ -33,10 +33,14 @@ ALL_MODULES.$(1).INSTALLED := \
 endef
 
 ##########################################
-# We may only afford small font footprint.
+# The following fonts are distributed as symlink only.
 ##########################################
 $(eval $(call create-font-symlink,DroidSans.ttf,Roboto-Regular.ttf))
 $(eval $(call create-font-symlink,DroidSans-Bold.ttf,Roboto-Bold.ttf))
+$(eval $(call create-font-symlink,DroidSerif-Regular.ttf,NotoSerif-Regular.ttf))
+$(eval $(call create-font-symlink,DroidSerif-Bold.ttf,NotoSerif-Bold.ttf))
+$(eval $(call create-font-symlink,DroidSerif-Italic.ttf,NotoSerif-Italic.ttf))
+$(eval $(call create-font-symlink,DroidSerif-BoldItalic.ttf,NotoSerif-BoldItalic.ttf))
 
 ################################
 # On space-constrained devices, we include a subset of fonts:
@@ -44,14 +48,6 @@ ifeq ($(SMALLER_FONT_FOOTPRINT),true)
 droidsans_fallback_src := DroidSansFallback.ttf
 extra_font_files := DroidSans.ttf DroidSans-Bold.ttf
 else
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSansEthiopic-Regular.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-
 include $(CLEAR_VARS)
 LOCAL_MODULE := MTLmr3m.ttf
 LOCAL_SRC_FILES := $(LOCAL_MODULE)
@@ -64,7 +60,6 @@ droidsans_fallback_src := DroidSansFallbackFull.ttf
 extra_font_files := \
 	DroidSans.ttf \
 	DroidSans-Bold.ttf \
-	DroidSansEthiopic-Regular.ttf \
 	MTLmr3m.ttf
 endif  # SMALLER_FONT_FOOTPRINT
 
@@ -102,10 +97,6 @@ font_src_files := \
     Roboto-Bold.ttf \
     Roboto-Italic.ttf \
     Roboto-BoldItalic.ttf \
-    DroidSerif-Regular.ttf \
-    DroidSerif-Bold.ttf \
-    DroidSerif-Italic.ttf \
-    DroidSerif-BoldItalic.ttf \
     DroidSansMono.ttf \
     Clockopia.ttf \
     AndroidClock.ttf \
@@ -135,12 +126,6 @@ font_src_files += \
     RobotoCondensed-BoldItalic.ttf \
     RobotoCondensed-Light.ttf \
     RobotoCondensed-LightItalic.ttf \
-    DroidNaskh-Regular.ttf \
-    DroidNaskhUI-Regular.ttf \
-    DroidSansHebrew-Regular.ttf \
-    DroidSansHebrew-Bold.ttf \
-    DroidSansArmenian.ttf \
-    DroidSansGeorgian.ttf \
     AndroidEmoji.ttf
 
 endif # !MINIMAL_FONT
