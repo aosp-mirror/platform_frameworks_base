@@ -2104,7 +2104,6 @@
 
   <public-padding type="attr" name="l_resource_pad" end="0x1010410" />
 
-  <public type="attr" name="fragmentBreadCrumbsStyle" />
   <public type="attr" name="fastScrollStyle" />
   <public type="attr" name="windowContentTransitions" />
   <public type="attr" name="windowContentTransitionManager" />
@@ -2195,20 +2194,16 @@
   <public type="style" name="Widget.StackView" />
 
   <public type="style" name="Widget.Holo.FastScroll" />
-  <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.StackView" />
 
   <public type="style" name="Widget.Holo.Light.Button.Borderless" />
   <public type="style" name="Widget.Holo.Light.FastScroll" />
-  <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.StackView" />
 
   <public type="style" name="Widget.DeviceDefault.FastScroll" />
-  <public type="style" name="Widget.DeviceDefault.FragmentBreadCrumbs" />
   <public type="style" name="Widget.DeviceDefault.StackView" />
 
   <public type="style" name="Widget.DeviceDefault.Light.FastScroll" />
-  <public type="style" name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" />
   <public type="style" name="Widget.DeviceDefault.Light.StackView" />
 
   <public type="style" name="TextAppearance.Quantum" />
@@ -2313,7 +2308,6 @@
   <public type="style" name="Widget.Quantum.EditText" />
   <public type="style" name="Widget.Quantum.ExpandableListView" />
   <public type="style" name="Widget.Quantum.FastScroll" />
-  <public type="style" name="Widget.Quantum.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Quantum.GridView" />
   <public type="style" name="Widget.Quantum.HorizontalScrollView" />
   <public type="style" name="Widget.Quantum.ImageButton" />
@@ -2373,7 +2367,6 @@
   <public type="style" name="Widget.Quantum.Light.EditText" />
   <public type="style" name="Widget.Quantum.Light.ExpandableListView" />
   <public type="style" name="Widget.Quantum.Light.FastScroll" />
-  <public type="style" name="Widget.Quantum.Light.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Quantum.Light.GridView" />
   <public type="style" name="Widget.Quantum.Light.HorizontalScrollView" />
   <public type="style" name="Widget.Quantum.Light.ImageButton" />

@@ -37,7 +37,10 @@ import android.widget.TextView;
  *
  * <p>The default style for this view is
  * {@link android.R.style#Widget_FragmentBreadCrumbs}.
+ *
+ * @deprecated This widget is no longer supported.
  */
+@Deprecated
 public class FragmentBreadCrumbs extends ViewGroup
         implements FragmentManager.OnBackStackChangedListener {
     Activity mActivity;
@@ -88,6 +91,9 @@ public class FragmentBreadCrumbs extends ViewGroup
         this(context, attrs, defStyleAttr, 0);
     }
 
+    /**
+     * @hide
+     */
     public FragmentBreadCrumbs(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
