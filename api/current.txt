@@ -829,6 +829,7 @@ package android {
     field public static final int moreIcon = 16843061; // 0x1010135
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
+    field public static final int navigationBarColor = 16843862; // 0x1010456
     field public static final int navigationMode = 16843471; // 0x10102cf
     field public static final int negativeButtonText = 16843254; // 0x10101f6
     field public static final int nestedScrollingEnabled = 16843835; // 0x101043b
@@ -1083,6 +1084,7 @@ package android {
     field public static final int state_single = 16842915; // 0x10100a3
     field public static final int state_window_focused = 16842909; // 0x101009d
     field public static final int staticWallpaperPreview = 16843569; // 0x1010331
+    field public static final int statusBarColor = 16843861; // 0x1010455
     field public static final int stepSize = 16843078; // 0x1010146
     field public static final int stopWithTask = 16843626; // 0x101036a
     field public static final int streamType = 16843273; // 0x1010209
@@ -1306,6 +1308,7 @@ package android {
     field public static final int windowContentTransitionManager = 16843796; // 0x1010414
     field public static final int windowContentTransitions = 16843795; // 0x1010413
     field public static final int windowDisablePreview = 16843298; // 0x1010222
+    field public static final int windowDrawsSystemBarBackgrounds = 16843860; // 0x1010454
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
     field public static final int windowEnterTransition = 16843836; // 0x101043c
@@ -32572,8 +32575,10 @@ package android.view {
     method protected final int getForcedWindowFlags();
     method public abstract android.view.LayoutInflater getLayoutInflater();
     method protected final int getLocalFeatures();
+    method public abstract int getNavigationBarColor();
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
+    method public abstract int getStatusBarColor();
     method public android.transition.TransitionManager getTransitionManager();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
@@ -32625,9 +32630,11 @@ package android.view {
     method public void setLayout(int, int);
     method public void setLocalFocus(boolean, boolean);
     method public void setLogo(int);
+    method public abstract void setNavigationBarColor(int);
     method public void setSharedElementEnterTransition(android.transition.Transition);
     method public void setSharedElementExitTransition(android.transition.Transition);
     method public void setSoftInputMode(int);
+    method public abstract void setStatusBarColor(int);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
     method public void setTransitionManager(android.transition.TransitionManager);
@@ -32785,6 +32792,7 @@ package android.view {
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
     field public static final deprecated int FLAG_DITHER = 4096; // 0x1000
+    field public static final int FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = -2147483648; // 0x80000000
     field public static final int FLAG_FORCE_NOT_FULLSCREEN = 2048; // 0x800
     field public static final int FLAG_FULLSCREEN = 1024; // 0x400
     field public static final int FLAG_HARDWARE_ACCELERATED = 16777216; // 0x1000000

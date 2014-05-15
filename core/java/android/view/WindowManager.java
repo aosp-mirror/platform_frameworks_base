@@ -915,6 +915,14 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
 
         /**
+         * Flag indicating that this Window is responsible for drawing the background for the
+         * system bars. If set, the system bars are drawn with a transparent background and the
+         * corresponding areas in this window are filled with the colors specified in
+         * {@link Window#getStatusBarColor()} and {@link Window#getNavigationBarColor()}.
+         */
+        public static final int FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = 0x80000000;
+
+        /**
          * Various behavioral options/flags.  Default is none.
          * 
          * @see #FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
@@ -941,6 +949,7 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_SPLIT_TOUCH
          * @see #FLAG_HARDWARE_ACCELERATED
          * @see #FLAG_LOCAL_FOCUS_MODE
+         * @see #FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
@@ -998,7 +1007,9 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
                     name = "FLAG_TRANSLUCENT_STATUS"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
-                    name = "FLAG_TRANSLUCENT_NAVIGATION")
+                    name = "FLAG_TRANSLUCENT_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                    name = "FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS")
         })
         public int flags;
 

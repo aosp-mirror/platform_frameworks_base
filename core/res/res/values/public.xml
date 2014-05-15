@@ -2171,6 +2171,9 @@
   <public type="attr" name="targetViewName" />
   <public type="attr" name="excludeViewName" />
   <public type="attr" name="matchOrder" />
+  <public type="attr" name="windowDrawsSystemBarBackgrounds" />
+  <public type="attr" name="statusBarColor"/>
+  <public type="attr" name="navigationBarColor"/>
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
