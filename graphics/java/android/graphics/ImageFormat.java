@@ -272,6 +272,7 @@ public class ImageFormat {
             case NV16:
             case YUY2:
             case YV12:
+            case JPEG:
             case NV21:
             case YUV_420_888:
             case RAW_SENSOR:

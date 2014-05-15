@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.graphics.ImageFormat;
 import android.os.Handler;
 import android.view.Surface;
 
@@ -147,7 +149,7 @@ public interface CameraDevice extends AutoCloseable {
      *   the size of the Surface with
      *   {@link android.view.SurfaceHolder#setFixedSize} to be one of the
      *   supported
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) processed sizes}
      *   before calling {@link android.view.SurfaceHolder#getSurface}.</li>
      *
      * <li>For accessing through an OpenGL texture via a
@@ -155,14 +157,14 @@ public interface CameraDevice extends AutoCloseable {
      *   the SurfaceTexture with
      *   {@link android.graphics.SurfaceTexture#setDefaultBufferSize} to be one
      *   of the supported
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) processed sizes}
      *   before creating a Surface from the SurfaceTexture with
      *   {@link Surface#Surface}.</li>
      *
      * <li>For recording with {@link android.media.MediaCodec}: Call
      *   {@link android.media.MediaCodec#createInputSurface} after configuring
      *   the media codec to use one of the
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) processed sizes}
      *   </li>
      *
      * <li>For recording with {@link android.media.MediaRecorder}: TODO</li>
@@ -171,18 +173,15 @@ public interface CameraDevice extends AutoCloseable {
      *   Create a RenderScript
      *   {@link android.renderscript.Allocation Allocation} with a supported YUV
      *   type, the IO_INPUT flag, and one of the supported
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}. Then
+     *   {@link StreamConfigurationMap#getOutputSizes(int) processed sizes}. Then
      *   obtain the Surface with
      *   {@link android.renderscript.Allocation#getSurface}.</li>
      *
-     * <li>For access to uncompressed or JPEG data in the application: Create a
-     *   {@link android.media.ImageReader} object with the desired
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS image format}, and a
-     *   size from the matching
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed},
-     *   {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES jpeg}. Then obtain
-     *   a Surface from it.</li>
-     *
+     * <li>For access to uncompressed or {@link ImageFormat#JPEG JPEG} data in the application:
+     * Create a {@link android.media.ImageReader} object with the desired
+     * {@link StreamConfigurationMap#getOutputFormats() image format}, and a size from the matching
+     * {@link StreamConfigurationMap#getOutputSizes(int) processed size} and {@code format}.
+     * Then obtain a {@link Surface} from it.</li>
      * </ul>
      *
      * </p>

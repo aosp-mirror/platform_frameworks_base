@@ -307,16 +307,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <li>The sizes will be sorted by increasing pixel area (width x height).
      * If several resolutions have the same area, they will be sorted by increasing width.</li>
      * <li>The aspect ratio of the largest thumbnail size will be same as the
-     * aspect ratio of largest JPEG output size in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations}.
+     * aspect ratio of largest JPEG output size in android.scaler.availableStreamConfigurations.
      * The largest size is defined as the size that has the largest pixel area
      * in a given size list.</li>
-     * <li>Each output JPEG size in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations} will have at least
+     * <li>Each output JPEG size in android.scaler.availableStreamConfigurations will have at least
      * one corresponding size that has the same aspect ratio in availableThumbnailSizes,
      * and vice versa.</li>
      * <li>All non (0, 0) sizes will have non-zero widths and heights.</li>
      * </ul>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
      */
     public static final Key<android.hardware.camera2.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.camera2.Size[].class);
@@ -445,8 +443,10 @@ public final class CameraCharacteristics extends CameraMetadata {
      * working at that point; DO NOT USE without careful
      * consideration of future support.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @deprecated
      * @hide
      */
+    @Deprecated
     public static final Key<Byte> QUIRKS_USE_PARTIAL_RESULT =
             new Key<Byte>("android.quirks.usePartialResult", byte.class);
 
@@ -461,8 +461,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>This lists the upper bound of the number of output streams supported by
      * the camera device. Using more streams simultaneously may require more hardware and
      * CPU resources that will consume more power. The image format for a output stream can
-     * be any supported format provided by {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations}.
-     * The formats defined in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations} can be catergorized
+     * be any supported format provided by android.scaler.availableStreamConfigurations.
+     * The formats defined in android.scaler.availableStreamConfigurations can be catergorized
      * into the 3 stream types as below:</p>
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
@@ -471,8 +471,6 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
@@ -483,14 +481,12 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>When set to 0, it means no input stream is supported.</p>
      * <p>The image format for a input stream can be any supported
      * format provided by
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP android.scaler.availableInputOutputFormatsMap}. When using an
+     * android.scaler.availableInputOutputFormatsMap. When using an
      * input stream, there must be at least one output stream
      * configured to to receive the reprocessed images.</p>
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
      * stream image format will be RAW_OPAQUE, the associated output stream image format
      * should be JPEG.</p>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP
      */
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
             new Key<Integer>("android.request.maxNumInputStreams", int.class);
@@ -629,22 +625,26 @@ public final class CameraCharacteristics extends CameraMetadata {
      * camera device for output streams.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
      * <p>When set to YUV_420_888, application can access the YUV420 data directly.</p>
+     * @deprecated
+     * @hide
      */
+    @Deprecated
     public static final Key<int[]> SCALER_AVAILABLE_FORMATS =
             new Key<int[]>("android.scaler.availableFormats", int[].class);
 
     /**
      * <p>The minimum frame duration that is supported
-     * for each resolution in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes}.</p>
+     * for each resolution in android.scaler.availableJpegSizes.</p>
      * <p>This corresponds to the minimum steady-state frame duration when only
      * that JPEG stream is active and captured in a burst, with all
      * processing (typically in android.*.mode) set to FAST.</p>
      * <p>When multiple streams are configured, the minimum
      * frame duration will be &gt;= max(individual stream min
      * durations)</p>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES
+     * @deprecated
+     * @hide
      */
+    @Deprecated
     public static final Key<long[]> SCALER_AVAILABLE_JPEG_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
 
@@ -654,7 +654,10 @@ public final class CameraCharacteristics extends CameraMetadata {
      * sensor maximum resolution (defined by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}).</p>
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @deprecated
+     * @hide
      */
+    @Deprecated
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableJpegSizes", android.hardware.camera2.Size[].class);
 
@@ -669,16 +672,17 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>For each available processed output size (defined in
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES android.scaler.availableProcessedSizes}), this property lists the
+     * android.scaler.availableProcessedSizes), this property lists the
      * minimum supportable frame duration for that size.</p>
      * <p>This should correspond to the frame duration when only that processed
      * stream is active, with all processing (typically in android.*.mode)
      * set to FAST.</p>
      * <p>When multiple streams are configured, the minimum frame duration will
      * be &gt;= max(individual stream min durations).</p>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES
+     * @deprecated
+     * @hide
      */
+    @Deprecated
     public static final Key<long[]> SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
 
@@ -696,7 +700,10 @@ public final class CameraCharacteristics extends CameraMetadata {
      * can provide.</p>
      * <p>Please reference the documentation for the image data destination to
      * check if it limits the maximum size for image data.</p>
+     * @deprecated
+     * @hide
      */
+    @Deprecated
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
 
@@ -746,13 +753,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      * </table>
      * <p>For ZSL-capable camera devices, using the RAW_OPAQUE format
      * as either input or output will never hurt maximum frame rate (i.e.
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations} will not have RAW_OPAQUE).</p>
+     * StreamConfigurationMap#getOutputStallDuration(int,Size)
+     * for a <code>format =</code> RAW_OPAQUE is always 0).</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
-     * <p>TODO: Add java type mapping for this property.</p>
+     * <p>TODO: typedef to ReprocessFormatMap</p>
      *
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
+     * @hide
      */
     public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
             new Key<int[]>("android.scaler.availableInputOutputFormatsMap", int[].class);
@@ -775,7 +783,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * check if it limits the maximum size for image data.</p>
      * <p>Not all output formats may be supported in a configuration with
      * an input stream of a particular format. For more details, see
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP android.scaler.availableInputOutputFormatsMap}.</p>
+     * android.scaler.availableInputOutputFormatsMap.</p>
      * <p>The following table describes the minimum required output stream
      * configurations based on the hardware level
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}):</p>
@@ -844,13 +852,11 @@ public final class CameraCharacteristics extends CameraMetadata {
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
-     * @see #SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT
-     * @see #SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT
+     * @hide
      */
-    public static final Key<int[]> SCALER_AVAILABLE_STREAM_CONFIGURATIONS =
-            new Key<int[]>("android.scaler.availableStreamConfigurations", int[].class);
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> SCALER_AVAILABLE_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.scaler.availableStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
 
     /**
      * <p>This lists the minimum frame duration for each
@@ -863,14 +869,16 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The minimum frame duration of a stream (of a particular format, size)
      * is the same regardless of whether the stream is input or output.</p>
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations} for more details about
+     * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
+     * <p>(Keep in sync with
+     * StreamConfigurationMap#getOutputMinFrameDuration)</p>
      *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
      * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @hide
      */
-    public static final Key<long[]> SCALER_AVAILABLE_MIN_FRAME_DURATIONS =
-            new Key<long[]>("android.scaler.availableMinFrameDurations", long[].class);
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_MIN_FRAME_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
     /**
      * <p>This lists the maximum stall duration for each
@@ -929,12 +937,105 @@ public final class CameraCharacteristics extends CameraMetadata {
      * for more details.</p>
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} for more information about
      * calculating the max frame rate (absent stalls).</p>
+     * <p>(Keep up to date with
+     * StreamConfigurationMap#getOutputStallDuration(int, Size) )</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @hide
      */
-    public static final Key<long[]> SCALER_AVAILABLE_STALL_DURATIONS =
-            new Key<long[]>("android.scaler.availableStallDurations", long[].class);
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_STALL_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available stream configurations that this
+     * camera device supports; also includes the minimum frame durations
+     * and the stall durations for each format/size combination.</p>
+     * <p>All camera devices will support sensor maximum resolution (defined by
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}) for the JPEG format.</p>
+     * <p>For a given use case, the actual maximum supported resolution
+     * may be lower than what is listed here, depending on the destination
+     * Surface for the image data. For example, for recording video,
+     * the video encoder chosen may have a maximum size limit (e.g. 1080p)
+     * smaller than what the camera (e.g. maximum resolution is 3264x2448)
+     * can provide.</p>
+     * <p>Please reference the documentation for the image data destination to
+     * check if it limits the maximum size for image data.</p>
+     * <p>Not all output formats may be supported in a configuration with
+     * an input stream of a particular format. For more details, see
+     * android.scaler.availableInputOutputFormatsMap.</p>
+     * <p>The following table describes the minimum required output stream
+     * configurations based on the hardware level
+     * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}):</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">Format</th>
+     * <th align="center">Size</th>
+     * <th align="center">Hardware Level</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">1920x1080 (1080p)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">1280x720 (720)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">640x480 (480p)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">320x240 (240p)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">all output sizes available for JPEG</td>
+     * <td align="center">FULL</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">all output sizes available for JPEG, up to the maximum video size</td>
+     * <td align="center">LIMITED</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">IMPLEMENTATION_DEFINED</td>
+     * <td align="center">same as YUV_420_888</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
+     * mandatory stream configurations on a per-capability basis.</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP =
+            new Key<android.hardware.camera2.params.StreamConfigurationMap>("android.scaler.streamConfigurationMap", android.hardware.camera2.params.StreamConfigurationMap.class);
 
     /**
      * <p>Area of raw data which corresponds to only
@@ -982,13 +1083,9 @@ public final class CameraCharacteristics extends CameraMetadata {
      * being clipped to the maximum. See that control
      * for a full definition of frame durations.</p>
      * <p>Refer to
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS android.scaler.availableProcessedMinDurations},
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS android.scaler.availableJpegMinDurations}, and
-     * android.scaler.availableRawMinDurations for the minimum
-     * frame duration values.</p>
+     * StreamConfigurationMap#getOutputMinFrameDuration(int,Size)
+     * for the minimum frame duration values.</p>
      *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS
-     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
@@ -1007,9 +1104,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * including black calibration pixels.</p>
      * <p>Maximum output resolution for raw format must
      * match this in
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations}.</p>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+     * android.scaler.availableStreamConfigurations.</p>
      */
     public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
             new Key<android.hardware.camera2.Size>("android.sensor.info.pixelArraySize", android.hardware.camera2.Size.class);
@@ -1420,4 +1515,13 @@ public final class CameraCharacteristics extends CameraMetadata {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
+
+
+
+
+
+
+
 }
