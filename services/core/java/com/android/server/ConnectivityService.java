@@ -5491,9 +5491,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } catch (Exception e) {
                 loge("Exception in setDnsServersForNetwork: " + e);
             }
-            // TODO - setprop "net.dnsX"
+            NetworkAgentInfo defaultNai = mNetworkForRequestId.get(mDefaultRequest.requestId);
+            if (defaultNai != null && defaultNai.network.netId == netId) {
+                setDefaultDnsSystemProperties(dnses);
+            }
         }
     }
+
+    private void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
+        int last = 0;
+        for (InetAddress dns : dnses) {
+            ++last;
+            String key = "net.dns" + last;
+            String value = dns.getHostAddress();
+            SystemProperties.set(key, value);
+        }
+        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
+            String key = "net.dns" + i;
+            SystemProperties.set(key, "");
+        }
+        mNumDnsEntries = last;
+    }
+
 
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {
@@ -5610,6 +5629,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (mDefaultRequest.requestId == nri.request.requestId) {
                         isNewDefault = true;
                         updateActiveDefaultNetwork(newNetwork);
+                        if (newNetwork.linkProperties != null) {
+                            setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnses());
+                        } else {
+                            setDefaultDnsSystemProperties(new ArrayList<InetAddress>());
+                        }
                     }
                 }
             }
