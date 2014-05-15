@@ -269,7 +269,6 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@style/Widget.Quantum.PopupMenu</item>
         <item name="stackViewStyle">@style/Widget.Quantum.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Quantum.ActivityChooserView</item>
-        <item name="fragmentBreadCrumbsStyle">@style/Widget.Quantum.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Quantum.PreferenceScreen</item>
@@ -612,7 +611,6 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@style/Widget.Quantum.Light.PopupMenu</item>
         <item name="stackViewStyle">@style/Widget.Quantum.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Quantum.Light.ActivityChooserView</item>
-        <item name="fragmentBreadCrumbsStyle">@style/Widget.Quantum.Light.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Quantum.PreferenceScreen</item>

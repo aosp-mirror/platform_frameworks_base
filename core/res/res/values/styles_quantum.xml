@@ -474,7 +474,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ExpandableListView.White"/>
-    <style name="Widget.Quantum.FragmentBreadCrumbs" parent="Widget.FragmentBreadCrumbs"/>
     <style name="Widget.Quantum.Gallery" parent="Widget.Gallery"/>
     <style name="Widget.Quantum.GestureOverlayView" parent="Widget.GestureOverlayView"/>
     <style name="Widget.Quantum.GridView" parent="Widget.GridView"/>
@@ -820,7 +819,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.EditText" parent="Widget.Quantum.EditText"/>
     <style name="Widget.Quantum.Light.ExpandableListView" parent="Widget.Quantum.ExpandableListView"/>
     <style name="Widget.Quantum.Light.ExpandableListView.White" parent="Widget.Quantum.ExpandableListView.White"/>
-    <style name="Widget.Quantum.Light.FragmentBreadCrumbs" parent="Widget.Quantum.FragmentBreadCrumbs"/>
     <style name="Widget.Quantum.Light.Gallery" parent="Widget.Quantum.Gallery"/>
     <style name="Widget.Quantum.Light.GestureOverlayView" parent="Widget.Quantum.GestureOverlayView"/>
     <style name="Widget.Quantum.Light.GridView" parent="Widget.Quantum.GridView"/>

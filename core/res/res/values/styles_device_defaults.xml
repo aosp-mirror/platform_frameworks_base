@@ -91,7 +91,8 @@ easier.
     <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch"/>
     <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Quantum.ExpandableListView.White"/>
     <style name="Widget.DeviceDefault.FastScroll" parent="Widget.Quantum.FastScroll"/>
-    <style name="Widget.DeviceDefault.FragmentBreadCrumbs" parent="Widget.Quantum.FragmentBreadCrumbs"/>
+    <!-- The FragmentBreadCrumbs widget is deprecated starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
+    <style name="Widget.DeviceDefault.FragmentBreadCrumbs" parent="Widget.Holo.FragmentBreadCrumbs"/>
     <style name="Widget.DeviceDefault.Gallery" parent="Widget.Quantum.Gallery"/>
     <style name="Widget.DeviceDefault.GestureOverlayView" parent="Widget.Quantum.GestureOverlayView"/>
     <style name="Widget.DeviceDefault.ImageWell" parent="Widget.Quantum.ImageWell"/>
@@ -130,7 +131,8 @@ easier.
     <style name="Widget.DeviceDefault.Light.EditText" parent="Widget.Quantum.Light.EditText"/>
     <style name="Widget.DeviceDefault.Light.ExpandableListView" parent="Widget.Quantum.Light.ExpandableListView"/>
     <style name="Widget.DeviceDefault.Light.FastScroll" parent="Widget.Quantum.Light.FastScroll"/>
-    <style name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" parent="Widget.Quantum.Light.FragmentBreadCrumbs"/>
+    <!-- The FragmentBreadCrumbs widget is deprecated starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
+    <style name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" parent="Widget.Holo.Light.FragmentBreadCrumbs"/>
     <style name="Widget.DeviceDefault.Light.GridView" parent="Widget.Quantum.Light.GridView"/>
     <style name="Widget.DeviceDefault.Light.ImageButton" parent="Widget.Quantum.Light.ImageButton"/>
     <style name="Widget.DeviceDefault.Light.ListView" parent="Widget.Quantum.Light.ListView"/>

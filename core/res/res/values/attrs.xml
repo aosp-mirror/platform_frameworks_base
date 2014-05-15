@@ -657,7 +657,9 @@
         <attr name="popupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
-        <!-- Default style for the FragmentBreadCrumbs widget. -->
+
+        <!-- Default style for the FragmentBreadCrumbs widget. This widget is deprecated
+             starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
         <attr name="fragmentBreadCrumbsStyle" format="reference" />
 
         <!-- NumberPicker style. -->
