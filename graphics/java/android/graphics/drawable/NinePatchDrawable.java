@@ -72,8 +72,8 @@ public class NinePatchDrawable extends Drawable {
     private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
     // These are scaled to match the target density.
-    private int mBitmapWidth;
-    private int mBitmapHeight;
+    private int mBitmapWidth = -1;
+    private int mBitmapHeight = -1;
 
     NinePatchDrawable() {
         mNinePatchState = new NinePatchState();
@@ -209,7 +209,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     private void setNinePatch(NinePatch ninePatch) {
-        if (ninePatch != mNinePatch) {
+        if (mNinePatch != ninePatch) {
             mNinePatch = ninePatch;
             if (ninePatch != null) {
                 computeBitmapSize();
@@ -339,7 +339,7 @@ public class NinePatchDrawable extends Drawable {
     public void setTint(ColorStateList tint) {
         if (mNinePatchState.mTint != tint) {
             mNinePatchState.mTint = tint;
-            updateTintFilter();
+            computeTintFilter();
             invalidateSelf();
         }
     }
@@ -362,23 +362,20 @@ public class NinePatchDrawable extends Drawable {
     public void setTintMode(Mode tintMode) {
         if (mNinePatchState.mTintMode != tintMode) {
             mNinePatchState.mTintMode = tintMode;
-            updateTintFilter();
+            computeTintFilter();
             invalidateSelf();
         }
     }
 
-    /**
-     * Ensures the tint filter is consistent with the current tint color and
-     * mode.
-     */
-    private void updateTintFilter() {
-        final ColorStateList tint = mNinePatchState.mTint;
-        final Mode tintMode = mNinePatchState.mTintMode;
-        if (tint != null && tintMode != null) {
-            if (mTintFilter == null) {
-                mTintFilter = new PorterDuffColorFilter(0, tintMode);
+    private void computeTintFilter() {
+        final NinePatchState state = mNinePatchState;
+        if (state.mTint != null && state.mTintMode != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            if (mTintFilter != null) {
+                mTintFilter.setColor(color);
+                mTintFilter.setMode(state.mTintMode);
             } else {
-                mTintFilter.setMode(tintMode);
+                mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
             }
         } else {
             mTintFilter = null;
@@ -422,139 +419,26 @@ public class NinePatchDrawable extends Drawable {
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
 
-        final TypedArray a = obtainAttributes(
-                r, theme, attrs, R.styleable.NinePatchDrawable);
-        inflateStateFromTypedArray(a);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.NinePatchDrawable);
+        updateStateFromTypedArray(a);
         a.recycle();
-    }
-
-    /**
-     * Initializes the constant state from the values in the typed array.
-     */
-    private void inflateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
-        final Resources r = a.getResources();
-        final NinePatchState ninePatchState = mNinePatchState;
-
-        // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        ninePatchState.mThemeAttrs = themeAttrs;
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_dither] == 0) {
-            final boolean dither = a.getBoolean(
-                    R.styleable.NinePatchDrawable_dither, DEFAULT_DITHER);
-            ninePatchState.mDither = dither;
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_src] == 0) {
-            final int id = a.getResourceId(R.styleable.NinePatchDrawable_src, 0);
-            if (id == 0) {
-                throw new XmlPullParserException(a.getPositionDescription() +
-                        ": <nine-patch> requires a valid src attribute");
-            }
-
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inDither = !ninePatchState.mDither;
-            options.inScreenDensity = r.getDisplayMetrics().noncompatDensityDpi;
-
-            final Rect padding = new Rect();
-            final Rect opticalInsets = new Rect();
-            Bitmap bitmap = null;
-
-            try {
-                final TypedValue value = new TypedValue();
-                final InputStream is = r.openRawResource(id, value);
-
-                bitmap = BitmapFactory.decodeResourceStream(r, value, is, padding, options);
-
-                is.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-
-            if (bitmap == null) {
-                throw new XmlPullParserException(a.getPositionDescription() +
-                        ": <nine-patch> requires a valid src attribute");
-            } else if (bitmap.getNinePatchChunk() == null) {
-                throw new XmlPullParserException(a.getPositionDescription() +
-                        ": <nine-patch> requires a valid 9-patch source image");
-            }
-
-            final NinePatch ninePatch = new NinePatch(bitmap, bitmap.getNinePatchChunk());
-            ninePatchState.mNinePatch = ninePatch;
-            ninePatchState.mPadding = padding;
-            ninePatchState.mOpticalInsets = Insets.of(opticalInsets);
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_autoMirrored] == 0) {
-            final boolean autoMirrored = a.getBoolean(
-                    R.styleable.NinePatchDrawable_autoMirrored, false);
-            ninePatchState.mAutoMirrored = autoMirrored;
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_tintMode] == 0) {
-            final int tintModeValue = a.getInt(R.styleable.NinePatchDrawable_tintMode, -1);
-            ninePatchState.mTintMode = Drawable.parseTintMode(tintModeValue, Mode.SRC_IN);
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_tint] == 0) {
-            ninePatchState.mTint = a.getColorStateList(R.styleable.NinePatchDrawable_tint);
-            if (ninePatchState.mTint != null) {
-                final int color = ninePatchState.mTint.getColorForState(getState(), 0);
-                mTintFilter = new PorterDuffColorFilter(color, ninePatchState.mTintMode);
-            }
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.NinePatchDrawable_alpha] == 0) {
-            ninePatchState.mBaseAlpha = a.getFloat(R.styleable.NinePatchDrawable_alpha, 1.0f);
-        }
-
-        // Apply the constant state to the paint.
-        initializeWithState(ninePatchState, r);
-
-        // Push density applied by setNinePatchState into state.
-        ninePatchState.mTargetDensity = mTargetDensity;
-    }
-
-    @Override
-    public void applyTheme(Theme t) {
-        super.applyTheme(t);
-
-        final NinePatchState state = mNinePatchState;
-        if (state == null) {
-            throw new RuntimeException("Can't apply theme to <nine-patch> with no constant state");
-        }
-
-        final int[] themeAttrs = state.mThemeAttrs;
-        if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(
-                    themeAttrs, R.styleable.NinePatchDrawable, 0, 0);
-            updateStateFromTypedArray(a);
-            a.recycle();
-        }
     }
 
     /**
      * Updates the constant state from the values in the typed array.
      */
-    private void updateStateFromTypedArray(TypedArray a) {
+    private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
         final Resources r = a.getResources();
         final NinePatchState state = mNinePatchState;
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_dither)) {
-            state.mDither = a.getBoolean(R.styleable.NinePatchDrawable_dither, DEFAULT_DITHER);
-        }
+        // Extract the theme attributes, if any.
+        final int[] themeAttrs = a.extractThemeAttrs();
+        state.mThemeAttrs = themeAttrs;
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_autoMirrored)) {
-            state.mAutoMirrored = a.getBoolean(R.styleable.NinePatchDrawable_autoMirrored, false);
-        }
+        state.mDither = a.getBoolean(R.styleable.NinePatchDrawable_dither, state.mDither);
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_src)) {
-            final int id = a.getResourceId(R.styleable.NinePatchDrawable_src, 0);
-            if (id == 0) {
-                throw new RuntimeException(a.getPositionDescription() +
-                        ": <nine-patch> requires a valid src attribute");
-            }
-
+        final int srcResId = a.getResourceId(R.styleable.NinePatchDrawable_src, 0);
+        if (srcResId != 0) {
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inDither = !state.mDither;
             options.inScreenDensity = r.getDisplayMetrics().noncompatDensityDpi;
@@ -565,7 +449,7 @@ public class NinePatchDrawable extends Drawable {
 
             try {
                 final TypedValue value = new TypedValue();
-                final InputStream is = r.openRawResource(id, value);
+                final InputStream is = r.openRawResource(srcResId, value);
 
                 bitmap = BitmapFactory.decodeResourceStream(r, value, is, padding, options);
 
@@ -575,10 +459,10 @@ public class NinePatchDrawable extends Drawable {
             }
 
             if (bitmap == null) {
-                throw new RuntimeException(a.getPositionDescription() +
+                throw new XmlPullParserException(a.getPositionDescription() +
                         ": <nine-patch> requires a valid src attribute");
             } else if (bitmap.getNinePatchChunk() == null) {
-                throw new RuntimeException(a.getPositionDescription() +
+                throw new XmlPullParserException(a.getPositionDescription() +
                         ": <nine-patch> requires a valid 9-patch source image");
             }
 
@@ -587,29 +471,44 @@ public class NinePatchDrawable extends Drawable {
             state.mOpticalInsets = Insets.of(opticalInsets);
         }
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_tintMode)) {
-            final int modeValue = a.getInt(R.styleable.NinePatchDrawable_tintMode, -1);
-            state.mTintMode = Drawable.parseTintMode(modeValue, Mode.SRC_IN);
+        state.mAutoMirrored = a.getBoolean(
+                R.styleable.NinePatchDrawable_autoMirrored, state.mAutoMirrored);
+        state.mBaseAlpha = a.getFloat(R.styleable.NinePatchDrawable_alpha, state.mBaseAlpha);
+
+        final int tintMode = a.getInt(R.styleable.NinePatchDrawable_tintMode, -1);
+        if (tintMode != -1) {
+            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
         }
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_tint)) {
-            final ColorStateList tint = a.getColorStateList(R.styleable.NinePatchDrawable_tint);
-            if (tint != null) {
-                state.mTint = tint;
-                final int color = tint.getColorForState(getState(), 0);
-                mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
-            }
+        final ColorStateList tint = a.getColorStateList(R.styleable.NinePatchDrawable_tint);
+        if (tint != null) {
+            state.mTint = tint;
         }
 
-        if (a.hasValue(R.styleable.NinePatchDrawable_alpha)) {
-            state.mBaseAlpha = a.getFloat(R.styleable.NinePatchDrawable_alpha, 1.0f);
-        }
-
-        // Apply the constant state to the paint.
+        // Update local properties.
         initializeWithState(state, r);
 
         // Push density applied by setNinePatchState into state.
         state.mTargetDensity = mTargetDensity;
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final NinePatchState state = mNinePatchState;
+        if (state == null || state.mThemeAttrs == null) {
+            return;
+        }
+
+        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.NinePatchDrawable);
+        try {
+            updateStateFromTypedArray(a);
+        } catch (XmlPullParserException e) {
+            throw new RuntimeException(e);
+        } finally {
+            a.recycle();
+        }
     }
 
     @Override
@@ -705,17 +604,19 @@ public class NinePatchDrawable extends Drawable {
     }
 
     final static class NinePatchState extends ConstantState {
-        NinePatch mNinePatch;
-        ColorStateList mTint;
+        // Values loaded during inflation.
+        int[] mThemeAttrs = null;
+        NinePatch mNinePatch = null;
+        ColorStateList mTint = null;
         Mode mTintMode = Mode.SRC_IN;
-        Rect mPadding;
-        Insets mOpticalInsets;
+        Rect mPadding = null;
+        Insets mOpticalInsets = Insets.NONE;
         float mBaseAlpha = 1.0f;
-        boolean mDither;
-        int[] mThemeAttrs;
-        int mChangingConfigurations;
+        boolean mDither = DEFAULT_DITHER;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
-        boolean mAutoMirrored;
+        boolean mAutoMirrored = false;
+
+        int mChangingConfigurations;
 
         NinePatchState() {
             // Empty constructor.
@@ -786,6 +687,10 @@ public class NinePatchDrawable extends Drawable {
         }
     }
 
+    /**
+     * The one constructor to rule them all. This is called by all public
+     * constructors to set the state and initialize local properties.
+     */
     private NinePatchDrawable(NinePatchState state, Resources res, Theme theme) {
         if (theme != null && state.canApplyTheme()) {
             mNinePatchState = new NinePatchState(state);
@@ -812,14 +717,12 @@ public class NinePatchDrawable extends Drawable {
             setDither(state.mDither);
         }
 
-        if (state.mTint != null) {
-            final int color = state.mTint.getColorForState(getState(), 0);
-            mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+        // Make a local copy of the padding.
+        if (state.mPadding != null) {
+            mPadding = new Rect(state.mPadding);
         }
 
-        final Rect statePadding = state.mPadding;
-        mPadding =  statePadding != null ? new Rect(statePadding) : null;
-
+        computeTintFilter();
         setNinePatch(state.mNinePatch);
     }
 }

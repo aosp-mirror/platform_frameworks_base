@@ -229,7 +229,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         final int[] themeAttrs = state.mThemeAttrs;
         if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.LayerDrawable, 0, 0);
+            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.LayerDrawable);
             updateStateFromTypedArray(a);
             a.recycle();
         }

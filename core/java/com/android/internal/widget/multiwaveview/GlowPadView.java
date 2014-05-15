@@ -238,6 +238,10 @@ public class GlowPadView extends View {
         Drawable pointDrawable = pointId != 0 ? context.getDrawable(pointId) : null;
         mGlowRadius = a.getDimension(R.styleable.GlowPadView_glowRadius, 0.0f);
 
+        mPointCloud = new PointCloud(pointDrawable);
+        mPointCloud.makePointCloud(mInnerRadius, mOuterRadius);
+        mPointCloud.glowManager.setRadius(mGlowRadius);
+
         TypedValue outValue = new TypedValue();
 
         // Read array of target drawables
@@ -273,10 +277,6 @@ public class GlowPadView extends View {
         setVibrateEnabled(mVibrationDuration > 0);
 
         assignDefaultsIfNeeded();
-
-        mPointCloud = new PointCloud(pointDrawable);
-        mPointCloud.makePointCloud(mInnerRadius, mOuterRadius);
-        mPointCloud.glowManager.setRadius(mGlowRadius);
     }
 
     private int getResourceId(TypedArray a, int id) {

@@ -1475,21 +1475,12 @@ public class Resources {
          *               in length to {@code attrs} or {@code null}. All values
          *               must be of type {@link TypedValue#TYPE_ATTRIBUTE}.
          * @param attrs The desired attributes to be retrieved.
-         * @param defStyleAttr An attribute in the current theme that contains a
-         *                     reference to a style resource that supplies
-         *                     defaults values for the TypedArray.  Can be
-         *                     0 to not look for defaults.
-         * @param defStyleRes A resource identifier of a style resource that
-         *                    supplies default values for the TypedArray,
-         *                    used only if defStyleAttr is 0 or can not be found
-         *                    in the theme.  Can be 0 to not look for defaults.
          * @return Returns a TypedArray holding an array of the attribute
          *         values. Be sure to call {@link TypedArray#recycle()}
          *         when done with it.
          * @hide
          */
-        public TypedArray resolveAttributes(int[] values, int[] attrs,
-                int defStyleAttr, int defStyleRes) {
+        public TypedArray resolveAttributes(int[] values, int[] attrs) {
             final int len = attrs.length;
             if (values != null && len != values.length) {
                 throw new IllegalArgumentException(
@@ -1497,8 +1488,7 @@ public class Resources {
             }
 
             final TypedArray array = TypedArray.obtain(Resources.this, len);
-            AssetManager.resolveAttrs(mTheme, defStyleAttr, defStyleRes,
-                    values, attrs, array.mData, array.mIndices);
+            AssetManager.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
             array.mTheme = this;
             array.mXml = null;
 

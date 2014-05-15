@@ -199,7 +199,7 @@ public class ColorDrawable extends Drawable {
 
         final int[] themeAttrs = state.mThemeAttrs;
         if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.ColorDrawable, 0, 0);
+            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.ColorDrawable);
             updateStateFromTypedArray(a);
             a.recycle();
         }

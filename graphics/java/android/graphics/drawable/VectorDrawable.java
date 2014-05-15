@@ -753,7 +753,7 @@ public class VectorDrawable extends Drawable {
             }
 
             final TypedArray a = t.resolveAttributes(
-                    mThemeAttrs, R.styleable.VectorDrawablePath, 0, 0);
+                    mThemeAttrs, R.styleable.VectorDrawablePath);
 
             mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, mClip);
 

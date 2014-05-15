@@ -885,13 +885,13 @@ public class TypedArray {
 
     /**
      * Extracts theme attributes from a typed array for later resolution using
-     * {@link Theme#resolveAttributes(int[], int[], int, int)}.
+     * {@link Theme#resolveAttributes(int[], int[])}. Removes the entries from
+     * the typed array so that subsequent calls to typed getters will return the
+     * default value without crashing.
      *
-     * @param array An array to populate with theme attributes. If the array is
-     *            null or not large enough, a new array will be returned.
      * @return an array of length {@link #getIndexCount()} populated with theme
-     *         attributes, or null if there are no theme attributes in the
-     *         typed array
+     *         attributes, or null if there are no theme attributes in the typed
+     *         array
      * @hide
      */
     public int[] extractThemeAttrs() {
@@ -901,15 +901,27 @@ public class TypedArray {
 
         int[] attrs = null;
 
+        final int[] data = mData;
         final int N = length();
         for (int i = 0; i < N; i++) {
-            final int attrId = getThemeAttributeId(i, 0);
-            if (attrId != 0) {
-                if (attrs == null) {
-                    attrs = new int[N];
-                }
-                attrs[i] = attrId;
+            final int index = i * AssetManager.STYLE_NUM_ENTRIES;
+            if (data[index + AssetManager.STYLE_TYPE] != TypedValue.TYPE_ATTRIBUTE) {
+                continue;
             }
+
+            // Null the entry so that we can safely call getZzz().
+            data[index + AssetManager.STYLE_TYPE] = TypedValue.TYPE_NULL;
+
+            final int attr = data[index + AssetManager.STYLE_DATA];
+            if (attr == 0) {
+                // This attribute is useless!
+                continue;
+            }
+
+            if (attrs == null) {
+                attrs = new int[N];
+            }
+            attrs[i] = attr;
         }
 
         return attrs;
