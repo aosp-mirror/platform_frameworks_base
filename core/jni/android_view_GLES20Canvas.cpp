@@ -686,8 +686,8 @@ static void renderTextLayout(OpenGLRenderer* renderer, Layout* layout,
         MinikinFontSkia* mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
         skFace = mfs->GetSkTypeface();
         glyphs[i] = layout->getGlyphId(i);
-        pos[2 * i] = SkFloatToScalar(layout->getX(i));
-        pos[2 * i + 1] = SkFloatToScalar(layout->getY(i));
+        pos[2 * i] = layout->getX(i);
+        pos[2 * i + 1] = layout->getY(i);
         if (i > 0 && skFace != lastFace) {
             paint->setTypeface(lastFace);
             size_t glyphsCount = i - start;
