@@ -64,6 +64,7 @@ public class Typeface {
 
     static Typeface sDefaultTypeface;
     static Map<String, Typeface> sSystemFontMap;
+    static FontFamily[] sFallbackFonts;
 
     /**
      * @hide
@@ -205,10 +206,26 @@ public class Typeface {
      */
     public static Typeface createFromFamilies(FontFamily[] families) {
         long[] ptrArray = new long[families.length];
-        Log.d("Minikin", "# of families: " + families.length);
         for (int i = 0; i < families.length; i++) {
-            Log.d("Minikin", "family ptr: " + families[i].mNativePtr);
             ptrArray[i] = families[i].mNativePtr;
+        }
+        return new Typeface(nativeCreateFromArray(ptrArray));
+    }
+
+    /**
+     * Create a new typeface from an array of font families, including
+     * also the font families in the fallback list.
+     *
+     * @param families array of font families
+     * @hide
+     */
+    public static Typeface createFromFamiliesWithDefault(FontFamily[] families) {
+        long[] ptrArray = new long[families.length + sFallbackFonts.length];
+        for (int i = 0; i < families.length; i++) {
+            ptrArray[i] = families[i].mNativePtr;
+        }
+        for (int i = 0; i < sFallbackFonts.length; i++) {
+            ptrArray[i + families.length] = sFallbackFonts[i].mNativePtr;
         }
         return new Typeface(nativeCreateFromArray(ptrArray));
     }
@@ -243,25 +260,37 @@ public class Typeface {
 
             FileInputStream systemIn = new FileInputStream(systemConfigFilename);
             List<FontListParser.Family> systemFontConfig = FontListParser.parse(systemIn);
+
+            FileInputStream fallbackIn = new FileInputStream(configFilename);
+            List<FontFamily> familyList = new ArrayList<FontFamily>();
+            // Note that the default typeface is always present in the fallback list;
+            // this is an enhancement from pre-Minikin behavior.
+            familyList.add(makeFamilyFromParsed(systemFontConfig.get(0)));
+            for (Family f : FontListParser.parse(fallbackIn)) {
+                familyList.add(makeFamilyFromParsed(f));
+            }
+            sFallbackFonts = familyList.toArray(new FontFamily[familyList.size()]);
+            setDefault(Typeface.createFromFamilies(sFallbackFonts));
+
             Map<String, Typeface> systemFonts = new HashMap<String, Typeface>();
-            for (Family f : systemFontConfig) {
-                FontFamily fontFamily = makeFamilyFromParsed(f);
-                FontFamily[] families = { fontFamily };
-                Typeface typeface = Typeface.createFromFamilies(families);
+            for (int i = 0; i < systemFontConfig.size(); i++) {
+                Typeface typeface;
+                Family f = systemFontConfig.get(i);
+                if (i == 0) {
+                    // The first entry is the default typeface; no sense in duplicating
+                    // the corresponding FontFamily.
+                    typeface = sDefaultTypeface;
+                } else {
+                    FontFamily fontFamily = makeFamilyFromParsed(f);
+                    FontFamily[] families = { fontFamily };
+                    typeface = Typeface.createFromFamiliesWithDefault(families);
+                }
                 for (String name : f.names) {
                     systemFonts.put(name, typeface);
                 }
             }
             sSystemFontMap = systemFonts;
 
-            FileInputStream fallbackIn = new FileInputStream(configFilename);
-            List<FontFamily> families = new ArrayList<FontFamily>();
-            families.add(makeFamilyFromParsed(systemFontConfig.get(0)));
-            for (Family f : FontListParser.parse(fallbackIn)) {
-                families.add(makeFamilyFromParsed(f));
-            }
-            FontFamily[] familyArray = families.toArray(new FontFamily[families.size()]);
-            setDefault(Typeface.createFromFamilies(familyArray));
         } catch (RuntimeException e) {
             Log.w(TAG, "Didn't create default family (most likely, non-Minikin build)");
             // TODO: normal in non-Minikin case, remove or make error when Minikin-only
