@@ -155,9 +155,6 @@ public class ProxyInfo implements Parcelable {
             mHost = source.getHost();
             mPort = source.getPort();
             mPacFileUrl = source.mPacFileUrl;
-            if (mPacFileUrl == null) {
-                mPacFileUrl = Uri.EMPTY;
-            }
             mExclusionList = source.getExclusionListAsString();
             mParsedExclusionList = source.mParsedExclusionList;
         } else {
