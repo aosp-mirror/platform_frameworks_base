@@ -80,6 +80,7 @@ public class NotificationUsageStats {
      * Called when the originating app removed the notification programmatically.
      */
     public synchronized void registerRemovedByApp(NotificationRecord notification) {
+        notification.stats.onRemoved();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numRemovedByApp++;
             stats.collect(notification.stats);
@@ -116,9 +117,7 @@ public class NotificationUsageStats {
      * <p>Called after {@link #registerClickedByUser(NotificationRecord)}.</p>
      */
     public synchronized void registerCancelDueToClick(NotificationRecord notification) {
-        // No explicit stats for this (the click has already been registered in
-        // registerClickedByUser), just make sure the single notification stats
-        // are folded up into aggregated stats.
+        notification.stats.onCancel();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.collect(notification.stats);
         }
@@ -130,7 +129,7 @@ public class NotificationUsageStats {
      * <p>Called for notifications of apps being uninstalled, for example.</p>
      */
     public synchronized void registerCancelUnknown(NotificationRecord notification) {
-        // Fold up individual stats.
+        notification.stats.onCancel();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.collect(notification.stats);
         }
@@ -185,6 +184,9 @@ public class NotificationUsageStats {
         public final Aggregate posttimeMs = new Aggregate();
         public final Aggregate posttimeToDismissMs = new Aggregate();
         public final Aggregate posttimeToFirstClickMs = new Aggregate();
+        public final Aggregate airtimeCount = new Aggregate();
+        public final Aggregate airtimeMs = new Aggregate();
+        public final Aggregate posttimeToFirstAirtimeMs = new Aggregate();
 
         public AggregatedStats(String key) {
             this.key = key;
@@ -198,6 +200,14 @@ public class NotificationUsageStats {
             }
             if (singleNotificationStats.posttimeToFirstClickMs >= 0) {
                 posttimeToFirstClickMs.addSample(singleNotificationStats.posttimeToFirstClickMs);
+            }
+            airtimeCount.addSample(singleNotificationStats.airtimeCount);
+            if (singleNotificationStats.airtimeMs >= 0) {
+                airtimeMs.addSample(singleNotificationStats.airtimeMs);
+            }
+            if (singleNotificationStats.posttimeToFirstAirtimeMs >= 0) {
+                posttimeToFirstAirtimeMs.addSample(
+                        singleNotificationStats.posttimeToFirstAirtimeMs);
             }
         }
 
@@ -221,6 +231,9 @@ public class NotificationUsageStats {
                     indent + "  posttimeMs=" + posttimeMs + ",\n" +
                     indent + "  posttimeToDismissMs=" + posttimeToDismissMs + ",\n" +
                     indent + "  posttimeToFirstClickMs=" + posttimeToFirstClickMs + ",\n" +
+                    indent + "  airtimeCount=" + airtimeCount + ",\n" +
+                    indent + "  airtimeMs=" + airtimeMs + ",\n" +
+                    indent + "  posttimeToFirstAirtimeMs=" + posttimeToFirstAirtimeMs + ",\n" +
                     indent + "}";
         }
     }
@@ -235,6 +248,33 @@ public class NotificationUsageStats {
         public long posttimeToFirstClickMs = -1;
         /** Elpased time since the notification was posted until it was dismissed by the user. */
         public long posttimeToDismissMs = -1;
+        /** Number of times the notification has been made visible. */
+        public long airtimeCount = 0;
+        /** Time in ms between the notification was posted and first shown; -1 if never shown. */
+        public long posttimeToFirstAirtimeMs = -1;
+        /**
+         * If currently visible, SystemClock.elapsedRealtime() when the notification was made
+         * visible; -1 otherwise.
+         */
+        public long currentAirtimeStartElapsedMs = -1;
+        /** Accumulated visible time. */
+        public long airtimeMs = 0;
+
+        public long getCurrentPosttimeMs() {
+            if (posttimeElapsedMs < 0) {
+                return 0;
+            }
+            return SystemClock.elapsedRealtime() - posttimeElapsedMs;
+        }
+
+        public long getCurrentAirtimeMs() {
+            long result = airtimeMs;
+            // Add incomplete airtime if currently shown.
+            if (currentAirtimeStartElapsedMs >= 0) {
+                result+= (SystemClock.elapsedRealtime() - currentAirtimeStartElapsedMs);
+            }
+            return result;
+        }
 
         /**
          * Called when the user clicked the notification.
@@ -252,6 +292,38 @@ public class NotificationUsageStats {
             if (posttimeToDismissMs < 0) {
                 posttimeToDismissMs = SystemClock.elapsedRealtime() - posttimeElapsedMs;
             }
+            finish();
+        }
+
+        public void onCancel() {
+            finish();
+        }
+
+        public void onRemoved() {
+            finish();
+        }
+
+        public void onVisibilityChanged(boolean visible) {
+            long elapsedNowMs = SystemClock.elapsedRealtime();
+            if (visible) {
+                if (currentAirtimeStartElapsedMs < 0) {
+                    airtimeCount++;
+                    currentAirtimeStartElapsedMs = elapsedNowMs;
+                }
+                if (posttimeToFirstAirtimeMs < 0) {
+                    posttimeToFirstAirtimeMs = elapsedNowMs - posttimeElapsedMs;
+                }
+            } else {
+                if (currentAirtimeStartElapsedMs >= 0) {
+                    airtimeMs += (elapsedNowMs - currentAirtimeStartElapsedMs);
+                    currentAirtimeStartElapsedMs = -1;
+                }
+            }
+        }
+
+        /** The notification is leaving the system. Finalize. */
+        public void finish() {
+            onVisibilityChanged(false);
         }
 
         @Override
@@ -260,6 +332,9 @@ public class NotificationUsageStats {
                     "posttimeElapsedMs=" + posttimeElapsedMs +
                     ", posttimeToFirstClickMs=" + posttimeToFirstClickMs +
                     ", posttimeToDismissMs=" + posttimeToDismissMs +
+                    ", airtimeCount=" + airtimeCount +
+                    ", airtimeMs=" + airtimeMs +
+                    ", currentAirtimeStartElapsedMs=" + currentAirtimeStartElapsedMs +
                     '}';
         }
     }
@@ -305,7 +380,7 @@ public class NotificationUsageStats {
         private static final int MSG_DISMISS = 4;
 
         private static final String DB_NAME = "notification_log.db";
-        private static final int DB_VERSION = 1;
+        private static final int DB_VERSION = 2;
 
         /** Age in ms after which events are pruned from the DB. */
         private static final long HORIZON_MS = 7 * 24 * 60 * 60 * 1000L;  // 1 week
@@ -329,6 +404,8 @@ public class NotificationUsageStats {
         private static final String COL_PRIORITY = "priority";
         private static final String COL_CATEGORY = "category";
         private static final String COL_ACTION_COUNT = "action_count";
+        private static final String COL_POSTTIME_MS = "posttime_ms";
+        private static final String COL_AIRTIME_MS = "airtime_ms";
 
         private static final int EVENT_TYPE_POST = 1;
         private static final int EVENT_TYPE_CLICK = 2;
@@ -354,16 +431,16 @@ public class NotificationUsageStats {
                     long nowMs = System.currentTimeMillis();
                     switch (msg.what) {
                         case MSG_POST:
-                            writeEvent(r.sbn.getPostTime(), EVENT_TYPE_POST, r, true);
+                            writeEvent(r.sbn.getPostTime(), EVENT_TYPE_POST, r);
                             break;
                         case MSG_CLICK:
-                            writeEvent(nowMs, EVENT_TYPE_CLICK, r, false);
+                            writeEvent(nowMs, EVENT_TYPE_CLICK, r);
                             break;
                         case MSG_REMOVE:
-                            writeEvent(nowMs, EVENT_TYPE_REMOVE, r, false);
+                            writeEvent(nowMs, EVENT_TYPE_REMOVE, r);
                             break;
                         case MSG_DISMISS:
-                            writeEvent(nowMs, EVENT_TYPE_DISMISS, r, false);
+                            writeEvent(nowMs, EVENT_TYPE_DISMISS, r);
                             break;
                         default:
                             Log.wtf(TAG, "Unknown message type: " + msg.what);
@@ -388,14 +465,22 @@ public class NotificationUsageStats {
                             COL_FLAGS + " INT," +
                             COL_PRIORITY + " INT," +
                             COL_CATEGORY + " TEXT," +
-                            COL_ACTION_COUNT + " INT" +
+                            COL_ACTION_COUNT + " INT," +
+                            COL_POSTTIME_MS + " INT," +
+                            COL_AIRTIME_MS + " INT" +
                             ")");
                 }
 
                 @Override
                 public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-                    db.execSQL("DROP TABLE IF EXISTS " + TAB_LOG);
-                    onCreate(db);
+                    switch (oldVersion) {
+                        case 1:
+                            // Add COL_POSTTIME_MS, COL_AIRTIME_MS columns,
+                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
+                                    COL_POSTTIME_MS + " INT");
+                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
+                                    COL_AIRTIME_MS + " INT");
+                    }
                 }
             };
         }
@@ -445,15 +530,16 @@ public class NotificationUsageStats {
             }
         }
 
-        private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r,
-                boolean populateNotificationDetails) {
+        private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r) {
             ContentValues cv = new ContentValues();
             cv.put(COL_EVENT_USER_ID, r.sbn.getUser().getIdentifier());
             cv.put(COL_EVENT_TIME, eventTimeMs);
             cv.put(COL_EVENT_TYPE, eventType);
             putNotificationIdentifiers(r, cv);
-            if (populateNotificationDetails) {
+            if (eventType == EVENT_TYPE_POST) {
                 putNotificationDetails(r, cv);
+            } else {
+                putPosttimeAirtime(r, cv);
             }
             SQLiteDatabase db = mHelper.getWritableDatabase();
             if (db.insert(TAB_LOG, null, cv) < 0) {
@@ -495,6 +581,11 @@ public class NotificationUsageStats {
             }
             outCv.put(COL_ACTION_COUNT, r.getNotification().actions != null ?
                     r.getNotification().actions.length : 0);
+        }
+
+        private static void putPosttimeAirtime(NotificationRecord r, ContentValues outCv) {
+            outCv.put(COL_POSTTIME_MS, r.stats.getCurrentPosttimeMs());
+            outCv.put(COL_AIRTIME_MS, r.stats.getCurrentAirtimeMs());
         }
 
         public void dump(PrintWriter pw, String indent) {
