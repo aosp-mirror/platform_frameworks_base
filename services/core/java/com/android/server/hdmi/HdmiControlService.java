@@ -127,8 +127,8 @@ public final class HdmiControlService extends SystemService {
             case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
                 handleGetMenuLanguage(message);
                 return true;
-            case HdmiCec.MESSAGE_GET_OSD_NAME:
-                handleGetOsdName(message);
+            case HdmiCec.MESSAGE_GIVE_OSD_NAME:
+                handleGiveOsdName(message);
                 return true;
             case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
                 handleGivePhysicalAddress(message);
@@ -170,7 +170,7 @@ public final class HdmiControlService extends SystemService {
         sendCecCommand(cecMessage);
     }
 
-    private void handleGetOsdName(HdmiCecMessage message) {
+    private void handleGiveOsdName(HdmiCecMessage message) {
         // TODO: read device name from settings or property.
         String name = HdmiCec.getDefaultDeviceName(message.getDestination());
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildSetOsdNameCommand(

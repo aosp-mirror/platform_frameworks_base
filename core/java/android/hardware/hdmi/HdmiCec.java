@@ -120,7 +120,7 @@ public final class HdmiCec {
     public static final int MESSAGE_TIMER_CLEARED_STATUS = 0x043;
     public static final int MESSAGE_USER_CONTROL_PRESSED = 0x44;
     public static final int MESSAGE_USER_CONTROL_RELEASED = 0x45;
-    public static final int MESSAGE_GET_OSD_NAME = 0x46;
+    public static final int MESSAGE_GIVE_OSD_NAME = 0x46;
     public static final int MESSAGE_SET_OSD_NAME = 0x47;
     public static final int MESSAGE_SET_OSD_STRING = 0x64;
     public static final int MESSAGE_SET_TIMER_PROGRAM_TITLE = 0x67;
@@ -158,6 +158,12 @@ public final class HdmiCec {
     public static final int MESSAGE_VENDOR_COMMAND_WITH_ID = 0xA0;
     public static final int MESSAGE_CLEAR_EXTERNAL_TIMER = 0xA1;
     public static final int MESSAGE_SET_EXTERNAL_TIMER = 0xA2;
+    public static final int MESSAGE_INITIATE_ARC = 0xC0;
+    public static final int MESSAGE_REPORT_ARC_INITIATED = 0xC1;
+    public static final int MESSAGE_REPORT_ARC_TERMINATED = 0xC2;
+    public static final int MESSAGE_REQUEST_ARC_INITIATION = 0xC3;
+    public static final int MESSAGE_REQUEST_ARC_TERMINATION = 0xC4;
+    public static final int MESSAGE_TERMINATE_ARC = 0xC5;
     public static final int MESSAGE_ABORT = 0xFF;
 
     public static final int UNKNOWN_VENDOR_ID = 0xFFFFFF;

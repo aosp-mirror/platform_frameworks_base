@@ -71,7 +71,7 @@ final class NewDeviceAction extends FeatureAction {
     @Override
     public boolean start() {
         sendCommand(
-                HdmiCecMessageBuilder.buildGetOsdNameCommand(mSourceAddress,
+                HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress,
                         mDeviceLogicalAddress));
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
         addTimer(mState, TIMEOUT_MS);
