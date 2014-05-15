@@ -2899,7 +2899,7 @@ public abstract class PackageManager {
      * instead.  This method will continue to be supported but the older observer interface
      * will not get additional failure details.
      */
-    @PrivateApi
+    // @PrivateApi
     public abstract void installPackage(
             Uri packageURI, IPackageInstallObserver observer, int flags,
             String installerPackageName);
@@ -2934,7 +2934,7 @@ public abstract class PackageManager {
      * continue to be supported but the older observer interface will not get additional failure
      * details.
      */
-    @PrivateApi
+    // @PrivateApi
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             Uri verificationURI, ManifestDigest manifestDigest,
@@ -3063,7 +3063,7 @@ public abstract class PackageManager {
      * on the system for other users, also install it for the calling user.
      * @hide
      */
-    @PrivateApi
+    // @PrivateApi
     public abstract int installExistingPackage(String packageName)
             throws NameNotFoundException;
 
@@ -3153,7 +3153,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @PrivateApi
+    // @PrivateApi
     public abstract void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags);
 
@@ -3222,7 +3222,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @PrivateApi
+    // @PrivateApi
     public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
 
     /**
