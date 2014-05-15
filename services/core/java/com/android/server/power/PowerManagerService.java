@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -400,7 +401,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
     // If true, the device is in low power mode.
-    private static boolean mLowPowerModeEnabled;
+    private boolean mLowPowerModeEnabled;
+
+    private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
+            = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
     private native void nativeInit();
 
@@ -623,11 +627,24 @@ public final class PowerManagerService extends com.android.server.SystemService
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
 
-        boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
+        final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
         if (lowPowerModeEnabled != mLowPowerModeEnabled) {
             powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
             mLowPowerModeEnabled = lowPowerModeEnabled;
+            BackgroundThread.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayList<PowerManagerInternal.LowPowerModeListener> listeners;
+                    synchronized (mLock) {
+                        listeners = new ArrayList<PowerManagerInternal.LowPowerModeListener>(
+                                mLowPowerModeListeners);
+                    }
+                    for (int i=0; i<listeners.size(); i++) {
+                        listeners.get(i).onLowPowerModeChanged(lowPowerModeEnabled);
+                    }
+                }
+            });
         }
 
         mDirty |= DIRTY_SETTINGS;
@@ -812,8 +829,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     private void notifyWakeLockReleasedLocked(WakeLock wakeLock) {
         if (mSystemReady && wakeLock.mNotifiedAcquired) {
             wakeLock.mNotifiedAcquired = false;
-            mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
-                    wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource);
+            mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag,
+                    wakeLock.mPackageName, wakeLock.mOwnerUid, wakeLock.mOwnerPid,
+                    wakeLock.mWorkSource, wakeLock.mHistoryTag);
         }
     }
 
@@ -2968,6 +2986,20 @@ public final class PowerManagerService extends com.android.server.SystemService
                 setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public boolean getLowPowerModeEnabled() {
+            synchronized (mLock) {
+                return mLowPowerModeEnabled;
+            }
+        }
+
+        @Override
+        public void registerLowPowerModeObserver(LowPowerModeListener listener) {
+            synchronized (mLock) {
+                mLowPowerModeListeners.add(listener);
             }
         }
 

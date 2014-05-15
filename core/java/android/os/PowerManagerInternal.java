@@ -55,6 +55,14 @@ public abstract class PowerManagerInternal {
      */
     public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
 
+    public abstract boolean getLowPowerModeEnabled();
+
+    public interface LowPowerModeListener {
+        public void onLowPowerModeChanged(boolean enabled);
+    }
+
+    public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);
+
     // TODO: Remove this and retrieve as a local service instead.
     public abstract void setPolicy(WindowManagerPolicy policy);
 }

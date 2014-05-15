@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -40,6 +41,7 @@ import android.util.Slog;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,7 +51,8 @@ import java.util.List;
  * All information we are collecting about things that can happen that impact
  * battery life.
  */
-public final class BatteryStatsService extends IBatteryStats.Stub {
+public final class BatteryStatsService extends IBatteryStats.Stub
+        implements PowerManagerInternal.LowPowerModeListener {
     static final String TAG = "BatteryStatsService";
 
     static IBatteryStats sService;
@@ -58,6 +61,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     Context mContext;
     private boolean mBluetoothPendingStats;
     private BluetoothHeadset mBluetoothHeadset;
+    PowerManagerInternal mPowerManagerInternal;
 
     BatteryStatsService(String filename, Handler handler) {
         mStats = new BatteryStatsImpl(filename, handler);
@@ -70,6 +74,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
                 * 1000L);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mPowerManagerInternal.registerLowPowerModeObserver(this);
+        mStats.noteLowPowerMode(mPowerManagerInternal.getLowPowerModeEnabled());
         (new WakeupReasonThread()).start();
      }
     
@@ -88,7 +95,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         sService = asInterface(b);
         return sService;
     }
-    
+
+    @Override
+    public void onLowPowerModeChanged(boolean enabled) {
+        synchronized (mStats) {
+            mStats.noteLowPowerMode(enabled);
+        }
+    }
+
     /**
      * @return the current statistics object, which may be modified
      * to reflect events that affect battery usage.  You must lock the
@@ -154,11 +168,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStopWakelock(int uid, int pid, String name, int type) {
+    public void noteStopWakelock(int uid, int pid, String name, String historyName, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopWakeLocked(uid, pid, name, type, SystemClock.elapsedRealtime(),
-                    SystemClock.uptimeMillis());
+            mStats.noteStopWakeLocked(uid, pid, name, historyName, type,
+                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         }
     }
 
@@ -171,20 +185,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteChangeWakelockFromSource(WorkSource ws, int pid, String name, int type,
-            WorkSource newWs, int newPid, String newName,
+    public void noteChangeWakelockFromSource(WorkSource ws, int pid, String name,
+            String historyName, int type, WorkSource newWs, int newPid, String newName,
             String newHistoryName, int newType, boolean newUnimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, type,
+            mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
                     newWs, newPid, newName, newHistoryName, newType, newUnimportantForLogging);
         }
     }
 
-    public void noteStopWakelockFromSource(WorkSource ws, int pid, String name, int type) {
+    public void noteStopWakelockFromSource(WorkSource ws, int pid, String name, String historyName,
+            int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopWakeFromSourceLocked(ws, pid, name, type);
+            mStats.noteStopWakeFromSourceLocked(ws, pid, name, historyName, type);
         }
     }
 
@@ -608,8 +623,29 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
+        pw.println("  --enable: enable an option: full-wake-history.");
+        pw.println("  --disable: disable an option: full-wake-history.");
         pw.println("  -h: print this help text.");
         pw.println("  <package.name>: optional name of package to filter output by.");
+    }
+
+    private int doEnableOrDisable(PrintWriter pw, int i, String[] args, boolean enable) {
+        i++;
+        if (i >= args.length) {
+            pw.println("Missing option argument for " + (enable ? "--enable" : "--disable"));
+            dumpHelp(pw);
+            return -1;
+        }
+        if ("full-wake-history".equals(args[i])) {
+            synchronized (mStats) {
+                mStats.setRecordAllWakeLocksLocked(enable);
+            }
+        } else {
+            pw.println("Unknown enable/disable option: " + args[i]);
+            dumpHelp(pw);
+            return -1;
+        }
+        return i;
     }
 
     @Override
@@ -662,6 +698,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                         pw.println("Battery stats written.");
                         noOutput = true;
                     }
+                } else if ("--enable".equals(arg)) {
+                    i = doEnableOrDisable(pw, i, args, true);
+                    if (i < 0) {
+                        return;
+                    }
+                    pw.println("Enabled: " + args[i]);
+                    return;
+                } else if ("--disable".equals(arg)) {
+                    i = doEnableOrDisable(pw, i, args, false);
+                    if (i < 0) {
+                        return;
+                    }
+                    pw.println("Disabled: " + args[i]);
+                    return;
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
