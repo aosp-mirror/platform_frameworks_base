@@ -255,7 +255,8 @@ public abstract class TextToSpeechService extends Service {
         // V2 to V1 interface adapter. This allows using V2 client interface on V1-only services.
         Bundle defaultParams = new Bundle();
         defaultParams.putFloat(TextToSpeechClient.Params.SPEECH_PITCH, 1.0f);
-        defaultParams.putFloat(TextToSpeechClient.Params.SPEECH_SPEED, -1.0f);
+        // Speech speed <= 0 makes it use a system wide setting
+        defaultParams.putFloat(TextToSpeechClient.Params.SPEECH_SPEED, 0.0f);
 
         // Enumerate all locales and check if they are available
         ArrayList<VoiceInfo> voicesInfo = new ArrayList<VoiceInfo>();

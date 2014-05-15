@@ -25,7 +25,10 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.speech.tts.ITextToSpeechCallback;
@@ -85,6 +88,8 @@ public class TextToSpeechClient {
     private boolean mFallbackToDefault;
     private HashMap<String, Pair<UtteranceId, RequestCallbacks>> mCallbacks;
     // Guarded by mLock
+
+    private InternalHandler mMainHandler = new InternalHandler();
 
     /** Common voices parameters */
     public static final class Params {
@@ -300,6 +305,8 @@ public class TextToSpeechClient {
     /**
      * Interface definition of callbacks that are called when the client is
      * connected or disconnected from the TTS service.
+     *
+     * The callbacks specified in this method will be called on the UI thread.
      */
     public static interface ConnectionCallbacks {
         /**
@@ -325,6 +332,9 @@ public class TextToSpeechClient {
          * with the speech service (e.g. a crash or resource problem causes it to be killed by the
          * system). When called, all requests have been canceled and no outstanding listeners will
          * be executed. Applications should disable UI components that require the service.
+         *
+         * When the service is working again, the client will receive a callback to the
+         * {@link #onConnectionSuccess()} method.
          */
         public void onServiceDisconnected();
 
@@ -688,7 +698,8 @@ public class TextToSpeechClient {
                 synchronized (mLock) {
                     mEngineStatus = new EngineStatus(mServiceConnection.getEngineName(),
                             voicesInfo);
-                    mConnectionCallbacks.onEngineStatusChange(mEngineStatus);
+                    mMainHandler.obtainMessage(InternalHandler.WHAT_ENGINE_STATUS_CHANGED,
+                            mEngineStatus).sendToTarget();
                 }
             }
         };
@@ -753,9 +764,11 @@ public class TextToSpeechClient {
             Log.i(TAG, "Asked to disconnect from " + name);
 
             synchronized(mLock) {
+                mEstablished = false;
+                mService = null;
                 stopSetupConnectionTask();
             }
-            mConnectionCallbacks.onServiceDisconnected();
+            mMainHandler.obtainMessage(InternalHandler.WHAT_SERVICE_DISCONNECTED).sendToTarget();
         }
 
         private void startSetupConnectionTask(ComponentName name) {
@@ -830,9 +843,11 @@ public class TextToSpeechClient {
     private boolean runAction(Action action) {
         synchronized (mLock) {
             if (mServiceConnection == null) {
+                Log.w(TAG, action.getName() + " failed: not bound to TTS engine");
                 return false;
             }
             if (!mServiceConnection.isEstablished()) {
+                Log.w(TAG, action.getName() + " failed: not fully bound to TTS engine");
                 return false;
             }
             mServiceConnection.runAction(action);
@@ -1043,5 +1058,22 @@ public class TextToSpeechClient {
                 }
             }
         });
+    }
+
+    class InternalHandler extends Handler {
+        final static int WHAT_ENGINE_STATUS_CHANGED = 1;
+        final static int WHAT_SERVICE_DISCONNECTED = 2;
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WHAT_ENGINE_STATUS_CHANGED:
+                    mConnectionCallbacks.onEngineStatusChange((EngineStatus) msg.obj);
+                    return;
+                case WHAT_SERVICE_DISCONNECTED:
+                    mConnectionCallbacks.onServiceDisconnected();
+                    return;
+            }
+        }
     }
 }
