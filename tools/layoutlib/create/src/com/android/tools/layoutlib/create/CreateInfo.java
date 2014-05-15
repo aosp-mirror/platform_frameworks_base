@@ -133,7 +133,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.BitmapFactory#finishDecode",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
-        "android.os.Build#getString",
         "android.text.format.DateFormat#is24HourFormat",
         "android.view.Choreographer#getRefreshRate",
         "android.view.Display#updateDisplayInfoLocked",
@@ -148,6 +147,7 @@ public final class CreateInfo implements ICreateInfo {
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
+        "android.os.SystemProperties#native_get",
     };
 
     /**

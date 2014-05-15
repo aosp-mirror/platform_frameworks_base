@@ -420,11 +420,19 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetShadowLayer(Paint thisPaint, float radius, float dx, float dy,
+    /*package*/ static void native_setShadowLayer(long paint, float radius, float dx, float dy,
             int color) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Paint.setShadowLayer is not supported.", null, null /*data*/);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean native_hasShadowLayer(long paint) {
+        // FIXME
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.hasShadowLayer is not supported.", null, null /*data*/);
+        return false;
     }
 
     @LayoutlibDelegate
