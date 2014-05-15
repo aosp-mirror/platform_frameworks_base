@@ -1125,6 +1125,14 @@ public class UserManagerService extends IUserManager.Stub {
             user.flags |= UserInfo.FLAG_DISABLED;
             writeUserLocked(user);
         }
+
+        if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                && user.isManagedProfile()) {
+            // Send broadcast to notify system that the user removed was a
+            // managed user.
+            sendProfileRemovedBroadcast(user.profileGroupId, user.id);
+        }
+
         if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
         int res;
         try {
@@ -1151,7 +1159,6 @@ public class UserManagerService extends IUserManager.Stub {
         // wiping the user's system directory and removing from the user list
         long ident = Binder.clearCallingIdentity();
         try {
-            final boolean isManaged = getUserInfo(userHandle).isManagedProfile();
             Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
             mContext.sendOrderedBroadcastAsUser(addedIntent, UserHandle.ALL,
@@ -1171,11 +1178,6 @@ public class UserManagerService extends IUserManager.Stub {
                                         synchronized (mPackagesLock) {
                                             removeUserStateLocked(userHandle);
                                         }
-                                    }
-                                    // Send broadcast to notify system that the user removed was a
-                                    // managed user.
-                                    if (isManaged) {
-                                        sendProfileRemovedBroadcast(userHandle);
                                     }
                                 }
                             }.start();
@@ -1228,11 +1230,11 @@ public class UserManagerService extends IUserManager.Stub {
         parent.delete();
     }
 
-    private void sendProfileRemovedBroadcast(int userHandle) {
+    private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(userHandle));
-        // Note: This makes an assumption that the parent owner is user 0.
-        mContext.sendBroadcastAsUser(managedProfileIntent, UserHandle.OWNER, null);
+        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
+        mContext.sendBroadcastAsUser(managedProfileIntent, new UserHandle(parentUserId), null);
     }
 
     @Override
