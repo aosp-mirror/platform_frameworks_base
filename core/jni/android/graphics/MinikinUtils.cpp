@@ -22,16 +22,17 @@
 
 namespace android {
 
-void MinikinUtils::SetLayoutProperties(Layout* layout, SkPaint* paint,
+void MinikinUtils::SetLayoutProperties(Layout* layout, SkPaint* paint, int flags,
     TypefaceImpl* typeface) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
     char css[256];
-    sprintf(css, "font-size: %d; font-weight: %d; font-style: %s",
+    sprintf(css, "font-size: %d; font-weight: %d; font-style: %s; -minikin-bidi: %d",
         (int)paint->getTextSize(),
         style.getWeight() * 100,
-        style.getItalic() ? "italic" : "normal");
+        style.getItalic() ? "italic" : "normal",
+        flags);
     layout->setProperties(css);
 }
 

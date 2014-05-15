@@ -28,7 +28,7 @@ namespace android {
 
 class MinikinUtils {
 public:
-    static void SetLayoutProperties(Layout* layout, SkPaint* paint,
+    static void SetLayoutProperties(Layout* layout, SkPaint* paint, int flags,
         TypefaceImpl* face);
 };
 

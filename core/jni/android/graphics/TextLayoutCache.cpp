@@ -367,6 +367,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
         bool forceLTR = false;
         bool forceRTL = false;
 
+        ALOGD("computeValues dirFlags=%d", dirFlags);
         switch (dirFlags & kBidi_Mask) {
             case kBidi_LTR: bidiReq = 0; break; // no ICU constant, canonical LTR level
             case kBidi_RTL: bidiReq = 1; break; // no ICU constant, canonical RTL level

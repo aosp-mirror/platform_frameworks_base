@@ -866,7 +866,7 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, typeface);
+        MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
         layout.doLayout(textArray + start, count);
         drawGlyphsToSkia(canvas, paint, &layout, x, y);
 #else
