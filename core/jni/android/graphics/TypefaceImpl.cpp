@@ -74,13 +74,16 @@ static FontCollection *makeFontCollection() {
         if (skFace != NULL) {
             MinikinFont *font = new MinikinFontSkia(skFace);
             family->addFont(font);
+            font->Unref();
         } else {
             ALOGE("failed to create font %s", fn);
         }
     }
     typefaces.push_back(family);
 
-    return new FontCollection(typefaces);
+    FontCollection *result = new FontCollection(typefaces);
+    family->Unref();
+    return result;
 }
 
 static void getDefaultTypefaceOnce() {
@@ -108,6 +111,7 @@ TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Sty
     TypefaceImpl* result = new TypefaceImpl;
     if (result != 0) {
         result->fFontCollection = resolvedFace->fFontCollection;
+        result->fFontCollection->Ref();
         result->fStyle = styleFromSkiaStyle(style);
     }
     return result;
@@ -121,9 +125,11 @@ static TypefaceImpl* createFromSkTypeface(SkTypeface* typeface) {
     std::vector<FontFamily *> typefaces;
     FontFamily* family = new FontFamily();
     family->addFont(minikinFont);
+    minikinFont->Unref();
     typefaces.push_back(family);
     TypefaceImpl* result = new TypefaceImpl;
     result->fFontCollection = new FontCollection(typefaces);
+    family->Unref();
     result->fStyle = FontStyle();  // TODO: improve
     return result;
 }
@@ -165,6 +171,7 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
 }
 
 void TypefaceImpl_unref(TypefaceImpl* face) {
+    face->fFontCollection->Unref();
     delete face;
 }
 

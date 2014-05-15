@@ -36,13 +36,21 @@ public class FontFamily {
             throw new RuntimeException();
         }
     }
-    // TODO: finalization
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            nUnrefFamily(mNativePtr);
+        } finally {
+            super.finalize();
+        }
+    }
 
     public boolean addFont(File path) {
         return nAddFont(mNativePtr, path.getAbsolutePath());
     }
 
     static native long nCreateFamily();
-    static native void nDestroyFamily(long nativePtr);
+    static native void nUnrefFamily(long nativePtr);
     static native boolean nAddFont(long nativeFamily, String path);
 }
