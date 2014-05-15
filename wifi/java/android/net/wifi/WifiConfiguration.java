@@ -802,8 +802,28 @@ public class WifiConfiguration implements Parcelable {
         return configKey(false);
     }
 
+    /** @hide
+     * return the config key string based on a scan result
+     */
+    static public String configKey(ScanResult result) {
+        String key = "\"" + result.SSID + "\"";
 
-        /** Implement the Parcelable interface {@hide} */
+        if (result.capabilities.contains("WEP")) {
+            key = key + "-WEP";
+        }
+
+        if (result.capabilities.contains("PSK")) {
+            key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_PSK];
+        }
+
+        if (result.capabilities.contains("EAP")) {
+            key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        }
+
+        return key;
+    }
+
+    /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
     }
