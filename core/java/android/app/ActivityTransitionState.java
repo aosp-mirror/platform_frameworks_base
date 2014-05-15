@@ -138,10 +138,7 @@ class ActivityTransitionState {
         ArrayList<String> sharedElementNames = mEnterActivityOptions.getSharedElementNames();
         ResultReceiver resultReceiver = mEnterActivityOptions.getResultReceiver();
         if (mEnterActivityOptions.isReturning()) {
-            if (mCalledActivityOptions != null) {
-                mCalledActivityOptions.dispatchActivityStopped();
-                mCalledActivityOptions = null;
-            }
+            restoreExitedViews();
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
             mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
                     resultReceiver, sharedElementNames, mExitingFrom, mExitingTo);
@@ -158,13 +155,21 @@ class ActivityTransitionState {
     }
 
     public void onStop() {
-        if (mCalledActivityOptions != null) {
-            mCalledActivityOptions.dispatchActivityStopped();
-            mCalledActivityOptions = null;
-        }
+        restoreExitedViews();
         if (mEnterTransitionCoordinator != null) {
             mEnterTransitionCoordinator.stop();
             mEnterTransitionCoordinator = null;
+        }
+    }
+
+    public void onResume() {
+        restoreExitedViews();
+    }
+
+    private void restoreExitedViews() {
+        if (mCalledActivityOptions != null) {
+            mCalledActivityOptions.dispatchActivityStopped();
+            mCalledActivityOptions = null;
         }
     }
 

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
  */
 class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "ExitTransitionCoordinator";
-    private static final long MAX_WAIT_MS = 1500;
+    private static final long MAX_WAIT_MS = 1000;
 
     private boolean mExitComplete;
 
@@ -58,6 +59,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Handler mHandler;
 
     private boolean mIsReturning;
+
+    private ObjectAnimator mBackgroundAnimator;
+
+    private boolean mIsHidden;
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
@@ -97,6 +102,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             case MSG_ACTIVITY_STOPPED:
                 setViewVisibility(mTransitioningViews, View.VISIBLE);
                 setViewVisibility(mSharedElements, View.VISIBLE);
+                mIsHidden = true;
                 break;
         }
     }
@@ -140,17 +146,22 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void fadeOutBackground() {
-        ObjectAnimator animator = ObjectAnimator.ofInt(getDecor().getBackground(),
-                "alpha", 0);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mIsBackgroundReady = true;
-                notifyComplete();
-            }
-        });
-        animator.setDuration(FADE_BACKGROUND_DURATION_MS);
-        animator.start();
+        if (mBackgroundAnimator == null) {
+            Drawable background = getDecor().getBackground();
+            mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 0);
+            mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mBackgroundAnimator = null;
+                    if (!mIsCanceled) {
+                        mIsBackgroundReady = true;
+                        notifyComplete();
+                    }
+                }
+            });
+            mBackgroundAnimator.setDuration(FADE_BACKGROUND_DURATION_MS);
+            mBackgroundAnimator.start();
+        }
     }
 
     private void beginTransition() {
@@ -176,6 +187,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     exitTransitionComplete();
+                    if (mIsHidden) {
+                        setViewVisibility(mTransitioningViews, View.VISIBLE);
+                    }
                 }
             });
         }
