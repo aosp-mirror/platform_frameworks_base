@@ -52,38 +52,32 @@ static FontStyle styleFromSkiaStyle(SkTypeface::Style skiaStyle) {
     return FontStyle(weight, italic);
 }
 
-TypefaceImpl* gDefaultTypeface;
+TypefaceImpl* gDefaultTypeface = NULL;
 pthread_once_t gDefaultTypefaceOnce = PTHREAD_ONCE_INIT;
 
-// TODO: this currently builds a font collection from hardcoded paths.
-// It will get replaced by an implementation that parses the XML files.
+// This installs a default typeface (from a hardcoded path) that allows
+// layouts to work (not crash on null pointer) before the default
+// typeface is set.
+// TODO: investigate why layouts are being created before Typeface.java
+// class initialization.
 static FontCollection *makeFontCollection() {
     std::vector<FontFamily *>typefaces;
     const char *fns[] = {
         "/system/fonts/Roboto-Regular.ttf",
-        "/system/fonts/Roboto-Italic.ttf",
-        "/system/fonts/Roboto-BoldItalic.ttf",
-        "/system/fonts/Roboto-Light.ttf",
-        "/system/fonts/Roboto-Thin.ttf",
-        "/system/fonts/Roboto-Bold.ttf",
-        "/system/fonts/Roboto-ThinItalic.ttf",
-        "/system/fonts/Roboto-LightItalic.ttf"
     };
 
     FontFamily *family = new FontFamily();
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
+        ALOGD("makeFontCollection adding %s", fn);
         SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
-        MinikinFont *font = new MinikinFontSkia(skFace);
-        family->addFont(font);
+        if (skFace != NULL) {
+            MinikinFont *font = new MinikinFontSkia(skFace);
+            family->addFont(font);
+        } else {
+            ALOGE("failed to create font %s", fn);
+        }
     }
-    typefaces.push_back(family);
-
-    family = new FontFamily();
-    const char *fn = "/system/fonts/NotoSansDevanagari-Regular.ttf";
-    SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
-    MinikinFont *font = new MinikinFontSkia(skFace);
-    family->addFont(font);
     typefaces.push_back(family);
 
     return new FontCollection(typefaces);
@@ -91,9 +85,13 @@ static FontCollection *makeFontCollection() {
 
 static void getDefaultTypefaceOnce() {
     Layout::init();
-    gDefaultTypeface = new TypefaceImpl;
-    gDefaultTypeface->fFontCollection = makeFontCollection();
-    gDefaultTypeface->fStyle = FontStyle();
+    if (gDefaultTypeface == NULL) {
+        // We expect the client to set a default typeface, but provide a
+        // default so we can make progress before that happens.
+        gDefaultTypeface = new TypefaceImpl;
+        gDefaultTypeface->fFontCollection = makeFontCollection();
+        gDefaultTypeface->fStyle = FontStyle();
+    }
 }
 
 TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src) {
@@ -116,6 +114,9 @@ TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Sty
 }
 
 static TypefaceImpl* createFromSkTypeface(SkTypeface* typeface) {
+    if (typeface == NULL) {
+        return NULL;
+    }
     MinikinFont* minikinFont = new MinikinFontSkia(typeface);
     std::vector<FontFamily *> typefaces;
     FontFamily* family = new FontFamily();
@@ -176,6 +177,10 @@ int TypefaceImpl_getStyle(TypefaceImpl* face) {
     return result;
 }
 
+void TypefaceImpl_setDefault(TypefaceImpl* face) {
+    gDefaultTypeface = face;
+}
+
 #else  // USE_MINIKIN
 
 /* Just use SkTypeface instead. */
@@ -217,6 +222,9 @@ void TypefaceImpl_unref(TypefaceImpl* face) {
 
 int TypefaceImpl_getStyle(TypefaceImpl* face) {
     return face->style();
+}
+
+void TypefaceImpl_setDefault(TypefaceImpl* face) {
 }
 
 #endif  // USE_MINIKIN

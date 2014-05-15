@@ -24,9 +24,17 @@ import java.io.File;
  * @hide
  */
 public class FontFamily {
+    /**
+     * @hide
+     */
     public long mNativePtr;
+
     public FontFamily() {
         mNativePtr = nCreateFamily();
+        mNativePtr = nCreateFamily();
+        if (mNativePtr == 0) {
+            throw new RuntimeException();
+        }
     }
     // TODO: finalization
 

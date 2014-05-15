@@ -120,6 +120,11 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
     return reinterpret_cast<jlong>(TypefaceImpl_createFromFamilies(families.get(), families.size()));
 }
 
+static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
+    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
+    return TypefaceImpl_setDefault(face);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gTypefaceMethods[] = {
@@ -133,6 +138,7 @@ static JNINativeMethod gTypefaceMethods[] = {
                                            (void*)Typeface_createFromFile },
     { "nativeCreateFromArray",    "([J)J",
                                            (void*)Typeface_createFromArray },
+    { "nativeSetDefault",         "(J)V",   (void*)Typeface_setDefault },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)
