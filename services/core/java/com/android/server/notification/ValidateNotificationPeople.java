@@ -45,13 +45,13 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private static final boolean ENABLE_PEOPLE_VALIDATOR = true;
     private static final String SETTING_ENABLE_PEOPLE_VALIDATOR =
             "validate_notification_people_enabled";
-    private static final String[] LOOKUP_PROJECTION = { Contacts._ID };
+    private static final String[] LOOKUP_PROJECTION = { Contacts._ID, Contacts.STARRED };
     private static final int MAX_PEOPLE = 10;
     private static final int PEOPLE_CACHE_SIZE = 200;
 
     private static final float NONE = 0f;
     private static final float VALID_CONTACT = 0.5f;
-    // TODO private static final float STARRED_CONTACT = 1f;
+    private static final float STARRED_CONTACT = 1f;
 
     protected boolean mEnabled;
     private Context mContext;
@@ -104,23 +104,29 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             public void work() {
                 if (INFO) Slog.i(TAG, "Executing: validation for: " + mRecord.sbn.getKey());
                 float affinity = NONE;
-                LookupResult lookupResult = null;
                 for (final String handle: pendingLookups) {
+                    LookupResult lookupResult = null;
                     final Uri uri = Uri.parse(handle);
                     if ("tel".equals(uri.getScheme())) {
                         if (DEBUG) Slog.d(TAG, "checking telephone URI: " + handle);
-                        lookupResult = resolvePhoneContact(handle, uri.getSchemeSpecificPart());
+                        lookupResult = resolvePhoneContact(uri.getSchemeSpecificPart());
+                    } else if ("mailto".equals(uri.getScheme())) {
+                        if (DEBUG) Slog.d(TAG, "checking mailto URI: " + handle);
+                        lookupResult = resolveEmailContact(uri.getSchemeSpecificPart());
                     } else if (handle.startsWith(Contacts.CONTENT_LOOKUP_URI.toString())) {
                         if (DEBUG) Slog.d(TAG, "checking lookup URI: " + handle);
-                        lookupResult = resolveContactsUri(handle, uri);
+                        lookupResult = searchContacts(uri);
                     } else {
+                        lookupResult = new LookupResult();  // invalid person for the cache
                         Slog.w(TAG, "unsupported URI " + handle);
                     }
+                    if (lookupResult != null) {
+                        synchronized (mPeopleCache) {
+                            mPeopleCache.put(handle, lookupResult);
+                        }
+                        affinity = Math.max(affinity, lookupResult.getAffinity());
+                    }
                 }
-                if (lookupResult != null) {
-                    affinity = Math.max(affinity, lookupResult.getAffinity());
-                }
-
                 float affinityBound = mRecord.getContactAffinity();
                 affinity = Math.max(affinity, affinityBound);
                 mRecord.setContactAffinity(affinity);
@@ -183,47 +189,27 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return null;
     }
 
-    private LookupResult resolvePhoneContact(final String handle, final String number) {
-        LookupResult lookupResult = null;
-        Cursor c = null;
-        try {
-            Uri numberUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                    Uri.encode(number));
-            c = mContext.getContentResolver().query(numberUri, LOOKUP_PROJECTION, null, null, null);
-            if (c != null && c.getCount() > 0) {
-                c.moveToFirst();
-                final int idIdx = c.getColumnIndex(Contacts._ID);
-                final int id = c.getInt(idIdx);
-                if (DEBUG) Slog.d(TAG, "is valid: " + id);
-                lookupResult = new LookupResult(id);
-            }
-        } catch(Throwable t) {
-            Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        if (lookupResult == null) {
-            lookupResult = new LookupResult(LookupResult.INVALID_ID);
-        }
-        synchronized (mPeopleCache) {
-            mPeopleCache.put(handle, lookupResult);
-        }
-        return lookupResult;
+    private LookupResult resolvePhoneContact(final String number) {
+        Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(number));
+        return searchContacts(phoneUri);
     }
 
-    private LookupResult resolveContactsUri(String handle, final Uri personUri) {
-        LookupResult lookupResult = null;
+    private LookupResult resolveEmailContact(final String email) {
+        Uri numberUri = Uri.withAppendedPath(
+                ContactsContract.CommonDataKinds.Email.CONTENT_LOOKUP_URI,
+                Uri.encode(email));
+        return searchContacts(numberUri);
+    }
+
+    private LookupResult searchContacts(Uri lookupUri) {
+        LookupResult lookupResult = new LookupResult();
         Cursor c = null;
         try {
-            c = mContext.getContentResolver().query(personUri, LOOKUP_PROJECTION, null, null, null);
+            c = mContext.getContentResolver().query(lookupUri, LOOKUP_PROJECTION, null, null, null);
             if (c != null && c.getCount() > 0) {
                 c.moveToFirst();
-                final int idIdx = c.getColumnIndex(Contacts._ID);
-                final int id = c.getInt(idIdx);
-                if (DEBUG) Slog.d(TAG, "is valid: " + id);
-                lookupResult = new LookupResult(id);
+                lookupResult.readContact(c);
             }
         } catch(Throwable t) {
             Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
@@ -231,12 +217,6 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             if (c != null) {
                 c.close();
             }
-        }
-        if (lookupResult == null) {
-            lookupResult = new LookupResult(LookupResult.INVALID_ID);
-        }
-        synchronized (mPeopleCache) {
-            mPeopleCache.put(handle, lookupResult);
         }
         return lookupResult;
     }
@@ -267,10 +247,29 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         private final long mExpireMillis;
         private int mId;
+        private boolean mStarred;
 
-        public LookupResult(int id) {
-            mId = id;
+        public LookupResult() {
+            mId = INVALID_ID;
+            mStarred = false;
             mExpireMillis = System.currentTimeMillis() + CONTACT_REFRESH_MILLIS;
+        }
+
+        public void readContact(Cursor cursor) {
+            final int idIdx = cursor.getColumnIndex(Contacts._ID);
+            if (idIdx >= 0) {
+                mId = cursor.getInt(idIdx);
+                if (DEBUG) Slog.d(TAG, "contact _ID is: " + mId);
+            } else {
+                if (DEBUG) Slog.d(TAG, "invalid cursor: no _ID");
+            }
+            final int starIdx = cursor.getColumnIndex(Contacts.STARRED);
+            if (starIdx >= 0) {
+                mStarred = cursor.getInt(starIdx) != 0;
+                if (DEBUG) Slog.d(TAG, "contact STARRED is: " + mStarred);
+            } else {
+                if (DEBUG) Slog.d(TAG, "invalid cursor: no STARRED");
+            }
         }
 
         public boolean isExpired() {
@@ -284,9 +283,16 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         public float getAffinity() {
             if (isInvalid()) {
                 return NONE;
+            } else if (mStarred) {
+                return STARRED_CONTACT;
             } else {
-                return VALID_CONTACT;  // TODO: finer grained result: stars
+                return VALID_CONTACT;
             }
+        }
+
+        public LookupResult setStarred(boolean starred) {
+            mStarred = starred;
+            return this;
         }
 
         public LookupResult setId(int id) {
