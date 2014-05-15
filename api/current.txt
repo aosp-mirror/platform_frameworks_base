@@ -32956,7 +32956,8 @@ package android.view.accessibility {
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {
-    method public void addAction(int);
+    method public void addAction(android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction);
+    method public deprecated void addAction(int);
     method public void addChild(android.view.View);
     method public void addChild(android.view.View, int);
     method public boolean canOpenPopup();
@@ -32965,7 +32966,8 @@ package android.view.accessibility {
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(java.lang.String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo focusSearch(int);
-    method public int getActions();
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getActionList();
+    method public deprecated int getActions();
     method public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
@@ -33013,7 +33015,8 @@ package android.view.accessibility {
     method public boolean performAction(int, android.os.Bundle);
     method public void recycle();
     method public boolean refresh();
-    method public void removeAction(int);
+    method public deprecated void removeAction(int);
+    method public boolean removeAction(android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction);
     method public boolean removeChild(android.view.View);
     method public boolean removeChild(android.view.View, int);
     method public void setAccessibilityFocused(boolean);
@@ -33092,6 +33095,34 @@ package android.view.accessibility {
     field public static final int MOVEMENT_GRANULARITY_PAGE = 16; // 0x10
     field public static final int MOVEMENT_GRANULARITY_PARAGRAPH = 8; // 0x8
     field public static final int MOVEMENT_GRANULARITY_WORD = 2; // 0x2
+  }
+
+  public static final class AccessibilityNodeInfo.AccessibilityAction {
+    ctor public AccessibilityNodeInfo.AccessibilityAction(int, java.lang.CharSequence);
+    method public int getId();
+    method public java.lang.CharSequence getLabel();
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_ACCESSIBILITY_FOCUS;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLEAR_ACCESSIBILITY_FOCUS;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLEAR_FOCUS;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLEAR_SELECTION;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CLICK;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COLLAPSE;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COPY;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CUT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DISMISS;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_EXPAND;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_FOCUS;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_LONG_CLICK;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_NEXT_AT_MOVEMENT_GRANULARITY;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_NEXT_HTML_ELEMENT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PASTE;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_BACKWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_FORWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SELECT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
   }
 
   public static final class AccessibilityNodeInfo.CollectionInfo {

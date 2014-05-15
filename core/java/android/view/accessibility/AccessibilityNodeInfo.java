@@ -17,15 +17,19 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -112,7 +116,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_SELECT = 0x00000004;
 
     /**
-     * Action that unselects the node.
+     * Action that deselects the node.
      */
     public static final int ACTION_CLEAR_SELECTION = 0x00000008;
 
@@ -306,6 +310,18 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </code></pre></p>
      */
     public static final int ACTION_SET_TEXT = 0x00200000;
+
+    private static final int LAST_LEGACY_STANDARD_ACTION = ACTION_SET_TEXT;
+
+    /**
+     * Mask to see if the value is larger than the largest ACTION_ constant
+     */
+    private static final int ACTION_TYPE_MASK = 0xFF000000;
+
+    /**
+     * Mask to define standard not legacy actions.
+     */
+    private static final int STANDARD_NON_LEGACY_ACTION_MASK = 0x01000000;
 
     // Action arguments
 
@@ -548,7 +564,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private String mViewIdResourceName;
 
     private LongArray mChildNodeIds;
-    private int mActions;
+    private ArrayList<AccessibilityAction> mActions;
 
     private int mMovementGranularities;
 
@@ -875,6 +891,17 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets the actions that can be performed on the node.
+     */
+    public List<AccessibilityAction> getActionList() {
+        if (mActions == null) {
+            return Collections.emptyList();
+        }
+
+        return mActions;
+    }
+
+    /**
+     * Gets the actions that can be performed on the node.
      *
      * @return The bit mask of with actions.
      *
@@ -892,9 +919,61 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see AccessibilityNodeInfo#ACTION_PREVIOUS_HTML_ELEMENT
      * @see AccessibilityNodeInfo#ACTION_SCROLL_FORWARD
      * @see AccessibilityNodeInfo#ACTION_SCROLL_BACKWARD
+     *
+     * @deprecated Use {@link #getActionList()}.
      */
+    @Deprecated
     public int getActions() {
-        return mActions;
+        int returnValue = 0;
+
+        if (mActions == null) {
+            return returnValue;
+        }
+
+        final int actionSize = mActions.size();
+        for (int i = 0; i < actionSize; i++) {
+            int actionId = mActions.get(i).getId();
+            if (actionId <= LAST_LEGACY_STANDARD_ACTION) {
+                returnValue |= actionId;
+            }
+        }
+
+        return returnValue;
+    }
+
+    /**
+     * Adds an action that can be performed on the node.
+     * <p>
+     * To add a standard action use the static constants on {@link AccessibilityAction}.
+     * To add a custom action create a new {@link AccessibilityAction} by passing in a
+     * resource id from your application as the action id and an optional label that
+     * describes the action. To override one of the standard actions use as the action
+     * id of a standard action id such as {@link #ACTION_CLICK} and an optional label that
+     * describes the action.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param action The action.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void addAction(AccessibilityAction action) {
+        enforceNotSealed();
+
+        if (action == null) {
+            return;
+        }
+
+        if (mActions == null) {
+            mActions = new ArrayList<AccessibilityAction>();
+        }
+
+        mActions.remove(action);
+        mActions.add(action);
     }
 
     /**
@@ -908,10 +987,21 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param action The action.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @throws IllegalArgumentException If the argument is not one of the standard actions.
+     *
+     * @deprecated This has been deprecated for {@link #addAction(AccessibilityAction)}
      */
+    @Deprecated
     public void addAction(int action) {
         enforceNotSealed();
-        mActions |= action;
+
+        AccessibilityAction newAction = getActionSingleton(action);
+        if (newAction == null) {
+            // This means it is not one of the standard actions
+            throw new IllegalArgumentException("Argument is not one of the standard actions");
+        }
+
+        addAction(newAction);
     }
 
     /**
@@ -923,13 +1013,40 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
-     * @param action The action.
+     * @param action The action to be removed.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #removeAction(AccessibilityAction)}
+     */
+    @Deprecated
+    public void removeAction(int action) {
+        enforceNotSealed();
+
+        removeAction(getActionSingleton(action));
+    }
+
+    /**
+     * Removes an action that can be performed on the node. If the action was
+     * not already added to the node, calling this method has no effect.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param action The action to be removed.
+     * @return The action removed from the list of actions.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void removeAction(int action) {
+    public boolean removeAction(AccessibilityAction action) {
         enforceNotSealed();
-        mActions &= ~action;
+
+        if (mActions == null || action == null) {
+            return false;
+        }
+
+        return mActions.remove(action);
     }
 
     /**
@@ -2307,7 +2424,29 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mBoundsInScreen.left);
         parcel.writeInt(mBoundsInScreen.right);
 
-        parcel.writeInt(mActions);
+        if (mActions != null && !mActions.isEmpty()) {
+            final int actionCount = mActions.size();
+            parcel.writeInt(actionCount);
+
+            int defaultLegacyStandardActions = 0;
+            for (int i = 0; i < actionCount; i++) {
+                AccessibilityAction action = mActions.get(i);
+                if (isDefaultLegacyStandardAction(action)) {
+                    defaultLegacyStandardActions |= action.getId();
+                }
+            }
+            parcel.writeInt(defaultLegacyStandardActions);
+
+            for (int i = 0; i < actionCount; i++) {
+                AccessibilityAction action = mActions.get(i);
+                if (!isDefaultLegacyStandardAction(action)) {
+                    parcel.writeInt(action.getId());
+                    parcel.writeCharSequence(action.getLabel());
+                }
+            }
+        } else {
+            parcel.writeInt(0);
+        }
 
         parcel.writeInt(mMovementGranularities);
 
@@ -2388,7 +2527,17 @@ public class AccessibilityNodeInfo implements Parcelable {
         mText = other.mText;
         mContentDescription = other.mContentDescription;
         mViewIdResourceName = other.mViewIdResourceName;
-        mActions= other.mActions;
+
+        final ArrayList<AccessibilityAction> otherActions = other.mActions;
+        if (otherActions != null && otherActions.size() > 0) {
+            if (mActions == null) {
+                mActions = new ArrayList(otherActions);
+            } else {
+                mActions.clear();
+                mActions.addAll(other.mActions);
+            }
+        }
+
         mBooleanProperties = other.mBooleanProperties;
         mMovementGranularities = other.mMovementGranularities;
 
@@ -2452,7 +2601,17 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInScreen.left = parcel.readInt();
         mBoundsInScreen.right = parcel.readInt();
 
-        mActions = parcel.readInt();
+        final int actionCount = parcel.readInt();
+        if (actionCount > 0) {
+            final int legacyStandardActions = parcel.readInt();
+            addLegacyStandardActions(legacyStandardActions);
+            final int nonLegacyActionCount = actionCount - Integer.bitCount(legacyStandardActions);
+            for (int i = 0; i < nonLegacyActionCount; i++) {
+                AccessibilityAction action = new AccessibilityAction(
+                        parcel.readInt(), parcel.readCharSequence());
+                addAction(action);
+            }
+        }
 
         mMovementGranularities = parcel.readInt();
 
@@ -2524,7 +2683,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mText = null;
         mContentDescription = null;
         mViewIdResourceName = null;
-        mActions = 0;
+        if (mActions != null) {
+            mActions.clear();
+        }
         mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
         mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
         mInputType = InputType.TYPE_NULL;
@@ -2543,6 +2704,33 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mCollectionItemInfo != null) {
             mCollectionItemInfo.recycle();
             mCollectionItemInfo = null;
+        }
+    }
+
+    private static boolean isDefaultLegacyStandardAction(AccessibilityAction action) {
+        return (action.getId() <= LAST_LEGACY_STANDARD_ACTION
+                && TextUtils.isEmpty(action.getLabel()));
+    }
+
+    private static AccessibilityAction getActionSingleton(int actionId) {
+        final int actions = AccessibilityAction.sStandardActions.size();
+        for (int i = 0; i < actions; i++) {
+            AccessibilityAction currentAction = AccessibilityAction.sStandardActions.valueAt(i);
+            if (actionId == currentAction.getId()) {
+                return currentAction;
+            }
+        }
+
+        return null;
+    }
+
+    private void addLegacyStandardActions(int actionMask) {
+        int remainingIds = actionMask;
+        while (remainingIds > 0) {
+            final int id = 1 << Integer.numberOfTrailingZeros(remainingIds);
+            remainingIds &= ~id;
+            AccessibilityAction action = getActionSingleton(id);
+            addAction(action);
         }
     }
 
@@ -2709,20 +2897,429 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; longClickable: ").append(isLongClickable());
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
-        builder.append("; scrollable: " + isScrollable());
-
-        builder.append("; [");
-        for (int actionBits = mActions; actionBits != 0;) {
-            final int action = 1 << Integer.numberOfTrailingZeros(actionBits);
-            actionBits &= ~action;
-            builder.append(getActionSymbolicName(action));
-            if (actionBits != 0) {
-                builder.append(", ");
-            }
-        }
-        builder.append("]");
+        builder.append("; scrollable: ").append(isScrollable());
+        builder.append("; actions: ").append(mActions);
 
         return builder.toString();
+    }
+
+    /**
+     * A class defining an action that can be performed on an {@link AccessibilityNodeInfo}.
+     * Each action has a unique id that is mandatory and optional data.
+     * <p>
+     * There are three categories of actions:
+     * <ul>
+     * <li><strong>Standard actions</strong> - These are actions that are reported and
+     * handled by the standard UI widgets in the platform. For each standard action
+     * there is a static constant defined in this class, e.g. {@link #ACTION_FOCUS}.
+     * </li>
+     * <li><strong>Custom actions action</strong> - These are actions that are reported
+     * and handled by custom widgets. i.e. ones that are not part of the UI toolkit. For
+     * example, an application may define a custom action for clearing the user history.
+     * </li>
+     * <li><strong>Overriden standard actions</strong> - These are actions that override
+     * standard actions to customize them. For example, an app may add a label to the
+     * standard click action to announce that this action clears browsing history.
+     * </ul>
+     * </p>
+     */
+    public static final class AccessibilityAction {
+
+        /**
+         * Action that gives input focus to the node.
+         */
+        public static final AccessibilityAction ACTION_FOCUS =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_FOCUS, null);
+
+        /**
+         * Action that clears input focus of the node.
+         */
+        public static final AccessibilityAction ACTION_CLEAR_FOCUS =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null);
+
+        /**
+         *  Action that selects the node.
+         */
+        public static final AccessibilityAction ACTION_SELECT =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_SELECT, null);
+
+        /**
+         * Action that deselects the node.
+         */
+        public static final AccessibilityAction ACTION_CLEAR_SELECTION =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLEAR_SELECTION, null);
+
+        /**
+         * Action that clicks on the node info.
+         */
+        public static final AccessibilityAction ACTION_CLICK =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLICK, null);
+
+        /**
+         * Action that long clicks on the node.
+         */
+        public static final AccessibilityAction ACTION_LONG_CLICK =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_LONG_CLICK, null);
+
+        /**
+         * Action that gives accessibility focus to the node.
+         */
+        public static final AccessibilityAction ACTION_ACCESSIBILITY_FOCUS =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+
+        /**
+         * Action that clears accessibility focus of the node.
+         */
+        public static final AccessibilityAction ACTION_CLEAR_ACCESSIBILITY_FOCUS =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
+
+        /**
+         * Action that requests to go to the next entity in this node's text
+         * at a given movement granularity. For example, move to the next character,
+         * word, etc.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT},
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN}<br>
+         * <strong>Example:</strong> Move to the previous character and do not extend selection.
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
+         *           AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER);
+         *   arguments.putBoolean(AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN,
+         *           false);
+         *   info.performAction(AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY.getId(),
+         *           arguments);
+         * </code></pre></p>
+         * </p>
+         *
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *
+         * @see AccessibilityNodeInfo#setMovementGranularities(int)
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         * @see AccessibilityNodeInfo#getMovementGranularities()
+         *  AccessibilityNodeInfo.getMovementGranularities()
+         *
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_CHARACTER
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_WORD
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_LINE
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_PARAGRAPH
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_PAGE
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE
+         */
+        public static final AccessibilityAction ACTION_NEXT_AT_MOVEMENT_GRANULARITY =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY, null);
+
+        /**
+         * Action that requests to go to the previous entity in this node's text
+         * at a given movement granularity. For example, move to the next character,
+         * word, etc.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT},
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN}<br>
+         * <strong>Example:</strong> Move to the next character and do not extend selection.
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
+         *           AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER);
+         *   arguments.putBoolean(AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN,
+         *           false);
+         *   info.performAction(AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY.getId(),
+         *           arguments);
+         * </code></pre></p>
+         * </p>
+         *
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
+         *
+         * @see AccessibilityNodeInfo#setMovementGranularities(int)
+         *   AccessibilityNodeInfo.setMovementGranularities(int)
+         * @see AccessibilityNodeInfo#getMovementGranularities()
+         *  AccessibilityNodeInfo.getMovementGranularities()
+         *
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_CHARACTER
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_WORD
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_LINE
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_PARAGRAPH
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
+         * @see AccessibilityNodeInfo#MOVEMENT_GRANULARITY_PAGE
+         *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE
+         */
+        public static final AccessibilityAction ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, null);
+
+        /**
+         * Action to move to the next HTML element of a given type. For example, move
+         * to the BUTTON, INPUT, TABLE, etc.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_HTML_ELEMENT_STRING
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING}<br>
+         * <strong>Example:</strong>
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING, "BUTTON");
+         *   info.performAction(AccessibilityAction.ACTION_NEXT_HTML_ELEMENT.getId(), arguments);
+         * </code></pre></p>
+         * </p>
+         */
+        public static final AccessibilityAction ACTION_NEXT_HTML_ELEMENT =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT, null);
+
+        /**
+         * Action to move to the previous HTML element of a given type. For example, move
+         * to the BUTTON, INPUT, TABLE, etc.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_HTML_ELEMENT_STRING
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING}<br>
+         * <strong>Example:</strong>
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING, "BUTTON");
+         *   info.performAction(AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT.getId(), arguments);
+         * </code></pre></p>
+         * </p>
+         */
+        public static final AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT, null);
+
+        /**
+         * Action to scroll the node content forward.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_FORWARD =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD, null);
+
+        /**
+         * Action to scroll the node content backward.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_BACKWARD =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD, null);
+
+        /**
+         * Action to copy the current selection to the clipboard.
+         */
+        public static final AccessibilityAction ACTION_COPY =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_COPY, null);
+
+        /**
+         * Action to paste the current clipboard content.
+         */
+        public static final AccessibilityAction ACTION_PASTE =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_PASTE, null);
+
+        /**
+         * Action to cut the current selection and place it to the clipboard.
+         */
+        public static final AccessibilityAction ACTION_CUT =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CUT, null);
+
+        /**
+         * Action to set the selection. Performing this action with no arguments
+         * clears the selection.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_START_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT},
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_END_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT}<br>
+         * <strong>Example:</strong>
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 1);
+         *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, 2);
+         *   info.performAction(AccessibilityAction.ACTION_SET_SELECTION.getId(), arguments);
+         * </code></pre></p>
+         * </p>
+         *
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_START_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT
+         * @see AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_END_INT
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT
+         */
+        public static final AccessibilityAction ACTION_SET_SELECTION =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_SET_SELECTION, null);
+
+        /**
+         * Action to expand an expandable node.
+         */
+        public static final AccessibilityAction ACTION_EXPAND =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_EXPAND, null);
+
+        /**
+         * Action to collapse an expandable node.
+         */
+        public static final AccessibilityAction ACTION_COLLAPSE =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_COLLAPSE, null);
+
+        /**
+         * Action to dismiss a dismissable node.
+         */
+        public static final AccessibilityAction ACTION_DISMISS =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_DISMISS, null);
+
+        /**
+         * Action that sets the text of the node. Performing the action without argument,
+         * using <code> null</code> or empty {@link CharSequence} will clear the text. This
+         * action will also put the cursor at the end of text.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE
+         *  AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE}<br>
+         * <strong>Example:</strong>
+         * <code><pre><p>
+         *   Bundle arguments = new Bundle();
+         *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+         *       "android");
+         *   info.performAction(AccessibilityAction.ACTION_SET_TEXT.getId(), arguments);
+         * </code></pre></p>
+         */
+        public static final AccessibilityAction ACTION_SET_TEXT =
+                new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_SET_TEXT, null);
+
+        private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<AccessibilityAction>();
+        static {
+            sStandardActions.add(ACTION_FOCUS);
+            sStandardActions.add(ACTION_CLEAR_FOCUS);
+            sStandardActions.add(ACTION_SELECT);
+            sStandardActions.add(ACTION_CLEAR_SELECTION);
+            sStandardActions.add(ACTION_CLICK);
+            sStandardActions.add(ACTION_LONG_CLICK);
+            sStandardActions.add(ACTION_ACCESSIBILITY_FOCUS);
+            sStandardActions.add(ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            sStandardActions.add(ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+            sStandardActions.add(ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+            sStandardActions.add(ACTION_NEXT_HTML_ELEMENT);
+            sStandardActions.add(ACTION_PREVIOUS_HTML_ELEMENT);
+            sStandardActions.add(ACTION_SCROLL_FORWARD);
+            sStandardActions.add(ACTION_SCROLL_BACKWARD);
+            sStandardActions.add(ACTION_COPY);
+            sStandardActions.add(ACTION_PASTE);
+            sStandardActions.add(ACTION_CUT);
+            sStandardActions.add(ACTION_SET_SELECTION);
+            sStandardActions.add(ACTION_EXPAND);
+            sStandardActions.add(ACTION_COLLAPSE);
+            sStandardActions.add(ACTION_DISMISS);
+            sStandardActions.add(ACTION_SET_TEXT);
+        }
+
+        private final int mActionId;
+        private final CharSequence mLabel;
+
+        /**
+         * Creates a new AccessibilityAction. For adding a standard action without a specific label,
+         * use the static constants.
+         *
+         * You can also override the description for one the standard actions. Below is an example
+         * how to override the standard click action by adding a custom label:
+         * <pre>
+         *   AccessibilityAction action = new AccessibilityAction(
+         *           AccessibilityAction.ACTION_ACTION_CLICK, getLocalizedLabel());
+         *   node.addAction(action);
+         * </pre>
+         *
+         * @param actionId The id for this action. This should either be one of the
+         *                 standard actions or a specific action for your app. In that case it is
+         *                 required to use a resource identifier.
+         * @param label The label for the new AccessibilityAction.
+         */
+        public AccessibilityAction(int actionId, @Nullable CharSequence label) {
+            if ((actionId & ACTION_TYPE_MASK) == 0 && Integer.bitCount(actionId) > 1) {
+                throw new IllegalArgumentException("Invalid standard action id");
+            }
+
+            if ((actionId & STANDARD_NON_LEGACY_ACTION_MASK) != 0) {
+                throw new IllegalArgumentException("action id not a resource id");
+            }
+
+            mActionId = actionId;
+            mLabel = label;
+        }
+
+        /**
+         * Gets the id for this action.
+         *
+         * @return The action id.
+         */
+        public int getId() {
+            return mActionId;
+        }
+
+        /**
+         * Gets the label for this action. Its purpose is to describe the
+         * action to user.
+         *
+         * @return The label.
+         */
+        public CharSequence getLabel() {
+            return mLabel;
+        }
+
+        @Override
+        public int hashCode() {
+            return mActionId;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) {
+                return false;
+            }
+
+            if (other == this) {
+                return true;
+            }
+
+            if (getClass() != other.getClass()) {
+                return false;
+            }
+
+            return mActionId == ((AccessibilityAction)other).mActionId;
+        }
+
+        @Override
+        public String toString() {
+            return "AccessibilityAction: " + getActionSymbolicName(mActionId) + " - " + mLabel;
+        }
     }
 
     /**
