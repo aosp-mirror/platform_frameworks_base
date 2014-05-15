@@ -33,16 +33,14 @@ class RenderProperties;
 
 class AnimationListener : public VirtualLightRefBase {
 public:
-    ANDROID_API virtual void onAnimationFinished(BaseAnimator*) = 0;
+    ANDROID_API virtual void onAnimationFinished(BaseRenderNodeAnimator*) = 0;
 protected:
     ANDROID_API virtual ~AnimationListener() {}
 };
 
-// Helper class to contain generic animator helpers
-class BaseAnimator : public VirtualLightRefBase {
-    PREVENT_COPY_AND_ASSIGN(BaseAnimator);
+class BaseRenderNodeAnimator : public VirtualLightRefBase {
+    PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
 public:
-
     ANDROID_API void setInterpolator(Interpolator* interpolator);
     ANDROID_API void setDuration(nsecs_t durationInMs);
     ANDROID_API nsecs_t duration() { return mDuration; }
@@ -50,30 +48,37 @@ public:
         mListener = listener;
     }
 
+    ANDROID_API virtual void onAttached(RenderNode* target) {}
+
+    // Guaranteed to happen before the staging push
+    void setupStartValueIfNecessary(RenderNode* target, TreeInfo& info);
+
+    bool animate(RenderNode* target, TreeInfo& info);
+
     bool isFinished() { return mPlayState == FINISHED; }
+    float finalValue() { return mFinalValue; }
 
 protected:
-    BaseAnimator();
-    virtual ~BaseAnimator();
+    BaseRenderNodeAnimator(float finalValue);
+    virtual ~BaseRenderNodeAnimator();
 
-    // This is the main animation entrypoint that subclasses should call
-    // to generate the onAnimation* lifecycle events
-    // Returns true if the animation has finished, false otherwise
-    bool animateFrame(TreeInfo& info);
-
-    // Called when PlayState switches from PENDING to RUNNING
-    virtual void onAnimationStarted() {}
-    virtual void onAnimationUpdated(float fraction) = 0;
-    virtual void onAnimationFinished() {}
+    void setStartValue(float value);
+    virtual float getValue(RenderNode* target) const = 0;
+    virtual void setValue(RenderNode* target, float value) = 0;
 
 private:
     void callOnFinishedListener(TreeInfo& info);
 
     enum PlayState {
+        NEEDS_START,
         PENDING,
         RUNNING,
         FINISHED,
     };
+
+    float mFinalValue;
+    float mDeltaValue;
+    float mFromValue;
 
     Interpolator* mInterpolator;
     PlayState mPlayState;
@@ -81,42 +86,6 @@ private:
     long mDuration;
 
    sp<AnimationListener> mListener;
-};
-
-class BaseRenderNodeAnimator : public BaseAnimator {
-public:
-    // Since the UI thread doesn't necessarily know what the current values
-    // actually are and thus can't do the calculations, this is used to inform
-    // the animator how to lazy-resolve the input value
-    enum DeltaValueType {
-        // The delta value represents an absolute value endpoint
-        // mDeltaValue needs to be recalculated to be mDelta = (mDelta - fromValue)
-        // in onAnimationStarted()
-        ABSOLUTE = 0,
-        // The final value represents an offset from the current value
-        // No recalculation is needed
-        DELTA,
-    };
-
-    bool animate(RenderNode* target, TreeInfo& info);
-
-protected:
-    BaseRenderNodeAnimator(DeltaValueType deltaType, float deltaValue);
-
-    RenderNode* target() const { return mTarget; }
-    virtual float getValue() const = 0;
-    virtual void setValue(float value) = 0;
-
-private:
-    virtual void onAnimationStarted();
-    virtual void onAnimationUpdated(float fraction);
-
-    // mTarget is only valid inside animate()
-    RenderNode* mTarget;
-
-    BaseRenderNodeAnimator::DeltaValueType mDeltaValueType;
-    float mDeltaValue;
-    float mFromValue;
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
@@ -136,23 +105,20 @@ public:
         ALPHA,
     };
 
-    ANDROID_API RenderPropertyAnimator(RenderProperty property,
-                DeltaValueType deltaType, float deltaValue);
+    ANDROID_API RenderPropertyAnimator(RenderProperty property, float finalValue);
+
+    ANDROID_API virtual void onAttached(RenderNode* target);
 
 protected:
-    ANDROID_API virtual float getValue() const;
-    ANDROID_API virtual void setValue(float value);
+    virtual float getValue(RenderNode* target) const;
+    virtual void setValue(RenderNode* target, float value);
 
 private:
     typedef void (RenderProperties::*SetFloatProperty)(float value);
     typedef float (RenderProperties::*GetFloatProperty)() const;
 
-    struct PropertyAccessors {
-        GetFloatProperty getter;
-        SetFloatProperty setter;
-    };
-
-    PropertyAccessors mPropertyAccess;
+    struct PropertyAccessors;
+    const PropertyAccessors* mPropertyAccess;
 
     static const PropertyAccessors PROPERTY_ACCESSOR_LUT[];
 };
@@ -160,10 +126,10 @@ private:
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
 public:
     ANDROID_API CanvasPropertyPrimitiveAnimator(CanvasPropertyPrimitive* property,
-            DeltaValueType deltaType, float deltaValue);
+            float finalValue);
 protected:
-    ANDROID_API virtual float getValue() const;
-    ANDROID_API virtual void setValue(float value);
+    virtual float getValue(RenderNode* target) const;
+    virtual void setValue(RenderNode* target, float value);
 private:
     sp<CanvasPropertyPrimitive> mProperty;
 };
@@ -176,10 +142,10 @@ public:
     };
 
     ANDROID_API CanvasPropertyPaintAnimator(CanvasPropertyPaint* property,
-            PaintField field, DeltaValueType deltaType, float deltaValue);
+            PaintField field, float finalValue);
 protected:
-    ANDROID_API virtual float getValue() const;
-    ANDROID_API virtual void setValue(float value);
+    virtual float getValue(RenderNode* target) const;
+    virtual void setValue(RenderNode* target, float value);
 private:
     sp<CanvasPropertyPaint> mProperty;
     PaintField mField;

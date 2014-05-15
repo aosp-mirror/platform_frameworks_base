@@ -92,9 +92,9 @@ private:
 
 class OnFinishedEvent {
 public:
-    OnFinishedEvent(BaseAnimator* animator, AnimationListener* listener)
+    OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
             : animator(animator), listener(listener) {}
-    sp<BaseAnimator> animator;
+    sp<BaseRenderNodeAnimator> animator;
     sp<AnimationListener> listener;
 };
 
@@ -127,7 +127,7 @@ public:
 
     virtual ~RootRenderNode() {}
 
-    virtual void callOnFinished(BaseAnimator* animator, AnimationListener* listener) {
+    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
         OnFinishedEvent event(animator, listener);
         mOnFinishedEvents.push_back(event);
     }

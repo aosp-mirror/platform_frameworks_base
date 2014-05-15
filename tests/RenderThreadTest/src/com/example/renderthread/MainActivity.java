@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.HardwareRenderer;
 import android.view.RenderNodeAnimator;
 import android.view.View;
@@ -73,12 +74,18 @@ public class MainActivity extends Activity implements OnItemClickListener {
             float delta = (pos - clickedPosition) * 1.1f;
             if (delta == 0) delta = -1;
             RenderNodeAnimator animator = new RenderNodeAnimator(
-                    RenderNodeAnimator.TRANSLATION_Y, RenderNodeAnimator.DELTA_TYPE_DELTA, dy * delta);
+                    RenderNodeAnimator.TRANSLATION_Y, dy * delta);
             animator.setDuration(DURATION);
+            if (child == clickedView) logTranslationY(clickedView);
             animator.start(child);
+            if (child == clickedView) logTranslationY(clickedView);
         }
         //mHandler.postDelayed(mLaunchActivity, (long) (DURATION * .4));
         mLaunchActivity.run();
+    }
+
+    private void logTranslationY(View v) {
+        Log.d("RTTest", "View has translationY: " + v.getTranslationY());
     }
 
     private Runnable mLaunchActivity = new Runnable() {

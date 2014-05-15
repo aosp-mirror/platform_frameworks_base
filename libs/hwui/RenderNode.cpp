@@ -53,7 +53,7 @@ void RenderNode::outputLogBuffer(int fd) {
 }
 
 RenderNode::RenderNode()
-        : mNeedsPropertiesSync(false)
+        : mDirtyPropertyFields(0)
         , mNeedsDisplayListDataSync(false)
         , mDisplayListData(0)
         , mStagingDisplayListData(0)
@@ -109,22 +109,36 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     prepareSubTree(info, mDisplayListData);
 }
 
-static bool is_finished(const sp<BaseRenderNodeAnimator>& animator) {
-    return animator->isFinished();
-}
+class PushAnimatorsFunctor {
+public:
+    PushAnimatorsFunctor(RenderNode* target, TreeInfo& info)
+            : mTarget(target), mInfo(info) {}
+
+    bool operator() (const sp<BaseRenderNodeAnimator>& animator) {
+        animator->setupStartValueIfNecessary(mTarget, mInfo);
+        return animator->isFinished();
+    }
+private:
+    RenderNode* mTarget;
+    TreeInfo& mInfo;
+};
 
 void RenderNode::pushStagingChanges(TreeInfo& info) {
-    if (mNeedsPropertiesSync) {
-        mNeedsPropertiesSync = false;
-        mProperties = mStagingProperties;
-    }
+    // Push the animators first so that setupStartValueIfNecessary() is called
+    // before properties() is trampled by stagingProperties(), as they are
+    // required by some animators.
     if (mNeedsAnimatorsSync) {
         mAnimators.resize(mStagingAnimators.size());
         std::vector< sp<BaseRenderNodeAnimator> >::iterator it;
+        PushAnimatorsFunctor functor(this, info);
         // hint: this means copy_if_not()
         it = std::remove_copy_if(mStagingAnimators.begin(), mStagingAnimators.end(),
-                mAnimators.begin(), is_finished);
+                mAnimators.begin(), functor);
         mAnimators.resize(std::distance(mAnimators.begin(), it));
+    }
+    if (mDirtyPropertyFields) {
+        mDirtyPropertyFields = 0;
+        mProperties = mStagingProperties;
     }
     if (mNeedsDisplayListDataSync) {
         mNeedsDisplayListDataSync = false;
@@ -144,7 +158,7 @@ public:
     AnimateFunctor(RenderNode* target, TreeInfo& info)
             : mTarget(target), mInfo(info) {}
 
-    bool operator() (sp<BaseRenderNodeAnimator>& animator) {
+    bool operator() (const sp<BaseRenderNodeAnimator>& animator) {
         return animator->animate(mTarget, mInfo);
     }
 private:

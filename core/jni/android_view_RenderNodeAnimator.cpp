@@ -62,7 +62,7 @@ public:
         mWeakThis = NULL;
     }
 
-    virtual void onAnimationFinished(BaseAnimator*) {
+    virtual void onAnimationFinished(BaseRenderNodeAnimator*) {
         JNIEnv* env = getEnv(mJvm);
         env->CallStaticVoidMethod(
                 gRenderNodeAnimatorClassInfo.clazz,
@@ -81,13 +81,6 @@ static inline RenderPropertyAnimator::RenderProperty toRenderProperty(jint prope
     return static_cast<RenderPropertyAnimator::RenderProperty>(property);
 }
 
-static inline RenderPropertyAnimator::DeltaValueType toDeltaType(jint deltaType) {
-    LOG_ALWAYS_FATAL_IF(deltaType != RenderPropertyAnimator::DELTA
-            && deltaType != RenderPropertyAnimator::ABSOLUTE,
-            "Invalid delta type %d", deltaType);
-    return static_cast<RenderPropertyAnimator::DeltaValueType>(deltaType);
-}
-
 static inline CanvasPropertyPaintAnimator::PaintField toPaintField(jint field) {
     LOG_ALWAYS_FATAL_IF(field < 0
             || field > CanvasPropertyPaintAnimator::ALPHA,
@@ -96,49 +89,46 @@ static inline CanvasPropertyPaintAnimator::PaintField toPaintField(jint field) {
 }
 
 static jlong createAnimator(JNIEnv* env, jobject clazz, jobject weakThis,
-        jint propertyRaw, jint deltaTypeRaw, jfloat deltaValue) {
+        jint propertyRaw, jfloat finalValue) {
     RenderPropertyAnimator::RenderProperty property = toRenderProperty(propertyRaw);
-    RenderPropertyAnimator::DeltaValueType deltaType = toDeltaType(deltaTypeRaw);
 
-    BaseAnimator* animator = new RenderPropertyAnimator(property, deltaType, deltaValue);
+    BaseRenderNodeAnimator* animator = new RenderPropertyAnimator(property, finalValue);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
 
 static jlong createCanvasPropertyFloatAnimator(JNIEnv* env, jobject clazz,
-        jobject weakThis, jlong canvasPropertyPtr, jint deltaTypeRaw, jfloat deltaValue) {
-    RenderPropertyAnimator::DeltaValueType deltaType = toDeltaType(deltaTypeRaw);
+        jobject weakThis, jlong canvasPropertyPtr, jfloat finalValue) {
     CanvasPropertyPrimitive* canvasProperty = reinterpret_cast<CanvasPropertyPrimitive*>(canvasPropertyPtr);
-    BaseAnimator* animator = new CanvasPropertyPrimitiveAnimator(canvasProperty, deltaType, deltaValue);
+    BaseRenderNodeAnimator* animator = new CanvasPropertyPrimitiveAnimator(canvasProperty, finalValue);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
 
 static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
         jobject weakThis, jlong canvasPropertyPtr, jint paintFieldRaw,
-        jint deltaTypeRaw, jfloat deltaValue) {
-    RenderPropertyAnimator::DeltaValueType deltaType = toDeltaType(deltaTypeRaw);
+        jfloat finalValue) {
     CanvasPropertyPaint* canvasProperty = reinterpret_cast<CanvasPropertyPaint*>(canvasPropertyPtr);
     CanvasPropertyPaintAnimator::PaintField paintField = toPaintField(paintFieldRaw);
-    BaseAnimator* animator = new CanvasPropertyPaintAnimator(
-            canvasProperty, paintField, deltaType, deltaValue);
+    BaseRenderNodeAnimator* animator = new CanvasPropertyPaintAnimator(
+            canvasProperty, paintField, finalValue);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
 
 static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jint duration) {
     LOG_ALWAYS_FATAL_IF(duration < 0, "Duration cannot be negative");
-    BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     animator->setDuration(duration);
 }
 
 static jint getDuration(JNIEnv* env, jobject clazz, jlong animatorPtr) {
-    BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     return static_cast<jint>(animator->duration());
 }
 
 static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong interpolatorPtr) {
-    BaseAnimator* animator = reinterpret_cast<BaseAnimator*>(animatorPtr);
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     Interpolator* interpolator = reinterpret_cast<Interpolator*>(interpolatorPtr);
     animator->setInterpolator(interpolator);
 }
@@ -153,9 +143,9 @@ const char* const kClassPathName = "android/view/RenderNodeAnimator";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IIF)J", (void*) createAnimator },
-    { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyFloatAnimator },
-    { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIIF)J", (void*) createCanvasPropertyPaintAnimator },
+    { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IF)J", (void*) createAnimator },
+    { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JF)J", (void*) createCanvasPropertyFloatAnimator },
+    { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyPaintAnimator },
     { "nSetDuration", "(JI)V", (void*) setDuration },
     { "nGetDuration", "(J)I", (void*) getDuration },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
