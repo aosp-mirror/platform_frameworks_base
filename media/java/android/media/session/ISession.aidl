@@ -40,6 +40,7 @@ interface ISession {
     boolean setRoute(in RouteInfo route);
     void setRouteOptions(in List<RouteOptions> options);
     void connectToRoute(in RouteInfo route, in RouteOptions options);
+    void disconnectFromRoute(in RouteInfo route);
     void sendRouteCommand(in RouteCommand event, in ResultReceiver cb);
 
     // These commands are for the TransportPerformer

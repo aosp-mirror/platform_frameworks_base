@@ -24,20 +24,19 @@ import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
-import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
-import android.media.session.PlaybackState;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
+import android.media.session.Session;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -56,16 +55,18 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final SessionManagerImpl mSessionManagerImpl;
-    private final MediaRouteProviderWatcher mRouteProviderWatcher;
+    // private final MediaRouteProviderWatcher mRouteProviderWatcher;
     private final MediaSessionStack mPriorityStack;
 
-    private final ArrayList<MediaSessionRecord> mRecords = new ArrayList<MediaSessionRecord>();
-    private final ArrayList<MediaRouteProviderProxy> mProviders
-            = new ArrayList<MediaRouteProviderProxy>();
+    private final ArrayList<MediaSessionRecord> mAllSessions = new ArrayList<MediaSessionRecord>();
+    private final SparseArray<UserRecord> mUserRecords = new SparseArray<UserRecord>();
+    // private final ArrayList<MediaRouteProviderProxy> mProviders
+    // = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
     private final Handler mHandler = new Handler();
 
     private MediaSessionRecord mPrioritySession;
+    private int mCurrentUserId = -1;
 
     // Used to keep track of the current request to show routes for a specific
     // session so we drop late callbacks properly.
@@ -77,16 +78,14 @@ public class MediaSessionService extends SystemService implements Monitor {
     public MediaSessionService(Context context) {
         super(context);
         mSessionManagerImpl = new SessionManagerImpl();
-        mRouteProviderWatcher = new MediaRouteProviderWatcher(context, mProviderWatcherCallback,
-                mHandler, context.getUserId());
         mPriorityStack = new MediaSessionStack();
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
-        mRouteProviderWatcher.start();
         Watchdog.getInstance().addMonitor(this);
+        updateUser();
     }
 
     /**
@@ -98,16 +97,28 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void showRoutePickerForSession(MediaSessionRecord record) {
         // TODO for now just toggle the route to test (we will only have one
         // match for now)
-        if (record.getRoute() != null) {
-            // For now send null to mean the local route
-            record.selectRoute(null);
-            return;
-        }
-        mShowRoutesRequestId++;
-        ArrayList<MediaRouteProviderProxy> providers = mRouteProviderWatcher.getProviders();
-        for (int i = providers.size() - 1; i >= 0; i--) {
-            MediaRouteProviderProxy provider = providers.get(i);
-            provider.getRoutes(record, mShowRoutesRequestId);
+        synchronized (mLock) {
+            if (!mAllSessions.contains(record)) {
+                Log.d(TAG, "Unknown session tried to show route picker. Ignoring.");
+                return;
+            }
+            RouteInfo current = record.getRoute();
+            UserRecord user = mUserRecords.get(record.getUserId());
+            if (current != null) {
+                // For now send null to mean the local route
+                MediaRouteProviderProxy proxy = user.getProviderLocked(current.getProvider());
+                if (proxy != null) {
+                    proxy.removeSession(record);
+                }
+                record.selectRoute(null);
+                return;
+            }
+            ArrayList<MediaRouteProviderProxy> providers = user.getProvidersLocked();
+            mShowRoutesRequestId++;
+            for (int i = providers.size() - 1; i >= 0; i--) {
+                MediaRouteProviderProxy provider = providers.get(i);
+                provider.getRoutes(record, mShowRoutesRequestId);
+            }
         }
     }
 
@@ -121,19 +132,31 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void connectToRoute(MediaSessionRecord session, RouteInfo route,
             RouteOptions options) {
         synchronized (mLock) {
-            MediaRouteProviderProxy proxy = getProviderLocked(route.getProvider());
+            if (!mAllSessions.contains(session)) {
+                Log.d(TAG, "Unknown session attempting to connect to route. Ignoring");
+                return;
+            }
+            UserRecord user = mUserRecords.get(session.getUserId());
+            if (user == null) {
+                Log.wtf(TAG, "connectToRoute: User " + session.getUserId() + " does not exist.");
+                return;
+            }
+            MediaRouteProviderProxy proxy = user.getProviderLocked(route.getProvider());
             if (proxy == null) {
                 Log.w(TAG, "Provider for route " + route.getName() + " does not exist.");
                 return;
             }
             RouteRequest request = new RouteRequest(session.getSessionInfo(), options, true);
-            // TODO make connect an async call to a ThreadPoolExecutor
             proxy.connectToRoute(session, route, request);
         }
     }
 
     public void updateSession(MediaSessionRecord record) {
         synchronized (mLock) {
+            if (!mAllSessions.contains(record)) {
+                Log.d(TAG, "Unknown session updated. Ignoring.");
+                return;
+            }
             mPriorityStack.onSessionStateChange(record);
             if (record.isSystemPriority()) {
                 if (record.isActive()) {
@@ -152,7 +175,31 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
         synchronized (mLock) {
+            if (!mAllSessions.contains(record)) {
+                Log.d(TAG, "Unknown session changed playback state. Ignoring.");
+                return;
+            }
             mPriorityStack.onPlaystateChange(record, oldState, newState);
+        }
+    }
+
+    @Override
+    public void onStartUser(int userHandle) {
+        updateUser();
+    }
+
+    @Override
+    public void onSwitchUser(int userHandle) {
+        updateUser();
+    }
+
+    @Override
+    public void onStopUser(int userHandle) {
+        synchronized (mLock) {
+            UserRecord user = mUserRecords.get(userHandle);
+            if (user != null) {
+                destroyUserLocked(user);
+            }
         }
     }
 
@@ -160,6 +207,13 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void monitor() {
         synchronized (mLock) {
             // Check for deadlock
+        }
+    }
+
+    protected void enforcePhoneStatePermission(int pid, int uid) {
+        if (getContext().checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE, pid, uid)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold the MODIFY_PHONE_STATE permission.");
         }
     }
 
@@ -175,12 +229,63 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    private void updateUser() {
+        synchronized (mLock) {
+            int userId = ActivityManager.getCurrentUser();
+            if (mCurrentUserId != userId) {
+                final int oldUserId = mCurrentUserId;
+                mCurrentUserId = userId; // do this first
+
+                UserRecord oldUser = mUserRecords.get(oldUserId);
+                if (oldUser != null) {
+                    oldUser.stopLocked();
+                }
+
+                UserRecord newUser = getOrCreateUser(userId);
+                newUser.startLocked();
+            }
+        }
+    }
+
+    /**
+     * Stop the user and unbind from everything.
+     *
+     * @param user The user to dispose of
+     */
+    private void destroyUserLocked(UserRecord user) {
+        user.stopLocked();
+        user.destroyLocked();
+        mUserRecords.remove(user.mUserId);
+    }
+
+    /*
+     * When a session is removed several things need to happen.
+     * 1. We need to remove it from the relevant user.
+     * 2. We need to remove it from the priority stack.
+     * 3. We need to remove it from all sessions.
+     * 4. If this is the system priority session we need to clear it.
+     * 5. We need to unlink to death from the cb binder
+     * 6. We need to tell the session to do any final cleanup (onDestroy)
+     */
     private void destroySessionLocked(MediaSessionRecord session) {
-        mRecords.remove(session);
+        int userId = session.getUserId();
+        UserRecord user = mUserRecords.get(userId);
+        if (user != null) {
+            user.removeSessionLocked(session);
+        }
+
         mPriorityStack.removeSession(session);
+        mAllSessions.remove(session);
         if (session == mPrioritySession) {
             mPrioritySession = null;
         }
+
+        try {
+            session.getCallback().asBinder().unlinkToDeath(session, 0);
+        } catch (Exception e) {
+            // ignore exceptions while destroying a session.
+        }
+        session.onDestroy();
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -195,13 +300,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
         throw new IllegalArgumentException("packageName is not owned by the calling process");
-    }
-
-    protected void enforcePhoneStatePermission(int pid, int uid) {
-        if (getContext().checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE, pid, uid)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold the MODIFY_PHONE_STATE permission.");
-        }
     }
 
     /**
@@ -271,14 +369,22 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, ISessionCallback cb, String tag) {
+            String callerPackageName, ISessionCallback cb, String tag) throws RemoteException {
         synchronized (mLock) {
             return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb, tag);
         }
     }
 
+    /*
+     * When a session is created the following things need to happen.
+     * 1. It's callback binder needs a link to death
+     * 2. It needs to be added to all sessions.
+     * 3. It needs to be added to the priority stack.
+     * 4. It needs to be added to the relevant user record.
+     */
     private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
             String callerPackageName, ISessionCallback cb, String tag) {
+
         final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
                 callerPackageName, cb, tag, this, mHandler);
         try {
@@ -286,17 +392,31 @@ public class MediaSessionService extends SystemService implements Monitor {
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
-        mRecords.add(session);
+
+        mAllSessions.add(session);
         mPriorityStack.addSession(session);
+
+        UserRecord user = getOrCreateUser(userId);
+        user.addSessionLocked(session);
+
         if (DEBUG) {
             Log.d(TAG, "Created session for package " + callerPackageName + " with tag " + tag);
         }
         return session;
     }
 
+    private UserRecord getOrCreateUser(int userId) {
+        UserRecord user = mUserRecords.get(userId);
+        if (user == null) {
+            user = new UserRecord(getContext(), userId);
+            mUserRecords.put(userId, user);
+        }
+        return user;
+    }
+
     private int findIndexOfSessionForIdLocked(String sessionId) {
-        for (int i = mRecords.size() - 1; i >= 0; i--) {
-            MediaSessionRecord session = mRecords.get(i);
+        for (int i = mAllSessions.size() - 1; i >= 0; i--) {
+            MediaSessionRecord session = mAllSessions.get(i);
             if (TextUtils.equals(session.getSessionInfo().getId(), sessionId)) {
                 return i;
             }
@@ -304,41 +424,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         return -1;
     }
 
-    private MediaRouteProviderProxy getProviderLocked(String providerId) {
-        for (int i = mProviders.size() - 1; i >= 0; i--) {
-            MediaRouteProviderProxy provider = mProviders.get(i);
-            if (TextUtils.equals(providerId, provider.getId())) {
-                return provider;
-            }
-        }
-        return null;
-    }
-
     private boolean isSessionDiscoverable(MediaSessionRecord record) {
-        // TODO probably want to check more than if it's published.
+        // TODO probably want to check more than if it's active.
         return record.isActive();
     }
-
-    private MediaRouteProviderWatcher.Callback mProviderWatcherCallback
-            = new MediaRouteProviderWatcher.Callback() {
-        @Override
-        public void removeProvider(MediaRouteProviderProxy provider) {
-            synchronized (mLock) {
-                mProviders.remove(provider);
-                provider.setRoutesListener(null);
-                provider.setInterested(false);
-            }
-        }
-
-        @Override
-        public void addProvider(MediaRouteProviderProxy provider) {
-            synchronized (mLock) {
-                mProviders.add(provider);
-                provider.setRoutesListener(mRoutesCallback);
-                provider.setInterested(true);
-            }
-        }
-    };
 
     private MediaRouteProviderProxy.RoutesListener mRoutesCallback
             = new MediaRouteProviderProxy.RoutesListener() {
@@ -350,8 +439,12 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 int index = findIndexOfSessionForIdLocked(sessionId);
                 if (index != -1 && routes != null && routes.size() > 0) {
-                    MediaSessionRecord record = mRecords.get(index);
-                    record.selectRoute(routes.get(0));
+                    MediaSessionRecord record = mAllSessions.get(index);
+                    RouteInfo route = routes.get(0);
+                    record.selectRoute(route);
+                    UserRecord user = mUserRecords.get(record.getUserId());
+                    MediaRouteProviderProxy provider = user.getProviderLocked(route.getProvider());
+                    provider.addSession(record);
                 }
             }
         }
@@ -362,12 +455,134 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 int index = findIndexOfSessionForIdLocked(sessionId);
                 if (index != -1) {
-                    MediaSessionRecord session = mRecords.get(index);
+                    MediaSessionRecord session = mAllSessions.get(index);
                     session.setRouteConnected(route, options.getConnectionOptions(), connection);
                 }
             }
         }
     };
+
+    /**
+     * Information about a particular user. The contents of this object is
+     * guarded by mLock.
+     */
+    final class UserRecord {
+        private final int mUserId;
+        private final MediaRouteProviderWatcher mRouteProviderWatcher;
+        private final ArrayList<MediaRouteProviderProxy> mProviders
+                = new ArrayList<MediaRouteProviderProxy>();
+        private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
+
+        public UserRecord(Context context, int userId) {
+            mUserId = userId;
+            mRouteProviderWatcher = new MediaRouteProviderWatcher(context,
+                    mProviderWatcherCallback, mHandler, userId);
+        }
+
+        public void startLocked() {
+            mRouteProviderWatcher.start();
+        }
+
+        public void stopLocked() {
+            mRouteProviderWatcher.stop();
+            updateInterestLocked();
+        }
+
+        public void destroyLocked() {
+            for (int i = mSessions.size() - 1; i >= 0; i--) {
+                MediaSessionRecord session = mSessions.get(i);
+                MediaSessionService.this.destroySessionLocked(session);
+                if (session.isConnected()) {
+                    session.disconnect(Session.DISCONNECT_REASON_USER_STOPPING);
+                }
+            }
+        }
+
+        public ArrayList<MediaRouteProviderProxy> getProvidersLocked() {
+            return mProviders;
+        }
+
+        public ArrayList<MediaSessionRecord> getSessionsLocked() {
+            return mSessions;
+        }
+
+        public void addSessionLocked(MediaSessionRecord session) {
+            mSessions.add(session);
+            updateInterestLocked();
+        }
+
+        public void removeSessionLocked(MediaSessionRecord session) {
+            mSessions.remove(session);
+            RouteInfo route = session.getRoute();
+            if (route != null) {
+                MediaRouteProviderProxy provider = getProviderLocked(route.getProvider());
+                if (provider != null) {
+                    provider.removeSession(session);
+                }
+            }
+            updateInterestLocked();
+        }
+
+        public void dumpLocked(PrintWriter pw, String prefix) {
+            pw.println(prefix + "Record for user " + mUserId);
+            String indent = prefix + "  ";
+            int size = mProviders.size();
+            pw.println(indent + size + " Providers:");
+            for (int i = 0; i < size; i++) {
+                mProviders.get(i).dump(pw, indent);
+            }
+            pw.println();
+            size = mSessions.size();
+            pw.println(indent + size + " Sessions:");
+            for (int i = 0; i < size; i++) {
+                // Just print the session info, the full session dump will
+                // already be in the list of all sessions.
+                pw.println(indent + mSessions.get(i).getSessionInfo());
+            }
+        }
+
+        public void updateInterestLocked() {
+            // TODO go through the sessions and build up the set of interfaces
+            // we're interested in. Update the provider watcher.
+            // For now, just express interest in all providers for the current
+            // user
+            boolean interested = mUserId == mCurrentUserId;
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                mProviders.get(i).setInterested(interested);
+            }
+        }
+
+        private MediaRouteProviderProxy getProviderLocked(String providerId) {
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                MediaRouteProviderProxy provider = mProviders.get(i);
+                if (TextUtils.equals(providerId, provider.getId())) {
+                    return provider;
+                }
+            }
+            return null;
+        }
+
+        private MediaRouteProviderWatcher.Callback mProviderWatcherCallback
+                = new MediaRouteProviderWatcher.Callback() {
+            @Override
+            public void removeProvider(MediaRouteProviderProxy provider) {
+                synchronized (mLock) {
+                    mProviders.remove(provider);
+                    provider.setRoutesListener(null);
+                    provider.setInterested(false);
+                }
+            }
+
+            @Override
+            public void addProvider(MediaRouteProviderProxy provider) {
+                synchronized (mLock) {
+                    mProviders.add(provider);
+                    provider.setRoutesListener(mRoutesCallback);
+                    provider.setInterested(true);
+                }
+            }
+        };
+    }
 
     class SessionManagerImpl extends ISessionManager.Stub {
         // TODO add createSessionAsUser, pass user-id to
@@ -447,19 +662,19 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (mPrioritySession != null) {
                     mPrioritySession.dump(pw, "");
                 }
-                int count = mRecords.size();
+                int count = mAllSessions.size();
                 pw.println(count + " Sessions:");
                 for (int i = 0; i < count; i++) {
-                    mRecords.get(i).dump(pw, "");
+                    mAllSessions.get(i).dump(pw, "");
                     pw.println();
                 }
                 mPriorityStack.dump(pw, "");
 
-                pw.println("Providers:");
-                count = mProviders.size();
+                pw.println("User Records:");
+                count = mUserRecords.size();
                 for (int i = 0; i < count; i++) {
-                    MediaRouteProviderProxy provider = mProviders.get(i);
-                    provider.dump(pw, "");
+                    UserRecord user = mUserRecords.get(i);
+                    user.dumpLocked(pw, "");
                 }
             }
         }

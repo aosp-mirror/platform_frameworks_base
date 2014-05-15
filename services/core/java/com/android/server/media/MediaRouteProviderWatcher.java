@@ -90,6 +90,8 @@ public class MediaRouteProviderWatcher {
         }
     }
 
+    // Stop discovering providers and routes. Providers that still have an
+    // active session connected to them will not unbind.
     public void stop() {
         if (mRunning) {
             mRunning = false;
@@ -97,10 +99,18 @@ public class MediaRouteProviderWatcher {
             mContext.unregisterReceiver(mScanPackagesReceiver);
             mHandler.removeCallbacks(mScanPackagesRunnable);
 
-            // Stop all providers.
+            // Stop all inactive providers.
             for (int i = mProviders.size() - 1; i >= 0; i--) {
                 mProviders.get(i).stop();
             }
+        }
+    }
+
+    // Clean up the providers forcibly unbinding if necessary
+    public void destroy() {
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            mProviders.get(i).destroy();
+            mProviders.remove(i);
         }
     }
 
