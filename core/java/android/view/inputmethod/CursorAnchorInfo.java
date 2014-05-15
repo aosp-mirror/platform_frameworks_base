@@ -290,14 +290,10 @@ public final class CursorAnchorInfo implements Parcelable {
          * is interpreted as an identity matrix.
          */
         public CursorAnchorInfoBuilder setMatrix(final Matrix matrix) {
-            if (matrix != null) {
-                mMatrix = matrix;
-            } else {
-                mMatrix = Matrix.IDENTITY_MATRIX;
-            }
+            mMatrix.set(matrix != null ? matrix : Matrix.IDENTITY_MATRIX);
             return this;
         }
-        private Matrix mMatrix = Matrix.IDENTITY_MATRIX;
+        private final Matrix mMatrix = new Matrix(Matrix.IDENTITY_MATRIX);
 
         /**
          * @return {@link CursorAnchorInfo} using parameters in this
@@ -320,7 +316,7 @@ public final class CursorAnchorInfo implements Parcelable {
             mInsertionMarkerTop = Float.NaN;
             mInsertionMarkerBaseline = Float.NaN;
             mInsertionMarkerBottom = Float.NaN;
-            mMatrix = Matrix.IDENTITY_MATRIX;
+            mMatrix.set(Matrix.IDENTITY_MATRIX);
             if (mCharacterRectBuilder != null) {
                 mCharacterRectBuilder.reset();
             }
@@ -338,7 +334,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerBottom = builder.mInsertionMarkerBottom;
         mCharacterRects = builder.mCharacterRectBuilder != null ?
                 builder.mCharacterRectBuilder.build() : null;
-        mMatrix = builder.mMatrix;
+        mMatrix = new Matrix(builder.mMatrix);
     }
 
     /**
