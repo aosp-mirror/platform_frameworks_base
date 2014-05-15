@@ -183,11 +183,17 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDialog = createDialog();
         prepareDialog();
 
-        WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
-        attrs.setTitle("GlobalActions");
-        mDialog.getWindow().setAttributes(attrs);
-        mDialog.show();
-        mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+        // If we only have 1 item and it's a simple press action, just do this action.
+        if (mAdapter.getCount() == 1
+                && mAdapter.getItem(0) instanceof SinglePressAction) {
+            ((SinglePressAction) mAdapter.getItem(0)).onPress();
+        } else {
+            WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
+            attrs.setTitle("GlobalActions");
+            mDialog.getWindow().setAttributes(attrs);
+            mDialog.show();
+            mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+        }
     }
 
     /**
@@ -398,7 +404,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
             @Override
             public boolean showBeforeProvisioning() {
-                return false;
+                return true;
             }
         };
     }
@@ -1022,6 +1028,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mEnableAccessibilityController = null;
                 super.setCanceledOnTouchOutside(true);
             }
+
             super.onStart();
         }
 
