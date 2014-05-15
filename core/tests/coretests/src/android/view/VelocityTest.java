@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.frameworktest.view;
+package android.view;
 
 import junit.framework.Assert;
 
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -30,7 +28,7 @@ import android.view.animation.LinearInterpolator;
 /**
  * Exercises {@link android.view.VelocityTracker} to compute correct velocity.<br>
  * To launch this test, use :<br>
- * <code>./development/testrunner/runtest.py framework -c com.android.frameworktest.view.VelocityTest</code>
+ * <code>./development/testrunner/runtest.py framework -c android.view.VelocityTest</code>
  */
 public class VelocityTest extends InstrumentationTestCase {
 
