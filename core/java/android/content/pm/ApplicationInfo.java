@@ -455,7 +455,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public String requiredCpuAbi;
+    public String cpuAbi;
 
     /**
      * The kernel user-ID that has been assigned to this application;
@@ -587,7 +587,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
         nativeLibraryDir = orig.nativeLibraryDir;
-        requiredCpuAbi = orig.requiredCpuAbi;
+        cpuAbi = orig.cpuAbi;
         resourceDirs = orig.resourceDirs;
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
@@ -628,7 +628,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
         dest.writeString(nativeLibraryDir);
-        dest.writeString(requiredCpuAbi);
+        dest.writeString(cpuAbi);
         dest.writeStringArray(resourceDirs);
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
@@ -668,7 +668,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         sourceDir = source.readString();
         publicSourceDir = source.readString();
         nativeLibraryDir = source.readString();
-        requiredCpuAbi = source.readString();
+        cpuAbi = source.readString();
         resourceDirs = source.readStringArray();
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();
