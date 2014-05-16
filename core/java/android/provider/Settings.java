@@ -2889,6 +2889,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY);
         }
 
         /** @hide */
@@ -5318,6 +5319,13 @@ public final class Settings {
         * to Gmail on the device must change to Google Mail.
         */
        public static final String USE_GOOGLE_MAIL = "use_google_mail";
+
+        /**
+         * Webview Data reduction proxy key.
+         * @hide
+         */
+        public static final String WEBVIEW_DATA_REDUCTION_PROXY_KEY =
+                "webview_data_reduction_proxy_key";
 
        /**
         * Whether Wifi display is enabled/disabled
