@@ -34,11 +34,11 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory {
      * Used to cache the float[] LUT for use across multiple native
      * interpolator creation
      */
-    public FallbackLUTInterpolator(TimeInterpolator interpolator, int duration) {
+    public FallbackLUTInterpolator(TimeInterpolator interpolator, long duration) {
         mLut = createLUT(interpolator, duration);
     }
 
-    private static float[] createLUT(TimeInterpolator interpolator, int duration) {
+    private static float[] createLUT(TimeInterpolator interpolator, long duration) {
         long frameIntervalNanos = Choreographer.getInstance().getFrameIntervalNanos();
         int animIntervalMs = (int) (frameIntervalNanos / TimeUtils.NANOS_PER_MS);
         int numAnimFrames = (int) Math.ceil(duration / animIntervalMs);
@@ -59,7 +59,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory {
     /**
      * Used to create a one-shot float[] LUT & native interpolator
      */
-    public static long createNativeInterpolator(TimeInterpolator interpolator, int duration) {
+    public static long createNativeInterpolator(TimeInterpolator interpolator, long duration) {
         float[] lut = createLUT(interpolator, duration);
         return NativeInterpolatorFactoryHelper.createLutInterpolator(lut);
     }

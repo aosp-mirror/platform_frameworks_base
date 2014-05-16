@@ -37,7 +37,10 @@ BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         , mInterpolator(0)
         , mPlayState(NEEDS_START)
         , mStartTime(0)
-        , mDuration(300){
+        , mDelayUntil(0)
+        , mDuration(300)
+        , mStartDelay(0) {
+
 }
 
 BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
@@ -47,10 +50,6 @@ BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
 void BaseRenderNodeAnimator::setInterpolator(Interpolator* interpolator) {
     delete mInterpolator;
     mInterpolator = interpolator;
-}
-
-void BaseRenderNodeAnimator::setDuration(nsecs_t duration) {
-    mDuration = duration;
 }
 
 void BaseRenderNodeAnimator::setStartValue(float value) {
@@ -68,7 +67,24 @@ void BaseRenderNodeAnimator::setupStartValueIfNecessary(RenderNode* target, Tree
     }
 }
 
+void BaseRenderNodeAnimator::setDuration(nsecs_t duration) {
+    mDuration = duration;
+}
+
+void BaseRenderNodeAnimator::setStartDelay(nsecs_t startDelay) {
+    mStartDelay = startDelay;
+}
+
 bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
+    if (mPlayState == PENDING && mStartDelay > 0 && mDelayUntil == 0) {
+        mDelayUntil = info.frameTimeMs + mStartDelay;
+        return false;
+    }
+
+    if (mDelayUntil > info.frameTimeMs) {
+        return false;
+    }
+
     if (mPlayState == PENDING) {
         mPlayState = RUNNING;
         mStartTime = info.frameTimeMs;
