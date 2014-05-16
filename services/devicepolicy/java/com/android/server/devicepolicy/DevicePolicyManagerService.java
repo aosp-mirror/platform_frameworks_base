@@ -3351,6 +3351,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public UserHandle createUser(ComponentName who, String name) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                UserInfo userInfo = mUserManager.createUser(name, 0 /* flags */);
+                if (userInfo != null) {
+                    return userInfo.getUserHandle();
+                }
+                return null;
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
+    public boolean removeUser(ComponentName who, UserHandle userHandle) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                return mUserManager.removeUser(userHandle.getIdentifier());
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
     public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
 
