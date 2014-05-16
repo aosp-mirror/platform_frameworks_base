@@ -5106,6 +5106,7 @@ package android.app.admin {
     method public void clearForwardingIntentFilters(android.content.ComponentName);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
+    method public android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
@@ -5139,6 +5140,7 @@ package android.app.admin {
     method public boolean isProfileOwnerApp(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
+    method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setApplicationBlocked(android.content.ComponentName, java.lang.String, boolean);
