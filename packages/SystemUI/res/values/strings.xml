@@ -553,6 +553,9 @@
         <item quantity="other">%d more</item>
     </plurals>
 
+    <!-- An explanation for the visual speed bump in the notifications, which will appear when you click on it. [CHAR LIMIT=50] -->
+    <string name="speed_bump_explanation">Less urgent notifications below</string>
+
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
     <string name="notification_tap_again">Tap again to open</string>
 

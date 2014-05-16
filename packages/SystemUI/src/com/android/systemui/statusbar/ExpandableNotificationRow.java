@@ -52,6 +52,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
+    private boolean mIsBelowSpeedBump;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -242,6 +243,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
         mPrivateLayout.setClipTopAmount(clipTopAmount);
+    }
+
+    public boolean isBelowSpeedBump() {
+        return mIsBelowSpeedBump;
+    }
+
+    public void setIsBelowSpeedBump(boolean isBelow) {
+        this.mIsBelowSpeedBump = isBelow;
     }
 
     public void notifyContentUpdated() {

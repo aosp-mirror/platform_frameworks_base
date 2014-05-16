@@ -40,9 +40,13 @@ public abstract class ExpandableView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (!mActualHeightInitialized && mActualHeight == 0) {
-            mActualHeight = getHeight();
+            mActualHeight = getInitialHeight();
         }
         mActualHeightInitialized = true;
+    }
+
+    protected int getInitialHeight() {
+        return getHeight();
     }
 
     @Override
@@ -144,6 +148,10 @@ public abstract class ExpandableView extends FrameLayout {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(this);
         }
+    }
+
+    public boolean isTransparent() {
+        return false;
     }
 
     /**
