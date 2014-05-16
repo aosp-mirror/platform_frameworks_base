@@ -36,12 +36,14 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.AudioService;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -49,6 +51,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -56,6 +59,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.google.android.util.AbstractMessageParser.MusicTrack;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -90,6 +94,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     final SparseArray<HashMap<String, Ops>> mUidOps
             = new SparseArray<HashMap<String, Ops>>();
+
+    private int mDeviceOwnerUid;
+    private final SparseIntArray mProfileOwnerUids = new SparseIntArray();
+    private final SparseArray<boolean[]> mOpRestrictions = new SparseArray<boolean[]>();
 
     public final static class Ops extends SparseArray<Op> {
         public final String packageName;
@@ -548,6 +556,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         synchronized (this) {
+            if (isOpRestricted(uid, code)) {
+                return AppOpsManager.MODE_IGNORED;
+            }
             Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
@@ -631,6 +642,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
+            if (isOpRestricted(uid, code)) {
+                return AppOpsManager.MODE_IGNORED;
+            }
             if (op.duration == -1) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName
                         + " code " + code + " time=" + op.time + " duration=" + op.duration);
@@ -665,6 +679,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
+            if (isOpRestricted(uid, code)) {
+                return AppOpsManager.MODE_IGNORED;
+            }
             final int switchCode = AppOpsManager.opToSwitch(code);
             final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
             if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
@@ -828,6 +845,23 @@ public class AppOpsService extends IAppOpsService.Stub {
             scheduleWriteLocked();
         }
         return op;
+    }
+
+    private boolean isOpRestricted(int uid, int code) {
+        int userHandle = UserHandle.getUserId(uid);
+        boolean[] opRestrictions = mOpRestrictions.get(userHandle);
+        if ((opRestrictions != null) && opRestrictions[code]) {
+            if (userHandle == UserHandle.USER_OWNER) {
+                if (uid != mDeviceOwnerUid) {
+                    return true;
+                }
+            } else {
+                if (uid != mProfileOwnerUids.get(userHandle, -1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     void readState() {
@@ -1167,4 +1201,66 @@ public class AppOpsService extends IAppOpsService.Stub {
         int mode;
         ArraySet<String> exceptionPackages = NO_EXCEPTIONS;
     }
+
+    @Override
+    public void setDeviceOwner(String packageName) throws RemoteException {
+        checkSystemUid("setDeviceOwner");
+        try {
+            mDeviceOwnerUid = mContext.getPackageManager().getPackageUid(packageName,
+                    UserHandle.USER_OWNER);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Could not find Device Owner UID");
+            mDeviceOwnerUid = -1;
+            throw new IllegalArgumentException("Could not find device owner package "
+                    + packageName);
+        }
+    }
+
+    @Override
+    public void setProfileOwner(String packageName, int userHandle) throws RemoteException {
+        checkSystemUid("setProfileOwner");
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(packageName,
+                    userHandle);
+            mProfileOwnerUids.put(userHandle, uid);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Could not find Profile Owner UID");
+            mProfileOwnerUids.put(userHandle, -1);
+            throw new IllegalArgumentException("Could not find profile owner package "
+                    + packageName);
+        }
+    }
+
+    @Override
+    public void setUserRestrictions(Bundle restrictions, int userHandle) throws RemoteException {
+        checkSystemUid("setUserRestrictions");
+        boolean[] opRestrictions = mOpRestrictions.get(userHandle);
+        if (opRestrictions == null) {
+            opRestrictions = new boolean[AppOpsManager._NUM_OP];
+            mOpRestrictions.put(userHandle, opRestrictions);
+        }
+        for (int i = 0; i < opRestrictions.length; ++i) {
+            String restriction = AppOpsManager.opToRestriction(i);
+            if (restriction != null) {
+                opRestrictions[i] = restrictions.getBoolean(restriction, false);
+            } else {
+                opRestrictions[i] = false;
+            }
+        }
+    }
+
+    @Override
+    public void removeUser(int userHandle) throws RemoteException {
+        checkSystemUid("removeUser");
+        mOpRestrictions.remove(userHandle);
+        mProfileOwnerUids.removeAt(mProfileOwnerUids.indexOfKey(userHandle));
+    }
+
+    private void checkSystemUid(String function) {
+        int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID) {
+            throw new SecurityException(function + " must by called by the system");
+        }
+    }
+
 }

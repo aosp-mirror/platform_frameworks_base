@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
 import com.android.internal.R;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -236,6 +237,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     };
+
+    private IAppOpsService mAppOpsService;
 
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
@@ -1208,6 +1211,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             loadSettingsLocked(getUserData(UserHandle.USER_OWNER), UserHandle.USER_OWNER);
             loadDeviceOwner();
+        }
+        mAppOpsService = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+        if (mDeviceOwner.hasDeviceOwner()) {
+            try {
+                mAppOpsService.setDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
+            }
+        }
+        for (Integer i : mDeviceOwner.getProfileOwnerKeys()) {
+            try {
+                mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerName(i), i);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
+            }
         }
     }
 
@@ -2953,6 +2972,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Trying to set device owner but device owner is already set.");
             }
 
+            long token = Binder.clearCallingIdentity();
+            try {
+                mAppOpsService.setDeviceOwner(packageName);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
             if (mDeviceOwner == null) {
                 // Device owner is not set and does not exist, set it.
                 mDeviceOwner = DeviceOwner.createWithDeviceOwner(packageName, ownerName);
@@ -3028,6 +3055,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isUserSetupComplete(userHandle)) {
                 throw new IllegalStateException(
                         "Trying to set profile owner but user is already set-up.");
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mAppOpsService.setProfileOwner(packageName, userHandle);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
