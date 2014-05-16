@@ -178,7 +178,7 @@ interface IBackupTransport {
     /**
      * Get the data for the application returned by {@link #nextRestorePackage}.
      * @param data An open, writable file into which the backup data should be stored.
-     * @return the same error codes as {@link #nextRestorePackage}.
+     * @return the same error codes as {@link #startRestore}.
      */
     int getRestoreData(in ParcelFileDescriptor outFd);
 

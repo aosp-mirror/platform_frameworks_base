@@ -32,6 +32,6 @@ public class LocalTransportService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return sTransport;
+        return sTransport.getBinder();
     }
 }

@@ -18,6 +18,7 @@ package com.android.internal.backup;
 
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupTransport;
 import android.app.backup.RestoreSet;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,7 +48,7 @@ import static android.system.OsConstants.*;
  * later restoring from there.  For testing only.
  */
 
-public class LocalTransport extends IBackupTransport.Stub {
+public class LocalTransport extends BackupTransport {
     private static final String TAG = "LocalTransport";
     private static final boolean DEBUG = true;
 
@@ -217,7 +218,7 @@ public class LocalTransport extends IBackupTransport.Stub {
 
     // Restore handling
     static final long[] POSSIBLE_SETS = { 2, 3, 4, 5, 6, 7, 8, 9 }; 
-    public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+    public RestoreSet[] getAvailableRestoreSets() {
         long[] existing = new long[POSSIBLE_SETS.length + 1];
         int num = 0;
 
