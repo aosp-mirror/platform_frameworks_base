@@ -1220,10 +1220,6 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     private RenderNode buildDisplayList(View view, HardwareCanvas canvas) {
-        if (mDrawDelta <= 0) {
-            return view.mRenderNode;
-        }
-
         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
                 == View.PFLAG_INVALIDATED;
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
