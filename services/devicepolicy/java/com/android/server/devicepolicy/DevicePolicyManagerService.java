@@ -1224,7 +1224,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             for (Integer i : mDeviceOwner.getProfileOwnerKeys()) {
                 try {
-                    mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerName(i), i);
+                    mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerPackageName(i), i);
                 } catch (RemoteException e) {
                     Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
                 }
