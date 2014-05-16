@@ -56,7 +56,7 @@ public class ConnectivityController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingTask(TaskStatus taskStatus) {
+    public void maybeTrackTaskState(TaskStatus taskStatus) {
         if (taskStatus.hasConnectivityConstraint() || taskStatus.hasMeteredConstraint()) {
             taskStatus.connectivityConstraintSatisfied.set(mConnectivity);
             taskStatus.meteredConstraintSatisfied.set(mMetered);
@@ -65,7 +65,7 @@ public class ConnectivityController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingTask(TaskStatus taskStatus) {
+    public void removeTaskStateIfTracked(TaskStatus taskStatus) {
         mTrackedTasks.remove(taskStatus);
     }
 
@@ -111,7 +111,7 @@ public class ConnectivityController extends StateController {
                     mMetered = false;
                     mConnectivity =
                             !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-                    if (isConnected) {  // No point making the call if we know there's no conn.
+                    if (mConnectivity) {  // No point making the call if we know there's no conn.
                         mMetered = connManager.isActiveNetworkMetered();
                     }
                     updateTrackedTasks(userid);

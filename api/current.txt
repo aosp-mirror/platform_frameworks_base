@@ -5245,7 +5245,7 @@ package android.app.task {
   public abstract class TaskService extends android.app.Service {
     ctor public TaskService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onStartTask(android.app.task.TaskParams);
+    method public abstract boolean onStartTask(android.app.task.TaskParams);
     method public abstract boolean onStopTask(android.app.task.TaskParams);
     method public final void taskFinished(android.app.task.TaskParams, boolean);
     field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_TASK_SERVICE";
