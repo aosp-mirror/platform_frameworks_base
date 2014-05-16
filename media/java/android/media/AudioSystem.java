@@ -199,6 +199,17 @@ public class AudioSystem
         }
     }
 
+    /*
+     * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
+     * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
+     */
+    public static final int SUCCESS            = 0;
+    public static final int ERROR              = -1;
+    public static final int BAD_VALUE          = -2;
+    public static final int INVALID_OPERATION  = -3;
+    public static final int PERMISSION_DENIED  = -4;
+    public static final int NO_INIT            = -5;
+    public static final int DEAD_OBJECT        = -6;
 
     /*
      * AudioPolicyService methods

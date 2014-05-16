@@ -61,25 +61,25 @@ public class AudioRecord
      */
     public static final int RECORDSTATE_RECORDING = 3;// matches SL_RECORDSTATE_RECORDING
 
-    // Error codes:
-    // to keep in sync with frameworks/base/core/jni/android_media_AudioRecord.cpp
     /**
      * Denotes a successful operation.
      */
-    public static final int SUCCESS                 = 0;
+    public  static final int SUCCESS                               = AudioSystem.SUCCESS;
     /**
      * Denotes a generic operation failure.
      */
-    public static final int ERROR                   = -1;
+    public  static final int ERROR                                 = AudioSystem.ERROR;
     /**
      * Denotes a failure due to the use of an invalid value.
      */
-    public static final int ERROR_BAD_VALUE         = -2;
+    public  static final int ERROR_BAD_VALUE                       = AudioSystem.BAD_VALUE;
     /**
      * Denotes a failure due to the improper use of a method.
      */
-    public static final int ERROR_INVALID_OPERATION = -3;
+    public  static final int ERROR_INVALID_OPERATION               = AudioSystem.INVALID_OPERATION;
 
+    // Error codes:
+    // to keep in sync with frameworks/base/core/jni/android_media_AudioRecord.cpp
     private static final int AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      = -16;
     private static final int AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK  = -17;
     private static final int AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       = -18;
