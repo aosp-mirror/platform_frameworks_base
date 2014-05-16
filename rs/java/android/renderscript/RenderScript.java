@@ -67,6 +67,12 @@ public class RenderScript {
     static Method registerNativeAllocation;
     static Method registerNativeFree;
 
+    /*
+     * Detect the bitness of the VM to allow FieldPacker to do the right thing.
+     */
+    static native int rsnSystemGetPointerSize();
+    static int sPointerSize;
+
     static {
         sInitialized = false;
         if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
@@ -84,6 +90,7 @@ public class RenderScript {
                 System.loadLibrary("rs_jni");
                 _nInit();
                 sInitialized = true;
+                sPointerSize = rsnSystemGetPointerSize();
             } catch (UnsatisfiedLinkError e) {
                 Log.e(LOG_TAG, "Error loading RS jni library: " + e);
                 throw new RSRuntimeException("Error loading RS jni library: " + e);
