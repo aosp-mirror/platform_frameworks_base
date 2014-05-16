@@ -235,7 +235,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mWakeLockNesting;
     boolean mWakeLockImportant;
-    public boolean mRecordAllWakeLocks;
+    boolean mRecordAllWakeLocks;
+    boolean mNoAutoReset;
 
     int mScreenState = Display.STATE_UNKNOWN;
     StopwatchTimer mScreenOnTimer;
@@ -2314,9 +2315,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private String mInitialAcquireWakeName;
-    private int mInitialAcquireWakeUid = -1;
-
     public void setRecordAllWakeLocksLocked(boolean enabled) {
         mRecordAllWakeLocks = enabled;
         if (!enabled) {
@@ -2324,6 +2322,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mActiveEvents.removeEvents(HistoryItem.EVENT_WAKE_LOCK);
         }
     }
+
+    public void setNoAutoReset(boolean enabled) {
+        mNoAutoReset = enabled;
+    }
+
+    private String mInitialAcquireWakeName;
+    private int mInitialAcquireWakeUid = -1;
 
     public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging, long elapsedRealtime, long uptime) {
@@ -2355,6 +2360,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else if (mRecordAllWakeLocks) {
                 if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_START, historyName,
                         uid, 0)) {
+                    mWakeLockNesting++;
                     return;
                 }
                 addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_WAKE_LOCK_START,
@@ -5942,9 +5948,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             // we have gone through a significant charge (from a very low
             // level to a now very high level).
             boolean reset = false;
-            if (oldStatus == BatteryManager.BATTERY_STATUS_FULL
+            if (!mNoAutoReset && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
-                    || (mDischargeCurrentLevel < 20 && level >= 80)) {
+                    || (mDischargeCurrentLevel < 20 && level >= 80))) {
                 doWrite = true;
                 resetAllStatsLocked();
                 mDischargeStartLevel = level;
