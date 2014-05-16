@@ -1555,10 +1555,6 @@ public abstract class HardwareRenderer {
         }
 
         private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
-            if (mDrawDelta <= 0) {
-                return view.mDisplayList;
-            }
-
             view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
                     == View.PFLAG_INVALIDATED;
             view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
