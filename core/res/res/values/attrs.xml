@@ -1672,6 +1672,7 @@
         <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="222" />
         <enum name="KEYCODE_MEDIA_SLEEP" value="223" />
         <enum name="KEYCODE_MEDIA_WAKEUP" value="224" />
+        <enum name="KEYCODE_PAIRING" value="225" />
     </attr>
 
     <!-- ***************************************************************** -->
