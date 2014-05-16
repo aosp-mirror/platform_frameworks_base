@@ -1962,7 +1962,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                 xOffset = dispatchEntry->xOffset * scaleFactor;
                 yOffset = dispatchEntry->yOffset * scaleFactor;
                 if (scaleFactor != 1.0f) {
-                    for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    for (uint32_t i = 0; i < motionEntry->pointerCount; i++) {
                         scaledCoords[i] = motionEntry->pointerCoords[i];
                         scaledCoords[i].scale(scaleFactor);
                     }
@@ -1975,7 +1975,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
                 // We don't want the dispatch target to know.
                 if (dispatchEntry->targetFlags & InputTarget::FLAG_ZERO_COORDS) {
-                    for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    for (uint32_t i = 0; i < motionEntry->pointerCount; i++) {
                         scaledCoords[i].clear();
                     }
                     usingCoords = scaledCoords;
