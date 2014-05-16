@@ -11876,6 +11876,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("  cmd may be one of:");
                 pw.println("    l[ibraries]: list known shared libraries");
                 pw.println("    f[ibraries]: list device features");
+                pw.println("    k[eysets]: print known keysets");
                 pw.println("    r[esolvers]: dump intent resolvers");
                 pw.println("    perm[issions]: dump permissions");
                 pw.println("    pref[erred]: print preferred package settings");
@@ -11886,8 +11887,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    m[essages]: print collected runtime messages");
                 pw.println("    v[erifiers]: print package verifier info");
                 pw.println("    version: print database version info");
+                pw.println("    write: write current settings now");
                 pw.println("    <package.name>: info about given package");
-                pw.println("    k[eysets]: print known keysets");
                 return;
             } else if ("--checkin".equals(opt)) {
                 checkin = true;
@@ -11938,6 +11939,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_VERSION);
             } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_KEYSETS);
+            } else if ("write".equals(cmd)) {
+                synchronized (mPackages) {
+                    mSettings.writeLPr();
+                    pw.println("Settings written.");
+                    return;
+                }
             }
         }
 
