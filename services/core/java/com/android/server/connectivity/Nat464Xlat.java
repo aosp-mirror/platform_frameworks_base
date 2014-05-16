@@ -74,6 +74,14 @@ public class Nat464Xlat extends BaseNetworkObserver {
         mIsStarted = false;
         mIsRunning = false;
         mLP = new LinkProperties();
+
+        // If this is a runtime restart, it's possible that clatd is already
+        // running, but we don't know about it. If so, stop it.
+        try {
+            if (mNMService.isClatdStarted()) {
+                mNMService.stopClatd();
+            }
+        } catch(RemoteException e) {}  // Well, we tried.
     }
 
     /**
@@ -198,13 +206,13 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 NetworkUtils.resetConnections(
                     CLAT_INTERFACE_NAME,
                     NetworkUtils.RESET_IPV4_ADDRESSES);
+                mBaseLP.removeStackedLink(mLP);
+                updateConnectivityService();
             }
             Slog.i(TAG, "interface " + CLAT_INTERFACE_NAME +
                    " removed, mIsRunning = " + mIsRunning + " -> false");
             mIsRunning = false;
-            mBaseLP.removeStackedLink(mLP);
             mLP.clear();
-            updateConnectivityService();
             Slog.i(TAG, "mLP = " + mLP);
         }
     }
