@@ -90,7 +90,7 @@
             android:layout_height="12dp"
             android:layout_marginStart="8dp"
             android:visibility="gone"
-            style="@style/Widget.Quantum.Light.ProgressBar.Horizontal"
+            style="@style/Widget.StatusBar.Quantum.ProgressBar"
             />
         <LinearLayout
             android:id="@+id/line3"

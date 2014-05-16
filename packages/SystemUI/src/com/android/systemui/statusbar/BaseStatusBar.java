@@ -428,14 +428,16 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void applyLegacyRowBackground(StatusBarNotification sbn,
             NotificationData.Entry entry) {
+        int version = 0;
+        try {
+            ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
+            version = info.targetSdkVersion;
+        } catch (NameNotFoundException ex) {
+            Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
+        }
+
         if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
-            int version = 0;
-            try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
-                version = info.targetSdkVersion;
-            } catch (NameNotFoundException ex) {
-                Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
-            }
+            // Using custom RemoteViews
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 entry.row.setBackgroundResource(R.drawable.notification_row_legacy_bg);
             } else if (version < Build.VERSION_CODES.L) {
