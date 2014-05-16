@@ -34,6 +34,7 @@ import java.util.WeakHashMap;
 
 /**
  * Interface for an {@link Activity} to interact with the user through voice.
+ * @hide
  */
 public class VoiceInteractor {
     static final String TAG = "VoiceInteractor";

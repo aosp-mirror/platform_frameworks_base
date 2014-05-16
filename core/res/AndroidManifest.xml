@@ -2056,7 +2056,7 @@
         android:protectionLevel="signature|system" />
 
     <!-- Must be required by a {@link android.service.voice.VoiceInteractionService},
-         to ensure that only the system can bind to it. -->
+         to ensure that only the system can bind to it. @hide -->
     <permission android:name="android.permission.BIND_VOICE_INTERACTION"
         android:label="@string/permlab_bindVoiceInteraction"
         android:description="@string/permdesc_bindVoiceInteraction"
