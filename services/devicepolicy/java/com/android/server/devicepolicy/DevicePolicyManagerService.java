@@ -1214,18 +1214,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
-        if (mDeviceOwner.hasDeviceOwner()) {
-            try {
-                mAppOpsService.setDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
+        if (mDeviceOwner != null) {
+            if (mDeviceOwner.hasDeviceOwner()) {
+                try {
+                    mAppOpsService.setDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
+                }
             }
-        }
-        for (Integer i : mDeviceOwner.getProfileOwnerKeys()) {
-            try {
-                mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerName(i), i);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
+            for (Integer i : mDeviceOwner.getProfileOwnerKeys()) {
+                try {
+                    mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerName(i), i);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
+                }
             }
         }
     }
