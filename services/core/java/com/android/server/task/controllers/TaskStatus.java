@@ -18,6 +18,8 @@ package com.android.server.task.controllers;
 
 import android.content.ComponentName;
 import android.content.Task;
+import android.content.pm.PackageParser;
+import android.os.Bundle;
 import android.os.SystemClock;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -36,7 +38,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TaskStatus {
     final int taskId;
     final int userId;
-    ComponentName component;
+    final int uId;
+    final ComponentName component;
+    final Bundle extras;
 
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean timeConstraintSatisfied = new AtomicBoolean();
@@ -60,15 +64,17 @@ public class TaskStatus {
 
     /** Generate a TaskStatus object for a given task and uid. */
     // TODO: reimplement this to reuse these objects instead of creating a new one each time?
-    static TaskStatus getForTaskAndUid(Task task, int uId) {
-        return new TaskStatus(task, uId);
+    public static TaskStatus getForTaskAndUser(Task task, int userId, int uId) {
+        return new TaskStatus(task, userId, uId);
     }
 
     /** Set up the state of a newly scheduled task. */
-    TaskStatus(Task task, int userId) {
+    TaskStatus(Task task, int userId, int uId) {
         this.taskId = task.getTaskId();
         this.userId = userId;
         this.component = task.getService();
+        this.extras = task.getExtras();
+        this.uId = uId;
 
         hasChargingConstraint = task.isRequireCharging();
         hasIdleConstraint = task.isRequireDeviceIdle();
@@ -92,6 +98,26 @@ public class TaskStatus {
         // Networking constraints
         hasMeteredConstraint = task.getNetworkCapabilities() == Task.NetworkType.UNMETERED;
         hasConnectivityConstraint = task.getNetworkCapabilities() == Task.NetworkType.ANY;
+    }
+
+    public int getTaskId() {
+        return taskId;
+    }
+
+    public ComponentName getServiceComponent() {
+        return component;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getUid() {
+        return uId;
+    }
+
+    public Bundle getExtras() {
+        return extras;
     }
 
     boolean hasConnectivityConstraint() {

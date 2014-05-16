@@ -34,14 +34,17 @@ interface ITaskCallback {
      * Immediate callback to the system after sending a start signal, used to quickly detect ANR.
      *
      * @param taskId Unique integer used to identify this task.
+     * @param ongoing True to indicate that the client is processing the task. False if the task is
+     * complete
      */
-    void acknowledgeStartMessage(int taskId);
+    void acknowledgeStartMessage(int taskId, boolean ongoing);
     /**
      * Immediate callback to the system after sending a stop signal, used to quickly detect ANR.
      *
      * @param taskId Unique integer used to identify this task.
+     * @param rescheulde Whether or not to reschedule this task.
      */
-    void acknowledgeStopMessage(int taskId);
+    void acknowledgeStopMessage(int taskId, boolean reschedule);
     /*
      * Tell the task manager that the client is done with its execution, so that it can go on to
      * the next one and stop attributing wakelock time to us etc.
