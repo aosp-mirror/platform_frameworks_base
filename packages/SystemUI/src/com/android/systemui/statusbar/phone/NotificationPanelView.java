@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -25,7 +27,10 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
@@ -34,6 +39,7 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
@@ -80,6 +86,9 @@ public class NotificationPanelView extends PanelView implements
     private int mClockNotificationsMarginMax;
     private float mClockYFractionMin;
     private float mClockYFractionMax;
+    private Interpolator mFastOutSlowInInterpolator;
+    private ObjectAnimator mClockAnimator;
+    private int mClockAnimationTarget = -1;
 
     /**
      * The number (fractional) of notifications the "more" card counts when calculating how many
@@ -120,6 +129,8 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.fast_out_slow_in);
     }
 
     @Override
@@ -164,19 +175,53 @@ public class NotificationPanelView extends PanelView implements
      * showing.
      */
     private void positionClockAndNotifications() {
+        boolean animateClock = mNotificationStackScroller.isAddOrRemoveAnimationPending();
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
             mStackScrollerIntrinsicPadding = mHeader.getBottom() + mNotificationTopPadding;
         } else {
             int notificationCount = mNotificationStackScroller.getNotGoneChildCount();
-            int y = getClockY(notificationCount);
+            int y = getClockY(notificationCount) - mKeyguardStatusView.getHeight()/2;
             int padding = getClockNotificationsPadding(notificationCount);
-            mKeyguardStatusView.setY(y - mKeyguardStatusView.getHeight()/2);
-            mStackScrollerIntrinsicPadding =
-                    (int) (mKeyguardStatusView.getY() + mKeyguardStatusView.getHeight() + padding);
+            if (animateClock || mClockAnimator != null) {
+                startClockAnimation(y);
+            } else {
+                mKeyguardStatusView.setY(y);
+            }
+            mStackScrollerIntrinsicPadding = y + mKeyguardStatusView.getHeight() + padding;
         }
         mNotificationStackScroller.setTopPadding(mStackScrollerIntrinsicPadding,
-                mAnimateNextTopPaddingChange);
+                mAnimateNextTopPaddingChange || animateClock);
         mAnimateNextTopPaddingChange = false;
+    }
+
+    private void startClockAnimation(int y) {
+        if (mClockAnimationTarget == y) {
+            return;
+        }
+        mClockAnimationTarget = y;
+        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                getViewTreeObserver().removeOnPreDrawListener(this);
+                if (mClockAnimator != null) {
+                    mClockAnimator.removeAllListeners();
+                    mClockAnimator.cancel();
+                }
+                mClockAnimator =
+                        ObjectAnimator.ofFloat(mKeyguardStatusView, View.Y, mClockAnimationTarget);
+                mClockAnimator.setInterpolator(mFastOutSlowInInterpolator);
+                mClockAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                mClockAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mClockAnimator = null;
+                        mClockAnimationTarget = -1;
+                    }
+                });
+                StackStateAnimator.startInstantly(mClockAnimator);
+                return true;
+            }
+        });
     }
 
     private int getClockNotificationsPadding(int notificationCount) {

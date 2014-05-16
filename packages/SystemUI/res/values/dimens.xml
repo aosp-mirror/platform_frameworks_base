@@ -302,6 +302,6 @@
     <!-- The margin between the clock and the notifications on Keyguard. See
          keyguard_clock_height_fraction_* for the difference between min and max.-->
     <dimen name="keyguard_clock_notifications_margin_min">22dp</dimen>
-    <dimen name="keyguard_clock_notifications_margin_max">28dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
 
 </resources>

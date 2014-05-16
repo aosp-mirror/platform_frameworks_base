@@ -108,6 +108,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             = new ArrayList<AnimationEvent>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
+    private boolean mAnimationsEnabled;
 
     /**
      * The raw amount of the overScroll on the top, which is not rubber-banded.
@@ -352,7 +353,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
-            if (animate) {
+            if (animate && mAnimationsEnabled && mIsExpanded) {
                 mTopPaddingNeedsAnimation = true;
                 mNeedsAnimation =  true;
             }
@@ -440,9 +441,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onChildSnappedBack(View animView) {
         mAmbientState.onDragFinished(animView);
         if (!mDragAnimPendingChildren.contains(animView)) {
-            mSnappedBackChildren.add(animView);
+            if (mAnimationsEnabled) {
+                mSnappedBackChildren.add(animView);
+                mNeedsAnimation = true;
+            }
             requestChildrenUpdate();
-            mNeedsAnimation = true;
         } else {
             // We start the swipe and snap back in the same frame, we don't want any animation
             mDragAnimPendingChildren.remove(animView);
@@ -451,10 +454,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onBeginDrag(View v) {
         setSwipingInProgress(true);
-        mDragAnimPendingChildren.add(v);
         mAmbientState.onBeginDrag(v);
+        if (mAnimationsEnabled) {
+            mDragAnimPendingChildren.add(v);
+            mNeedsAnimation = true;
+        }
         requestChildrenUpdate();
-        mNeedsAnimation = true;
     }
 
     public void onDragCancelled(View v) {
@@ -1082,8 +1087,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void generateRemoveAnimation(View child) {
-        if (mIsExpanded) {
-
+        if (mIsExpanded && mAnimationsEnabled) {
             if (!mChildrenToAddAnimated.contains(child)) {
                 // Generate Animations
                 mChildrenToRemoveAnimated.add(child);
@@ -1141,8 +1145,17 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    public void setAnimationsEnabled(boolean animationsEnabled) {
+        mAnimationsEnabled = animationsEnabled;
+    }
+
+    public boolean isAddOrRemoveAnimationPending() {
+        return mNeedsAnimation
+                && (!mChildrenToAddAnimated.isEmpty() || !mChildrenToRemoveAnimated.isEmpty());
+    }
+
     public void generateAddAnimation(View child) {
-        if (mIsExpanded) {
+        if (mIsExpanded && mAnimationsEnabled) {
 
             // Generate Animations
             mChildrenToAddAnimated.add(child);
@@ -1447,7 +1460,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.setDimmed(dimmed);
         mAmbientState.setDimmed(dimmed);
         updatePadding(dimmed);
-        if (animate) {
+        if (animate && mAnimationsEnabled) {
             mDimmedNeedsAnimation = true;
             mNeedsAnimation =  true;
         }
@@ -1459,8 +1472,10 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void setActivatedChild(View activatedChild) {
         mAmbientState.setActivatedChild(activatedChild);
-        mActivateNeedsAnimation = true;
-        mNeedsAnimation =  true;
+        if (mAnimationsEnabled) {
+            mActivateNeedsAnimation = true;
+            mNeedsAnimation =  true;
+        }
         requestChildrenUpdate();
     }
 

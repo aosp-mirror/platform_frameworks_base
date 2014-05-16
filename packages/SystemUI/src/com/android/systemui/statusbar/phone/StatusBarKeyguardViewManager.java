@@ -125,11 +125,13 @@ public class StatusBarKeyguardViewManager {
 
     public void onScreenTurnedOff() {
         mScreenOn = false;
+        mPhoneStatusBar.onScreenTurnedOff();
         mBouncer.onScreenTurnedOff();
     }
 
     public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         mScreenOn = true;
+        mPhoneStatusBar.onScreenTurnedOn();
         if (callback != null) {
             callbackAfterDraw(callback);
         }
