@@ -70,7 +70,7 @@ import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaRouter;
-import android.media.session.SessionManager;
+import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyManager;
@@ -657,7 +657,7 @@ class ContextImpl extends Context {
 
         registerService(MEDIA_SESSION_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
-                return new SessionManager(ctx);
+                return new MediaSessionManager(ctx);
             }
         });
         registerService(TRUST_SERVICE, new ServiceFetcher() {

@@ -64,6 +64,7 @@ import java.util.List;
  *       &lt;/intent-filter>
  *   &lt;/service>
  * </pre>
+ * @hide
  */
 public abstract class RouteProviderService extends Service {
     private static final String TAG = "RouteProvider";

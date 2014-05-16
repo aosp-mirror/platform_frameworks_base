@@ -15,6 +15,7 @@
  */
 package android.media.session;
 
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.os.Handler;
 import android.os.Looper;

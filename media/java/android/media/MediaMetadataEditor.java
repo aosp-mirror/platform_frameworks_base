@@ -17,7 +17,6 @@
 package android.media;
 
 import android.graphics.Bitmap;
-import android.media.session.MediaMetadata;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;

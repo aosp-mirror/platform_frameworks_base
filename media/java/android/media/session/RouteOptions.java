@@ -34,6 +34,7 @@ import java.util.List;
  * appropriate route options when it is ready to connect to the route. Each
  * route options instance must specify a complete set of capabilities to request
  * when the connection is established.
+ * @hide
  */
 public final class RouteOptions implements Parcelable {
     private static final String TAG = "RouteOptions";

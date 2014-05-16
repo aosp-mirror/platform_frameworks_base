@@ -21,19 +21,19 @@ import android.os.Parcelable;
 /**
  * Information about a media session, including the owner's package name.
  */
-public final class SessionInfo implements Parcelable {
+public final class MediaSessionInfo implements Parcelable {
     private final String mId;
     private final String mPackageName;
 
     /**
      * @hide
      */
-    public SessionInfo(String id, String packageName) {
+    public MediaSessionInfo(String id, String packageName) {
         mId = id;
         mPackageName = packageName;
     }
 
-    private SessionInfo(Parcel in) {
+    private MediaSessionInfo(Parcel in) {
         mId = in.readString();
         mPackageName = in.readString();
     }
@@ -72,16 +72,16 @@ public final class SessionInfo implements Parcelable {
         dest.writeString(mPackageName);
     }
 
-    public static final Parcelable.Creator<SessionInfo> CREATOR
-            = new Parcelable.Creator<SessionInfo>() {
+    public static final Parcelable.Creator<MediaSessionInfo> CREATOR
+            = new Parcelable.Creator<MediaSessionInfo>() {
         @Override
-        public SessionInfo createFromParcel(Parcel in) {
-            return new SessionInfo(in);
+        public MediaSessionInfo createFromParcel(Parcel in) {
+            return new MediaSessionInfo(in);
         }
 
         @Override
-        public SessionInfo[] newArray(int size) {
-            return new SessionInfo[size];
+        public MediaSessionInfo[] newArray(int size) {
+            return new MediaSessionInfo[size];
         }
     };
 }

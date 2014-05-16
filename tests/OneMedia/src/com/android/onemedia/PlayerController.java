@@ -16,10 +16,10 @@
  */
 package com.android.onemedia;
 
-import android.media.session.SessionController;
-import android.media.session.MediaMetadata;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
 import android.media.session.RouteInfo;
-import android.media.session.SessionManager;
+import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.media.session.TransportController;
 import android.os.Bundle;
@@ -40,7 +40,7 @@ public class PlayerController {
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTED = 1;
 
-    protected SessionController mController;
+    protected MediaController mController;
     protected IPlayerService mBinder;
     protected TransportController mTransportControls;
 
@@ -49,7 +49,7 @@ public class PlayerController {
     private Listener mListener;
     private TransportListener mTransportListener = new TransportListener();
     private SessionCallback mControllerCb;
-    private SessionManager mManager;
+    private MediaSessionManager mManager;
     private Handler mHandler = new Handler();
 
     private boolean mResumed;
@@ -62,7 +62,7 @@ public class PlayerController {
             mServiceIntent = serviceIntent;
         }
         mControllerCb = new SessionCallback();
-        mManager = (SessionManager) context
+        mManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
 
         mResumed = false;
@@ -155,7 +155,7 @@ public class PlayerController {
             mBinder = IPlayerService.Stub.asInterface(service);
             Log.d(TAG, "service is " + service + " binder is " + mBinder);
             try {
-                mController = SessionController.fromToken(mBinder.getSessionToken());
+                mController = MediaController.fromToken(mBinder.getSessionToken());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error getting session", e);
                 return;
@@ -176,7 +176,7 @@ public class PlayerController {
         }
     };
 
-    private class SessionCallback extends SessionController.Callback {
+    private class SessionCallback extends MediaController.Callback {
         @Override
         public void onRouteChanged(RouteInfo route) {
             // TODO

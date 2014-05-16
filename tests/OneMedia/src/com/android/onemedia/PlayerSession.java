@@ -21,9 +21,9 @@ import android.media.session.Route;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.media.session.RoutePlaybackControls;
-import android.media.session.Session;
-import android.media.session.SessionManager;
-import android.media.session.SessionToken;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionToken;
 import android.media.session.PlaybackState;
 import android.media.session.TransportPerformer;
 import android.os.Bundle;
@@ -40,10 +40,10 @@ import java.util.ArrayList;
 public class PlayerSession {
     private static final String TAG = "PlayerSession";
 
-    protected Session mSession;
+    protected MediaSession mSession;
     protected Context mContext;
     protected Renderer mRenderer;
-    protected Session.Callback mCallback;
+    protected MediaSession.Callback mCallback;
     protected Renderer.Listener mRenderListener;
     protected TransportPerformer mPerformer;
 
@@ -79,7 +79,7 @@ public class PlayerSession {
         if (mSession != null) {
             mSession.release();
         }
-        SessionManager man = (SessionManager) mContext
+        MediaSessionManager man = (MediaSessionManager) mContext
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
         mSession = man.createSession("OneMedia");
@@ -87,7 +87,7 @@ public class PlayerSession {
         mPerformer = mSession.getTransportPerformer();
         mPerformer.addListener(new TransportListener());
         mPerformer.setPlaybackState(mPlaybackState);
-        mSession.setFlags(Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mSession.setRouteOptions(mRouteOptions);
         mSession.setActive(true);
     }
@@ -106,7 +106,7 @@ public class PlayerSession {
         mListener = listener;
     }
 
-    public SessionToken getSessionToken() {
+    public MediaSessionToken getSessionToken() {
         return mSession.getSessionToken();
     }
 
@@ -204,7 +204,7 @@ public class PlayerSession {
 
     }
 
-    private class SessionCb extends Session.Callback {
+    private class SessionCb extends MediaSession.Callback {
         @Override
         public void onMediaButton(Intent mediaRequestIntent) {
             if (Intent.ACTION_MEDIA_BUTTON.equals(mediaRequestIntent.getAction())) {

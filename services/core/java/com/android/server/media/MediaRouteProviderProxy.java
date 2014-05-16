@@ -26,7 +26,7 @@ import android.media.routeprovider.RouteProviderService;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.RouteEvent;
 import android.media.session.RouteInfo;
-import android.media.session.Session;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;

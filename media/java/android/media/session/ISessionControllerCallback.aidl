@@ -15,7 +15,7 @@
 
 package android.media.session;
 
-import android.media.session.MediaMetadata;
+import android.media.MediaMetadata;
 import android.media.session.RouteInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;

@@ -2079,7 +2079,7 @@
 
     <!-- Must be required by a {@link android.media.routeprovider.RouteProviderService}
          to ensure that only the system can interact with it.
-         -->
+         @hide -->
     <permission android:name="android.permission.BIND_ROUTE_PROVIDER"
         android:label="@string/permlab_bindRouteProvider"
         android:description="@string/permdesc_bindRouteProvider"

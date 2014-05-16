@@ -24,10 +24,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.media.session.MediaMetadata;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.PlaybackState;
-import android.media.session.Session;
+import android.media.session.MediaSession;
 import android.media.session.TransportPerformer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -341,7 +340,7 @@ public class RemoteControlClient
      */
     public final static int FLAG_INFORMATION_REQUEST_ALBUM_ART = 1 << 3;
 
-    private Session mSession;
+    private MediaSession mSession;
 
     /**
      * Class constructor.

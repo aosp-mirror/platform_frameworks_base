@@ -15,14 +15,14 @@
 
 package com.android.onemedia;
 
-import android.media.session.SessionToken;
+import android.media.session.MediaSessionToken;
 import android.os.Bundle;
 
 import com.android.onemedia.IPlayerCallback;
 import com.android.onemedia.playback.IRequestCallback;
 
 interface IPlayerService {
-    SessionToken getSessionToken();
+    MediaSessionToken getSessionToken();
     void registerCallback(in IPlayerCallback cb);
     void unregisterCallback(in IPlayerCallback cb);
     void sendRequest(String action, in Bundle params, in IRequestCallback cb);

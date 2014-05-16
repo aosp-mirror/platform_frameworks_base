@@ -30,7 +30,7 @@ import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
-import android.media.session.Session;
+import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -503,7 +503,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 MediaSessionRecord session = mSessions.get(i);
                 MediaSessionService.this.destroySessionLocked(session);
                 if (session.isConnected()) {
-                    session.disconnect(Session.DISCONNECT_REASON_USER_STOPPING);
+                    session.disconnect(MediaSession.DISCONNECT_REASON_USER_STOPPING);
                 }
             }
         }

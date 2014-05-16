@@ -28,17 +28,18 @@ import java.util.List;
  * to. The MediaRoute must be used to get {@link RouteInterface}
  * instances which can be used to communicate over a specific interface on the
  * route.
+ * @hide
  */
 public final class Route {
     private static final String TAG = "Route";
     private final RouteInfo mInfo;
-    private final Session mSession;
+    private final MediaSession mSession;
     private final RouteOptions mOptions;
 
     /**
      * @hide
      */
-    public Route(RouteInfo info, RouteOptions options, Session session) {
+    public Route(RouteInfo info, RouteOptions options, MediaSession session) {
         if (info == null || options == null) {
             throw new IllegalStateException("Route info was not valid!");
         }
@@ -93,7 +94,7 @@ public final class Route {
     /**
      * @hide
      */
-    Session getSession() {
+    MediaSession getSession() {
         return mSession;
     }
 }

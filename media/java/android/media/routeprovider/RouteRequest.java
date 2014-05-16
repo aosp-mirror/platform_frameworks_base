@@ -16,7 +16,7 @@
 package android.media.routeprovider;
 
 import android.media.session.RouteOptions;
-import android.media.session.SessionInfo;
+import android.media.session.MediaSessionInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,16 +30,17 @@ import java.io.PrintWriter;
  * provides the full set of connection parameters they would like to use for a
  * connection. An app that can connect in multiple ways will be represented by
  * multiple requests.
+ * @hide
  */
 public final class RouteRequest implements Parcelable {
-    private final SessionInfo mSessionInfo;
+    private final MediaSessionInfo mSessionInfo;
     private final RouteOptions mOptions;
     private final boolean mActive;
 
     /**
      * @hide
      */
-    public RouteRequest(SessionInfo info, RouteOptions connRequest,
+    public RouteRequest(MediaSessionInfo info, RouteOptions connRequest,
             boolean active) {
         mSessionInfo = info;
         mOptions = connRequest;
@@ -47,7 +48,7 @@ public final class RouteRequest implements Parcelable {
     }
 
     private RouteRequest(Parcel in) {
-        mSessionInfo = SessionInfo.CREATOR.createFromParcel(in);
+        mSessionInfo = MediaSessionInfo.CREATOR.createFromParcel(in);
         mOptions = RouteOptions.CREATOR.createFromParcel(in);
         mActive = in.readInt() != 0;
     }
@@ -57,7 +58,7 @@ public final class RouteRequest implements Parcelable {
      *
      * @return Info on the session making the request
      */
-    public SessionInfo getSessionInfo() {
+    public MediaSessionInfo getSessionInfo() {
         return mSessionInfo;
     }
 

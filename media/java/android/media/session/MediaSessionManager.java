@@ -39,10 +39,10 @@ import java.util.List;
  * get an instance of this class.
  * <p>
  *
- * @see Session
- * @see SessionController
+ * @see MediaSession
+ * @see MediaController
  */
-public final class SessionManager {
+public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
 
     private final ISessionManager mService;
@@ -52,7 +52,7 @@ public final class SessionManager {
     /**
      * @hide
      */
-    public SessionManager(Context context) {
+    public MediaSessionManager(Context context) {
         // Consider rewriting like DisplayManagerGlobal
         // Decide if we need context
         mContext = context;
@@ -64,9 +64,9 @@ public final class SessionManager {
      * Creates a new session.
      *
      * @param tag A short name for debugging purposes
-     * @return a {@link Session} for the new session
+     * @return a {@link MediaSession} for the new session
      */
-    public Session createSession(String tag) {
+    public MediaSession createSession(String tag) {
         return createSessionAsUser(tag, UserHandle.myUserId());
     }
 
@@ -78,13 +78,13 @@ public final class SessionManager {
      *
      * @param tag A short name for debugging purposes
      * @param userId The user id to create the session as.
-     * @return a {@link Session} for the new session
+     * @return a {@link MediaSession} for the new session
      * @hide
      */
-    public Session createSessionAsUser(String tag, int userId) {
+    public MediaSession createSessionAsUser(String tag, int userId) {
         try {
-            Session.CallbackStub cbStub = new Session.CallbackStub();
-            Session session = new Session(mService
+            MediaSession.CallbackStub cbStub = new MediaSession.CallbackStub();
+            MediaSession session = new MediaSession(mService
                     .createSession(mContext.getPackageName(), cbStub, tag, userId), cbStub);
             cbStub.setMediaSession(session);
 
@@ -107,7 +107,7 @@ public final class SessionManager {
      *            May be null.
      * @return A list of controllers for ongoing sessions
      */
-    public List<SessionController> getActiveSessions(ComponentName notificationListener) {
+    public List<MediaController> getActiveSessions(ComponentName notificationListener) {
         return getActiveSessionsForUser(notificationListener, UserHandle.myUserId());
     }
 
@@ -124,13 +124,13 @@ public final class SessionManager {
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
-    public List<SessionController> getActiveSessionsForUser(ComponentName notificationListener,
+    public List<MediaController> getActiveSessionsForUser(ComponentName notificationListener,
             int userId) {
-        ArrayList<SessionController> controllers = new ArrayList<SessionController>();
+        ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
             List<IBinder> binders = mService.getSessions(notificationListener, userId);
             for (int i = binders.size() - 1; i >= 0; i--) {
-                SessionController controller = SessionController.fromBinder(ISessionController.Stub
+                MediaController controller = MediaController.fromBinder(ISessionController.Stub
                         .asInterface(binders.get(i)));
                 controllers.add(controller);
             }
