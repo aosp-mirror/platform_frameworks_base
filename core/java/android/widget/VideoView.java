@@ -30,6 +30,7 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.Metadata;
 import android.media.SubtitleController;
 import android.media.SubtitleTrack.RenderingWidget;
+import android.media.TtmlRenderer;
 import android.media.WebVttRenderer;
 import android.net.Uri;
 import android.os.Looper;
@@ -314,6 +315,7 @@ public class VideoView extends SurfaceView
             final SubtitleController controller = new SubtitleController(
                     context, mMediaPlayer.getMediaTimeProvider(), mMediaPlayer);
             controller.registerRenderer(new WebVttRenderer(context));
+            controller.registerRenderer(new TtmlRenderer(context));
             mMediaPlayer.setSubtitleAnchor(controller, this);
 
             if (mAudioSession != 0) {
