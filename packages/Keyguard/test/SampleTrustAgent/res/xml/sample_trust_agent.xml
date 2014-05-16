@@ -14,5 +14,5 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<trust_agent xmlns:android="http://schemas.android.com/apk/res/android"
+<trust-agent xmlns:android="http://schemas.android.com/apk/res/android"
         android:settingsActivity=".SampleTrustAgentSettings" />

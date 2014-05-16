@@ -19,7 +19,6 @@ package com.android.trustagent.test;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -53,7 +52,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.enable_trust) {
-            SampleTrustAgent.sendEnableTrust(this, "SampleTrustAgent", TRUST_DURATION_MS,
+            SampleTrustAgent.sendGrantTrust(this, "SampleTrustAgent", TRUST_DURATION_MS,
                     null /* extra */);
         } else if (id == R.id.revoke_trust) {
             SampleTrustAgent.sendRevokeTrust(this);
