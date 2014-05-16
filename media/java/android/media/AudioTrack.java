@@ -125,25 +125,25 @@ public class AudioTrack
      */
     public static final int STATE_NO_STATIC_DATA = 2;
 
-    // Error codes:
-    // to keep in sync with frameworks/base/core/jni/android_media_AudioTrack.cpp
     /**
      * Denotes a successful operation.
      */
-    public  static final int SUCCESS                               = 0;
+    public  static final int SUCCESS                               = AudioSystem.SUCCESS;
     /**
      * Denotes a generic operation failure.
      */
-    public  static final int ERROR                                 = -1;
+    public  static final int ERROR                                 = AudioSystem.ERROR;
     /**
      * Denotes a failure due to the use of an invalid value.
      */
-    public  static final int ERROR_BAD_VALUE                       = -2;
+    public  static final int ERROR_BAD_VALUE                       = AudioSystem.BAD_VALUE;
     /**
      * Denotes a failure due to the improper use of a method.
      */
-    public  static final int ERROR_INVALID_OPERATION               = -3;
+    public  static final int ERROR_INVALID_OPERATION               = AudioSystem.INVALID_OPERATION;
 
+    // Error codes:
+    // to keep in sync with frameworks/base/core/jni/android_media_AudioTrack.cpp
     private static final int ERROR_NATIVESETUP_AUDIOSYSTEM         = -16;
     private static final int ERROR_NATIVESETUP_INVALIDCHANNELMASK  = -17;
     private static final int ERROR_NATIVESETUP_INVALIDFORMAT       = -18;

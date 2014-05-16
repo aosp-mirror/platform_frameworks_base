@@ -32,6 +32,7 @@
 #include <binder/MemoryBase.h>
 
 #include "android_media_AudioFormat.h"
+#include "android_media_AudioErrors.h"
 
 // ----------------------------------------------------------------------------
 
@@ -94,30 +95,11 @@ static SortedVector <audiotrack_callback_cookie *> sAudioTrackCallBackCookies;
 // ----------------------------------------------------------------------------
 #define DEFAULT_OUTPUT_SAMPLE_RATE   44100
 
-#define AUDIOTRACK_SUCCESS                         0
-#define AUDIOTRACK_ERROR                           -1
-#define AUDIOTRACK_ERROR_BAD_VALUE                 -2
-#define AUDIOTRACK_ERROR_INVALID_OPERATION         -3
 #define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         -16
 #define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK  -17
 #define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   -19
 #define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    -20
-
-
-jint android_media_translateErrorCode(int code) {
-    switch (code) {
-    case NO_ERROR:
-        return AUDIOTRACK_SUCCESS;
-    case BAD_VALUE:
-        return AUDIOTRACK_ERROR_BAD_VALUE;
-    case INVALID_OPERATION:
-        return AUDIOTRACK_ERROR_INVALID_OPERATION;
-    default:
-        return AUDIOTRACK_ERROR;
-    }
-}
-
 
 // ----------------------------------------------------------------------------
 static void audioCallback(int event, void* user, void *info) {
@@ -249,13 +231,13 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     if (jSession == NULL) {
         ALOGE("Error creating AudioTrack: invalid session ID pointer");
-        return (jint) AUDIOTRACK_ERROR;
+        return (jint) AUDIO_JAVA_ERROR;
     }
 
     jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
     if (nSession == NULL) {
         ALOGE("Error creating AudioTrack: Error retrieving session id pointer");
-        return (jint) AUDIOTRACK_ERROR;
+        return (jint) AUDIO_JAVA_ERROR;
     }
     int sessionId = nSession[0];
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
@@ -346,7 +328,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     //ALOGV("storing lpJniStorage: %x\n", (long)lpJniStorage);
     env->SetLongField(thiz, javaAudioTrackFields.jniData, (jlong)lpJniStorage);
 
-    return (jint) AUDIOTRACK_SUCCESS;
+    return (jint) AUDIO_JAVA_SUCCESS;
 
     // failures:
 native_init_failure:
@@ -596,7 +578,7 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
     ScopedBytesRO bytes(env, javaBytes);
     if (bytes.get() == NULL) {
         ALOGE("Error retrieving source of audio data to play, can't play");
-        return AUDIOTRACK_ERROR_BAD_VALUE;
+        return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
     jint written = writeToTrack(lpTrack, javaAudioFormat, bytes.get(), byteOffset,
@@ -695,7 +677,7 @@ static jint android_media_AudioTrack_get_native_frame_count(JNIEnv *env,  jobjec
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for frameCount()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
 
     return lpTrack->frameCount();
@@ -709,9 +691,9 @@ static jint android_media_AudioTrack_set_playback_rate(JNIEnv *env,  jobject thi
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setSampleRate()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode(lpTrack->setSampleRate(sampleRateInHz));
+    return nativeToJavaStatus(lpTrack->setSampleRate(sampleRateInHz));
 }
 
 
@@ -721,7 +703,7 @@ static jint android_media_AudioTrack_get_playback_rate(JNIEnv *env,  jobject thi
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for getSampleRate()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     return (jint) lpTrack->getSampleRate();
 }
@@ -734,9 +716,9 @@ static jint android_media_AudioTrack_set_marker_pos(JNIEnv *env,  jobject thiz,
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setMarkerPosition()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->setMarkerPosition(markerPos) );
+    return nativeToJavaStatus( lpTrack->setMarkerPosition(markerPos) );
 }
 
 
@@ -748,7 +730,7 @@ static jint android_media_AudioTrack_get_marker_pos(JNIEnv *env,  jobject thiz) 
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for getMarkerPosition()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     lpTrack->getMarkerPosition(&markerPos);
     return (jint)markerPos;
@@ -762,9 +744,9 @@ static jint android_media_AudioTrack_set_pos_update_period(JNIEnv *env,  jobject
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setPositionUpdatePeriod()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->setPositionUpdatePeriod(period) );
+    return nativeToJavaStatus( lpTrack->setPositionUpdatePeriod(period) );
 }
 
 
@@ -776,7 +758,7 @@ static jint android_media_AudioTrack_get_pos_update_period(JNIEnv *env,  jobject
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for getPositionUpdatePeriod()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     lpTrack->getPositionUpdatePeriod(&period);
     return (jint)period;
@@ -790,9 +772,9 @@ static jint android_media_AudioTrack_set_position(JNIEnv *env,  jobject thiz,
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setPosition()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->setPosition(position) );
+    return nativeToJavaStatus( lpTrack->setPosition(position) );
 }
 
 
@@ -804,7 +786,7 @@ static jint android_media_AudioTrack_get_position(JNIEnv *env,  jobject thiz) {
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for getPosition()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     lpTrack->getPosition(&position);
     return (jint)position;
@@ -818,7 +800,7 @@ static jint android_media_AudioTrack_get_latency(JNIEnv *env,  jobject thiz) {
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for latency()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     return (jint)lpTrack->latency();
 }
@@ -830,7 +812,7 @@ static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, j
 
     if (lpTrack == NULL) {
         ALOGE("Unable to retrieve AudioTrack pointer for getTimestamp()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     AudioTimestamp timestamp;
     status_t status = lpTrack->getTimestamp(timestamp);
@@ -838,13 +820,13 @@ static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, j
         jlong* nTimestamp = (jlong *) env->GetPrimitiveArrayCritical(jTimestamp, NULL);
         if (nTimestamp == NULL) {
             ALOGE("Unable to get array for getTimestamp()");
-            return AUDIOTRACK_ERROR;
+            return (jint)AUDIO_JAVA_ERROR;
         }
         nTimestamp[0] = (jlong) timestamp.mPosition;
         nTimestamp[1] = (jlong) ((timestamp.mTime.tv_sec * 1000000000LL) + timestamp.mTime.tv_nsec);
         env->ReleasePrimitiveArrayCritical(jTimestamp, nTimestamp, 0);
     }
-    return (jint) android_media_translateErrorCode(status);
+    return (jint) nativeToJavaStatus(status);
 }
 
 
@@ -855,9 +837,9 @@ static jint android_media_AudioTrack_set_loop(JNIEnv *env,  jobject thiz,
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setLoop()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->setLoop(loopStart, loopEnd, loopCount) );
+    return nativeToJavaStatus( lpTrack->setLoop(loopStart, loopEnd, loopCount) );
 }
 
 
@@ -867,9 +849,9 @@ static jint android_media_AudioTrack_reload(JNIEnv *env,  jobject thiz) {
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for reload()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->reload() );
+    return nativeToJavaStatus( lpTrack->reload() );
 }
 
 
@@ -952,9 +934,9 @@ static jint android_media_AudioTrack_attachAuxEffect(JNIEnv *env,  jobject thiz,
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for attachAuxEffect()");
-        return AUDIOTRACK_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateErrorCode( lpTrack->attachAuxEffect(effectId) );
+    return nativeToJavaStatus( lpTrack->attachAuxEffect(effectId) );
 }
 
 // ----------------------------------------------------------------------------

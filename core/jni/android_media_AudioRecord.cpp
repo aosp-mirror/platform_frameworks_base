@@ -27,6 +27,7 @@
 #include <media/AudioRecord.h>
 
 #include "android_media_AudioFormat.h"
+#include "android_media_AudioErrors.h"
 
 // ----------------------------------------------------------------------------
 
@@ -55,28 +56,11 @@ static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
 
 // ----------------------------------------------------------------------------
 
-#define AUDIORECORD_SUCCESS                         0
-#define AUDIORECORD_ERROR                           -1
-#define AUDIORECORD_ERROR_BAD_VALUE                 -2
-#define AUDIORECORD_ERROR_INVALID_OPERATION         -3
 #define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -16
 #define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK -17
 #define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       -19
 #define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
-
-jint android_media_translateRecorderErrorCode(int code) {
-    switch (code) {
-    case NO_ERROR:
-        return AUDIORECORD_SUCCESS;
-    case BAD_VALUE:
-        return AUDIORECORD_ERROR_BAD_VALUE;
-    case INVALID_OPERATION:
-        return AUDIORECORD_ERROR_INVALID_OPERATION;
-    default:
-        return AUDIORECORD_ERROR;
-    }
-}
 
 // ----------------------------------------------------------------------------
 static void recorderCallback(int event, void* user, void *info) {
@@ -197,13 +181,13 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     if (jSession == NULL) {
         ALOGE("Error creating AudioRecord: invalid session ID pointer");
-        return (jint) AUDIORECORD_ERROR;
+        return (jint) AUDIO_JAVA_ERROR;
     }
 
     jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
-        return (jint) AUDIORECORD_ERROR;
+        return (jint) AUDIO_JAVA_ERROR;
     }
     int sessionId = nSession[0];
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
@@ -259,7 +243,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // of the Java object (in mNativeCallbackCookie) so we can free the memory in finalize()
     env->SetLongField(thiz, javaAudioRecordFields.nativeCallbackCookie, (jlong)lpCallbackData);
 
-    return (jint) AUDIORECORD_SUCCESS;
+    return (jint) AUDIO_JAVA_SUCCESS;
 
     // failure:
 native_init_failure:
@@ -280,10 +264,10 @@ android_media_AudioRecord_start(JNIEnv *env, jobject thiz, jint event, jint trig
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
     if (lpRecorder == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return (jint) AUDIORECORD_ERROR;
+        return (jint) AUDIO_JAVA_ERROR;
     }
 
-    return (jint) android_media_translateRecorderErrorCode(
+    return nativeToJavaStatus(
             lpRecorder->start((AudioSystem::sync_event_t)event, triggerSession));
 }
 
@@ -383,7 +367,7 @@ static jint android_media_AudioRecord_readInByteArray(JNIEnv *env,  jobject thiz
     env->ReleaseByteArrayElements(javaAudioData, recordBuff, 0);
 
     if (readSize < 0) {
-        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
     }
     return (jint) readSize;
 }
@@ -428,7 +412,7 @@ static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thi
     env->ReleaseShortArrayElements(javaAudioData, recordBuff, 0);
 
     if (readSize < 0) {
-        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
     } else {
         readSize /= sizeof(short);
     }
@@ -461,7 +445,7 @@ static jint android_media_AudioRecord_readInDirectBuffer(JNIEnv *env,  jobject t
     ssize_t readSize = lpRecorder->read(nativeFromJavaBuf,
                                    capacity < sizeInBytes ? capacity : sizeInBytes);
     if (readSize < 0) {
-        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
     }
     return (jint)readSize;
 }
@@ -475,9 +459,9 @@ static jint android_media_AudioRecord_set_marker_pos(JNIEnv *env,  jobject thiz,
     if (lpRecorder == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioRecord pointer for setMarkerPosition()");
-        return AUDIORECORD_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateRecorderErrorCode( lpRecorder->setMarkerPosition(markerPos) );
+    return nativeToJavaStatus( lpRecorder->setMarkerPosition(markerPos) );
 }
 
 
@@ -490,7 +474,7 @@ static jint android_media_AudioRecord_get_marker_pos(JNIEnv *env,  jobject thiz)
     if (lpRecorder == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioRecord pointer for getMarkerPosition()");
-        return AUDIORECORD_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     lpRecorder->getMarkerPosition(&markerPos);
     return (jint)markerPos;
@@ -506,9 +490,9 @@ static jint android_media_AudioRecord_set_pos_update_period(JNIEnv *env,  jobjec
     if (lpRecorder == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioRecord pointer for setPositionUpdatePeriod()");
-        return AUDIORECORD_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
-    return android_media_translateRecorderErrorCode( lpRecorder->setPositionUpdatePeriod(period) );
+    return nativeToJavaStatus( lpRecorder->setPositionUpdatePeriod(period) );
 }
 
 
@@ -521,7 +505,7 @@ static jint android_media_AudioRecord_get_pos_update_period(JNIEnv *env,  jobjec
     if (lpRecorder == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioRecord pointer for getPositionUpdatePeriod()");
-        return AUDIORECORD_ERROR;
+        return (jint)AUDIO_JAVA_ERROR;
     }
     lpRecorder->getPositionUpdatePeriod(&period);
     return (jint)period;
