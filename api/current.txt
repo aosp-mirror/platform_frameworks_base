@@ -13819,6 +13819,7 @@ package android.media {
     method public boolean isMicrophoneMute();
     method public boolean isMusicActive();
     method public boolean isSpeakerphoneOn();
+    method public boolean isVolumeFixed();
     method public deprecated boolean isWiredHeadsetOn();
     method public void loadSoundEffects();
     method public void playSoundEffect(int);

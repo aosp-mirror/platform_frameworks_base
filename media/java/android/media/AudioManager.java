@@ -54,6 +54,7 @@ public class AudioManager {
     private long mVolumeKeyUpTime;
     private final boolean mUseMasterVolume;
     private final boolean mUseVolumeKeySounds;
+    private final boolean mUseFixedVolume;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
     AudioPortEventHandler mAudioPortEventHandler;
@@ -441,6 +442,8 @@ public class AudioManager {
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
         mAudioPortEventHandler = new AudioPortEventHandler(this);
+        mUseFixedVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useFixedVolume);
     }
 
     private static IAudioService getService()
@@ -577,6 +580,26 @@ public class AudioManager {
     }
 
     /**
+     * Indicates if the device implements a fixed volume policy.
+     * <p>Some devices may not have volume control and may operate at a fixed volume,
+     * and may not enable muting or changing the volume of audio streams.
+     * This method will return true on such devices.
+     * <p>The following APIs have no effect when volume is fixed:
+     * <ul>
+     *   <li> {@link #adjustVolume(int, int)}
+     *   <li> {@link #adjustSuggestedStreamVolume(int, int, int)}
+     *   <li> {@link #adjustStreamVolume(int, int, int)}
+     *   <li> {@link #setStreamVolume(int, int, int)}
+     *   <li> {@link #setRingerMode(int)}
+     *   <li> {@link #setStreamSolo(int, boolean)}
+     *   <li> {@link #setStreamMute(int, boolean)}
+     * </ul>
+     */
+    public boolean isVolumeFixed() {
+        return mUseFixedVolume;
+    }
+
+    /**
      * Adjusts the volume of a particular stream by one step in a direction.
      * <p>
      * This method should only be used by applications that replace the platform-wide
@@ -614,7 +637,8 @@ public class AudioManager {
      * <p>
      * This method should only be used by applications that replace the platform-wide
      * management of audio settings or the main telephony application.
-     *
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
@@ -622,6 +646,7 @@ public class AudioManager {
      * @see #adjustSuggestedStreamVolume(int, int, int)
      * @see #adjustStreamVolume(int, int, int)
      * @see #setStreamVolume(int, int, int)
+     * @see #isVolumeFixed()
      */
     public void adjustVolume(int direction, int flags) {
         IAudioService service = getService();
@@ -644,6 +669,8 @@ public class AudioManager {
      * This method should only be used by applications that replace the platform-wide
      * management of audio settings or the main telephony application.
      *
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
@@ -653,6 +680,7 @@ public class AudioManager {
      * @see #adjustVolume(int, int)
      * @see #adjustStreamVolume(int, int, int)
      * @see #setStreamVolume(int, int, int)
+     * @see #isVolumeFixed()
      */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
         IAudioService service = getService();
@@ -801,10 +829,12 @@ public class AudioManager {
      * Silent mode will mute the volume and will not vibrate. Vibrate mode will
      * mute the volume and vibrate. Normal mode will be audible and may vibrate
      * according to user settings.
-     *
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      * @param ringerMode The ringer mode, one of {@link #RINGER_MODE_NORMAL},
      *            {@link #RINGER_MODE_SILENT}, or {@link #RINGER_MODE_VIBRATE}.
      * @see #getRingerMode()
+     * @see #isVolumeFixed()
      */
     public void setRingerMode(int ringerMode) {
         if (!isValidRingerMode(ringerMode)) {
@@ -820,13 +850,15 @@ public class AudioManager {
 
     /**
      * Sets the volume index for a particular stream.
-     *
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
      *            {@link #getStreamMaxVolume(int)} for the largest valid value.
      * @param flags One or more flags.
      * @see #getStreamMaxVolume(int)
      * @see #getStreamVolume(int)
+     * @see #isVolumeFixed()
      */
     public void setStreamVolume(int streamType, int index, int flags) {
         IAudioService service = getService();
@@ -919,9 +951,13 @@ public class AudioManager {
      * <p>
      * For a better user experience, applications MUST unsolo a soloed stream
      * in onPause() and solo is again in onResume() if appropriate.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      *
      * @param streamType The stream to be soloed/unsoloed.
      * @param state The required solo state: true for solo ON, false for solo OFF
+     *
+     * @see #isVolumeFixed()
      */
     public void setStreamSolo(int streamType, boolean state) {
         IAudioService service = getService();
@@ -948,9 +984,13 @@ public class AudioManager {
      * <p>
      * This method should only be used by applications that replace the platform-wide
      * management of audio settings or the main telephony application.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
      *
      * @param streamType The stream to be muted/unmuted.
      * @param state The required mute state: true for mute ON, false for mute OFF
+     *
+     * @see #isVolumeFixed()
      */
     public void setStreamMute(int streamType, boolean state) {
         IAudioService service = getService();
