@@ -201,22 +201,6 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 {
     ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
         sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
-    uint32_t afSampleRate;
-    size_t afFrameCount;
-
-    status_t status = AudioSystem::getOutputFrameCount(&afFrameCount,
-            (audio_stream_type_t) streamType);
-    if (status != NO_ERROR) {
-        ALOGE("Error %d creating AudioTrack: Could not get AudioSystem frame count "
-              "for stream type %d.", status, streamType);
-        return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
-    }
-    status = AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t) streamType);
-    if (status != NO_ERROR) {
-        ALOGE("Error %d creating AudioTrack: Could not get AudioSystem sampling rate "
-              "for stream type %d.", status, streamType);
-        return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
-    }
 
     // Java channel masks don't map directly to the native definition, but it's a simple shift
     // to skip the two deprecated channel configurations "default" and "mono".
@@ -229,23 +213,8 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     uint32_t channelCount = popcount(nativeChannelMask);
 
-    // check the stream type
-    audio_stream_type_t atStreamType;
-    switch (streamType) {
-    case AUDIO_STREAM_VOICE_CALL:
-    case AUDIO_STREAM_SYSTEM:
-    case AUDIO_STREAM_RING:
-    case AUDIO_STREAM_MUSIC:
-    case AUDIO_STREAM_ALARM:
-    case AUDIO_STREAM_NOTIFICATION:
-    case AUDIO_STREAM_BLUETOOTH_SCO:
-    case AUDIO_STREAM_DTMF:
-        atStreamType = (audio_stream_type_t) streamType;
-        break;
-    default:
-        ALOGE("Error creating AudioTrack: unknown stream type %d.", streamType);
-        return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
-    }
+    // stream type already checked in Java
+    audio_stream_type_t atStreamType = (audio_stream_type_t) streamType;
 
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
@@ -305,6 +274,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpJniStorage->mCallbackData.busy = false;
 
     // initialize the native AudioTrack object
+    status_t status = NO_ERROR;
     switch (memoryMode) {
     case MODE_STREAM:
 
