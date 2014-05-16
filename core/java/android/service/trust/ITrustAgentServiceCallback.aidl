@@ -23,6 +23,6 @@ import android.os.UserHandle;
  * @hide
  */
 oneway interface ITrustAgentServiceCallback {
-    void enableTrust(String message, long durationMs, boolean initiatedByUser);
+    void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser);
     void revokeTrust();
 }

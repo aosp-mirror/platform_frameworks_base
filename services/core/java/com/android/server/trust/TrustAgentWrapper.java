@@ -52,7 +52,7 @@ public class TrustAgentWrapper {
 
     // Trust state
     private boolean mTrusted;
-    private String mMessage;
+    private CharSequence mMessage;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -60,7 +60,7 @@ public class TrustAgentWrapper {
             switch (msg.what) {
                 case MSG_ENABLE_TRUST:
                     mTrusted = true;
-                    mMessage = (String) msg.obj;
+                    mMessage = (CharSequence) msg.obj;
                     boolean initiatedByUser = msg.arg1 != 0;
                     // TODO: Handle handle user initiated trust changes.
                     mTrustManagerService.updateTrust(mUserId);
@@ -79,7 +79,8 @@ public class TrustAgentWrapper {
 
     private ITrustAgentServiceCallback mCallback = new ITrustAgentServiceCallback.Stub() {
 
-        public void enableTrust(String userMessage, long durationMs, boolean initiatedByUser) {
+        @Override
+        public void grantTrust(CharSequence userMessage, long durationMs, boolean initiatedByUser) {
             if (DEBUG) Slog.v(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
                         + ", initiatedByUser = " + initiatedByUser + ")");
 
@@ -91,6 +92,7 @@ public class TrustAgentWrapper {
             }
         }
 
+        @Override
         public void revokeTrust() {
             if (DEBUG) Slog.v(TAG, "revokeTrust()");
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
@@ -155,7 +157,7 @@ public class TrustAgentWrapper {
         return mTrusted;
     }
 
-    public String getMessage() {
+    public CharSequence getMessage() {
         return mMessage;
     }
 

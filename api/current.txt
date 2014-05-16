@@ -29,7 +29,7 @@ package android {
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_ROUTE_PROVIDER = "android.permission.BIND_ROUTE_PROVIDER";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
-    field public static final java.lang.String BIND_TRUST_AGENT_SERVICE = "android.permission.BIND_TRUST_AGENT_SERVICE";
+    field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
     field public static final java.lang.String BIND_VOICE_INTERACTION = "android.permission.BIND_VOICE_INTERACTION";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
@@ -25327,10 +25327,10 @@ package android.service.trust {
 
   public class TrustAgentService extends android.app.Service {
     ctor public TrustAgentService();
-    method protected final void enableTrust(java.lang.String, long, boolean);
+    method public final void grantTrust(java.lang.CharSequence, long, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected void onUnlockAttempt(boolean);
-    method protected final void revokeTrust();
+    method public void onUnlockAttempt(boolean);
+    method public final void revokeTrust();
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
   }

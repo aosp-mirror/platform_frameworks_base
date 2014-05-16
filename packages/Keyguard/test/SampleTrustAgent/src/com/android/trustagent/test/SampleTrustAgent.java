@@ -31,7 +31,7 @@ public class SampleTrustAgent extends TrustAgentService {
 
     LocalBroadcastManager mLocalBroadcastManager;
 
-    private static final String ACTION_ENABLE_TRUST = "action.sample_trust_agent.enable_trust";
+    private static final String ACTION_GRANT_TRUST = "action.sample_trust_agent.grant_trust";
     private static final String ACTION_REVOKE_TRUST = "action.sample_trust_agent.revoke_trust";
 
     private static final String EXTRA_MESSAGE = "extra.message";
@@ -45,14 +45,14 @@ public class SampleTrustAgent extends TrustAgentService {
     public void onCreate() {
         super.onCreate();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_ENABLE_TRUST);
+        filter.addAction(ACTION_GRANT_TRUST);
         filter.addAction(ACTION_REVOKE_TRUST);
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mLocalBroadcastManager.registerReceiver(mReceiver, filter);
     }
 
     @Override
-    protected void onUnlockAttempt(boolean successful) {
+    public void onUnlockAttempt(boolean successful) {
         if (getReportUnlockAttempts(this)) {
             Toast.makeText(this, "onUnlockAttempt(successful=" + successful + ")",
                     Toast.LENGTH_SHORT).show();
@@ -69,8 +69,8 @@ public class SampleTrustAgent extends TrustAgentService {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (ACTION_ENABLE_TRUST.equals(action)) {
-                enableTrust(intent.getStringExtra(EXTRA_MESSAGE),
+            if (ACTION_GRANT_TRUST.equals(action)) {
+                grantTrust(intent.getStringExtra(EXTRA_MESSAGE),
                         intent.getLongExtra(EXTRA_DURATION, 0),
                         false /* initiatedByUser */);
             } else if (ACTION_REVOKE_TRUST.equals(action)) {
@@ -79,9 +79,9 @@ public class SampleTrustAgent extends TrustAgentService {
         }
     };
 
-    public static void sendEnableTrust(Context context,
+    public static void sendGrantTrust(Context context,
             String message, long durationMs, Bundle extra) {
-        Intent intent = new Intent(ACTION_ENABLE_TRUST);
+        Intent intent = new Intent(ACTION_GRANT_TRUST);
         intent.putExtra(EXTRA_MESSAGE, message);
         intent.putExtra(EXTRA_DURATION, durationMs);
         intent.putExtra(EXTRA_EXTRA, extra);

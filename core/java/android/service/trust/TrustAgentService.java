@@ -29,12 +29,12 @@ import android.util.Slog;
  * to be trusted.
  *
  * <p>To extend this class, you must declare the service in your manifest file with
- * the {@link android.Manifest.permission#BIND_TRUST_AGENT_SERVICE} permission
+ * the {@link android.Manifest.permission#BIND_TRUST_AGENT} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
  * <pre>
  * &lt;service android:name=".TrustAgent"
  *          android:label="&#64;string/service_name"
- *          android:permission="android.permission.BIND_TRUST_AGENT_SERVICE">
+ *          android:permission="android.permission.BIND_TRUST_AGENT">
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.trust.TrustAgentService" />
  *     &lt;/intent-filter>
@@ -47,7 +47,7 @@ import android.util.Slog;
  * {@link android.R.styleable#TrustAgent}. For example:</p>
  *
  * <pre>
- * &lt;trust_agent xmlns:android="http://schemas.android.com/apk/res/android"
+ * &lt;trust-agent xmlns:android="http://schemas.android.com/apk/res/android"
  *          android:settingsActivity=".TrustAgentSettings" /></pre>
  */
 public class TrustAgentService extends Service {
@@ -88,7 +88,7 @@ public class TrustAgentService extends Service {
      *
      * @param successful true if the attempt succeeded
      */
-    protected void onUnlockAttempt(boolean successful) {
+    public void onUnlockAttempt(boolean successful) {
     }
 
     private void onError(String msg) {
@@ -96,7 +96,7 @@ public class TrustAgentService extends Service {
     }
 
     /**
-     * Call to enable trust on the device.
+     * Call to grant trust on the device.
      *
      * @param message describes why the device is trusted, e.g. "Trusted by location".
      * @param durationMs amount of time in milliseconds to keep the device in a trusted state. Trust
@@ -104,10 +104,10 @@ public class TrustAgentService extends Service {
      * @param initiatedByUser indicates that the user has explicitly initiated an action that proves
      *                        the user is about to use the device.
      */
-    protected final void enableTrust(String message, long durationMs, boolean initiatedByUser) {
+    public final void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser) {
         if (mCallback != null) {
             try {
-                mCallback.enableTrust(message, durationMs, initiatedByUser);
+                mCallback.grantTrust(message.toString(), durationMs, initiatedByUser);
             } catch (RemoteException e) {
                 onError("calling enableTrust()");
             }
@@ -117,7 +117,7 @@ public class TrustAgentService extends Service {
     /**
      * Call to revoke trust on the device.
      */
-    protected final void revokeTrust() {
+    public final void revokeTrust() {
         if (mCallback != null) {
             try {
                 mCallback.revokeTrust();
