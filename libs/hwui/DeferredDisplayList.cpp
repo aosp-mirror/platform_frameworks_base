@@ -28,6 +28,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayListOp.h"
 #include "OpenGLRenderer.h"
+#include "utils/MathUtils.h"
 
 #if DEBUG_DEFER
     #define DEFER_LOGD(...) ALOGD(__VA_ARGS__)
@@ -146,10 +147,6 @@ private:
     mergeid_t mMergeId;
 };
 
-// compare alphas approximately, with a small margin
-#define NEQ_FALPHA(lhs, rhs) \
-        fabs((float)lhs - (float)rhs) > 0.001f
-
 class MergingDrawBatch : public DrawBatch {
 public:
     MergingDrawBatch(DeferInfo& deferInfo, int width, int height) :
@@ -196,7 +193,11 @@ public:
         const DeferredDisplayState* lhs = state;
         const DeferredDisplayState* rhs = mOps[0].state;
 
-        if (NEQ_FALPHA(lhs->mAlpha, rhs->mAlpha)) return false;
+        if (!MathUtils::areEqual(lhs->mAlpha, rhs->mAlpha)) return false;
+
+        // Identical round rect clip state means both ops will clip in the same way, or not at all.
+        // As the state objects are const, we can compare their pointers to determine mergeability
+        if (lhs->mRoundRectClipState != rhs->mRoundRectClipState) return false;
 
         /* Clipping compatibility check
          *

@@ -58,9 +58,22 @@ public:
         mShouldClip = clip;
     }
 
+    bool getShouldClip() const {
+        return mShouldClip;
+    }
+
     bool willClip() const {
         // only round rect outlines can be used for clipping
         return mShouldClip && (mType == kOutlineType_RoundRect);
+    }
+
+    bool getAsRoundRect(Rect* outRect, float* outRadius) const {
+        if (mType == kOutlineType_RoundRect) {
+            outRect->set(mBounds);
+            *outRadius = mRadius;
+            return true;
+        }
+        return false;
     }
 
     const SkPath* getPath() const {

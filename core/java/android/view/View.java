@@ -10706,9 +10706,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mRenderNode.setOutline(mOutline);
     }
 
-    // TODO: remove
-    public final boolean getClipToOutline() { return false; }
-    public void setClipToOutline(boolean clipToOutline) {}
+    public final boolean getClipToOutline() {
+        return mRenderNode.getClipToOutline();
+    }
+
+    public void setClipToOutline(boolean clipToOutline) {
+        // TODO: add a fast invalidation here
+        if (getClipToOutline() != clipToOutline) {
+            mRenderNode.setClipToOutline(clipToOutline);
+        }
+    }
 
     private void queryOutlineFromBackgroundIfUndefined() {
         if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
@@ -10717,7 +10724,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mOutline = new Outline();
             } else {
                 //invalidate outline, to ensure background calculates it
-                mOutline.set(null);
+                mOutline.reset();
             }
             if (mBackground.getOutline(mOutline)) {
                 if (!mOutline.isValid()) {

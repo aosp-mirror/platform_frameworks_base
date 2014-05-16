@@ -45,17 +45,18 @@ namespace uirenderer {
 #define COLOR_COMPONENT_THRESHOLD 1.0f
 #define COLOR_COMPONENT_INV_THRESHOLD 0.0f
 
-#define PROGRAM_KEY_TEXTURE 0x1
-#define PROGRAM_KEY_A8_TEXTURE 0x2
-#define PROGRAM_KEY_BITMAP 0x4
-#define PROGRAM_KEY_GRADIENT 0x8
-#define PROGRAM_KEY_BITMAP_FIRST 0x10
-#define PROGRAM_KEY_COLOR_MATRIX 0x20
-#define PROGRAM_KEY_COLOR_BLEND 0x40
-#define PROGRAM_KEY_BITMAP_NPOT 0x80
-#define PROGRAM_KEY_SWAP_SRC_DST 0x2000
+#define PROGRAM_KEY_TEXTURE             0x01
+#define PROGRAM_KEY_A8_TEXTURE          0x02
+#define PROGRAM_KEY_BITMAP              0x04
+#define PROGRAM_KEY_GRADIENT            0x08
+#define PROGRAM_KEY_BITMAP_FIRST        0x10
+#define PROGRAM_KEY_COLOR_MATRIX        0x20
+#define PROGRAM_KEY_COLOR_BLEND         0x40
+#define PROGRAM_KEY_BITMAP_NPOT         0x80
 
-#define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
+#define PROGRAM_KEY_SWAP_SRC_DST      0x2000
+
+#define PROGRAM_KEY_BITMAP_WRAPS_MASK  0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
 
 // Encode the xfermodes on 6 bits
@@ -83,6 +84,7 @@ namespace uirenderer {
 
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
 #define PROGRAM_EMULATE_STENCIL 43
+#define PROGRAM_HAS_ROUND_RECT_CLIP 44
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -158,6 +160,7 @@ struct ProgramDescription {
 
     bool hasDebugHighlight;
     bool emulateStencil;
+    bool hasRoundRectClip;
 
     /**
      * Resets this description. All fields are reset back to the default
@@ -198,6 +201,8 @@ struct ProgramDescription {
         gamma = 2.2f;
 
         hasDebugHighlight = false;
+        emulateStencil = false;
+        hasRoundRectClip = false;
     }
 
     /**
@@ -264,6 +269,7 @@ struct ProgramDescription {
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
         if (emulateStencil) key |= programid(0x1) << PROGRAM_EMULATE_STENCIL;
+        if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
         return key;
     }
 

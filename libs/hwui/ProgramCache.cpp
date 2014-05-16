@@ -58,6 +58,8 @@ const char* gVS_Header_Uniforms_HasGradient =
 const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mat4 textureTransform;\n"
         "uniform mediump vec2 textureDimension;\n";
+const char* gVS_Header_Uniforms_HasRoundRectClip =
+        "uniform mat4 roundRectInvTransform;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
 const char* gVS_Header_Varyings_HasColors =
@@ -85,6 +87,8 @@ const char* gVS_Header_Varyings_HasGradient[6] = {
         "varying highp vec2 sweep;\n"
         "varying vec2 ditherTexCoords;\n",
 };
+const char* gVS_Header_Varyings_HasRoundRectClip =
+        "varying vec2 roundRectPos;\n";
 const char* gVS_Main =
         "\nvoid main(void) {\n";
 const char* gVS_Main_OutTexCoords =
@@ -115,9 +119,12 @@ const char* gVS_Main_OutGradient[6] = {
 const char* gVS_Main_OutBitmapTexCoords =
         "    outBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
 const char* gVS_Main_Position =
-        "    gl_Position = projection * transform * position;\n";
+        "    vec4 transformedPosition = projection * transform * position;\n"
+        "    gl_Position = transformedPosition;\n";
 const char* gVS_Main_AAVertexShape =
         "    alpha = vtxAlpha;\n";
+const char* gVS_Main_HasRoundRectClip =
+        "    roundRectPos = (roundRectInvTransform * transformedPosition).xy;\n";
 const char* gVS_Footer =
         "}\n\n";
 
@@ -159,6 +166,10 @@ const char* gFS_Uniforms_ColorOp[3] = {
 };
 const char* gFS_Uniforms_Gamma =
         "uniform float gamma;\n";
+
+const char* gFS_Uniforms_HasRoundRectClip =
+        "uniform vec4 roundRectInnerRectLTRB;\n"
+        "uniform float roundRectRadius;\n";
 
 const char* gFS_Main =
         "\nvoid main(void) {\n"
@@ -318,6 +329,15 @@ const char* gFS_Main_ApplyColorOp[3] = {
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
+
+// Note: LTRB -> xyzw
+const char* gFS_Main_FragColor_HasRoundRectClip =
+        "    mediump vec2 fragToLT = roundRectInnerRectLTRB.xy - roundRectPos;\n"
+        "    mediump vec2 fragFromRB = roundRectPos - roundRectInnerRectLTRB.zw;\n"
+        "    mediump vec2 dist = max(max(fragToLT, fragFromRB), vec2(0.0, 0.0));\n"
+        "    mediump float linearDist = roundRectRadius - length(dist);\n"
+        "    gl_FragColor *= clamp(linearDist, 0.0, 1.0);\n";
+
 const char* gFS_Main_DebugHighlight =
         "    gl_FragColor.rgb = vec3(0.0, gl_FragColor.a, 0.0);\n";
 const char* gFS_Main_EmulateStencil =
@@ -462,6 +482,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.hasBitmap) {
         shader.append(gVS_Header_Uniforms_HasBitmap);
     }
+    if (description.hasRoundRectClip) {
+        shader.append(gVS_Header_Uniforms_HasRoundRectClip);
+    }
     // Varyings
     if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
@@ -477,6 +500,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     }
     if (description.hasBitmap) {
         shader.append(gVS_Header_Varyings_HasBitmap);
+    }
+    if (description.hasRoundRectClip) {
+        shader.append(gVS_Header_Varyings_HasRoundRectClip);
     }
 
     // Begin the shader
@@ -499,6 +525,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Main_Position);
         if (description.hasGradient) {
             shader.append(gVS_Main_OutGradient[gradientIndex(description)]);
+        }
+        if (description.hasRoundRectClip) {
+            shader.append(gVS_Main_HasRoundRectClip);
         }
     }
     // End the shader
@@ -546,6 +575,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasBitmap) {
         shader.append(gVS_Header_Varyings_HasBitmap);
     }
+    if (description.hasRoundRectClip) {
+        shader.append(gVS_Header_Varyings_HasRoundRectClip);
+    }
 
     // Uniforms
     int modulateOp = MODULATE_OP_NO_MODULATE;
@@ -568,11 +600,18 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasGammaCorrection) {
         shader.append(gFS_Uniforms_Gamma);
     }
+    if (description.hasRoundRectClip) {
+        shader.append(gFS_Uniforms_HasRoundRectClip);
+    }
 
     // Optimization for common cases
-    if (!description.isAA && !blendFramebuffer && !description.hasColors &&
-            description.colorOp == ProgramDescription::kColorNone &&
-            !description.hasDebugHighlight && !description.emulateStencil) {
+    if (!description.isAA
+            && !blendFramebuffer
+            && !description.hasColors
+            && description.colorOp == ProgramDescription::kColorNone
+            && !description.hasDebugHighlight
+            && !description.emulateStencil
+            && !description.hasRoundRectClip) {
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;
@@ -721,6 +760,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
         if (description.hasColors) {
             shader.append(gFS_Main_FragColor_HasColors);
+        }
+        if (description.hasRoundRectClip) {
+            shader.append(gFS_Main_FragColor_HasRoundRectClip);
         }
         if (description.hasDebugHighlight) {
             shader.append(gFS_Main_DebugHighlight);

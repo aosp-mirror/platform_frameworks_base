@@ -64,6 +64,7 @@ public:
     mat4 mMatrix;
     DrawModifiers mDrawModifiers;
     float mAlpha;
+    const RoundRectClipState* mRoundRectClipState;
 };
 
 class OpStatePair {

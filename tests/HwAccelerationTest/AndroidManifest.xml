@@ -216,6 +216,15 @@
         </activity>
 
         <activity
+                android:name="ClipOutlineActivity"
+                android:label="Clip/Outline">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="DisplayListLayersActivity"
                 android:label="Layers/Display Lists">
             <intent-filter>

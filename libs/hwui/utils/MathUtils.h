@@ -34,6 +34,10 @@ public:
         return value >= gNonZeroEpsilon;
     }
 
+    inline static bool areEqual(float valueA, float valueB) {
+        return isZero(valueA - valueB);
+    }
+
     inline static int min(int a, int b) {
         return a < b ? a : b;
     }

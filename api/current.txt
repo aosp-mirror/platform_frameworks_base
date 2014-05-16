@@ -10214,7 +10214,9 @@ package android.graphics {
   public final class Outline {
     ctor public Outline();
     ctor public Outline(android.graphics.Outline);
+    method public boolean canClip();
     method public boolean isValid();
+    method public void reset();
     method public void set(android.graphics.Outline);
     method public void setConvexPath(android.graphics.Path);
     method public void setOval(int, int, int, int);

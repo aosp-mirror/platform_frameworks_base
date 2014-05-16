@@ -88,6 +88,14 @@ public:
     virtual bool clipPath(const SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
+    /**
+     * Does not support different clipping Ops (that is, every call to setClippingOutline is
+     * effectively using SkRegion::kReplaceOp)
+     *
+     * The clipping outline is independent from the regular clip.
+     */
+    void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
+
 protected:
     const Rect& getRenderTargetClipBounds() const { return mSnapshot->getRenderTargetClip(); }
 
@@ -106,7 +114,7 @@ protected:
 
     // Clip
     bool calculateQuickRejectForScissor(float left, float top, float right, float bottom,
-            bool* clipRequired, bool snapOut) const;
+            bool* clipRequired, bool* roundRectClipRequired, bool snapOut) const;
 
     /**
      * Called just after a restore has occurred. The 'removed' snapshot popped from the stack,

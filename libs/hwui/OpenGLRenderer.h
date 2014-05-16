@@ -993,6 +993,8 @@ private:
     bool mCountOverdraw;
     float mOverdraw;
 
+    bool mSkipOutlineClip;
+
     friend class DisplayListRenderer;
     friend class Layer;
     friend class TextSetupFunctor;
