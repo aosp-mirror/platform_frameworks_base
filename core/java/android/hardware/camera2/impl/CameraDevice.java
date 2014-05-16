@@ -21,7 +21,6 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.CameraBinderDecorator;

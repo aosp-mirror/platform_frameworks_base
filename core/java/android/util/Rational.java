@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.camera2;
+package android.util;
 
 /**
- * The rational data type used by CameraMetadata keys. Contains a pair of ints representing the
- * numerator and denominator of a Rational number. This type is immutable.
+ * <p>An immutable data type representation a rational number.</p>
+ *
+ * <p>Contains a pair of {@code int}s representing the numerator and denominator of a
+ * Rational number. </p>
  */
 public final class Rational {
     private final int mNumerator;
@@ -30,7 +32,9 @@ public final class Rational {
      * is always positive.</p>
      *
      * <p>A rational value with a 0-denominator may be constructed, but will have similar semantics
-     * as float NaN and INF values. The int getter functions return 0 in this case.</p>
+     * as float {@code NaN} and {@code INF} values. For {@code NaN},
+     * both {@link #getNumerator} and {@link #getDenominator} functions will return 0. For
+     * positive or negative {@code INF}, only the {@link #getDenominator} will return 0.</p>
      *
      * @param numerator the numerator of the rational
      * @param denominator the denominator of the rational

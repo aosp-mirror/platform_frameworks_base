@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.util.Rational;
 
 import java.util.Collections;
 import java.util.List;
@@ -316,8 +317,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <li>All non (0, 0) sizes will have non-zero widths and heights.</li>
      * </ul>
      */
-    public static final Key<android.hardware.camera2.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
-            new Key<android.hardware.camera2.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.camera2.Size[].class);
+    public static final Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
+            new Key<android.util.Size[]>("android.jpeg.availableThumbnailSizes", android.util.Size[].class);
 
     /**
      * <p>List of supported aperture
@@ -393,8 +394,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The map should be on the order of 30-40 rows and columns, and
      * must be smaller than 64x64.</p>
      */
-    public static final Key<android.hardware.camera2.Size> LENS_INFO_SHADING_MAP_SIZE =
-            new Key<android.hardware.camera2.Size>("android.lens.info.shadingMapSize", android.hardware.camera2.Size.class);
+    public static final Key<android.util.Size> LENS_INFO_SHADING_MAP_SIZE =
+            new Key<android.util.Size>("android.lens.info.shadingMapSize", android.util.Size.class);
 
     /**
      * <p>The lens focus distance calibration quality.</p>
@@ -658,8 +659,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * @hide
      */
     @Deprecated
-    public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
-            new Key<android.hardware.camera2.Size[]>("android.scaler.availableJpegSizes", android.hardware.camera2.Size[].class);
+    public static final Key<android.util.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
+            new Key<android.util.Size[]>("android.scaler.availableJpegSizes", android.util.Size[].class);
 
     /**
      * <p>The maximum ratio between active area width
@@ -704,8 +705,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * @hide
      */
     @Deprecated
-    public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
-            new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
+    public static final Key<android.util.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
+            new Key<android.util.Size[]>("android.scaler.availableProcessedSizes", android.util.Size[].class);
 
     /**
      * <p>The mapping of image formats that are supported by this
@@ -961,9 +962,6 @@ public final class CameraCharacteristics extends CameraMetadata {
      * can provide.</p>
      * <p>Please reference the documentation for the image data destination to
      * check if it limits the maximum size for image data.</p>
-     * <p>Not all output formats may be supported in a configuration with
-     * an input stream of a particular format. For more details, see
-     * android.scaler.availableInputOutputFormatsMap.</p>
      * <p>The following table describes the minimum required output stream
      * configurations based on the hardware level
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}):</p>
@@ -1106,8 +1104,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * match this in
      * android.scaler.availableStreamConfigurations.</p>
      */
-    public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
-            new Key<android.hardware.camera2.Size>("android.sensor.info.pixelArraySize", android.hardware.camera2.Size.class);
+    public static final Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
+            new Key<android.util.Size>("android.sensor.info.pixelArraySize", android.util.Size.class);
 
     /**
      * <p>Maximum raw value output by sensor.</p>
@@ -1515,13 +1513,4 @@ public final class CameraCharacteristics extends CameraMetadata {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
-
 }

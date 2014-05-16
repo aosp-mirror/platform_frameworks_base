@@ -12308,12 +12308,16 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
+}
+
+package android.hardware.camera2.params {
+
   public final class ColorSpaceTransform {
-    ctor public ColorSpaceTransform(android.hardware.camera2.Rational[]);
+    ctor public ColorSpaceTransform(android.util.Rational[]);
     ctor public ColorSpaceTransform(int[]);
-    method public void copyElements(android.hardware.camera2.Rational[], int);
+    method public void copyElements(android.util.Rational[], int);
     method public void copyElements(int[], int);
-    method public android.hardware.camera2.Rational getElement(int, int);
+    method public android.util.Rational getElement(int, int);
   }
 
   public final class Face {
@@ -12333,7 +12337,7 @@ package android.hardware.camera2 {
     method public int getColumnCount();
     method public float getGainFactor(int, int, int);
     method public int getGainFactorCount();
-    method public android.hardware.camera2.RggbChannelVector getGainFactorVector(int, int);
+    method public android.hardware.camera2.params.RggbChannelVector getGainFactorVector(int, int);
     method public int getRowCount();
     field public static final float MINIMUM_GAIN_FACTOR = 1.0f;
   }
@@ -12342,7 +12346,7 @@ package android.hardware.camera2 {
     ctor public MeteringRectangle(int, int, int, int, int);
     ctor public MeteringRectangle(android.graphics.Point, android.util.Size, int);
     ctor public MeteringRectangle(android.graphics.Rect, int);
-    method public boolean equals(android.hardware.camera2.MeteringRectangle);
+    method public boolean equals(android.hardware.camera2.params.MeteringRectangle);
     method public int getHeight();
     method public int getMeteringWeight();
     method public android.graphics.Rect getRect();
@@ -12351,12 +12355,6 @@ package android.hardware.camera2 {
     method public int getWidth();
     method public int getX();
     method public int getY();
-  }
-
-  public final class Rational {
-    ctor public Rational(int, int);
-    method public int getDenominator();
-    method public int getNumerator();
   }
 
   public final class RggbChannelVector {
@@ -12374,10 +12372,17 @@ package android.hardware.camera2 {
     field public static final int RED = 0; // 0x0
   }
 
-  public final class Size {
-    ctor public Size(int, int);
-    method public final int getHeight();
-    method public final int getWidth();
+  public final class StreamConfigurationMap {
+    method public final int[] getOutputFormats();
+    method public long getOutputMinFrameDuration(int, android.util.Size);
+    method public long getOutputMinFrameDuration(java.lang.Class<T>, android.util.Size);
+    method public android.util.Size[] getOutputSizes(java.lang.Class<T>);
+    method public android.util.Size[] getOutputSizes(int);
+    method public long getOutputStallDuration(int, android.util.Size);
+    method public long getOutputStallDuration(java.lang.Class<T>, android.util.Size);
+    method public boolean isOutputSupportedFor(int);
+    method public static boolean isOutputSupportedFor(java.lang.Class<T>);
+    method public boolean isOutputSupportedFor(android.view.Surface);
   }
 
   public final class TonemapCurve {
@@ -12390,23 +12395,6 @@ package android.hardware.camera2 {
     field public static final float LEVEL_BLACK = 0.0f;
     field public static final float LEVEL_WHITE = 1.0f;
     field public static final int POINT_SIZE = 2; // 0x2
-  }
-
-}
-
-package android.hardware.camera2.params {
-
-  public final class StreamConfigurationMap {
-    method public final int[] getOutputFormats();
-    method public long getOutputMinFrameDuration(int, android.util.Size);
-    method public long getOutputMinFrameDuration(java.lang.Class<T>, android.util.Size);
-    method public android.util.Size[] getOutputSizes(java.lang.Class<T>);
-    method public android.util.Size[] getOutputSizes(int);
-    method public long getOutputStallDuration(int, android.util.Size);
-    method public long getOutputStallDuration(java.lang.Class<T>, android.util.Size);
-    method public boolean isOutputSupportedFor(int);
-    method public static boolean isOutputSupportedFor(java.lang.Class<T>);
-    method public boolean isOutputSupportedFor(android.view.Surface);
   }
 
 }
@@ -29994,6 +29982,12 @@ package android.util {
     method public static android.util.Range<T> create(T, T);
     method public T getLower();
     method public T getUpper();
+  }
+
+  public final class Rational {
+    ctor public Rational(int, int);
+    method public int getDenominator();
+    method public int getNumerator();
   }
 
   public final class Size {

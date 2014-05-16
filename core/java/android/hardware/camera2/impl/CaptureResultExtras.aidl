@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.impl;
 
 /** @hide */
 parcelable CaptureResultExtras;

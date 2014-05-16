@@ -17,7 +17,7 @@
 package com.android.mediaframeworktest.unit;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.hardware.camera2.Rational;
+import android.util.Rational;
 
 /**
  * <pre>

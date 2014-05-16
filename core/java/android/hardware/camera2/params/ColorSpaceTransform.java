@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
 
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.util.Rational;
 
 import java.util.Arrays;
 

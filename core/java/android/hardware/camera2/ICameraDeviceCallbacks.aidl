@@ -17,7 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.CaptureResultExtras;
+import android.hardware.camera2.impl.CaptureResultExtras;
 
 /** @hide */
 interface ICameraDeviceCallbacks

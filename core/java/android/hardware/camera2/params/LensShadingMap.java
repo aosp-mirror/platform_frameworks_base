@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
-import static android.hardware.camera2.RggbChannelVector.*;
+import static android.hardware.camera2.params.RggbChannelVector.*;
 
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.util.Arrays;

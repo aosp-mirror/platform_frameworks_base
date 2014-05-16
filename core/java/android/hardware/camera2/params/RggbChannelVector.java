@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.camera2;
+package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
 
