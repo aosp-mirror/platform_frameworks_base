@@ -6343,8 +6343,9 @@
     <!-- Use <code>voice-interaction-service</code> as the root tag of the XML resource that
          describes a {@link android.service.voice.VoiceInteractionService}, which is referenced from
          its {@link android.service.voice.VoiceInteractionService#SERVICE_META_DATA} meta-data entry.
-         Described here are the attributes that can be included in that tag. -->
+         Described here are the attributes that can be included in that tag. @hide -->
     <declare-styleable name="VoiceInteractionService">
+        <!-- @hide -->
         <attr name="sessionService" format="string" />
         <attr name="settingsActivity" />
     </declare-styleable>
