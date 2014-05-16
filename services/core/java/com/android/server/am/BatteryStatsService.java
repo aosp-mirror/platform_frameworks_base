@@ -623,8 +623,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
-        pw.println("  --enable: enable an option: full-wake-history.");
-        pw.println("  --disable: disable an option: full-wake-history.");
+        pw.println("  --enable: enable an option: full-wake-history, no-auto-reset.");
+        pw.println("  --disable: disable an option: full-wake-history, no-auto-reset.");
         pw.println("  -h: print this help text.");
         pw.println("  <package.name>: optional name of package to filter output by.");
     }
@@ -639,6 +639,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if ("full-wake-history".equals(args[i])) {
             synchronized (mStats) {
                 mStats.setRecordAllWakeLocksLocked(enable);
+            }
+        } else if ("no-auto-reset".equals(args[i])) {
+            synchronized (mStats) {
+                mStats.setNoAutoReset(enable);
             }
         } else {
             pw.println("Unknown enable/disable option: " + args[i]);

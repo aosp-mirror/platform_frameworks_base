@@ -531,7 +531,8 @@ public abstract class BatteryStats implements Parcelable {
 
     public final static class HistoryItem implements Parcelable {
         public HistoryItem next;
-        
+
+        // The time of this event in milliseconds, as per SystemClock.elapsedRealtime().
         public long time;
 
         public static final byte CMD_UPDATE = 0;        // These can be written as deltas
@@ -645,7 +646,7 @@ public abstract class BatteryStats implements Parcelable {
         public int eventCode;
         public HistoryTag eventTag;
 
-        // Only set for CMD_CURRENT_TIME.
+        // Only set for CMD_CURRENT_TIME or CMD_RESET, as per System.currentTimeMillis().
         public long currentTime;
 
         // Meta-data when reading.
