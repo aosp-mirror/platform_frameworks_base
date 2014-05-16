@@ -1344,7 +1344,7 @@ public class Notification implements Parcelable
         /**
          * Add a timestamp pertaining to the notification (usually the time the event occurred).
          * It will be shown in the notification content view by default; use
-         * {@link Builder#setShowWhen(boolean) setShowWhen} to control this.
+         * {@link #setShowWhen(boolean) setShowWhen} to control this.
          *
          * @see Notification#when
          */
@@ -1354,7 +1354,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Control whether the timestamp set with {@link Builder#setWhen(long) setWhen} is shown
+         * Control whether the timestamp set with {@link #setWhen(long) setWhen} is shown
          * in the content view.
          */
         public Builder setShowWhen(boolean show) {
