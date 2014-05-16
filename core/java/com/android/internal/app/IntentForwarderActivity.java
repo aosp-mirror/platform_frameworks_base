@@ -35,8 +35,8 @@ import java.util.Set;
 
 
 /*
- * This is used in conjunction with DevicePolicyManager.setForwardingIntents to enable intents to be
- * passed in and out of a managed profile.
+ * This is used in conjunction with the {@link setCrossProfileIntentFilter} method of
+ * {@link DevicePolicyManager} to enable intents to be passed in and out of a managed profile.
  */
 
 public class IntentForwarderActivity extends Activity  {

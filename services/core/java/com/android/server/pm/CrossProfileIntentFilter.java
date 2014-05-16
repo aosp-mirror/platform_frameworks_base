@@ -26,44 +26,48 @@ import java.io.IOException;
 import android.os.UserHandle;
 
 /**
- * The {@link PackageManagerService} maintains some {@link ForwardingIntentFilter}s for every user.
- * If an {@link Intent} matches the {@link ForwardingIntentFilter}, then it can be forwarded to the
- * {@link #mUserIdDest}.
+ * The {@link PackageManagerService} maintains some {@link CrossProfileIntentFilter}s for each user.
+ * If an {@link Intent} matches the {@link CrossProfileIntentFilter}, then activities in the user
+ * {@link #mTargetUserId} can access it.
  */
-class ForwardingIntentFilter extends IntentFilter {
-    private static final String ATTR_USER_ID_DEST = "userIdDest";
+class CrossProfileIntentFilter extends IntentFilter {
+    private static final String ATTR_TARGET_USER_ID = "targetUserId";
+    private static final String ATTR_USER_ID_DEST = "userIdDest";//Old name. Kept for compatibility.
     private static final String ATTR_REMOVABLE = "removable";
     private static final String ATTR_FILTER = "filter";
 
-    private static final String TAG = "ForwardingIntentFilter";
+    private static final String TAG = "CrossProfileIntentFilter";
 
     // If the intent matches the IntentFilter, then it can be forwarded to this userId.
-    final int mUserIdDest;
+    final int mTargetUserId;
     boolean mRemovable;
 
-    ForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdDest) {
+    CrossProfileIntentFilter(IntentFilter filter, boolean removable, int targetUserId) {
         super(filter);
-        mUserIdDest = userIdDest;
+        mTargetUserId = targetUserId;
         mRemovable = removable;
     }
 
-    public int getUserIdDest() {
-        return mUserIdDest;
+    public int getTargetUserId() {
+        return mTargetUserId;
     }
 
     public boolean isRemovable() {
         return mRemovable;
     }
 
-    ForwardingIntentFilter(XmlPullParser parser) throws XmlPullParserException, IOException {
-        String userIdDestString = parser.getAttributeValue(null, ATTR_USER_ID_DEST);
-        if (userIdDestString == null) {
-            String msg = "Missing element under " + TAG +": " + ATTR_USER_ID_DEST + " at " +
+    CrossProfileIntentFilter(XmlPullParser parser) throws XmlPullParserException, IOException {
+        String targetUserIdString = parser.getAttributeValue(null, ATTR_TARGET_USER_ID);
+        if (targetUserIdString == null) {
+            targetUserIdString = parser.getAttributeValue(null, ATTR_USER_ID_DEST);
+        }
+        if (targetUserIdString == null) {
+            String msg = "Missing element under " + TAG +": " + ATTR_TARGET_USER_ID + " at " +
                     parser.getPositionDescription();
             PackageManagerService.reportSettingsProblem(Log.WARN, msg);
-            mUserIdDest = UserHandle.USER_NULL;
+            mTargetUserId = UserHandle.USER_NULL;
         } else {
-            mUserIdDest = Integer.parseInt(userIdDestString);
+            mTargetUserId = Integer.parseInt(targetUserIdString);
         }
         String removableString = parser.getAttributeValue(null, ATTR_REMOVABLE);
         if (removableString != null) {
@@ -99,7 +103,7 @@ class ForwardingIntentFilter extends IntentFilter {
     }
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
-        serializer.attribute(null, ATTR_USER_ID_DEST, Integer.toString(mUserIdDest));
+        serializer.attribute(null, ATTR_TARGET_USER_ID, Integer.toString(mTargetUserId));
         serializer.attribute(null, ATTR_REMOVABLE, Boolean.toString(mRemovable));
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
@@ -108,7 +112,7 @@ class ForwardingIntentFilter extends IntentFilter {
 
     @Override
     public String toString() {
-        return "ForwardingIntentFilter{0x" + Integer.toHexString(System.identityHashCode(this))
-                + " " + Integer.toString(mUserIdDest) + "}";
+        return "CrossProfileIntentFilter{0x" + Integer.toHexString(System.identityHashCode(this))
+                + " " + Integer.toString(mTargetUserId) + "}";
     }
 }

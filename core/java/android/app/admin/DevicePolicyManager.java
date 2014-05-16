@@ -176,15 +176,16 @@ public class DevicePolicyManager {
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
     /**
-     * Flag for {@link #addForwardingIntentFilter}: the intents will forwarded to the primary user.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from a
+     * managed profile to its parent.
      */
-    public static int FLAG_TO_PRIMARY_USER = 0x0001;
+    public static int FLAG_PARENT_CAN_ACCESS_MANAGED = 0x0001;
 
     /**
-     * Flag for {@link #addForwardingIntentFilter}: the intents will be forwarded to the managed
-     * profile.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from the
+     * parent to its managed profile.
      */
-    public static int FLAG_TO_MANAGED_PROFILE = 0x0002;
+    public static int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
     /**
      * Return true if the given administrator component is currently
@@ -1951,17 +1952,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to forward intents sent from the managed profile to the owner, or
-     * from the owner to the managed profile.
-     * If an intent matches this intent filter, then activities belonging to the other user can
-     * respond to this intent.
+     * Called by the profile owner so that some intents sent in the managed profile can also be
+     * resolved in the parent, or vice versa.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param filter if an intent matches this IntentFilter, then it can be forwarded.
+     * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
+     * other profile
      */
-    public void addForwardingIntentFilter(ComponentName admin, IntentFilter filter, int flags) {
+    public void addCrossProfileIntentFilter(ComponentName admin, IntentFilter filter, int flags) {
         if (mService != null) {
             try {
-                mService.addForwardingIntentFilter(admin, filter, flags);
+                mService.addCrossProfileIntentFilter(admin, filter, flags);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1969,14 +1969,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to remove the forwarding intent filters from the current user
-     * and from the owner.
+     * Called by a profile owner to remove the cross-profile intent filters from the managed profile
+     * and from the parent.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      */
-    public void clearForwardingIntentFilters(ComponentName admin) {
+    public void clearCrossProfileIntentFilters(ComponentName admin) {
         if (mService != null) {
             try {
-                mService.clearForwardingIntentFilters(admin);
+                mService.clearCrossProfileIntentFilters(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

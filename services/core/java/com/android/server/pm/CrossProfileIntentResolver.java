@@ -23,22 +23,22 @@ import com.android.server.IntentResolver;
 import java.util.List;
 
 /**
- * Used to find a list of {@link ForwardingIntentFilter}s that match an intent.
+ * Used to find a list of {@link CrossProfileIntentFilter}s that match an intent.
  */
-class ForwardingIntentResolver
-        extends IntentResolver<ForwardingIntentFilter, ForwardingIntentFilter> {
+class CrossProfileIntentResolver
+        extends IntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter> {
     @Override
-    protected ForwardingIntentFilter[] newArray(int size) {
-        return new ForwardingIntentFilter[size];
+    protected CrossProfileIntentFilter[] newArray(int size) {
+        return new CrossProfileIntentFilter[size];
     }
 
     @Override
-    protected boolean isPackageForFilter(String packageName, ForwardingIntentFilter filter) {
+    protected boolean isPackageForFilter(String packageName, CrossProfileIntentFilter filter) {
         return false;
     }
 
     @Override
-    protected void sortResults(List<ForwardingIntentFilter> results) {
+    protected void sortResults(List<CrossProfileIntentFilter> results) {
         //We don't sort the results
     }
 }

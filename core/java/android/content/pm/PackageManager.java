@@ -3576,24 +3576,38 @@ public abstract class PackageManager {
     }
 
     /**
-     * Adds a forwarding intent filter. After calling this method all intents sent from the user
-     * with id userIdOrig can also be be resolved by activities in the user with id userIdDest if
-     * they match the specified intent filter.
-     * @param filter the {@link IntentFilter} the intent has to match to be forwarded
-     * @param removable if set to false, {@link clearForwardingIntents} will not remove this intent
-     * filter
-     * @param userIdOrig user from which the intent can be forwarded
-     * @param userIdDest user to which the intent can be forwarded
+     * Adds a {@link CrossProfileIntentFilter}. After calling this method all intents sent from the
+     * user with id sourceUserId can also be be resolved by activities in the user with id
+     * targetUserId if they match the specified intent filter.
+     * @param filter the {@link IntentFilter} the intent has to match
+     * @param removable if set to false, {@link clearCrossProfileIntentFilters} will not remove this
+     * {@link CrossProfileIntentFilter}
      * @hide
      */
-    public abstract void addForwardingIntentFilter(IntentFilter filter, boolean removable,
-            int userIdOrig, int userIdDest);
+    public abstract void addCrossProfileIntentFilter(IntentFilter filter, boolean removable,
+            int sourceUserId, int targetUserId);
 
     /**
-     * Clearing all removable {@link ForwardingIntentFilter}s that are set with the given user as
-     * the origin.
-     * @param userIdOrig user from which the intent can be forwarded
+     * @hide
+     * @deprecated
+     * TODO: remove it as soon as the code of ManagedProvisionning is updated
+    */
+    public abstract void addForwardingIntentFilter(IntentFilter filter, boolean removable,
+            int sourceUserId, int targetUserId);
+
+    /**
+     * Clearing removable {@link CrossProfileIntentFilter}s which have the specified user as their
+     * source
+     * @param sourceUserId
+     * be cleared.
      * @hide
      */
-    public abstract void clearForwardingIntentFilters(int userIdOrig);
+    public abstract void clearCrossProfileIntentFilters(int sourceUserId);
+
+    /**
+     * @hide
+     * @deprecated
+     * TODO: remove it as soon as the code of ManagedProvisionning is updated
+    */
+    public abstract void clearForwardingIntentFilters(int sourceUserId);
 }
