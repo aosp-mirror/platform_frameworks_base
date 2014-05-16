@@ -16602,7 +16602,6 @@ package android.net.wifi {
     field public java.lang.String capabilities;
     field public int frequency;
     field public int level;
-    field public android.net.wifi.passpoint.PasspointInfo passpoint;
     field public long timestamp;
   }
 
