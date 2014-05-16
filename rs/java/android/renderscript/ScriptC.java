@@ -67,6 +67,26 @@ public class ScriptC extends Script {
     }
 
     /**
+     * Only intended for use by the generated derived classes.
+     *
+     * @param rs
+     * @hide
+     */
+    protected ScriptC(RenderScript rs, String resName, byte[] bitcode32, byte[] bitcode64) {
+        super(0, rs);
+        long id = 0;
+        if (RenderScript.sPointerSize == 4) {
+            id = internalStringCreate(rs, resName, bitcode32);
+        } else {
+            id = internalStringCreate(rs, resName, bitcode64);
+        }
+        if (id == 0) {
+            throw new RSRuntimeException("Loading of ScriptC script failed.");
+        }
+        setID(id);
+    }
+
+    /**
      * Name of the file that holds the object cache.
      */
     private static final String CACHE_PATH = "com.android.renderscript.cache";
@@ -113,4 +133,17 @@ public class ScriptC extends Script {
         //        Log.v(TAG, "Create script for resource = " + resName);
         return rs.nScriptCCreate(resName, mCachePath, pgm, pgmLength);
     }
+
+    private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
+        // Create the RS cache path if we haven't done so already.
+        if (mCachePath == null) {
+            File f = new File(rs.mCacheDir, CACHE_PATH);
+            mCachePath = f.getAbsolutePath();
+            f.mkdirs();
+        }
+        //        Log.v(TAG, "Create script for resource = " + resName);
+        return rs.nScriptCCreate(resName, mCachePath, bitcode, bitcode.length);
+    }
+
+
 }

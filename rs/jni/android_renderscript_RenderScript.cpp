@@ -1573,6 +1573,12 @@ nMeshGetIndices(JNIEnv *_env, jobject _this, jlong con, jlong mesh, jlongArray _
     free(prims);
 }
 
+static jint
+nSystemGetPointerSize(JNIEnv *_env, jobject _this) {
+    return (jint)sizeof(void*);
+}
+
+
 // ---------------------------------------------------------------------------
 
 
@@ -1708,6 +1714,7 @@ static JNINativeMethod methods[] = {
 {"rsnMeshGetVertices",               "(JJ[JI)V",                              (void*)nMeshGetVertices },
 {"rsnMeshGetIndices",                "(JJ[J[II)V",                            (void*)nMeshGetIndices },
 
+{"rsnSystemGetPointerSize",          "()I",                                   (void*)nSystemGetPointerSize },
 };
 
 static int registerFuncs(JNIEnv *_env)
