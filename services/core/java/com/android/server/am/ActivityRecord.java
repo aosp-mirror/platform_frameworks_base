@@ -149,7 +149,7 @@ final class ActivityRecord {
     boolean mStartingWindowShown = false;
     ActivityContainer mInitialActivityContainer;
 
-    ActivityManager.RecentsActivityValues activityValues; // the recents information for this activity
+    ActivityManager.TaskDescription taskDescription; // the recents information for this activity
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();

@@ -7087,50 +7087,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.description = tr.lastDescription;
         rti.stackId = tr.stack.mStackId;
         rti.userId = tr.userId;
-
-        // Traverse upwards looking for any break between main task activities and
-        // utility activities.
-        final ArrayList<ActivityRecord> activities = tr.mActivities;
-        int activityNdx;
-        final int numActivities = activities.size();
-        for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
-             ++activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
-            if (r.intent != null &&
-                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                            != 0) {
-                break;
-            }
-        }
-        if (activityNdx > 0) {
-            // Traverse downwards starting below break looking for set label, icon.
-            // Note that if there are activities in the task but none of them set the
-            // recent activity values, then we do not fall back to the last set
-            // values in the TaskRecord.
-            rti.activityValues = new ActivityManager.RecentsActivityValues();
-            for (--activityNdx; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.activityValues != null) {
-                    if (rti.activityValues.label == null) {
-                        rti.activityValues.label = r.activityValues.label;
-                        tr.lastActivityValues.label = r.activityValues.label;
-                    }
-                    if (rti.activityValues.icon == null) {
-                        rti.activityValues.icon = r.activityValues.icon;
-                        tr.lastActivityValues.icon = r.activityValues.icon;
-                    }
-                    if (rti.activityValues.colorPrimary == 0) {
-                        rti.activityValues.colorPrimary = r.activityValues.colorPrimary;
-                        tr.lastActivityValues.colorPrimary = r.activityValues.colorPrimary;
-                    }
-                }
-            }
-        } else {
-            // If there are no activity records in this task, then we use the last
-            // resolved values
-            rti.activityValues =
-                    new ActivityManager.RecentsActivityValues(tr.lastActivityValues);
-        }
+        rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
         return rti;
     }
 
@@ -7261,11 +7218,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setRecentsActivityValues(IBinder token, ActivityManager.RecentsActivityValues rav) {
+    public void setTaskDescription(IBinder token, ActivityManager.TaskDescription td) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.activityValues = rav;
+                r.taskDescription = td;
+                r.task.updateTaskDescription();
             }
         }
     }
