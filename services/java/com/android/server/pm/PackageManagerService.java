@@ -5041,11 +5041,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (pkg.applicationInfo.nativeLibraryDir != null) {
             final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
             try {
+                // Enable gross and lame hacks for apps that are built with old
+                // SDK tools. We must scan their APKs for renderscript bitcode and
+                // not launch them if it's present. Don't bother checking on devices
+                // that don't have 64 bit support.
+                String[] abiList = Build.SUPPORTED_ABIS;
+                boolean hasLegacyRenderscriptBitcode = false;
+                if (abiOverride != null) {
+                    abiList = new String[] { abiOverride };
+                } else if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
+                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                    abiList = Build.SUPPORTED_32_BIT_ABIS;
+                    hasLegacyRenderscriptBitcode = true;
+                }
+
                 File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                 final String dataPathString = dataPath.getCanonicalPath();
-
-                final String[] abiList = (abiOverride != null) ? new String[] { abiOverride } :
-                        Build.SUPPORTED_ABIS;
 
                 if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
                     /*
@@ -5059,17 +5070,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "removed obsolete native libraries for system package "
                                 + path);
                     }
-                    if (abiOverride != null) {
-                        pkg.applicationInfo.cpuAbi = abiOverride;
+                    if (abiOverride != null || hasLegacyRenderscriptBitcode) {
+                        pkg.applicationInfo.cpuAbi = abiList[0];
+                        pkgSetting.cpuAbiString = abiList[0];
                     } else {
                         setInternalAppAbi(pkg, pkgSetting);
                     }
                 } else {
                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
                         /*
-                         * Update native library dir if it starts with
-                         * /data/data
-                         */
+                        * Update native library dir if it starts with
+                        * /data/data
+                        */
                         if (nativeLibraryDir.getPath().startsWith(dataPathString)) {
                             setInternalAppNativeLibraryPath(pkg, pkgSetting);
                             nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
@@ -5088,8 +5100,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // note of what ABI we're using
                             if (copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                                 pkg.applicationInfo.cpuAbi = abiList[copyRet];
-                            } else if (abiOverride != null) {
-                                pkg.applicationInfo.cpuAbi = abiOverride;
+                            } else if (abiOverride != null || hasLegacyRenderscriptBitcode) {
+                                pkg.applicationInfo.cpuAbi = abiList[0];
                             } else {
                                 pkg.applicationInfo.cpuAbi = null;
                             }
@@ -5113,8 +5125,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // Note that (non upgraded) system apps will not have any native
                             // libraries bundled in their APK, but we're guaranteed not to be
                             // such an app at this point.
-                            if (abiOverride != null) {
-                                pkg.applicationInfo.cpuAbi = abiOverride;
+                            if (abiOverride != null || hasLegacyRenderscriptBitcode) {
+                                pkg.applicationInfo.cpuAbi = abiList[0];
                             } else {
                                 pkg.applicationInfo.cpuAbi = null;
                             }
@@ -8777,9 +8789,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codeFile);
-            final String[] abiList = (abiOverride != null) ?
+            String[] abiList = (abiOverride != null) ?
                     new String[] { abiOverride } : Build.SUPPORTED_ABIS;
             try {
+                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
+                        abiOverride == null &&
+                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                    abiList = Build.SUPPORTED_32_BIT_ABIS;
+                }
+
                 int copyRet = copyNativeLibrariesForInternalApp(handle, nativeLibraryFile, abiList);
                 if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                     return copyRet;
