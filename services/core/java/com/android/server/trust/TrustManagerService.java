@@ -24,11 +24,14 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -81,6 +84,7 @@ public class TrustManagerService extends SystemService {
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
+    private final DevicePolicyReceiver mDevicePolicyReceiver = new DevicePolicyReceiver();
     private final Context mContext;
 
     private UserManager mUserManager;
@@ -105,8 +109,8 @@ public class TrustManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
-            // Listen for package changes
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
+            mDevicePolicyReceiver.register(mContext);
             refreshAgentList();
         }
     }
@@ -158,8 +162,13 @@ public class TrustManagerService extends SystemService {
         mObsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
+            int disabledFeatures = lockPatternUtils.getDevicePolicyManager()
+                    .getKeyguardDisabledFeatures(null, userInfo.id);
+            boolean disableTrustAgents =
+                    (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
+
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
-            if (enabledAgents == null) {
+            if (disableTrustAgents || enabledAgents == null) {
                 continue;
             }
             List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
@@ -384,4 +393,24 @@ public class TrustManagerService extends SystemService {
             return true;
         }
     };
+
+    private class DevicePolicyReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
+                    intent.getAction())) {
+                refreshAgentList();
+            }
+        }
+
+        public void register(Context context) {
+            context.registerReceiverAsUser(this,
+                    UserHandle.ALL,
+                    new IntentFilter(
+                            DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                    null /* permission */,
+                    null /* scheduler */);
+        }
+    }
 }
