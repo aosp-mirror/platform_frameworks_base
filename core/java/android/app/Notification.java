@@ -16,9 +16,6 @@
 
 package android.app;
 
-import com.android.internal.R;
-import com.android.internal.util.NotificationColorUtil;
-
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +37,9 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
+
+import com.android.internal.R;
+import com.android.internal.util.NotificationColorUtil;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -134,7 +134,7 @@ public class Notification implements Parcelable
      * leave it at its default value of 0.
      *
      * @see android.widget.ImageView#setImageLevel
-     * @see android.graphics.drawable#setLevel
+     * @see android.graphics.drawable.Drawable#setLevel
      */
     public int iconLevel;
 
@@ -700,10 +700,13 @@ public class Notification implements Parcelable
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
      * selected by the user.
      * <p>
-     * Apps should use {@link Builder#addAction(int, CharSequence, PendingIntent)} to create and
-     * attach actions.
+     * Apps should use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}
+     * or {@link Notification.Builder#addAction(Notification.Action)}
+     * to attach actions.
      */
     public static class Action implements Parcelable {
+        private final Bundle mExtras;
+
         /**
          * Small icon representing the action.
          */
@@ -717,22 +720,102 @@ public class Notification implements Parcelable
          * may be rendered in a disabled presentation by the system UI.
          */
         public PendingIntent actionIntent;
- 
-        private Action() { }
+
         private Action(Parcel in) {
             icon = in.readInt();
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             if (in.readInt() == 1) {
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
+            mExtras = in.readBundle();
         }
         /**
-         * Use {@link Builder#addAction(int, CharSequence, PendingIntent)}.
+         * Use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}.
          */
         public Action(int icon, CharSequence title, PendingIntent intent) {
+            this(icon, title, intent, new Bundle());
+        }
+
+        private Action(int icon, CharSequence title, PendingIntent intent, Bundle extras) {
             this.icon = icon;
             this.title = title;
             this.actionIntent = intent;
+            this.mExtras = extras != null ? extras : new Bundle();
+        }
+
+        /**
+         * Get additional metadata carried around with this Action.
+         */
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        /**
+         * Builder class for {@link Action} objects.
+         */
+        public static class Builder {
+            private final int mIcon;
+            private final CharSequence mTitle;
+            private final PendingIntent mIntent;
+            private final Bundle mExtras;
+
+            /**
+             * Construct a new builder for {@link Action} object.
+             * @param icon icon to show for this action
+             * @param title the title of the action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             */
+            public Builder(int icon, CharSequence title, PendingIntent intent) {
+                this(icon, title, intent, new Bundle());
+            }
+
+            /**
+             * Construct a new builder for {@link Action} object using the fields from an
+             * {@link Action}.
+             * @param action the action to read fields from.
+             */
+            public Builder(Action action) {
+                this(action.icon, action.title, action.actionIntent, new Bundle(action.mExtras));
+            }
+
+            private Builder(int icon, CharSequence title, PendingIntent intent, Bundle extras) {
+                mIcon = icon;
+                mTitle = title;
+                mIntent = intent;
+                mExtras = extras;
+            }
+
+            /**
+             * Merge additional metadata into this builder.
+             *
+             * <p>Values within the Bundle will replace existing extras values in this Builder.
+             *
+             * @see Notification.Action#extras
+             */
+            public Builder addExtras(Bundle extras) {
+                if (extras != null) {
+                    mExtras.putAll(extras);
+                }
+                return this;
+            }
+
+            /**
+             * Get the metadata Bundle used by this Builder.
+             *
+             * <p>The returned Bundle is shared with this Builder.
+             */
+            public Bundle getExtras() {
+                return mExtras;
+            }
+
+            /**
+             * Combine all of the options that have been set and return a new {@link Action}
+             * object.
+             * @return the built action
+             */
+            public Action build() {
+                return new Action(mIcon, mTitle, mIntent, mExtras);
+            }
         }
 
         @Override
@@ -740,8 +823,8 @@ public class Notification implements Parcelable
             return new Action(
                 this.icon,
                 this.title,
-                this.actionIntent // safe to alias
-            );
+                this.actionIntent, // safe to alias
+                new Bundle(this.mExtras));
         }
         @Override
         public int describeContents() {
@@ -757,9 +840,10 @@ public class Notification implements Parcelable
             } else {
                 out.writeInt(0);
             }
+            out.writeBundle(mExtras);
         }
-        public static final Parcelable.Creator<Action> CREATOR
-        = new Parcelable.Creator<Action>() {
+        public static final Parcelable.Creator<Action> CREATOR =
+                new Parcelable.Creator<Action>() {
             public Action createFromParcel(Parcel in) {
                 return new Action(in);
             }
@@ -1761,11 +1845,13 @@ public class Notification implements Parcelable
          *
          * @see Notification#extras
          */
-        public Builder addExtras(Bundle bag) {
-            if (mExtras == null) {
-                mExtras = new Bundle(bag);
-            } else {
-                mExtras.putAll(bag);
+        public Builder addExtras(Bundle extras) {
+            if (extras != null) {
+                if (mExtras == null) {
+                    mExtras = new Bundle(extras);
+                } else {
+                    mExtras.putAll(extras);
+                }
             }
             return this;
         }
@@ -1782,8 +1868,8 @@ public class Notification implements Parcelable
          *
          * @see Notification#extras
          */
-        public Builder setExtras(Bundle bag) {
-            mExtras = bag;
+        public Builder setExtras(Bundle extras) {
+            mExtras = extras;
             return this;
         }
 
@@ -1823,6 +1909,26 @@ public class Notification implements Parcelable
          */
         public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
             mActions.add(new Action(icon, safeCharSequence(title), intent));
+            return this;
+        }
+
+        /**
+         * Add an action to this notification. Actions are typically displayed by
+         * the system as a button adjacent to the notification content.
+         * <p>
+         * Every action must have an icon (32dp square and matching the
+         * <a href="{@docRoot}design/style/iconography.html#action-bar">Holo
+         * Dark action bar</a> visual style), a textual label, and a {@link PendingIntent}.
+         * <p>
+         * A notification in its expanded form can display up to 3 actions, from left to right in
+         * the order they were added. Actions will not be displayed when the notification is
+         * collapsed, however, so be sure that any essential functions may be accessed by the user
+         * in some other way (for example, in the Activity pointed to by {@link #contentIntent}).
+         *
+         * @param action The action to add.
+         */
+        public Builder addAction(Action action) {
+            mActions.add(action);
             return this;
         }
 
