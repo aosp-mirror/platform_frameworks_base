@@ -16,4 +16,4 @@
 
 package android.service.notification;
 
-parcelable NotificationOrderUpdate;
+parcelable NotificationRankingUpdate;

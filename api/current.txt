@@ -25589,20 +25589,24 @@ package android.service.notification {
     method public final deprecated void cancelNotification(java.lang.String, java.lang.String, int);
     method public final void cancelNotification(java.lang.String);
     method public final void cancelNotifications(java.lang.String[]);
+    method public java.lang.String[] getActiveNotificationKeys();
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
     method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[]);
-    method public java.lang.String[] getOrderedNotificationKeys();
+    method public android.service.notification.NotificationListenerService.Ranking getCurrentRanking();
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onListenerConnected(java.lang.String[]);
-    method public void onNotificationOrderUpdate();
     method public abstract void onNotificationPosted(android.service.notification.StatusBarNotification);
+    method public void onNotificationRankingUpdate();
     method public abstract void onNotificationRemoved(android.service.notification.StatusBarNotification);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationListenerService";
   }
 
-  public class NotificationOrderUpdate implements android.os.Parcelable {
-    ctor public NotificationOrderUpdate(android.os.Parcel);
+  public static class NotificationListenerService.Ranking implements android.os.Parcelable {
     method public int describeContents();
+    method public int getIndexOfKey(java.lang.String);
+    method public java.lang.String[] getOrderedKeys();
+    method public boolean isAmbient(java.lang.String);
+    method public boolean isInterceptedByDoNotDisturb(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }

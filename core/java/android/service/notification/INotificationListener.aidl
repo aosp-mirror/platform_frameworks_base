@@ -17,15 +17,15 @@
 package android.service.notification;
 
 import android.service.notification.StatusBarNotification;
-import android.service.notification.NotificationOrderUpdate;
+import android.service.notification.NotificationRankingUpdate;
 
 /** @hide */
 oneway interface INotificationListener
 {
-    void onListenerConnected(in NotificationOrderUpdate update);
+    void onListenerConnected(in NotificationRankingUpdate update);
     void onNotificationPosted(in StatusBarNotification notification,
-            in NotificationOrderUpdate update);
+            in NotificationRankingUpdate update);
     void onNotificationRemoved(in StatusBarNotification notification,
-            in NotificationOrderUpdate update);
-    void onNotificationOrderUpdate(in NotificationOrderUpdate update);
+            in NotificationRankingUpdate update);
+    void onNotificationRankingUpdate(in NotificationRankingUpdate update);
 }

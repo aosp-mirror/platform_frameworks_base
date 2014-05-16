@@ -24,12 +24,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * A service that receives calls from the system when new notifications are posted or removed.
+ * A service that receives calls from the system when new notifications are
+ * posted or removed, or their ranking changed.
  * <p>To extend this class, you must declare the service in your manifest file with
  * the {@link android.Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
@@ -48,7 +51,7 @@ public abstract class NotificationListenerService extends Service {
             + "[" + getClass().getSimpleName() + "]";
 
     private INotificationListenerWrapper mWrapper = null;
-    private String[] mNotificationKeys;
+    private Ranking mRanking;
 
     private INotificationManager mNoMan;
 
@@ -102,11 +105,11 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Implement this method to be notified when the notification order cahnges.
-     *
-     * Call {@link #getOrderedNotificationKeys()} to retrieve the new order.
+     * Implement this method to be notified when the notification ranking changes.
+     * <P>
+     * Call {@link #getCurrentRanking()} to retrieve the new ranking.
      */
-    public void onNotificationOrderUpdate() {
+    public void onNotificationRankingUpdate() {
         // optional
     }
 
@@ -224,6 +227,19 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Request the list of notification keys in their current ranking order.
+     * <p>
+     * You can use the notification keys for subsequent retrieval via
+     * {@link #getActiveNotifications(String[]) or dismissal via
+     * {@link #cancelNotifications(String[]).
+     *
+     * @return An array of active notification keys, in their ranking order.
+     */
+    public String[] getActiveNotificationKeys() {
+        return mRanking.getOrderedKeys();
+    }
+
+    /**
      * Request the list of outstanding notifications (that is, those that are visible to the
      * current user). Useful when you don't know what's already been posted.
      *
@@ -242,15 +258,20 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Request the list of notification keys in their current natural order.
-     * You can use the notification keys for subsequent retrieval via
-     * {@link #getActiveNotifications(String[]) or dismissal via
-     * {@link #cancelNotifications(String[]).
+     * Returns current ranking information.
      *
-     * @return An array of active notification keys, in their natural order.
+     * <p>
+     * The returned object represents the current ranking snapshot and only
+     * applies for currently active notifications. Hence you must retrieve a
+     * new Ranking after each notification event such as
+     * {@link #onNotificationPosted(StatusBarNotification)},
+     * {@link #onNotificationRemoved(StatusBarNotification)}, etc.
+     *
+     * @return A {@link NotificationListenerService.Ranking} object providing
+     *     access to ranking information
      */
-    public String[] getOrderedNotificationKeys() {
-        return mNotificationKeys;
+    public Ranking getCurrentRanking() {
+        return mRanking;
     }
 
     @Override
@@ -308,59 +329,163 @@ public abstract class NotificationListenerService extends Service {
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn,
-                NotificationOrderUpdate update) {
-            try {
-                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-                synchronized (mWrapper) {
-                    updateNotificationKeys(update);
+                NotificationRankingUpdate update) {
+            // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+            synchronized (mWrapper) {
+                applyUpdate(update);
+                try {
                     NotificationListenerService.this.onNotificationPosted(sbn);
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error running onNotificationPosted", t);
                 }
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onOrderedNotificationPosted", t);
             }
         }
         @Override
         public void onNotificationRemoved(StatusBarNotification sbn,
-                NotificationOrderUpdate update) {
-            try {
-                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-                synchronized (mWrapper) {
-                    updateNotificationKeys(update);
+                NotificationRankingUpdate update) {
+            // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+            synchronized (mWrapper) {
+                applyUpdate(update);
+                try {
                     NotificationListenerService.this.onNotificationRemoved(sbn);
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error running onNotificationRemoved", t);
                 }
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationRemoved", t);
             }
         }
         @Override
-        public void onListenerConnected(NotificationOrderUpdate update) {
-            try {
-                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-                synchronized (mWrapper) {
-                    updateNotificationKeys(update);
-                    NotificationListenerService.this.onListenerConnected(mNotificationKeys);
+        public void onListenerConnected(NotificationRankingUpdate update) {
+            // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+            synchronized (mWrapper) {
+                applyUpdate(update);
+                try {
+                    NotificationListenerService.this.onListenerConnected(
+                            mRanking.getOrderedKeys());
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error running onListenerConnected", t);
                 }
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onListenerConnected", t);
             }
         }
         @Override
-        public void onNotificationOrderUpdate(NotificationOrderUpdate update)
+        public void onNotificationRankingUpdate(NotificationRankingUpdate update)
                 throws RemoteException {
-            try {
-                // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-                synchronized (mWrapper) {
-                    updateNotificationKeys(update);
-                    NotificationListenerService.this.onNotificationOrderUpdate();
+            // protect subclass from concurrent modifications of (@link mNotificationKeys}.
+            synchronized (mWrapper) {
+                applyUpdate(update);
+                try {
+                    NotificationListenerService.this.onNotificationRankingUpdate();
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error running onNotificationRankingUpdate", t);
                 }
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationOrderUpdate", t);
             }
         }
     }
 
-    private void updateNotificationKeys(NotificationOrderUpdate update) {
-        // TODO: avoid garbage by comparing the lists
-        mNotificationKeys = update.getOrderedKeys();
+    private void applyUpdate(NotificationRankingUpdate update) {
+        mRanking = new Ranking(update);
+    }
+
+    /**
+     * Provides access to ranking information on currently active
+     * notifications.
+     *
+     * <p>
+     * Note that this object represents a ranking snapshot that only applies to
+     * notifications active at the time of retrieval.
+     */
+    public static class Ranking implements Parcelable {
+        private final NotificationRankingUpdate mRankingUpdate;
+
+        private Ranking(NotificationRankingUpdate rankingUpdate) {
+            mRankingUpdate = rankingUpdate;
+        }
+
+        /**
+         * Request the list of notification keys in their current ranking
+         * order.
+         *
+         * @return An array of active notification keys, in their ranking order.
+         */
+        public String[] getOrderedKeys() {
+            return mRankingUpdate.getOrderedKeys();
+        }
+
+        /**
+         * Returns the rank of the notification with the given key, that is the
+         * index of <code>key</code> in the array of keys returned by
+         * {@link #getOrderedKeys()}.
+         *
+         * @return The rank of the notification with the given key; -1 when the
+         *      given key is unknown.
+         */
+        public int getIndexOfKey(String key) {
+            // TODO: Optimize.
+            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
+            for (int i = 0; i < orderedKeys.length; i++) {
+                if (orderedKeys[i].equals(key)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /**
+         * Returns whether the notification with the given key was intercepted
+         * by &quot;Do not disturb&quot;.
+         */
+        public boolean isInterceptedByDoNotDisturb(String key) {
+            // TODO: Optimize.
+            for (String interceptedKey : mRankingUpdate.getDndInterceptedKeys()) {
+                if (interceptedKey.equals(key)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Returns whether the notification with the given key is an ambient
+         * notification, that is a notification that doesn't require the user's
+         * immediate attention.
+         */
+        public boolean isAmbient(String key) {
+            // TODO: Optimize.
+            int firstAmbientIndex = mRankingUpdate.getFirstAmbientIndex();
+            if (firstAmbientIndex < 0) {
+                return false;
+            }
+            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
+            for (int i = firstAmbientIndex; i < orderedKeys.length; i++) {
+                if (orderedKeys[i].equals(key)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ----------- Parcelable
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(mRankingUpdate, flags);
+        }
+
+        public static final Creator<Ranking> CREATOR = new Creator<Ranking>() {
+            @Override
+            public Ranking createFromParcel(Parcel source) {
+                NotificationRankingUpdate rankingUpdate = source.readParcelable(null);
+                return new Ranking(rankingUpdate);
+            }
+
+            @Override
+            public Ranking[] newArray(int size) {
+                return new Ranking[size];
+            }
+        };
     }
 }
