@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -44,6 +45,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private int mBgResId = R.drawable.notification_quantum_bg;
     private int mDimmedBgResId = R.drawable.notification_quantum_bg_dim;
+
+    private int mBgTint = 0;
+    private int mDimmedBgTint = 0;
 
     /**
      * Flag to indicate that the notification has been touched once and the second touch will
@@ -209,17 +213,23 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * @param bgResId The background resource to use in normal state.
      * @param dimmedBgResId The background resource to use in dimmed state.
      */
-    public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
+    public void setBackgroundResourceIds(int bgResId, int bgTint, int dimmedBgResId, int dimmedTint) {
         mBgResId = bgResId;
+        mBgTint = bgTint;
         mDimmedBgResId = dimmedBgResId;
+        mDimmedBgTint = dimmedTint;
         updateBackgroundResource();
+    }
+
+    public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
+        setBackgroundResourceIds(bgResId, 0, dimmedBgResId, 0);
     }
 
     private void fadeBackgroundResource() {
         if (mDimmed) {
-            setBackgroundDimmed(mDimmedBgResId);
+            setBackgroundDimmed(mDimmedBgResId, mDimmedBgTint);
         } else {
-            setBackgroundNormal(mBgResId);
+            setBackgroundNormal(mBgResId, mBgTint);
         }
         int startAlpha = mDimmed ? 255 : 0;
         int endAlpha = mDimmed ? 0 : 255;
@@ -256,12 +266,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateBackgroundResource() {
         if (mDimmed) {
-            setBackgroundDimmed(mDimmedBgResId);
+            setBackgroundDimmed(mDimmedBgResId, mDimmedBgTint);
             mBackgroundDimmed.setAlpha(255);
             setBackgroundNormal(null);
         } else {
             setBackgroundDimmed(null);
-            setBackgroundNormal(mBgResId);
+            setBackgroundNormal(mBgResId, mBgTint);
             mBackgroundNormal.setAlpha(255);
         }
     }
@@ -295,12 +305,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         invalidate();
     }
 
-    private void setBackgroundNormal(int drawableResId) {
-        setBackgroundNormal(getResources().getDrawable(drawableResId));
+    private void setBackgroundNormal(int drawableResId, int tintColor) {
+        final Drawable d = getResources().getDrawable(drawableResId);
+        if (tintColor != 0) {
+            d.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
+        }
+        setBackgroundNormal(d);
     }
 
-    private void setBackgroundDimmed(int drawableResId) {
-        setBackgroundDimmed(getResources().getDrawable(drawableResId));
+    private void setBackgroundDimmed(int drawableResId, int tintColor) {
+        final Drawable d = getResources().getDrawable(drawableResId);
+        if (tintColor != 0) {
+            d.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
+        }
+        setBackgroundDimmed(d);
     }
 
     @Override
