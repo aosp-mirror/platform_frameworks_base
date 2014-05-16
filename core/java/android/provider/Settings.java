@@ -769,6 +769,17 @@ public final class Settings {
     public static final String
             ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
 
+    /**
+     * Activity Action: Show Device Name Settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against ithis.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String DEVICE_NAME_SETTINGS = "android.settings.DEVICE_NAME";
+
     // End of Intent actions for Settings
 
     /**
