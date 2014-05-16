@@ -513,19 +513,18 @@ public class NotificationManagerService extends SystemService {
                     if (val == null) {
                         pw.println("null");
                     } else {
-                        pw.print(val.toString());
-                        if (val instanceof Bitmap) {
+                        pw.print(val.getClass().getSimpleName());
+                        if (val instanceof CharSequence || val instanceof String) {
+                            // redact contents from bugreports
+                        } else if (val instanceof Bitmap) {
                             pw.print(String.format(" (%dx%d)",
                                     ((Bitmap) val).getWidth(),
                                     ((Bitmap) val).getHeight()));
                         } else if (val.getClass().isArray()) {
-                            pw.println(" {");
                             final int N = Array.getLength(val);
-                            for (int i=0; i<N; i++) {
-                                if (i > 0) pw.println(",");
-                                pw.print(prefix + "      " + Array.get(val, i));
-                            }
-                            pw.print("\n" + prefix + "    }");
+                            pw.println(" (" + N + ")");
+                        } else {
+                            pw.print(" (" + String.valueOf(val) + ")");
                         }
                         pw.println();
                     }
