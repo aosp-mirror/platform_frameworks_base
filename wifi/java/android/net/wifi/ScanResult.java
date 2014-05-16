@@ -81,6 +81,7 @@ public class ScanResult implements Parcelable {
     /**
      * Passpoint ANQP information. This is not fetched automatically.
      * Use {@link PasspointManager#requestAnqpInfo} to request ANQP info.
+     * {@hide}
      */
     public PasspointInfo passpoint;
 
