@@ -409,7 +409,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /**
      * used to remove a network request, either a listener or a real request
-     * includes a NetworkRequest
+     * arg1 = UID of caller
+     * obj  = NetworkRequest
      */
     private static final int EVENT_RELEASE_NETWORK_REQUEST = 22;
 
@@ -3333,10 +3334,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void handleReleaseNetworkRequest(NetworkRequest request) {
-        if (DBG) log("releasing NetworkRequest " + request);
-        NetworkRequestInfo nri = mNetworkRequests.remove(request);
+    private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
+        NetworkRequestInfo nri = mNetworkRequests.get(request);
         if (nri != null) {
+            if (nri.mUid != callingUid) {
+                if (DBG) log("Attempt to release unowned NetworkRequest " + request);
+                return;
+            }
+            if (DBG) log("releasing NetworkRequest " + request);
+            mNetworkRequests.remove(request);
             // tell the network currently servicing this that it's no longer interested
             NetworkAgentInfo affectedNetwork = mNetworkForRequestId.get(nri.request.requestId);
             if (affectedNetwork != null) {
@@ -3482,7 +3488,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST: {
-                    handleReleaseNetworkRequest((NetworkRequest) msg.obj);
+                    handleReleaseNetworkRequest((NetworkRequest) msg.obj, msg.arg1);
                     break;
                 }
             }
@@ -5460,8 +5466,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public void releaseNetworkRequest(NetworkRequest networkRequest) {
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST,
-                networkRequest));
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST, getCallingUid(),
+                0, networkRequest));
     }
 
     @Override
