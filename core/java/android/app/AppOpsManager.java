@@ -451,13 +451,13 @@ public class AppOpsManager {
             null, //WRITE_CLIPBOARD
             null, //TAKE_MEDIA_BUTTONS
             null, //TAKE_AUDIO_FOCUS
-            null, //AUDIO_MASTER_VOLUME
-            null, //AUDIO_VOICE_VOLUME
-            null, //AUDIO_RING_VOLUME
-            null, //AUDIO_MEDIA_VOLUME
-            null, //AUDIO_ALARM_VOLUME
-            null, //AUDIO_NOTIFICATION_VOLUME
-            null, //AUDIO_BLUETOOTH_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MASTER_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_VOICE_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_RING_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MEDIA_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ALARM_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_NOTIFICATION_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_BLUETOOTH_VOLUME
             null, //WAKE_LOCK
             null, //MONITOR_LOCATION
             null, //MONITOR_HIGH_POWER_LOCATION
