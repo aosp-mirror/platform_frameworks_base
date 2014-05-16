@@ -666,6 +666,8 @@ public class Switch extends CompoundButton {
             case MotionEvent.ACTION_CANCEL: {
                 if (mTouchMode == TOUCH_MODE_DRAGGING) {
                     stopDrag(ev);
+                    // Allow super class to handle pressed state, etc.
+                    super.onTouchEvent(ev);
                     return true;
                 }
                 mTouchMode = TOUCH_MODE_IDLE;
@@ -801,7 +803,7 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    public void draw(Canvas c) {
         final Rect tempRect = mTempRect;
         final Drawable trackDrawable = mTrackDrawable;
         final Drawable thumbDrawable = mThumbDrawable;
@@ -815,9 +817,6 @@ public class Switch extends CompoundButton {
         trackDrawable.getPadding(tempRect);
 
         final int switchInnerLeft = switchLeft + tempRect.left;
-        final int switchInnerTop = switchTop + tempRect.top;
-        final int switchInnerRight = switchRight - tempRect.right;
-        final int switchInnerBottom = switchBottom - tempRect.bottom;
 
         // Relies on mTempRect, MUST be called first!
         final int thumbPos = getThumbOffset();
@@ -833,7 +832,25 @@ public class Switch extends CompoundButton {
             background.setHotspotBounds(thumbLeft, switchTop, thumbRight, switchBottom);
         }
 
+        // Draw the background.
+        super.draw(c);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        final Rect tempRect = mTempRect;
+        final Drawable trackDrawable = mTrackDrawable;
+        final Drawable thumbDrawable = mThumbDrawable;
+        trackDrawable.getPadding(tempRect);
+
+        final int switchTop = mSwitchTop;
+        final int switchBottom = mSwitchBottom;
+        final int switchInnerLeft = mSwitchLeft + tempRect.left;
+        final int switchInnerTop = switchTop + tempRect.top;
+        final int switchInnerRight = mSwitchRight - tempRect.right;
+        final int switchInnerBottom = switchBottom - tempRect.bottom;
 
         if (mSplitTrack) {
             final Insets insets = thumbDrawable.getOpticalInsets();
@@ -861,7 +878,8 @@ public class Switch extends CompoundButton {
             }
             mTextPaint.drawableState = drawableState;
 
-            final int left = (thumbLeft + thumbRight) / 2 - switchText.getWidth() / 2;
+            final Rect thumbBounds = thumbDrawable.getBounds();
+            final int left = (thumbBounds.left + thumbBounds.right) / 2 - switchText.getWidth() / 2;
             final int top = (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2;
             canvas.translate(left, top);
             switchText.draw(canvas);

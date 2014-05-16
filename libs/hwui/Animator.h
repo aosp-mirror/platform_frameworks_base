@@ -44,6 +44,8 @@ public:
     ANDROID_API void setInterpolator(Interpolator* interpolator);
     ANDROID_API void setDuration(nsecs_t durationInMs);
     ANDROID_API nsecs_t duration() { return mDuration; }
+    ANDROID_API void setStartDelay(nsecs_t startDelayInMs);
+    ANDROID_API nsecs_t startDelay() { return mStartDelay; }
     ANDROID_API void setListener(AnimationListener* listener) {
         mListener = listener;
     }
@@ -82,10 +84,12 @@ private:
 
     Interpolator* mInterpolator;
     PlayState mPlayState;
-    long mStartTime;
-    long mDuration;
+    nsecs_t mStartTime;
+    nsecs_t mDelayUntil;
+    nsecs_t mDuration;
+    nsecs_t mStartDelay;
 
-   sp<AnimationListener> mListener;
+    sp<AnimationListener> mListener;
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {

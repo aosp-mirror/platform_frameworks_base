@@ -116,15 +116,26 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
     return reinterpret_cast<jlong>( animator );
 }
 
-static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jint duration) {
+static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong duration) {
     LOG_ALWAYS_FATAL_IF(duration < 0, "Duration cannot be negative");
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     animator->setDuration(duration);
 }
 
-static jint getDuration(JNIEnv* env, jobject clazz, jlong animatorPtr) {
+static jlong getDuration(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
-    return static_cast<jint>(animator->duration());
+    return static_cast<jlong>(animator->duration());
+}
+
+static void setStartDelay(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong startDelay) {
+    LOG_ALWAYS_FATAL_IF(startDelay < 0, "Start delay cannot be negative");
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
+    animator->setStartDelay(startDelay);
+}
+
+static jlong getStartDelay(JNIEnv* env, jobject clazz, jlong animatorPtr) {
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
+    return static_cast<jlong>(animator->startDelay());
 }
 
 static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong interpolatorPtr) {
@@ -146,8 +157,10 @@ static JNINativeMethod gMethods[] = {
     { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyPaintAnimator },
-    { "nSetDuration", "(JI)V", (void*) setDuration },
-    { "nGetDuration", "(J)I", (void*) getDuration },
+    { "nSetDuration", "(JJ)V", (void*) setDuration },
+    { "nGetDuration", "(J)J", (void*) getDuration },
+    { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },
+    { "nGetStartDelay", "(J)J", (void*) getStartDelay },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
 #endif
 };

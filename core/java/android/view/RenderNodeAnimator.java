@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
@@ -28,12 +29,12 @@ import com.android.internal.view.animation.HasNativeInterpolator;
 import com.android.internal.view.animation.NativeInterpolatorFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * @hide
  */
-public final class RenderNodeAnimator {
-
+public final class RenderNodeAnimator extends Animator {
     // Keep in sync with enum RenderProperty in Animator.h
     public static final int TRANSLATION_X = 0;
     public static final int TRANSLATION_Y = 1;
@@ -50,6 +51,11 @@ public final class RenderNodeAnimator {
 
     // Keep in sync with enum PaintFields in Animator.h
     public static final int PAINT_STROKE_WIDTH = 0;
+
+    /**
+     * Field for the Paint alpha channel, which should be specified as a value
+     * between 0 and 255.
+     */
     public static final int PAINT_ALPHA = 1;
 
     // ViewPropertyAnimator uses a mask for its values, we need to remap them
@@ -74,8 +80,11 @@ public final class RenderNodeAnimator {
     private VirtualRefBasePtr mNativePtr;
 
     private RenderNode mTarget;
+    private View mViewTarget;
     private TimeInterpolator mInterpolator;
+
     private boolean mStarted = false;
+    private boolean mFinished = false;
 
     public int mapViewPropertyToRenderProperty(int viewProperty) {
         return sViewPropertyAnimatorMap.get(viewProperty);
@@ -92,6 +101,14 @@ public final class RenderNodeAnimator {
                 property.getNativeContainer(), finalValue));
     }
 
+    /**
+     * Creates a new render node animator for a field on a Paint property.
+     *
+     * @param property The paint property to target
+     * @param paintField Paint field to animate, one of {@link #PAINT_ALPHA} or
+     *            {@link #PAINT_STROKE_WIDTH}
+     * @param finalValue The target value for the property
+     */
     public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField, float finalValue) {
         init(nCreateCanvasPropertyPaintAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
@@ -115,56 +132,139 @@ public final class RenderNodeAnimator {
         if (mInterpolator.getClass().isAnnotationPresent(HasNativeInterpolator.class)) {
             ni = ((NativeInterpolatorFactory)mInterpolator).createNativeInterpolator();
         } else {
-            int duration = nGetDuration(mNativePtr.get());
+            long duration = nGetDuration(mNativePtr.get());
             ni = FallbackLUTInterpolator.createNativeInterpolator(mInterpolator, duration);
         }
         nSetInterpolator(mNativePtr.get(), ni);
     }
 
-    private void start(RenderNode node) {
+    @Override
+    public void start() {
+        if (mTarget == null) {
+            throw new IllegalStateException("Missing target!");
+        }
+
         if (mStarted) {
             throw new IllegalStateException("Already started!");
         }
+
         mStarted = true;
         applyInterpolator();
-        mTarget = node;
         mTarget.addAnimator(this);
+
+        final ArrayList<AnimatorListener> listeners = getListeners();
+        final int numListeners = listeners == null ? 0 : listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            listeners.get(i).onAnimationStart(this);
+        }
+
+        if (mViewTarget != null) {
+            // Kick off a frame to start the process
+            mViewTarget.invalidateViewProperty(true, false);
+        }
     }
 
-    public void start(View target) {
-        start(target.mRenderNode);
-        // Kick off a frame to start the process
-        target.invalidateViewProperty(true, false);
+    @Override
+    public void cancel() {
+        mTarget.removeAnimator(this);
+
+        final ArrayList<AnimatorListener> listeners = getListeners();
+        final int numListeners = listeners == null ? 0 : listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            listeners.get(i).onAnimationCancel(this);
+        }
     }
 
-    public void start(Canvas canvas) {
+    @Override
+    public void end() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void pause() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void resume() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setTarget(View view) {
+        mViewTarget = view;
+        mTarget = view.mRenderNode;
+    }
+
+    public void setTarget(Canvas canvas) {
         if (!(canvas instanceof GLES20RecordingCanvas)) {
             throw new IllegalArgumentException("Not a GLES20RecordingCanvas");
         }
-        GLES20RecordingCanvas recordingCanvas = (GLES20RecordingCanvas) canvas;
-        start(recordingCanvas.mNode);
+
+        final GLES20RecordingCanvas recordingCanvas = (GLES20RecordingCanvas) canvas;
+        setTarget(recordingCanvas.mNode);
     }
 
-    public void cancel() {
-        mTarget.removeAnimator(this);
+    public void setTarget(RenderNode node) {
+        mViewTarget = null;
+        mTarget = node;
     }
 
-    public void setDuration(int duration) {
+    public RenderNode getTarget() {
+        return mTarget;
+    }
+
+    @Override
+    public void setStartDelay(long startDelay) {
+        checkMutable();
+        nSetStartDelay(mNativePtr.get(), startDelay);
+    }
+
+    @Override
+    public long getStartDelay() {
+        return nGetStartDelay(mNativePtr.get());
+    }
+
+    @Override
+    public RenderNodeAnimator setDuration(long duration) {
         checkMutable();
         nSetDuration(mNativePtr.get(), duration);
+        return this;
     }
 
+    @Override
+    public long getDuration() {
+        return nGetDuration(mNativePtr.get());
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mStarted && !mFinished;
+    }
+
+    @Override
     public void setInterpolator(TimeInterpolator interpolator) {
         checkMutable();
         mInterpolator = interpolator;
     }
 
-    long getNativeAnimator() {
-        return mNativePtr.get();
+    @Override
+    public TimeInterpolator getInterpolator() {
+        return mInterpolator;
     }
 
     private void onFinished() {
+        mFinished = true;
         mTarget.removeAnimator(this);
+
+        final ArrayList<AnimatorListener> listeners = getListeners();
+        final int numListeners = listeners == null ? 0 : listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            listeners.get(i).onAnimationEnd(this);
+        }
+    }
+
+    long getNativeAnimator() {
+        return mNativePtr.get();
     }
 
     // Called by native
@@ -181,7 +281,9 @@ public final class RenderNodeAnimator {
             long canvasProperty, float deltaValue);
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
             long canvasProperty, int paintField, float deltaValue);
-    private static native void nSetDuration(long nativePtr, int duration);
-    private static native int nGetDuration(long nativePtr);
+    private static native void nSetDuration(long nativePtr, long duration);
+    private static native long nGetDuration(long nativePtr);
+    private static native void nSetStartDelay(long nativePtr, long startDelay);
+    private static native long nGetStartDelay(long nativePtr);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
 }

@@ -4774,8 +4774,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, this);
             }
 
-            manageFocusHotspot(true, oldFocus);
             onFocusChanged(true, direction, previouslyFocusedRect);
+            manageFocusHotspot(true, oldFocus);
             refreshDrawableState();
         }
     }
@@ -6752,6 +6752,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets the pressed state for this view and provides a touch coordinate for
+     * animation hinting.
+     *
+     * @param pressed Pass true to set the View's internal state to "pressed",
+     *            or false to reverts the View's internal state from a
+     *            previously set "pressed" state.
+     * @param x The x coordinate of the touch that caused the press
+     * @param y The y coordinate of the touch that caused the press
+     */
+    private void setPressed(boolean pressed, float x, float y) {
+        if (pressed) {
+            setHotspot(R.attr.state_pressed, x, y);
+        }
+
+        setPressed(pressed);
+    }
+
+    /**
      * Sets the pressed state for this view.
      *
      * @see #isClickable()
@@ -6767,6 +6785,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_PRESSED;
         } else {
             mPrivateFlags &= ~PFLAG_PRESSED;
+        }
+
+        if (!pressed) {
+            clearHotspot(R.attr.state_pressed);
         }
 
         if (needsRefresh) {
@@ -8993,7 +9015,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             if (event.getAction() == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
-                clearHotspot(R.attr.state_pressed);
                 setPressed(false);
             }
             // A disabled view that is clickable still consumes the touch
@@ -9026,8 +9047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             // showed it as pressed.  Make it show the pressed
                             // state now (before scheduling the click) to ensure
                             // the user sees it.
-                            setHotspot(R.attr.state_pressed, x, y);
-                            setPressed(true);
+                            setPressed(true, x, y);
                        }
 
                         if (!mHasPerformedLongPress) {
@@ -9061,8 +9081,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         }
 
                         removeTapCallback();
-                    } else {
-                        clearHotspot(R.attr.state_pressed);
                     }
                     break;
 
@@ -9175,7 +9193,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void removeUnsetPressCallback() {
         if ((mPrivateFlags & PFLAG_PRESSED) != 0 && mUnsetPressedState != null) {
-            clearHotspot(R.attr.state_pressed);
             setPressed(false);
             removeCallbacks(mUnsetPressedState);
         }
@@ -19234,8 +19251,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @Override
         public void run() {
             mPrivateFlags &= ~PFLAG_PREPRESSED;
-            setHotspot(R.attr.state_pressed, x, y);
-            setPressed(true);
+            setPressed(true, x, y);
             checkForLongClick(ViewConfiguration.getTapTimeout());
         }
     }
@@ -19516,7 +19532,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private final class UnsetPressedState implements Runnable {
         @Override
         public void run() {
-            clearHotspot(R.attr.state_pressed);
             setPressed(false);
         }
     }

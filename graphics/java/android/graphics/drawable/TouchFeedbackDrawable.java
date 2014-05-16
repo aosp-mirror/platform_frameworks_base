@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -33,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.org.bouncycastle.util.Arrays;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,11 +42,36 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * Documentation pending.
+ * Drawable that shows a ripple effect in response to state changes. The
+ * anchoring position of the ripple for a given state may be specified by
+ * calling {@link #setHotspot(int, float, float)} with the corresponding state
+ * attribute identifier.
+ * <p>
+ * A touch feedback drawable may contain multiple child layers, including a
+ * special mask layer that is not drawn to the screen. A single layer may be set
+ * as the mask by specifying its android:id value as {@link android.R.id#mask}.
+ * <p>
+ * If a mask layer is set, the ripple effect will be masked against that layer
+ * before it is blended onto the composite of the remaining child layers.
+ * <p>
+ * If no mask layer is set, the ripple effect is simply blended onto the
+ * composite of the child layers using the specified
+ * {@link android.R.styleable#TouchFeedbackDrawable_tintMode}.
+ * <p>
+ * If no child layers or mask is specified and the ripple is set as a View
+ * background, the ripple will be blended onto the first available parent
+ * background within the View's hierarchy using the specified
+ * {@link android.R.styleable#TouchFeedbackDrawable_tintMode}. In this case, the
+ * drawing region may extend outside of the Drawable bounds.
+ *
+ * @attr ref android.R.styleable#DrawableStates_state_focused
+ * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class TouchFeedbackDrawable extends LayerDrawable {
     private static final String LOG_TAG = TouchFeedbackDrawable.class.getSimpleName();
     private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
+    private static final PorterDuffXfermode DST_ATOP = new PorterDuffXfermode(Mode.DST_ATOP);
+    private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
     private static final PorterDuffXfermode SRC_OVER = new PorterDuffXfermode(Mode.SRC_OVER);
 
     /** The maximum number of ripples supported. */
@@ -63,10 +90,22 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     private final TouchFeedbackState mState;
 
-    /** Lazily-created map of touch hotspot IDs to ripples. */
-    private SparseArray<Ripple> mRipples;
+    /**
+     * Lazily-created map of pending hotspot locations. These may be modified by
+     * calls to {@link #setHotspot(int, float, float)}.
+     */
+    private SparseArray<PointF> mPendingHotspots;
 
-    /** Lazily-created array of actively animating ripples. */
+    /**
+     * Lazily-created map of active hotspot locations. These may be modified by
+     * calls to {@link #setHotspot(int, float, float)}.
+     */
+    private SparseArray<Ripple> mActiveHotspots;
+
+    /**
+     * Lazily-created array of actively animating ripples. Inactive ripples are
+     * pruned during draw(). The locations of these will not change.
+     */
     private Ripple[] mAnimatingRipples;
     private int mAnimatingRipplesCount = 0;
 
@@ -96,24 +135,18 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     protected boolean onStateChange(int[] stateSet) {
         super.onStateChange(stateSet);
 
-        // TODO: Implicitly tie states to ripple IDs. For now, just clear
-        // focused and pressed if they aren't in the state set.
-        boolean hasFocused = false;
-        boolean hasPressed = false;
-        for (int i = 0; i < stateSet.length; i++) {
-            if (stateSet[i] == R.attr.state_pressed) {
-                hasPressed = true;
-            } else if (stateSet[i] == R.attr.state_focused) {
-                hasFocused = true;
-            }
-        }
-
-        if (!hasPressed) {
+        final boolean pressed = Arrays.contains(stateSet, R.attr.state_pressed);
+        if (!pressed) {
             removeHotspot(R.attr.state_pressed);
+        } else {
+            activateHotspot(R.attr.state_pressed);
         }
 
-        if (!hasFocused) {
+        final boolean focused = Arrays.contains(stateSet, R.attr.state_focused);
+        if (!focused) {
             removeHotspot(R.attr.state_focused);
+        } else {
+            activateHotspot(R.attr.state_focused);
         }
 
         if (mRipplePaint != null && mState.mTint != null) {
@@ -138,19 +171,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
             mHotspotBounds.set(bounds);
         }
 
-        onHotspotBoundsChange();
-    }
-
-    private void onHotspotBoundsChange() {
-        final int x = mHotspotBounds.centerX();
-        final int y = mHotspotBounds.centerY();
-        final int N = mAnimatingRipplesCount;
-        for (int i = 0; i < N; i++) {
-            if (mState.mPinned) {
-                mAnimatingRipples[i].move(x, y);
-            }
-            mAnimatingRipples[i].onBoundsChanged();
-        }
+        invalidateSelf();
     }
 
     @Override
@@ -172,7 +193,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public boolean isStateful() {
-        return super.isStateful() || mState.mTint != null && mState.mTint.isStateful();
+        return true;
     }
 
     /**
@@ -213,7 +234,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(
                 r, theme, attrs, R.styleable.TouchFeedbackDrawable);
-        inflateStateFromTypedArray(a);
+        updateStateFromTypedArray(a);
         a.recycle();
 
         super.inflate(r, parser, attrs, theme);
@@ -245,25 +266,23 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     /**
      * Initializes the constant state from the values in the typed array.
      */
-    private void inflateStateFromTypedArray(TypedArray a) {
+    private void updateStateFromTypedArray(TypedArray a) {
         final TouchFeedbackState state = mState;
 
         // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        state.mTouchThemeAttrs = themeAttrs;
+        state.mTouchThemeAttrs = a.extractThemeAttrs();
 
-        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tint] == 0) {
-            mState.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
+        final ColorStateList tint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
+        if (tint != null) {
+            mState.mTint = tint;
         }
 
-        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_tintMode] == 0) {
-            mState.setTintMode(Drawable.parseTintMode(
-                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP));
+        final int tintMode = a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1);
+        if (tintMode != -1) {
+            mState.setTintMode(Drawable.parseTintMode(tintMode, Mode.SRC_ATOP));
         }
 
-        if (themeAttrs == null || themeAttrs[R.styleable.TouchFeedbackDrawable_pinned] == 0) {
-            mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
-        }
+        mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, mState.mPinned);
     }
 
     /**
@@ -283,38 +302,14 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         super.applyTheme(t);
 
         final TouchFeedbackState state = mState;
-        if (state == null) {
-            throw new RuntimeException(
-                    "Can't apply theme to <touch-feedback> with no constant state");
+        if (state == null || state.mTouchThemeAttrs == null) {
+            return;
         }
 
-        final int[] themeAttrs = state.mTouchThemeAttrs;
-        if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(
-                    themeAttrs, R.styleable.TouchFeedbackDrawable);
-            updateStateFromTypedArray(a);
-            a.recycle();
-        }
-    }
-
-    /**
-     * Updates the constant state from the values in the typed array.
-     */
-    private void updateStateFromTypedArray(TypedArray a) {
-        final TouchFeedbackState state = mState;
-
-        if (a.hasValue(R.styleable.TouchFeedbackDrawable_tint)) {
-            state.mTint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
-        }
-
-        if (a.hasValue(R.styleable.TouchFeedbackDrawable_tintMode)) {
-            mState.setTintMode(Drawable.parseTintMode(
-                    a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1), Mode.SRC_ATOP));
-        }
-
-        if (a.hasValue(R.styleable.TouchFeedbackDrawable_pinned)) {
-            mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, false);
-        }
+        final TypedArray a = t.resolveAttributes(state.mTouchThemeAttrs,
+                R.styleable.TouchFeedbackDrawable);
+        updateStateFromTypedArray(a);
+        a.recycle();
     }
 
     @Override
@@ -329,59 +324,123 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     @Override
     public void setHotspot(int id, float x, float y) {
-        if (mRipples == null) {
-            mRipples = new SparseArray<Ripple>();
-            mAnimatingRipples = new Ripple[MAX_RIPPLES];
+        if (mState.mPinned && !circleContains(mHotspotBounds, x, y)) {
+            x = mHotspotBounds.exactCenterX();
+            y = mHotspotBounds.exactCenterY();
         }
 
-        if (mAnimatingRipplesCount >= MAX_RIPPLES) {
-            Log.e(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
+        final int[] stateSet = getState();
+        if (!Arrays.contains(stateSet, id)) {
+            // The hotspot is not active, so just modify the pending location.
+            getOrCreatePendingHotspot(id).set(x, y);
             return;
         }
 
-        final Ripple ripple = mRipples.get(id);
-        if (ripple == null) {
-            final Rect bounds = mHotspotBounds;
-            if (mState.mPinned) {
-                x = bounds.exactCenterX();
-                y = bounds.exactCenterY();
-            }
-
-            // TODO: Clean this up in the API.
-            final boolean pulse = (id != R.attr.state_focused);
-            final Ripple newRipple = new Ripple(this, bounds, mDensity, pulse);
-            newRipple.move(x, y);
-
-            mAnimatingRipples[mAnimatingRipplesCount++] = newRipple;
-            mRipples.put(id, newRipple);
-        } else if (mState.mPinned) {
-            final Rect bounds = mHotspotBounds;
-            x = bounds.exactCenterX();
-            y = bounds.exactCenterY();
-            ripple.move(x, y);
-        } else {
-            ripple.move(x, y);
+        if (mAnimatingRipplesCount >= MAX_RIPPLES) {
+            // This should never happen unless the user is tapping like a maniac
+            // or there is a bug that's preventing ripples from being removed.
+            Log.d(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
+            return;
         }
+
+        if (mActiveHotspots == null) {
+            mActiveHotspots = new SparseArray<Ripple>();
+            mAnimatingRipples = new Ripple[MAX_RIPPLES];
+        }
+
+        final Ripple ripple = mActiveHotspots.get(id);
+        if (ripple != null) {
+            // The hotspot is active, but we can't move it because it's probably
+            // busy animating the center position.
+            return;
+        }
+
+        // The hotspot needs to be made active.
+        createActiveHotspot(id, x, y);
+    }
+
+    private boolean circleContains(Rect bounds, float x, float y) {
+        final float pX = bounds.exactCenterX() - x;
+        final float pY = bounds.exactCenterY() - y;
+        final double pointRadius = Math.sqrt(pX * pX + pY * pY);
+
+        final float bX = bounds.width() / 2.0f;
+        final float bY = bounds.height() / 2.0f;
+        final double boundsRadius = Math.sqrt(bX * bX + bY * bY);
+
+        return pointRadius < boundsRadius;
+    }
+
+    private PointF getOrCreatePendingHotspot(int id) {
+        final PointF p;
+        if (mPendingHotspots == null) {
+            mPendingHotspots = new SparseArray<>(2);
+            p = null;
+        } else {
+            p = mPendingHotspots.get(id);
+        }
+
+        if (p == null) {
+            final PointF newPoint = new PointF();
+            mPendingHotspots.put(id, newPoint);
+            return newPoint;
+        } else {
+            return p;
+        }
+    }
+
+    /**
+     * Moves a hotspot from pending to active.
+     */
+    private void activateHotspot(int id) {
+        final SparseArray<PointF> pendingHotspots = mPendingHotspots;
+        if (pendingHotspots != null) {
+            final int index = pendingHotspots.indexOfKey(id);
+            if (index >= 0) {
+                final PointF hotspot = pendingHotspots.valueAt(index);
+                pendingHotspots.removeAt(index);
+                createActiveHotspot(id, hotspot.x, hotspot.y);
+            }
+        }
+    }
+
+    /**
+     * Creates an active hotspot at the specified location.
+     */
+    private void createActiveHotspot(int id, float x, float y) {
+        final int color = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+        final Ripple newRipple = new Ripple(this, mHotspotBounds, color);
+        newRipple.enter(x, y);
+
+        if (mAnimatingRipples == null) {
+            mAnimatingRipples = new Ripple[MAX_RIPPLES];
+        }
+        mAnimatingRipples[mAnimatingRipplesCount++] = newRipple;
+
+        if (mActiveHotspots == null) {
+            mActiveHotspots = new SparseArray<Ripple>();
+        }
+        mActiveHotspots.put(id, newRipple);
     }
 
     @Override
     public void removeHotspot(int id) {
-        if (mRipples == null) {
+        if (mActiveHotspots == null) {
             return;
         }
 
-        final Ripple ripple = mRipples.get(id);
+        final Ripple ripple = mActiveHotspots.get(id);
         if (ripple != null) {
             ripple.exit();
 
-            mRipples.remove(id);
+            mActiveHotspots.remove(id);
         }
     }
 
     @Override
     public void clearHotspots() {
-        if (mRipples != null) {
-            mRipples.clear();
+        if (mActiveHotspots != null) {
+            mActiveHotspots.clear();
         }
 
         final int count = mAnimatingRipplesCount;
@@ -402,7 +461,6 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     public void setHotspotBounds(int left, int top, int right, int bottom) {
         mOverrideBounds = true;
         mHotspotBounds.set(left, top, right, bottom);
-        onHotspotBoundsChange();
     }
 
     @Override
@@ -412,9 +470,9 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         final ChildDrawable[] array = mLayerState.mChildren;
         final boolean maskOnly = mState.mMask != null && N == 1;
 
-        int restoreToCount = drawRippleLayer(canvas, bounds, maskOnly);
+        int restoreToCount = drawRippleLayer(canvas, maskOnly);
 
-        if (restoreToCount >= 0) { 
+        if (restoreToCount >= 0) {
             // We have a ripple layer that contains ripples. If we also have an
             // explicit mask drawable, apply it now using DST_IN blending.
             if (mState.mMask != null) {
@@ -450,7 +508,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
     }
 
-    private int drawRippleLayer(Canvas canvas, Rect bounds, boolean maskOnly) {
+    private int drawRippleLayer(Canvas canvas, boolean maskOnly) {
         final int count = mAnimatingRipplesCount;
         if (count == 0) {
             return -1;
@@ -458,7 +516,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
         final Ripple[] ripples = mAnimatingRipples;
         final boolean projected = isProjected();
-        final Rect layerBounds = projected ? getDirtyBounds() : bounds;
+        final Rect layerBounds = projected ? getDirtyBounds() : getBounds();
 
         // Separate the ripple color and alpha channel. The alpha will be
         // applied when we merge the ripples down to the canvas.
@@ -479,6 +537,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
         boolean drewRipples = false;
         int restoreToCount = -1;
+        int restoreTranslate = -1;
         int animatingCount = 0;
 
         // Draw ripples and update the animating ripples array.
@@ -509,6 +568,10 @@ public class TouchFeedbackDrawable extends LayerDrawable {
                 restoreToCount = canvas.saveLayer(layerBounds.left, layerBounds.top,
                         layerBounds.right, layerBounds.bottom, layerPaint);
                 layerPaint.setAlpha(255);
+
+                restoreTranslate = canvas.save();
+                // Translate the canvas to the current hotspot bounds.
+                canvas.translate(mHotspotBounds.exactCenterX(), mHotspotBounds.exactCenterY());
             }
 
             drewRipples |= ripple.draw(canvas, ripplePaint);
@@ -518,6 +581,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
 
         mAnimatingRipplesCount = animatingCount;
+
+        // Always restore the translation.
+        if (restoreTranslate >= 0) {
+            canvas.restoreToCount(restoreTranslate);
+        }
 
         // If we created a layer with no content, merge it immediately.
         if (restoreToCount >= 0 && !drewRipples) {
@@ -543,11 +611,14 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         dirtyBounds.set(drawingBounds);
         drawingBounds.setEmpty();
 
+        final int cX = (int) mHotspotBounds.exactCenterX();
+        final int cY = (int) mHotspotBounds.exactCenterY();
         final Rect rippleBounds = mTempRect;
         final Ripple[] activeRipples = mAnimatingRipples;
         final int N = mAnimatingRipplesCount;
         for (int i = 0; i < N; i++) {
             activeRipples[i].getBounds(rippleBounds);
+            rippleBounds.offset(cX, cY);
             drawingBounds.union(rippleBounds);
         }
 
@@ -563,11 +634,11 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
     static class TouchFeedbackState extends LayerState {
         int[] mTouchThemeAttrs;
-        ColorStateList mTint;
-        PorterDuffXfermode mTintXfermode;
-        PorterDuffXfermode mTintXfermodeInverse;
+        ColorStateList mTint = null;
+        PorterDuffXfermode mTintXfermode = SRC_ATOP;
+        PorterDuffXfermode mTintXfermodeInverse = DST_ATOP;
         Drawable mMask;
-        boolean mPinned;
+        boolean mPinned = false;
 
         public TouchFeedbackState(
                 TouchFeedbackState orig, TouchFeedbackDrawable owner, Resources res) {
