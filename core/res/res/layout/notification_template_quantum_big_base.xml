@@ -23,10 +23,9 @@
     internal:layout_minHeight="65dp"
     internal:layout_maxHeight="unbounded"
     >
-    <ImageView android:id="@+id/icon"
+    <include layout="@layout/notification_template_icon_group"
         android:layout_width="@dimen/notification_large_icon_width"
         android:layout_height="@dimen/notification_large_icon_height"
-        android:scaleType="center"
         />
     <LinearLayout
         android:layout_width="match_parent"
@@ -127,16 +126,6 @@
                     android:singleLine="true"
                     android:gravity="center"
                     android:paddingStart="8dp"
-                    />
-                <ImageView android:id="@+id/right_icon"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="0"
-                    android:layout_marginStart="8dp"
-                    android:scaleType="centerInside"
-                    android:visibility="gone"
-                    android:drawableAlpha="153"
                     />
             </LinearLayout>
             <ProgressBar

@@ -1889,26 +1889,20 @@ public class Notification implements Parcelable
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
-            int smallIconImageViewId = R.id.icon;
+
             if (mPriority < PRIORITY_LOW) {
                 // TODO: Low priority presentation
             }
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
                 processLargeIcon(mLargeIcon, contentView);
-                smallIconImageViewId = R.id.right_icon;
-            }
-            if (mSmallIcon != 0) {
-                contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);
-                contentView.setViewVisibility(smallIconImageViewId, View.VISIBLE);
-                if (mLargeIcon != null) {
-                    processSmallRightIcon(mSmallIcon, smallIconImageViewId, contentView);
-                } else {
-                    processSmallIconAsLarge(mSmallIcon, contentView);
-                }
-
-            } else {
-                contentView.setViewVisibility(smallIconImageViewId, View.GONE);
+                contentView.setImageViewResource(R.id.right_icon, mSmallIcon);
+                contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
+                processSmallRightIcon(mSmallIcon, contentView);
+            } else { // small icon at left
+                contentView.setImageViewResource(R.id.icon, mSmallIcon);
+                contentView.setViewVisibility(R.id.icon, View.VISIBLE);
+                processSmallIconAsLarge(mSmallIcon, contentView);
             }
             if (mContentTitle != null) {
                 contentView.setTextViewText(R.id.title, processLegacyText(mContentTitle));
@@ -2103,6 +2097,8 @@ public class Notification implements Parcelable
         private void processLargeIcon(Bitmap largeIcon, RemoteViews contentView) {
             if (!isLegacy() || mColorUtil.isGrayscale(largeIcon)) {
                 applyLargeIconBackground(contentView);
+            } else {
+                removeLargeIconBackground(contentView);
             }
         }
 
@@ -2122,16 +2118,31 @@ public class Notification implements Parcelable
                     -1);
         }
 
+        private void removeLargeIconBackground(RemoteViews contentView) {
+            contentView.setInt(R.id.icon, "setBackgroundResource", 0);
+        }
+
         /**
          * Recolor small icons when used in the R.id.right_icon slot.
          */
-        private void processSmallRightIcon(int smallIconDrawableId, int smallIconImageViewId,
+        private void processSmallRightIcon(int smallIconDrawableId,
                 RemoteViews contentView) {
             if (!isLegacy() || mColorUtil.isGrayscale(mContext, smallIconDrawableId)) {
-                contentView.setDrawableParameters(smallIconImageViewId, false, -1,
-                        mContext.getResources().getColor(
-                                R.color.notification_action_legacy_color_filter),
-                        PorterDuff.Mode.MULTIPLY, -1);
+                contentView.setDrawableParameters(R.id.right_icon, false, -1,
+                        0xFFFFFFFF,
+                        PorterDuff.Mode.SRC_ATOP, -1);
+
+                contentView.setInt(R.id.right_icon,
+                        "setBackgroundResource",
+                        R.drawable.notification_icon_legacy_bg);
+
+                contentView.setDrawableParameters(
+                        R.id.right_icon,
+                        true,
+                        -1,
+                        mColor,
+                        PorterDuff.Mode.SRC_ATOP,
+                        -1);
             }
         }
 
