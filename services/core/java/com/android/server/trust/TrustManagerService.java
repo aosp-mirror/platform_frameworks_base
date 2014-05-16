@@ -49,6 +49,7 @@ import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.Xml;
 
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class TrustManagerService extends SystemService {
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
     private final DevicePolicyReceiver mDevicePolicyReceiver = new DevicePolicyReceiver();
+    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
     private final Context mContext;
 
     private UserManager mUserManager;
@@ -268,6 +270,9 @@ public class TrustManagerService extends SystemService {
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
+        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+            return false;
+        }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
@@ -285,6 +290,11 @@ public class TrustManagerService extends SystemService {
             if (info.userId == userId) {
                 info.agent.onUnlockAttempt(successful);
             }
+        }
+
+        if (successful && !mUserHasAuthenticatedSinceBoot.get(userId)) {
+            mUserHasAuthenticatedSinceBoot.put(userId, true);
+            updateTrust(userId);
         }
     }
 
