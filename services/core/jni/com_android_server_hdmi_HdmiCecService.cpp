@@ -142,7 +142,7 @@ private:
     // Handles incoming <Request Active Source> message. If one of logical
     // devices is active, it should reply with <Active Source> message.
     void handleRequestActiveSource();
-    void handleGetOsdName(const cec_message_t& msg);
+    void handleGiveOsdName(const cec_message_t& msg);
     void handleGiveDeviceVendorID(const cec_message_t& msg);
     void handleGetCECVersion(const cec_message_t& msg);
     void handleGetMenuLanguage(const cec_message_t& msg);
@@ -555,8 +555,8 @@ void HdmiCecHandler::processIncomingMessage(const cec_message_t& msg) {
         sendReportPhysicalAddress(msg.destination);
     } else if (opcode == CEC_MESSAGE_REQUEST_ACTIVE_SOURCE) {
         handleRequestActiveSource();
-    } else if (opcode == CEC_MESSAGE_GET_OSD_NAME) {
-        handleGetOsdName(msg);
+    } else if (opcode == CEC_MESSAGE_GIVE_OSD_NAME) {
+        handleGiveOsdName(msg);
     } else if (opcode == CEC_MESSAGE_GIVE_DEVICE_VENDOR_ID) {
         handleGiveDeviceVendorID(msg);
     } else if (opcode == CEC_MESSAGE_GET_CEC_VERSION) {
@@ -631,7 +631,7 @@ void HdmiCecHandler::handleRequestActiveSource() {
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
-void HdmiCecHandler::handleGetOsdName(const cec_message_t& msg) {
+void HdmiCecHandler::handleGiveOsdName(const cec_message_t& msg) {
     if (!mOsdName.empty()) {
         sendSetOsdName(msg.destination, msg.initiator, mOsdName.c_str(), mOsdName.length());
     }

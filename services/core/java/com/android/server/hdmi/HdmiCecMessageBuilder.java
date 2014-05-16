@@ -58,14 +58,14 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
-     * Build &lt;Get Osd Name&gt; command.
+     * Build &lt;Give Osd Name&gt; command.
      *
      * @param src source address of command
      * @param dest destination address of command
      * @return newly created {@link HdmiCecMessage}
      */
-    static HdmiCecMessage buildGetOsdNameCommand(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GET_OSD_NAME);
+    static HdmiCecMessage buildGiveOsdNameCommand(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_OSD_NAME);
     }
 
     /**
