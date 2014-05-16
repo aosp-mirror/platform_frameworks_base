@@ -17,9 +17,12 @@
 package com.android.server.media;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISession;
@@ -29,14 +32,18 @@ import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.media.session.Session;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -64,6 +71,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     // = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
     private final Handler mHandler = new Handler();
+    private final PowerManager.WakeLock mMediaEventWakeLock;
 
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
@@ -79,6 +87,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         super(context);
         mSessionManagerImpl = new SessionManagerImpl();
         mPriorityStack = new MediaSessionStack();
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
     }
 
     @Override
@@ -377,7 +387,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     /*
      * When a session is created the following things need to happen.
-     * 1. It's callback binder needs a link to death
+     * 1. Its callback binder needs a link to death
      * 2. It needs to be added to all sessions.
      * 3. It needs to be added to the priority stack.
      * 4. It needs to be added to the relevant user record.
@@ -585,9 +595,10 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     class SessionManagerImpl extends ISessionManager.Stub {
-        // TODO add createSessionAsUser, pass user-id to
-        // ActivityManagerNative.handleIncomingUser and stash result for use
-        // when starting services on that session's behalf.
+        private static final String EXTRA_WAKELOCK_ACQUIRED =
+                "android.media.AudioService.WAKELOCK_ACQUIRED";
+        private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; // magic number
+
         @Override
         public ISession createSession(String packageName, ISessionCallback cb, String tag,
                 int userId) throws RemoteException {
@@ -644,6 +655,59 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        /**
+         * Handles the dispatching of the media button events to one of the
+         * registered listeners, or if there was none, broadcast an
+         * ACTION_MEDIA_BUTTON intent to the rest of the system.
+         *
+         * @param keyEvent a non-null KeyEvent whose key code is one of the
+         *            supported media buttons
+         * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held
+         *            while this key event is dispatched.
+         */
+        @Override
+        public void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+            if (keyEvent == null || !KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
+                Log.w(TAG, "Attempted to dispatch null or non-media key event.");
+                return;
+            }
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
+            try {
+                if (needWakeLock) {
+                    mMediaEventWakeLock.acquire();
+                }
+                synchronized (mLock) {
+                    MediaSessionRecord mbSession = mPriorityStack
+                            .getDefaultMediaButtonSession(mCurrentUserId);
+                    if (mbSession != null) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Sending media key to " + mbSession.getSessionInfo());
+                        }
+                        mbSession.sendMediaButton(keyEvent,
+                                needWakeLock ? mKeyEventDoneReceiver : null);
+                    } else {
+                        if (DEBUG) {
+                            Log.d(TAG, "Sending media key ordered broadcast");
+                        }
+                        // Fallback to legacy behavior
+                        Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                        if (needWakeLock) {
+                            keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
+                                    WAKELOCK_RELEASE_ON_FINISHED);
+                        }
+                        getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                                null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
@@ -678,6 +742,36 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
         }
+
+        ResultReceiver mKeyEventDoneReceiver = new ResultReceiver(mHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                synchronized (mLock) {
+                    if (mMediaEventWakeLock.isHeld()) {
+                        mMediaEventWakeLock.release();
+                    }
+                }
+            }
+        };
+
+        BroadcastReceiver mKeyEventDone = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null) {
+                    return;
+                }
+                Bundle extras = intent.getExtras();
+                if (extras == null) {
+                    return;
+                }
+                synchronized (mLock) {
+                    if (extras.containsKey(EXTRA_WAKELOCK_ACQUIRED)
+                            && mMediaEventWakeLock.isHeld()) {
+                        mMediaEventWakeLock.release();
+                    }
+                }
+            }
+        };
     }
 
 }

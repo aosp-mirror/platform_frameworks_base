@@ -365,6 +365,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionCb.mCb;
     }
 
+    public void sendMediaButton(KeyEvent ke, ResultReceiver cb) {
+        mSessionCb.sendMediaButton(ke, cb);
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mTag + " " + this);
 
@@ -645,11 +649,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             mCb = cb;
         }
 
-        public void sendMediaButton(KeyEvent keyEvent) {
+        public void sendMediaButton(KeyEvent keyEvent, ResultReceiver cb) {
             Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
             try {
-                mCb.onMediaButton(mediaButtonIntent);
+                mCb.onMediaButton(mediaButtonIntent, cb);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
@@ -785,7 +789,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void sendMediaButton(KeyEvent mediaButtonIntent) {
-            mSessionCb.sendMediaButton(mediaButtonIntent);
+            mSessionCb.sendMediaButton(mediaButtonIntent, null);
         }
 
         @Override

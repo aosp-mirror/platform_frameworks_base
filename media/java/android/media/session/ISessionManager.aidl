@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 /**
  * Interface to the MediaSessionManagerService
@@ -27,4 +28,5 @@ import android.os.Bundle;
 interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
     List<IBinder> getSessions(in ComponentName compName, int userId);
+    void dispatchMediaKeyEvent(in KeyEvent keyEvent, boolean needWakeLock);
 }
