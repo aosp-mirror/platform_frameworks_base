@@ -66,6 +66,7 @@ public abstract class NetworkAgent extends Handler {
     private AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
     private static final boolean DBG = true;
+    private static final boolean VDBG = true;
     // TODO - this class shouldn't cache data or it runs the risk of getting out of sync
     // Make the API require each of these when any is updated so we have the data we need,
     // without caching.
@@ -266,11 +267,14 @@ public abstract class NetworkAgent extends Handler {
      */
     private void evalScores() {
         if (mConnectionRequested) {
+            if (VDBG) log("evalScores - already trying - size=" + mNetworkRequests.size());
             // already trying
             return;
         }
+        if (VDBG) log("evalScores!");
         for (int i=0; i < mNetworkRequests.size(); i++) {
             int score = mNetworkRequests.valueAt(i).score;
+            if (VDBG) log(" checking request Min " + score + " vs my score " + mNetworkScore);
             if (score < mNetworkScore) {
                 // have a request that has a lower scored network servicing it
                 // (or no network) than we could provide, so lets connect!
