@@ -230,7 +230,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
      * tasks, then we do the shutdown.
      */
     private void startShutdown() {
-        mCompletedListener.onClientExecutionCompleted(token);
+        mCompletedListener.onAllTasksCompleted(token);
         mCallbackHandler.obtainMessage(MSG_SHUTDOWN).sendToTarget();
     }
 
@@ -389,7 +389,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
          * This TaskServiceContext is shutting down. Remove all the tasks from the pending queue
          * and reschedule them as if they had failed.
          * Before posting this message, caller must invoke
-         * {@link com.android.server.task.TaskCompletedListener#onClientExecutionCompleted(int)}
+         * {@link com.android.server.task.TaskCompletedListener#onAllTasksCompleted(int)}.
          */
         private void handleShutdownH() {
             for (int i = 0; i < mPending.size(); i++) {

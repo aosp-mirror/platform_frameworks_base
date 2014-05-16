@@ -136,7 +136,6 @@ public class TaskManagerService extends com.android.server.SystemService
      * For now this takes the task and if it's ready to run it will run it. In future we might not
      * provide the task, so that the StateChangedListener has to run through its list of tasks to
      * see which are ready. This will further decouple the controllers from the execution logic.
-     * @param taskStatus The state of the task which has changed.
      */
     @Override
     public void onTaskStateChanged(TaskStatus taskStatus) {
@@ -170,7 +169,7 @@ public class TaskManagerService extends com.android.server.SystemService
     }
 
     @Override
-    public void onClientExecutionCompleted(int serviceToken) {
+    public void onAllTasksCompleted(int serviceToken) {
         
     }
 

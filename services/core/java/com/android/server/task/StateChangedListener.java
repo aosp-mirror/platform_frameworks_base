@@ -19,9 +19,9 @@ package com.android.server.task;
 import com.android.server.task.controllers.TaskStatus;
 
 /**
- * Interface through which a {@link StateController} informs the
- * {@link com.android.server.task.TaskManagerService} that there are some tasks potentially ready
- * to be run.
+ * Interface through which a {@link com.android.server.task.controllers.StateController} informs
+ * the {@link com.android.server.task.TaskManagerService} that there are some tasks potentially
+ * ready to be run.
  */
 public interface StateChangedListener {
     /**
