@@ -668,6 +668,11 @@ public final class ViewRootImpl implements ViewParent,
     public void detachFunctor(long functor) {
         // TODO: Make the resize buffer some other way to not need this block
         mBlockResizeBuffer = true;
+        if (mAttachInfo.mHardwareRenderer != null) {
+            // Fence so that any pending invokeFunctor() messages will be processed
+            // before we return from detachFunctor.
+            mAttachInfo.mHardwareRenderer.fence();
+        }
     }
 
     public boolean invokeFunctor(long functor, boolean waitForCompletion) {
