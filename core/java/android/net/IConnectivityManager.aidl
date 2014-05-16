@@ -153,7 +153,9 @@ interface IConnectivityManager
 
     void setAirplaneMode(boolean enable);
 
-    void registerNetworkFactory(in Messenger messenger);
+    void registerNetworkFactory(in Messenger messenger, in String name);
+
+    void unregisterNetworkFactory(in Messenger messenger);
 
     void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score);
