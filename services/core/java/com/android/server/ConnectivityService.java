@@ -3216,6 +3216,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // tell the network currently servicing this that it's no longer interested
             NetworkAgentInfo affectedNetwork = mNetworkForRequestId.get(nri.request.requestId);
             if (affectedNetwork != null) {
+                mNetworkForRequestId.remove(nri.request.requestId);
                 affectedNetwork.networkRequests.remove(nri.request.requestId);
                 if (VDBG) {
                     log(" Removing from current network " + affectedNetwork.name() + ", leaving " +
