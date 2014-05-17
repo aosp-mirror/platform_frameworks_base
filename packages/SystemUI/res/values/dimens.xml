@@ -82,6 +82,9 @@
     <!-- Height of a medium notification in the status bar -->
     <dimen name="notification_mid_height">128dp</dimen>
 
+    <!-- Height of a the summary ("more card") notification on keyguard. -->
+    <dimen name="notification_summary_height">40dp</dimen>
+
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
 
@@ -289,4 +292,16 @@
     
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
+
+    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
+         max value is used when no notifications are displaying, and the min value is when the
+         highest possible number of notifications are showing. -->
+    <fraction name="keyguard_clock_y_fraction_max">29.5%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">18%</fraction>
+
+    <!-- The margin between the clock and the notifications on Keyguard. See
+         keyguard_clock_height_fraction_* for the difference between min and max.-->
+    <dimen name="keyguard_clock_notifications_margin_min">22dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">28dp</dimen>
+
 </resources>

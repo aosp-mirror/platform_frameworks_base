@@ -961,6 +961,21 @@ public class NotificationStackScrollLayout extends ViewGroup
         return null;
     }
 
+    /**
+     * @return the number of children which have visibility unequal to GONE
+     */
+    public int getNotGoneChildCount() {
+        int childCount = getChildCount();
+        int count = 0;
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private int getMaxExpandHeight(View view) {
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;

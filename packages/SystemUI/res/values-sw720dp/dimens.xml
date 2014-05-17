@@ -65,5 +65,11 @@
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
+
+    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
+     max value is used when no notifications are displaying, and the min value is when the
+     highest possible number of notifications are showing. -->
+    <fraction name="keyguard_clock_y_fraction_max">35%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">25%</fraction>
 </resources>
 

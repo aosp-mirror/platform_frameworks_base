@@ -322,7 +322,7 @@ public class PanelView extends FrameLayout {
         setOnHierarchyChangeListener(mHierarchyListener);
     }
 
-    private void loadDimens() {
+    protected void loadDimens() {
         final Resources res = getContext().getResources();
 
         mSelfExpandVelocityPx = res.getDimension(R.dimen.self_expand_velocity);
@@ -583,8 +583,14 @@ public class PanelView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
         loadDimens();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        loadDimens();
+        mMaxPanelHeight = -1;
     }
 
     public void fling(float vel, boolean always) {
@@ -695,12 +701,6 @@ public class PanelView extends FrameLayout {
 //        setLayoutParams(lp);
 
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mMaxPanelHeight = -1;
     }
 
     protected void onHeightUpdated(float expandedHeight) {
