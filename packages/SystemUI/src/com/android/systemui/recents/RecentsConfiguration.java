@@ -65,6 +65,7 @@ public class RecentsConfiguration {
     public int taskBarViewLightTextColor;
     public int taskBarViewDarkTextColor;
 
+    public boolean launchedFromAltTab;
     public boolean launchedWithThumbnailAnimation;
 
     /** Private constructor */

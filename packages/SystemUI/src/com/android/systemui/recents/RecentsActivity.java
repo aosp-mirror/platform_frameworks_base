@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -81,7 +82,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             String action = intent.getAction();
             Console.log(Constants.Log.App.SystemUIHandshake,
                     "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
-            if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            if (action.equals(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY)) {
+                // Dismiss recents, launching the focused task
+                dismissRecentsIfVisible();
+            } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // Try and unfilter and filtered stacks
                 if (!mRecentsView.unfilterFilteredStacks()) {
                     // If there are no filtered stacks, dismiss recents and launch the first task
@@ -105,6 +109,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         config.launchedWithThumbnailAnimation = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_ANIMATING_WITH_THUMBNAIL, false);
+        config.launchedFromAltTab = launchIntent.getBooleanExtra(
+                AlternateRecentsComponent.EXTRA_FROM_ALT_TAB, false);
 
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
@@ -184,7 +190,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             int appWidgetId = config.searchBarAppWidgetId;
             if (appWidgetId >= 0) {
                 Console.log(Constants.Log.App.SystemUIHandshake,
-                        "[RecentsActivity|onCreate|addSearchAppWidgetView]",
+                "[RecentsActivity|onCreate|addSearchAppWidgetView]",
                         "Id: " + appWidgetId,
                         Console.AnsiBlue);
                 mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
@@ -205,8 +211,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
     boolean dismissRecentsIfVisible() {
         if (mVisible) {
-            if (!mRecentsView.launchFirstTask()) {
-                finish();
+            if (!mRecentsView.launchFocusedTask()) {
+                if (!mRecentsView.launchFirstTask()) {
+                    finish();
+                }
             }
             return true;
         }
@@ -303,6 +311,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
+        filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
         filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
@@ -359,6 +368,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (loader != null) {
             loader.onTrimMemory(level);
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_TAB) {
+            // Focus the next task in the stack
+            final boolean backward = event.isShiftPressed();
+            mRecentsView.focusNextTask(!backward);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

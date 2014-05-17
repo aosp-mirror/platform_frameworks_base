@@ -80,6 +80,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mMaxScroll;
     int mStashedScroll;
     int mLastInfoPaneStackScroll;
+    int mFocusedTaskIndex = -1;
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
 
@@ -306,6 +307,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroll = value;
     }
 
+    /**
+     * Returns the scroll to such that the task transform at that index will have t=0. (If the scroll
+     * is not bounded)
+     */
+    int getStackScrollForTaskIndex(int i) {
+        int taskHeight = mTaskRect.height();
+        return (int) (i * Constants.Values.TaskStackView.StackOverlapPct * taskHeight);
+    }
+
     /** Gets the current stack scroll */
     public int getStackScroll() {
         return mStackScroll;
@@ -458,6 +468,64 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return false;
+    }
+
+    /** Focuses the task at the specified index in the stack */
+    void focusTask(int taskIndex, boolean scrollToNewPosition) {
+        Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "" + taskIndex);
+        if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
+            mFocusedTaskIndex = taskIndex;
+
+            // Focus the view if possible, otherwise, focus the view after we scroll into position
+            Task t = mStack.getTasks().get(taskIndex);
+            TaskView tv = getChildViewForTask(t);
+            Runnable postScrollRunnable = null;
+            if (tv != null) {
+                tv.setFocusedTask();
+                Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "Requesting focus");
+            } else {
+                postScrollRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Task t = mStack.getTasks().get(mFocusedTaskIndex);
+                        TaskView tv = getChildViewForTask(t);
+                        if (tv != null) {
+                            tv.setFocusedTask();
+                            Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]",
+                                    "Requesting focus after scroll animation");
+                        }
+                    }
+                };
+            }
+
+            if (scrollToNewPosition) {
+                // Scroll the view into position
+                int newScroll = Math.max(mMinScroll, Math.min(mMaxScroll,
+                        getStackScrollForTaskIndex(taskIndex)));
+
+                animateScroll(getStackScroll(), newScroll, postScrollRunnable);
+            } else {
+                if (postScrollRunnable != null) {
+                    postScrollRunnable.run();
+                }
+            }
+        }
+    }
+
+    /** Focuses the next task in the stack */
+    void focusNextTask(boolean forward) {
+        Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusNextTask]", "" + mFocusedTaskIndex);
+
+        // Find the next index to focus
+        int numTasks = mStack.getTaskCount();
+        if (mFocusedTaskIndex < 0) {
+            mFocusedTaskIndex = numTasks - 1;
+        }
+        if (0 <= mFocusedTaskIndex && mFocusedTaskIndex < numTasks) {
+            mFocusedTaskIndex = Math.max(0, Math.min(numTasks - 1,
+                    mFocusedTaskIndex + (forward ? -1 : 1)));
+        }
+        focusTask(mFocusedTaskIndex, true);
     }
 
     /** Enables the hw layers and increments the hw layer requirement ref count */
@@ -630,6 +698,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             setStackScroll(mMaxScroll);
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
+
+            // Update the focused task index to be the next item to the top task
+            if (config.launchedFromAltTab) {
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+            }
 
             // Animate the task bar of the first task view
             if (config.launchedWithThumbnailAnimation) {

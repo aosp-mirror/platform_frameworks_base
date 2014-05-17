@@ -94,6 +94,34 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
+    /** Launches the focused task from the first stack if possible */
+    public boolean launchFocusedTask() {
+        // Get the first stack view
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                TaskStackView stackView = (TaskStackView) child;
+                TaskStack stack = stackView.mStack;
+                // Iterate the stack views and try and find the focused task
+                int taskCount = stackView.getChildCount();
+                for (int j = 0; j < taskCount; j++) {
+                    TaskView tv = (TaskView) stackView.getChildAt(j);
+                    Task task = tv.getTask();
+                    if (tv.isFocusedTask()) {
+                        Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
+                                "Found focused Task");
+                        onTaskLaunched(stackView, tv, stack, task);
+                        return true;
+                    }
+                }
+            }
+        }
+        Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
+                "No Tasks focused");
+        return false;
+    }
+
     /** Launches the first task from the first stack if possible */
     public boolean launchFirstTask() {
         // Get the first stack view
@@ -231,6 +259,24 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskStackView tsv = (TaskStackView) child;
                 child.layout(left, top, left + tsv.getMeasuredWidth(), top + tsv.getMeasuredHeight());
             }
+        }
+    }
+
+    /** Focuses the next task in the first stack view */
+    public void focusNextTask(boolean forward) {
+        // Get the first stack view
+        TaskStackView stackView = null;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                stackView = (TaskStackView) child;
+                break;
+            }
+        }
+
+        if (stackView != null) {
+            stackView.focusNextTask(forward);
         }
     }
 

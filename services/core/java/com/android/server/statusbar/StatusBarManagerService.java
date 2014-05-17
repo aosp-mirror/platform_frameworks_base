@@ -460,6 +460,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
+    public void showRecentApps(boolean triggeredFromAltTab) {
+        if (mBar != null) {
+            try {
+                mBar.showRecentApps(triggeredFromAltTab);
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void hideRecentApps() {
+        if (mBar != null) {
+            try {
+                mBar.hideRecentApps();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
     public void setCurrentUser(int newUserId) {
         if (SPEW) Slog.d(TAG, "Setting current user to user " + newUserId);
         mCurrentUserId = newUserId;

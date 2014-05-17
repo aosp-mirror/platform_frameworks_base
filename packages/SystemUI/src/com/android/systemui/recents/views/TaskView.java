@@ -18,6 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -57,6 +58,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mTaskInfoPaneVisible;
+    boolean mIsFocused;
     Point mLastTouchDown = new Point();
     Path mRoundedRectClipPath = new Path();
 
@@ -365,6 +367,34 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         if (mDim > 0) {
             canvas.drawColor(mDim << 24);
         }
+    }
+
+    /**
+     * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
+     * if the view is not currently visible, or we are in touch state (where we still want to keep
+     * track of focus).
+     */
+    public void setFocusedTask() {
+        mIsFocused = true;
+        requestFocus();
+    }
+
+    /**
+     * Updates the explicitly focused state when the view focus changes.
+     */
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        if (!gainFocus) {
+            mIsFocused = false;
+        }
+    }
+
+    /**
+     * Returns whether we have explicitly been focused.
+     */
+    public boolean isFocusedTask() {
+        return mIsFocused || isFocused();
     }
 
     /**** TaskCallbacks Implementation ****/

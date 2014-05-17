@@ -36,9 +36,12 @@ oneway interface IStatusBar
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
     void setHardKeyboardStatus(boolean available, boolean enabled);
+    void setWindowState(int window, int state);
+
+    void showRecentApps(boolean triggeredFromAltTab);
+    void hideRecentApps();
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
-    void setWindowState(int window, int state);
 }
 

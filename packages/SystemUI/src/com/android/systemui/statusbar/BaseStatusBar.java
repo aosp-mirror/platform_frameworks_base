@@ -87,8 +87,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
 
-    protected static final int MSG_TOGGLE_RECENTS_PANEL = 1020;
-    protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    protected static final int MSG_SHOW_RECENT_APPS = 1019;
+    protected static final int MSG_HIDE_RECENT_APPS = 1020;
+    protected static final int MSG_TOGGLE_RECENTS_APPS = 1021;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
@@ -494,8 +495,22 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void showRecentApps(boolean triggeredFromAltTab) {
+        int msg = MSG_SHOW_RECENT_APPS;
+        mHandler.removeMessages(msg);
+        mHandler.obtainMessage(msg, triggeredFromAltTab ? 1 : 0, 0).sendToTarget();
+    }
+
+    @Override
+    public void hideRecentApps() {
+        int msg = MSG_HIDE_RECENT_APPS;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
     public void toggleRecentApps() {
-        int msg = MSG_TOGGLE_RECENTS_PANEL;
+        int msg = MSG_TOGGLE_RECENTS_APPS;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
@@ -578,12 +593,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         public boolean onTouch(View v, MotionEvent event) {
             int action = event.getAction() & MotionEvent.ACTION_MASK;
             if (action == MotionEvent.ACTION_DOWN) {
-                preloadRecentTasksList();
+                preloadRecents();
             } else if (action == MotionEvent.ACTION_CANCEL) {
-                cancelPreloadingRecentTasksList();
+                cancelPreloadingRecents();
             } else if (action == MotionEvent.ACTION_UP) {
                 if (!v.isPressed()) {
-                    cancelPreloadingRecentTasksList();
+                    cancelPreloadingRecents();
                 }
 
             }
@@ -591,28 +606,38 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
-    protected void toggleRecentsActivity() {
+    /** Proxy for RecentsComponent */
+
+    protected void showRecents(boolean triggeredFromAltTab) {
+        if (mRecents != null) {
+            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
+            mRecents.showRecents(triggeredFromAltTab, getStatusBarView());
+        }
+    }
+
+    protected void hideRecents() {
+        if (mRecents != null) {
+            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
+            mRecents.hideRecents();
+        }
+    }
+
+    protected void toggleRecents() {
         if (mRecents != null) {
             sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
             mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
         }
     }
 
-    protected void preloadRecentTasksList() {
+    protected void preloadRecents() {
         if (mRecents != null) {
-            mRecents.preloadRecentTasksList();
+            mRecents.preloadRecents();
         }
     }
 
-    protected void cancelPreloadingRecentTasksList() {
+    protected void cancelPreloadingRecents() {
         if (mRecents != null) {
-            mRecents.cancelPreloadingRecentTasksList();
-        }
-    }
-
-    protected void closeRecents() {
-        if (mRecents != null) {
-            mRecents.closeRecents();
+            mRecents.cancelPreloadingRecents();
         }
     }
 
@@ -653,17 +678,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void handleMessage(Message m) {
             Intent intent;
             switch (m.what) {
-             case MSG_TOGGLE_RECENTS_PANEL:
-                 toggleRecentsActivity();
+             case MSG_SHOW_RECENT_APPS:
+                 showRecents(m.arg1 > 0);
                  break;
-             case MSG_CLOSE_RECENTS_PANEL:
-                 closeRecents();
+             case MSG_HIDE_RECENT_APPS:
+                 hideRecents();
+                 break;
+             case MSG_TOGGLE_RECENTS_APPS:
+                 toggleRecents();
                  break;
              case MSG_PRELOAD_RECENT_APPS:
-                  preloadRecentTasksList();
+                  preloadRecents();
                   break;
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
-                  cancelPreloadingRecentTasksList();
+                  cancelPreloadingRecents();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Log.d(TAG, "opening search panel");
