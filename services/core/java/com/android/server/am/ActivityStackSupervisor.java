@@ -1818,7 +1818,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             targetStack = sourceTask.stack;
             targetStack.moveToFront();
-            mWindowManager.moveTaskToTop(sourceTask.taskId);
+            mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
