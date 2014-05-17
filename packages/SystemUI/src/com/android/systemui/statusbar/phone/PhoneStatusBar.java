@@ -2922,4 +2922,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void reattachSystemIcons() {
         mSystemIconArea.addView(mSystemIcons, 0);
     }
+
+    public void onScreenTurnedOff() {
+        mStackScroller.setAnimationsEnabled(false);
+    }
+
+    public void onScreenTurnedOn() {
+        mStackScroller.setAnimationsEnabled(true);
+    }
 }

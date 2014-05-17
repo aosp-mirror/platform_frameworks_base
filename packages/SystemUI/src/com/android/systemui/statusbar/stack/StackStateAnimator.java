@@ -434,7 +434,7 @@ public class StackStateAnimator {
     /**
      * Start an animator instantly instead of waiting on the next synchronization frame
      */
-    private void startInstantly(ValueAnimator animator) {
+    public static void startInstantly(ValueAnimator animator) {
         animator.start();
         animator.setCurrentPlayTime(0);
     }
