@@ -3555,14 +3555,14 @@ package android.app {
   }
 
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
-    ctor public ActivityManager.TaskDescription(android.app.ActivityManager.TaskDescription);
-    ctor public ActivityManager.TaskDescription(java.lang.CharSequence, android.graphics.Bitmap, int);
-    ctor public ActivityManager.TaskDescription(java.lang.CharSequence, android.graphics.Bitmap);
-    ctor public ActivityManager.TaskDescription(java.lang.CharSequence);
+    ctor public ActivityManager.TaskDescription(java.lang.String, android.graphics.Bitmap, int);
+    ctor public ActivityManager.TaskDescription(java.lang.String, android.graphics.Bitmap);
+    ctor public ActivityManager.TaskDescription(java.lang.String);
     ctor public ActivityManager.TaskDescription();
+    ctor public ActivityManager.TaskDescription(android.app.ActivityManager.TaskDescription);
     method public int describeContents();
     method public android.graphics.Bitmap getIcon();
-    method public java.lang.CharSequence getLabel();
+    method public java.lang.String getLabel();
     method public int getPrimaryColor();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
