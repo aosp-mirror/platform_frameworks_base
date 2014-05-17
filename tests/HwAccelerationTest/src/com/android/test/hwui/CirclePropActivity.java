@@ -108,7 +108,6 @@ public class CirclePropActivity extends Activity {
 
             mToggle = !mToggle;
 
-            /*
             mRunningAnimations.add(new RenderNodeAnimator(
                     mX, mToggle ? 400.0f : 200.0f));
 
@@ -131,7 +130,8 @@ public class CirclePropActivity extends Activity {
                 RenderNodeAnimator anim = mRunningAnimations.get(i);
                 anim.setInterpolator(interp);
                 anim.setDuration(1000);
-                anim.start(this);
+                anim.setTarget(this);
+                anim.start();
             }
 
             if (mToggle) {
@@ -147,7 +147,6 @@ public class CirclePropActivity extends Activity {
                     }
                 });
             }
-            */
             return true;
         }
     }
