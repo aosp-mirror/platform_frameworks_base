@@ -204,6 +204,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mTextColor = 0;
     private int mStatusBarColor = 0;
     private int mNavigationBarColor = 0;
+    private boolean mForcedStatusBarColor = false;
+    private boolean mForcedNavigationBarColor = false;
 
     private CharSequence mTitle = null;
 
@@ -3084,8 +3086,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             decor.setOnSystemUiVisibilityChangeListener(decor);
         }
-        mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
-        mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+        if (!mForcedStatusBarColor) {
+            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
+        }
+        if (!mForcedNavigationBarColor) {
+            mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+        }
 
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.HONEYCOMB) {
@@ -4245,19 +4251,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public int getStatusBarColor() {
-        return 0;
+        return mStatusBarColor;
     }
 
     @Override
     public void setStatusBarColor(int color) {
+        mStatusBarColor = color;
+        mForcedStatusBarColor = true;
+        if (mDecor != null) {
+            mDecor.updateColorViews(null);
+        }
     }
 
     @Override
     public int getNavigationBarColor() {
-        return 0;
+        return mNavigationBarColor;
     }
 
     @Override
     public void setNavigationBarColor(int color) {
+        mNavigationBarColor = color;
+        mForcedNavigationBarColor = true;
+        if (mDecor != null) {
+            mDecor.updateColorViews(null);
+        }
     }
 }
