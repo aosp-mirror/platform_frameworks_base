@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 
 /**
  * Container of data passed to the {@link android.app.task.TaskManager} fully encapsulating the
@@ -37,6 +38,18 @@ public class Task implements Parcelable {
     }
 
     /**
+     * Amount of backoff a task has initially by default, in milliseconds.
+     * @hide.
+     */
+    public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 5000L;
+
+    /**
+     * Default type of backoff.
+     * @hide
+     */
+    public static final int DEFAULT_BACKOFF_POLICY = BackoffPolicy.EXPONENTIAL;
+
+    /**
      * Linear: retry_time(failure_time, t) = failure_time + initial_retry_delay * t, t >= 1
      * Expon: retry_time(failure_time, t) = failure_time + initial_retry_delay ^ t, t >= 1
      */
@@ -47,7 +60,7 @@ public class Task implements Parcelable {
 
     private final int taskId;
     // TODO: Change this to use PersistableBundle when that lands in master.
-    private final Bundle extras;
+    private final PersistableBundle extras;
     private final ComponentName service;
     private final boolean requireCharging;
     private final boolean requireDeviceIdle;
@@ -71,7 +84,7 @@ public class Task implements Parcelable {
     /**
      * Bundle of extras which are returned to your application at execution time.
      */
-    public Bundle getExtras() {
+    public PersistableBundle getExtras() {
         return extras;
     }
 
@@ -171,7 +184,7 @@ public class Task implements Parcelable {
 
     private Task(Parcel in) {
         taskId = in.readInt();
-        extras = in.readBundle();
+        extras = in.readPersistableBundle();
         service = ComponentName.readFromParcel(in);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
@@ -188,7 +201,7 @@ public class Task implements Parcelable {
 
     private Task(Task.Builder b) {
         taskId = b.mTaskId;
-        extras = new Bundle(b.mExtras);
+        extras = new PersistableBundle(b.mExtras);
         service = b.mTaskService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
@@ -211,7 +224,7 @@ public class Task implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(taskId);
-        out.writeBundle(extras);
+        out.writePersistableBundle(extras);
         ComponentName.writeToParcel(service, out);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
@@ -238,12 +251,10 @@ public class Task implements Parcelable {
         }
     };
 
-    /**
-     * Builder class for constructing {@link Task} objects.
-     */
+    /** Builder class for constructing {@link Task} objects. */
     public static final class Builder {
         private int mTaskId;
-        private Bundle mExtras;
+        private PersistableBundle mExtras = PersistableBundle.EMPTY;
         private ComponentName mTaskService;
         // Requirements.
         private boolean mRequiresCharging;
@@ -258,8 +269,8 @@ public class Task implements Parcelable {
         private boolean mHasLateConstraint;
         private long mIntervalMillis;
         // Back-off parameters.
-        private long mInitialBackoffMillis = 5000L;
-        private int mBackoffPolicy = BackoffPolicy.EXPONENTIAL;
+        private long mInitialBackoffMillis = DEFAULT_INITIAL_BACKOFF_MILLIS;
+        private int mBackoffPolicy = DEFAULT_BACKOFF_POLICY;
         /** Easy way to track whether the client has tried to set a back-off policy. */
         private boolean mBackoffPolicySet = false;
 
@@ -279,7 +290,7 @@ public class Task implements Parcelable {
          * Set optional extras. This is persisted, so we only allow primitive types.
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
          */
-        public Builder setExtras(Bundle extras) {
+        public Builder setExtras(PersistableBundle extras) {
             mExtras = extras;
             return this;
         }
@@ -394,18 +405,13 @@ public class Task implements Parcelable {
          * @return The task object to hand to the TaskManager. This object is immutable.
          */
         public Task build() {
-            if (mExtras == null) {
-                mExtras = Bundle.EMPTY;
-            }
-            if (mTaskId < 0) {
-                throw new IllegalArgumentException("Task id must be greater than 0.");
-            }
+            mExtras = new PersistableBundle(mExtras);  // Make our own copy.
             // Check that a deadline was not set on a periodic task.
-            if (mIsPeriodic && mHasLateConstraint) {
+            if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
                         "periodic task.");
             }
-            if (mIsPeriodic && mHasEarlyConstraint) {
+            if (mIsPeriodic && (mMinLatencyMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
                         "periodic task");
             }
