@@ -179,4 +179,9 @@ public class KeyguardUpdateMonitorCallback {
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onScreenTurnedOff(int why) { }
+
+    /**
+     * Called when trust changes for a user.
+     */
+    public void onTrustChanged(int userId) { }
 }

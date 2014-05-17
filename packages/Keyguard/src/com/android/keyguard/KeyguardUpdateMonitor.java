@@ -213,6 +213,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     @Override
     public void onTrustChanged(boolean enabled, int userId) {
         mUserHasTrust.put(userId, enabled);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustChanged(userId);
+            }
+        }
     }
 
     private boolean isTrustDisabled(int userId) {

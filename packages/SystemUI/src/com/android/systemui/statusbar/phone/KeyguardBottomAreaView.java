@@ -36,7 +36,11 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 
 /**
@@ -52,9 +56,13 @@ public class KeyguardBottomAreaView extends FrameLayout
 
     private SwipeAffordanceView mCameraButton;
     private SwipeAffordanceView mPhoneButton;
+    private ImageView mLockIcon;
 
     private PowerManager mPowerManager;
     private ActivityStarter mActivityStarter;
+
+    private LockPatternUtils mLockPatternUtils;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -78,12 +86,17 @@ public class KeyguardBottomAreaView extends FrameLayout
         super.onFinishInflate();
         mCameraButton = (SwipeAffordanceView) findViewById(R.id.camera_button);
         mPhoneButton = (SwipeAffordanceView) findViewById(R.id.phone_button);
+        mLockIcon = (ImageView) findViewById(R.id.lock_icon);
         mCameraButton.setAffordanceListener(this);
         mPhoneButton.setAffordanceListener(this);
+        mLockPatternUtils = new LockPatternUtils(getContext());
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
+        KeyguardUpdateMonitor.getInstance(getContext()).registerCallback(mCallback);
         watchForDevicePolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
         updatePhoneVisibility();
+        updateTrust();
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
@@ -185,4 +198,41 @@ public class KeyguardBottomAreaView extends FrameLayout
             launchPhone();
         }
     }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (changedView == this && visibility == VISIBLE) {
+            updateTrust();
+        }
+    }
+
+    private void updateTrust() {
+        if (getVisibility() != VISIBLE) {
+            return;
+        }
+        int user = mLockPatternUtils.getCurrentUser();
+        boolean trust = !mLockPatternUtils.isSecure() ||
+                mKeyguardUpdateMonitor.getUserHasTrust(user);
+
+        int iconRes = trust ? R.drawable.ic_lock_open_24dp : R.drawable.ic_lock_24dp;
+        mLockIcon.setImageResource(iconRes);
+    }
+
+    final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onScreenTurnedOn() {
+            updateTrust();
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            updateTrust();
+        }
+
+        @Override
+        public void onTrustChanged(int userId) {
+            updateTrust();
+        }
+    };
 }
