@@ -77,7 +77,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
                     RenderNodeAnimator.TRANSLATION_Y, dy * delta);
             animator.setDuration(DURATION);
             if (child == clickedView) logTranslationY(clickedView);
-            animator.start(child);
+            animator.setTarget(child);
+            animator.start();
             if (child == clickedView) logTranslationY(clickedView);
         }
         //mHandler.postDelayed(mLaunchActivity, (long) (DURATION * .4));
