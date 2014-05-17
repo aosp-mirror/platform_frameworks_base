@@ -31,7 +31,6 @@
   <java-symbol type="id" name="account_type" />
   <java-symbol type="id" name="action_bar" />
   <java-symbol type="id" name="action_bar_container" />
-  <java-symbol type="id" name="action_bar_overlay_layout" />
   <java-symbol type="id" name="action_bar_title" />
   <java-symbol type="id" name="action_bar_subtitle" />
   <java-symbol type="id" name="action_context_bar" />
@@ -61,6 +60,7 @@
   <java-symbol type="id" name="day" />
   <java-symbol type="id" name="day_names" />
   <java-symbol type="id" name="decrement" />
+  <java-symbol type="id" name="decor_content_parent" />
   <java-symbol type="id" name="default_activity_button" />
   <java-symbol type="id" name="deny_button" />
   <java-symbol type="id" name="description" />

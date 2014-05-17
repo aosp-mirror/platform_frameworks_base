@@ -183,7 +183,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
     private void init(View decor) {
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
-                com.android.internal.R.id.action_bar_overlay_layout);
+                com.android.internal.R.id.decor_content_parent);
         if (mOverlayLayout != null) {
             mOverlayLayout.setActionBarVisibilityCallback(this);
         }
