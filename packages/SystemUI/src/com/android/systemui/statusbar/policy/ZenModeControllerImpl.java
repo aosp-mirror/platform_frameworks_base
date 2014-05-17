@@ -52,6 +52,7 @@ public class ZenModeControllerImpl implements ZenModeController {
                 fireZenChanged(value != 0);
             }
         };
+        mSetting.setListening(true);
         mNoMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }

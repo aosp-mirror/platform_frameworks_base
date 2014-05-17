@@ -59,6 +59,7 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
 
     public void addStateChangedCallback(BluetoothStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
+        fireCallback(cb);
     }
 
     @Override
@@ -131,7 +132,11 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
 
     private void fireCallbacks() {
         for (BluetoothStateChangeCallback cb : mChangeCallbacks) {
-            cb.onBluetoothStateChange(mEnabled);
+            fireCallback(cb);
         }
+    }
+
+    private void fireCallback(BluetoothStateChangeCallback cb) {
+        cb.onBluetoothStateChange(mEnabled);
     }
 }

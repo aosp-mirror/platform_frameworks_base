@@ -21,10 +21,10 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.provider.Settings.Global;
 
-import com.android.systemui.statusbar.policy.Disposable;
+import com.android.systemui.statusbar.policy.Listenable;
 
 /** Helper for managing a global setting. **/
-public abstract class GlobalSetting extends ContentObserver implements Disposable {
+public abstract class GlobalSetting extends ContentObserver implements Listenable {
     private final Context mContext;
     private final String mSettingName;
 
@@ -34,8 +34,6 @@ public abstract class GlobalSetting extends ContentObserver implements Disposabl
         super(handler);
         mContext = context;
         mSettingName = settingName;
-        mContext.getContentResolver().registerContentObserver(
-                Global.getUriFor(mSettingName), false, this);
     }
 
     public int getValue() {
@@ -47,8 +45,13 @@ public abstract class GlobalSetting extends ContentObserver implements Disposabl
     }
 
     @Override
-    public void dispose() {
-        mContext.getContentResolver().unregisterContentObserver(this);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mContext.getContentResolver().registerContentObserver(
+                    Global.getUriFor(mSettingName), false, this);
+        } else {
+            mContext.getContentResolver().unregisterContentObserver(this);
+        }
     }
 
     @Override

@@ -28,6 +28,10 @@ public class CastControllerImpl implements CastController {
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final MediaRouter mMediaRouter;
 
+    private boolean mEnabled;
+    private boolean mConnecting;
+    private String mConnectedRouteName;
+
     public CastControllerImpl(Context context) {
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
     }
@@ -35,6 +39,7 @@ public class CastControllerImpl implements CastController {
     @Override
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
+        fireStateChanged(callback);
     }
 
     @Override
@@ -76,12 +81,23 @@ public class CastControllerImpl implements CastController {
         if (connectedRoute != null) {
             connectedRouteName = connectedRoute.getName().toString();
         }
-        fireStateChanged(enabled, connecting, connectedRouteName);
+        synchronized(mCallbacks) {
+            mEnabled = enabled;
+            mConnecting = connecting;
+            mConnectedRouteName = connectedRouteName;
+        }
+        fireStateChanged();
     }
 
-    private void fireStateChanged(boolean enabled, boolean connecting, String connectedRouteName) {
+    private void fireStateChanged() {
         for (Callback callback : mCallbacks) {
-            callback.onStateChanged(enabled, connecting, connectedRouteName);
+            fireStateChanged(callback);
+        }
+    }
+
+    private void fireStateChanged(Callback callback) {
+        synchronized(mCallbacks) {
+            callback.onStateChanged(mEnabled, mConnecting, mConnectedRouteName);
         }
     }
 

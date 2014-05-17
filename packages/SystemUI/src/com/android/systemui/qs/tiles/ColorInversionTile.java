@@ -39,8 +39,6 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
                 handleRefreshState(value);
             }
         };
-
-        refreshState();
     }
 
     @Override
@@ -49,8 +47,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    public void dispose() {
-        mSetting.dispose();
+    public void setListening(boolean listening) {
+        mSetting.setListening(listening);
     }
 
     @Override

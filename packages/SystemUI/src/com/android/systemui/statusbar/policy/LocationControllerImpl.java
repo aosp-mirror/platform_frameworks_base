@@ -92,6 +92,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      */
     public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
+        locationSettingsChanged(cb);
     }
 
     public void removeSettingsChangedCallback(LocationSettingsChangeCallback cb) {
@@ -202,6 +203,10 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
             cb.onLocationSettingsChanged(isEnabled);
         }
+    }
+
+    private void locationSettingsChanged(LocationSettingsChangeCallback cb) {
+        cb.onLocationSettingsChanged(isLocationEnabled());
     }
 
     @Override

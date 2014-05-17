@@ -33,7 +33,11 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     public BluetoothTile(Host host) {
         super(host);
         mController = host.getBluetoothController();
-        mController.addStateChangedCallback(mCallback);
+    }
+
+    @Override
+    public boolean supportsDualTargets() {
+        return true;
     }
 
     @Override
@@ -42,8 +46,12 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     }
 
     @Override
-    public void dispose() {
-        mController.removeStateChangedCallback(mCallback);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mController.addStateChangedCallback(mCallback);
+        } else {
+            mController.removeStateChangedCallback(mCallback);
+        }
     }
 
     @Override

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-/** Common interface for items requiring manual cleanup. **/
-public interface Disposable {
-    void dispose();
+/** Common interface for components with an active listening state. **/
+public interface Listenable {
+    void setListening(boolean listening);
 }

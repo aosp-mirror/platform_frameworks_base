@@ -42,7 +42,7 @@ public class HotspotTile extends QSTile<QSTile.State> {
     }
 
     @Override
-    public void dispose() {
+    public void setListening(boolean listening) {
 
     }
 

@@ -35,14 +35,9 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     private final CastController mController;
 
-    private boolean mShown;
-
     public CastTile(Host host) {
         super(host);
         mController = host.getCastController();
-        if (mController != null) {
-            mController.addCallback(mCallback);
-        }
     }
 
     @Override
@@ -51,9 +46,14 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    public void dispose() {
+    public void setListening(boolean listening) {
         if (mController == null) return;
-        mController.removeCallback(mCallback);
+        if (listening) {
+            mController.addCallback(mCallback);
+        } else {
+            mController.removeCallback(mCallback);
+        }
+        mController.setDiscovering(listening);
     }
 
     @Override
@@ -61,14 +61,6 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         super.handleUserSwitch(newUserId);
         if (mController == null) return;
         mController.setCurrentUserId(newUserId);
-    }
-
-    @Override
-    protected void handleShown(boolean shown) {
-        if (mShown == shown) return;
-        if (mController == null) return;
-        mShown = shown;
-        mController.setDiscovering(mShown);
     }
 
     @Override

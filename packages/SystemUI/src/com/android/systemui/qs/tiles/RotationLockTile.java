@@ -33,8 +33,6 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     public RotationLockTile(Host host) {
         super(host);
         mController = host.getRotationLockController();
-        if (mController == null) return;
-        mController.addRotationLockControllerCallback(mCallback);
     }
 
     @Override
@@ -42,9 +40,13 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         return new BooleanState();
     }
 
-    public void dispose() {
+    public void setListening(boolean listening) {
         if (mController == null) return;
-        mController.removeRotationLockControllerCallback(mCallback);
+        if (listening) {
+            mController.addRotationLockControllerCallback(mCallback);
+        } else {
+            mController.removeRotationLockControllerCallback(mCallback);
+        }
     }
 
     @Override

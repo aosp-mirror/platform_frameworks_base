@@ -38,7 +38,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     public CellularTile(Host host) {
         super(host);
         mController = host.getNetworkController();
-        mController.addNetworkSignalChangedCallback(mCallback);
     }
 
     @Override
@@ -47,8 +46,12 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    public void dispose() {
-        mController.removeNetworkSignalChangedCallback(mCallback);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mController.addNetworkSignalChangedCallback(mCallback);
+        } else {
+            mController.removeNetworkSignalChangedCallback(mCallback);
+        }
     }
 
     @Override

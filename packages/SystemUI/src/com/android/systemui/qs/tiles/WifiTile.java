@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
+import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -37,7 +38,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     public WifiTile(Host host) {
         super(host);
         mController = host.getNetworkController();
-        mController.addNetworkSignalChangedCallback(mCallback);
+    }
+
+    @Override
+    public boolean supportsDualTargets() {
+        return true;
     }
 
     @Override
@@ -46,8 +51,12 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    public void dispose() {
-        mController.removeNetworkSignalChangedCallback(mCallback);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mController.addNetworkSignalChangedCallback(mCallback);
+        } else {
+            mController.removeNetworkSignalChangedCallback(mCallback);
+        }
     }
 
     @Override
@@ -67,8 +76,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
-        if (arg == null) return;
         state.visible = true;
+        if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
+        if (arg == null) return;
         CallbackInfo cb = (CallbackInfo) arg;
 
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
@@ -114,6 +124,18 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         boolean activityIn;
         boolean activityOut;
         String wifiSignalContentDescription;
+
+        @Override
+        public String toString() {
+            return new StringBuilder("CallbackInfo[")
+                .append("enabled=").append(enabled)
+                .append(",wifiSignalIconId=").append(wifiSignalIconId)
+                .append(",enabledDesc=").append(enabledDesc)
+                .append(",activityIn=").append(activityIn)
+                .append(",activityOut=").append(activityOut)
+                .append(",wifiSignalContentDescription=").append(wifiSignalContentDescription)
+                .append(']').toString();
+        }
     }
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
@@ -121,6 +143,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
                 boolean activityIn, boolean activityOut,
                 String wifiSignalContentDescriptionId, String description) {
+            if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
             final CallbackInfo info = new CallbackInfo();
             info.enabled = enabled;
             info.wifiSignalIconId = wifiSignalIconId;

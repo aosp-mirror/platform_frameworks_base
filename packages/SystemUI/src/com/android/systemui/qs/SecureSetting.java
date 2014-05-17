@@ -21,10 +21,10 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.provider.Settings.Secure;
 
-import com.android.systemui.statusbar.policy.Disposable;
+import com.android.systemui.statusbar.policy.Listenable;
 
 /** Helper for managing a secure setting. **/
-public abstract class SecureSetting extends ContentObserver implements Disposable {
+public abstract class SecureSetting extends ContentObserver implements Listenable {
     private final Context mContext;
     private final String mSettingName;
 
@@ -38,8 +38,7 @@ public abstract class SecureSetting extends ContentObserver implements Disposabl
     }
 
     public void rebindForCurrentUser() {
-        mContext.getContentResolver().registerContentObserver(
-                Secure.getUriFor(mSettingName), false, this);
+        setListening(true);
     }
 
     public int getValue() {
@@ -51,8 +50,13 @@ public abstract class SecureSetting extends ContentObserver implements Disposabl
     }
 
     @Override
-    public void dispose() {
-        mContext.getContentResolver().unregisterContentObserver(this);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mContext.getContentResolver().registerContentObserver(
+                    Secure.getUriFor(mSettingName), false, this);
+        } else {
+            mContext.getContentResolver().unregisterContentObserver(this);
+        }
     }
 
     @Override

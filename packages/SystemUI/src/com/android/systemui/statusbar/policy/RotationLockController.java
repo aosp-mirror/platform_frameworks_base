@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-public interface RotationLockController extends Disposable {
+public interface RotationLockController extends Listenable {
     int getRotationLockOrientation();
     boolean isRotationLockAffordanceVisible();
     boolean isRotationLocked();
