@@ -493,7 +493,7 @@ public class PasspointManager {
     /**
      * Select and connect to a Passpoint network.
      *
-     * @param policy Selected Passpoint network, see {@link PasspointPolicy}
+     * @param selected Selected Passpoint network, see {@link PasspointPolicy}
      */
     public void connect(PasspointPolicy selected) {
     }
