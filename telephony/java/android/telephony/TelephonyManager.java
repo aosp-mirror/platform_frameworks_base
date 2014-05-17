@@ -82,39 +82,7 @@ public class TelephonyManager {
         static final int NEVER_USE = 2;
     }
 
-    private final HashMap<CallStateListener,Listener> mListeners
-            = new HashMap<CallStateListener,Listener>();
     private final Context mContext;
-
-    private static class Listener extends ITelephonyListener.Stub {
-        final CallStateListener mListener;
-        private static final int WHAT = 1;
-
-        private Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                mListener.onCallStateChanged(msg.arg1, msg.arg2, (String)msg.obj);
-            }
-        };
-
-        Listener(CallStateListener listener) {
-            mListener = listener;
-        }
-
-        @Override
-        public void onUpdate(final int callId, final int state, final String number) {
-            if (mHandler != null) {
-                mHandler.sendMessage(mHandler.obtainMessage(WHAT, callId, state, number));
-            }
-        }
-
-        void clearQueue() {
-            mHandler.removeMessages(WHAT);
-
-            // Don't accept more incoming binder calls either.
-            mHandler = null;
-        }
-    }
 
     /** @hide */
     public TelephonyManager(Context context) {
@@ -2016,46 +1984,6 @@ public class TelephonyManager {
 
     /** @hide */
     @PrivateApi
-    public void toggleHold() {
-        try {
-            getITelephony().toggleHold();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#toggleHold", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void merge() {
-        try {
-            getITelephony().merge();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#merge", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void swap() {
-        try {
-            getITelephony().swap();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#swap", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void mute(boolean mute) {
-        try {
-            getITelephony().mute(mute);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#mute", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
     public void silenceRinger() {
         try {
             getITelephony().silenceRinger();
@@ -2290,57 +2218,5 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#needsOtaServiceProvisioning", e);
         }
         return false;
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void playDtmfTone(char digit, boolean timedShortCode) {
-        try {
-            getITelephony().playDtmfTone(digit, timedShortCode);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#playDtmfTone", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void stopDtmfTone() {
-        try {
-            getITelephony().stopDtmfTone();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#stopDtmfTone", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void addCallStateListener(CallStateListener listener) {
-        try {
-            if (listener == null) {
-                throw new RuntimeException("Listener can't be null");
-            }
-            if (!mListeners.containsKey(listener)) {
-                final Listener l = new Listener(listener);
-                mListeners.put(listener, l);
-                getITelephony().addListener(l);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#addListener", e);
-        }
-    }
-
-    /** @hide */
-    @PrivateApi
-    public void removeCallStateListener(CallStateListener listener) {
-        try {
-            final Listener l = mListeners.remove(listener);
-            if (l != null) {
-                // Make sure that no callbacks that are already in flight come.
-                l.clearQueue();
-                getITelephony().removeListener(l);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#removeListener", e);
-        }
     }
 }
