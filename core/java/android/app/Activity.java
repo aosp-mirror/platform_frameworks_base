@@ -3613,15 +3613,15 @@ public class Activity extends ContextThemeWrapper
             theme.applyStyle(resid, false);
         }
 
-        // Get the primary color and update the RecentsActivityValues for this activity
+        // Get the primary color and update the TaskDescription for this activity
         if (theme != null) {
             TypedArray a = theme.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
             int colorPrimary = a.getColor(com.android.internal.R.styleable.Theme_colorPrimary, 0);
             a.recycle();
             if (colorPrimary != 0) {
-                ActivityManager.RecentsActivityValues v = new ActivityManager.RecentsActivityValues();
-                v.colorPrimary = colorPrimary;
-                setRecentsActivityValues(v);
+                ActivityManager.TaskDescription v = new ActivityManager.TaskDescription(null, null,
+                        colorPrimary);
+                setTaskDescription(v);
             }
         }
     }
@@ -4926,27 +4926,30 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Sets information describing this Activity for presentation inside the Recents System UI. When
-     * {@link ActivityManager#getRecentTasks} is called, the activities of each task are
-     * traversed in order from the topmost activity to the bottommost. The traversal continues for
-     * each property until a suitable value is found. For each task those values will be returned in
-     * {@link android.app.ActivityManager.RecentsActivityValues}.
+     * Sets information describing the task with this activity for presentation inside the Recents
+     * System UI. When {@link ActivityManager#getRecentTasks} is called, the activities of each task
+     * are traversed in order from the topmost activity to the bottommost. The traversal continues
+     * for each property until a suitable value is found. For each task the taskDescription will be
+     * returned in {@link android.app.ActivityManager.TaskDescription}.
      *
      * @see ActivityManager#getRecentTasks
-     * @see android.app.ActivityManager.RecentsActivityValues
+     * @see android.app.ActivityManager.TaskDescription
      *
-     * @param values The Recents values that describe this activity.
+     * @param taskDescription The TaskDescription properties that describe the task with this activity
      */
-    public void setRecentsActivityValues(ActivityManager.RecentsActivityValues values) {
-        ActivityManager.RecentsActivityValues activityValues =
-                new ActivityManager.RecentsActivityValues(values);
-        // Scale the icon down to something reasonable
-        if (values.icon != null) {
+    public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
+        ActivityManager.TaskDescription td;
+        // Scale the icon down to something reasonable if it is provided
+        if (taskDescription.getIcon() != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-            activityValues.icon = Bitmap.createScaledBitmap(values.icon, size, size, true);
+            final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size, true);
+            td = new ActivityManager.TaskDescription(taskDescription.getLabel(), icon,
+                    taskDescription.getPrimaryColor());
+        } else {
+            td = taskDescription;
         }
         try {
-            ActivityManagerNative.getDefault().setRecentsActivityValues(mToken, activityValues);
+            ActivityManagerNative.getDefault().setTaskDescription(mToken, td);
         } catch (RemoteException e) {
         }
     }

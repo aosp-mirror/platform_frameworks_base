@@ -2158,12 +2158,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SET_RECENTS_ACTIVITY_VALUES_TRANSACTION: {
+        case SET_TASK_DESCRIPTION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            ActivityManager.RecentsActivityValues values =
-                    ActivityManager.RecentsActivityValues.CREATOR.createFromParcel(data);
-            setRecentsActivityValues(token, values);
+            ActivityManager.TaskDescription values =
+                    ActivityManager.TaskDescription.CREATOR.createFromParcel(data);
+            setTaskDescription(token, values);
             reply.writeNoException();
             return true;
         }
@@ -4967,14 +4967,14 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void setRecentsActivityValues(IBinder token, ActivityManager.RecentsActivityValues values)
+    public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         values.writeToParcel(data, 0);
-        mRemote.transact(SET_RECENTS_ACTIVITY_VALUES_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        mRemote.transact(SET_TASK_DESCRIPTION_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();

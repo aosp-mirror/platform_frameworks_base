@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
@@ -477,65 +478,84 @@ public class ActivityManager {
     /**
      * Information you can set and retrieve about the current activity within the recent task list.
      */
-    public static class RecentsActivityValues implements Parcelable {
-        public CharSequence label;
-        public Bitmap icon;
-        public int colorPrimary;
+    public static class TaskDescription implements Parcelable {
+        private String mLabel;
+        private Bitmap mIcon;
+        private int mColorPrimary;
 
-        public RecentsActivityValues(RecentsActivityValues values) {
-            copyFrom(values);
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this task.
+         * @param icon An icon that represents the current state of this task.
+         * @param colorPrimary A color to override the theme's primary color.  This color must be opaque.
+         */
+        public TaskDescription(String label, Bitmap icon, int colorPrimary) {
+            if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
+                throw new RuntimeException("A TaskDescription's primary color should be opaque");
+            }
+
+            mLabel = label;
+            mIcon = icon;
+            mColorPrimary = colorPrimary;
         }
 
         /**
-         * Creates the RecentsActivityValues to the specified values.
-         *
-         * @param label A label and description of the current state of this activity.
-         * @param icon An icon that represents the current state of this activity.
-         * @param color A color to override the theme's primary color.
-         */
-        public RecentsActivityValues(CharSequence label, Bitmap icon, int color) {
-            this.label = label;
-            this.icon = icon;
-            this.colorPrimary = color;
-        }
-
-        /**
-         * Creates the RecentsActivityValues to the specified values.
+         * Creates the TaskDescription to the specified values.
          *
          * @param label A label and description of the current state of this activity.
          * @param icon An icon that represents the current state of this activity.
          */
-        public RecentsActivityValues(CharSequence label, Bitmap icon) {
+        public TaskDescription(String label, Bitmap icon) {
             this(label, icon, 0);
         }
 
         /**
-         * Creates the RecentsActivityValues to the specified values.
+         * Creates the TaskDescription to the specified values.
          *
          * @param label A label and description of the current state of this activity.
          */
-        public RecentsActivityValues(CharSequence label) {
+        public TaskDescription(String label) {
             this(label, null, 0);
         }
 
-        public RecentsActivityValues() {
+        /**
+         * Creates an empty TaskDescription.
+         */
+        public TaskDescription() {
             this(null, null, 0);
         }
 
-        private RecentsActivityValues(Parcel source) {
+        /**
+         * Creates a copy of another TaskDescription.
+         */
+        public TaskDescription(TaskDescription td) {
+            this(td.getLabel(), td.getIcon(), td.getPrimaryColor());
+        }
+
+        private TaskDescription(Parcel source) {
             readFromParcel(source);
         }
 
         /**
-         * Do a shallow copy of another set of activity values.
-         * @hide
+         * @return The label and description of the current state of this task.
          */
-        public void copyFrom(RecentsActivityValues v) {
-            if (v != null) {
-                label = v.label;
-                icon = v.icon;
-                colorPrimary = v.colorPrimary;
-            }
+        public String getLabel() {
+            return mLabel;
+        }
+
+        /**
+         * @return The icon that represents the current state of this task.
+         */
+        public Bitmap getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * @return The color override on the theme's primary color.
+         */
+        public int getPrimaryColor() {
+            return mColorPrimary;
         }
 
         @Override
@@ -545,37 +565,41 @@ public class ActivityManager {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            TextUtils.writeToParcel(label, dest,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            if (icon == null) {
+            if (mLabel == null) {
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
-                icon.writeToParcel(dest, 0);
+                dest.writeString(mLabel);
             }
-            dest.writeInt(colorPrimary);
+            if (mIcon == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                mIcon.writeToParcel(dest, 0);
+            }
+            dest.writeInt(mColorPrimary);
         }
 
         public void readFromParcel(Parcel source) {
-            label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            icon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
-            colorPrimary = source.readInt();
+            mLabel = source.readInt() > 0 ? source.readString() : null;
+            mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
+            mColorPrimary = source.readInt();
         }
 
-        public static final Creator<RecentsActivityValues> CREATOR
-                = new Creator<RecentsActivityValues>() {
-            public RecentsActivityValues createFromParcel(Parcel source) {
-                return new RecentsActivityValues(source);
+        public static final Creator<TaskDescription> CREATOR
+                = new Creator<TaskDescription>() {
+            public TaskDescription createFromParcel(Parcel source) {
+                return new TaskDescription(source);
             }
-            public RecentsActivityValues[] newArray(int size) {
-                return new RecentsActivityValues[size];
+            public TaskDescription[] newArray(int size) {
+                return new TaskDescription[size];
             }
         };
 
         @Override
         public String toString() {
-            return "RecentsActivityValues Label: " + label + " Icon: " + icon +
-                    " colorPrimary: " + colorPrimary;
+            return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
+                    " colorPrimary: " + mColorPrimary;
         }
     }
 
@@ -629,9 +653,11 @@ public class ActivityManager {
 
         /**
          * The recent activity values for the highest activity in the stack to have set the values.
-         * {@link Activity#setRecentsActivityValues(android.app.ActivityManager.RecentsActivityValues)}.
+         * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
+         *
+         * @hide
          */
-        public RecentsActivityValues activityValues;
+        public TaskDescription taskDescription;
 
         public RecentTaskInfo() {
         }
@@ -654,9 +680,9 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            if (activityValues != null) {
+            if (taskDescription != null) {
                 dest.writeInt(1);
-                activityValues.writeToParcel(dest, 0);
+                taskDescription.writeToParcel(dest, 0);
             } else {
                 dest.writeInt(0);
             }
@@ -670,8 +696,8 @@ public class ActivityManager {
             baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            activityValues = source.readInt() > 0 ?
-                    RecentsActivityValues.CREATOR.createFromParcel(source) : null;
+            taskDescription = source.readInt() > 0 ?
+                    TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
         }

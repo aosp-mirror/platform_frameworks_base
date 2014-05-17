@@ -58,8 +58,8 @@ final class TaskRecord extends ThumbnailHolder {
 
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
-    ActivityManager.RecentsActivityValues lastActivityValues =
-            new ActivityManager.RecentsActivityValues();
+    ActivityManager.TaskDescription lastTaskDescription =
+            new ActivityManager.TaskDescription();
 
     /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities = new ArrayList<ActivityRecord>();
@@ -484,6 +484,48 @@ final class TaskRecord extends ThumbnailHolder {
             }
         }
         return null;
+    }
+
+    /** Updates the last task description values. */
+    void updateTaskDescription() {
+        // Traverse upwards looking for any break between main task activities and
+        // utility activities.
+        int activityNdx;
+        final int numActivities = mActivities.size();
+        for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
+             ++activityNdx) {
+            final ActivityRecord r = mActivities.get(activityNdx);
+            if (r.intent != null &&
+                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                            != 0) {
+                break;
+            }
+        }
+        if (activityNdx > 0) {
+            // Traverse downwards starting below break looking for set label, icon.
+            // Note that if there are activities in the task but none of them set the
+            // recent activity values, then we do not fall back to the last set
+            // values in the TaskRecord.
+            String label = null;
+            Bitmap icon = null;
+            int colorPrimary = 0;
+            for (--activityNdx; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = mActivities.get(activityNdx);
+                if (r.taskDescription != null) {
+                    if (label == null) {
+                        label = r.taskDescription.getLabel();
+                    }
+                    if (icon == null) {
+                        icon = r.taskDescription.getIcon();
+                    }
+                    if (colorPrimary == 0) {
+                        colorPrimary = r.taskDescription.getPrimaryColor();
+
+                    }
+                }
+            }
+            lastTaskDescription = new ActivityManager.TaskDescription(label, icon, colorPrimary);
+        }
     }
 
     void dump(PrintWriter pw, String prefix) {

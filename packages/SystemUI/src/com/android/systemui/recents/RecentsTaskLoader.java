@@ -400,15 +400,14 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             if (info == null) continue;
 
-            ActivityManager.RecentsActivityValues av = t.activityValues;
+            ActivityManager.TaskDescription av = t.taskDescription;
             String activityLabel = null;
             BitmapDrawable activityIcon = null;
             int activityColor = 0;
             if (av != null) {
-                activityLabel = (av.label != null ? av.label.toString() :
-                        ssp.getActivityLabel(info));
-                activityIcon = (av.icon != null) ? new BitmapDrawable(res, av.icon) : null;
-                activityColor = av.colorPrimary;
+                activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
+                activityIcon = (av.getIcon() != null) ? new BitmapDrawable(res, av.getIcon()) : null;
+                activityColor = av.getPrimaryColor();
             } else {
                 activityLabel = ssp.getActivityLabel(info);
             }

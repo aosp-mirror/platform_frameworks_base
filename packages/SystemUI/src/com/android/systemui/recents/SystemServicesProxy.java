@@ -96,18 +96,19 @@ public class SystemServicesProxy {
                 int packageIndex = i % Constants.DebugFlags.App.SystemServicesProxyMockPackageCount;
                 ComponentName cn = new ComponentName("com.android.test" + packageIndex,
                         "com.android.test" + i + ".Activity");
+                String description = "" + i + " - " +
+                        Long.toString(Math.abs(new Random().nextLong()), 36);
                 // Create the recent task info
                 ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
                 rti.id = rti.persistentId = i;
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
-                rti.activityValues = new ActivityManager.RecentsActivityValues();
-                rti.description = "" + i + " - " +
-                        Long.toString(Math.abs(new Random().nextLong()), 36);
+                rti.description = description;
                 if (i % 2 == 0) {
-                    rti.activityValues.label = rti.description;
-                    rti.activityValues.icon = Bitmap.createBitmap(mDummyIcon);
-                    rti.activityValues.colorPrimary = new Random().nextInt();
+                    rti.taskDescription = new ActivityManager.TaskDescription(description,
+                        Bitmap.createBitmap(mDummyIcon), new Random().nextInt());
+                } else {
+                    rti.taskDescription = new ActivityManager.TaskDescription();
                 }
                 tasks.add(rti);
             }
