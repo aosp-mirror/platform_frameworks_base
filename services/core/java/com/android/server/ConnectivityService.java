@@ -193,6 +193,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final boolean DBG = true;
     private static final boolean VDBG = true; // STOPSHIP
 
+    // network sampling debugging
+    private static final boolean SAMPLE_DBG = false;
+
     private static final boolean LOGD_RULES = false;
 
     // TODO: create better separation between radio types and network types
@@ -219,10 +222,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // Set network sampling interval at 12 minutes, this way, even if the timers get
     // aggregated, it will fire at around 15 minutes, which should allow us to
     // aggregate this timer with other timers (specially the socket keep alive timers)
-    private static final int DEFAULT_SAMPLING_INTERVAL_IN_SECONDS = (VDBG ? 30 : 12 * 60);
+    private static final int DEFAULT_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE_DBG ? 30 : 12 * 60);
 
     // start network sampling a minute after booting ...
-    private static final int DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS = (VDBG ? 30 : 60);
+    private static final int DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE_DBG ? 30 : 60);
 
     AlarmManager mAlarmManager;
 
