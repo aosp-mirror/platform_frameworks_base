@@ -621,8 +621,9 @@ public class PreferenceManager {
      * Registers a listener.
      * 
      * @see OnActivityStopListener
+     * @hide
      */
-    void registerOnActivityStopListener(OnActivityStopListener listener) {
+    public void registerOnActivityStopListener(OnActivityStopListener listener) {
         synchronized (this) {
             if (mActivityStopListeners == null) {
                 mActivityStopListeners = new ArrayList<OnActivityStopListener>();
@@ -638,8 +639,9 @@ public class PreferenceManager {
      * Unregisters a listener.
      * 
      * @see OnActivityStopListener
+     * @hide
      */
-    void unregisterOnActivityStopListener(OnActivityStopListener listener) {
+    public void unregisterOnActivityStopListener(OnActivityStopListener listener) {
         synchronized (this) {
             if (mActivityStopListeners != null) {
                 mActivityStopListeners.remove(listener);

@@ -4556,6 +4556,12 @@ public final class Settings {
         public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
+         * If enabled, intercepted notifications will be displayed (not suppressed) in zen mode.
+         * @hide
+         */
+        public static final String DISPLAY_INTERCEPTED_NOTIFICATIONS = "display_intercepted_notifications";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
