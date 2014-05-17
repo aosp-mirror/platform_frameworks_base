@@ -16,12 +16,17 @@
 
 package android.service.trust;
 
+import android.Manifest;
 import android.annotation.SdkConstant;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.util.Slog;
 
 /**
@@ -82,6 +87,22 @@ public class TrustAgentService extends Service {
             }
         };
     };
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ComponentName component = new ComponentName(this, getClass());
+        try {
+            ServiceInfo serviceInfo = getPackageManager().getServiceInfo(component, 0 /* flags */);
+            if (!Manifest.permission.BIND_TRUST_AGENT.equals(serviceInfo.permission)) {
+                throw new IllegalStateException(component.flattenToShortString()
+                        + " is not declared with the permission "
+                        + "\"" + Manifest.permission.BIND_TRUST_AGENT + "\"");
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Can't get ServiceInfo for " + component.toShortString());
+        }
+    }
 
     /**
      * Called when the user attempted to authenticate on the device.
