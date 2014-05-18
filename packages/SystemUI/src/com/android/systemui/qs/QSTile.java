@@ -19,7 +19,6 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -50,6 +49,7 @@ import java.util.Objects;
 public abstract class QSTile<TState extends State> implements Listenable {
     protected final String TAG = "QSTile." + getClass().getSimpleName();
     protected static final boolean DEBUG = false;
+    public static final int FEEDBACK_START_DELAY = 400;
 
     protected final Host mHost;
     protected final Context mContext;

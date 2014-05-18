@@ -193,4 +193,9 @@
     </style>
 
     <style name="QSBorderless" parent="@android:style/Widget.Quantum.Button.Borderless" />
+
+    <style name="QSBorderless.Tiny">
+        <item name="android:minHeight">12dip</item>
+        <item name="android:minWidth">12dip</item>
+    </style>
 </resources>

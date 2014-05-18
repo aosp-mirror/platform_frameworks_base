@@ -112,7 +112,7 @@ public class QSTileHost implements QSTile.Host {
 
     @Override
     public void startSettingsActivity(final Intent intent) {
-        mStatusBar.postStartSettingsActivity(intent);
+        mStatusBar.postStartSettingsActivity(intent, QSTile.FEEDBACK_START_DELAY);
     }
 
     @Override

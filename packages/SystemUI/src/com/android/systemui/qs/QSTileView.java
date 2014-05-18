@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,9 +45,9 @@ public class QSTileView extends ViewGroup {
     protected final Context mContext;
     private final View mIcon;
     private final View mDivider;
-    private final TextView mLabel;
     private final H mHandler = new H();
 
+    private TextView mLabel;
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
@@ -56,14 +57,7 @@ public class QSTileView extends ViewGroup {
 
         mContext = context;
         final Resources res = context.getResources();
-        mLabel = new TextView(mContext);
-        mLabel.setId(android.R.id.title);
-        mLabel.setTextColor(res.getColor(R.color.quick_settings_tile_text));
-        mLabel.setGravity(Gravity.CENTER);
-        mLabel.setTypeface(CONDENSED);
-        mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                res.getDimensionPixelSize(R.dimen.quick_settings_tile_text_size));
-        addView(mLabel);
+        recreateLabel();
         setClipChildren(false);
 
         mIcon = createIcon();
@@ -79,8 +73,33 @@ public class QSTileView extends ViewGroup {
         setBackground(getSelectableBackground());
     }
 
+    private void recreateLabel() {
+        CharSequence labelText = null;
+        if (mLabel != null) {
+            labelText = mLabel.getText();
+            removeView(mLabel);
+        }
+        final Resources res = mContext.getResources();
+        mLabel = new TextView(mDual ? new ContextThemeWrapper(mContext, R.style.QSBorderless_Tiny)
+                : mContext);
+        mLabel.setId(android.R.id.title);
+        mLabel.setTextColor(res.getColor(R.color.quick_settings_tile_text));
+        mLabel.setGravity(Gravity.CENTER);
+        mLabel.setTypeface(CONDENSED);
+        mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                res.getDimensionPixelSize(R.dimen.quick_settings_tile_text_size));
+        if (labelText != null) {
+            mLabel.setText(labelText);
+        }
+        addView(mLabel);
+    }
+
     public void setDual(boolean dual) {
+        final boolean changed = dual != mDual;
         mDual = dual;
+        if (changed) {
+            recreateLabel();
+        }
         if (mDual) {
             setOnClickListener(mClickPrimary);
             mLabel.setClickable(true);
@@ -121,9 +140,10 @@ public class QSTileView extends ViewGroup {
         final int iconSpec = exactly((int)mLabel.getTextSize() * 2);
         mIcon.measure(iconSpec, iconSpec);
         mLabel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
-        mLabel.measure(widthMeasureSpec, exactly(mLabel.getMeasuredHeight() + p * 2));
         if (mDual) {
             mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
+        } else {
+            mLabel.measure(widthMeasureSpec, exactly(mLabel.getMeasuredHeight() + p * 2));
         }
         setMeasuredDimension(w, h);
     }
