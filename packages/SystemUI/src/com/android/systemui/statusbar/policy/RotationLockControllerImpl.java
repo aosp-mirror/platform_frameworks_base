@@ -39,12 +39,12 @@ public final class RotationLockControllerImpl implements RotationLockController 
 
     public RotationLockControllerImpl(Context context) {
         mContext = context;
-        RotationPolicy.registerRotationPolicyListener(mContext,
-                mRotationPolicyListener, UserHandle.USER_ALL);
+        setListening(true);
     }
 
     public void addRotationLockControllerCallback(RotationLockControllerCallback callback) {
         mCallbacks.add(callback);
+        notifyChanged(callback);
     }
 
     public void removeRotationLockControllerCallback(RotationLockControllerCallback callback) {
@@ -68,14 +68,23 @@ public final class RotationLockControllerImpl implements RotationLockController 
     }
 
     @Override
-    public void dispose() {
-        RotationPolicy.unregisterRotationPolicyListener(mContext, mRotationPolicyListener);
+    public void setListening(boolean listening) {
+        if (listening) {
+            RotationPolicy.registerRotationPolicyListener(mContext, mRotationPolicyListener,
+                    UserHandle.USER_ALL);
+        } else {
+            RotationPolicy.unregisterRotationPolicyListener(mContext, mRotationPolicyListener);
+        }
     }
 
     private void notifyChanged() {
         for (RotationLockControllerCallback callback : mCallbacks) {
-            callback.onRotationLockStateChanged(RotationPolicy.isRotationLocked(mContext),
-                    RotationPolicy.isRotationLockToggleVisible(mContext));
+            notifyChanged(callback);
         }
+    }
+
+    private void notifyChanged(RotationLockControllerCallback callback) {
+        callback.onRotationLockStateChanged(RotationPolicy.isRotationLocked(mContext),
+                RotationPolicy.isRotationLockToggleVisible(mContext));
     }
 }

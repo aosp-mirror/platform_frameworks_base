@@ -80,7 +80,10 @@ public class QSPanel extends ViewGroup {
             showDetail(false /*show*/, mDetailRecord);
         }
         for (TileRecord r : mRecords) {
-            r.tile.setShown(expanded);
+            r.tile.setListening(expanded);
+            if (expanded) {
+                r.tile.refreshState();
+            }
         }
     }
 
@@ -125,6 +128,7 @@ public class QSPanel extends ViewGroup {
             }
         };
         r.tileView.init(click, clickSecondary);
+        r.tile.refreshState();
         mRecords.add(r);
 
         addView(r.tileView);
@@ -156,24 +160,29 @@ public class QSPanel extends ViewGroup {
         mCellHeight = (int)(mCellWidth / TILE_ASPECT);
         mLargeCellWidth = (int)(mCellWidth * LARGE_TILE_FACTOR);
         mLargeCellHeight = (int)(mCellHeight * LARGE_TILE_FACTOR);
-        int r = 0;
-        int c = 0;
+        int r = -1;
+        int c = -1;
         int rows = 0;
+        boolean rowIsDual = false;
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
+            // wrap to next column if we've reached the max # of columns
+            // also don't allow dual + single tiles on the same row
+            if (r == -1 || c == (mColumns - 1) || rowIsDual != record.tile.supportsDualTargets()) {
+                r++;
+                c = 0;
+                rowIsDual = record.tile.supportsDualTargets();
+            } else {
+                c++;
+            }
             record.row = r;
             record.col = c;
             rows = r + 1;
-            c++;
-            if (c == mColumns /*end of normal column*/ || r == 0 && c == 2 /*end of 1st column*/) {
-                c = 0;
-                r++;
-            }
         }
 
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
-            record.tileView.setDual(record.row == 0);
+            record.tileView.setDual(record.tile.supportsDualTargets());
             final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));

@@ -51,8 +51,8 @@ public class BugreportTile extends QSTile<QSTile.State> {
     }
 
     @Override
-    public void dispose() {
-        mSetting.dispose();
+    public void setListening(boolean listening) {
+        mSetting.setListening(listening);
     }
 
     @Override

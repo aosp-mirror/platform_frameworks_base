@@ -30,7 +30,7 @@ import android.view.ViewGroup;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.Disposable;
+import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -47,8 +47,9 @@ import java.util.Objects;
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
  */
-public abstract class QSTile<TState extends State> implements Disposable {
-    private final String TAG = "QSTile." + getClass().getSimpleName();
+public abstract class QSTile<TState extends State> implements Listenable {
+    protected final String TAG = "QSTile." + getClass().getSimpleName();
+    protected static final boolean DEBUG = false;
 
     protected final Host mHost;
     protected final Context mContext;
@@ -67,6 +68,10 @@ public abstract class QSTile<TState extends State> implements Disposable {
         mHost = host;
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
+    }
+
+    public boolean supportsDualTargets() {
+        return false;
     }
 
     public Host getHost() {
@@ -111,10 +116,6 @@ public abstract class QSTile<TState extends State> implements Disposable {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId).sendToTarget();
     }
 
-    public void setShown(boolean shown) {
-        mHandler.obtainMessage(H.SHOWN, shown ? 1 : 0, 0).sendToTarget();
-    }
-
     // call only on tile worker looper
 
     private void handleSetCallback(Callback callback) {
@@ -124,10 +125,6 @@ public abstract class QSTile<TState extends State> implements Disposable {
 
     protected void handleSecondaryClick() {
         // optional
-    }
-
-    protected void handleShown(boolean shown) {
-        // optional, discouraged
     }
 
     protected void handleRefreshState(Object arg) {
@@ -161,7 +158,6 @@ public abstract class QSTile<TState extends State> implements Disposable {
         private static final int REFRESH_STATE = 4;
         private static final int SHOW_DETAIL = 5;
         private static final int USER_SWITCH = 6;
-        private static final int SHOWN = 7;
 
         private H(Looper looper) {
             super(looper);
@@ -189,9 +185,6 @@ public abstract class QSTile<TState extends State> implements Disposable {
                 } else if (msg.what == USER_SWITCH) {
                     name = "handleUserSwitch";
                     handleUserSwitch(msg.arg1);
-                } else if (msg.what == SHOWN) {
-                    name = "handleShown";
-                    handleShown(msg.arg1 != 0);
                 }
             } catch (Throwable t) {
                 final String error = "Error in " + name;

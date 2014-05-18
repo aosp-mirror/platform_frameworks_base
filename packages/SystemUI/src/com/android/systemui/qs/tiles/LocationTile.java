@@ -31,7 +31,6 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     public LocationTile(Host host) {
         super(host);
         mController = host.getLocationController();
-        mController.addSettingsChangedCallback(mCallback);
     }
 
     @Override
@@ -39,8 +38,13 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         return new BooleanState();
     }
 
-    public void dispose() {
-        mController.removeSettingsChangedCallback(mCallback);
+    @Override
+    public void setListening(boolean listening) {
+        if (listening) {
+            mController.addSettingsChangedCallback(mCallback);
+        } else {
+            mController.removeSettingsChangedCallback(mCallback);
+        }
     }
 
     @Override

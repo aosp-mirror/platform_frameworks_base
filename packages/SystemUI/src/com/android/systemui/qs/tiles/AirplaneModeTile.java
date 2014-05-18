@@ -39,11 +39,6 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
                 handleRefreshState(value);
             }
         };
-
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mContext.registerReceiver(mReceiver, filter);
-        refreshState();
     }
 
     @Override
@@ -84,9 +79,15 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
-    public void dispose() {
-        mSetting.dispose();
-        mContext.unregisterReceiver(mReceiver);
+    public void setListening(boolean listening) {
+        if (listening) {
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            mContext.registerReceiver(mReceiver, filter);
+        } else {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        mSetting.setListening(listening);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

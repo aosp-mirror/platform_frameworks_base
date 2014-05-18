@@ -33,8 +33,6 @@ public class RingerModeTile extends QSTile<RingerModeTile.IntState> {
     public RingerModeTile(Host host) {
         super(host);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        final IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        mContext.registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -43,8 +41,13 @@ public class RingerModeTile extends QSTile<RingerModeTile.IntState> {
     }
 
     @Override
-    public void dispose() {
-        mContext.unregisterReceiver(mReceiver);
+    public void setListening(boolean listening) {
+        if (listening) {
+            final IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
+            mContext.registerReceiver(mReceiver, filter);
+        } else {
+            mContext.unregisterReceiver(mReceiver);
+        }
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +34,6 @@ public class ZenModeTile extends QSTile<QSTile.BooleanState> {
     public ZenModeTile(Host host) {
         super(host);
         mController = host.getZenModeController();
-        mController.addCallback(mCallback);
     }
 
     @Override
@@ -51,8 +51,12 @@ public class ZenModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    public void dispose() {
-        mController.removeCallback(mCallback);
+    public void setListening(boolean listening) {
+        if (listening) {
+            mController.addCallback(mCallback);
+        } else {
+            mController.removeCallback(mCallback);
+        }
     }
 
     @Override
@@ -77,6 +81,7 @@ public class ZenModeTile extends QSTile<QSTile.BooleanState> {
     private final ZenModeController.Callback mCallback = new ZenModeController.Callback() {
         @Override
         public void onZenChanged(boolean zen) {
+            if (DEBUG) Log.d(TAG, "onZenChanged " + zen);
             refreshState(zen);
         }
     };
