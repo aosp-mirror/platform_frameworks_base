@@ -55,6 +55,6 @@ public class HotspotTile extends QSTile<QSTile.State> {
     protected void handleUpdateState(State state, Object arg) {
         state.visible = mController != null;
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_hotspot);
+        state.iconId = R.drawable.ic_qs_hotspot_off;
     }
 }

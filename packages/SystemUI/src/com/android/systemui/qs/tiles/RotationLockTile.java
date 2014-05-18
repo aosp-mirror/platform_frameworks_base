@@ -63,8 +63,8 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         if (state.value != rotationLocked) {
             state.value = rotationLocked;
             final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(rotationLocked
-                    ? R.drawable.ic_rotate_locked_anim
-                    : R.drawable.ic_rotate_unlocked_anim);
+                    ? R.drawable.ic_qs_rotation_locked
+                    : R.drawable.ic_qs_rotation_unlocked);
             state.icon = d;
             mUiHandler.post(new Runnable() {
                 @Override
@@ -82,12 +82,12 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                     : R.string.quick_settings_rotation_locked_label;
             state.label = mContext.getString(label);
             if (state.icon == null) {
-                state.icon = mContext.getDrawable(R.drawable.ic_rotate_24_15);
+                state.icon = mContext.getDrawable(R.drawable.ic_qs_rotation_15);
             }
         } else {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
             if (state.icon == null) {
-                state.icon = mContext.getDrawable(R.drawable.ic_rotate_24_01);
+                state.icon = mContext.getDrawable(R.drawable.ic_qs_rotation_01);
             }
         }
     }

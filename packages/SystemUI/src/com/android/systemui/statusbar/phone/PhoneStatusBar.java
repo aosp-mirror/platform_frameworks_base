@@ -619,7 +619,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mModeIcon = (ImageView)mStatusBarView.findViewById(R.id.modeIcon);
-        mModeIcon.setImageResource(R.drawable.stat_sys_zen_limited);
+        mModeIcon.setImageResource(R.drawable.ic_qs_zen_on);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 

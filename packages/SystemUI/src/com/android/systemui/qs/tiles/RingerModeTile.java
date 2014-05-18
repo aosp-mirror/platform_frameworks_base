@@ -67,13 +67,13 @@ public class RingerModeTile extends QSTile<RingerModeTile.IntState> {
         state.visible = true;
         state.value = ringerMode;
         if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
-            state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_ringer_vibrate);
+            state.iconId = R.drawable.ic_qs_ringer_vibrate;
             state.label = "Vibrate";
         } else if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
-            state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_ringer_silent);
+            state.iconId = R.drawable.ic_qs_ringer_silent;
             state.label = "Silent";
         } else {
-            state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_ringer_audible);
+            state.iconId = R.drawable.ic_qs_ringer_audible;
             state.label = "Audible";
         }
     }

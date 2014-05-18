@@ -65,7 +65,6 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         state.value = airplaneMode;
         state.visible = true;
         state.label = mContext.getString(R.string.quick_settings_airplane_mode_label);
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_airplane);
         if (airplaneMode) {
             state.iconId =  R.drawable.ic_qs_airplane_on;
             state.contentDescription =  mContext.getString(

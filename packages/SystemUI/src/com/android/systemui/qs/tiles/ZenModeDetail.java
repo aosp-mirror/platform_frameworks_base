@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
@@ -39,7 +40,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.qs.QSImageView;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
@@ -72,9 +72,7 @@ public class ZenModeDetail extends RelativeLayout {
         mContext = getContext();
         mController = mHost.getZenModeController();
 
-        final QSImageView close = (QSImageView) findViewById(android.R.id.button1);
-        close.setImageDrawable(mHost.getVectorDrawable(R.drawable.ic_qs_close));
-        close.setEnabledVersion(true);
+        final ImageView close = (ImageView) findViewById(android.R.id.button1);
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -239,9 +237,7 @@ public class ZenModeDetail extends RelativeLayout {
             title.setText(condition.summary);
             title.setEnabled(enabled);
             title.setAlpha(enabled ? 1 : .5f);
-            final QSImageView button1 = (QSImageView) row.findViewById(android.R.id.button1);
-            button1.setImageDrawable(mHost.getVectorDrawable(R.drawable.ic_qs_minus));
-            button1.setEnabledVersion(true);
+            final ImageView button1 = (ImageView) row.findViewById(android.R.id.button1);
             button1.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -250,9 +246,7 @@ public class ZenModeDetail extends RelativeLayout {
                 }
             });
 
-            final QSImageView button2 = (QSImageView) row.findViewById(android.R.id.button2);
-            button2.setImageDrawable(mHost.getVectorDrawable(R.drawable.ic_qs_plus));
-            button2.setEnabledVersion(true);
+            final ImageView button2 = (ImageView) row.findViewById(android.R.id.button2);
             button2.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {

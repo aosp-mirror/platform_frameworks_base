@@ -74,13 +74,13 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.visible = true;
         state.label = mContext
                 .getString(R.string.quick_settings_remote_display_no_connection_label);
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_cast);
         if (arg instanceof CallbackInfo) {
             final CallbackInfo cb = (CallbackInfo) arg;
             if (cb.connectedRouteName != null) {
                 state.value = !cb.connecting;
             }
         }
+        state.iconId = state.value ? R.drawable.ic_qs_cast_on : R.drawable.ic_qs_cast_off;
     }
 
     private static class CallbackInfo {

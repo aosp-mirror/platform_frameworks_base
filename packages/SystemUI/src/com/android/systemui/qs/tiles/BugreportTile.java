@@ -64,8 +64,7 @@ public class BugreportTile extends QSTile<QSTile.State> {
     @Override
     protected void handleUpdateState(State state, Object pushArg) {
         state.visible = mSetting.getValue() != 0;
-        state.iconId = com.android.internal.R.drawable.stat_sys_adb;
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_bugreport);
+        state.iconId = R.drawable.ic_qs_bugreport;
         state.label = mContext.getString(com.android.internal.R.string.bugreport_title);
     }
 

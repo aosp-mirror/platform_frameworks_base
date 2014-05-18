@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.VectorDrawable;
 import android.os.HandlerThread;
 import android.os.Looper;
 
@@ -134,11 +133,6 @@ public class QSTileHost implements QSTile.Host {
     @Override
     public Context getContext() {
         return mContext;
-    }
-
-    @Override
-    public VectorDrawable getVectorDrawable(int resId) {
-        return (VectorDrawable) mContext.getDrawable(resId);
     }
 
     @Override
