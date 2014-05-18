@@ -20,7 +20,7 @@ This is an optimized layout for a screen with the Action Bar enabled.
 
 <com.android.internal.widget.ActionBarOverlayLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/action_bar_overlay_layout"
+    android:id="@+id/decor_content_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:splitMotionEvents="false"

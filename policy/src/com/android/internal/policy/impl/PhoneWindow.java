@@ -36,6 +36,7 @@ import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
+import com.android.internal.widget.DecorContentParent;
 import com.android.internal.widget.SwipeDismissLayout;
 
 import android.app.ActivityManager;
@@ -147,7 +148,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private TextView mTitleView;
 
-    private ActionBarView mActionBar;
+    private DecorContentParent mDecorContentParent;
     private ActionMenuPresenterCallback mActionMenuPresenterCallback;
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
 
@@ -441,8 +442,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setTitle(CharSequence title) {
         if (mTitleView != null) {
             mTitleView.setText(title);
-        } else if (mActionBar != null) {
-            mActionBar.setWindowTitle(title);
+        } else if (mDecorContentParent != null) {
+            mDecorContentParent.setWindowTitle(title);
         }
         mTitle = title;
     }
@@ -489,10 +490,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean isActionBarMenu =
                 (st.featureId == FEATURE_OPTIONS_PANEL || st.featureId == FEATURE_ACTION_BAR);
 
-        if (isActionBarMenu && mActionBar != null) {
+        if (isActionBarMenu && mDecorContentParent != null) {
             // Enforce ordering guarantees around events so that the action bar never
             // dispatches menu-related events before the panel is prepared.
-            mActionBar.setMenuPrepared();
+            mDecorContentParent.setMenuPrepared();
         }
 
         if (st.createdPanelView == null) {
@@ -504,11 +505,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
 
-                if (isActionBarMenu && mActionBar != null) {
+                if (isActionBarMenu && mDecorContentParent != null) {
                     if (mActionMenuPresenterCallback == null) {
                         mActionMenuPresenterCallback = new ActionMenuPresenterCallback();
                     }
-                    mActionBar.setMenu(st.menu, mActionMenuPresenterCallback);
+                    mDecorContentParent.setMenu(st.menu, mActionMenuPresenterCallback);
                 }
 
                 // Call callback, and return if it doesn't want to display menu.
@@ -520,9 +521,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // Ditch the menu created above
                     st.setMenu(null);
 
-                    if (isActionBarMenu && mActionBar != null) {
+                    if (isActionBarMenu && mDecorContentParent != null) {
                         // Don't show it in the action bar either
-                        mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                        mDecorContentParent.setMenu(null, mActionMenuPresenterCallback);
                     }
 
                     return false;
@@ -545,10 +546,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             if (!cb.onPreparePanel(st.featureId, st.createdPanelView, st.menu)) {
-                if (isActionBarMenu && mActionBar != null) {
+                if (isActionBarMenu && mDecorContentParent != null) {
                     // The app didn't want to show the menu for now but it still exists.
                     // Clear it out of the action bar.
-                    mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                    mDecorContentParent.setMenu(null, mActionMenuPresenterCallback);
                 }
                 st.menu.startDispatchingItemsChanged();
                 return false;
@@ -573,7 +574,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         // Action bars handle their own menu state
-        if (mActionBar == null) {
+        if (mDecorContentParent == null) {
             PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
             if ((st != null) && (st.menu != null)) {
                 if (st.isOpen) {
@@ -625,12 +626,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void openPanel(int featureId, KeyEvent event) {
-        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                mActionBar.isOverflowReserved() &&
+        if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != null &&
+                mDecorContentParent.canShowOverflowMenu() &&
                 !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
-            if (mActionBar.getVisibility() == View.VISIBLE) {
-                mActionBar.showOverflowMenu();
-            }
+            mDecorContentParent.showOverflowMenu();
         } else {
             openPanel(getPanelState(featureId, true), event);
         }
@@ -759,10 +758,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void closePanel(int featureId) {
-        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                mActionBar.isOverflowReserved() &&
+        if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != null &&
+                mDecorContentParent.canShowOverflowMenu() &&
                 !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
-            mActionBar.hideOverflowMenu();
+            mDecorContentParent.hideOverflowMenu();
         } else if (featureId == FEATURE_CONTEXT_MENU) {
             closeContextMenu();
         } else {
@@ -784,7 +783,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public final void closePanel(PanelFeatureState st, boolean doCallback) {
         // System.out.println("Close panel: isOpen=" + st.isOpen);
         if (doCallback && st.featureId == FEATURE_OPTIONS_PANEL &&
-                mActionBar != null && mActionBar.isOverflowMenuShowing()) {
+                mDecorContentParent != null && mDecorContentParent.isOverflowMenuShowing()) {
             checkCloseActionMenu(st.menu);
             return;
         }
@@ -830,7 +829,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         mClosingActionMenu = true;
-        mActionBar.dismissPopupMenus();
+        mDecorContentParent.dismissPopups();
         Callback cb = getCallback();
         if (cb != null && !isDestroyed()) {
             cb.onPanelClosed(FEATURE_ACTION_BAR, menu);
@@ -876,7 +875,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         
         // Prepare the options panel if we have an action bar
         if ((featureId == FEATURE_ACTION_BAR || featureId == FEATURE_OPTIONS_PANEL)
-                && mActionBar != null) {
+                && mDecorContentParent != null) {
             st = getPanelState(Window.FEATURE_OPTIONS_PANEL, false);
             if (st != null) {
                 st.isPrepared = false;
@@ -923,17 +922,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             
             boolean playSoundEffect = false;
             final PanelFeatureState st = getPanelState(featureId, true);
-            if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                    mActionBar.isOverflowReserved() &&
+            if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != null &&
+                    mDecorContentParent.canShowOverflowMenu() &&
                     !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
-                if (mActionBar.getVisibility() == View.VISIBLE) {
-                    if (!mActionBar.isOverflowMenuShowing()) {
-                        if (!isDestroyed() && preparePanel(st, event)) {
-                            playSoundEffect = mActionBar.showOverflowMenu();
-                        }
-                    } else {
-                        playSoundEffect = mActionBar.hideOverflowMenu();
+                if (!mDecorContentParent.isOverflowMenuShowing()) {
+                    if (!isDestroyed() && preparePanel(st, event)) {
+                        playSoundEffect = mDecorContentParent.showOverflowMenu();
                     }
+                } else {
+                    playSoundEffect = mDecorContentParent.hideOverflowMenu();
                 }
             } else {
                 if (st.isOpen || st.isHandled) {
@@ -1046,7 +1043,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             st.isHandled = true;
 
             // Only close down the menu if we don't have an action bar keeping it open.
-            if ((flags & Menu.FLAG_PERFORM_NO_CLOSE) == 0 && mActionBar == null) {
+            if ((flags & Menu.FLAG_PERFORM_NO_CLOSE) == 0 && mDecorContentParent == null) {
                 closePanel(st, true);
             }
         }
@@ -1068,7 +1065,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         boolean res = st.menu.performIdentifierAction(id, flags);
 
         // Only close down the menu if we don't have an action bar keeping it open.
-        if (mActionBar == null) {
+        if (mDecorContentParent == null) {
             closePanel(st, true);
         }
 
@@ -1103,12 +1100,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void reopenMenu(boolean toggleMenuMode) {
-        if (mActionBar != null && mActionBar.isOverflowReserved() &&
+        if (mDecorContentParent != null && mDecorContentParent.canShowOverflowMenu() &&
                 (!ViewConfiguration.get(getContext()).hasPermanentMenuKey() ||
-                        mActionBar.isOverflowMenuShowPending())) {
+                        mDecorContentParent.isOverflowMenuShowPending())) {
             final Callback cb = getCallback();
-            if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
-                if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
+            if (!mDecorContentParent.isOverflowMenuShowing() || !toggleMenuMode) {
+                if (cb != null && !isDestroyed()) {
                     // If we have a menu invalidation pending, do it now.
                     if (mInvalidatePanelMenuPosted &&
                             (mInvalidatePanelMenuFeatures & (1 << FEATURE_OPTIONS_PANEL)) != 0) {
@@ -1123,11 +1120,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (st.menu != null && !st.refreshMenuContent &&
                             cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
-                        mActionBar.showOverflowMenu();
+                        mDecorContentParent.showOverflowMenu();
                     }
                 }
             } else {
-                mActionBar.hideOverflowMenu();
+                mDecorContentParent.hideOverflowMenu();
                 if (cb != null && !isDestroyed()) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     cb.onPanelClosed(FEATURE_ACTION_BAR, st.menu);
@@ -1164,7 +1161,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         // If we have an action bar, initialize the menu with a context themed for it.
         if ((st.featureId == FEATURE_OPTIONS_PANEL || st.featureId == FEATURE_ACTION_BAR) &&
-                mActionBar != null) {
+                mDecorContentParent != null) {
             TypedValue outValue = new TypedValue();
             Resources.Theme currentTheme = context.getTheme();
             currentTheme.resolveAttribute(com.android.internal.R.attr.actionBarWidgetTheme,
@@ -1509,8 +1506,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mIconRes = resId;
         mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON;
         mResourcesSetFlags &= ~FLAG_RESOURCE_SET_ICON_FALLBACK;
-        if (mActionBar != null) {
-            mActionBar.setIcon(resId);
+        if (mDecorContentParent != null) {
+            mDecorContentParent.setIcon(resId);
         }
     }
 
@@ -1520,13 +1517,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return;
         }
         mIconRes = resId;
-        if (mActionBar != null && (!mActionBar.hasIcon() ||
+        if (mDecorContentParent != null && (!mDecorContentParent.hasIcon() ||
                 (mResourcesSetFlags & FLAG_RESOURCE_SET_ICON_FALLBACK) != 0)) {
             if (resId != 0) {
-                mActionBar.setIcon(resId);
+                mDecorContentParent.setIcon(resId);
                 mResourcesSetFlags &= ~FLAG_RESOURCE_SET_ICON_FALLBACK;
             } else {
-                mActionBar.setIcon(getContext().getPackageManager().getDefaultActivityIcon());
+                mDecorContentParent.setIcon(
+                        getContext().getPackageManager().getDefaultActivityIcon());
                 mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON_FALLBACK;
             }
         }
@@ -1536,8 +1534,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setLogo(int resId) {
         mLogoRes = resId;
         mResourcesSetFlags |= FLAG_RESOURCE_SET_LOGO;
-        if (mActionBar != null) {
-            mActionBar.setLogo(resId);
+        if (mDecorContentParent != null) {
+            mDecorContentParent.setLogo(resId);
         }
     }
 
@@ -1547,8 +1545,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return;
         }
         mLogoRes = resId;
-        if (mActionBar != null && !mActionBar.hasLogo()) {
-            mActionBar.setLogo(resId);
+        if (mDecorContentParent != null && !mDecorContentParent.hasLogo()) {
+            mDecorContentParent.setLogo(resId);
         }
     }
 
@@ -1805,9 +1803,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             outState.putSparseParcelableArray(PANELS_TAG, panelStates);
         }
 
-        if (mActionBar != null) {
+        if (mDecorContentParent != null) {
             SparseArray<Parcelable> actionBarStates = new SparseArray<Parcelable>();
-            mActionBar.saveHierarchyState(actionBarStates);
+            mDecorContentParent.saveToolbarHierarchyState(actionBarStates);
             outState.putSparseParcelableArray(ACTION_BAR_TAG, actionBarStates);
         }
 
@@ -1846,11 +1844,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             restorePanelState(panelStates);
         }
 
-        if (mActionBar != null) {
+        if (mDecorContentParent != null) {
             SparseArray<Parcelable> actionBarStates =
                     savedInstanceState.getSparseParcelableArray(ACTION_BAR_TAG);
             if (actionBarStates != null) {
-                mActionBar.restoreHierarchyState(actionBarStates);
+                mDecorContentParent.restoreToolbarHierarchyState(actionBarStates);
             } else {
                 Log.w(TAG, "Missing saved instance states for action bar views! " +
                         "State will not be restored.");
@@ -2124,12 +2122,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         public boolean superDispatchKeyEvent(KeyEvent event) {
-            if (super.dispatchKeyEvent(event)) {
-                return true;
-            }
-
-            // Not handled by the view hierarchy, does the action bar want it
-            // to cancel out of something special?
+            // Give priority to closing action modes if applicable.
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                 final int action = event.getAction();
                 // Back cancels action modes first.
@@ -2139,17 +2132,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                     return true;
                 }
-
-                // Next collapse any expanded action views.
-                if (mActionBar != null && mActionBar.hasExpandedActionView()) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        mActionBar.collapseActionView();
-                    }
-                    return true;
-                }
             }
 
-            return false;
+            return super.dispatchKeyEvent(event);
         }
 
         public boolean superDispatchKeyShortcutEvent(KeyEvent event) {
@@ -2844,8 +2829,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 cb.onDetachedFromWindow();
             }
 
-            if (mActionBar != null) {
-                mActionBar.dismissPopupMenus();
+            if (mDecorContentParent != null) {
+                mDecorContentParent.dismissPopups();
             }
 
             if (mActionModePopup != null) {
@@ -3281,96 +3266,68 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // Set up decor part of UI to ignore fitsSystemWindows if appropriate.
             mDecor.makeOptionalFitsSystemWindows();
 
-            mTitleView = (TextView)findViewById(com.android.internal.R.id.title);
-            if (mTitleView != null) {
-                mTitleView.setLayoutDirection(mDecor.getLayoutDirection());
-                if ((getLocalFeatures() & (1 << FEATURE_NO_TITLE)) != 0) {
-                    View titleContainer = findViewById(com.android.internal.R.id.title_container);
-                    if (titleContainer != null) {
-                        titleContainer.setVisibility(View.GONE);
-                    } else {
-                        mTitleView.setVisibility(View.GONE);
-                    }
-                    if (mContentParent instanceof FrameLayout) {
-                        ((FrameLayout)mContentParent).setForeground(null);
-                    }
-                } else {
-                    mTitleView.setText(mTitle);
+            final DecorContentParent decorContentParent = (DecorContentParent) mDecor.findViewById(
+                    com.android.internal.R.id.decor_content_parent);
+
+            if (decorContentParent != null) {
+                mDecorContentParent = decorContentParent;
+                mDecorContentParent.setWindowCallback(getCallback());
+                if (mDecorContentParent.getTitle() == null) {
+                    mDecorContentParent.setWindowTitle(mTitle);
                 }
-            } else {
-                mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
-                if (mActionBar != null) {
-                    mActionBar.setWindowCallback(getCallback());
-                    if (mActionBar.getTitle() == null) {
-                        mActionBar.setWindowTitle(mTitle);
-                    }
-                    final int localFeatures = getLocalFeatures();
-                    if ((localFeatures & (1 << FEATURE_PROGRESS)) != 0) {
-                        mActionBar.initProgress();
-                    }
-                    if ((localFeatures & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
-                        mActionBar.initIndeterminateProgress();
-                    }
 
-                    final ActionBarOverlayLayout abol = (ActionBarOverlayLayout) findViewById(
-                            com.android.internal.R.id.action_bar_overlay_layout);
-                    if (abol != null) {
-                        abol.setOverlayMode(
-                                (localFeatures & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0);
+                final int localFeatures = getLocalFeatures();
+                for (int i = 0; i < FEATURE_MAX; i++) {
+                    if ((localFeatures & (1 << i)) != 0) {
+                        mDecorContentParent.initFeature(i);
                     }
+                }
 
-                    boolean splitActionBar = false;
-                    final boolean splitWhenNarrow =
-                            (mUiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0;
-                    if (splitWhenNarrow) {
-                        splitActionBar = getContext().getResources().getBoolean(
-                                com.android.internal.R.bool.split_action_bar_is_narrow);
-                    } else {
-                        splitActionBar = getWindowStyle().getBoolean(
-                                com.android.internal.R.styleable.Window_windowSplitActionBar, false);
-                    }
-                    final ActionBarContainer splitView = (ActionBarContainer) findViewById(
-                            com.android.internal.R.id.split_action_bar);
-                    if (splitView != null) {
-                        mActionBar.setSplitView(splitView);
-                        mActionBar.setSplitActionBar(splitActionBar);
-                        mActionBar.setSplitWhenNarrow(splitWhenNarrow);
+                mDecorContentParent.setUiOptions(mUiOptions);
 
-                        final ActionBarContextView cab = (ActionBarContextView) findViewById(
-                                com.android.internal.R.id.action_context_bar);
-                        cab.setSplitView(splitView);
-                        cab.setSplitActionBar(splitActionBar);
-                        cab.setSplitWhenNarrow(splitWhenNarrow);
-                    } else if (splitActionBar) {
-                        Log.e(TAG, "Requested split action bar with " +
-                                "incompatible window decor! Ignoring request.");
-                    }
+                if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) != 0 ||
+                        (mIconRes != 0 && !mDecorContentParent.hasIcon())) {
+                    mDecorContentParent.setIcon(mIconRes);
+                } else if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) == 0 &&
+                        mIconRes == 0 && !mDecorContentParent.hasIcon()) {
+                    mDecorContentParent.setIcon(
+                            getContext().getPackageManager().getDefaultActivityIcon());
+                    mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON_FALLBACK;
+                }
+                if ((mResourcesSetFlags & FLAG_RESOURCE_SET_LOGO) != 0 ||
+                        (mLogoRes != 0 && !mDecorContentParent.hasLogo())) {
+                    mDecorContentParent.setLogo(mLogoRes);
+                }
 
-                    if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) != 0 ||
-                            (mIconRes != 0 && !mActionBar.hasIcon())) {
-                        mActionBar.setIcon(mIconRes);
-                    } else if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) == 0 &&
-                            mIconRes == 0 && !mActionBar.hasIcon()) {
-                        mActionBar.setIcon(
-                                getContext().getPackageManager().getDefaultActivityIcon());
-                        mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON_FALLBACK;
-                    }
-                    if ((mResourcesSetFlags & FLAG_RESOURCE_SET_LOGO) != 0 ||
-                            (mLogoRes != 0 && !mActionBar.hasLogo())) {
-                        mActionBar.setLogo(mLogoRes);
-                    }
-
-                    // Post the panel invalidate for later; avoid application onCreateOptionsMenu
-                    // being called in the middle of onCreate or similar.
-                    mDecor.post(new Runnable() {
-                        public void run() {
-                            // Invalidate if the panel menu hasn't been created before this.
-                            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-                            if (!isDestroyed() && (st == null || st.menu == null)) {
-                                invalidatePanelMenu(FEATURE_ACTION_BAR);
-                            }
+                // Post the panel invalidate for later; avoid application onCreateOptionsMenu
+                // being called in the middle of onCreate or similar.
+                mDecor.post(new Runnable() {
+                    public void run() {
+                        // Invalidate if the panel menu hasn't been created before this.
+                        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+                        if (!isDestroyed() && (st == null || st.menu == null)) {
+                            invalidatePanelMenu(FEATURE_ACTION_BAR);
                         }
-                    });
+                    }
+                });
+            } else {
+                mTitleView = (TextView)findViewById(com.android.internal.R.id.title);
+                if (mTitleView != null) {
+                    mTitleView.setLayoutDirection(mDecor.getLayoutDirection());
+                    if ((getLocalFeatures() & (1 << FEATURE_NO_TITLE)) != 0) {
+                        View titleContainer = findViewById(
+                                com.android.internal.R.id.title_container);
+                        if (titleContainer != null) {
+                            titleContainer.setVisibility(View.GONE);
+                        } else {
+                            mTitleView.setVisibility(View.GONE);
+                        }
+                        if (mContentParent instanceof FrameLayout) {
+                            ((FrameLayout)mContentParent).setForeground(null);
+                        }
+                    } else {
+                        mTitleView.setText(mTitle);
+                    }
                 }
             }
 

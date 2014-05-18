@@ -19,26 +19,34 @@ package com.android.internal.widget;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.IntProperty;
+import android.util.Log;
 import android.util.Property;
+import android.util.SparseArray;
+import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.widget.OverScroller;
+import com.android.internal.view.menu.MenuPresenter;
 
 /**
  * Special layout for the containing of an overlay action bar (and its
  * content) to correctly handle fitting system windows when the content
  * has request that its layout ignore them.
  */
-public class ActionBarOverlayLayout extends ViewGroup {
+public class ActionBarOverlayLayout extends ViewGroup implements DecorContentParent {
     private static final String TAG = "ActionBarOverlayLayout";
 
     private int mActionBarHeight;
@@ -47,7 +55,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
 
     // The main UI elements that we handle the layout of.
     private View mContent;
-    private View mActionBarBottom;
+    private ActionBarContainer mActionBarBottom;
     private ActionBarContainer mActionBarTop;
 
     // Some interior UI elements.
@@ -556,7 +564,8 @@ public class ActionBarOverlayLayout extends ViewGroup {
             mActionBarTop = (ActionBarContainer) findViewById(
                     com.android.internal.R.id.action_bar_container);
             mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
-            mActionBarBottom = findViewById(com.android.internal.R.id.split_action_bar);
+            mActionBarBottom = (ActionBarContainer) findViewById(
+                    com.android.internal.R.id.split_action_bar);
         }
     }
 
@@ -627,6 +636,179 @@ public class ActionBarOverlayLayout extends ViewGroup {
         mFlingEstimator.fling(0, 0, 0, (int) velocityY, 0, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         final int finalY = mFlingEstimator.getFinalY();
         return finalY > mActionBarTop.getHeight();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (super.dispatchKeyEvent(event)) {
+            return true;
+        }
+
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            final int action = event.getAction();
+
+            // Collapse any expanded action views.
+            if (mActionBarView != null && mActionBarView.hasExpandedActionView()) {
+                if (action == KeyEvent.ACTION_UP) {
+                    mActionBarView.collapseActionView();
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void setWindowCallback(Window.Callback cb) {
+        pullChildren();
+        mActionBarView.setWindowCallback(cb);
+    }
+
+    @Override
+    public void setWindowTitle(CharSequence title) {
+        pullChildren();
+        mActionBarView.setWindowTitle(title);
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        pullChildren();
+        return mActionBarView.getTitle();
+    }
+
+    @Override
+    public void initFeature(int windowFeature) {
+        pullChildren();
+        switch (windowFeature) {
+            case Window.FEATURE_PROGRESS:
+                mActionBarView.initProgress();
+                break;
+            case Window.FEATURE_INDETERMINATE_PROGRESS:
+                mActionBarView.initIndeterminateProgress();
+                break;
+            case Window.FEATURE_ACTION_BAR_OVERLAY:
+                setOverlayMode(true);
+                break;
+        }
+    }
+
+    @Override
+    public void setUiOptions(int uiOptions) {
+        boolean splitActionBar = false;
+        final boolean splitWhenNarrow =
+                (uiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0;
+        if (splitWhenNarrow) {
+            splitActionBar = getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.split_action_bar_is_narrow);
+        }
+        if (splitActionBar) {
+            pullChildren();
+            if (mActionBarBottom != null) {
+                mActionBarView.setSplitView(mActionBarBottom);
+                mActionBarView.setSplitActionBar(splitActionBar);
+                mActionBarView.setSplitWhenNarrow(splitWhenNarrow);
+
+                final ActionBarContextView cab = (ActionBarContextView) findViewById(
+                        com.android.internal.R.id.action_context_bar);
+                cab.setSplitView(mActionBarBottom);
+                cab.setSplitActionBar(splitActionBar);
+                cab.setSplitWhenNarrow(splitWhenNarrow);
+            } else if (splitActionBar) {
+                Log.e(TAG, "Requested split action bar with " +
+                        "incompatible window decor! Ignoring request.");
+            }
+        }
+    }
+
+    @Override
+    public boolean hasIcon() {
+        pullChildren();
+        return mActionBarView.hasIcon();
+    }
+
+    @Override
+    public boolean hasLogo() {
+        pullChildren();
+        return mActionBarView.hasLogo();
+    }
+
+    @Override
+    public void setIcon(int resId) {
+        pullChildren();
+        mActionBarView.setIcon(resId);
+    }
+
+    @Override
+    public void setIcon(Drawable d) {
+        pullChildren();
+        mActionBarView.setIcon(d);
+    }
+
+    @Override
+    public void setLogo(int resId) {
+        pullChildren();
+        mActionBarView.setLogo(resId);
+    }
+
+    @Override
+    public boolean canShowOverflowMenu() {
+        pullChildren();
+        return mActionBarView.isOverflowReserved() && mActionBarView.getVisibility() == VISIBLE;
+    }
+
+    @Override
+    public boolean isOverflowMenuShowing() {
+        pullChildren();
+        return mActionBarView.isOverflowMenuShowing();
+    }
+
+    @Override
+    public boolean isOverflowMenuShowPending() {
+        pullChildren();
+        return mActionBarView.isOverflowMenuShowPending();
+    }
+
+    @Override
+    public boolean showOverflowMenu() {
+        pullChildren();
+        return mActionBarView.showOverflowMenu();
+    }
+
+    @Override
+    public boolean hideOverflowMenu() {
+        pullChildren();
+        return mActionBarView.hideOverflowMenu();
+    }
+
+    @Override
+    public void setMenuPrepared() {
+        pullChildren();
+        mActionBarView.setMenuPrepared();
+    }
+
+    @Override
+    public void setMenu(Menu menu, MenuPresenter.Callback cb) {
+        pullChildren();
+        mActionBarView.setMenu(menu, cb);
+    }
+
+    @Override
+    public void saveToolbarHierarchyState(SparseArray<Parcelable> toolbarStates) {
+        pullChildren();
+        mActionBarView.saveHierarchyState(toolbarStates);
+    }
+
+    @Override
+    public void restoreToolbarHierarchyState(SparseArray<Parcelable> toolbarStates) {
+        pullChildren();
+        mActionBarView.restoreHierarchyState(toolbarStates);
+    }
+
+    @Override
+    public void dismissPopups() {
+        pullChildren();
+        mActionBarView.dismissPopupMenus();
     }
 
     public static class LayoutParams extends MarginLayoutParams {
