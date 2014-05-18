@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import libcore.util.EmptyArray;
 
@@ -79,11 +80,12 @@ final class HdmiCecController {
             new SparseArray<HdmiCecDeviceInfo>();
     // Set-like container for all local devices' logical address.
     // Key and value are same.
-    private final SparseArray<Integer> mLocalLogicalAddresses =
-            new SparseArray<Integer>();
+    private final SparseIntArray mLocalAddresses = new SparseIntArray();
 
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController() {
+        // TODO: Consider restoring the local device addresses from persistent storage
+        //       to allocate the same addresses again if possible.
     }
 
     /**
@@ -106,6 +108,44 @@ final class HdmiCecController {
 
         handler.init(service, nativePtr);
         return handler;
+    }
+
+    /**
+     * Initialize {@link #mLocalAddresses} by allocating logical addresses for each hosted type.
+     *
+     * @param deviceTypes local device types
+     */
+    void initializeLocalDevices(int[] deviceTypes) {
+        for (int deviceType : deviceTypes) {
+            int preferred = getPreferredAddress(deviceType);
+            allocateLogicalAddress(deviceType, preferred, new AllocateLogicalAddressCallback() {
+                @Override
+                public void onAllocated(int deviceType, int logicalAddress) {
+                    addLogicalAddress(logicalAddress);
+                }
+            });
+        }
+    }
+
+    /**
+     * Get the preferred address for a given type.
+     *
+     * @param deviceType logical device type to get the address for
+     * @return preferred address; {@link HdmiCec#ADDR_UNREGISTERED} if not available.
+     */
+    private int getPreferredAddress(int deviceType) {
+        // Uses the data restored from persistent memory at boot up if they are available.
+        // Otherwise we return UNREGISTERED indicating there is no preferred address.
+        // Note that for address SPECIFIC_USE(14), HdmiCec.getTypeFromAddress() returns DEVICE_TV,
+        // meaning that we do not support device type video processor yet.
+        for (int i = 0; i < mLocalAddresses.size(); ++i) {
+            int address = mLocalAddresses.keyAt(i);
+            int type = HdmiCec.getTypeFromAddress(address);
+            if (type == deviceType) {
+                return address;
+            }
+        }
+        return HdmiCec.ADDR_UNREGISTERED;
     }
 
     /**
@@ -322,7 +362,7 @@ final class HdmiCecController {
      */
     int addLogicalAddress(int newLogicalAddress) {
         if (HdmiCec.isValidAddress(newLogicalAddress)) {
-            mLocalLogicalAddresses.append(newLogicalAddress, newLogicalAddress);
+            mLocalAddresses.put(newLogicalAddress, newLogicalAddress);
             return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
             return -1;
@@ -337,7 +377,7 @@ final class HdmiCecController {
     void clearLogicalAddress() {
         // TODO: consider to backup logical address so that new logical address
         // allocation can use it as preferred address.
-        mLocalLogicalAddresses.clear();
+        mLocalAddresses.clear();
         nativeClearLogicalAddress(mNativePtr);
     }
 
@@ -382,7 +422,7 @@ final class HdmiCecController {
         // Can access command targeting devices available in local device or
         // broadcast command.
         return address == HdmiCec.ADDR_BROADCAST
-                || mLocalLogicalAddresses.get(address) != null;
+                || mLocalAddresses.indexOfKey(address) < 0;
     }
 
     private void onReceiveCommand(HdmiCecMessage message) {
