@@ -15953,6 +15953,44 @@ package android.net {
     field public static final java.lang.String MAILTO_SCHEME = "mailto:";
   }
 
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    ctor public NetworkCapabilities();
+    ctor public NetworkCapabilities(android.net.NetworkCapabilities);
+    method public void addNetworkCapability(int);
+    method public void addTransportType(int);
+    method public int describeContents();
+    method public int getLinkDownstreamBandwidthKbps();
+    method public int getLinkUpstreamBandwidthKbps();
+    method public java.util.Collection<java.lang.Integer> getNetworkCapabilities();
+    method public java.util.Collection<java.lang.Integer> getTransportTypes();
+    method public boolean hasCapability(int);
+    method public boolean hasTransport(int);
+    method public void removeNetworkCapability(int);
+    method public void removeTransportType(int);
+    method public void setLinkDownstreamBandwidthKbps(int);
+    method public void setLinkUpstreamBandwidthKbps(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int NET_CAPABILITY_CBS = 5; // 0x5
+    field public static final int NET_CAPABILITY_DUN = 2; // 0x2
+    field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
+    field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
+    field public static final int NET_CAPABILITY_IA = 7; // 0x7
+    field public static final int NET_CAPABILITY_IMS = 4; // 0x4
+    field public static final int NET_CAPABILITY_INTERNET = 12; // 0xc
+    field public static final int NET_CAPABILITY_MMS = 0; // 0x0
+    field public static final int NET_CAPABILITY_NOT_METERED = 11; // 0xb
+    field public static final int NET_CAPABILITY_NOT_RESTRICTED = 13; // 0xd
+    field public static final int NET_CAPABILITY_RCS = 8; // 0x8
+    field public static final int NET_CAPABILITY_SUPL = 1; // 0x1
+    field public static final int NET_CAPABILITY_WIFI_P2P = 6; // 0x6
+    field public static final int NET_CAPABILITY_XCAP = 9; // 0x9
+    field public static final int TRANSPORT_BLUETOOTH = 2; // 0x2
+    field public static final int TRANSPORT_CELLULAR = 0; // 0x0
+    field public static final int TRANSPORT_ETHERNET = 3; // 0x3
+    field public static final int TRANSPORT_WIFI = 1; // 0x1
+  }
+
   public class NetworkInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.net.NetworkInfo.DetailedState getDetailedState();
