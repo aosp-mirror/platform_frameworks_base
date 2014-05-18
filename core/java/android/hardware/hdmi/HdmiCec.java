@@ -171,8 +171,15 @@ public final class HdmiCec {
     public static final int POWER_STATUS_UNKNOWN = -1;
     public static final int POWER_STATUS_ON = 0;
     public static final int POWER_STATUS_STANDBY = 1;
-    public static final int POWER_TRANSIENT_TO_ON = 2;
-    public static final int POWER_TRANSIENT_TO_STANDBY = 3;
+    public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
+    public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
+
+    public static final int RESULT_SUCCESS = 0;
+    public static final int RESULT_TIMEOUT = 1;
+    public static final int RESULT_SOURCE_NOT_AVAILABLE = 2;
+    public static final int RESULT_TARGET_NOT_AVAILABLE = 3;
+    public static final int RESULT_ALREADY_IN_PROGRESS = 4;
+    public static final int RESULT_EXCEPTION = 5;
 
     private static final int[] ADDRESS_TO_TYPE = {
         DEVICE_TV,  // ADDR_TV
