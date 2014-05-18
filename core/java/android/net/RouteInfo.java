@@ -28,19 +28,18 @@ import java.util.Collection;
 
 /**
  * A simple container for route information.
+ * <p>
+ * This is used both to describe static network configuration and live network
+ * configuration information.  In the static case the interface name (retrieved
+ * via {@link #getInterface}) should be {@code null} as that information will not
+ * yet be known.
  *
- * In order to be used, a route must have a destination prefix and:
- *
- * - A gateway address (next-hop, for gatewayed routes), or
- * - An interface (for directly-connected routes), or
- * - Both a gateway and an interface.
- *
- * This class does not enforce these constraints because there is code that
- * uses RouteInfo objects to store directly-connected routes without interfaces.
- * Such objects cannot be used directly, but can be put into a LinkProperties
- * object which then specifies the interface.
- *
- * @hide
+ * A route may be configured with:
+ * <ul>
+ * <li>a destination {@link LinkAddress} for directly-connected subnets,
+ * <li>a gateway {@link InetAddress} for default routes,
+ * <li>or both for a subnet.
+ * </ul>
  */
 public class RouteInfo implements Parcelable {
     /**
@@ -67,7 +66,7 @@ public class RouteInfo implements Parcelable {
      *
      * If destination is null, then gateway must be specified and the
      * constructed route is either the IPv4 default route <code>0.0.0.0</code>
-     * if @gateway is an instance of {@link Inet4Address}, or the IPv6 default
+     * if the gateway is an instance of {@link Inet4Address}, or the IPv6 default
      * route <code>::/0</code> if gateway is an instance of
      * {@link Inet6Address}.
      *
@@ -76,6 +75,8 @@ public class RouteInfo implements Parcelable {
      * @param destination the destination prefix
      * @param gateway the IP address to route packets through
      * @param iface the interface name to send packets on
+     *
+     * @hide
      */
     public RouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
         if (destination == null) {
@@ -108,22 +109,51 @@ public class RouteInfo implements Parcelable {
         mIsHost = isHost();
     }
 
+    /**
+     * Constructs a {@code RouteInfo} object.
+     *
+     * If destination is null, then gateway must be specified and the
+     * constructed route is either the IPv4 default route <code>0.0.0.0</code>
+     * if the gateway is an instance of {@link Inet4Address}, or the IPv6 default
+     * route <code>::/0</code> if gateway is an instance of {@link Inet6Address}.
+     * <p>
+     * Destination and gateway may not both be null.
+     *
+     * @param destination the destination address and prefix in a {@link LinkAddress}
+     * @param gateway the {@link InetAddress} to route packets through
+     */
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         this(destination, gateway, null);
     }
 
+    /**
+     * Constructs a default {@code RouteInfo} object.
+     *
+     * @param gateway the {@link InetAddress} to route packets through
+     */
     public RouteInfo(InetAddress gateway) {
         this(null, gateway, null);
     }
 
+    /**
+     * Constructs a {@code RouteInfo} object representing a direct connected subnet.
+     *
+     * @param host the {@link LinkAddress} describing the address and prefix length of the subnet.
+     */
     public RouteInfo(LinkAddress host) {
         this(host, null, null);
     }
 
+    /**
+     * @hide
+     */
     public static RouteInfo makeHostRoute(InetAddress host, String iface) {
         return makeHostRoute(host, null, iface);
     }
 
+    /**
+     * @hide
+     */
     public static RouteInfo makeHostRoute(InetAddress host, InetAddress gateway, String iface) {
         if (host == null) return null;
 
@@ -153,29 +183,100 @@ public class RouteInfo implements Parcelable {
         return val;
     }
 
-
+    /**
+     * Retrieves the destination address and prefix length in the form of a {@link LinkAddress}.
+     *
+     * @return {@link LinkAddress} specifying the destination.
+     */
     public LinkAddress getDestination() {
         return mDestination;
     }
 
+    /**
+     * Retrieves the gateway or next hop {@link InetAddress} for this route.
+     *
+     * @return {@link InetAddress} specifying the gateway or next hop.
+     */
     public InetAddress getGateway() {
         return mGateway;
     }
 
+    /**
+     * Retrieves the interface used for this route, if known.  Note that for static
+     * network configurations, this won't be set.
+     *
+     * @return The name of the interface used for this route.
+     */
     public String getInterface() {
         return mInterface;
     }
 
+    /**
+     * Indicates if this route is a default route (ie, has no destination specified).
+     *
+     * @return {@code true} if the destination is null or has a prefix length of 0.
+     */
     public boolean isDefaultRoute() {
         return mIsDefault;
     }
 
+    /**
+     * Indicates if this route is a host route (ie, matches only a single host address).
+     *
+     * @return {@code true} if the destination has a prefix length of 32/128 for v4/v6.
+     */
     public boolean isHostRoute() {
         return mIsHost;
     }
 
+    /**
+     * Indicates if this route has a next hop ({@code true}) or is directly-connected
+     * ({@code false}).
+     *
+     * @return {@code true} if a gateway is specified
+     */
     public boolean hasGateway() {
         return mHasGateway;
+    }
+
+    /**
+     * @hide
+     */
+    protected boolean matches(InetAddress destination) {
+        if (destination == null) return false;
+
+        // match the route destination and destination with prefix length
+        InetAddress dstNet = NetworkUtils.getNetworkPart(destination,
+                mDestination.getNetworkPrefixLength());
+
+        return mDestination.getAddress().equals(dstNet);
+    }
+
+    /**
+     * Find the route from a Collection of routes that best matches a given address.
+     * May return null if no routes are applicable.
+     * @param routes a Collection of RouteInfos to chose from
+     * @param dest the InetAddress your trying to get to
+     * @return the RouteInfo from the Collection that best fits the given address
+     *
+     * @hide
+     */
+    public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
+        if ((routes == null) || (dest == null)) return null;
+
+        RouteInfo bestRoute = null;
+        // pick a longest prefix match under same address type
+        for (RouteInfo route : routes) {
+            if (NetworkUtils.addressTypeMatches(route.mDestination.getAddress(), dest)) {
+                if ((bestRoute != null) &&
+                        (bestRoute.mDestination.getNetworkPrefixLength() >=
+                        route.mDestination.getNetworkPrefixLength())) {
+                    continue;
+                }
+                if (route.matches(dest)) bestRoute = route;
+            }
+        }
+        return bestRoute;
     }
 
     public String toString() {
@@ -185,30 +286,6 @@ public class RouteInfo implements Parcelable {
         return val;
     }
 
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        if (mDestination == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeByteArray(mDestination.getAddress().getAddress());
-            dest.writeInt(mDestination.getNetworkPrefixLength());
-        }
-
-        if (mGateway == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeByteArray(mGateway.getAddress());
-        }
-
-        dest.writeString(mInterface);
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
 
@@ -229,17 +306,51 @@ public class RouteInfo implements Parcelable {
                 : mInterface.equals(target.getInterface());
 
         return sameDestination && sameAddress && sameInterface
-            && mIsDefault == target.mIsDefault;
+                && mIsDefault == target.mIsDefault;
     }
 
-    @Override
     public int hashCode() {
         return (mDestination == null ? 0 : mDestination.hashCode() * 41)
-            + (mGateway == null ? 0 :mGateway.hashCode() * 47)
-            + (mInterface == null ? 0 :mInterface.hashCode() * 67)
-            + (mIsDefault ? 3 : 7);
+                + (mGateway == null ? 0 :mGateway.hashCode() * 47)
+                + (mInterface == null ? 0 :mInterface.hashCode() * 67)
+                + (mIsDefault ? 3 : 7);
     }
 
+    /**
+     * Implement the Parcelable interface
+     * @hide
+     */
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Implement the Parcelable interface
+     * @hide
+     */
+    public void writeToParcel(Parcel dest, int flags) {
+        if (mDestination == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeByteArray(mDestination.getAddress().getAddress());
+            dest.writeInt(mDestination.getNetworkPrefixLength());
+        }
+
+        if (mGateway == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeByteArray(mGateway.getAddress());
+        }
+
+        dest.writeString(mInterface);
+    }
+
+    /**
+     * Implement the Parcelable interface.
+     * @hide
+     */
     public static final Creator<RouteInfo> CREATOR =
         new Creator<RouteInfo>() {
         public RouteInfo createFromParcel(Parcel in) {
@@ -279,39 +390,4 @@ public class RouteInfo implements Parcelable {
             return new RouteInfo[size];
         }
     };
-
-    protected boolean matches(InetAddress destination) {
-        if (destination == null) return false;
-
-        // match the route destination and destination with prefix length
-        InetAddress dstNet = NetworkUtils.getNetworkPart(destination,
-                mDestination.getNetworkPrefixLength());
-
-        return mDestination.getAddress().equals(dstNet);
-    }
-
-    /**
-     * Find the route from a Collection of routes that best matches a given address.
-     * May return null if no routes are applicable.
-     * @param routes a Collection of RouteInfos to chose from
-     * @param dest the InetAddress your trying to get to
-     * @return the RouteInfo from the Collection that best fits the given address
-     */
-    public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
-        if ((routes == null) || (dest == null)) return null;
-
-        RouteInfo bestRoute = null;
-        // pick a longest prefix match under same address type
-        for (RouteInfo route : routes) {
-            if (NetworkUtils.addressTypeMatches(route.mDestination.getAddress(), dest)) {
-                if ((bestRoute != null) &&
-                        (bestRoute.mDestination.getNetworkPrefixLength() >=
-                        route.mDestination.getNetworkPrefixLength())) {
-                    continue;
-                }
-                if (route.matches(dest)) bestRoute = route;
-            }
-        }
-        return bestRoute;
-    }
 }
