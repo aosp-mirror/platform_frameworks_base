@@ -86,6 +86,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
         loadDimens();
+        updateVisibilities();
     }
 
     private void loadDimens() {
