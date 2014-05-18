@@ -2565,13 +2565,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
-    public void postStartSettingsActivity(final Intent intent) {
-        mHandler.post(new Runnable() {
+    public void postStartSettingsActivity(final Intent intent, int delay) {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 handleStartSettingsActivity(intent, true /*onlyProvisioned*/);
             }
-        });
+        }, delay);
     }
 
     private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
@@ -2587,7 +2587,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void startSettingsActivity(String action) {
-        postStartSettingsActivity(new Intent(action));
+        postStartSettingsActivity(new Intent(action), 0);
     }
 
     private static class FastColorDrawable extends Drawable {
