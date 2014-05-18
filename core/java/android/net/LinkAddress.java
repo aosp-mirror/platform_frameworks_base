@@ -39,7 +39,8 @@ import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
  * <ul>
  * <li>An IP address and prefix length (e.g., {@code 2001:db8::1/64} or {@code 192.0.2.1/24}).
  * The address must be unicast, as multicast addresses cannot be assigned to interfaces.
- * <li>Address flags: A bitmask of {@code IFA_F_*} values representing properties of the address.
+ * <li>Address flags: A bitmask of {@code IFA_F_*} values representing properties
+ * of the address.
  * <li>Address scope: An integer defining the scope in which the address is unique (e.g.,
  * {@code RT_SCOPE_LINK} or {@code RT_SCOPE_SITE}).
  * <ul>
@@ -47,10 +48,9 @@ import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
  * When constructing a {@code LinkAddress}, the IP address and prefix are required. The flags and
  * scope are optional. If they are not specified, the flags are set to zero, and the scope will be
  * determined based on the IP address (e.g., link-local addresses will be created with a scope of
- * {@code RT_SCOPE_LINK}, global addresses with {@code RT_SCOPE_UNIVERSE}, etc.) If they are
- * specified, they are not checked for validity.
+ * {@code RT_SCOPE_LINK}, global addresses with {@code RT_SCOPE_UNIVERSE},
+ * etc.) If they are specified, they are not checked for validity.
  *
- * @hide
  */
 public class LinkAddress implements Parcelable {
     /**
@@ -119,6 +119,10 @@ public class LinkAddress implements Parcelable {
      * the specified flags and scope. Flags and scope are not checked for validity.
      * @param address The IP address.
      * @param prefixLength The prefix length.
+     * @param flags A bitmask of {@code IFA_F_*} values representing properties of the address.
+     * @param scope An integer defining the scope in which the address is unique (e.g.,
+     *              {@link OsConstants#RT_SCOPE_LINK} or {@link OsConstants#RT_SCOPE_SITE}).
+     * @hide
      */
     public LinkAddress(InetAddress address, int prefixLength, int flags, int scope) {
         init(address, prefixLength, flags, scope);
@@ -129,6 +133,7 @@ public class LinkAddress implements Parcelable {
      * The flags are set to zero and the scope is determined from the address.
      * @param address The IP address.
      * @param prefixLength The prefix length.
+     * @hide
      */
     public LinkAddress(InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
@@ -139,6 +144,7 @@ public class LinkAddress implements Parcelable {
      * Constructs a new {@code LinkAddress} from an {@code InterfaceAddress}.
      * The flags are set to zero and the scope is determined from the address.
      * @param interfaceAddress The interface address.
+     * @hide
      */
     public LinkAddress(InterfaceAddress interfaceAddress) {
         this(interfaceAddress.getAddress(),
@@ -149,6 +155,7 @@ public class LinkAddress implements Parcelable {
      * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
      * "2001:db8::1/64". The flags are set to zero and the scope is determined from the address.
      * @param string The string to parse.
+     * @hide
      */
     public LinkAddress(String address) {
         this(address, 0, 0);
@@ -161,6 +168,7 @@ public class LinkAddress implements Parcelable {
      * @param string The string to parse.
      * @param flags The address flags.
      * @param scope The address scope.
+     * @hide
      */
     public LinkAddress(String address, int flags, int scope) {
         InetAddress inetAddress = null;
@@ -220,9 +228,10 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
-     * Determines whether this {@code LinkAddress} and the provided {@code LinkAddress} represent
-     * the same address. Two LinkAddresses represent the same address if they have the same IP
-     * address and prefix length, even if their properties are different.
+     * Determines whether this {@code LinkAddress} and the provided {@code LinkAddress}
+     * represent the same address. Two {@code LinkAddresses} represent the same address
+     * if they have the same IP address and prefix length, even if their properties are
+     * different.
      *
      * @param other the {@code LinkAddress} to compare to.
      * @return {@code true} if both objects have the same address and prefix length, {@code false}
@@ -233,28 +242,28 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
-     * Returns the InetAddress of this address.
+     * Returns the {@link InetAddress} of this {@code LinkAddress}.
      */
     public InetAddress getAddress() {
         return address;
     }
 
     /**
-     * Returns the prefix length of this address.
+     * Returns the prefix length of this {@code LinkAddress}.
      */
     public int getNetworkPrefixLength() {
         return prefixLength;
     }
 
     /**
-     * Returns the flags of this address.
+     * Returns the flags of this {@code LinkAddress}.
      */
     public int getFlags() {
         return flags;
     }
 
     /**
-     * Returns the scope of this address.
+     * Returns the scope of this {@code LinkAddress}.
      */
     public int getScope() {
         return scope;
@@ -262,6 +271,7 @@ public class LinkAddress implements Parcelable {
 
     /**
      * Returns true if this {@code LinkAddress} is global scope and preferred.
+     * @hide
      */
     public boolean isGlobalPreferred() {
         return (scope == RT_SCOPE_UNIVERSE &&

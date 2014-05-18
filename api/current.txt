@@ -15847,6 +15847,16 @@ package android.net {
     field public int serverAddress;
   }
 
+  public class LinkAddress implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.net.InetAddress getAddress();
+    method public int getFlags();
+    method public int getNetworkPrefixLength();
+    method public int getScope();
+    method public boolean isSameAddressAs(android.net.LinkAddress);
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class LocalServerSocket {
     ctor public LocalServerSocket(java.lang.String) throws java.io.IOException;
     ctor public LocalServerSocket(java.io.FileDescriptor) throws java.io.IOException;
