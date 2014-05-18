@@ -73,8 +73,7 @@ public class ZenModeTile extends QSTile<QSTile.BooleanState> {
         final boolean zen = arg instanceof Boolean ? (Boolean)arg : mController.isZen();
         state.value = zen;
         state.visible = true;
-        state.iconId = R.drawable.stat_sys_zen_limited;
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_zen);
+        state.iconId = zen ? R.drawable.ic_qs_zen_on : R.drawable.ic_qs_zen_off;
         state.label = mContext.getString(R.string.zen_mode_title);
     }
 

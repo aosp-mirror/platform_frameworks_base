@@ -19,8 +19,9 @@
     android:layout_height="match_parent"
     android:background="@color/system_secondary_color" >
 
-    <com.android.systemui.qs.QSImageView
+    <ImageView
         android:id="@android:id/button1"
+        android:src="@drawable/ic_qs_close"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentStart="true"

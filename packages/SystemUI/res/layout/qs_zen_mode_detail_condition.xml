@@ -38,8 +38,9 @@
         android:maxLines="1"
         android:text="@string/accessibility_back" />
 
-    <com.android.systemui.qs.QSImageView
+    <ImageView
         android:id="@android:id/button1"
+        android:src="@drawable/ic_qs_plus"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"
@@ -47,8 +48,9 @@
         android:padding="@dimen/quick_settings_panel_padding"
         android:paddingRight="0px" />
 
-    <com.android.systemui.qs.QSImageView
+    <ImageView
         android:id="@android:id/button2"
+        android:src="@drawable/ic_qs_minus"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"

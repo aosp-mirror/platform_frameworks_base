@@ -65,8 +65,8 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         if (state.value != locationEnabled) {
             state.value = locationEnabled;
             final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(locationEnabled
-                    ? R.drawable.ic_location_on_anim
-                    : R.drawable.ic_location_off_anim);
+                    ? R.drawable.ic_qs_location_on
+                    : R.drawable.ic_qs_location_off);
             state.icon = d;
             mUiHandler.post(new Runnable() {
                 @Override
@@ -75,15 +75,14 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
                 }
             });
         }
-        //state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_location);
         if (locationEnabled) {
-            if (state.icon == null) state.iconId = R.drawable.ic_location_24_01;
+            if (state.icon == null) state.iconId = R.drawable.ic_qs_location_01;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,
                     mContext.getString(R.string.accessibility_desc_on));
         } else {
-            if (state.icon == null) state.iconId = R.drawable.ic_location_24_11;
+            if (state.icon == null) state.iconId = R.drawable.ic_qs_location_11;
             state.label = mContext.getString(R.string.quick_settings_location_off_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,

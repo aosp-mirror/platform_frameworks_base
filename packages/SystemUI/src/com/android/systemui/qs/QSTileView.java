@@ -28,6 +28,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
@@ -98,7 +99,7 @@ public class QSTileView extends ViewGroup {
     }
 
     protected View createIcon() {
-        QSImageView icon = new QSImageView(mContext);
+        final ImageView icon = new ImageView(mContext);
         icon.setId(android.R.id.icon);
         icon.setScaleType(ScaleType.CENTER_INSIDE);
         return icon;
@@ -156,15 +157,12 @@ public class QSTileView extends ViewGroup {
     }
 
     protected void handleStateChanged(QSTile.State state) {
-        if (mIcon instanceof QSImageView) {
-            QSImageView qsiv = (QSImageView) mIcon;
+        if (mIcon instanceof ImageView) {
+            ImageView iv = (ImageView) mIcon;
             if (state.icon != null) {
-                qsiv.setImageDrawable(state.icon);
+                iv.setImageDrawable(state.icon);
             } else if (state.iconId > 0) {
-                qsiv.setImageResource(state.iconId);
-            }
-            if (state.icon != null && state instanceof QSTile.BooleanState) {
-                qsiv.setEnabledVersion(((QSTile.BooleanState)state).value);
+                iv.setImageResource(state.iconId);
             }
         }
         mLabel.setText(state.label);

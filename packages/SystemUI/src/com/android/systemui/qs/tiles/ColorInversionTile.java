@@ -71,6 +71,6 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.visible = mVisible;
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.icon = mHost.getVectorDrawable(R.drawable.ic_qs_invert_colors);
+        state.iconId = R.drawable.ic_qs_color_inversion;
     }
 }

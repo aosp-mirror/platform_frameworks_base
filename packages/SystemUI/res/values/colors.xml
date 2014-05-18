@@ -41,8 +41,6 @@
     <color name="system_secondary_color">#ff384248</color>
     <color name="system_accent_color">#ff7fcac3</color>
     <color name="system_error_color">#fff0592b</color>
-    <color name="quick_settings_tile_icon_enabled">#ffffffff</color>
-    <color name="quick_settings_tile_icon_disabled">#ffcccccc</color>
     <color name="quick_settings_tile_divider">#ff888888</color>
     <color name="quick_settings_tile_text">#FFFFFFFF</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
