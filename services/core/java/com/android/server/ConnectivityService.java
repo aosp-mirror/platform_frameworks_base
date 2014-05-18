@@ -507,9 +507,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
+    // sequence number for Networks
     private final static int MIN_NET_ID = 10; // some reserved marks
     private final static int MAX_NET_ID = 65535;
     private int mNextNetId = MIN_NET_ID;
+
+    // sequence number of NetworkRequests
+    private int mNextNetworkRequestId = 1;
 
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
@@ -526,7 +530,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        mDefaultRequest = new NetworkRequest(netCap, true);
+        mDefaultRequest = new NetworkRequest(netCap, true, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(null, mDefaultRequest, new Binder(),
                 NetworkRequestInfo.REQUEST);
         mNetworkRequests.put(mDefaultRequest, nri);
@@ -771,6 +775,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext.registerReceiver(mProvisioningReceiver, filter);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+    }
+
+    private synchronized int nextNetworkRequestId() {
+        return mNextNetworkRequestId++;
     }
 
     private synchronized int nextNetId() {
@@ -5271,7 +5279,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             throw new IllegalArgumentException("Bad timeout specified");
         }
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities));
+                networkCapabilities), false, nextNetworkRequestId());
         if (DBG) log("requestNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.REQUEST);
@@ -5297,7 +5305,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
 
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities));
+                networkCapabilities), false, nextNetworkRequestId());
         if (DBG) log("listenForNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.LISTEN);
