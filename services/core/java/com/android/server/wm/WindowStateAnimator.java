@@ -46,6 +46,7 @@ import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
@@ -151,6 +152,10 @@ class WindowStateAnimator {
     static final int READY_TO_SHOW = 3;
     /** Set when the window has been shown in the screen the first time. */
     static final int HAS_DRAWN = 4;
+
+    private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
     static String drawStateToString(int state) {
         switch (state) {
             case NO_SURFACE: return "NO_SURFACE";
@@ -1176,9 +1181,15 @@ class WindowStateAnimator {
             // content insets as well.
             int offsetTop = Math.max(w.mSystemDecorRect.top, w.mContentInsets.top);
             mTmpClipRect.set(w.mSystemDecorRect);
-            mTmpClipRect.offset(0, -offsetTop);
-            mTmpClipRect.intersect(mClipRect);
-            mTmpClipRect.offset(0, offsetTop);
+            // Don't apply the workaround to apps explicitly requesting fullscreen layout.
+            if ((w.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
+                    == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) {
+                mTmpClipRect.intersect(mClipRect);
+            } else {
+                mTmpClipRect.offset(0, -offsetTop);
+                mTmpClipRect.intersect(mClipRect);
+                mTmpClipRect.offset(0, offsetTop);
+            }
             clipRect = mTmpClipRect;
 
         }
