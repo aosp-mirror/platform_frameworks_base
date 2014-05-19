@@ -17,8 +17,11 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.params.Face;
+import android.hardware.camera2.utils.TypeReference;
+import android.util.Log;
 import android.util.Rational;
+
+import java.util.List;
 
 /**
  * <p>The results of a single image capture from the image sensor.</p>
@@ -36,7 +39,98 @@ import android.util.Rational;
  * <p>{@link CameraCharacteristics} objects are immutable.</p>
  *
  */
-public final class CaptureResult extends CameraMetadata {
+public final class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
+
+    private static final String TAG = "CaptureResult";
+    private static final boolean VERBOSE = false;
+
+    /**
+     * A {@code Key} is used to do capture result field lookups with
+     * {@link CaptureResult#get}.
+     *
+     * <p>For example, to get the timestamp corresponding to the exposure of the first row:
+     * <code><pre>
+     * long timestamp = captureResult.get(CaptureResult.SENSOR_TIMESTAMP);
+     * </pre></code>
+     * </p>
+     *
+     * <p>To enumerate over all possible keys for {@link CaptureResult}, see
+     * {@link CameraCharacteristics#getAvailableCaptureResultKeys}.</p>
+     *
+     * @see CaptureResult#get
+     * @see CameraCharacteristics#getAvailableCaptureResultKeys
+     */
+    public final static class Key<T> {
+        private final CameraMetadataNative.Key<T> mKey;
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, Class<T> type) {
+            mKey = new CameraMetadataNative.Key<T>(name, type);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, TypeReference<T> typeReference) {
+            mKey = new CameraMetadataNative.Key<T>(name, typeReference);
+        }
+
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        public String getName() {
+            return mKey.getName();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final int hashCode() {
+            return mKey.hashCode();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        public final boolean equals(Object o) {
+            return o instanceof Key && ((Key<T>)o).mKey.equals(mKey);
+        }
+
+        /**
+         * Visible for CameraMetadataNative implementation only; do not use.
+         *
+         * TODO: Make this private or remove it altogether.
+         *
+         * @hide
+         */
+        public CameraMetadataNative.Key<T> getNativeKey() {
+            return mKey;
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        /*package*/ Key(CameraMetadataNative.Key<?> nativeKey) {
+            mKey = (CameraMetadataNative.Key<T>) nativeKey;
+        }
+    }
 
     private final CameraMetadataNative mResults;
     private final CaptureRequest mRequest;
@@ -55,7 +149,10 @@ public final class CaptureResult extends CameraMetadata {
             throw new IllegalArgumentException("parent was null");
         }
 
-        mResults = results;
+        mResults = CameraMetadataNative.move(results);
+        if (mResults.isEmpty()) {
+            throw new AssertionError("Results must not be empty");
+        }
         mRequest = parent;
         mSequenceId = sequenceId;
     }
@@ -68,9 +165,85 @@ public final class CaptureResult extends CameraMetadata {
         return new CameraMetadataNative(mResults);
     }
 
-    @Override
+    /**
+     * Creates a request-less result.
+     *
+     * <p><strong>For testing only.</strong></p>
+     * @hide
+     */
+    public CaptureResult(CameraMetadataNative results, int sequenceId) {
+        if (results == null) {
+            throw new IllegalArgumentException("results was null");
+        }
+
+        mResults = CameraMetadataNative.move(results);
+        if (mResults.isEmpty()) {
+            throw new AssertionError("Results must not be empty");
+        }
+
+        mRequest = null;
+        mSequenceId = sequenceId;
+    }
+
+    /**
+     * Get a capture result field value.
+     *
+     * <p>The field definitions can be found in {@link CaptureResult}.</p>
+     *
+     * <p>Querying the value for the same key more than once will return a value
+     * which is equal to the previous queried value.</p>
+     *
+     * @throws IllegalArgumentException if the key was not valid
+     *
+     * @param key The result field to read.
+     * @return The value of that key, or {@code null} if the field is not set.
+     */
     public <T> T get(Key<T> key) {
-        return mResults.get(key);
+        T value = mResults.get(key);
+        if (VERBOSE) Log.v(TAG, "#get for Key = " + key.getName() + ", returned value = " + value);
+        return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T> T getProtected(Key<?> key) {
+        return (T) mResults.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Class<Key<?>> getKeyClass() {
+        Object thisClass = Key.class;
+        return (Class<Key<?>>)thisClass;
+    }
+
+    /**
+     * Dumps the native metadata contents to logcat.
+     *
+     * <p>Visibility for testing/debugging only. The results will not
+     * include any synthesized keys, as they are invisible to the native layer.</p>
+     *
+     * @hide
+     */
+    public void dumpToLog() {
+        mResults.dumpToLog();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Key<?>> getKeys() {
+        // Force the javadoc for this function to show up on the CaptureResult page
+        return super.getKeys();
     }
 
     /**
@@ -110,6 +283,7 @@ public final class CaptureResult extends CameraMetadata {
      * @return int frame number
      */
     public int getFrameNumber() {
+        // TODO: @hide REQUEST_FRAME_COUNT
         return get(REQUEST_FRAME_COUNT);
     }
 

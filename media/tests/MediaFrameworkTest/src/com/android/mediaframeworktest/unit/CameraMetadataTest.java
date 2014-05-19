@@ -17,6 +17,7 @@
 package com.android.mediaframeworktest.unit;
 
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 import android.util.Range;
 import android.util.Rational;
 import android.util.SizeF;
@@ -26,6 +27,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.util.Size;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -46,6 +49,7 @@ import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
 
 /**
  * <pre>
@@ -55,6 +59,10 @@ import java.nio.ByteOrder;
  * </pre>
  */
 public class CameraMetadataTest extends junit.framework.TestCase {
+
+    private static final boolean VERBOSE = false;
+    private static final String TAG = "CameraMetadataTest";
+
 
     CameraMetadataNative mMetadata;
 
@@ -940,7 +948,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         };
         int availableFormatTag = CameraMetadataNative.getTag("android.scaler.availableFormats");
 
-        Key<int[]> formatKey = CameraCharacteristics.SCALER_AVAILABLE_FORMATS;
+        Key<int[]> formatKey = CameraCharacteristics.SCALER_AVAILABLE_FORMATS.getNativeKey();
 
         validateArrayMetadataReadWriteOverride(formatKey, availableFormats,
                 expectedIntValues, availableFormatTag);
@@ -1046,7 +1054,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 0x20, 320, 240, INPUT,   // RAW16
         };
         Key<StreamConfiguration[]> configKey =
-                CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
+                CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS.getNativeKey();
         mMetadata.writeValues(configKey.getTag(),
                 toByteArray(rawAvailableStreamConfigs));
 
@@ -1074,7 +1082,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 0x21, 1920, 1080, 33333338  // BLOB
         };
         Key<StreamConfigurationDuration[]> durationKey =
-                CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
+                CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS.getNativeKey();
         mMetadata.writeValues(durationKey.getTag(),
                 toByteArray(rawAvailableMinDurations));
 
@@ -1100,7 +1108,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 0x21, 1920, 1080, 33333338  // BLOB
         };
         Key<StreamConfigurationDuration[]> stallDurationKey =
-                CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS;
+                CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS.getNativeKey();
         mMetadata.writeValues(stallDurationKey.getTag(),
                 toByteArray(rawAvailableStallDurations));
 
@@ -1156,6 +1164,31 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                     Duration.Stall,
                     expectedAvailableStallDurations[i+3]);
         }
+    }
+
+    @SmallTest
+    public void testCaptureResult() {
+        mMetadata.set(CaptureRequest.CONTROL_AE_MODE,
+                CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
+        if (VERBOSE) mMetadata.dumpToLog();
+
+        CaptureResult captureResult = new CaptureResult(mMetadata, /*sequenceId*/0);
+
+        List<CaptureResult.Key<?>> allKeys = captureResult.getKeys();
+        if (VERBOSE) Log.v(TAG, "testCaptureResult: key list size " + allKeys);
+        for (CaptureResult.Key<?> key : captureResult.getKeys()) {
+            if (VERBOSE) {
+                Log.v(TAG,
+                    "testCaptureResult: key " + key + " value" + captureResult.get(key));
+            }
+        }
+
+        assertTrue(allKeys.size() >= 1); // FIXME: android.statistics.faces counts as a key
+        assertTrue(allKeys.contains(CaptureResult.CONTROL_AE_MODE));
+
+        assertEquals(CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH,
+                (int)captureResult.get(CaptureResult.CONTROL_AE_MODE));
     }
 
     private static void checkStreamConfigurationMapByFormatSize(StreamConfigurationMap configMap,

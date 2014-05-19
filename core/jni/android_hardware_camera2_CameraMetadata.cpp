@@ -39,6 +39,9 @@
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 
+#include <sys/types.h> // for socketpair
+#include <sys/socket.h> // for socketpair
+
 #if defined(LOG_NNDEBUG)
 #if !LOG_NNDEBUG
 #define ALOGVV ALOGV
@@ -351,6 +354,119 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
     }
 }
 
+struct DumpMetadataParams {
+    int writeFd;
+    const CameraMetadata* metadata;
+};
+
+static void* CameraMetadata_writeMetadataThread(void* arg) {
+    DumpMetadataParams* p = static_cast<DumpMetadataParams*>(arg);
+
+    /*
+     * Write the dumped data, and close the writing side FD.
+     */
+    p->metadata->dump(p->writeFd, /*verbosity*/2);
+
+    if (close(p->writeFd) < 0) {
+        ALOGE("%s: Failed to close writeFd (errno = %#x, message = '%s')",
+                __FUNCTION__, errno, strerror(errno));
+    }
+
+    return NULL;
+}
+
+static void CameraMetadata_dump(JNIEnv *env, jobject thiz) {
+    ALOGV("%s", __FUNCTION__);
+    CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
+    if (metadata == NULL) {
+        return;
+    }
+
+    /*
+     * Create a socket pair for local streaming read/writes.
+     *
+     * The metadata will be dumped into the write side,
+     * and then read back out (and logged) via the read side.
+     */
+
+    int writeFd, readFd;
+    {
+
+        int sv[2];
+        if (socketpair(AF_LOCAL, SOCK_STREAM, /*protocol*/0, &sv[0]) < 0) {
+            jniThrowExceptionFmt(env, "java/io/IOException",
+                    "Failed to create socketpair (errno = %#x, message = '%s')",
+                    errno, strerror(errno));
+            return;
+        }
+        writeFd = sv[0];
+        readFd = sv[1];
+    }
+
+    /*
+     * Create a thread for doing the writing.
+     *
+     * The reading and writing must be concurrent, otherwise
+     * the write will block forever once it exhausts the capped
+     * buffer size (from getsockopt).
+     */
+    pthread_t writeThread;
+    DumpMetadataParams params = {
+        writeFd,
+        metadata
+    };
+
+    {
+        int threadRet = pthread_create(&writeThread, /*attr*/NULL,
+                CameraMetadata_writeMetadataThread, (void*)&params);
+
+        if (threadRet != 0) {
+            close(writeFd);
+
+            jniThrowExceptionFmt(env, "java/io/IOException",
+                    "Failed to create thread for writing (errno = %#x, message = '%s')",
+                    threadRet, strerror(threadRet));
+        }
+    }
+
+    /*
+     * Read out a byte until stream is complete. Write completed lines
+     * to ALOG.
+     */
+    {
+        char out[] = {'\0', '\0'}; // large enough to append as a string
+        String8 logLine;
+
+        // Read one byte at a time! Very slow but avoids complicated \n scanning.
+        ssize_t res;
+        while ((res = TEMP_FAILURE_RETRY(read(readFd, &out[0], /*count*/1))) > 0) {
+            if (out[0] == '\n') {
+                ALOGD("%s", logLine.string());
+                logLine.clear();
+            } else {
+                logLine.append(out);
+            }
+        }
+
+        if (res < 0) {
+            jniThrowExceptionFmt(env, "java/io/IOException",
+                    "Failed to read from fd (errno = %#x, message = '%s')",
+                    errno, strerror(errno));
+            //return;
+        } else if (!logLine.isEmpty()) {
+            ALOGD("%s", logLine.string());
+        }
+    }
+
+    int res;
+
+    // Join until thread finishes. Ensures params/metadata is valid until then.
+    if ((res = pthread_join(writeThread, /*retval*/NULL)) != 0) {
+        ALOGE("%s: Failed to join thread (errno = %#x, message = '%s')",
+                __FUNCTION__, res, strerror(res));
+    }
+}
+
 static void CameraMetadata_readFromParcel(JNIEnv *env, jobject thiz, jobject parcel) {
     ALOGV("%s", __FUNCTION__);
     CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
@@ -436,6 +552,9 @@ static JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeWriteValues",
     "(I[B)V",
     (void *)CameraMetadata_writeValues },
+  { "nativeDump",
+    "()V",
+    (void *)CameraMetadata_dump },
 // Parcelable interface
   { "nativeReadFromParcel",
     "(Landroid/os/Parcel;)V",

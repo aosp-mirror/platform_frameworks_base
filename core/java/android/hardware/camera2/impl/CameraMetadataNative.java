@@ -20,7 +20,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
@@ -46,10 +46,14 @@ import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.utils.TypeReference;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -58,7 +62,147 @@ import java.util.ArrayList;
  * Implementation of camera metadata marshal/unmarshal across Binder to
  * the camera service
  */
-public class CameraMetadataNative extends CameraMetadata implements Parcelable {
+public class CameraMetadataNative implements Parcelable {
+
+    public static class Key<T> {
+        private boolean mHasTag;
+        private int mTag;
+        private final Class<T> mType;
+        private final TypeReference<T> mTypeReference;
+        private final String mName;
+
+        /**
+         * Visible for testing only.
+         *
+         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+         * for application code or vendor-extended keys.</p>
+         */
+        public Key(String name, Class<T> type) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (type == null) {
+                throw new NullPointerException("Type needs to be non-null");
+            }
+            mName = name;
+            mType = type;
+            mTypeReference = TypeReference.createSpecializedTypeReference(type);
+        }
+
+        /**
+         * Visible for testing only.
+         *
+         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+         * for application code or vendor-extended keys.</p>
+         */
+        @SuppressWarnings("unchecked")
+        public Key(String name, TypeReference<T> typeReference) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (typeReference == null) {
+                throw new NullPointerException("TypeReference needs to be non-null");
+            }
+            mName = name;
+            mType = (Class<T>)typeReference.getRawType();
+            mTypeReference = typeReference;
+        }
+
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        public final String getName() {
+            return mName;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final int hashCode() {
+            return mName.hashCode() ^ mTypeReference.hashCode();
+        }
+
+        /**
+         * Compare this key against other native keys, request keys, result keys, and
+         * characteristics keys.
+         *
+         * <p>Two keys are considered equal if their name and type reference are equal.</p>
+         *
+         * <p>Note that the equality against non-native keys is one-way. A native key may be equal
+         * to a result key; but that same result key will not be equal to a native key.</p>
+         */
+        @SuppressWarnings("rawtypes")
+        @Override
+        public final boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            Key<?> lhs;
+
+            if (o instanceof CaptureResult.Key) {
+                lhs = ((CaptureResult.Key)o).getNativeKey();
+            } else if (o instanceof CaptureRequest.Key) {
+                lhs = ((CaptureRequest.Key)o).getNativeKey();
+            } else if (o instanceof CameraCharacteristics.Key) {
+                lhs = ((CameraCharacteristics.Key)o).getNativeKey();
+            } else if ((o instanceof Key)) {
+                lhs = (Key<?>)o;
+            } else {
+                return false;
+            }
+
+            return mName.equals(lhs.mName) && mTypeReference.equals(lhs.mTypeReference);
+        }
+
+        /**
+         * <p>
+         * Get the tag corresponding to this key. This enables insertion into the
+         * native metadata.
+         * </p>
+         *
+         * <p>This value is looked up the first time, and cached subsequently.</p>
+         *
+         * @return The tag numeric value corresponding to the string
+         */
+        public final int getTag() {
+            if (!mHasTag) {
+                mTag = CameraMetadataNative.getTag(mName);
+                mHasTag = true;
+            }
+            return mTag;
+        }
+
+        /**
+         * Get the raw class backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be erased.</p>
+         */
+        public final Class<T> getType() {
+            // TODO: remove this; other places should use #getTypeReference() instead
+            return mType;
+        }
+
+        /**
+         * Get the type reference backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be retained.</p>
+         */
+        public final TypeReference<T> getTypeReference() {
+            return mTypeReference;
+        }
+    }
 
     private static final String TAG = "CameraMetadataJV";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -82,6 +226,20 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         if (mMetadataPtr == 0) {
             throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         }
+    }
+
+    /**
+     * Move the contents from {@code other} into a new camera metadata instance.</p>
+     *
+     * <p>After this call, {@code other} will become empty.</p>
+     *
+     * @param other the previous metadata instance which will get pilfered
+     * @return a new metadata instance with the values from {@code other} moved into it
+     */
+    public static CameraMetadataNative move(CameraMetadataNative other) {
+        CameraMetadataNative newObject = new CameraMetadataNative();
+        newObject.swap(other);
+        return newObject;
     }
 
     public static final Parcelable.Creator<CameraMetadataNative> CREATOR =
@@ -109,8 +267,36 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         nativeWriteToParcel(dest);
     }
 
-    @Override
+    /**
+     * @hide
+     */
+    public <T> T get(CameraCharacteristics.Key<T> key) {
+        return get(key.getNativeKey());
+    }
+
+    /**
+     * @hide
+     */
+    public <T> T get(CaptureResult.Key<T> key) {
+        return get(key.getNativeKey());
+    }
+
+    /**
+     * @hide
+     */
+    public <T> T get(CaptureRequest.Key<T> key) {
+        return get(key.getNativeKey());
+    }
+
+    /**
+     * Look-up a metadata field value by its key.
+     *
+     * @param key a non-{@code null} key instance
+     * @return the field corresponding to the {@code key}, or {@code null} if no value was set
+     */
     public <T> T get(Key<T> key) {
+        Preconditions.checkNotNull(key, "key must not be null");
+
         T value = getOverride(key);
         if (value != null) {
             return value;
@@ -152,6 +338,18 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         setBase(key, value);
     }
 
+    public <T> void set(CaptureRequest.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
+    }
+
+    public <T> void set(CaptureResult.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
+    }
+
+    public <T> void set(CameraCharacteristics.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
+    }
+
     // Keep up-to-date with camera_metadata.h
     /**
      * @hide
@@ -186,6 +384,18 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         // this sets mMetadataPtr to 0
         nativeClose();
         mMetadataPtr = 0; // set it to 0 again to prevent eclipse from making this field final
+    }
+
+    private <T> T getBase(CameraCharacteristics.Key<T> key) {
+        return getBase(key.getNativeKey());
+    }
+
+    private <T> T getBase(CaptureResult.Key<T> key) {
+        return getBase(key.getNativeKey());
+    }
+
+    private <T> T getBase(CaptureRequest.Key<T> key) {
+        return getBase(key.getNativeKey());
     }
 
     private <T> T getBase(Key<T> key) {
@@ -342,6 +552,18 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return new StreamConfigurationMap(configurations, minFrameDurations, stallDurations);
     }
 
+    private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
+    private <T> void setBase(CaptureResult.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
+    private <T> void setBase(CaptureRequest.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
     private <T> void setBase(Key<T> key, T value) {
         int tag = key.getTag();
 
@@ -440,6 +662,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private native synchronized byte[] nativeReadValues(int tag);
     private native synchronized void nativeWriteValues(int tag, byte[] src);
+    private native synchronized void nativeDump() throws IOException; // dump to ALOGD
 
     private static native int nativeGetTagFromKey(String keyName)
             throws IllegalArgumentException;
@@ -531,6 +754,22 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return nativeReadValues(tag);
     }
 
+    /**
+     * Dumps the native metadata contents to logcat.
+     *
+     * <p>Visibility for testing/debugging only. The results will not
+     * include any synthesized keys, as they are invisible to the native layer.</p>
+     *
+     * @hide
+     */
+    public void dumpToLog() {
+        try {
+            nativeDump();
+        } catch (IOException e) {
+            Log.wtf(TAG, "Dump logging failed", e);
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -599,5 +838,4 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         nativeClassInit();
         registerAllMarshalers();
     }
-
 }

@@ -16,7 +16,9 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.utils.TypeReference;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Rational;
@@ -25,6 +27,7 @@ import android.view.Surface;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -58,7 +61,98 @@ import java.util.Objects;
  * @see CameraDevice#setRepeatingRequest
  * @see CameraDevice#createCaptureRequest
  */
-public final class CaptureRequest extends CameraMetadata implements Parcelable {
+public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
+        implements Parcelable {
+
+    /**
+     * A {@code Key} is used to do capture request field lookups with
+     * {@link CaptureResult#get} or to set fields with
+     * {@link CaptureRequest.Builder#set(Key, Object)}.
+     *
+     * <p>For example, to set the crop rectangle for the next capture:
+     * <code><pre>
+     * Rect cropRectangle = new Rect(0, 0, 640, 480);
+     * captureRequestBuilder.set(SCALER_CROP_REGION, cropRectangle);
+     * </pre></code>
+     * </p>
+     *
+     * <p>To enumerate over all possible keys for {@link CaptureResult}, see
+     * {@link CameraCharacteristics#getAvailableCaptureResultKeys}.</p>
+     *
+     * @see CaptureResult#get
+     * @see CameraCharacteristics#getAvailableCaptureResultKeys
+     */
+    public final static class Key<T> {
+        private final CameraMetadataNative.Key<T> mKey;
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, Class<T> type) {
+            mKey = new CameraMetadataNative.Key<T>(name, type);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, TypeReference<T> typeReference) {
+            mKey = new CameraMetadataNative.Key<T>(name, typeReference);
+        }
+
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        public String getName() {
+            return mKey.getName();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final int hashCode() {
+            return mKey.hashCode();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        public final boolean equals(Object o) {
+            return o instanceof Key && ((Key<T>)o).mKey.equals(mKey);
+        }
+
+        /**
+         * Visible for CameraMetadataNative implementation only; do not use.
+         *
+         * TODO: Make this private or remove it altogether.
+         *
+         * @hide
+         */
+        public CameraMetadataNative.Key<T> getNativeKey() {
+            return mKey;
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        /*package*/ Key(CameraMetadataNative.Key<?> nativeKey) {
+            mKey = (CameraMetadataNative.Key<T>) nativeKey;
+        }
+    }
 
     private final HashSet<Surface> mSurfaceSet;
     private final CameraMetadataNative mSettings;
@@ -93,14 +187,55 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * Used by the Builder to create a mutable CaptureRequest.
      */
     private CaptureRequest(CameraMetadataNative settings) {
-        mSettings = settings;
+        mSettings = CameraMetadataNative.move(settings);
         mSurfaceSet = new HashSet<Surface>();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
+    /**
+     * Get a capture request field value.
+     *
+     * <p>The field definitions can be found in {@link CaptureRequest}.</p>
+     *
+     * <p>Querying the value for the same key more than once will return a value
+     * which is equal to the previous queried value.</p>
+     *
+     * @throws IllegalArgumentException if the key was not valid
+     *
+     * @param key The result field to read.
+     * @return The value of that key, or {@code null} if the field is not set.
+     */
     public <T> T get(Key<T> key) {
         return mSettings.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T> T getProtected(Key<?> key) {
+        return (T) mSettings.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Class<Key<?>> getKeyClass() {
+        Object thisClass = Key.class;
+        return (Class<Key<?>>)thisClass;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Key<?>> getKeys() {
+        // Force the javadoc for this function to show up on the CaptureRequest page
+        return super.getKeys();
     }
 
     /**
