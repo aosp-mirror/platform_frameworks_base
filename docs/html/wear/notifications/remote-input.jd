@@ -25,16 +25,16 @@ you must type text replies into the voice input field, so be sure you have enabl
 <h2 id="RemoteInput">Define the Remote Input</h2>
 
 <p>To create an action that supports voice input, first create an instance of
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html">
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html">
 <code>RemoteInput</code></a> using the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> APIs.
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> APIs.
     The
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> constructor takes a string that the system
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> constructor takes a string that the system
     will use as a key for the {@link android.content.Intent} extra that carries the reply message
     to your app on the handheld.</p>
 
 <p>For example, here's how to create a new
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html">
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html">
 <code>RemoteInput</code></a> object that provides a custom
     label for the voice input prompt:</p>
 
@@ -56,7 +56,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
 
 <p>In addition to allowing voice input, you can
     provide up to five text responses that the user can select for quick replies. Call
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html#setChoices(java.lang.String[])"><code>setChoices()</code></a> and pass it a string array.</p>
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.Builder.html#setChoices(java.lang.String[])"><code>setChoices()</code></a> and pass it a string array.</p>
 
 <p>For example, you may define some responses in a resource array:</p>
 
@@ -73,7 +73,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
 </pre>
 
 <p>Then, inflate the string array and add it to the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a>:</p>
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a>:</p>
 
 <pre>
 String replyLabel = getResources().getString(R.string.reply_label);
@@ -93,8 +93,8 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
 <p>If "Reply" is your notification's primary action (defined by the {@link
 android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}
 method), then you should attach the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to the main action using
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#addRemoteInputForContentIntent(android.preview.support.wearable.notifications.RemoteInput)">
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to the main action using
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#addRemoteInputForContentIntent(android.support.wearable.notifications.RemoteInput)">
 <code>addRemoteInputForContentIntent()</code></a>. For example:</p>
 
 <pre>
@@ -116,18 +116,19 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
         .setLabel(replyLabel)
         .build();
 
-// Create wearable notification and add remote input
+// Add remote input to wearable options and apply to notification
 Notification replyNotification =
-        new WearableNotifications.Builder(replyNotificationBuilder)
+        new WearableNotificationOptions.Builder()
         .addRemoteInputForContentIntent(remoteInput)
+        .build()
+        .applyTo(replyNotificationBuilder)
         .build();
 </pre>
 
-
 <p>By using
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#addRemoteInputForContentIntent(android.preview.support.wearable.notifications.RemoteInput)">
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#addRemoteInputForContentIntent(android.support.wearable.notifications.RemoteInput)">
 <code>addRemoteInputForContentIntent()</code></a> to add the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> object to the notification's primary action,
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> object to the notification's primary action,
 the button that normally appears as an "Open" action becomes the "Reply" action
 and starts the voice input UI when users select it on Android Wear.</p>
 
@@ -137,14 +138,14 @@ and starts the voice input UI when users select it on Android Wear.</p>
 
 <p>If the "Reply" action is not your notification's primary action and you want to enable
 voice input for a secondary action, add the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to a new action button defined by an
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to a new action button defined by an
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableAction.html">
 <code>Action</code></a> object.</p>
 
 <p>You should instantiate the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">
-<code>Action</code></a> with the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html"><code>Action.Builder()</code></a>
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableAction.html">
+<code>WearableAction</code></a> with the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableAction.Builder.html"><code>WearableAction.Builder()</code></a>
 constructor, which takes an icon and text label for the action button, plus the
 {@link android.app.PendingIntent}
 the system should use to invoke your app when the user selects the action. For example:</p>
@@ -161,7 +162,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
         .build();
 
 // Create the notification action
-Action replyAction = new Action.Builder(R.drawable.ic_message,
+WearableAction replyAction = new WearableAction.Builder(R.drawable.ic_message,
         "Reply", pendingIntent)
         .addRemoteInput(remoteInput)
         .build();
@@ -169,33 +170,36 @@ Action replyAction = new Action.Builder(R.drawable.ic_message,
 
 
 <p>After you add the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">
-<code>Action</code></a>, add the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html">
-<code>Action</code></a> to the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"><code>WearableNotifications.Builder</code></a> using
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#addAction(Action)"><code>addAction()</code></a>.
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html"><code>RemoteInput</code></a> to the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableAction.html">
+<code>Wearablection</code></a>, set the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableAction.html">
+<code>WearableAction</code></a> on the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html"><code>WearableNotifications.Builder</code></a> using
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationsOptions.Builder.html#addAction(Action)"><code>addAction()</code></a>.
 For example:</p>
 
 <pre>
 // Create basic notification builder
 NotificationCompat.Builder replyNotificationBuilder =
         new NotificationCompat.Builder(this)
-        .setContentTitle("New message");
+                .setContentTitle("New message");
 
 // Create the notification action and add remote input
-Action replyAction = new Action.Builder(R.drawable.ic_message,
+WearableAction replyAction = new WearableAction.Builder(R.drawable.ic_message,
         "Reply", pendingIntent)
         .addRemoteInput(remoteInput)
         .build();
 
 // Create wearable notification and add action
 Notification replyNotification =
-        new WearableNotifications.Builder(replyNotificationBuilder)
-        .addAction(replyAction)
-        .build();
+        new WearableNotificationOptions.Builder()
+                .addAction(replyAction)
+                .build()
+                .applyTo(replyNotificationBuilder)
+                .build();
 </pre>
+
 
 <p>Now, when the user selects "Reply" from an Android wearable, the system prompts the user
     for voice input (and shows the list of pre-defined replies, if provided).
@@ -203,11 +207,35 @@ Notification replyNotification =
     the {@link android.content.Intent} attached to the action and adds the
 <code>EXTRA_VOICE_REPLY</code> extra (the string
     you passed to the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> constructor)
-    with the user's message as the string value.</p>
+  <a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.Builder.html"><code>RemoteInput.Builder</code></a> constructor)
+  with the user's message as the string value.</p>
 
-
-
+<h2 id="ObtainInput">Obtaining the Voice Input as a String</h2>
+<p>To obtain the user's voice input, call
+<a href="{@docRoot}reference/android/support/wearable/notifications/RemoteInput.html#getResultsFromIntent(Intent)"><code>getResultsFromIntent()</code></a>,
+passing in the "Reply" action's intent. This method returns
+a {@link android.os.Bundle} that represents the intent's extras. You can then query the
+{@link android.os.Bundle} to obtain the user's voice input string.
+</p>
+<p>
+The following code shows a method that accepts an intent and returns the voice input string,
+which is referenced by the <code>EXTRA_VOICE_REPLY</code> key that is used in the previous examples:
+</p>
+<pre>
+/**
+ * Obtain the intent that started this activity by calling
+ * Activity.getIntent() and pass it into this method to
+ * get the associated voice input string.
+ */
+private String getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+        if (remoteInput != null) {
+            return remoteInput.getString(Intent.EXTRA_VOICE_REPLY);
+        }
+    }
+    return null;
+}
+</pre>
 
 </body>
 </html>
