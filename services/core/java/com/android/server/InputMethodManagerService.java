@@ -2369,20 +2369,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     void setEnabledSessionInMainThread(SessionState session) {
         if (mEnabledSession != session) {
-            if (mEnabledSession != null) {
+            if (mEnabledSession != null && mEnabledSession.session != null) {
                 try {
                     if (DEBUG) Slog.v(TAG, "Disabling: " + mEnabledSession);
-                    mEnabledSession.method.setSessionEnabled(
-                            mEnabledSession.session, false);
+                    mEnabledSession.method.setSessionEnabled(mEnabledSession.session, false);
                 } catch (RemoteException e) {
                 }
             }
             mEnabledSession = session;
-            try {
-                if (DEBUG) Slog.v(TAG, "Enabling: " + mEnabledSession);
-                session.method.setSessionEnabled(
-                        session.session, true);
-            } catch (RemoteException e) {
+            if (mEnabledSession != null && mEnabledSession.session != null) {
+                try {
+                    if (DEBUG) Slog.v(TAG, "Enabling: " + mEnabledSession);
+                    mEnabledSession.method.setSessionEnabled(mEnabledSession.session, true);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
