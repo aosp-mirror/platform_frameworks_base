@@ -60,7 +60,8 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         } else if (mDemoMode && command.equals(COMMAND_STATUS)) {
             String volume = args.getString("volume");
             if (volume != null) {
-                int iconId = volume.equals("silent") ? R.drawable.stat_sys_ringer_silent
+                int iconId = volume.equals("zen") ? R.drawable.stat_sys_ringer_zen
+                        : volume.equals("silent") ? R.drawable.stat_sys_ringer_silent
                         : volume.equals("vibrate") ? R.drawable.stat_sys_ringer_vibrate
                         : 0;
                 updateSlot("volume", null, iconId);

@@ -223,8 +223,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     IconMerger mNotificationIcons;
     // [+>
     View mMoreIcon;
-    // mode indicator icon
-    ImageView mModeIcon;
 
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -488,12 +486,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void setZenMode(int mode) {
         super.setZenMode(mode);
-        if (mModeIcon == null) return;
         if (!isDeviceProvisioned()) return;
         final boolean zen = mode != Settings.Global.ZEN_MODE_OFF;
-        mModeIcon.setVisibility(zen ? View.VISIBLE : View.GONE);
         if (!zen) {
             mIntercepted.releaseIntercepted();
+        }
+        if (mIconPolicy != null) {
+            mIconPolicy.setZenMode(zen);
         }
     }
 
@@ -618,8 +617,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
-        mModeIcon = (ImageView)mStatusBarView.findViewById(R.id.modeIcon);
-        mModeIcon.setImageResource(R.drawable.ic_qs_zen_on);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
