@@ -16,8 +16,8 @@
 
 package com.android.server.task;
 
+import android.app.task.Task;
 import android.content.Context;
-import android.content.Task;
 import android.util.SparseArray;
 
 import com.android.server.task.controllers.TaskStatus;
@@ -92,6 +92,13 @@ public class TaskStore {
     // TODO: Implement this.
     private SparseArray<TaskStatus> intialiseTaskMapFromDisk() {
         return new SparseArray<TaskStatus>();
+    }
+
+    /**
+     * @return the number of tasks in the store
+     */
+    public int size() {
+        return mTasks.size();
     }
 
     /**

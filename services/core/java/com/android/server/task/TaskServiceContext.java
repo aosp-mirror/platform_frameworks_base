@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * is reused to start concurrent tasks on the TaskService. Information here is unique
  * to the service.
  * Functionality provided by this class:
- *     - Managages wakelock for the service.
+ *     - Manages wakelock for the service.
  *     - Sends onStartTask() and onStopTask() messages to client app, and handles callbacks.
  *     -
  */

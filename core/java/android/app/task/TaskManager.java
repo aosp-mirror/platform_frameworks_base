@@ -14,14 +14,19 @@
  * limitations under the License
  */
 
-package android.content;
+package android.app.task;
 
 import java.util.List;
+
+import android.content.Context;
 
 /**
  * Class for scheduling various types of tasks with the scheduling framework on the device.
  *
- * Get an instance of this class through {@link Context#getSystemService(String)}.
+ * <p>You do not
+ * instantiate this class directly; instead, retrieve it through
+ * {@link android.content.Context#getSystemService
+ * Context.getSystemService(Context.TASK_SERVICE)}.
  */
 public abstract class TaskManager {
     /*
@@ -29,18 +34,20 @@ public abstract class TaskManager {
      * if the run-time for your task is too short, or perhaps the system can't resolve the
      * requisite {@link TaskService} in your package.
      */
-    static final int RESULT_INVALID_PARAMETERS = -1;
+    public static final int RESULT_INVALID_PARAMETERS = -1;
+
     /**
      * Returned from {@link #schedule(Task)} if this application has made too many requests for
      * work over too short a time.
      */
     // TODO: Determine if this is necessary.
-    static final int RESULT_OVER_QUOTA = -2;
+    public static final int RESULT_OVER_QUOTA = -2;
 
-    /*
-     * @param task The task you wish scheduled. See {@link Task#TaskBuilder} for more detail on
-     * the sorts of tasks you can schedule.
-     * @return If >0, this int corresponds to the taskId of the successfully scheduled task.
+    /**
+     * @param task The task you wish scheduled. See
+     * {@link android.app.task.Task.Builder Task.Builder} for more detail on the sorts of tasks
+     * you can schedule.
+     * @return If >0, this int returns the taskId of the successfully scheduled task.
      * Otherwise you have to compare the return value to the error codes defined in this class.
      */
     public abstract int schedule(Task task);

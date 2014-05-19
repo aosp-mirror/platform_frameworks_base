@@ -28,7 +28,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 /**
- * <p>Entry point for the callback from the {@link android.content.TaskManager}.</p>
+ * <p>Entry point for the callback from the {@link android.app.task.TaskManager}.</p>
  * <p>This is the base class that handles asynchronous requests that were previously scheduled. You
  * are responsible for overriding {@link TaskService#onStartTask(TaskParams)}, which is where
  * you will implement your task logic.</p>
@@ -215,9 +215,9 @@ public abstract class TaskService extends Service {
      *
      * <p>This will happen if the requirements specified at schedule time are no longer met. For
      * example you may have requested WiFi with
-     * {@link android.content.Task.Builder#setRequiredNetworkCapabilities(int)}, yet while your
+     * {@link android.app.task.Task.Builder#setRequiredNetworkCapabilities(int)}, yet while your
      * task was executing the user toggled WiFi. Another example is if you had specified
-     * {@link android.content.Task.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
+     * {@link android.app.task.Task.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
      * idle maintenance window. You are solely responsible for the behaviour of your application
      * upon receipt of this message; your app will likely start to misbehave if you ignore it. One
      * immediate repercussion is that the system will cease holding a wakelock for you.</p>
@@ -237,7 +237,7 @@ public abstract class TaskService extends Service {
      *     You can specify post-execution behaviour to the scheduler here with
      *     <code>needsReschedule </code>. This will apply a back-off timer to your task based on
      *     the default, or what was set with
-     *     {@link android.content.Task.Builder#setBackoffCriteria(long, int)}. The original
+     *     {@link android.app.task.Task.Builder#setBackoffCriteria(long, int)}. The original
      *     requirements are always honoured even for a backed-off task. Note that a task running in
      *     idle mode will not be backed-off. Instead what will happen is the task will be re-added
      *     to the queue and re-executed within a future idle maintenance window.

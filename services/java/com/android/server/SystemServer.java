@@ -83,6 +83,7 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.task.TaskManagerService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
@@ -132,6 +133,8 @@ public final class SystemServer {
             "com.android.server.hdmi.HdmiCecService";
     private static final String ETHERNET_SERVICE_CLASS =
             "com.android.server.ethernet.EthernetService";
+    private static final String TASK_SERVICE_CLASS =
+            "com.android.server.task.TaskManagerService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -830,6 +833,8 @@ public final class SystemServer {
             mSystemServiceManager.startService(TwilightService.class);
 
             mSystemServiceManager.startService(UiModeManagerService.class);
+
+            mSystemServiceManager.startService(TaskManagerService.class);
 
             if (!disableNonCoreServices) {
                 try {
