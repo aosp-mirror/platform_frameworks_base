@@ -421,6 +421,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean mustNotify;
         boolean mustInitialize = false;
         boolean wasDimOrDoze = false;
+        boolean autoBrightnessAdjustmentChanged = false;
 
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
@@ -437,6 +438,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             } else if (mPendingRequestChangedLocked) {
                 wasDimOrDoze = (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM
                         || mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE);
+                autoBrightnessAdjustmentChanged = (mPowerRequest.screenAutoBrightnessAdjustment
+                        != mPendingRequestLocked.screenAutoBrightnessAdjustment);
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
                 mPendingWaitForNegativeProximityLocked = false;
@@ -494,7 +497,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (screenAutoBrightness >= 0 && mPowerRequest.useAutoBrightness) {
                 // Use current auto-brightness value.
                 target = screenAutoBrightness;
-                slow = mUsingScreenAutoBrightness;
+                slow = mUsingScreenAutoBrightness && !autoBrightnessAdjustmentChanged;
                 mUsingScreenAutoBrightness = true;
             } else {
                 // Light sensor is disabled or not ready yet.
