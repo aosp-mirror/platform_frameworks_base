@@ -798,9 +798,29 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    protected int computeVerticalScrollRange() {
-        // needed for the overScroller
-        return mContentHeight;
+    protected boolean overScrollBy(int deltaX, int deltaY,
+            int scrollX, int scrollY,
+            int scrollRangeX, int scrollRangeY,
+            int maxOverScrollX, int maxOverScrollY,
+            boolean isTouchEvent) {
+
+        int newScrollY = scrollY + deltaY;
+
+        final int top = -maxOverScrollY;
+        final int bottom = maxOverScrollY + scrollRangeY;
+
+        boolean clampedY = false;
+        if (newScrollY > bottom) {
+            newScrollY = bottom;
+            clampedY = true;
+        } else if (newScrollY < top) {
+            newScrollY = top;
+            clampedY = true;
+        }
+
+        onOverScrolled(0, newScrollY, false, clampedY);
+
+        return clampedY;
     }
 
     /**
@@ -1023,8 +1043,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private void fling(int velocityY) {
         if (getChildCount() > 0) {
-            int height = (int) getLayoutHeight();
-            int bottom = getContentHeight();
+            int scrollRange = getScrollRange();
 
             float topAmount = getCurrentOverScrollAmount(true);
             float bottomAmount = getCurrentOverScrollAmount(false);
@@ -1043,7 +1062,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mMaxOverScroll = 0.0f;
             }
             mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0,
-                    Math.max(0, bottom - height), 0, height/2);
+                    Math.max(0, scrollRange), 0, Integer.MAX_VALUE / 2);
 
             postInvalidateOnAnimation();
         }
