@@ -3131,6 +3131,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return symbolicName != null ? symbolicName : Integer.toString(toolType);
     }
 
+    /**
+     * Checks if a mouse or stylus button (or combination of buttons) is pressed.
+     * @param button Button (or combination of buttons).
+     * @return True if specified buttons are pressed.
+     *
+     * @see #BUTTON_PRIMARY
+     * @see #BUTTON_SECONDARY
+     * @see #BUTTON_TERTIARY
+     * @see #BUTTON_FORWARD
+     * @see #BUTTON_BACK
+     */
+    public final boolean isButtonPressed(int button) {
+        if (button == 0) {
+            return false;
+        }
+        return (getButtonState() & button) == button;
+    }
+
     public static final Parcelable.Creator<MotionEvent> CREATOR
             = new Parcelable.Creator<MotionEvent>() {
         public MotionEvent createFromParcel(Parcel in) {
