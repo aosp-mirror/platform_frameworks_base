@@ -63,6 +63,9 @@ public class PhoneStatusBarPolicy {
     // ringer volume
     private boolean mVolumeVisible;
 
+    // zen mode
+    private boolean mZen;
+
     // bluetooth device status
     private boolean mBluetoothEnabled = false;
 
@@ -152,6 +155,11 @@ public class PhoneStatusBarPolicy {
         updateVolume();
     }
 
+    public void setZenMode(boolean zen) {
+        mZen = zen;
+        updateVolume();
+    }
+
     private final void updateAlarm(Intent intent) {
         boolean alarmSet = intent.getBooleanExtra("alarmSet", false);
         mService.setIconVisibility("alarm_clock", alarmSet);
@@ -195,11 +203,15 @@ public class PhoneStatusBarPolicy {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
-                ringerMode == AudioManager.RINGER_MODE_VIBRATE;
+                ringerMode == AudioManager.RINGER_MODE_VIBRATE ||
+                mZen;
 
         final int iconId;
         String contentDescription = null;
-        if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+        if (mZen) {
+            iconId = R.drawable.stat_sys_ringer_zen;
+            contentDescription = mContext.getString(R.string.zen_mode_title);
+        } else if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
             iconId = R.drawable.stat_sys_ringer_vibrate;
             contentDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
         } else {
