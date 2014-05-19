@@ -15816,18 +15816,23 @@ package android.net {
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public deprecated boolean getBackgroundDataSetting();
-    method public android.net.ProxyInfo getGlobalProxy();
+    method public android.net.LinkProperties getLinkProperties(android.net.Network);
+    method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
     method public android.net.NetworkInfo getNetworkInfo(int);
-    method public int getNetworkPreference();
+    method public deprecated int getNetworkPreference();
     method public boolean isActiveNetworkMetered();
     method public boolean isNetworkActive();
     method public static boolean isNetworkTypeValid(int);
+    method public android.net.NetworkRequest listenForNetwork(android.net.NetworkCapabilities, android.net.ConnectivityManager.NetworkCallbackListener);
     method public void registerNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
-    method public boolean requestRouteToHost(int, int);
-    method public void setGlobalProxy(android.net.ProxyInfo);
-    method public void setNetworkPreference(int);
-    method public int startUsingNetworkFeature(int, java.lang.String);
-    method public int stopUsingNetworkFeature(int, java.lang.String);
+    method public void releaseNetworkRequest(android.net.NetworkRequest);
+    method public void reportBadNetwork(android.net.Network);
+    method public android.net.NetworkRequest requestNetwork(android.net.NetworkCapabilities, android.net.ConnectivityManager.NetworkCallbackListener);
+    method public android.net.NetworkRequest requestNetwork(android.net.NetworkCapabilities, android.app.PendingIntent);
+    method public deprecated boolean requestRouteToHost(int, int);
+    method public deprecated void setNetworkPreference(int);
+    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
+    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
     method public void unregisterNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
@@ -15835,6 +15840,8 @@ package android.net {
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
+    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
+    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK_CAPABILITIES = "networkRequestNetworkCapabilities";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
@@ -15849,6 +15856,16 @@ package android.net {
     field public static final int TYPE_MOBILE_SUPL = 3; // 0x3
     field public static final int TYPE_WIFI = 1; // 0x1
     field public static final int TYPE_WIMAX = 6; // 0x6
+  }
+
+  public static class ConnectivityManager.NetworkCallbackListener {
+    ctor public ConnectivityManager.NetworkCallbackListener();
+    method public void onAvailable(android.net.NetworkRequest, android.net.Network);
+    method public void onLinkPropertiesChanged(android.net.NetworkRequest, android.net.Network, android.net.LinkProperties);
+    method public void onLosing(android.net.NetworkRequest, android.net.Network, int);
+    method public void onLost(android.net.NetworkRequest, android.net.Network);
+    method public void onNetworkCapabilitiesChanged(android.net.NetworkRequest, android.net.Network, android.net.NetworkCapabilities);
+    method public void onReleased(android.net.NetworkRequest);
   }
 
   public static abstract interface ConnectivityManager.OnNetworkActiveListener {
@@ -15985,6 +16002,18 @@ package android.net {
     field public static final java.lang.String MAILTO_SCHEME = "mailto:";
   }
 
+  public class Network implements android.os.Parcelable {
+    method public void bindProcess();
+    method public int describeContents();
+    method public java.net.InetAddress[] getAllByName(java.lang.String) throws java.net.UnknownHostException;
+    method public java.net.InetAddress getByName(java.lang.String) throws java.net.UnknownHostException;
+    method public static android.net.Network getProcessBoundNetwork();
+    method public javax.net.SocketFactory socketFactory();
+    method public static void unbindProcess();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     ctor public NetworkCapabilities();
     ctor public NetworkCapabilities(android.net.NetworkCapabilities);
@@ -16068,6 +16097,13 @@ package android.net {
     enum_constant public static final android.net.NetworkInfo.State DISCONNECTING;
     enum_constant public static final android.net.NetworkInfo.State SUSPENDED;
     enum_constant public static final android.net.NetworkInfo.State UNKNOWN;
+  }
+
+  public class NetworkRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public final android.net.NetworkCapabilities networkCapabilities;
   }
 
   public class ParseException extends java.lang.RuntimeException {

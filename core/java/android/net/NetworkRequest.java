@@ -22,18 +22,18 @@ import android.os.Parcelable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Defines a request for a network, made by calling {@link ConnectivityManager.requestNetwork}.
+ * Defines a request for a network, made by calling {@link ConnectivityManager#requestNetwork}
+ * or {@link ConnectivityManager#listenForNetwork}.
  *
  * This token records the {@link NetworkCapabilities} used to make the request and identifies
  * the request.  It should be used to release the request via
- * {@link ConnectivityManager.releaseNetworkRequest} when the network is no longer desired.
- * @hide
+ * {@link ConnectivityManager#releaseNetworkRequest} when the network is no longer desired.
  */
 public class NetworkRequest implements Parcelable {
     /**
      * The {@link NetworkCapabilities} that define this request.  This should not be modified.
      * The networkCapabilities of the request are set when
-     * {@link ConnectivityManager.requestNetwork} is called and the value is presented here
+     * {@link ConnectivityManager#requestNetwork} is called and the value is presented here
      * as a convenient reminder of what was requested.
      */
     public final NetworkCapabilities networkCapabilities;
