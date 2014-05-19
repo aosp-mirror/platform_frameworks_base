@@ -1603,7 +1603,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             updateAllSharedLibrariesLPw();
 
             for (SharedUserSetting setting : mSettings.getAllSharedUsersLPw()) {
-                adjustCpuAbisForSharedUserLPw(setting.packages, true /* do dexopt */,
+                // NOTE: We ignore potential failures here during a system scan (like
+                // the rest of the commands above) because there's precious little we
+                // can do about it. A settings error is reported, though.
+                adjustCpuAbisForSharedUserLPw(setting.packages, null,
                         false /* force dexopt */, false /* defer dexopt */);
             }
 
@@ -5251,8 +5254,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
                 // We don't do this here during boot because we can do it all
                 // at once after scanning all existing packages.
-                adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
-                        true, forceDex, (scanMode & SCAN_DEFER_DEX) != 0);
+                if (!adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
+                        pkg.applicationInfo.cpuAbi,
+                        forceDex, (scanMode & SCAN_DEFER_DEX) != 0)) {
+                    mLastScanError = PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
+                    return null;
+                }
             }
             // We don't expect installation to fail beyond this point,
             if ((scanMode&SCAN_MONITOR) != 0) {
@@ -5597,9 +5604,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
-    public void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
-            boolean doDexOpt, boolean forceDexOpt, boolean deferDexOpt) {
-        String requiredInstructionSet = null;
+    private boolean adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
+            String requiredInstructionSet, boolean forceDexOpt, boolean deferDexOpt) {
         PackageSetting requirer = null;
         for (PackageSetting ps : packagesForUser) {
             if (ps.cpuAbiString != null) {
@@ -5607,20 +5613,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (requiredInstructionSet != null) {
                     if (!instructionSet.equals(requiredInstructionSet)) {
                         // We have a mismatch between instruction sets (say arm vs arm64).
-                        //
-                        // TODO: We should rescan all the packages in a shared UID to check if
-                        // they do contain shared libs for other ABIs in addition to the ones we've
-                        // already extracted. For example, the package might contain both arm64-v8a
-                        // and armeabi-v7a shared libs, and we'd have chosen arm64-v8a on 64 bit
-                        // devices.
-                        String errorMessage = "Instruction set mismatch, " + requirer.pkg.packageName
-                                + " requires " + requiredInstructionSet + " whereas " + ps.pkg.packageName
+                        // bail out.
+                        String errorMessage = "Instruction set mismatch, "
+                                + ((requirer == null) ? "[caller]" : requirer.pkg)
+                                + " requires " + requiredInstructionSet + " whereas " + ps.pkg
                                 + " requires " + instructionSet;
                         Slog.e(TAG, errorMessage);
 
                         reportSettingsProblem(Log.WARN, errorMessage);
                         // Give up, don't bother making any other changes to the package settings.
-                        return;
+                        return false;
                     }
                 } else {
                     requiredInstructionSet = instructionSet;
@@ -5636,14 +5638,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (ps.pkg != null) {
                         ps.pkg.applicationInfo.cpuAbi = requirer.cpuAbiString;
                         Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + ps.cpuAbiString);
-                        if (doDexOpt) {
-                            performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true);
+
+                        if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
+                            ps.cpuAbiString = null;
+                            ps.pkg.applicationInfo.cpuAbi = null;
+                            return false;
+                        } else {
                             mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
                         }
                     }
                 }
             }
         }
+
+        return true;
     }
 
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
