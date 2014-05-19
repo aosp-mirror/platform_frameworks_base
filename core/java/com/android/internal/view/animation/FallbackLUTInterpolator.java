@@ -24,10 +24,13 @@ import android.view.Choreographer;
  * Interpolator that builds a lookup table to use. This is a fallback for
  * building a native interpolator from a TimeInterpolator that is not marked
  * with {@link HasNativeInterpolator}
+ *
+ * This implements TimeInterpolator to allow for easier interop with Animators
  */
 @HasNativeInterpolator
-public class FallbackLUTInterpolator implements NativeInterpolatorFactory {
+public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeInterpolator {
 
+    private TimeInterpolator mSourceInterpolator;
     private final float mLut[];
 
     /**
@@ -35,6 +38,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory {
      * interpolator creation
      */
     public FallbackLUTInterpolator(TimeInterpolator interpolator, long duration) {
+        mSourceInterpolator = interpolator;
         mLut = createLUT(interpolator, duration);
     }
 
@@ -62,5 +66,10 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory {
     public static long createNativeInterpolator(TimeInterpolator interpolator, long duration) {
         float[] lut = createLUT(interpolator, duration);
         return NativeInterpolatorFactoryHelper.createLutInterpolator(lut);
+    }
+
+    @Override
+    public float getInterpolation(float input) {
+        return mSourceInterpolator.getInterpolation(input);
     }
 }

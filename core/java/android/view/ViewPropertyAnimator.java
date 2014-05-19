@@ -19,6 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.animation.TimeInterpolator;
+import android.os.Build;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,6 +108,11 @@ public class ViewPropertyAnimator {
      * (duration, start delay, interpolator, etc.).
      */
     private ValueAnimator mTempValueAnimator;
+
+    /**
+     * A RenderThread-driven backend that may intercept startAnimation
+     */
+    private ViewPropertyAnimatorRT mRTBackend;
 
     /**
      * This listener is the mechanism by which the underlying Animator causes changes to the
@@ -227,7 +233,7 @@ public class ViewPropertyAnimator {
      * values are used to calculate the animated value for a given animation fraction
      * during the animation.
      */
-    private static class NameValuesHolder {
+    static class NameValuesHolder {
         int mNameConstant;
         float mFromValue;
         float mDeltaValue;
@@ -247,6 +253,9 @@ public class ViewPropertyAnimator {
     ViewPropertyAnimator(View view) {
         mView = view;
         view.ensureTransformationInfo();
+        if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+            mRTBackend = new ViewPropertyAnimatorRT(view);
+        }
     }
 
     /**
@@ -371,6 +380,10 @@ public class ViewPropertyAnimator {
         return this;
     }
 
+    Animator.AnimatorListener getListener() {
+        return mListener;
+    }
+
     /**
      * Sets a listener for update events in the underlying ValueAnimator that runs
      * the property animations. Note that the underlying animator is animating between
@@ -388,6 +401,10 @@ public class ViewPropertyAnimator {
     public ViewPropertyAnimator setUpdateListener(ValueAnimator.AnimatorUpdateListener listener) {
         mUpdateListener = listener;
         return this;
+    }
+
+    ValueAnimator.AnimatorUpdateListener getUpdateListener() {
+        return mUpdateListener;
     }
 
     /**
@@ -825,12 +842,22 @@ public class ViewPropertyAnimator {
         return this;
     }
 
+    boolean hasActions() {
+        return mPendingSetupAction != null
+                || mPendingCleanupAction != null
+                || mPendingOnStartAction != null
+                || mPendingOnEndAction != null;
+    }
+
     /**
      * Starts the underlying Animator for a set of properties. We use a single animator that
      * simply runs from 0 to 1, and then use that fractional value to set each property
      * value accordingly.
      */
     private void startAnimation() {
+        if (mRTBackend != null && mRTBackend.startAnimation(this)) {
+            return;
+        }
         mView.setHasTransientState(true);
         ValueAnimator animator = ValueAnimator.ofFloat(1.0f);
         ArrayList<NameValuesHolder> nameValueList =
