@@ -4710,11 +4710,6 @@
     <!-- ========================== -->
     <eat-comment />
 
-    <!-- Drawable used to draw Vector Drawables. -->
-    <declare-styleable name="VectorDrawable">
-        <attr name="versionCode" />
-    </declare-styleable>
-
     <!-- Define the virtual size of the drawing surface paths will draw to. -->
     <declare-styleable name="VectorDrawableViewport">
         <!-- The width of the canvas the drawing is on. -->

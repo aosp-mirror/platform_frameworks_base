@@ -50,8 +50,7 @@ import java.util.HashMap;
  * <p/>
  * <dl>
  * <dt><code>&lt;vector></code></dt>
- * <dd>The attribute <code>android:versionCode</code> defines the version of
- * VectorDrawable</dd>
+ * <dd>Used to defined a vector drawable</dd>
  * <dt><code>&lt;size></code></dt>
  * <dd>Used to defined the intrinsic Width Height size of the drawable using
  * <code>android:width</code> and <code>android:height</code></dd>
@@ -284,20 +283,6 @@ public class VectorDrawable extends Drawable {
                 } else if (SHAPE_VIEWPORT.equals(tagName)) {
                     pathRenderer.parseViewport(res, attrs);
                     noViewportTag = false;
-                } else if (SHAPE_VECTOR.equals(tagName)) {
-                    final TypedArray a = res.obtainAttributes(attrs, R.styleable.VectorDrawable);
-
-                    // Parsing the version information.
-                    // Right now, we only support version "1".
-                    // If the xml didn't specify the version number, the default
-                    // version is "1".
-                    final int versionCode = a.getInt(R.styleable.VectorDrawable_versionCode, 1);
-                    if (versionCode != 1) {
-                        throw new IllegalArgumentException(
-                                "So far, VectorDrawable only support version 1");
-                    }
-
-                    a.recycle();
                 }
             }
 
