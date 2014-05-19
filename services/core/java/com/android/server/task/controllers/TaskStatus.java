@@ -16,17 +16,19 @@
 
 package com.android.server.task.controllers;
 
+import android.app.task.Task;
 import android.content.ComponentName;
-import android.content.Task;
 import android.content.pm.PackageParser;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
 
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Uniquely identifies a task internally.
- * Created from the public {@link android.content.Task} object when it lands on the scheduler.
+ * Created from the public {@link android.app.task.Task} object when it lands on the scheduler.
  * Contains current state of the requirements of the task, as well as a function to evaluate
  * whether it's ready to run.
  * This object is shared among the various controllers - hence why the different fields are atomic.
@@ -36,10 +38,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 public class TaskStatus {
+    final Task task;
     final int taskId;
-    final int userId;
     final int uId;
-    final ComponentName component;
     final Bundle extras;
 
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
@@ -57,9 +58,9 @@ public class TaskStatus {
     private long earliestRunTimeElapsedMillis;
     private long latestRunTimeElapsedMillis;
 
-    /** Provide a unique handle to the service that this task will be run on. */
+    /** Provide a handle to the service that this task will be run on. */
     public int getServiceToken() {
-        return component.hashCode() + userId;
+        return uId;
     }
 
     /** Generate a TaskStatus object for a given task and uid. */
@@ -70,9 +71,8 @@ public class TaskStatus {
 
     /** Set up the state of a newly scheduled task. */
     TaskStatus(Task task, int userId, int uId) {
+        this.task = task;
         this.taskId = task.getTaskId();
-        this.userId = userId;
-        this.component = task.getService();
         this.extras = task.getExtras();
         this.uId = uId;
 
@@ -100,16 +100,20 @@ public class TaskStatus {
         hasConnectivityConstraint = task.getNetworkCapabilities() == Task.NetworkType.ANY;
     }
 
+    public Task getTask() {
+        return task;
+    }
+
     public int getTaskId() {
         return taskId;
     }
 
     public ComponentName getServiceComponent() {
-        return component;
+        return task.getService();
     }
 
     public int getUserId() {
-        return userId;
+        return UserHandle.getUserId(uId);
     }
 
     public int getUid() {
@@ -161,9 +165,9 @@ public class TaskStatus {
 
     @Override
     public int hashCode() {
-        int result = component.hashCode();
+        int result = getServiceComponent().hashCode();
         result = 31 * result + taskId;
-        result = 31 * result + userId;
+        result = 31 * result + uId;
         return result;
     }
 
@@ -174,7 +178,14 @@ public class TaskStatus {
 
         TaskStatus that = (TaskStatus) o;
         return ((taskId == that.taskId)
-                && (userId == that.userId)
-                && (component.equals(that.component)));
+                && (uId == that.uId)
+                && (getServiceComponent().equals(that.getServiceComponent())));
+    }
+
+    // Dumpsys infrastructure
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.print("Task "); pw.println(taskId);
+        pw.print(prefix); pw.print("uid="); pw.println(uId);
+        pw.print(prefix); pw.print("component="); pw.println(task.getService());
     }
 }

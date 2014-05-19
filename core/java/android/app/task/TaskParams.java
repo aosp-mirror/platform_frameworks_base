@@ -47,7 +47,7 @@ public class TaskParams implements Parcelable {
 
     /**
      * @return The extras you passed in when constructing this task with
-     * {@link android.content.Task.Builder#setExtras(android.os.Bundle)}. This will
+     * {@link android.app.task.Task.Builder#setExtras(android.os.Bundle)}. This will
      * never be null. If you did not set any extras this will be an empty bundle.
      */
     public Bundle getExtras() {
