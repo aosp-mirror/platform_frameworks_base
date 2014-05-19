@@ -16,7 +16,7 @@ are not able to read details from each message on the wearable (they must open y
 handheld to view more information). So for the wearable device, you should
 group all the notifications together in a stack. The stack of notifications appears as a single
 card, which users can expand to view the details from each notification separately. The new
-<a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+<a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#setGroup(java.lang.String, int)">
 <code>setGroup()</code></a> method makes this possible while allowing you to still provide
 only one summary notification on the handheld device.</p>
 
@@ -28,21 +28,24 @@ Wear</a>.</p>
 <h2 id="AddGroup">Add Each Notification to a Group</h2>
 
 <p>To create a stack, call <a
-href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#setGroup(java.lang.String, int)">
 <code>setGroup()</code></a> for each notification you want in the stack and specify a
-group key. Then call <a href="{@docRoot}reference/android/preview/support/v4/app/NotificationManagerCompat.html#notify(int, android.app.Notification)"><code>notify()</code></a> to send it to the wearable.</p>
+group key. Then call <a href="{@docRoot}reference/android/support/wearable/app/NotificationManagerCompat.html#notify(int, android.app.Notification)"><code>notify()</code></a> to send it to the wearable.</p>
 
 <pre style="clear:right">
 final static String GROUP_KEY_EMAILS = "group_key_emails";
 
-// Build the notification and pass this builder to WearableNotifications.Builder
+// Build the notification
 NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
          .setContentTitle("New mail from " + sender1)
          .setContentText(subject1)
          .setSmallIcon(R.drawable.new_mail);
 
-Notification notif1 = new WearableNotifications.Builder(builder)
+// Set the group with WearableNotificationOptions.Builder and apply to the notification
+Notification notif1 = new WearableNotificationOptions.Builder()
          .setGroup(GROUP_KEY_EMAILS)
+         .build()
+         .applyTo(builder)
          .build();
 
 // Issue the notification
@@ -52,8 +55,10 @@ notificationManager.notify(notificationId1, notif);
 </pre>
 
 <p>Later on, when you create another notification, specify
-the same group key. When you call <a href="{@docRoot}reference/android/preview/support/v4/app/NotificationManagerCompat.html#notify(int, android.app.Notification)"><code>notify()</code></a>, this notification appears
-in the same stack as the previous notification, instead of as a new card:</p>
+the same group key. When you call
+<a href="{@docRoot}reference/android/support/v4/app/NotificationManagerCompat.html#notify(int, android.app.Notification)"><code>notify()</code></a>,
+this notification appears in the same stack as the previous notification,
+instead of as a new card:</p>
 
 <pre style="clear:right">
 builder = new NotificationCompat.Builder(mContext)
@@ -62,8 +67,10 @@ builder = new NotificationCompat.Builder(mContext)
          .setSmallIcon(R.drawable.new_mail);
 
 // Use the same group as the previous notification
-Notification notif2 = new WearableNotifications.Builder(builder)
+Notification notif2 = new WearableNotificationOptions.Builder()
          .setGroup(GROUP_KEY_EMAILS)
+         .build()
+         .applyTo(builder)
          .build();
 
 notificationManager.notify(notificationId2, notif);
@@ -72,7 +79,7 @@ notificationManager.notify(notificationId2, notif);
 <p>By default, notifications appear in the order in which you added them, with the most recent
   notification visible at the top.  You can define a specific position in the group
   by passing an order position as the second parameter for <a
-href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setGroup(java.lang.String, int)">
+href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#setGroup(java.lang.String, int)">
 <code>setGroup()</code></a>.</p>
 
 
@@ -83,7 +90,7 @@ href="{@docRoot}reference/android/preview/support/wearable/notifications/Wearabl
 <p>It's important that you still provide a summary notification that appears on handheld devices.
 So in addition to adding each unique notification to the same stack group, also add a summary
 notification, but set its order position to be <a
-href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.html#GROUP_ORDER_SUMMARY"><code>GROUP_ORDER_SUMMARY</code></a>.</p>
+href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationsOptions.html#GROUP_ORDER_SUMMARY"><code>GROUP_ORDER_SUMMARY</code></a>.</p>
 
 <p>This notification does not appear in your stack of notifications on the wearable, but
 appears as the only notification on the handheld device.</p>
@@ -92,23 +99,22 @@ appears as the only notification on the handheld device.</p>
 Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
         R.drawable.ic_large_icon);
 
+// Create an InboxStyle notification
 builder = new NotificationCompat.Builder(this)
+        .setContentTitle("2 new messages")
         .setSmallIcon(R.drawable.ic_small_icon)
-        .setLargeIcon(largeIcon);
+        .setLargeIcon(largeIcon)
+        .setStyle(new NotificationCompat.InboxStyle()
+                .addLine("Alex Faaborg   Check this out")
+                .addLine("Jeff Chang   Launch Party")
+                .setBigContentTitle("2 new messages")
+                .setSummaryText("johndoe@gmail.com"));
 
-// Use the same group key and pass this builder to InboxStyle notification
-WearableNotifications.Builder wearableBuilder = new WearableNotifications
-        .Builder(builder)
-        .setGroup(GROUP_KEY_EMAILS,
-                WearableNotifications.GROUP_ORDER_SUMMARY);
-
-// Build the final notification to show on the handset
-Notification summaryNotification = new NotificationCompat.InboxStyle(
-        wearableBuilder.getCompatBuilder())
-        .addLine("Alex Faaborg   Check this out")
-        .addLine("Jeff Chang   Launch Party")
-        .setBigContentTitle("2 new messages")
-        .setSummaryText("johndoe@gmail.com")
+// Specify the notification to be the group summary
+Notification summaryNotification = new WearableNotificationOptions.Builder()
+        .setGroupSummary(GROUP_KEY_EMAILS)
+        .build()
+        .applyTo(builder)
         .build();
 
 notificationManager.notify(notificationId3, summaryNotification);
