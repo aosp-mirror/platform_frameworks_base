@@ -8194,7 +8194,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod();
         info.setPassword(isPassword);
 
-        if (!isPassword) {
+        if (!isPassword || shouldSpeakPasswordsForAccessibility()) {
             info.setText(getTextForAccessibility());
         }
 
