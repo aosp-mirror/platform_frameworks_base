@@ -561,4 +561,6 @@
 
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
+
+    <string name="bugreport_tile_extended" translatable="false">%s\n%s (%s)</string>
 </resources>

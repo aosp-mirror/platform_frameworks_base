@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings.Global;
 import android.view.WindowManager;
@@ -70,7 +71,11 @@ public class BugreportTile extends QSTile<QSTile.State> {
     protected void handleUpdateState(State state, Object pushArg) {
         state.visible = mSetting.getValue() != 0;
         state.iconId = R.drawable.ic_qs_bugreport;
-        state.label = mContext.getString(com.android.internal.R.string.bugreport_title);
+        state.label = mContext.getString(
+                R.string.bugreport_tile_extended,
+                mContext.getString(com.android.internal.R.string.bugreport_title),
+                Build.VERSION.RELEASE,
+                Build.ID);
     }
 
     private final Runnable mShowDialog = new Runnable() {
