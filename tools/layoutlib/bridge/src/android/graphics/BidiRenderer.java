@@ -18,9 +18,11 @@ package android.graphics;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,12 +38,12 @@ import android.graphics.Paint_Delegate.FontInfo;
 @SuppressWarnings("deprecation")
 public class BidiRenderer {
 
-    /* package */ static class ScriptRun {
+    /*package*/ static class ScriptRun {
         int start;
         int limit;
         boolean isRtl;
         int scriptCode;
-        FontInfo font;
+        Font font;
 
         public ScriptRun(int start, int limit, boolean isRtl) {
             this.start = start;
@@ -51,9 +53,10 @@ public class BidiRenderer {
         }
     }
 
-    private Graphics2D mGraphics;
-    private Paint_Delegate mPaint;
+    private final Graphics2D mGraphics;
+    private final Paint_Delegate mPaint;
     private char[] mText;
+    private List<Font> mFonts;
     // Bounds of the text drawn so far.
     private RectF mBounds;
     private float mBaseline;
@@ -63,11 +66,15 @@ public class BidiRenderer {
      * @param paint The Paint to use to get the fonts. Should not be null.
      * @param text Unidirectional text. Should not be null.
      */
-    /* package */ BidiRenderer(Graphics2D graphics, Paint_Delegate paint, char[] text) {
+    /*package*/ BidiRenderer(Graphics2D graphics, Paint_Delegate paint, char[] text) {
         assert (paint != null);
         mGraphics = graphics;
         mPaint = paint;
         mText = text;
+        mFonts = new ArrayList<Font>(paint.getFonts().size());
+        for (FontInfo fontInfo : paint.getFonts()) {
+            mFonts.add(fontInfo.mFont);
+        }
     }
 
     /**
@@ -94,7 +101,7 @@ public class BidiRenderer {
         // the script runs.
         mBounds = new RectF(x, y, x, y);
         mBaseline = y;
-        for (ScriptRun run : getScriptRuns(mText, start, limit, isRtl, mPaint.getFonts())) {
+        for (ScriptRun run : getScriptRuns(mText, start, limit, isRtl, mFonts)) {
             int flag = Font.LAYOUT_NO_LIMIT_CONTEXT | Font.LAYOUT_NO_START_CONTEXT;
             flag |= isRtl ? Font.LAYOUT_RIGHT_TO_LEFT : Font.LAYOUT_LEFT_TO_RIGHT;
             renderScript(run.start, run.limit, run.font, flag, advances, advancesIndex, draw);
@@ -108,16 +115,15 @@ public class BidiRenderer {
      * much as possible. This also implements a fallback mechanism to render characters that cannot
      * be drawn using the preferred font.
      */
-    private void renderScript(int start, int limit, FontInfo preferredFont, int flag,
+    private void renderScript(int start, int limit, Font preferredFont, int flag,
             float[] advances, int advancesIndex, boolean draw) {
-        List<FontInfo> fonts = mPaint.getFonts();
-        if (fonts == null || preferredFont == null) {
+        if (mFonts.size() == 0 || preferredFont == null) {
             return;
         }
 
         while (start < limit) {
             boolean foundFont = false;
-            int canDisplayUpTo = preferredFont.mFont.canDisplayUpTo(mText, start, limit);
+            int canDisplayUpTo = preferredFont.canDisplayUpTo(mText, start, limit);
             if (canDisplayUpTo == -1) {
                 // We can draw all characters in the text.
                 render(start, limit, preferredFont, flag, advances, advancesIndex, draw);
@@ -133,8 +139,8 @@ public class BidiRenderer {
             // The current character cannot be drawn with the preferred font. Cycle through all the
             // fonts to check which one can draw it.
             int charCount = Character.isHighSurrogate(mText[start]) ? 2 : 1;
-            for (FontInfo font : fonts) {
-                canDisplayUpTo = font.mFont.canDisplayUpTo(mText, start, start + charCount);
+            for (Font font : mFonts) {
+                canDisplayUpTo = font.canDisplayUpTo(mText, start, start + charCount);
                 if (canDisplayUpTo == -1) {
                     render(start, start+charCount, font, flag, advances, advancesIndex, draw);
                     start += charCount;
@@ -160,15 +166,19 @@ public class BidiRenderer {
      * Renders the text to the right of the bounds with the given font.
      * @param font The font to render the text with.
      */
-    private void render(int start, int limit, FontInfo font, int flag, float[] advances,
+    private void render(int start, int limit, Font font, int flag, float[] advances,
             int advancesIndex, boolean draw) {
 
-        // Since the metrics don't have anti-aliasing set, we create a new FontRenderContext with
-        // the anti-aliasing set.
-        FontRenderContext f = font.mMetrics.getFontRenderContext();
-        FontRenderContext frc = new FontRenderContext(f.getTransform(), mPaint.isAntiAliased(),
-                f.usesFractionalMetrics());
-        GlyphVector gv = font.mFont.layoutGlyphVector(frc, mText, start, limit, flag);
+        FontRenderContext frc;
+        if (mGraphics != null) {
+            frc = mGraphics.getFontRenderContext();
+        } else {
+            frc = Toolkit.getDefaultToolkit().getFontMetrics(font).getFontRenderContext();
+            // Metrics obtained this way don't have anti-aliasing set. So,
+            // we create a new FontRenderContext with anti-aliasing set.
+            frc = new FontRenderContext(font.getTransform(), mPaint.isAntiAliased(), frc.usesFractionalMetrics());
+        }
+        GlyphVector gv = font.layoutGlyphVector(frc, mText, start, limit, flag);
         int ng = gv.getNumGlyphs();
         int[] ci = gv.getGlyphCharIndices(0, ng, null);
         if (advances != null) {
@@ -206,7 +216,7 @@ public class BidiRenderer {
     }
 
     /* package */  static List<ScriptRun> getScriptRuns(char[] text, int start, int limit,
-            boolean isRtl, List<FontInfo> fonts) {
+            boolean isRtl, List<Font> fonts) {
         LinkedList<ScriptRun> scriptRuns = new LinkedList<ScriptRun>();
 
         int count = limit - start;
@@ -225,10 +235,10 @@ public class BidiRenderer {
 
     // TODO: Replace this method with one which returns the font based on the scriptCode.
     private static void setScriptFont(char[] text, ScriptRun run,
-            List<FontInfo> fonts) {
-        for (FontInfo fontInfo : fonts) {
-            if (fontInfo.mFont.canDisplayUpTo(text, run.start, run.limit) == -1) {
-                run.font = fontInfo;
+            List<Font> fonts) {
+        for (Font font : fonts) {
+            if (font.canDisplayUpTo(text, run.start, run.limit) == -1) {
+                run.font = font;
                 return;
             }
         }

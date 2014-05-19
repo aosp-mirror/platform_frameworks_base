@@ -26,7 +26,6 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
-import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.layoutlib.bridge.util.DynamicIdMap;
@@ -61,7 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Main entry point of the LayoutLib Bridge.
  * <p/>To use this bridge, simply instantiate an object of type {@link Bridge} and call
- * {@link #createScene(SceneParams)}
+ * {@link #createSession(SessionParams)}
  */
 public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
@@ -147,8 +146,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             if (getClass() != obj.getClass()) return false;
 
             IntArray other = (IntArray) obj;
-            if (!Arrays.equals(mArray, other.mArray)) return false;
-            return true;
+            return Arrays.equals(mArray, other.mArray);
         }
     }
 
@@ -251,14 +249,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
 
         // load the fonts.
-        FontLoader fontLoader = FontLoader.create(fontLocation.getAbsolutePath());
-        if (fontLoader != null) {
-            Typeface_Delegate.init(fontLoader);
-        } else {
-            log.error(LayoutLog.TAG_BROKEN,
-                    "Failed create FontLoader in layout lib.", null);
-            return false;
-        }
+        Typeface_Delegate.setFontLocation(fontLocation.getAbsolutePath());
 
         // now parse com.android.internal.R (and only this one as android.R is a subset of
         // the internal version), and put the content in the maps.

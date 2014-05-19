@@ -203,6 +203,16 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean native_isAffine(long native_object) {
+        Matrix_Delegate d = sManager.getDelegate(native_object);
+        if (d == null) {
+            return true;
+        }
+
+        return (d.computeTypeMask() & kPerspective_Mask) == 0;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static boolean native_rectStaysRect(long native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
