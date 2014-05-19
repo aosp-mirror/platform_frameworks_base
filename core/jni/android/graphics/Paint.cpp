@@ -853,7 +853,7 @@ public:
         }
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(new SkBlurDrawLooper((SkColor)color, sigma, dx, dy))->unref();
+            paint->setLooper(SkBlurDrawLooper::Create((SkColor)color, sigma, dx, dy))->unref();
         }
     }
 
