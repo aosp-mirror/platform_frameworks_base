@@ -193,9 +193,11 @@ public class ThreadedRenderer extends HardwareRenderer {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
         HardwareCanvas canvas = mRootNode.start(mWidth, mHeight);
         try {
+            canvas.save();
             callbacks.onHardwarePreDraw(canvas);
             canvas.drawDisplayList(view.getDisplayList());
             callbacks.onHardwarePostDraw(canvas);
+            canvas.restore();
         } finally {
             mRootNode.end(canvas);
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
