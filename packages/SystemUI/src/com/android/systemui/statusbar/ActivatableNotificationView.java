@@ -19,18 +19,17 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
-import com.android.internal.R;
+import com.android.systemui.R;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -38,13 +37,19 @@ import com.android.internal.R;
  */
 public abstract class ActivatableNotificationView extends ExpandableOutlineView {
 
-    private static final long DOUBLETAP_TIMEOUT_MS = 1000;
+    private static final long DOUBLETAP_TIMEOUT_MS = 1200;
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
+    private static final int ACTIVATE_ANIMATION_LENGTH = 220;
+
+    private static final Interpolator ACTIVATE_INVERSE_INTERPOLATOR
+            = new PathInterpolator(0.6f, 0, 0.5f, 1);
+    private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
+            = new PathInterpolator(0, 0, 0.5f, 1);
 
     private boolean mDimmed;
 
-    private int mBgResId = R.drawable.notification_quantum_bg;
-    private int mDimmedBgResId = R.drawable.notification_quantum_bg_dim;
+    private int mBgResId = com.android.internal.R.drawable.notification_quantum_bg;
+    private int mDimmedBgResId = com.android.internal.R.drawable.notification_quantum_bg_dim;
 
     private int mBgTint = 0;
     private int mDimmedBgTint = 0;
@@ -61,18 +66,30 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private OnActivatedListener mOnActivatedListener;
 
-    protected Drawable mBackgroundNormal;
-    protected Drawable mBackgroundDimmed;
-    private ObjectAnimator mBackgroundAnimator;
+    private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
+
+    private NotificationBackgroundView mBackgroundNormal;
+    private NotificationBackgroundView mBackgroundDimmed;
+    private ObjectAnimator mBackgroundAnimator;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        updateBackgroundResource();
-        setWillNotDraw(false);
         mFastOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
+        mLinearOutSlowInInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        setClipChildren(false);
+        setClipToPadding(false);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
+        mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
+        updateBackgroundResource();
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -81,42 +98,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             makeInactive();
         }
     };
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        draw(canvas, mBackgroundNormal);
-        draw(canvas, mBackgroundDimmed);
-    }
-
-    private void draw(Canvas canvas, Drawable drawable) {
-        if (drawable != null) {
-            drawable.setBounds(0, mClipTopAmount, getWidth(), mActualHeight);
-            drawable.draw(canvas);
-        }
-    }
-
-    @Override
-    protected boolean verifyDrawable(Drawable who) {
-        return super.verifyDrawable(who) || who == mBackgroundNormal
-                || who == mBackgroundDimmed;
-    }
-
-    @Override
-    protected void drawableStateChanged() {
-        drawableStateChanged(mBackgroundNormal);
-        drawableStateChanged(mBackgroundDimmed);
-    }
-
-    private void drawableStateChanged(Drawable d) {
-        if (d != null && d.isStateful()) {
-            d.setState(getDrawableState());
-        }
-    }
-
-    @Override
-    public void setOnClickListener(OnClickListener l) {
-        super.setOnClickListener(l);
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -146,10 +127,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             case MotionEvent.ACTION_UP:
                 if (isWithinTouchSlop(event)) {
                     if (!mActivated) {
-                        makeActive(event.getX(), event.getY());
+                        makeActive();
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
-                        makeInactive();
                         performClick();
                     }
                 } else {
@@ -165,12 +145,49 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return true;
     }
 
-    private void makeActive(float x, float y) {
-        mBackgroundDimmed.setHotspot(0, x, y);
+    private void makeActive() {
+        startActivateAnimation(false /* reverse */);
         mActivated = true;
         if (mOnActivatedListener != null) {
             mOnActivatedListener.onActivated(this);
         }
+    }
+
+    private void startActivateAnimation(boolean reverse) {
+        int widthHalf = mBackgroundNormal.getWidth()/2;
+        int heightHalf = mBackgroundNormal.getActualHeight()/2;
+        float radius = (float) Math.sqrt(widthHalf*widthHalf + heightHalf*heightHalf);
+        ValueAnimator animator =
+                mBackgroundNormal.createRevealAnimator(widthHalf, heightHalf, 0, radius);
+        mBackgroundNormal.setVisibility(View.VISIBLE);
+        Interpolator interpolator;
+        Interpolator alphaInterpolator;
+        if (!reverse) {
+            interpolator = mLinearOutSlowInInterpolator;
+            alphaInterpolator = mLinearOutSlowInInterpolator;
+        } else {
+            interpolator = ACTIVATE_INVERSE_INTERPOLATOR;
+            alphaInterpolator = ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
+        }
+        animator.setInterpolator(interpolator);
+        animator.setDuration(ACTIVATE_ANIMATION_LENGTH);
+        if (reverse) {
+            mBackgroundNormal.setAlpha(1f);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mBackgroundNormal.setVisibility(View.INVISIBLE);
+                }
+            });
+            animator.reverse();
+        } else {
+            mBackgroundNormal.setAlpha(0.4f);
+            animator.start();
+        }
+        mBackgroundNormal.animate()
+                .alpha(reverse ? 0f : 1f)
+                .setInterpolator(alphaInterpolator)
+                .setDuration(ACTIVATE_ANIMATION_LENGTH);
     }
 
     /**
@@ -178,10 +195,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private void makeInactive() {
         if (mActivated) {
-            // Make sure that we clear the hotspot from the center.
-            if (mBackgroundDimmed != null) {
-                mBackgroundDimmed.setHotspot(0, getWidth() / 2, getActualHeight() / 2);
-                mBackgroundDimmed.removeHotspot(0);
+            if (mDimmed) {
+                startActivateAnimation(true /* reverse */);
             }
             mActivated = false;
         }
@@ -227,16 +242,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void fadeBackgroundResource() {
         if (mDimmed) {
-            setBackgroundDimmed(mDimmedBgResId, mDimmedBgTint);
+            mBackgroundDimmed.setVisibility(View.VISIBLE);
         } else {
-            setBackgroundNormal(mBgResId, mBgTint);
+            mBackgroundNormal.setVisibility(View.VISIBLE);
         }
-        int startAlpha = mDimmed ? 255 : 0;
-        int endAlpha = mDimmed ? 0 : 255;
+        float startAlpha = mDimmed ? 1f : 0;
+        float endAlpha = mDimmed ? 0 : 1f;
         int duration = BACKGROUND_ANIMATION_LENGTH_MS;
         // Check whether there is already a background animation running.
         if (mBackgroundAnimator != null) {
-            startAlpha = (Integer) mBackgroundAnimator.getAnimatedValue();
+            startAlpha = (Float) mBackgroundAnimator.getAnimatedValue();
             duration = (int) mBackgroundAnimator.getCurrentPlayTime();
             mBackgroundAnimator.removeAllListeners();
             mBackgroundAnimator.cancel();
@@ -247,16 +262,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         mBackgroundNormal.setAlpha(startAlpha);
         mBackgroundAnimator =
-                ObjectAnimator.ofInt(mBackgroundNormal, "alpha", startAlpha, endAlpha);
+                ObjectAnimator.ofFloat(mBackgroundNormal, View.ALPHA, startAlpha, endAlpha);
         mBackgroundAnimator.setInterpolator(mFastOutSlowInInterpolator);
         mBackgroundAnimator.setDuration(duration);
         mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (mDimmed) {
-                    setBackgroundNormal(null);
+                    mBackgroundNormal.setVisibility(View.INVISIBLE);
                 } else {
-                    setBackgroundDimmed(null);
+                    mBackgroundDimmed.setVisibility(View.INVISIBLE);
                 }
                 mBackgroundAnimator = null;
             }
@@ -266,59 +281,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateBackgroundResource() {
         if (mDimmed) {
-            setBackgroundDimmed(mDimmedBgResId, mDimmedBgTint);
-            mBackgroundDimmed.setAlpha(255);
-            setBackgroundNormal(null);
+            mBackgroundDimmed.setVisibility(View.VISIBLE);
+            mBackgroundDimmed.setCustomBackground(mDimmedBgResId, mDimmedBgTint);
+            mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else {
-            setBackgroundDimmed(null);
-            setBackgroundNormal(mBgResId, mBgTint);
-            mBackgroundNormal.setAlpha(255);
+            mBackgroundDimmed.setVisibility(View.INVISIBLE);
+            mBackgroundNormal.setVisibility(View.VISIBLE);
+            mBackgroundNormal.setCustomBackground(mBgResId, mBgTint);
+            mBackgroundNormal.setAlpha(1f);
         }
-    }
-
-    /**
-     * Sets a background drawable for the normal state. As we need to change our bounds
-     * independently of layout, we need the notion of a background independently of the regular View
-     * background..
-     */
-    private void setBackgroundNormal(Drawable backgroundNormal) {
-        if (mBackgroundNormal != null) {
-            mBackgroundNormal.setCallback(null);
-            unscheduleDrawable(mBackgroundNormal);
-        }
-        mBackgroundNormal = backgroundNormal;
-        if (mBackgroundNormal != null) {
-            mBackgroundNormal.setCallback(this);
-        }
-        invalidate();
-    }
-
-    private void setBackgroundDimmed(Drawable overlay) {
-        if (mBackgroundDimmed != null) {
-            mBackgroundDimmed.setCallback(null);
-            unscheduleDrawable(mBackgroundDimmed);
-        }
-        mBackgroundDimmed = overlay;
-        if (mBackgroundDimmed != null) {
-            mBackgroundDimmed.setCallback(this);
-        }
-        invalidate();
-    }
-
-    private void setBackgroundNormal(int drawableResId, int tintColor) {
-        final Drawable d = getResources().getDrawable(drawableResId);
-        if (tintColor != 0) {
-            d.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
-        }
-        setBackgroundNormal(d);
-    }
-
-    private void setBackgroundDimmed(int drawableResId, int tintColor) {
-        final Drawable d = getResources().getDrawable(drawableResId);
-        if (tintColor != 0) {
-            d.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
-        }
-        setBackgroundDimmed(d);
     }
 
     @Override
@@ -330,14 +301,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
         super.setActualHeight(actualHeight, notifyListeners);
-        invalidate();
         setPivotY(actualHeight / 2);
+        mBackgroundNormal.setActualHeight(actualHeight);
+        mBackgroundDimmed.setActualHeight(actualHeight);
     }
 
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
-        invalidate();
+        mBackgroundNormal.setClipTopAmount(clipTopAmount);
+        mBackgroundDimmed.setClipTopAmount(clipTopAmount);
     }
 
     public void setOnActivatedListener(OnActivatedListener onActivatedListener) {
