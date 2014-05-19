@@ -428,7 +428,6 @@ public class AudioManager {
     public static final int USE_DEFAULT_STREAM_TYPE = Integer.MIN_VALUE;
 
     private static IAudioService sService;
-    private MediaSessionLegacyHelper mSessionHelper;
 
     /**
      * @hide
@@ -439,9 +438,6 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
-        if (USE_SESSIONS) {
-            mSessionHelper = MediaSessionLegacyHelper.getHelper(context);
-        }
     }
 
     private static IAudioService getService()
@@ -478,11 +474,16 @@ public class AudioManager {
      *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
      */
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
-        IAudioService service = getService();
-        try {
-            service.dispatchMediaKeyEvent(keyEvent);
-        } catch (RemoteException e) {
-            Log.e(TAG, "dispatchMediaKeyEvent threw exception ", e);
+        if (USE_SESSIONS) {
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
+            helper.sendMediaButtonEvent(keyEvent, false);
+        } else {
+            IAudioService service = getService();
+            try {
+                service.dispatchMediaKeyEvent(keyEvent);
+            } catch (RemoteException e) {
+                Log.e(TAG, "dispatchMediaKeyEvent threw exception ", e);
+            }
         }
     }
 
@@ -2178,7 +2179,8 @@ public class AudioManager {
             Log.e(TAG, "Dead object in registerMediaButtonIntent"+e);
         }
         if (USE_SESSIONS) {
-            mSessionHelper.addMediaButtonListener(pi, mContext);
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
+            helper.addMediaButtonListener(pi, mContext);
         }
     }
 
@@ -2254,7 +2256,8 @@ public class AudioManager {
             Log.e(TAG, "Dead object in unregisterMediaButtonIntent"+e);
         }
         if (USE_SESSIONS) {
-            mSessionHelper.removeMediaButtonListener(pi);
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
+            helper.removeMediaButtonListener(pi);
         }
     }
 
@@ -2281,7 +2284,7 @@ public class AudioManager {
             Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
         }
         if (USE_SESSIONS) {
-            rcClient.registerWithSession(mSessionHelper);
+            rcClient.registerWithSession(MediaSessionLegacyHelper.getHelper(mContext));
         }
     }
 
@@ -2303,7 +2306,7 @@ public class AudioManager {
             Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
         }
         if (USE_SESSIONS) {
-            rcClient.unregisterWithSession(mSessionHelper);
+            rcClient.unregisterWithSession(MediaSessionLegacyHelper.getHelper(mContext));
         }
     }
 

@@ -46,6 +46,7 @@ import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -107,6 +108,10 @@ public class AudioService extends IAudioService.Stub {
     protected static final boolean DEBUG_RC = false;
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = false;
+
+    /** Reroute calls to media session apis */
+    private static final boolean USE_SESSIONS = true;
+    private static final boolean DEBUG_SESSIONS = true;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
@@ -3472,7 +3477,7 @@ public class AudioService extends IAudioService.Stub {
                 if (volume < 0) {
                     volFloat = (float)Math.pow(10, (float)sSoundEffectVolumeDb/20);
                 } else {
-                    volFloat = (float) volume / 1000.0f;
+                    volFloat = volume / 1000.0f;
                 }
 
                 if (SOUND_EFFECT_FILES_MAP[effectType][1] > 0) {
@@ -3554,7 +3559,7 @@ public class AudioService extends IAudioService.Stub {
                     }
                     Settings.System.putFloatForUser(mContentResolver,
                                                     Settings.System.VOLUME_MASTER,
-                                                    (float)msg.arg1 / (float)1000.0,
+                                                    msg.arg1 / (float)1000.0,
                                                     UserHandle.USER_CURRENT);
                     break;
 
@@ -4325,11 +4330,27 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
-        mMediaFocusControl.dispatchMediaKeyEvent(keyEvent);
+        if (USE_SESSIONS) {
+            if (DEBUG_SESSIONS) {
+                int pid = getCallingPid();
+                Log.w(TAG, "Call to dispatchMediaKeyEvent from " + pid);
+            }
+            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
+        } else {
+            mMediaFocusControl.dispatchMediaKeyEvent(keyEvent);
+        }
     }
 
     public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
-        mMediaFocusControl.dispatchMediaKeyEventUnderWakelock(keyEvent);
+        if (USE_SESSIONS) {
+            if (DEBUG_SESSIONS) {
+                int pid = getCallingPid();
+                Log.w(TAG, "Call to dispatchMediaKeyEventUnderWakelock from " + pid);
+            }
+            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, true);
+        } else {
+            mMediaFocusControl.dispatchMediaKeyEventUnderWakelock(keyEvent);
+        }
     }
 
     //==========================================================================================

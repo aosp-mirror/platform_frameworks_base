@@ -28,7 +28,7 @@ import android.os.ResultReceiver;
  */
 oneway interface ISessionCallback {
     void onCommand(String command, in Bundle extras, in ResultReceiver cb);
-    void onMediaButton(in Intent mediaButtonIntent);
+    void onMediaButton(in Intent mediaButtonIntent, in ResultReceiver cb);
     void onRequestRouteChange(in RouteInfo route);
     void onRouteConnected(in RouteInfo route, in RouteOptions options);
     void onRouteDisconnected(in RouteInfo route, int reason);

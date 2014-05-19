@@ -25,6 +25,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,5 +138,31 @@ public final class SessionManager {
             Log.e(TAG, "Failed to get active sessions: ", e);
         }
         return controllers;
+    }
+
+    /**
+     * Send a media key event. The receiver will be selected automatically.
+     *
+     * @param keyEvent The KeyEvent to send.
+     * @hide
+     */
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+        dispatchMediaKeyEvent(keyEvent, false);
+    }
+
+    /**
+     * Send a media key event. The receiver will be selected automatically.
+     *
+     * @param keyEvent The KeyEvent to send
+     * @param needWakeLock true if a wake lock should be held while sending the
+     *            key
+     * @hide
+     */
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        try {
+            mService.dispatchMediaKeyEvent(keyEvent, needWakeLock);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send key event.", e);
+        }
     }
 }
