@@ -42,6 +42,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private boolean mIsBouncing;
     private SecurityCallback mSecurityCallback;
 
+    private final KeyguardUpdateMonitor mUpdateMonitor;
+
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         public boolean dismiss(boolean authenticated);
@@ -62,6 +64,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         super(context, attrs, defStyle);
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
+        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -303,7 +306,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
-        if (SecurityMode.None == mCurrentSecuritySelection) {
+        if (mUpdateMonitor.getUserHasTrust(mLockPatternUtils.getCurrentUser())) {
+            finish = true;
+        } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
             // Allow an alternate, such as biometric unlock
             securityMode = mSecurityModel.getAlternateFor(securityMode);
