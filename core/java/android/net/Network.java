@@ -20,20 +20,35 @@ import android.os.Parcelable;
 import android.os.Parcel;
 
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
+import javax.net.SocketFactory;
 
 /**
- * Identifies the Network.
+ * Identifies a {@code Network}.  This is supplied to applications via
+ * {@link ConnectivityManager#NetworkCallbacks} in response to
+ * {@link ConnectivityManager#requestNetwork} or {@link ConnectivityManager#listenForNetwork}.
+ * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
+ * through a targeted {@link SocketFactory} or process-wide via {@link #bindProcess}.
  * @hide
  */
 public class Network implements Parcelable {
 
+    /**
+     * @hide
+     */
     public final int netId;
 
+    /**
+     * @hide
+     */
     public Network(int netId) {
         this.netId = netId;
     }
 
+    /**
+     * @hide
+     */
     public Network(Network that) {
         this.netId = that.netId;
     }
@@ -64,6 +79,45 @@ public class Network implements Parcelable {
         return InetAddress.getByNameOnNet(host, netId);
     }
 
+    /**
+     * Returns a {@link SocketFactory} bound to this network.  Any {@link Socket} created by
+     * this factory will have its traffic sent over this {@code Network}.  Note that if this
+     * {@code Network} ever disconnects, this factory and any {@link Socket} it produced in the
+     * past or future will cease to work.
+     *
+     * @return a {@link SocketFactory} which produces {@link Socket} instances bound to this
+     *         {@code Network}.
+     */
+    public SocketFactory socketFactory() {
+        return null;
+    }
+
+    /**
+     * Binds the current process to this network.  All sockets created in the future (and not
+     * explicitly bound via a bound {@link SocketFactory} (see {@link Network#socketFactory})
+     * will be bound to this network.  Note that if this {@code Network} ever disconnects
+     * all sockets created in this way will cease to work.  This is by design so an application
+     * doesn't accidentally use sockets it thinks are still bound to a particular {@code Network}.
+     */
+    public void bindProcess() {
+    }
+
+    /**
+     * A static utility method to return any {@code Network} currently bound by this process.
+     *
+     * @return {@code Network} to which this process is bound.
+     */
+    public static Network getProcessBoundNetwork() {
+        return null;
+    }
+
+    /**
+     * Clear any process specific {@code Network} binding.  This reverts a call to
+     * {@link Network#bindProcess}.
+     */
+    public static void unbindProcess() {
+    }
+
     // implement the Parcelable interface
     public int describeContents() {
         return 0;
@@ -84,4 +138,14 @@ public class Network implements Parcelable {
                 return new Network[size];
             }
     };
+
+    public boolean equals(Object obj) {
+        if (obj instanceof Network == false) return false;
+        Network other = (Network)obj;
+        return this.netId == other.netId;
+    }
+
+    public int hashCode() {
+        return netId * 11;
+    }
 }
