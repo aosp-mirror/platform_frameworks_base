@@ -1847,10 +1847,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             return true;
         }
         if (mGeocodeProvider != null) {
-            if (doesPackageHaveUid(uid, mGeocodeProvider.getConnectedPackageName())) return true;
+            if (doesUidHavePackage(uid, mGeocodeProvider.getConnectedPackageName())) return true;
         }
         for (LocationProviderProxy proxy : mProxyProviders) {
-            if (doesPackageHaveUid(uid, proxy.getConnectedPackageName())) return true;
+            if (doesUidHavePackage(uid, proxy.getConnectedPackageName())) return true;
         }
         return false;
     }
@@ -1876,19 +1876,23 @@ public class LocationManagerService extends ILocationManager.Stub {
                 "or UID of a currently bound location provider");
     }
 
-    private boolean doesPackageHaveUid(int uid, String packageName) {
+    /**
+     * Returns true if the given package belongs to the given uid.
+     */
+    private boolean doesUidHavePackage(int uid, String packageName) {
         if (packageName == null) {
             return false;
         }
-        try {
-            ApplicationInfo appInfo = mPackageManager.getApplicationInfo(packageName, 0);
-            if (appInfo.uid != uid) {
-                return false;
-            }
-        } catch (NameNotFoundException e) {
+        String[] packageNames = mPackageManager.getPackagesForUid(uid);
+        if (packageNames == null) {
             return false;
         }
-        return true;
+        for (String name : packageNames) {
+            if (packageName.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
