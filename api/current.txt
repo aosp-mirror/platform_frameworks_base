@@ -13778,7 +13778,6 @@ package android.media {
   }
 
   public class AudioFormat {
-    ctor public AudioFormat();
     field public static final deprecated int CHANNEL_CONFIGURATION_DEFAULT = 1; // 0x1
     field public static final deprecated int CHANNEL_CONFIGURATION_INVALID = 0; // 0x0
     field public static final deprecated int CHANNEL_CONFIGURATION_MONO = 2; // 0x2

@@ -156,4 +156,10 @@ public class AudioFormat {
         }
     }
 
+    /** @removed */
+    public AudioFormat()
+    {
+        throw new UnsupportedOperationException("There is no valid usage of this constructor");
+    }
+
 }
