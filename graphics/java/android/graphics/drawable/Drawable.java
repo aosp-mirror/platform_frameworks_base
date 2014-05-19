@@ -484,55 +484,28 @@ public abstract class Drawable {
     }
 
     /**
-     * Indicates whether the drawable supports hotspots. Hotspots are uniquely
-     * identifiable coordinates the may be added, updated and removed within a
-     * drawable.
+     * Specifies the hotspot's location within the drawable.
      *
-     * @return true if hotspots are supported
-     * @see #setHotspot(int, float, float)
-     * @see #removeHotspot(int)
-     * @see #clearHotspots()
-     */
-    public boolean supportsHotspots() {
-        return false;
-    }
-
-    /**
-     * Specifies a hotspot's location within the drawable.
-     * <p>
-     * The specified key should be an id declared in the resources of the
-     * application to ensure it is unique (see the <a
-     * href={@docRoot}guide/topics/resources/more-resources.html#Id">ID resource type</a>).
-     *
-     * @param key The key identifying the hotspot
      * @param x The X coordinate of the center of the hotspot
      * @param y The Y coordinate of the center of the hotspot
      */
-    public void setHotspot(int key, float x, float y) {}
+    public void setHotspot(float x, float y) {}
 
     /**
-     * Removes the hotspot with the specified key from the drawable.
-     *
-     * @param key The key identifying the hotspot
-     */
-    public void removeHotspot(int key) {}
-
-    /**
-     * Immediately removes all hotspots from the drawable.
-     */
-    public void clearHotspots() {}
-    
-    /**
-     * Sets the bounds to which hotspots are constrained.
-     *
-     * @hide until we finalize these APIs
+     * Sets the bounds to which the hotspot is constrained, if they should be
+     * different from the drawable bounds.
+     * 
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
      */
     public void setHotspotBounds(int left, int top, int right, int bottom) {}
 
     /**
      * Whether this drawable requests projection.
      *
-     * @hide until we finalize these APIs
+     * @hide magic!
      */
     public boolean isProjected() {
         return false;
@@ -1047,8 +1020,8 @@ public abstract class Drawable {
             drawable = new LayerDrawable();
         } else if (name.equals("transition")) {
             drawable = new TransitionDrawable();
-        } else if (name.equals("touch-feedback")) {
-            drawable = new TouchFeedbackDrawable();
+        } else if (name.equals("ripple")) {
+            drawable = new RippleDrawable();
         } else if (name.equals("color")) {
             drawable = new ColorDrawable();
         } else if (name.equals("shape")) {

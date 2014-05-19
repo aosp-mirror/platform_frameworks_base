@@ -569,42 +569,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean supportsHotspots() {
+    public void setHotspot(float x, float y) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
-            if (array[i].mDrawable.supportsHotspots()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public void setHotspot(int id, float x, float y) {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            array[i].mDrawable.setHotspot(id, x, y);
-        }
-    }
-
-    @Override
-    public void removeHotspot(int id) {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            array[i].mDrawable.removeHotspot(id);
-        }
-    }
-
-    @Override
-    public void clearHotspots() {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            array[i].mDrawable.clearHotspots();
+            array[i].mDrawable.setHotspot(x, y);
         }
     }
 

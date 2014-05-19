@@ -15,9 +15,9 @@
   ~ limitations under the License
   -->
 
-<touch-feedback
+<ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tint="#ff444444"
     >
     <item android:drawable="@drawable/notification_bg_normal" />
-</touch-feedback>
+</ripple>

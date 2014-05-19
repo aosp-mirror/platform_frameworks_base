@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<touch-feedback
+<ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tint="#ffffffff"
     android:tintMode="src_over"
@@ -26,4 +26,4 @@
             <corners android:radius="@dimen/notification_quantum_rounded_rect_radius" />
         </shape>
     </item>
-</touch-feedback>
+</ripple>

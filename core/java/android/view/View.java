@@ -4789,25 +4789,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param v previous or the next focus holder, or null if none
      */
     private void manageFocusHotspot(boolean focused, View v) {
-        if (mBackground != null && mBackground.supportsHotspots()) {
-            final Rect r = new Rect();
-            if (!focused && v != null) {
-                v.getBoundsOnScreen(r);
-                final int[] location = new int[2];
-                getLocationOnScreen(location);
-                r.offset(-location[0], -location[1]);
-            } else {
-                r.set(0, 0, mRight - mLeft, mBottom - mTop);
-            }
-
-            final float x = r.exactCenterX();
-            final float y = r.exactCenterY();
-            mBackground.setHotspot(R.attr.state_focused, x, y);
-
-            if (!focused) {
-                mBackground.removeHotspot(R.attr.state_focused);
-            }
+        if (mBackground == null) {
+            return;
         }
+
+        final Rect r = new Rect();
+        if (!focused && v != null) {
+            v.getBoundsOnScreen(r);
+            final int[] location = new int[2];
+            getLocationOnScreen(location);
+            r.offset(-location[0], -location[1]);
+        } else {
+            r.set(0, 0, mRight - mLeft, mBottom - mTop);
+        }
+
+        final float x = r.exactCenterX();
+        final float y = r.exactCenterY();
+        mBackground.setHotspot(x, y);
     }
 
     /**
@@ -6763,7 +6761,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void setPressed(boolean pressed, float x, float y) {
         if (pressed) {
-            setHotspot(R.attr.state_pressed, x, y);
+            setHotspot(x, y);
         }
 
         setPressed(pressed);
@@ -6785,10 +6783,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_PRESSED;
         } else {
             mPrivateFlags &= ~PFLAG_PRESSED;
-        }
-
-        if (!pressed) {
-            clearHotspot(R.attr.state_pressed);
         }
 
         if (needsRefresh) {
@@ -9106,21 +9100,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
-                        setHotspot(R.attr.state_pressed, x, y);
+                        setHotspot(x, y);
                         setPressed(true);
                         checkForLongClick(0);
                     }
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
-                    clearHotspot(R.attr.state_pressed);
                     setPressed(false);
                     removeTapCallback();
                     removeLongPressCallback();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    setHotspot(R.attr.state_pressed, x, y);
+                    setHotspot(x, y);
 
                     // Be lenient about moving outside of buttons
                     if (!pointInView(x, y, mTouchSlop)) {
@@ -9142,17 +9135,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
-    private void setHotspot(int id, float x, float y) {
-        final Drawable bg = mBackground;
-        if (bg != null && bg.supportsHotspots()) {
-            bg.setHotspot(id, x, y);
-        }
-    }
-
-    private void clearHotspot(int id) {
-        final Drawable bg = mBackground;
-        if (bg != null && bg.supportsHotspots()) {
-            bg.removeHotspot(id);
+    private void setHotspot(float x, float y) {
+        if (mBackground != null) {
+            mBackground.setHotspot(x, y);
         }
     }
 
@@ -12902,10 +12887,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void onDetachedFromWindowInternal() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
-
-        if (mBackground != null) {
-            mBackground.clearHotspots();
-        }
 
         removeUnsetPressCallback();
         removeLongPressCallback();

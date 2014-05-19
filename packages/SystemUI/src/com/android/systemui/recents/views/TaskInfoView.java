@@ -25,7 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.TouchFeedbackDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -156,8 +156,8 @@ class TaskInfoView extends FrameLayout {
             // Workaround: The button currently doesn't support setting a custom background tint
             // not defined in the theme.  Just lower the alpha on the button to make it blend more
             // into the background.
-            if (mAppInfoButton.getBackground() instanceof TouchFeedbackDrawable) {
-                TouchFeedbackDrawable d = (TouchFeedbackDrawable) mAppInfoButton.getBackground();
+            if (mAppInfoButton.getBackground() instanceof RippleDrawable) {
+                RippleDrawable d = (RippleDrawable) mAppInfoButton.getBackground();
                 if (d != null) {
                     d.setAlpha(96);
                 }

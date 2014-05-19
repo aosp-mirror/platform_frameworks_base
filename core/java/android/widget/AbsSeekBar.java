@@ -31,8 +31,6 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.internal.R;
-
 public abstract class AbsSeekBar extends ProgressBar {
     private final Rect mTempRect = new Rect();
 
@@ -348,7 +346,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         final int right = left + thumbWidth;
 
         final Drawable background = getBackground();
-        if (background != null && background.supportsHotspots()) {
+        if (background != null) {
             final Rect bounds = mThumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
@@ -499,17 +497,10 @@ public abstract class AbsSeekBar extends ProgressBar {
         return true;
     }
 
-    private void setHotspot(int id, float x, float y) {
+    private void setHotspot(float x, float y) {
         final Drawable bg = getBackground();
-        if (bg != null && bg.supportsHotspots()) {
-            bg.setHotspot(id, x, y);
-        }
-    }
-
-    private void clearHotspot(int id) {
-        final Drawable bg = getBackground();
-        if (bg != null && bg.supportsHotspots()) {
-            bg.removeHotspot(id);
+        if (bg != null) {
+            bg.setHotspot(x, y);
         }
     }
 
@@ -541,7 +532,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         final int max = getMax();
         progress += scale * max;
 
-        setHotspot(R.attr.state_pressed, x, (int) event.getY());
+        setHotspot(x, (int) event.getY());
         setProgress((int) progress, true);
     }
 
@@ -567,7 +558,6 @@ public abstract class AbsSeekBar extends ProgressBar {
      * canceled.
      */
     void onStopTrackingTouch() {
-        clearHotspot(R.attr.state_pressed);
         mIsDragging = false;
     }
 
