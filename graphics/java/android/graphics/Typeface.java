@@ -66,6 +66,9 @@ public class Typeface {
     static Map<String, Typeface> sSystemFontMap;
     static FontFamily[] sFallbackFonts;
 
+    static final String SYSTEM_FONTS_CONFIG = "system_fonts.xml";
+    static final String FALLBACK_FONTS_CONFIG = "fallback_fonts.xml";
+
     /**
      * @hide
      */
@@ -249,10 +252,16 @@ public class Typeface {
         return fontFamily;
     }
 
-    static {
+    /*
+     * (non-Javadoc)
+     *
+     * This should only be called once, from the static class initializer block.
+     */
+    private static void init() {
         // Load font config and initialize Minikin state
-        String systemConfigFilename = "/system/etc/system_fonts.xml";
-        String configFilename = "/system/etc/fallback_fonts.xml";
+        File systemFontConfigLocation = getSystemFontConfigLocation();
+        File systemConfigFilename = new File(systemFontConfigLocation, SYSTEM_FONTS_CONFIG);
+        File configFilename = new File(systemFontConfigLocation, FALLBACK_FONTS_CONFIG);
         try {
             // TODO: throws an exception non-Minikin builds, to fail early;
             // remove when Minikin-only
@@ -301,7 +310,10 @@ public class Typeface {
         } catch (XmlPullParserException e) {
             Log.e(TAG, "XML parse exception for " + configFilename);
         }
+    }
 
+    static {
+        init();
         // Set up defaults and typefaces exposed in public API
         DEFAULT         = create((String) null, 0);
         DEFAULT_BOLD    = create((String) null, Typeface.BOLD);
@@ -315,6 +327,11 @@ public class Typeface {
             create((String) null, Typeface.ITALIC),
             create((String) null, Typeface.BOLD_ITALIC),
         };
+
+    }
+
+    private static File getSystemFontConfigLocation() {
+        return new File("/system/etc/");
     }
 
     @Override

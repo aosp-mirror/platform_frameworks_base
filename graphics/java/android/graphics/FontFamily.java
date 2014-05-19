@@ -31,7 +31,6 @@ public class FontFamily {
 
     public FontFamily() {
         mNativePtr = nCreateFamily();
-        mNativePtr = nCreateFamily();
         if (mNativePtr == 0) {
             throw new RuntimeException();
         }
