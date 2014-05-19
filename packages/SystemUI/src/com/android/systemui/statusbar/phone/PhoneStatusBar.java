@@ -1393,8 +1393,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
-                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+                mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+                mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
             }
         }
 
@@ -1545,8 +1545,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+            mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
         }
 
         if ((flags & CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL) == 0) {

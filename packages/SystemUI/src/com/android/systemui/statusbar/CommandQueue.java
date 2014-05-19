@@ -57,6 +57,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
     private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
     private static final int MSG_SET_WINDOW_STATE           = 16 << MSG_SHIFT;
+    private static final int MSG_SHOW_RECENT_APPS           = 17 << MSG_SHIFT;
+    private static final int MSG_HIDE_RECENT_APPS           = 18 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -96,11 +98,13 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
+        public void showRecentApps(boolean triggeredFromAltTab);
+        public void hideRecentApps();
         public void toggleRecentApps();
         public void preloadRecentApps();
+        public void cancelPreloadRecentApps();
         public void showSearchPanel();
         public void hideSearchPanel();
-        public void cancelPreloadRecentApps();
         public void setWindowState(int window, int state);
 
     }
@@ -211,6 +215,21 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void showRecentApps(boolean triggeredFromAltTab) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SHOW_RECENT_APPS);
+            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS,
+                    triggeredFromAltTab ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
+    public void hideRecentApps() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+            mHandler.obtainMessage(MSG_HIDE_RECENT_APPS, 0, 0, null).sendToTarget();
+        }
+    }
+
     public void toggleRecentApps() {
         synchronized (mList) {
             mHandler.removeMessages(MSG_TOGGLE_RECENT_APPS);
@@ -308,6 +327,12 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SET_HARD_KEYBOARD_STATUS:
                     mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
+                    break;
+                case MSG_SHOW_RECENT_APPS:
+                    mCallbacks.showRecentApps(msg.arg1 != 0);
+                    break;
+                case MSG_HIDE_RECENT_APPS:
+                    mCallbacks.hideRecentApps();
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
                     mCallbacks.toggleRecentApps();

@@ -69,6 +69,7 @@ public class Constants {
             public static final boolean TouchEvents = false;
             public static final boolean MeasureAndLayout = false;
             public static final boolean HwLayers = false;
+            public static final boolean Focus = false;
         }
 
         public static class TaskStack {

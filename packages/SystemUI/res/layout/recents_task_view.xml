@@ -16,7 +16,8 @@
 <com.android.systemui.recents.views.TaskView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" 
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:focusable="true">
     <com.android.systemui.recents.views.TaskThumbnailView
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"
@@ -69,7 +70,7 @@
             android:layout_height="@dimen/recents_task_view_application_icon_size"
             android:layout_gravity="center_vertical|end"
             android:padding="23dp"
-            android:src="@drawable/recents_dismiss_dark" />
+            android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
 </com.android.systemui.recents.views.TaskView>
 

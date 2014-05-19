@@ -27,7 +27,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,10 +65,30 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
+    public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowRecents(triggeredFromAltTab, statusBarView);
+        }
+    }
+
+    @Override
+    public void hideRecents() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onHideRecents();
+        } else {
+            Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
+            intent.setPackage("com.android.systemui");
+            sendBroadcastSafely(intent);
+
+            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+        }
+    }
+
+    @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
         if (mUseAlternateRecents) {
             // Launch the alternate recents if required
-            mAlternateRecents.onToggleRecents(display, layoutDirection, statusBarView);
+            mAlternateRecents.onToggleRecents(statusBarView);
             return;
         }
 
@@ -222,7 +241,7 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
-    public void preloadRecentTasksList() {
+    public void preloadRecents() {
         if (mUseAlternateRecents) {
             mAlternateRecents.onPreloadRecents();
         } else {
@@ -236,26 +255,13 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
-    public void cancelPreloadingRecentTasksList() {
+    public void cancelPreloadingRecents() {
         if (mUseAlternateRecents) {
             mAlternateRecents.onCancelPreloadingRecents();
         } else {
             Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
             intent.setClassName("com.android.systemui",
                     "com.android.systemui.recent.RecentsPreloadReceiver");
-            sendBroadcastSafely(intent);
-
-            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
-        }
-    }
-
-    @Override
-    public void closeRecents() {
-        if (mUseAlternateRecents) {
-            mAlternateRecents.onCloseRecents();
-        } else {
-            Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
-            intent.setPackage("com.android.systemui");
             sendBroadcastSafely(intent);
 
             RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();

@@ -20,11 +20,9 @@ import android.view.Display;
 import android.view.View;
 
 public interface RecentsComponent {
+    void showRecents(boolean triggeredFromAltTab, View statusBarView);
+    void hideRecents();
     void toggleRecents(Display display, int layoutDirection, View statusBarView);
-
-    void preloadRecentTasksList();
-
-    void cancelPreloadingRecentTasksList();
-
-    void closeRecents();
+    void preloadRecents();
+    void cancelPreloadingRecents();
 }

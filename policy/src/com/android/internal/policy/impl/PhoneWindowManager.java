@@ -261,13 +261,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mLastInputMethodWindow = null;
     WindowState mLastInputMethodTargetWindow = null;
 
-    static final int RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS = 0;
-    static final int RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW = 1;
-    static final int RECENT_APPS_BEHAVIOR_DISMISS = 2;
-    static final int RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH = 3;
-
-    RecentApplicationsDialog mRecentAppsDialog;
-    int mRecentAppsDialogHeldModifiers;
+    int mRecentAppsHeldModifiers;
     boolean mLanguageSwitchKeyPressed;
 
     int mLidState = LID_ABSENT;
@@ -806,52 +800,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     };
-
-    /**
-     * Create (if necessary) and show or dismiss the recent apps dialog according
-     * according to the requested behavior.
-     */
-    void showOrHideRecentAppsDialog(final int behavior) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mRecentAppsDialog == null) {
-                    mRecentAppsDialog = new RecentApplicationsDialog(mContext);
-                }
-                if (mRecentAppsDialog.isShowing()) {
-                    switch (behavior) {
-                        case RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS:
-                        case RECENT_APPS_BEHAVIOR_DISMISS:
-                            mRecentAppsDialog.dismiss();
-                            break;
-                        case RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH:
-                            mRecentAppsDialog.dismissAndSwitch();
-                            break;
-                        case RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW:
-                        default:
-                            break;
-                    }
-                } else {
-                    switch (behavior) {
-                        case RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS:
-                            mRecentAppsDialog.show();
-                            break;
-                        case RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW:
-                            try {
-                                mWindowManager.setInTouchMode(false);
-                            } catch (RemoteException e) {
-                            }
-                            mRecentAppsDialog.show();
-                            break;
-                        case RECENT_APPS_BEHAVIOR_DISMISS:
-                        case RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH:
-                        default:
-                            break;
-                    }
-                }
-            }
-        });
-    }
 
     /** {@inheritDoc} */
     @Override
@@ -2261,21 +2209,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Display task switcher for ALT-TAB or Meta-TAB.
         if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
-            if (mRecentAppsDialogHeldModifiers == 0 && !keyguardOn) {
+            if (mRecentAppsHeldModifiers == 0 && !keyguardOn) {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                 if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)
                         || KeyEvent.metaStateHasModifiers(
                                 shiftlessModifiers, KeyEvent.META_META_ON)) {
-                    mRecentAppsDialogHeldModifiers = shiftlessModifiers;
-                    showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW);
+                    mRecentAppsHeldModifiers = shiftlessModifiers;
+                    showRecentApps(true);
                     return -1;
                 }
             }
-        } else if (!down && mRecentAppsDialogHeldModifiers != 0
-                && (metaState & mRecentAppsDialogHeldModifiers) == 0) {
-            mRecentAppsDialogHeldModifiers = 0;
-            showOrHideRecentAppsDialog(keyguardOn ? RECENT_APPS_BEHAVIOR_DISMISS :
-                    RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH);
+        } else if (!down && mRecentAppsHeldModifiers != 0
+                && (metaState & mRecentAppsHeldModifiers) == 0) {
+            mRecentAppsHeldModifiers = 0;
+            hideRecentApps();
         }
 
         // Handle keyboard language switching.
@@ -2448,7 +2395,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     statusbar.cancelPreloadRecentApps();
                 }
             } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when showing recent apps", e);
+                Slog.e(TAG, "RemoteException when cancelling recent apps preload", e);
                 // re-acquire status bar service next time it is needed.
                 mStatusBarService = null;
             }
@@ -2457,14 +2404,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void toggleRecentApps() {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
                 statusbar.toggleRecentApps();
             }
         } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when toggling recent apps", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
+        }
+    }
+
+    private void showRecentApps(boolean triggeredFromAltTab) {
+        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.showRecentApps(triggeredFromAltTab);
+            }
+        } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException when showing recent apps", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
+        }
+    }
+
+    private void hideRecentApps() {
+        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.hideRecentApps();
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when closing recent apps", e);
             // re-acquire status bar service next time it is needed.
             mStatusBarService = null;
         }

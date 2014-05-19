@@ -106,8 +106,11 @@ class SystemUIMessageHandler extends Handler {
             } catch (RemoteException re) {
                 re.printStackTrace();
             }
-        } else if (msg.what == AlternateRecentsComponent.MSG_CLOSE_RECENTS) {
-            // Do nothing
+        } else if (msg.what == AlternateRecentsComponent.MSG_HIDE_RECENTS) {
+            // Send a broadcast to hide recents
+            Intent intent = new Intent(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
+            intent.setPackage(context.getPackageName());
+            context.sendBroadcast(intent);
         } else if (msg.what == AlternateRecentsComponent.MSG_TOGGLE_RECENTS) {
             // Send a broadcast to toggle recents
             Intent intent = new Intent(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
@@ -125,6 +128,7 @@ class SystemUIMessageHandler extends Handler {
 
 /* Service */
 public class RecentsService extends Service {
+    final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
 
     Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));
