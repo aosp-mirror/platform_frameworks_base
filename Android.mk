@@ -326,7 +326,6 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
-	telephony/java/com/android/internal/telephony/ITelephonyListener.aidl \
 	telephony/java/com/android/internal/telephony/IThirdPartyCallListener.aidl \
 	telephony/java/com/android/internal/telephony/IThirdPartyCallProvider.aidl \
 	telephony/java/com/android/internal/telephony/IThirdPartyCallSendDtmfCallback.aidl \
