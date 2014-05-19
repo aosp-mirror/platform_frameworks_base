@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
@@ -288,16 +289,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     @Override
-    protected boolean fitSystemWindows(Rect insets) {
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         Console.log(Constants.Log.UI.MeasureAndLayout,
                 "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
 
         // Update the configuration with the latest system insets and trigger a relayout
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        config.updateSystemInsets(insets);
+        config.updateSystemInsets(insets.getSystemWindowInsets());
         requestLayout();
 
-        return true;
+        return insets.consumeSystemWindowInsets(false, false, false, true);
     }
 
     /** Closes any open info panes */
