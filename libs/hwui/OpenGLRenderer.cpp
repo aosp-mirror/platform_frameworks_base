@@ -662,7 +662,9 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
         // When the layer is not an FBO, we may use glCopyTexImage so we
         // need to make sure the layer does not extend outside the bounds
         // of the framebuffer
-        if (!bounds.intersect(Rect(0, 0, getViewportWidth(), getViewportHeight()))) {
+        const Snapshot& previous = *(currentSnapshot()->previous);
+        Rect previousViewport(0, 0, previous.getViewportWidth(), previous.getViewportHeight());
+        if (!bounds.intersect(previousViewport)) {
             bounds.setEmpty();
         } else if (fboLayer) {
             clip.set(bounds);
