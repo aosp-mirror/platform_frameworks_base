@@ -469,10 +469,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
-    public void hideRecentApps() {
+    public void hideRecentApps(boolean triggeredFromAltTab) {
         if (mBar != null) {
             try {
-                mBar.hideRecentApps();
+                mBar.hideRecentApps(triggeredFromAltTab);
             } catch (RemoteException ex) {}
         }
     }

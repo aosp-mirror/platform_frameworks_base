@@ -18,7 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -26,6 +26,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,8 +39,8 @@ import com.android.systemui.recents.model.Task;
 
 
 /* A task view */
-public class TaskView extends FrameLayout implements View.OnClickListener,
-        Task.TaskCallbacks {
+public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.OnClickListener,
+        View.OnLongClickListener {
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskIconClicked(TaskView tv);
@@ -415,7 +416,17 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             // Rebind any listeners
             mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);
-            mInfoView.mAppInfoButton.setOnClickListener(this);
+            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
+                ContentResolver cr = getContext().getContentResolver();
+                boolean devOptsEnabled = Settings.Global.getInt(cr,
+                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
+                if (devOptsEnabled) {
+                    mBarView.mApplicationIcon.setOnLongClickListener(this);
+                }
+            }
+            if (Constants.DebugFlags.App.EnableInfoPane) {
+                mInfoView.mAppInfoButton.setOnClickListener(this);
+            }
         }
         mTaskDataLoaded = true;
     }
@@ -429,7 +440,13 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
             mBarView.unbindFromTask();
             // Unbind any listeners
             mBarView.mApplicationIcon.setOnClickListener(null);
-            mInfoView.mAppInfoButton.setOnClickListener(null);
+            mBarView.mDismissButton.setOnClickListener(null);
+            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
+                mBarView.mApplicationIcon.setOnLongClickListener(null);
+            }
+            if (Constants.DebugFlags.App.EnableInfoPane) {
+                mInfoView.mAppInfoButton.setOnClickListener(null);
+            }
         }
         mTaskDataLoaded = false;
     }
@@ -452,5 +469,14 @@ public class TaskView extends FrameLayout implements View.OnClickListener,
         } else if (v == mInfoView.mAppInfoButton) {
             mCb.onTaskAppInfoClicked(this);
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mBarView.mApplicationIcon) {
+            mCb.onTaskAppInfoClicked(this);
+            return true;
+        }
+        return false;
     }
 }

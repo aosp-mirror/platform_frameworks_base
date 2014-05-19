@@ -2226,7 +2226,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (!down && mRecentAppsHeldModifiers != 0
                 && (metaState & mRecentAppsHeldModifiers) == 0) {
             mRecentAppsHeldModifiers = 0;
-            hideRecentApps();
+            hideRecentApps(true);
         }
 
         // Handle keyboard language switching.
@@ -2434,12 +2434,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void hideRecentApps() {
+    private void hideRecentApps(boolean triggeredFromAltTab) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
-                statusbar.hideRecentApps();
+                statusbar.hideRecentApps(triggeredFromAltTab);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException when closing recent apps", e);

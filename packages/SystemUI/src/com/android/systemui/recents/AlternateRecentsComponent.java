@@ -185,13 +185,13 @@ public class AlternateRecentsComponent {
     }
 
     /** Hides the recents */
-    public void onHideRecents() {
+    public void onHideRecents(boolean triggeredFromAltTab) {
         Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
         if (mServiceIsBound) {
             // Notify recents to close it
             try {
                 Bundle data = new Bundle();
-                Message msg = Message.obtain(null, MSG_HIDE_RECENTS, 0, 0);
+                Message msg = Message.obtain(null, MSG_HIDE_RECENTS, triggeredFromAltTab ? 1 : 0, 0);
                 msg.setData(data);
                 mService.send(msg);
             } catch (RemoteException re) {

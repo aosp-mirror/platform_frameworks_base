@@ -110,6 +110,9 @@ class SystemUIMessageHandler extends Handler {
             // Send a broadcast to hide recents
             Intent intent = new Intent(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
             intent.setPackage(context.getPackageName());
+            if (msg.arg1 != 0) {
+                intent.putExtra(RecentsService.EXTRA_TRIGGERED_FROM_ALT_TAB, true);
+            }
             context.sendBroadcast(intent);
         } else if (msg.what == AlternateRecentsComponent.MSG_TOGGLE_RECENTS) {
             // Send a broadcast to toggle recents
@@ -130,6 +133,7 @@ class SystemUIMessageHandler extends Handler {
 public class RecentsService extends Service {
     final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+    final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
 
     Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));
 

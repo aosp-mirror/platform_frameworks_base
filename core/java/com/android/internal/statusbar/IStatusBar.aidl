@@ -39,7 +39,7 @@ oneway interface IStatusBar
     void setWindowState(int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
-    void hideRecentApps();
+    void hideRecentApps(boolean triggeredFromAltTab);
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
