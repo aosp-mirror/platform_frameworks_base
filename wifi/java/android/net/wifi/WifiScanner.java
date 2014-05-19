@@ -783,6 +783,9 @@ public class WifiScanner {
                     FullScanResult result = (FullScanResult) msg.obj;
                     ((ScanListener) listener).onFullResult(result);
                     return;
+                case CMD_PERIOD_CHANGED:
+                    ((ScanListener) listener).onPeriodChanged(msg.arg1);
+                    return;
                 case CMD_AP_FOUND:
                     ((HotlistListener) listener).onFound(
                             ((ParcelableScanResults) msg.obj).getResults());
