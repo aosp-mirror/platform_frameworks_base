@@ -52,6 +52,13 @@ for more information about adding maps to your app.</p>
     zoom, and pan properties of the "camera" perspective of the map.
     <a class="external-link" href="https://developers.google.com/maps/documentation/android/views">Change
     the view</a>.</p>
+
+    <h4>Add Street View to your app</h4>
+    <p>Embed Street View into an activity and let your users explore the world
+      through panoramic 360-degree views. Programmatically control the zoom and
+      orientation (tilt and bearing) of the Street View camera, and animate the
+      camera movements over a given duration.
+      <a class="external-link" href="https://developers.google.com/maps/documentation/android/streetview">Add Street View</a>.</p>
   </div>
 
 
