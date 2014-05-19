@@ -32,7 +32,6 @@ import android.util.Log;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.ITelephonyListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
