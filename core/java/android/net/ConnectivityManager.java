@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
@@ -57,13 +58,15 @@ import com.android.internal.util.Protocol;
  * is lost</li>
  * <li>Provide an API that allows applications to query the coarse-grained or fine-grained
  * state of the available networks</li>
+ * <li>Provide an API that allows applications to request and select networks for their data
+ * traffic</li>
  * </ol>
  */
 public class ConnectivityManager {
     private static final String TAG = "ConnectivityManager";
 
     /**
-     * A change in network connectivity has occurred. A connection has either
+     * A change in network connectivity has occurred. A default connection has either
      * been established or lost. The NetworkInfo for the affected network is
      * sent as an extra; it should be consulted to see what kind of
      * connectivity event occurred.
@@ -547,13 +550,12 @@ public class ConnectivityManager {
      * @param preference the network type to prefer over all others.  It is
      *         unspecified what happens to the old preferred network in the
      *         overall ordering.
+     * @deprecated Functionality has been removed as it no longer makes sense,
+     *             with many more than two networks - we'd need an array to express
+     *             preference.  Instead we use dynamic network properties of
+     *             the networks to describe their precedence.
      */
     public void setNetworkPreference(int preference) {
-        // TODO - deprecate with:
-        // @deprecated Functionality has been removed as it no longer makes sense,
-        //         with many more than two networks - we'd need an array to express
-        //         preference.  Instead we use dynamic network properties of
-        //         the networks to describe their precedence.
     }
 
     /**
@@ -563,14 +565,13 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * @deprecated Functionality has been removed as it no longer makes sense,
+     *             with many more than two networks - we'd need an array to express
+     *             preference.  Instead we use dynamic network properties of
+     *             the networks to describe their precedence.
      */
     public int getNetworkPreference() {
-        // TODO - deprecate with:
-        // @deprecated Functionality has been removed as it no longer makes sense,
-        //         with many more than two networks - we'd need an array to express
-        //         preference.  Instead we use dynamic network properties of
-        //         the networks to describe their precedence.
-        return -1;
+        return TYPE_NONE;
     }
 
     /**
@@ -716,7 +717,13 @@ public class ConnectivityManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Get the {@link LinkProperties} for the given {@link Network}.  This
+     * will return {@code null} if the network is unknown.
+     *
+     * @param network The {@link Network} object identifying the network in question.
+     * @return The {@link LinkProperties} for the network, or {@code null}.
+     **/
     public LinkProperties getLinkProperties(Network network) {
         try {
             return mService.getLinkProperties(network);
@@ -725,7 +732,13 @@ public class ConnectivityManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Get the {@link NetworkCapabilities} for the given {@link Network}.  This
+     * will return {@code null} if the network is unknown.
+     *
+     * @param network The {@link Network} object identifying the network in question.
+     * @return The {@link NetworkCapabilities} for the network, or {@code null}.
+     */
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
             return mService.getNetworkCapabilities(network);
@@ -788,6 +801,8 @@ public class ConnectivityManager {
      * The interpretation of this value is specific to each networking
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
+     *
+     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
         try {
@@ -810,6 +825,8 @@ public class ConnectivityManager {
      * The interpretation of this value is specific to each networking
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
+     *
+     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
         try {
@@ -829,6 +846,9 @@ public class ConnectivityManager {
      * host is to be routed
      * @param hostAddress the IP address of the host to which the route is desired
      * @return {@code true} on success, {@code false} on failure
+     *
+     * @deprecated Deprecated in favor of the {@link #requestNetwork},
+     *             {@link Network#bindProcess} and {@link Network#socketFactory} api.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
@@ -851,6 +871,8 @@ public class ConnectivityManager {
      * @param hostAddress the IP address of the host to which the route is desired
      * @return {@code true} on success, {@code false} on failure
      * @hide
+     * @deprecated Deprecated in favor of the {@link #requestNetwork} and
+     *             {@link Network#bindProcess} api.
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         byte[] address = hostAddress.getAddress();
@@ -1332,13 +1354,13 @@ public class ConnectivityManager {
     }
 
     /**
-     * Report a problem network to the framework.  This will cause the framework
-     * to evaluate the situation and try to fix any problems.  Note that false
-     * may be subsequently ignored.
+     * Report a problem network to the framework.  This provides a hint to the system
+     * that there might be connectivity problems on this network and may cause 
+     * the framework to re-evaluate network connectivity and/or switch to another
+     * network.
      *
-     * @param network The Network the application was attempting to use or null
-     *                to indicate the current default network.
-     * {@hide}
+     * @param network The {@link Network} the application was attempting to use
+     *                or {@code null} to indicate the current default network.
      */
     public void reportBadNetwork(Network network) {
         try {
@@ -1358,6 +1380,7 @@ public class ConnectivityManager {
      *
      * <p>This method requires the call to hold the permission
      * android.Manifest.permission#CONNECTIVITY_INTERNAL.
+     * @hide
      */
     public void setGlobalProxy(ProxyInfo p) {
         try {
@@ -1374,6 +1397,7 @@ public class ConnectivityManager {
      *
      * <p>This method requires the call to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * @hide
      */
     public ProxyInfo getGlobalProxy() {
         try {
@@ -1393,6 +1417,7 @@ public class ConnectivityManager {
      * <p>This method requires the call to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
+     * @deprecated Deprecated in favor of {@link #getLinkProperties}
      */
     public ProxyInfo getProxy() {
         try {
@@ -1645,11 +1670,10 @@ public class ConnectivityManager {
     }
 
     /**
-     * Interface for NetworkRequest callbacks.  Used for notifications about network
-     * changes.
-     * @hide
+     * Base class for NetworkRequest callbacks.  Used for notifications about network
+     * changes.  Should be extended by applications wanting notifications.
      */
-    public static class NetworkCallbacks {
+    public static class NetworkCallbackListener {
         /** @hide */
         public static final int PRECHECK     = 1;
         /** @hide */
@@ -1675,51 +1699,73 @@ public class ConnectivityManager {
         public void onPreCheck(NetworkRequest networkRequest, Network network) {}
 
         /**
-         * Called when the framework connects and has validated the new network.
+         * Called when the framework connects and has declared new network ready for use.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
+         * @param network The {@link Network} of the satisfying network.
          */
         public void onAvailable(NetworkRequest networkRequest, Network network) {}
 
         /**
-         * Called when the framework is losing the network.  Often paired with an
-         * onAvailable call with the new replacement network for graceful handover.
-         * This may not be called if we have a hard loss (loss without warning).
-         * This may be followed by either an onLost call or an onAvailable call for this
-         * network depending on if we lose or regain it.
+         * Called when the network is about to be disconnected.  Often paired with an
+         * {@link NetworkCallbackListener#onAvailable} call with the new replacement network
+         * for graceful handover.  This may not be called if we have a hard loss
+         * (loss without warning).  This may be followed by either a
+         * {@link NetworkCallbackListener#onLost} call or a
+         * {@link NetworkCallbackListener#onAvailable} call for this network depending
+         * on whether we lose or regain it.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
+         * @param network The {@link Network} of the failing network.
+         * @param maxSecToLive The time in seconds the framework will attempt to keep the
+         *                     network connected.  Note that the network may suffers a
+         *                     hard loss at any time.
          */
         public void onLosing(NetworkRequest networkRequest, Network network, int maxSecToLive) {}
 
         /**
          * Called when the framework has a hard loss of the network or when the
-         * graceful failure ends.  Note applications should only request this callback
-         * if the application is willing to track the Available and Lost callbacks
-         * together, else the application may think it has no network when it
-         * really does (A Avail, B Avail, A Lost..  still have B).
+         * graceful failure ends.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
+         * @param network The {@link Network} lost.
          */
         public void onLost(NetworkRequest networkRequest, Network network) {}
 
         /**
          * Called if no network is found in the given timeout time.  If no timeout is given,
          * this will not be called.
+         * @hide
          */
         public void onUnavailable(NetworkRequest networkRequest) {}
 
         /**
          * Called when the network the framework connected to for this request
          * changes capabilities but still satisfies the stated need.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
+         * @param network The {@link Network} whose capabilities have changed.
+         * @param networkCapabilities The new {@link NetworkCapabilities} for this network.
          */
         public void onNetworkCapabilitiesChanged(NetworkRequest networkRequest, Network network,
                 NetworkCapabilities networkCapabilities) {}
 
         /**
          * Called when the network the framework connected to for this request
-         * changes LinkProperties.
+         * changes {@link LinkProperties}.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
+         * @param network The {@link Network} whose link properties have changed.
+         * @param linkProperties The new {@link LinkProperties} for this network.
          */
         public void onLinkPropertiesChanged(NetworkRequest networkRequest, Network network,
                 LinkProperties linkProperties) {}
 
         /**
-         * Called when a releaseNetworkRequest call concludes and the registered callbacks will
-         * no longer be used.
+         * Called when a {@link #releaseNetworkRequest} call concludes and the registered
+         * callbacks will no longer be used.
+         *
+         * @param networkRequest The {@link NetworkRequest} used to initiate the request.
          */
         public void onReleased(NetworkRequest networkRequest) {}
     }
@@ -1745,12 +1791,12 @@ public class ConnectivityManager {
     public static final int CALLBACK_EXIT               = BASE + 9;
 
     private static class CallbackHandler extends Handler {
-        private final HashMap<NetworkRequest, NetworkCallbacks>mCallbackMap;
+        private final HashMap<NetworkRequest, NetworkCallbackListener>mCallbackMap;
         private final AtomicInteger mRefCount;
         private static final String TAG = "ConnectivityManager.CallbackHandler";
         private final ConnectivityManager mCm;
 
-        CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallbacks>callbackMap,
+        CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallbackListener>callbackMap,
                 AtomicInteger refCount, ConnectivityManager cm) {
             super(looper);
             mCallbackMap = callbackMap;
@@ -1764,7 +1810,7 @@ public class ConnectivityManager {
             switch (message.what) {
                 case CALLBACK_PRECHECK: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         callbacks.onPreCheck(request, getNetwork(message));
                     } else {
@@ -1774,7 +1820,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_AVAILABLE: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         callbacks.onAvailable(request, getNetwork(message));
                     } else {
@@ -1784,7 +1830,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_LOSING: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         callbacks.onLosing(request, getNetwork(message), message.arg1);
                     } else {
@@ -1794,7 +1840,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_LOST: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         callbacks.onLost(request, getNetwork(message));
                     } else {
@@ -1804,7 +1850,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_UNAVAIL: {
                     NetworkRequest req = (NetworkRequest)message.obj;
-                    NetworkCallbacks callbacks = null;
+                    NetworkCallbackListener callbacks = null;
                     synchronized(mCallbackMap) {
                         callbacks = mCallbackMap.get(req);
                     }
@@ -1817,7 +1863,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_CAP_CHANGED: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         Network network = getNetwork(message);
                         NetworkCapabilities cap = mCm.getNetworkCapabilities(network);
@@ -1830,7 +1876,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_IP_CHANGED: {
                     NetworkRequest request = getNetworkRequest(message);
-                    NetworkCallbacks callbacks = getCallbacks(request);
+                    NetworkCallbackListener callbacks = getCallbacks(request);
                     if (callbacks != null) {
                         Network network = getNetwork(message);
                         LinkProperties lp = mCm.getLinkProperties(network);
@@ -1843,7 +1889,7 @@ public class ConnectivityManager {
                 }
                 case CALLBACK_RELEASED: {
                     NetworkRequest req = (NetworkRequest)message.obj;
-                    NetworkCallbacks callbacks = null;
+                    NetworkCallbackListener callbacks = null;
                     synchronized(mCallbackMap) {
                         callbacks = mCallbackMap.remove(req);
                     }
@@ -1870,7 +1916,7 @@ public class ConnectivityManager {
         private NetworkRequest getNetworkRequest(Message msg) {
             return (NetworkRequest)(msg.obj);
         }
-        private NetworkCallbacks getCallbacks(NetworkRequest req) {
+        private NetworkCallbackListener getCallbacks(NetworkRequest req) {
             synchronized(mCallbackMap) {
                 return mCallbackMap.get(req);
             }
@@ -1878,7 +1924,7 @@ public class ConnectivityManager {
         private Network getNetwork(Message msg) {
             return new Network(msg.arg2);
         }
-        private NetworkCallbacks removeCallbacks(Message msg) {
+        private NetworkCallbackListener removeCallbacks(Message msg) {
             NetworkRequest req = (NetworkRequest)msg.obj;
             synchronized(mCallbackMap) {
                 return mCallbackMap.remove(req);
@@ -1893,7 +1939,7 @@ public class ConnectivityManager {
                 HandlerThread callbackThread = new HandlerThread("ConnectivityManager");
                 callbackThread.start();
                 sCallbackHandler = new CallbackHandler(callbackThread.getLooper(),
-                        sNetworkCallbacks, sCallbackRefCount, this);
+                        sNetworkCallbackListener, sCallbackRefCount, this);
             }
         }
     }
@@ -1907,8 +1953,8 @@ public class ConnectivityManager {
         }
     }
 
-    static final HashMap<NetworkRequest, NetworkCallbacks> sNetworkCallbacks =
-            new HashMap<NetworkRequest, NetworkCallbacks>();
+    static final HashMap<NetworkRequest, NetworkCallbackListener> sNetworkCallbackListener =
+            new HashMap<NetworkRequest, NetworkCallbackListener>();
     static final AtomicInteger sCallbackRefCount = new AtomicInteger(0);
     static CallbackHandler sCallbackHandler = null;
 
@@ -1916,9 +1962,11 @@ public class ConnectivityManager {
     private final static int REQUEST = 2;
 
     private NetworkRequest somethingForNetwork(NetworkCapabilities need,
-            NetworkCallbacks networkCallbacks, int timeoutSec, int action) {
+            NetworkCallbackListener networkCallbackListener, int timeoutSec, int action) {
         NetworkRequest networkRequest = null;
-        if (networkCallbacks == null) throw new IllegalArgumentException("null NetworkCallbacks");
+        if (networkCallbackListener == null) {
+            throw new IllegalArgumentException("null NetworkCallbackListener");
+        }
         if (need == null) throw new IllegalArgumentException("null NetworkCapabilities");
         try {
             addCallbackListener();
@@ -1930,8 +1978,8 @@ public class ConnectivityManager {
                         timeoutSec, new Binder());
             }
             if (networkRequest != null) {
-                synchronized(sNetworkCallbacks) {
-                    sNetworkCallbacks.put(networkRequest, networkCallbacks);
+                synchronized(sNetworkCallbackListener) {
+                    sNetworkCallbackListener.put(networkRequest, networkCallbackListener);
                 }
             }
         } catch (RemoteException e) {}
@@ -1943,46 +1991,44 @@ public class ConnectivityManager {
      * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
-     * {@link releaseNetworkRequest} or the calling application exits.
-     * Status of the request can be follwed by listening to the various
-     * callbacks described in {@link NetworkCallbacks}.  The {@link Network}
-     * can be used by using the {@link bindSocketToNetwork},
-     * {@link bindApplicationToNetwork} and {@link getAddrInfoOnNetwork} functions.
+     * {@link #releaseNetworkRequest} or the calling application exits.
+     * Status of the request can be followed by listening to the various
+     * callbacks described in {@link NetworkCallbackListener}.  The {@link Network}
+     * can be used to direct traffic to the network.
      *
      * @param need {@link NetworkCapabilities} required by this request.
-     * @param networkCallbacks The callbacks to be utilized for this request.  Note
-     *                         the callbacks can be shared by multiple requests and
-     *                         the NetworkRequest token utilized to determine to which
-     *                         request the callback relates.
+     * @param networkCallbackListener The {@link NetworkCallbackListener} to be utilized for this
+     *                         request.  Note the callbacks can be shared by multiple
+     *                         requests and the NetworkRequest token utilized to
+     *                         determine to which request the callback relates.
      * @return A {@link NetworkRequest} object identifying the request.
-     * @hide
      */
     public NetworkRequest requestNetwork(NetworkCapabilities need,
-            NetworkCallbacks networkCallbacks) {
-        return somethingForNetwork(need, networkCallbacks, 0, REQUEST);
+            NetworkCallbackListener networkCallbackListener) {
+        return somethingForNetwork(need, networkCallbackListener, 0, REQUEST);
     }
 
     /**
      * Request a network to satisfy a set of {@link NetworkCapabilities}, limited
      * by a timeout.
      *
-     * This function behaves identically, but if a suitable network is not found
-     * within the given time (in Seconds) the {@link NetworkCallbacks#unavailable}
-     * callback is called.  The request must still be released normally by
-     * calling {@link releaseNetworkRequest}.
+     * This function behaves identically to the non-timedout version, but if a suitable
+     * network is not found within the given time (in Seconds) the
+     * {@link NetworkCallbackListener#unavailable} callback is called.  The request must
+     * still be released normally by calling {@link releaseNetworkRequest}.
      * @param need {@link NetworkCapabilities} required by this request.
-     * @param networkCallbacks The callbacks to be utilized for this request.  Note
+     * @param networkCallbackListener The callbacks to be utilized for this request.  Note
      *                         the callbacks can be shared by multiple requests and
      *                         the NetworkRequest token utilized to determine to which
      *                         request the callback relates.
      * @param timeoutSec The time in seconds to attempt looking for a suitable network
-     *                   before {@link NetworkCallbacks#unavailable} is called.
+     *                   before {@link NetworkCallbackListener#unavailable} is called.
      * @return A {@link NetworkRequest} object identifying the request.
      * @hide
      */
     public NetworkRequest requestNetwork(NetworkCapabilities need,
-            NetworkCallbacks networkCallbacks, int timeoutSec) {
-        return somethingForNetwork(need, networkCallbacks, timeoutSec, REQUEST);
+            NetworkCallbackListener networkCallbackListener, int timeoutSec) {
+        return somethingForNetwork(need, networkCallbackListener, timeoutSec, REQUEST);
     }
 
     /**
@@ -1993,36 +2039,52 @@ public class ConnectivityManager {
     public final static int MAX_NETWORK_REQUEST_TIMEOUT_SEC = 100 * 60;
 
     /**
+     * The lookup key for a {@link Network} object included with the intent after
+     * succesfully finding a network for the applications request.  Retrieve it with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
+
+    /**
+     * The lookup key for a {@link NetworkCapabilities} object included with the intent after
+     * succesfully finding a network for the applications request.  Retrieve it with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_NETWORK_REQUEST_NETWORK_CAPABILITIES =
+            "networkRequestNetworkCapabilities";
+
+
+    /**
      * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
-     * This function behavies identically, but instead of {@link NetworkCallbacks}
-     * a {@link PendingIntent} is used.  This means the request may outlive the
-     * calling application and get called back when a suitable network is found.
+     * This function behavies identically to the callback-equiped version, but instead
+     * of {@link NetworkCallbackListener} a {@link PendingIntent} is used.  This means
+     * the request may outlive the calling application and get called back when a suitable
+     * network is found.
      * <p>
      * The operation is an Intent broadcast that goes to a broadcast receiver that
      * you registered with {@link Context#registerReceiver} or through the
      * &lt;receiver&gt; tag in an AndroidManifest.xml file
      * <p>
      * The operation Intent is delivered with two extras, a {@link Network} typed
-     * extra called {@link EXTRA_NETWORK_REQUEST_NETWORK} and a {@link NetworkCapabilities}
-     * typed extra called {@link EXTRA_NETWORK_REQUEST_NETWORK_CAPABILTIES} containing
+     * extra called {@link #EXTRA_NETWORK_REQUEST_NETWORK} and a {@link NetworkCapabilities}
+     * typed extra called {@link #EXTRA_NETWORK_REQUEST_NETWORK_CAPABILITIES} containing
      * the original requests parameters.  It is important to create a new,
-     * {@link NetworkCallbacks} based request before completing the processing of the
+     * {@link NetworkCallbackListener} based request before completing the processing of the
      * Intent to reserve the network or it will be released shortly after the Intent
      * is processed.
      * <p>
      * If there is already an request for this Intent registered (with the equality of
      * two Intents defined by {@link Intent#filterEquals}), then it will be removed and
-     * replace by this one, effectively releasing the previous {@link NetworkRequest}.
+     * replaced by this one, effectively releasing the previous {@link NetworkRequest}.
      * <p>
-     * The request may be released normally by calling {@link releaseNetworkRequest}.
+     * The request may be released normally by calling {@link #releaseNetworkRequest}.
      *
-     * @param need {@link NetworkCapabilties} required by this request.
+     * @param need {@link NetworkCapabilities} required by this request.
      * @param operation Action to perform when the network is available (corresponds
-     *                  to the {@link NetworkCallbacks#onAvailable} call.  Typically
+     *                  to the {@link NetworkCallbackListener#onAvailable} call.  Typically
      *                  comes from {@link PendingIntent#getBroadcast}.
      * @return A {@link NetworkRequest} object identifying the request.
-     * @hide
      */
     public NetworkRequest requestNetwork(NetworkCapabilities need, PendingIntent operation) {
         try {
@@ -2035,28 +2097,27 @@ public class ConnectivityManager {
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkCapabilities}.  The callbacks will continue to be called until
      * either the application exits or the request is released using
-     * {@link releaseNetworkRequest}.
+     * {@link #releaseNetworkRequest}.
      *
      * @param need {@link NetworkCapabilities} required by this request.
-     * @param networkCallbacks The {@link NetworkCallbacks} to be called as suitable
+     * @param networkCallbackListener The {@link NetworkCallbackListener} to be called as suitable
      *                         networks change state.
      * @return A {@link NetworkRequest} object identifying the request.
-     * @hide
      */
     public NetworkRequest listenForNetwork(NetworkCapabilities need,
-            NetworkCallbacks networkCallbacks) {
-        return somethingForNetwork(need, networkCallbacks, 0, LISTEN);
+            NetworkCallbackListener networkCallbackListener) {
+        return somethingForNetwork(need, networkCallbackListener, 0, LISTEN);
     }
 
     /**
-     * Releases a {NetworkRequest} generated either through a {@link requestNetwork}
-     * or a {@link listenForNetwork} call.  The {@link NetworkCallbacks} given in the
-     * earlier call may continue receiving calls until the {@link NetworkCallbacks#onReleased}
-     * function is called, signifiying the end of the request.
+     * Releases a {@link NetworkRequest} generated either through a {@link #requestNetwork}
+     * or a {@link #listenForNetwork} call.  The {@link NetworkCallbackListener} given in the
+     * earlier call may continue receiving calls until the
+     * {@link NetworkCallbackListener#onReleased} function is called, signifying the end
+     * of the request.
      *
      * @param networkRequest The {@link NetworkRequest} generated by an earlier call to
-     *                       {@link requestNetwork} or {@link listenForNetwork}.
-     * @hide
+     *                       {@link #requestNetwork} or {@link #listenForNetwork}.
      */
     public void releaseNetworkRequest(NetworkRequest networkRequest) {
         if (networkRequest == null) throw new IllegalArgumentException("null NetworkRequest");
