@@ -145,7 +145,7 @@
 .wear-hero {
   height: calc(100% - 70px);
   min-height: 504px;
-  margin-top: -4px;
+  margin-top: 0;
   padding-top: 0;
   padding-bottom: 0;
   background-image: url(/wear/images/hero.jpg);
