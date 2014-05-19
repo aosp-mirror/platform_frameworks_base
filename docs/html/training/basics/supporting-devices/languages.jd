@@ -40,10 +40,11 @@ your string values.</p>
 <h2 id="CreateDirs">Create Locale Directories and String Files</h2> 
 
 <p>To add support for more languages, create additional <code>values</code> directories inside
-<code>res/</code> that include a hyphen and the ISO country code at the end of the
+<code>res/</code> that include a hyphen and the ISO language code at the end of the
 directory name. For example, <code>values-es/</code> is the directory containing simple
 resourcess for the Locales with the language code "es".  Android loads the appropriate resources
-according to the locale settings of the device at run time.</p>
+according to the locale settings of the device at run time. For more information, see
+ <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing Alternative Resources</a>.</p>
 
 <p>Once you’ve decided on the languages you will support, create the resource subdirectories and
 string resource files. For example:</p>
