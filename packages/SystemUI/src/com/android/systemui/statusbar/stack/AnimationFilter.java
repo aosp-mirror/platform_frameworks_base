@@ -28,6 +28,7 @@ public class AnimationFilter {
     boolean animateScale;
     boolean animateHeight;
     boolean animateDimmed;
+    boolean hasDelays;
 
     public AnimationFilter animateAlpha() {
         animateAlpha = true;
@@ -36,6 +37,11 @@ public class AnimationFilter {
 
     public AnimationFilter animateY() {
         animateY = true;
+        return this;
+    }
+
+    public AnimationFilter hasDelays() {
+        hasDelays = true;
         return this;
     }
 
@@ -79,6 +85,7 @@ public class AnimationFilter {
         animateScale |= filter.animateScale;
         animateHeight |= filter.animateHeight;
         animateDimmed |= filter.animateDimmed;
+        hasDelays |= filter.hasDelays;
     }
 
     private void reset() {
@@ -88,5 +95,6 @@ public class AnimationFilter {
         animateScale = false;
         animateHeight = false;
         animateDimmed = false;
+        hasDelays = false;
     }
 }

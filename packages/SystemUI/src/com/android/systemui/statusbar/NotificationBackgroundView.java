@@ -34,7 +34,6 @@ public class NotificationBackgroundView extends View {
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setWillNotDraw(false);
     }
 
     @Override

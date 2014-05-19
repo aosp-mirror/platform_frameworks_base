@@ -1039,6 +1039,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (rowParent != null) rowParent.removeView(entry.row);
         updateRowStates();
         updateNotificationIcons();
+        updateSpeedBump();
 
         return entry.notification;
     }
@@ -1083,8 +1084,22 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "addNotificationViews: added at " + pos);
         }
-        updateNotificationIcons();
         updateRowStates();
+        updateNotificationIcons();
+        updateSpeedBump();
+    }
+
+    protected void updateSpeedBump() {
+        int n = mNotificationData.size();
+        int speedBumpIndex = -1;
+        for (int i = n-1; i >= 0; i--) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (entry.row.getVisibility() != View.GONE && speedBumpIndex == -1
+                    && entry.row.isBelowSpeedBump() ) {
+                speedBumpIndex = n - 1 - i;
+            }
+        }
+        mStackScroller.updateSpeedBumpIndex(speedBumpIndex);
     }
 
     private void addNotificationViews(IBinder key, StatusBarNotification notification) {
@@ -1104,7 +1119,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
         int n = mNotificationData.size();
         int visibleNotifications = 0;
-        int speedBumpIndex = -1;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         for (int i = n-1; i >= 0; i--) {
             NotificationData.Entry entry = mNotificationData.get(i);
@@ -1125,16 +1139,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
-                if (entry.row.getVisibility() == View.GONE) {
+                boolean wasGone = entry.row.getVisibility() == View.GONE;
+                entry.row.setVisibility(View.VISIBLE);
+                if (wasGone) {
                     // notify the scroller of a child addition
                     mStackScroller.generateAddAnimation(entry.row);
                 }
-                entry.row.setVisibility(View.VISIBLE);
                 visibleNotifications++;
-            }
-            if (entry.row.getVisibility() != View.GONE && speedBumpIndex == -1
-                    && entry.row.isBelowSpeedBump() ) {
-                speedBumpIndex = n - 1 - i;
             }
         }
 
@@ -1143,8 +1154,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
-
-        mStackScroller.updateSpeedBumpIndex(speedBumpIndex);
     }
 
     private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
@@ -1280,6 +1289,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return;
                 }
                 updateRowStates();
+                updateSpeedBump();
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
