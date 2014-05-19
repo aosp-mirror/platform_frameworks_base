@@ -59,14 +59,80 @@ about your users' Android version.</p>
 
 </div>
 
-<h2 style="margin-top:0" id="newfeatures">New Features in Version 4.3</h2>
+<h2 style="margin-top:0" id="newfeatures">New Features</h2>
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Google Play services, Version 4.4</a> <em>(May 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 4.4</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 4.4, see the
+announcement <a href="http://android-developers.blogspot.com/2014/05/google-play-services-44.html" class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Maps</strong> - New features for Street View and enhanced control of
+  Indoor Maps.
+  <ul>
+    <li><a href="http://developers.google.com/maps/documentation/android/streetview.html" class="external-link">Street View developer guide</a> - Add Street View to your app and programmatically control
+      the user’s experience.
+    <li><a href="http://developers.google.com/maps/documentation/android/map.html#indoor_maps" class="external-link">Indoor Maps developer guide</a> - Customize the level picker
+      and specify the active level of a building.</a>
+  </ul>
+  </li>
+
+  <li><strong>Activity recognition</strong> - The Location API has been updated with new activity detectors for running and walking.
+    <ul>
+      <li><a href="{@docRoot}reference/com/google/android/gms/location/DetectedActivity.html"><code>DetectedActivity</code> class reference</a>
+    </ul>
+  </li>
+
+  <li><strong>Mobile Ads</strong> - The new in-app purchase APIs allow
+    publishers to display in-app purchase ads, which enables users to purchase
+    advertised items directly.
+    <ul>
+      <li><a href="https://developers.google.com/mobile-ads-sdk/docs/admob/advanced#play-inapppurchaselistener" class="external-link">In-app purchase APIs developer guide</a> -
+        Enable in-app purchases via ads by using the in-app purchase APIs.
+      <li><a href="{@docRoot}reference/com/google/android/gms/ads/purchase/package-summary.html">In-app purchase API reference</a>
+    </ul>
+  </li>
+
+  <li><strong>Wallet Fragment</strong> - The new Wallet Fragment API allows you
+    to easily integrate Google Wallet Instant Buy with an existing app.
+    <ul>
+    <li><a href="http://developers.google.com/wallet/instant-buy/android/tutorial.html#about_walletfragment" class="external-link">About Wallet Fragment</a> - Tutorial showing how to
+      use wallet fragment to handle user events and to automate key parts of the purchase lifecycle.
+    <li><a href="http://developers.google.com/wallet/instant-buy/diagrams.html#detailed_api_process_flow" class="external-link">Detailed API process flow</a></a>
+  </ul>
+  </li>
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Google Play services, Version 4.3</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 4.3</dt>
+<dd>
 <p>For a summary of the feature highlights in Google Play services 4.3, see the
 announcement <a href="http://android-developers.blogspot.com/2014/03/google-play-services-43.html" class="external-link">blog post</a>.</p>
 <ul>
 <li><strong>Play Games</strong> - The new Game Gifts API enables games to send virtual in-game requests to anyone in a player’s circles or through player search.
    <ul>
       <li><a href="http://developers.google.com/games/services/android/giftRequests.html" class="external-link">Developing Game Gifts in Android</a></li>
-      <li><a href="/reference/com/google/android/gms/games/request/package-summary.html">Game Gifts API reference</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/games/request/package-summary.html">Game Gifts API reference</a></li>
    </ul>
 </li>
 <li><strong>Analytics</strong> - Google Analytics and Tag Manager are now part of Google Play services.
@@ -74,7 +140,7 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
       <li><a href="http://developers.google.com/analytics/devguides/collection/android/v4/" class="external-link">Getting Started with the Analytics API in Android</a></li>
       <li><a href="/reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
       <li><a href="http://developers.google.com/tag-manager/android/" class="external-link">Getting Started with the Tag Manager API in Android</a></li>
-      <li><a href="/reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
    </ul>
 </li>
 <li><strong>Drive</strong> - Change notifications, offline content, and more.
@@ -86,10 +152,14 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
 </li>
 <li><strong>Address</strong> - Let your users provide complete addresses in a single click.
    <ul>
-      <li><a href="/reference/com/google/android/gms/identity/intents/package-summary.html">Address API reference</a> </li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/identity/intents/package-summary.html">Address API reference</a> </li>
    </ul>
 </li>
 </ul>
+</dd>
+</dl>
+  </div>
+</div>
 
 <h2>How It Works</h2>
 
@@ -151,7 +221,3 @@ easy for you to focus on what's important: your users' experience.</p>
 
 <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a> the SDK and check out
 the various products in the Google Play services platform now!</p>
-
-
-
-
