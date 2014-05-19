@@ -19851,6 +19851,532 @@ package android.opengl {
     field public static final int GL_WAIT_FAILED = 37149; // 0x911d
   }
 
+  public class GLES31 extends android.opengl.GLES30 {
+    method public static void glActiveShaderProgram(int, int);
+    method public static void glBindImageTexture(int, int, int, boolean, int, int, int);
+    method public static void glBindProgramPipeline(int);
+    method public static void glBindVertexBuffer(int, int, long, int);
+    method public static int glCreateShaderProgramv(int, java.lang.String[]);
+    method public static void glDeleteProgramPipelines(int, int[], int);
+    method public static void glDeleteProgramPipelines(int, java.nio.IntBuffer);
+    method public static void glDispatchCompute(int, int, int);
+    method public static void glDispatchComputeIndirect(long);
+    method public static void glDrawArraysIndirect(int, long);
+    method public static void glDrawElementsIndirect(int, int, long);
+    method public static void glFramebufferParameteri(int, int, int);
+    method public static void glGenProgramPipelines(int, int[], int);
+    method public static void glGenProgramPipelines(int, java.nio.IntBuffer);
+    method public static void glGetBooleani_v(int, int, boolean[], int);
+    method public static void glGetBooleani_v(int, int, java.nio.IntBuffer);
+    method public static void glGetFramebufferParameteriv(int, int, int[], int);
+    method public static void glGetFramebufferParameteriv(int, int, java.nio.IntBuffer);
+    method public static void glGetMultisamplefv(int, int, float[], int);
+    method public static void glGetMultisamplefv(int, int, java.nio.FloatBuffer);
+    method public static void glGetProgramInterfaceiv(int, int, int, int[], int);
+    method public static void glGetProgramInterfaceiv(int, int, int, java.nio.IntBuffer);
+    method public static java.lang.String glGetProgramPipelineInfoLog(int);
+    method public static void glGetProgramPipelineiv(int, int, int[], int);
+    method public static void glGetProgramPipelineiv(int, int, java.nio.IntBuffer);
+    method public static int glGetProgramResourceIndex(int, int, java.lang.String);
+    method public static int glGetProgramResourceLocation(int, int, java.lang.String);
+    method public static java.lang.String glGetProgramResourceName(int, int, int);
+    method public static void glGetProgramResourceiv(int, int, int, int, int[], int, int, int[], int, int[], int);
+    method public static void glGetProgramResourceiv(int, int, int, int, java.nio.IntBuffer, int, java.nio.IntBuffer, java.nio.IntBuffer);
+    method public static void glGetTexLevelParameterfv(int, int, int, float[], int);
+    method public static void glGetTexLevelParameterfv(int, int, int, java.nio.FloatBuffer);
+    method public static void glGetTexLevelParameteriv(int, int, int, int[], int);
+    method public static void glGetTexLevelParameteriv(int, int, int, java.nio.IntBuffer);
+    method public static boolean glIsProgramPipeline(int);
+    method public static void glMemoryBarrier(int);
+    method public static void glMemoryBarrierByRegion(int);
+    method public static void glProgramUniform1f(int, int, float);
+    method public static void glProgramUniform1fv(int, int, int, float[], int);
+    method public static void glProgramUniform1fv(int, int, int, java.nio.FloatBuffer);
+    method public static void glProgramUniform1i(int, int, int);
+    method public static void glProgramUniform1iv(int, int, int, int[], int);
+    method public static void glProgramUniform1iv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform1ui(int, int, int);
+    method public static void glProgramUniform1uiv(int, int, int, int[], int);
+    method public static void glProgramUniform1uiv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform2f(int, int, float, float);
+    method public static void glProgramUniform2fv(int, int, int, float[], int);
+    method public static void glProgramUniform2fv(int, int, int, java.nio.FloatBuffer);
+    method public static void glProgramUniform2i(int, int, int, int);
+    method public static void glProgramUniform2iv(int, int, int, int[], int);
+    method public static void glProgramUniform2iv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform2ui(int, int, int, int);
+    method public static void glProgramUniform2uiv(int, int, int, int[], int);
+    method public static void glProgramUniform2uiv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform3f(int, int, float, float, float);
+    method public static void glProgramUniform3fv(int, int, int, float[], int);
+    method public static void glProgramUniform3fv(int, int, int, java.nio.FloatBuffer);
+    method public static void glProgramUniform3i(int, int, int, int, int);
+    method public static void glProgramUniform3iv(int, int, int, int[], int);
+    method public static void glProgramUniform3iv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform3ui(int, int, int, int, int);
+    method public static void glProgramUniform3uiv(int, int, int, int[], int);
+    method public static void glProgramUniform3uiv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform4f(int, int, float, float, float, float);
+    method public static void glProgramUniform4fv(int, int, int, float[], int);
+    method public static void glProgramUniform4fv(int, int, int, java.nio.FloatBuffer);
+    method public static void glProgramUniform4i(int, int, int, int, int, int);
+    method public static void glProgramUniform4iv(int, int, int, int[], int);
+    method public static void glProgramUniform4iv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniform4ui(int, int, int, int, int, int);
+    method public static void glProgramUniform4uiv(int, int, int, int[], int);
+    method public static void glProgramUniform4uiv(int, int, int, java.nio.IntBuffer);
+    method public static void glProgramUniformMatrix2fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix2fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix2x3fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix2x3fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix2x4fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix2x4fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix3fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix3fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix3x2fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix3x2fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix3x4fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix3x4fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix4fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix4fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix4x2fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix4x2fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glProgramUniformMatrix4x3fv(int, int, int, boolean, float[], int);
+    method public static void glProgramUniformMatrix4x3fv(int, int, int, boolean, java.nio.FloatBuffer);
+    method public static void glSampleMaski(int, int);
+    method public static void glTexStorage2DMultisample(int, int, int, int, int, boolean);
+    method public static void glUseProgramStages(int, int, int);
+    method public static void glValidateProgramPipeline(int);
+    method public static void glVertexAttribBinding(int, int);
+    method public static void glVertexAttribFormat(int, int, int, boolean, int);
+    method public static void glVertexAttribIFormat(int, int, int, int);
+    method public static void glVertexBindingDivisor(int, int);
+    field public static final int GL_ACTIVE_ATOMIC_COUNTER_BUFFERS = 37593; // 0x92d9
+    field public static final int GL_ACTIVE_PROGRAM = 33369; // 0x8259
+    field public static final int GL_ACTIVE_RESOURCES = 37621; // 0x92f5
+    field public static final int GL_ACTIVE_VARIABLES = 37637; // 0x9305
+    field public static final int GL_ALL_SHADER_BITS = -1; // 0xffffffff
+    field public static final int GL_ARRAY_SIZE = 37627; // 0x92fb
+    field public static final int GL_ARRAY_STRIDE = 37630; // 0x92fe
+    field public static final int GL_ATOMIC_COUNTER_BARRIER_BIT = 4096; // 0x1000
+    field public static final int GL_ATOMIC_COUNTER_BUFFER = 37568; // 0x92c0
+    field public static final int GL_ATOMIC_COUNTER_BUFFER_BINDING = 37569; // 0x92c1
+    field public static final int GL_ATOMIC_COUNTER_BUFFER_INDEX = 37633; // 0x9301
+    field public static final int GL_ATOMIC_COUNTER_BUFFER_SIZE = 37571; // 0x92c3
+    field public static final int GL_ATOMIC_COUNTER_BUFFER_START = 37570; // 0x92c2
+    field public static final int GL_BLOCK_INDEX = 37629; // 0x92fd
+    field public static final int GL_BUFFER_BINDING = 37634; // 0x9302
+    field public static final int GL_BUFFER_DATA_SIZE = 37635; // 0x9303
+    field public static final int GL_BUFFER_UPDATE_BARRIER_BIT = 512; // 0x200
+    field public static final int GL_BUFFER_VARIABLE = 37605; // 0x92e5
+    field public static final int GL_COMMAND_BARRIER_BIT = 64; // 0x40
+    field public static final int GL_COMPUTE_SHADER = 37305; // 0x91b9
+    field public static final int GL_COMPUTE_SHADER_BIT = 32; // 0x20
+    field public static final int GL_COMPUTE_WORK_GROUP_SIZE = 33383; // 0x8267
+    field public static final int GL_DEPTH_STENCIL_TEXTURE_MODE = 37098; // 0x90ea
+    field public static final int GL_DISPATCH_INDIRECT_BUFFER = 37102; // 0x90ee
+    field public static final int GL_DISPATCH_INDIRECT_BUFFER_BINDING = 37103; // 0x90ef
+    field public static final int GL_DRAW_INDIRECT_BUFFER = 36671; // 0x8f3f
+    field public static final int GL_DRAW_INDIRECT_BUFFER_BINDING = 36675; // 0x8f43
+    field public static final int GL_FRAGMENT_SHADER_BIT = 2; // 0x2
+    field public static final int GL_FRAMEBUFFER_BARRIER_BIT = 1024; // 0x400
+    field public static final int GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS = 37652; // 0x9314
+    field public static final int GL_FRAMEBUFFER_DEFAULT_HEIGHT = 37649; // 0x9311
+    field public static final int GL_FRAMEBUFFER_DEFAULT_SAMPLES = 37651; // 0x9313
+    field public static final int GL_FRAMEBUFFER_DEFAULT_WIDTH = 37648; // 0x9310
+    field public static final int GL_IMAGE_2D = 36941; // 0x904d
+    field public static final int GL_IMAGE_2D_ARRAY = 36947; // 0x9053
+    field public static final int GL_IMAGE_3D = 36942; // 0x904e
+    field public static final int GL_IMAGE_BINDING_ACCESS = 36670; // 0x8f3e
+    field public static final int GL_IMAGE_BINDING_FORMAT = 36974; // 0x906e
+    field public static final int GL_IMAGE_BINDING_LAYER = 36669; // 0x8f3d
+    field public static final int GL_IMAGE_BINDING_LAYERED = 36668; // 0x8f3c
+    field public static final int GL_IMAGE_BINDING_LEVEL = 36667; // 0x8f3b
+    field public static final int GL_IMAGE_BINDING_NAME = 36666; // 0x8f3a
+    field public static final int GL_IMAGE_CUBE = 36944; // 0x9050
+    field public static final int GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS = 37065; // 0x90c9
+    field public static final int GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE = 37064; // 0x90c8
+    field public static final int GL_IMAGE_FORMAT_COMPATIBILITY_TYPE = 37063; // 0x90c7
+    field public static final int GL_INT_IMAGE_2D = 36952; // 0x9058
+    field public static final int GL_INT_IMAGE_2D_ARRAY = 36958; // 0x905e
+    field public static final int GL_INT_IMAGE_3D = 36953; // 0x9059
+    field public static final int GL_INT_IMAGE_CUBE = 36955; // 0x905b
+    field public static final int GL_INT_SAMPLER_2D_MULTISAMPLE = 37129; // 0x9109
+    field public static final int GL_IS_ROW_MAJOR = 37632; // 0x9300
+    field public static final int GL_LOCATION = 37646; // 0x930e
+    field public static final int GL_MATRIX_STRIDE = 37631; // 0x92ff
+    field public static final int GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = 37596; // 0x92dc
+    field public static final int GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE = 37592; // 0x92d8
+    field public static final int GL_MAX_COLOR_TEXTURE_SAMPLES = 37134; // 0x910e
+    field public static final int GL_MAX_COMBINED_ATOMIC_COUNTERS = 37591; // 0x92d7
+    field public static final int GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS = 37585; // 0x92d1
+    field public static final int GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS = 33382; // 0x8266
+    field public static final int GL_MAX_COMBINED_IMAGE_UNIFORMS = 37071; // 0x90cf
+    field public static final int GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES = 36665; // 0x8f39
+    field public static final int GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS = 37084; // 0x90dc
+    field public static final int GL_MAX_COMPUTE_ATOMIC_COUNTERS = 33381; // 0x8265
+    field public static final int GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS = 33380; // 0x8264
+    field public static final int GL_MAX_COMPUTE_IMAGE_UNIFORMS = 37309; // 0x91bd
+    field public static final int GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS = 37083; // 0x90db
+    field public static final int GL_MAX_COMPUTE_SHARED_MEMORY_SIZE = 33378; // 0x8262
+    field public static final int GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS = 37308; // 0x91bc
+    field public static final int GL_MAX_COMPUTE_UNIFORM_BLOCKS = 37307; // 0x91bb
+    field public static final int GL_MAX_COMPUTE_UNIFORM_COMPONENTS = 33379; // 0x8263
+    field public static final int GL_MAX_COMPUTE_WORK_GROUP_COUNT = 37310; // 0x91be
+    field public static final int GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = 37099; // 0x90eb
+    field public static final int GL_MAX_COMPUTE_WORK_GROUP_SIZE = 37311; // 0x91bf
+    field public static final int GL_MAX_DEPTH_TEXTURE_SAMPLES = 37135; // 0x910f
+    field public static final int GL_MAX_FRAGMENT_ATOMIC_COUNTERS = 37590; // 0x92d6
+    field public static final int GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS = 37584; // 0x92d0
+    field public static final int GL_MAX_FRAGMENT_IMAGE_UNIFORMS = 37070; // 0x90ce
+    field public static final int GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS = 37082; // 0x90da
+    field public static final int GL_MAX_FRAMEBUFFER_HEIGHT = 37654; // 0x9316
+    field public static final int GL_MAX_FRAMEBUFFER_SAMPLES = 37656; // 0x9318
+    field public static final int GL_MAX_FRAMEBUFFER_WIDTH = 37653; // 0x9315
+    field public static final int GL_MAX_IMAGE_UNITS = 36664; // 0x8f38
+    field public static final int GL_MAX_INTEGER_SAMPLES = 37136; // 0x9110
+    field public static final int GL_MAX_NAME_LENGTH = 37622; // 0x92f6
+    field public static final int GL_MAX_NUM_ACTIVE_VARIABLES = 37623; // 0x92f7
+    field public static final int GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET = 36447; // 0x8e5f
+    field public static final int GL_MAX_SAMPLE_MASK_WORDS = 36441; // 0x8e59
+    field public static final int GL_MAX_SHADER_STORAGE_BLOCK_SIZE = 37086; // 0x90de
+    field public static final int GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS = 37085; // 0x90dd
+    field public static final int GL_MAX_UNIFORM_LOCATIONS = 33390; // 0x826e
+    field public static final int GL_MAX_VERTEX_ATOMIC_COUNTERS = 37586; // 0x92d2
+    field public static final int GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS = 37580; // 0x92cc
+    field public static final int GL_MAX_VERTEX_ATTRIB_BINDINGS = 33498; // 0x82da
+    field public static final int GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET = 33497; // 0x82d9
+    field public static final int GL_MAX_VERTEX_ATTRIB_STRIDE = 33509; // 0x82e5
+    field public static final int GL_MAX_VERTEX_IMAGE_UNIFORMS = 37066; // 0x90ca
+    field public static final int GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS = 37078; // 0x90d6
+    field public static final int GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET = 36446; // 0x8e5e
+    field public static final int GL_NAME_LENGTH = 37625; // 0x92f9
+    field public static final int GL_NUM_ACTIVE_VARIABLES = 37636; // 0x9304
+    field public static final int GL_OFFSET = 37628; // 0x92fc
+    field public static final int GL_PIXEL_BUFFER_BARRIER_BIT = 128; // 0x80
+    field public static final int GL_PROGRAM_INPUT = 37603; // 0x92e3
+    field public static final int GL_PROGRAM_OUTPUT = 37604; // 0x92e4
+    field public static final int GL_PROGRAM_PIPELINE_BINDING = 33370; // 0x825a
+    field public static final int GL_PROGRAM_SEPARABLE = 33368; // 0x8258
+    field public static final int GL_READ_ONLY = 35000; // 0x88b8
+    field public static final int GL_READ_WRITE = 35002; // 0x88ba
+    field public static final int GL_REFERENCED_BY_COMPUTE_SHADER = 37643; // 0x930b
+    field public static final int GL_REFERENCED_BY_FRAGMENT_SHADER = 37642; // 0x930a
+    field public static final int GL_REFERENCED_BY_VERTEX_SHADER = 37638; // 0x9306
+    field public static final int GL_SAMPLER_2D_MULTISAMPLE = 37128; // 0x9108
+    field public static final int GL_SAMPLE_MASK = 36433; // 0x8e51
+    field public static final int GL_SAMPLE_MASK_VALUE = 36434; // 0x8e52
+    field public static final int GL_SAMPLE_POSITION = 36432; // 0x8e50
+    field public static final int GL_SHADER_STORAGE_BARRIER_BIT = 8192; // 0x2000
+    field public static final int GL_SHADER_STORAGE_BLOCK = 37606; // 0x92e6
+    field public static final int GL_SHADER_STORAGE_BUFFER = 37074; // 0x90d2
+    field public static final int GL_SHADER_STORAGE_BUFFER_BINDING = 37075; // 0x90d3
+    field public static final int GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT = 37087; // 0x90df
+    field public static final int GL_SHADER_STORAGE_BUFFER_SIZE = 37077; // 0x90d5
+    field public static final int GL_SHADER_STORAGE_BUFFER_START = 37076; // 0x90d4
+    field public static final int GL_STENCIL_INDEX = 6401; // 0x1901
+    field public static final int GL_TEXTURE_2D_MULTISAMPLE = 37120; // 0x9100
+    field public static final int GL_TEXTURE_ALPHA_SIZE = 32863; // 0x805f
+    field public static final int GL_TEXTURE_ALPHA_TYPE = 35859; // 0x8c13
+    field public static final int GL_TEXTURE_BINDING_2D_MULTISAMPLE = 37124; // 0x9104
+    field public static final int GL_TEXTURE_BLUE_SIZE = 32862; // 0x805e
+    field public static final int GL_TEXTURE_BLUE_TYPE = 35858; // 0x8c12
+    field public static final int GL_TEXTURE_COMPRESSED = 34465; // 0x86a1
+    field public static final int GL_TEXTURE_DEPTH = 32881; // 0x8071
+    field public static final int GL_TEXTURE_DEPTH_SIZE = 34890; // 0x884a
+    field public static final int GL_TEXTURE_DEPTH_TYPE = 35862; // 0x8c16
+    field public static final int GL_TEXTURE_FETCH_BARRIER_BIT = 8; // 0x8
+    field public static final int GL_TEXTURE_FIXED_SAMPLE_LOCATIONS = 37127; // 0x9107
+    field public static final int GL_TEXTURE_GREEN_SIZE = 32861; // 0x805d
+    field public static final int GL_TEXTURE_GREEN_TYPE = 35857; // 0x8c11
+    field public static final int GL_TEXTURE_HEIGHT = 4097; // 0x1001
+    field public static final int GL_TEXTURE_INTERNAL_FORMAT = 4099; // 0x1003
+    field public static final int GL_TEXTURE_RED_SIZE = 32860; // 0x805c
+    field public static final int GL_TEXTURE_RED_TYPE = 35856; // 0x8c10
+    field public static final int GL_TEXTURE_SAMPLES = 37126; // 0x9106
+    field public static final int GL_TEXTURE_SHARED_SIZE = 35903; // 0x8c3f
+    field public static final int GL_TEXTURE_STENCIL_SIZE = 35057; // 0x88f1
+    field public static final int GL_TEXTURE_UPDATE_BARRIER_BIT = 256; // 0x100
+    field public static final int GL_TEXTURE_WIDTH = 4096; // 0x1000
+    field public static final int GL_TOP_LEVEL_ARRAY_SIZE = 37644; // 0x930c
+    field public static final int GL_TOP_LEVEL_ARRAY_STRIDE = 37645; // 0x930d
+    field public static final int GL_TRANSFORM_FEEDBACK_BARRIER_BIT = 2048; // 0x800
+    field public static final int GL_TRANSFORM_FEEDBACK_VARYING = 37620; // 0x92f4
+    field public static final int GL_TYPE = 37626; // 0x92fa
+    field public static final int GL_UNIFORM = 37601; // 0x92e1
+    field public static final int GL_UNIFORM_BARRIER_BIT = 4; // 0x4
+    field public static final int GL_UNIFORM_BLOCK = 37602; // 0x92e2
+    field public static final int GL_UNSIGNED_INT_ATOMIC_COUNTER = 37595; // 0x92db
+    field public static final int GL_UNSIGNED_INT_IMAGE_2D = 36963; // 0x9063
+    field public static final int GL_UNSIGNED_INT_IMAGE_2D_ARRAY = 36969; // 0x9069
+    field public static final int GL_UNSIGNED_INT_IMAGE_3D = 36964; // 0x9064
+    field public static final int GL_UNSIGNED_INT_IMAGE_CUBE = 36966; // 0x9066
+    field public static final int GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE = 37130; // 0x910a
+    field public static final int GL_VERTEX_ATTRIB_BINDING = 33492; // 0x82d4
+    field public static final int GL_VERTEX_ATTRIB_RELATIVE_OFFSET = 33493; // 0x82d5
+    field public static final int GL_VERTEX_BINDING_BUFFER = 36687; // 0x8f4f
+    field public static final int GL_VERTEX_BINDING_DIVISOR = 33494; // 0x82d6
+    field public static final int GL_VERTEX_BINDING_OFFSET = 33495; // 0x82d7
+    field public static final int GL_VERTEX_BINDING_STRIDE = 33496; // 0x82d8
+    field public static final int GL_VERTEX_SHADER_BIT = 1; // 0x1
+    field public static final int GL_WRITE_ONLY = 35001; // 0x88b9
+  }
+
+  public class GLES31Ext {
+    method public static void glBlendBarrierKHR();
+    method public static void glBlendEquationSeparateiEXT(int, int, int);
+    method public static void glBlendEquationiEXT(int, int);
+    method public static void glBlendFuncSeparateiEXT(int, int, int, int, int);
+    method public static void glBlendFunciEXT(int, int, int);
+    method public static void glColorMaskiEXT(int, boolean, boolean, boolean, boolean);
+    method public static void glCopyImageSubDataEXT(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
+    method public static void glDebugMessageCallbackKHR(android.opengl.GLES31Ext.DebugProcKHR);
+    method public static void glDebugMessageControlKHR(int, int, int, int, int[], int, boolean);
+    method public static void glDebugMessageControlKHR(int, int, int, int, java.nio.IntBuffer, boolean);
+    method public static void glDebugMessageInsertKHR(int, int, int, int, java.lang.String);
+    method public static void glDisableiEXT(int, int);
+    method public static void glEnableiEXT(int, int);
+    method public static void glFramebufferTextureEXT(int, int, int, int);
+    method public static android.opengl.GLES31Ext.DebugProcKHR glGetDebugMessageCallbackKHR();
+    method public static int glGetDebugMessageLogKHR(int, int, int[], int, int[], int, int[], int, int[], int, int[], int, byte[], int);
+    method public static int glGetDebugMessageLogKHR(int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.ByteBuffer);
+    method public static java.lang.String[] glGetDebugMessageLogKHR(int, int[], int, int[], int, int[], int, int[], int);
+    method public static java.lang.String[] glGetDebugMessageLogKHR(int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer);
+    method public static java.lang.String glGetObjectLabelKHR(int, int);
+    method public static java.lang.String glGetObjectPtrLabelKHR(long);
+    method public static void glGetSamplerParameterIivEXT(int, int, int[], int);
+    method public static void glGetSamplerParameterIivEXT(int, int, java.nio.IntBuffer);
+    method public static void glGetSamplerParameterIuivEXT(int, int, int[], int);
+    method public static void glGetSamplerParameterIuivEXT(int, int, java.nio.IntBuffer);
+    method public static void glGetTexParameterIivEXT(int, int, int[], int);
+    method public static void glGetTexParameterIivEXT(int, int, java.nio.IntBuffer);
+    method public static void glGetTexParameterIuivEXT(int, int, int[], int);
+    method public static void glGetTexParameterIuivEXT(int, int, java.nio.IntBuffer);
+    method public static boolean glIsEnablediEXT(int, int);
+    method public static void glMinSampleShadingOES(float);
+    method public static void glObjectLabelKHR(int, int, int, java.lang.String);
+    method public static void glObjectPtrLabelKHR(long, java.lang.String);
+    method public static void glPatchParameteriEXT(int, int);
+    method public static void glPopDebugGroupKHR();
+    method public static void glPrimitiveBoundingBoxEXT(float, float, float, float, float, float, float, float);
+    method public static void glPushDebugGroupKHR(int, int, int, java.lang.String);
+    method public static void glSamplerParameterIivEXT(int, int, int[], int);
+    method public static void glSamplerParameterIivEXT(int, int, java.nio.IntBuffer);
+    method public static void glSamplerParameterIuivEXT(int, int, int[], int);
+    method public static void glSamplerParameterIuivEXT(int, int, java.nio.IntBuffer);
+    method public static void glTexBufferEXT(int, int, int);
+    method public static void glTexBufferRangeEXT(int, int, int, int, int);
+    method public static void glTexParameterIivEXT(int, int, int[], int);
+    method public static void glTexParameterIivEXT(int, int, java.nio.IntBuffer);
+    method public static void glTexParameterIuivEXT(int, int, int[], int);
+    method public static void glTexParameterIuivEXT(int, int, java.nio.IntBuffer);
+    method public static void glTexStorage3DMultisampleOES(int, int, int, int, int, int, boolean);
+    field public static final int GL_BLEND_ADVANCED_COHERENT_KHR = 37509; // 0x9285
+    field public static final int GL_BUFFER_KHR = 33504; // 0x82e0
+    field public static final int GL_CLAMP_TO_BORDER_EXT = 33069; // 0x812d
+    field public static final int GL_COLORBURN_KHR = 37530; // 0x929a
+    field public static final int GL_COLORDODGE_KHR = 37529; // 0x9299
+    field public static final int GL_COMPRESSED_RGBA_ASTC_10x10_KHR = 37819; // 0x93bb
+    field public static final int GL_COMPRESSED_RGBA_ASTC_10x5_KHR = 37816; // 0x93b8
+    field public static final int GL_COMPRESSED_RGBA_ASTC_10x6_KHR = 37817; // 0x93b9
+    field public static final int GL_COMPRESSED_RGBA_ASTC_10x8_KHR = 37818; // 0x93ba
+    field public static final int GL_COMPRESSED_RGBA_ASTC_12x10_KHR = 37820; // 0x93bc
+    field public static final int GL_COMPRESSED_RGBA_ASTC_12x12_KHR = 37821; // 0x93bd
+    field public static final int GL_COMPRESSED_RGBA_ASTC_4x4_KHR = 37808; // 0x93b0
+    field public static final int GL_COMPRESSED_RGBA_ASTC_5x4_KHR = 37809; // 0x93b1
+    field public static final int GL_COMPRESSED_RGBA_ASTC_5x5_KHR = 37810; // 0x93b2
+    field public static final int GL_COMPRESSED_RGBA_ASTC_6x5_KHR = 37811; // 0x93b3
+    field public static final int GL_COMPRESSED_RGBA_ASTC_6x6_KHR = 37812; // 0x93b4
+    field public static final int GL_COMPRESSED_RGBA_ASTC_8x5_KHR = 37813; // 0x93b5
+    field public static final int GL_COMPRESSED_RGBA_ASTC_8x6_KHR = 37814; // 0x93b6
+    field public static final int GL_COMPRESSED_RGBA_ASTC_8x8_KHR = 37815; // 0x93b7
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = 37851; // 0x93db
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR = 37848; // 0x93d8
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR = 37849; // 0x93d9
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR = 37850; // 0x93da
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = 37852; // 0x93dc
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = 37853; // 0x93dd
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR = 37840; // 0x93d0
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR = 37841; // 0x93d1
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR = 37842; // 0x93d2
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR = 37843; // 0x93d3
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR = 37844; // 0x93d4
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR = 37845; // 0x93d5
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR = 37846; // 0x93d6
+    field public static final int GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR = 37847; // 0x93d7
+    field public static final int GL_CONTEXT_FLAG_DEBUG_BIT_KHR = 2; // 0x2
+    field public static final int GL_DARKEN_KHR = 37527; // 0x9297
+    field public static final int GL_DEBUG_CALLBACK_FUNCTION_KHR = 33348; // 0x8244
+    field public static final int GL_DEBUG_CALLBACK_USER_PARAM_KHR = 33349; // 0x8245
+    field public static final int GL_DEBUG_GROUP_STACK_DEPTH_KHR = 33389; // 0x826d
+    field public static final int GL_DEBUG_LOGGED_MESSAGES_KHR = 37189; // 0x9145
+    field public static final int GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR = 33347; // 0x8243
+    field public static final int GL_DEBUG_OUTPUT_KHR = 37600; // 0x92e0
+    field public static final int GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR = 33346; // 0x8242
+    field public static final int GL_DEBUG_SEVERITY_HIGH_KHR = 37190; // 0x9146
+    field public static final int GL_DEBUG_SEVERITY_LOW_KHR = 37192; // 0x9148
+    field public static final int GL_DEBUG_SEVERITY_MEDIUM_KHR = 37191; // 0x9147
+    field public static final int GL_DEBUG_SEVERITY_NOTIFICATION_KHR = 33387; // 0x826b
+    field public static final int GL_DEBUG_SOURCE_API_KHR = 33350; // 0x8246
+    field public static final int GL_DEBUG_SOURCE_APPLICATION_KHR = 33354; // 0x824a
+    field public static final int GL_DEBUG_SOURCE_OTHER_KHR = 33355; // 0x824b
+    field public static final int GL_DEBUG_SOURCE_SHADER_COMPILER_KHR = 33352; // 0x8248
+    field public static final int GL_DEBUG_SOURCE_THIRD_PARTY_KHR = 33353; // 0x8249
+    field public static final int GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR = 33351; // 0x8247
+    field public static final int GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR = 33357; // 0x824d
+    field public static final int GL_DEBUG_TYPE_ERROR_KHR = 33356; // 0x824c
+    field public static final int GL_DEBUG_TYPE_MARKER_KHR = 33384; // 0x8268
+    field public static final int GL_DEBUG_TYPE_OTHER_KHR = 33361; // 0x8251
+    field public static final int GL_DEBUG_TYPE_PERFORMANCE_KHR = 33360; // 0x8250
+    field public static final int GL_DEBUG_TYPE_POP_GROUP_KHR = 33386; // 0x826a
+    field public static final int GL_DEBUG_TYPE_PORTABILITY_KHR = 33359; // 0x824f
+    field public static final int GL_DEBUG_TYPE_PUSH_GROUP_KHR = 33385; // 0x8269
+    field public static final int GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR = 33358; // 0x824e
+    field public static final int GL_DECODE_EXT = 35401; // 0x8a49
+    field public static final int GL_DIFFERENCE_KHR = 37534; // 0x929e
+    field public static final int GL_EXCLUSION_KHR = 37536; // 0x92a0
+    field public static final int GL_FIRST_VERTEX_CONVENTION_EXT = 36429; // 0x8e4d
+    field public static final int GL_FRACTIONAL_EVEN_EXT = 36476; // 0x8e7c
+    field public static final int GL_FRACTIONAL_ODD_EXT = 36475; // 0x8e7b
+    field public static final int GL_FRAGMENT_INTERPOLATION_OFFSET_BITS_OES = 36445; // 0x8e5d
+    field public static final int GL_FRAMEBUFFER_ATTACHMENT_LAYERED_EXT = 36263; // 0x8da7
+    field public static final int GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT = 37650; // 0x9312
+    field public static final int GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT = 36264; // 0x8da8
+    field public static final int GL_GEOMETRY_LINKED_INPUT_TYPE_EXT = 35095; // 0x8917
+    field public static final int GL_GEOMETRY_LINKED_OUTPUT_TYPE_EXT = 35096; // 0x8918
+    field public static final int GL_GEOMETRY_LINKED_VERTICES_OUT_EXT = 35094; // 0x8916
+    field public static final int GL_GEOMETRY_SHADER_BIT_EXT = 4; // 0x4
+    field public static final int GL_GEOMETRY_SHADER_EXT = 36313; // 0x8dd9
+    field public static final int GL_GEOMETRY_SHADER_INVOCATIONS_EXT = 34943; // 0x887f
+    field public static final int GL_HARDLIGHT_KHR = 37531; // 0x929b
+    field public static final int GL_HSL_COLOR_KHR = 37551; // 0x92af
+    field public static final int GL_HSL_HUE_KHR = 37549; // 0x92ad
+    field public static final int GL_HSL_LUMINOSITY_KHR = 37552; // 0x92b0
+    field public static final int GL_HSL_SATURATION_KHR = 37550; // 0x92ae
+    field public static final int GL_IMAGE_BUFFER_EXT = 36945; // 0x9051
+    field public static final int GL_IMAGE_CUBE_MAP_ARRAY_EXT = 36948; // 0x9054
+    field public static final int GL_INT_IMAGE_BUFFER_EXT = 36956; // 0x905c
+    field public static final int GL_INT_IMAGE_CUBE_MAP_ARRAY_EXT = 36959; // 0x905f
+    field public static final int GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES = 37132; // 0x910c
+    field public static final int GL_INT_SAMPLER_BUFFER_EXT = 36304; // 0x8dd0
+    field public static final int GL_INT_SAMPLER_CUBE_MAP_ARRAY_EXT = 36878; // 0x900e
+    field public static final int GL_ISOLINES_EXT = 36474; // 0x8e7a
+    field public static final int GL_IS_PER_PATCH_EXT = 37607; // 0x92e7
+    field public static final int GL_LAST_VERTEX_CONVENTION_EXT = 36430; // 0x8e4e
+    field public static final int GL_LAYER_PROVOKING_VERTEX_EXT = 33374; // 0x825e
+    field public static final int GL_LIGHTEN_KHR = 37528; // 0x9298
+    field public static final int GL_LINES_ADJACENCY_EXT = 10; // 0xa
+    field public static final int GL_LINE_STRIP_ADJACENCY_EXT = 11; // 0xb
+    field public static final int GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_EXT = 35378; // 0x8a32
+    field public static final int GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS_EXT = 36382; // 0x8e1e
+    field public static final int GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS_EXT = 36383; // 0x8e1f
+    field public static final int GL_MAX_DEBUG_GROUP_STACK_DEPTH_KHR = 33388; // 0x826c
+    field public static final int GL_MAX_DEBUG_LOGGED_MESSAGES_KHR = 37188; // 0x9144
+    field public static final int GL_MAX_DEBUG_MESSAGE_LENGTH_KHR = 37187; // 0x9143
+    field public static final int GL_MAX_FRAGMENT_INTERPOLATION_OFFSET_OES = 36444; // 0x8e5c
+    field public static final int GL_MAX_FRAMEBUFFER_LAYERS_EXT = 37655; // 0x9317
+    field public static final int GL_MAX_GEOMETRY_ATOMIC_COUNTERS_EXT = 37589; // 0x92d5
+    field public static final int GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS_EXT = 37583; // 0x92cf
+    field public static final int GL_MAX_GEOMETRY_IMAGE_UNIFORMS_EXT = 37069; // 0x90cd
+    field public static final int GL_MAX_GEOMETRY_INPUT_COMPONENTS_EXT = 37155; // 0x9123
+    field public static final int GL_MAX_GEOMETRY_OUTPUT_COMPONENTS_EXT = 37156; // 0x9124
+    field public static final int GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT = 36320; // 0x8de0
+    field public static final int GL_MAX_GEOMETRY_SHADER_INVOCATIONS_EXT = 36442; // 0x8e5a
+    field public static final int GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS_EXT = 37079; // 0x90d7
+    field public static final int GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_EXT = 35881; // 0x8c29
+    field public static final int GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT = 36321; // 0x8de1
+    field public static final int GL_MAX_GEOMETRY_UNIFORM_BLOCKS_EXT = 35372; // 0x8a2c
+    field public static final int GL_MAX_GEOMETRY_UNIFORM_COMPONENTS_EXT = 36319; // 0x8ddf
+    field public static final int GL_MAX_LABEL_LENGTH_KHR = 33512; // 0x82e8
+    field public static final int GL_MAX_PATCH_VERTICES_EXT = 36477; // 0x8e7d
+    field public static final int GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS_EXT = 37587; // 0x92d3
+    field public static final int GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS_EXT = 37581; // 0x92cd
+    field public static final int GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS_EXT = 37067; // 0x90cb
+    field public static final int GL_MAX_TESS_CONTROL_INPUT_COMPONENTS_EXT = 34924; // 0x886c
+    field public static final int GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS_EXT = 36483; // 0x8e83
+    field public static final int GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS_EXT = 37080; // 0x90d8
+    field public static final int GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS_EXT = 36481; // 0x8e81
+    field public static final int GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS_EXT = 36485; // 0x8e85
+    field public static final int GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS_EXT = 36489; // 0x8e89
+    field public static final int GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS_EXT = 36479; // 0x8e7f
+    field public static final int GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS_EXT = 37588; // 0x92d4
+    field public static final int GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS_EXT = 37582; // 0x92ce
+    field public static final int GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS_EXT = 37068; // 0x90cc
+    field public static final int GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS_EXT = 34925; // 0x886d
+    field public static final int GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS_EXT = 36486; // 0x8e86
+    field public static final int GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS_EXT = 37081; // 0x90d9
+    field public static final int GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS_EXT = 36482; // 0x8e82
+    field public static final int GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS_EXT = 36490; // 0x8e8a
+    field public static final int GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS_EXT = 36480; // 0x8e80
+    field public static final int GL_MAX_TESS_GEN_LEVEL_EXT = 36478; // 0x8e7e
+    field public static final int GL_MAX_TESS_PATCH_COMPONENTS_EXT = 36484; // 0x8e84
+    field public static final int GL_MAX_TEXTURE_BUFFER_SIZE_EXT = 35883; // 0x8c2b
+    field public static final int GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_OES = 36443; // 0x8e5b
+    field public static final int GL_MIN_SAMPLE_SHADING_VALUE_OES = 35895; // 0x8c37
+    field public static final int GL_MULTIPLY_KHR = 37524; // 0x9294
+    field public static final int GL_OVERLAY_KHR = 37526; // 0x9296
+    field public static final int GL_PATCHES_EXT = 14; // 0xe
+    field public static final int GL_PATCH_VERTICES_EXT = 36466; // 0x8e72
+    field public static final int GL_PRIMITIVES_GENERATED_EXT = 35975; // 0x8c87
+    field public static final int GL_PRIMITIVE_BOUNDING_BOX_EXT = 37566; // 0x92be
+    field public static final int GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED = 33313; // 0x8221
+    field public static final int GL_PROGRAM_KHR = 33506; // 0x82e2
+    field public static final int GL_QUADS_EXT = 7; // 0x7
+    field public static final int GL_QUERY_KHR = 33507; // 0x82e3
+    field public static final int GL_REFERENCED_BY_GEOMETRY_SHADER_EXT = 37641; // 0x9309
+    field public static final int GL_REFERENCED_BY_TESS_CONTROL_SHADER_EXT = 37639; // 0x9307
+    field public static final int GL_REFERENCED_BY_TESS_EVALUATION_SHADER_EXT = 37640; // 0x9308
+    field public static final int GL_SAMPLER_2D_MULTISAMPLE_ARRAY_OES = 37131; // 0x910b
+    field public static final int GL_SAMPLER_BUFFER_EXT = 36290; // 0x8dc2
+    field public static final int GL_SAMPLER_CUBE_MAP_ARRAY_EXT = 36876; // 0x900c
+    field public static final int GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW_EXT = 36877; // 0x900d
+    field public static final int GL_SAMPLER_KHR = 33510; // 0x82e6
+    field public static final int GL_SAMPLE_SHADING_OES = 35894; // 0x8c36
+    field public static final int GL_SCREEN_KHR = 37525; // 0x9295
+    field public static final int GL_SHADER_KHR = 33505; // 0x82e1
+    field public static final int GL_SKIP_DECODE_EXT = 35402; // 0x8a4a
+    field public static final int GL_SOFTLIGHT_KHR = 37532; // 0x929c
+    field public static final int GL_STACK_OVERFLOW_KHR = 1283; // 0x503
+    field public static final int GL_STACK_UNDERFLOW_KHR = 1284; // 0x504
+    field public static final int GL_STENCIL_INDEX8_OES = 36168; // 0x8d48
+    field public static final int GL_STENCIL_INDEX_OES = 6401; // 0x1901
+    field public static final int GL_TESS_CONTROL_OUTPUT_VERTICES_EXT = 36469; // 0x8e75
+    field public static final int GL_TESS_CONTROL_SHADER_BIT_EXT = 8; // 0x8
+    field public static final int GL_TESS_CONTROL_SHADER_EXT = 36488; // 0x8e88
+    field public static final int GL_TESS_EVALUATION_SHADER_BIT_EXT = 16; // 0x10
+    field public static final int GL_TESS_EVALUATION_SHADER_EXT = 36487; // 0x8e87
+    field public static final int GL_TESS_GEN_MODE_EXT = 36470; // 0x8e76
+    field public static final int GL_TESS_GEN_POINT_MODE_EXT = 36473; // 0x8e79
+    field public static final int GL_TESS_GEN_SPACING_EXT = 36471; // 0x8e77
+    field public static final int GL_TESS_GEN_VERTEX_ORDER_EXT = 36472; // 0x8e78
+    field public static final int GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES = 37122; // 0x9102
+    field public static final int GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY_OES = 37125; // 0x9105
+    field public static final int GL_TEXTURE_BINDING_BUFFER_EXT = 35884; // 0x8c2c
+    field public static final int GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_EXT = 36874; // 0x900a
+    field public static final int GL_TEXTURE_BORDER_COLOR_EXT = 4100; // 0x1004
+    field public static final int GL_TEXTURE_BUFFER_BINDING_EXT = 35882; // 0x8c2a
+    field public static final int GL_TEXTURE_BUFFER_DATA_STORE_BINDING_EXT = 35885; // 0x8c2d
+    field public static final int GL_TEXTURE_BUFFER_EXT = 35882; // 0x8c2a
+    field public static final int GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT_EXT = 37279; // 0x919f
+    field public static final int GL_TEXTURE_BUFFER_OFFSET_EXT = 37277; // 0x919d
+    field public static final int GL_TEXTURE_BUFFER_SIZE_EXT = 37278; // 0x919e
+    field public static final int GL_TEXTURE_CUBE_MAP_ARRAY_EXT = 36873; // 0x9009
+    field public static final int GL_TEXTURE_SRGB_DECODE_EXT = 35400; // 0x8a48
+    field public static final int GL_TRIANGLES_ADJACENCY_EXT = 12; // 0xc
+    field public static final int GL_TRIANGLE_STRIP_ADJACENCY_EXT = 13; // 0xd
+    field public static final int GL_UNDEFINED_VERTEX_EXT = 33376; // 0x8260
+    field public static final int GL_UNSIGNED_INT_IMAGE_BUFFER_EXT = 36967; // 0x9067
+    field public static final int GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY_EXT = 36970; // 0x906a
+    field public static final int GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES = 37133; // 0x910d
+    field public static final int GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT = 36312; // 0x8dd8
+    field public static final int GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_EXT = 36879; // 0x900f
+    field public static final int GL_VERTEX_ARRAY_KHR = 32884; // 0x8074
+  }
+
+  public static abstract interface GLES31Ext.DebugProcKHR {
+    method public abstract void onMessage(int, int, int, int, java.lang.String);
+  }
+
   public class GLException extends java.lang.RuntimeException {
     ctor public GLException(int);
     ctor public GLException(int, java.lang.String);
