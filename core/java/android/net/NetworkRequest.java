@@ -22,11 +22,19 @@ import android.os.Parcelable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * Defines a request for a network, made by calling {@link ConnectivityManager.requestNetwork}.
+ *
+ * This token records the {@link NetworkCapabilities} used to make the request and identifies
+ * the request.  It should be used to release the request via
+ * {@link ConnectivityManager.releaseNetworkRequest} when the network is no longer desired.
  * @hide
  */
 public class NetworkRequest implements Parcelable {
     /**
-     * The NetworkCapabilities that define this request
+     * The {@link NetworkCapabilities} that define this request.  This should not be modified.
+     * The networkCapabilities of the request are set when
+     * {@link ConnectivityManager.requestNetwork} is called and the value is presented here
+     * as a convenient reminder of what was requested.
      */
     public final NetworkCapabilities networkCapabilities;
 
@@ -34,7 +42,7 @@ public class NetworkRequest implements Parcelable {
      * Identifies the request.  NetworkRequests should only be constructed by
      * the Framework and given out to applications as tokens to be used to identify
      * the request.
-     * TODO - make sure this input is checked whenever a NR is passed in a public API
+     * @hide
      */
     public final int requestId;
 
@@ -45,31 +53,18 @@ public class NetworkRequest implements Parcelable {
      */
     public final boolean needsBroadcasts;
 
-    private static final AtomicInteger sNextRequestId = new AtomicInteger(1);
-
     /**
      * @hide
      */
-    public NetworkRequest(NetworkCapabilities nc) {
-        this(nc, false, sNextRequestId.getAndIncrement());
-    }
-
-    /**
-     * @hide
-     */
-    public NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts) {
-        this(nc, needsBroadcasts, sNextRequestId.getAndIncrement());
-    }
-
-    /**
-     * @hide
-     */
-    private NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts, int rId) {
+    public NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts, int rId) {
         requestId = rId;
         networkCapabilities = nc;
         this.needsBroadcasts = needsBroadcasts;
     }
 
+    /**
+     * @hide
+     */
     public NetworkRequest(NetworkRequest that) {
         networkCapabilities = new NetworkCapabilities(that.networkCapabilities);
         requestId = that.requestId;
