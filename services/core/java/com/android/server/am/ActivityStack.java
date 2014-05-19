@@ -742,19 +742,10 @@ final class ActivityStack {
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
         if (w < 0) {
-            Configuration config = res.getConfiguration();
-            boolean useAlternateRecents = (config.smallestScreenWidthDp < 600);
-            if (useAlternateRecents) {
-                mThumbnailWidth = w =
-                   res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
-                mThumbnailHeight = h =
-                   res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
-            } else {
-                mThumbnailWidth = w =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-                mThumbnailHeight = h =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
-            }
+            mThumbnailWidth = w =
+               res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
+            mThumbnailHeight = h =
+               res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
         }
 
         if (w > 0) {

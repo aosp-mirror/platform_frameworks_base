@@ -44,14 +44,12 @@ public class Recents extends SystemUI implements RecentsComponent {
     private static final boolean DEBUG = true;
 
     // Which recents to use
-    boolean mUseAlternateRecents;
+    boolean mUseAlternateRecents = true;
     AlternateRecentsComponent mAlternateRecents;
     boolean mBootCompleted = false;
 
     @Override
     public void start() {
-        Configuration config = mContext.getResources().getConfiguration();
-        mUseAlternateRecents = (config.smallestScreenWidthDp < 600);
         if (mUseAlternateRecents) {
             if (mAlternateRecents == null) {
                 mAlternateRecents = new AlternateRecentsComponent(mContext);
