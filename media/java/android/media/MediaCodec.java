@@ -212,6 +212,7 @@ final public class MediaCodec {
      * <li>"video/x-vnd.on2.vp8" - VP8 video (i.e. video in .webm)
      * <li>"video/x-vnd.on2.vp9" - VP9 video (i.e. video in .webm)
      * <li>"video/avc" - H.264/AVC video
+     * <li>"video/hevc" - H.265/HEVC video
      * <li>"video/mp4v-es" - MPEG4 video
      * <li>"video/3gpp" - H.263 video
      * <li>"audio/3gpp" - AMR narrowband audio
