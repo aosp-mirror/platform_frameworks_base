@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -167,7 +168,7 @@ public class SignalClusterView
     }
 
     private void applyInetProblem(ImageView iv) {
-        iv.setColorFilter(mInetProblem ? PROBLEM_FILTER : null);
+        iv.setColorFilter(Build.IS_DEBUGGABLE && mInetProblem ? PROBLEM_FILTER : null);
     }
 
     // Run after each indicator change.
