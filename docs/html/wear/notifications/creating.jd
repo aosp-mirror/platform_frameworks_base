@@ -44,8 +44,8 @@ library</a> and the Developer Preview support library. So to get started,
 you should include the following imports in your project code:</p>
 
 <pre>
-import android.preview.support.wearable.notifications.*;
-import android.preview.support.v4.app.NotificationManagerCompat;
+import android.support.wearable.notifications.*;
+import android.support.wearable.app.NotificationManagerCompat;
 import android.support.v4.app.NotificationCompat;
 </pre>
 
@@ -64,7 +64,7 @@ such as action buttons and large icons, while remaining compatible with Android 
 
 <p>For example, here's some code that creates and issues a notification using the
 {@link android.support.v4.app.NotificationCompat} APIs combined with the new
-<a href="{@docRoot}reference/android/preview/support/v4/app/NotificationManagerCompat.html">
+<a href="{@docRoot}reference/android/support/wearable/app/NotificationManagerCompat.html">
 <code>NotificationManagerCompat</code></a> API:</p>
 
 
@@ -206,54 +206,70 @@ Wear</a>.</p>
   you can add additional pages of content that users can view by swiping to the left, or add the ability
 for users to deliver your app a text response using voice input.</p>
 
-<p>To use these new APIs, pass your instance of
-{@link android.support.v4.app.NotificationCompat.Builder} to the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#WearableNotifications.Builder(android.content.Context)"> <code>WearableNotifications.Builder()</code></a> constructor. You can then add new
-features to your notification using the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
-  ><code>WearableNotifications.Builder</code></a> methods. For example:</p>
+<p>To use these new APIs:</p>
+
+<ol>
+  <li>Create an instance of
+{@link android.support.v4.app.NotificationCompat.Builder}, setting the
+desired properties for your notification.</li>
+  <li>Create a
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#WearableNotificationOptions.Builder(android.content.Context)"> <code>WearableNotificationOptions.Builder</code></a>, setting the wearable-specific options for the notication.</li>
+  <li>Call <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#WearableNotificationOptions.Builder#applyTo"><code>WearableNotificationOptions.Builder.applyTo()</code>
+  </a>, passing in the {@link android.support.v4.app.NotificationCompat.Builder}. This applies
+  the wearable options to the notification.</li>
+</ol>
+
+<p>
+For example, the following code calls the
+ <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#setHintHideIcon(boolean)">
+  <code>setHintHideIcon()</code></a> method to remove the app icon from the notification card.
+</p>
 
 <pre>
 // Create a NotificationCompat.Builder for standard notification features
-NotificationCompat.Builder notificationBuilder =
-        new NotificationCompat.Builder(mContext)
-        .setContentTitle("New mail from " + sender.toString())
-        .setContentText(subject)
-        .setSmallIcon(R.drawable.new_mail);
-
-// Create a WearablesNotification.Builder to add special functionality for wearables
-Notification notification =
-        new WearableNotifications.Builder(notificationBuilder)
-        .setHintHideIcon(true)
-        .build();
+ NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext)
+         .setContentTitle("New mail from " + sender)
+         .setContentText(subject)
+         .setSmallIcon(R.drawable.new_mail);
+// Create a WearablesNotificationOptions.Builder to add functionality for wearables
+ Notification notif = new WearableNotificationOptions.Builder()
+         <b>.setHintHideIcon(true)</b>
+         .build()
+         .applyTo(builder); //apply wearable options to to the original notification
+         .build()
 </pre>
 
-<p>The <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html#setBigActionIcon(int)">
-  <code>setHintHideIcon()</code></a> method removes your app icon from the notification card.
-  This method is just one example of new notification features available from the
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
-  ><code>WearableNotifications.Builder</code></a> class.</p>
+<p>The
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html#setHintHideIcon(boolean)">
+  <code>setHintHideIcon()</code></a> method is just one example of new notification features available with the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html"
+  ><code>WearableNotificationOptions.Builder</code></a> class.
+</p>
 
-<p>When you want to deliver your notifications, be certain to always use the
-  <a href="{@docRoot}reference/android/preview/support/v4/app/NotificationManagerCompat.html">
-    <code>NotificationManagerCompat</code></a> API:</p>
+
+<p>When you want to deliver your notifications, always use the
+  <a href="{@docRoot}reference/android/support/wearable/app/NotificationManagerCompat.html">
+  <code>NotificationManagerCompat</code></a> API instead of
+  {@link android.app.NotificationManager}:</p>
 
 <pre>
 // Get an instance of the NotificationManager service
 NotificationManagerCompat notificationManager =
         NotificationManagerCompat.from(this);
 
-// Build the notification and issues it with notification manager.
-notificationManager.notify(notificationId, notification);
+// Issue the notification with notification manager.
+notificationManager.notify(notificationId, notif);
 </pre>
 
-<p>If you instead use the framework's {@link android.app.NotificationManager}, some
-features from <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"><code>WearableNotifications.Builder</code></a>
-will not work.</p>
+
+<p>If you use the framework's {@link android.app.NotificationManager}, some
+features from <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html"><code>WearableNotificationOptions.Builder</code></a>
+do not work.</p>
+
 
 <p>To continue enhancing your notifications for wearables using
-  <a href="{@docRoot}reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html"
-  ><code>WearableNotifications.Builder</code></a> and other APIs in the
+  <a href="{@docRoot}reference/android/support/wearable/notifications/WearableNotificationOptions.Builder.html"
+  ><code>WearableNotificationOptions.Builder</code></a> and other APIs in the
   preview support library, see the following developer guides:</p>
 
   <dl>
