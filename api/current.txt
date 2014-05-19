@@ -10908,7 +10908,6 @@ package android.graphics.drawable {
     method public void applyTheme(android.content.res.Resources.Theme);
     method public boolean canApplyTheme();
     method public void clearColorFilter();
-    method public void clearHotspots();
     method public final void copyBounds(android.graphics.Rect);
     method public final android.graphics.Rect copyBounds();
     method public static android.graphics.drawable.Drawable createFromPath(java.lang.String);
@@ -10951,7 +10950,6 @@ package android.graphics.drawable {
     method protected void onBoundsChange(android.graphics.Rect);
     method protected boolean onLevelChange(int);
     method protected boolean onStateChange(int[]);
-    method public void removeHotspot(int);
     method public static int resolveOpacity(int, int);
     method public void scheduleSelf(java.lang.Runnable, long);
     method public abstract void setAlpha(int);
@@ -10964,11 +10962,11 @@ package android.graphics.drawable {
     method public void setColorFilter(int, android.graphics.PorterDuff.Mode);
     method public void setDither(boolean);
     method public void setFilterBitmap(boolean);
-    method public void setHotspot(int, float, float);
+    method public void setHotspot(float, float);
+    method public void setHotspotBounds(int, int, int, int);
     method public final boolean setLevel(int);
     method public boolean setState(int[]);
     method public boolean setVisible(boolean, boolean);
-    method public boolean supportsHotspots();
     method public void unscheduleSelf(java.lang.Runnable);
   }
 
@@ -11025,30 +11023,6 @@ package android.graphics.drawable {
     method public final void setEnterFadeDuration(int);
     method public final void setExitFadeDuration(int);
     method public final void setVariablePadding(boolean);
-  }
-
-  public class DrawableWrapper extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
-    ctor public DrawableWrapper();
-    method public void draw(android.graphics.Canvas);
-    method public android.graphics.Rect getDirtyBounds();
-    method protected final android.graphics.drawable.Drawable getDrawable();
-    method public int getOpacity();
-    method public final int[] getState();
-    method public void invalidateDrawable(android.graphics.drawable.Drawable);
-    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
-    method public void setAlpha(int);
-    method public final void setBounds(int, int, int, int);
-    method public final void setBounds(android.graphics.Rect);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method protected void setConstantState(android.graphics.drawable.DrawableWrapper.WrapperState, android.content.res.Resources);
-    method protected final void setDrawable(android.graphics.drawable.Drawable, android.content.res.Resources);
-    method public final boolean setState(int[]);
-    method public void setXfermode(android.graphics.Xfermode);
-    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
-  }
-
-  public static abstract class DrawableWrapper.WrapperState extends android.graphics.drawable.Drawable.ConstantState {
-    method public int getChangingConfigurations();
   }
 
   public class GradientDrawable extends android.graphics.drawable.Drawable {
@@ -11174,6 +11148,13 @@ package android.graphics.drawable {
     method public void setPicture(android.graphics.Picture);
   }
 
+  public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
+    method public android.graphics.Rect getDirtyBounds();
+    method public android.content.res.ColorStateList getTint();
+    method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
+  }
+
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public RotateDrawable();
     method public void draw(android.graphics.Canvas);
@@ -11241,13 +11222,6 @@ package android.graphics.drawable {
   public class StateListDrawable extends android.graphics.drawable.DrawableContainer {
     ctor public StateListDrawable();
     method public void addState(int[], android.graphics.drawable.Drawable);
-  }
-
-  public class TouchFeedbackDrawable extends android.graphics.drawable.LayerDrawable {
-    method public android.graphics.Rect getDirtyBounds();
-    method public android.content.res.ColorStateList getTint();
-    method public void setTint(android.content.res.ColorStateList);
-    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class TransitionDrawable extends android.graphics.drawable.LayerDrawable implements android.graphics.drawable.Drawable.Callback {

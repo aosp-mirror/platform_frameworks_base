@@ -131,6 +131,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
 
     // overrides from Drawable.Callback
 
+    @Override
     public void invalidateDrawable(Drawable who) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -138,6 +139,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         }
     }
 
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -145,6 +147,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         }
     }
 
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -184,23 +187,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     }
 
     @Override
-    public boolean supportsHotspots() {
-        return mInsetState.mDrawable.supportsHotspots();
-    }
-
-    @Override
-    public void setHotspot(int id, float x, float y) {
-        mInsetState.mDrawable.setHotspot(id, x, y);
-    }
-
-    @Override
-    public void removeHotspot(int id) {
-        mInsetState.mDrawable.removeHotspot(id);
-    }
-
-    @Override
-    public void clearHotspots() {
-        mInsetState.mDrawable.clearHotspots();
+    public void setHotspot(float x, float y) {
+        mInsetState.mDrawable.setHotspot(x, y);
     }
 
     @Override

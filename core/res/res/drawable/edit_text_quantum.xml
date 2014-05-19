@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<touch-feedback xmlns:android="http://schemas.android.com/apk/res/android"
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:tint="?attr/colorControlActivated">
     <item>
         <selector>
@@ -36,4 +36,4 @@
             </item>
         </selector>
     </item>
-</touch-feedback>
+</ripple>

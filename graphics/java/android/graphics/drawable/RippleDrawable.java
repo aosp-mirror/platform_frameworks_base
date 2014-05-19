@@ -22,6 +22,7 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
@@ -44,7 +45,7 @@ import java.io.IOException;
 /**
  * Drawable that shows a ripple effect in response to state changes. The
  * anchoring position of the ripple for a given state may be specified by
- * calling {@link #setHotspot(int, float, float)} with the corresponding state
+ * calling {@link #setHotspot(float, float)} with the corresponding state
  * attribute identifier.
  * <p>
  * A touch feedback drawable may contain multiple child layers, including a
@@ -56,19 +57,19 @@ import java.io.IOException;
  * <p>
  * If no mask layer is set, the ripple effect is simply blended onto the
  * composite of the child layers using the specified
- * {@link android.R.styleable#TouchFeedbackDrawable_tintMode}.
+ * {@link android.R.styleable#RippleDrawable_tintMode}.
  * <p>
  * If no child layers or mask is specified and the ripple is set as a View
  * background, the ripple will be blended onto the first available parent
  * background within the View's hierarchy using the specified
- * {@link android.R.styleable#TouchFeedbackDrawable_tintMode}. In this case, the
+ * {@link android.R.styleable#RippleDrawable_tintMode}. In this case, the
  * drawing region may extend outside of the Drawable bounds.
  *
  * @attr ref android.R.styleable#DrawableStates_state_focused
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
-public class TouchFeedbackDrawable extends LayerDrawable {
-    private static final String LOG_TAG = TouchFeedbackDrawable.class.getSimpleName();
+public class RippleDrawable extends LayerDrawable {
+    private static final String LOG_TAG = RippleDrawable.class.getSimpleName();
     private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
     private static final PorterDuffXfermode DST_ATOP = new PorterDuffXfermode(Mode.DST_ATOP);
     private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
@@ -88,17 +89,17 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     /** Current dirty bounds, union of current and previous drawing bounds. */
     private final Rect mDirtyBounds = new Rect();
 
-    private final TouchFeedbackState mState;
+    private final RippleState mState;
 
     /**
      * Lazily-created map of pending hotspot locations. These may be modified by
-     * calls to {@link #setHotspot(int, float, float)}.
+     * calls to {@link #setHotspot(float, float)}.
      */
     private SparseArray<PointF> mPendingHotspots;
 
     /**
      * Lazily-created map of active hotspot locations. These may be modified by
-     * calls to {@link #setHotspot(int, float, float)}.
+     * calls to {@link #setHotspot(float, float)}.
      */
     private SparseArray<Ripple> mActiveHotspots;
 
@@ -121,8 +122,18 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     /** Whether bounds are being overridden. */
     private boolean mOverrideBounds;
 
-    TouchFeedbackDrawable() {
-        this(new TouchFeedbackState(null, null, null), null, null);
+    RippleDrawable() {
+        this(new RippleState(null, null, null), null, null);
+    }
+
+    @Override
+    public void setAlpha(int alpha) {
+        
+    }
+
+    @Override
+    public void setColorFilter(ColorFilter cf) {
+        
     }
 
     @Override
@@ -233,7 +244,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(
-                r, theme, attrs, R.styleable.TouchFeedbackDrawable);
+                r, theme, attrs, R.styleable.RippleDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
 
@@ -267,22 +278,22 @@ public class TouchFeedbackDrawable extends LayerDrawable {
      * Initializes the constant state from the values in the typed array.
      */
     private void updateStateFromTypedArray(TypedArray a) {
-        final TouchFeedbackState state = mState;
+        final RippleState state = mState;
 
         // Extract the theme attributes, if any.
         state.mTouchThemeAttrs = a.extractThemeAttrs();
 
-        final ColorStateList tint = a.getColorStateList(R.styleable.TouchFeedbackDrawable_tint);
+        final ColorStateList tint = a.getColorStateList(R.styleable.RippleDrawable_tint);
         if (tint != null) {
             mState.mTint = tint;
         }
 
-        final int tintMode = a.getInt(R.styleable.TouchFeedbackDrawable_tintMode, -1);
+        final int tintMode = a.getInt(R.styleable.RippleDrawable_tintMode, -1);
         if (tintMode != -1) {
             mState.setTintMode(Drawable.parseTintMode(tintMode, Mode.SRC_ATOP));
         }
 
-        mState.mPinned = a.getBoolean(R.styleable.TouchFeedbackDrawable_pinned, mState.mPinned);
+        mState.mPinned = a.getBoolean(R.styleable.RippleDrawable_pinned, mState.mPinned);
     }
 
     /**
@@ -301,13 +312,13 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     public void applyTheme(Theme t) {
         super.applyTheme(t);
 
-        final TouchFeedbackState state = mState;
+        final RippleState state = mState;
         if (state == null || state.mTouchThemeAttrs == null) {
             return;
         }
 
         final TypedArray a = t.resolveAttributes(state.mTouchThemeAttrs,
-                R.styleable.TouchFeedbackDrawable);
+                R.styleable.RippleDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
     }
@@ -318,17 +329,14 @@ public class TouchFeedbackDrawable extends LayerDrawable {
     }
 
     @Override
-    public boolean supportsHotspots() {
-        return true;
-    }
-
-    @Override
-    public void setHotspot(int id, float x, float y) {
+    public void setHotspot(float x, float y) {
         if (mState.mPinned && !circleContains(mHotspotBounds, x, y)) {
             x = mHotspotBounds.exactCenterX();
             y = mHotspotBounds.exactCenterY();
         }
 
+        // TODO: We should only have a single pending/active hotspot.
+        final int id = R.attr.state_pressed;
         final int[] stateSet = getState();
         if (!Arrays.contains(stateSet, id)) {
             // The hotspot is not active, so just modify the pending location.
@@ -423,8 +431,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         mActiveHotspots.put(id, newRipple);
     }
 
-    @Override
-    public void removeHotspot(int id) {
+    private void removeHotspot(int id) {
         if (mActiveHotspots == null) {
             return;
         }
@@ -437,8 +444,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
     }
 
-    @Override
-    public void clearHotspots() {
+    private void clearHotspots() {
         if (mActiveHotspots != null) {
             mActiveHotspots.clear();
         }
@@ -632,7 +638,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         return mState;
     }
 
-    static class TouchFeedbackState extends LayerState {
+    static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
         ColorStateList mTint = null;
         PorterDuffXfermode mTintXfermode = SRC_ATOP;
@@ -640,8 +646,8 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         Drawable mMask;
         boolean mPinned = false;
 
-        public TouchFeedbackState(
-                TouchFeedbackState orig, TouchFeedbackDrawable owner, Resources res) {
+        public RippleState(
+                RippleState orig, RippleDrawable owner, Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
@@ -655,7 +661,7 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
 
         public void setTintMode(Mode mode) {
-            final Mode invertedMode = TouchFeedbackState.invertPorterDuffMode(mode);
+            final Mode invertedMode = RippleState.invertPorterDuffMode(mode);
             mTintXfermodeInverse = new PorterDuffXfermode(invertedMode);
             mTintXfermode = new PorterDuffXfermode(mode);
         }
@@ -675,17 +681,17 @@ public class TouchFeedbackDrawable extends LayerDrawable {
 
         @Override
         public Drawable newDrawable() {
-            return new TouchFeedbackDrawable(this, null, null);
+            return new RippleDrawable(this, null, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new TouchFeedbackDrawable(this, res, null);
+            return new RippleDrawable(this, res, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res, Theme theme) {
-            return new TouchFeedbackDrawable(this, res, theme);
+            return new RippleDrawable(this, res, theme);
         }
 
         /**
@@ -716,20 +722,20 @@ public class TouchFeedbackDrawable extends LayerDrawable {
         }
     }
 
-    private TouchFeedbackDrawable(TouchFeedbackState state, Resources res, Theme theme) {
+    private RippleDrawable(RippleState state, Resources res, Theme theme) {
         boolean needsTheme = false;
 
-        final TouchFeedbackState ns;
+        final RippleState ns;
         if (theme != null && state != null && state.canApplyTheme()) {
-            ns = new TouchFeedbackState(state, this, res);
+            ns = new RippleState(state, this, res);
             needsTheme = true;
         } else if (state == null) {
-            ns = new TouchFeedbackState(null, this, res);
+            ns = new RippleState(null, this, res);
         } else {
             // We always need a new state since child drawables contain local
             // state but live within the parent's constant state.
             // TODO: Move child drawables into local state.
-            ns = new TouchFeedbackState(state, this, res);
+            ns = new RippleState(state, this, res);
         }
 
         if (res != null) {

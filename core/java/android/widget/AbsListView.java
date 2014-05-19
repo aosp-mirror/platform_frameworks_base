@@ -2502,22 +2502,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         positionSelector(position, sel);
 
         final Drawable selector = mSelector;
-        if (selector != null && selector.supportsHotspots() && position != INVALID_POSITION) {
+        if (selector != null && position != INVALID_POSITION) {
             final Rect bounds = mSelectorRect;
             final float x = bounds.exactCenterX();
             final float y = bounds.exactCenterY();
-            selector.setHotspot(R.attr.state_focused, x, y);
+            selector.setHotspot(x, y);
         }
     }
 
     void positionSelector(int position, View sel) {
         if (position != INVALID_POSITION) {
-            if (mSelectorPosition != position) {
-                final Drawable selector = mSelector;
-                if (selector != null && selector.supportsHotspots()) {
-                    selector.clearHotspots();
-                }
-            }
             mSelectorPosition = position;
         }
 
@@ -3245,9 +3239,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     ((TransitionDrawable) d).resetTransition();
                                 }
                             }
-                            if (d.supportsHotspots()) {
-                                d.setHotspot(R.attr.state_pressed, x, y);
-                            }
+                            d.setHotspot(x, y);
                         }
 
                         if (longClickable) {
@@ -3783,9 +3775,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 if (d != null && d instanceof TransitionDrawable) {
                                     ((TransitionDrawable) d).resetTransition();
                                 }
-                                if (mSelector.supportsHotspots()) {
-                                    mSelector.setHotspot(R.attr.state_pressed, x, ev.getY());
-                                }
+                                mSelector.setHotspot(x, ev.getY());
                             }
                             if (mTouchModeReset != null) {
                                 removeCallbacks(mTouchModeReset);
@@ -3797,9 +3787,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
                                     setPressed(false);
-                                    if (mSelector != null && mSelector.supportsHotspots()) {
-                                        mSelector.removeHotspot(R.attr.state_pressed);
-                                    }
                                     if (!mDataChanged && !mIsDetaching && isAttachedToWindow()) {
                                         performClick.run();
                                     }
