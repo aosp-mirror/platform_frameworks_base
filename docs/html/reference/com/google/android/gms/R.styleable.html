@@ -75,6 +75,13 @@
 
 
 
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -87,7 +94,9 @@
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
-href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+href="//fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
+  title="roboto">
 <link href="/assets/css/default.css" rel="stylesheet" type="text/css">
 
 
@@ -114,56 +123,63 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   })();
 </script>
 </head>
+
 <body class="gc-documentation google
   develop" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
+
 <a name="top"></a>
 
-    <!-- Header -->
+  <!-- Header -->
+  <div id="header-wrapper">
     <div id="header">
-        <div class="wrap" id="header-wrap">
-          <div class="col-3 logo">
+      <div class="wrap" id="header-wrap">
+        <div class="col-3 logo">
           <a href="/index.html">
-            <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
+            <img src="/assets/images/dac_logo.png"
+                srcset="/assets/images/dac_logo@2x.png 2x"
+                width="123" height="25" alt="Android Developers" />
           </a>
           <div class="btn-quicknav" id="btn-quicknav">
-          	<a href="#" class="arrow-inactive">Quicknav</a>
-			      <a href="#" class="arrow-active">Quicknav</a>
+            <a href="#" class="arrow-inactive">Quicknav</a>
+            <a href="#" class="arrow-active">Quicknav</a>
           </div>
-          </div>
-            <ul class="nav-x col-9">
-                <li class="design">
-                  <a href="/design/index.html"
-                  zh-tw-lang="設計"
-                  zh-cn-lang="设计"
-                  ru-lang="Проектирование"
-                  ko-lang="디자인"
-                  ja-lang="設計"
-                  es-lang="Diseñar"               
-                  >Design</a></li>
-                <li class="develop"><a href="/develop/index.html"
-                  zh-tw-lang="開發"
-                  zh-cn-lang="开发"
-                  ru-lang="Разработка"
-                  ko-lang="개발"
-                  ja-lang="開発"
-                  es-lang="Desarrollar"               
-                  >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html"
-                  zh-tw-lang="發佈"
-                  zh-cn-lang="分发"
-                  ru-lang="Распространение"
-                  ko-lang="배포"
-                  ja-lang="配布"
-                  es-lang="Distribuir"               
-                  >Distribute</a></li>
-            </ul>
-            
-            <!-- New Search -->
-            <div class="menu-container">
-            <div class="moremenu">
+        </div>
+        <ul class="nav-x col-9">
+            <li class="design">
+              <a href="/design/index.html"
+              zh-tw-lang="設計"
+              zh-cn-lang="设计"
+              ru-lang="Проектирование"
+              ko-lang="디자인"
+              ja-lang="設計"
+              es-lang="Diseñar"
+              >Design</a></li>
+            <li class="develop"><a href="/develop/index.html"
+              zh-tw-lang="開發"
+              zh-cn-lang="开发"
+              ru-lang="Разработка"
+              ko-lang="개발"
+              ja-lang="開発"
+              es-lang="Desarrollar"
+              >Develop</a></li>
+            <li class="distribute last"><a href="/distribute/index.html"
+              zh-tw-lang="發佈"
+              zh-cn-lang="分发"
+              ru-lang="Распространение"
+              ko-lang="배포"
+              ja-lang="配布"
+              es-lang="Distribuir"
+              >Distribute</a></li>
+        </ul>
+
+
+
+
+<div class="menu-container">
+  <div class="moremenu">
     <div id="more-btn"></div>
   </div>
   <div class="morehover" id="moremenu">
@@ -171,7 +187,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
     <div class="mid">
       <div class="header">Links</div>
       <ul>
-        <li><a href="https://play.google.com/apps/publish/">Google Play Developer Console</a></li>
+        <li><a href="https://play.google.com/apps/publish/" target="_googleplay">Google Play Developer Console</a></li>
         <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
         <li><a href="/about/index.html">About Android</a></li>
       </ul>
@@ -181,7 +197,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li class="active"><a>Android Developers</a></li>
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
-      
+
       
       
         <div class="header">Language</div>
@@ -203,28 +219,27 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         </script>
       
       
-
-
       <br class="clearfix" />
-    </div>
+    </div><!-- end 'mid' -->
     <div class="bottom"></div>
-  </div>
+  </div><!-- end 'moremenu' -->
+
   <div class="search" id="search-container">
     <div class="search-inner">
       <div id="search-btn"></div>
       <div class="left"></div>
       <form onsubmit="return submit_search()">
         <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
-onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
-onkeydown="return search_changed(event, true, '/')" 
-onkeyup="return search_changed(event, false, '/')" />
+          onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
+          onkeydown="return search_changed(event, true, '/')"
+          onkeyup="return search_changed(event, false, '/')" />
       </form>
       <div class="right"></div>
-        <a class="close hide">close</a>
-        <div class="left"></div>
-        <div class="right"></div>
-    </div>
-  </div>
+      <a class="close hide">close</a>
+      <div class="left"></div>
+      <div class="right"></div>
+    </div><!-- end search-inner -->
+  </div><!-- end search-container -->
 
   <div class="search_filtered_wrapper reference">
     <div class="suggest-card reference no-display">
@@ -254,92 +269,83 @@ onkeyup="return search_changed(event, false, '/')" />
       </ul>
     </div>
   </div>
+</div><!-- end menu-container (search and menu widget) -->
 
-  </div>
-  <!-- /New Search>
-          
-          
-          <!-- Expanded quicknav -->
-           <div id="quicknav" class="col-9">
-                <ul>
-                    <li class="design">
-                      <ul>
-                        <li><a href="/design/index.html">Get Started</a></li>
-                        <li><a href="/design/style/index.html">Style</a></li>
-                        <li><a href="/design/patterns/index.html">Patterns</a></li>
-                        <li><a href="/design/building-blocks/index.html">Building Blocks</a></li>
-                        <li><a href="/design/downloads/index.html">Downloads</a></li>
-                        <li><a href="/design/videos/index.html">Videos</a></li>
-                      </ul>
-                    </li>
-                    <li class="develop">
-                      <ul>
-                        <li><a href="/training/index.html"
-                          zh-tw-lang="訓練課程"
-                          zh-cn-lang="培训"
-                          ru-lang="Курсы"
-                          ko-lang="교육"
-                          ja-lang="トレーニング"
-                          es-lang="Capacitación"               
-                          >Training</a></li>
-                        <li><a href="/guide/index.html"
-                          zh-tw-lang="API 指南"
-                          zh-cn-lang="API 指南"
-                          ru-lang="Руководства по API"
-                          ko-lang="API 가이드"
-                          ja-lang="API ガイド"
-                          es-lang="Guías de la API"               
-                          >API Guides</a></li>
-                        <li><a href="/reference/packages.html"
-                          zh-tw-lang="參考資源"
-                          zh-cn-lang="参考"
-                          ru-lang="Справочник"
-                          ko-lang="참조문서"
-                          ja-lang="リファレンス"
-                          es-lang="Referencia"               
-                          >Reference</a></li>
-                        <li><a href="/tools/index.html"
-                          zh-tw-lang="相關工具"
-                          zh-cn-lang="工具"
-                          ru-lang="Инструменты"
-                          ko-lang="도구"
-                          ja-lang="ツール"
-                          es-lang="Herramientas"               
-                          >Tools</a>
-                          <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
-                        </li>
-                        <li><a href="/google/index.html">Google Services</a>
-                        </li>
-                        
-                          <li><a href="/samples/index.html">Samples</a>
-                          </li>
-                        
-                      </ul>
-                    </li>
-                    <li class="distribute last">
-                      <ul>
-                        <li><a href="/distribute/index.html">Google Play</a></li>
-                        <li><a href="/distribute/googleplay/publish/index.html">Publishing</a></li>
-                        <li><a href="/distribute/googleplay/promote/index.html">Promoting</a></li>
-                        <li><a href="/distribute/googleplay/quality/index.html">App Quality</a></li>
-                        <li><a href="/distribute/googleplay/spotlight/index.html">Spotlight</a></li>
-                        <li><a href="/distribute/open.html">Open Distribution</a></li>
-                      </ul>
-                    </li>
-                </ul>
-          </div>
-          <!-- /Expanded quicknav -->
-        </div>
-    </div>
-    <!-- /Header -->
-    
-    
-  <div id="searchResults" class="wrap" style="display:none;">
-          <h2 id="searchTitle">Results</h2>
-          <div id="leftSearchControl" class="search-control">Loading...</div>
-  </div>
-    
-    
+
+
+        <!-- Expanded quicknav -->
+        <div id="quicknav" class="col-9">
+          <ul>
+            <li class="design">
+              <ul>
+                <li><a href="/design/index.html">Get Started</a></li>
+                <li><a href="/design/style/index.html">Style</a></li>
+                <li><a href="/design/patterns/index.html">Patterns</a></li>
+                <li><a href="/design/building-blocks/index.html">Building Blocks</a></li>
+                <li><a href="/design/downloads/index.html">Downloads</a></li>
+                <li><a href="/design/videos/index.html">Videos</a></li>
+              </ul>
+            </li>
+            <li class="develop">
+              <ul>
+                <li><a href="/training/index.html"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
+                  ru-lang="Курсы"
+                  ko-lang="교육"
+                  ja-lang="トレーニング"
+                  es-lang="Capacitación"
+                  >Training</a></li>
+                <li><a href="/guide/index.html"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
+                  ru-lang="Руководства по API"
+                  ko-lang="API 가이드"
+                  ja-lang="API ガイド"
+                  es-lang="Guías de la API"
+                  >API Guides</a></li>
+                <li><a href="/reference/packages.html"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
+                  ru-lang="Справочник"
+                  ko-lang="참조문서"
+                  ja-lang="リファレンス"
+                  es-lang="Referencia"
+                  >Reference</a></li>
+                <li><a href="/tools/index.html"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
+                  ru-lang="Инструменты"
+                  ko-lang="도구"
+                  ja-lang="ツール"
+                  es-lang="Herramientas"
+                  >Tools</a>
+                  <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
+                </li>
+                <li><a href="/google/index.html">Google Services</a>
+                </li>
+
+                  <li><a href="/samples/index.html">Samples</a>
+                  </li>
+
+              </ul>
+            </li>
+            <li class="distribute last">
+              <ul>
+                <li><a href="/distribute/googleplay/index.html">Google Play</a></li>
+                <li><a href="/distribute/essentials/index.html">Essentials</a></li>
+                <li><a href="/distribute/users/index.html">Get Users</a></li>
+                <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
+                <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
+                <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!-- /Expanded quicknav -->
+      </div><!-- end header-wrap.wrap -->
+    </div><!-- end header -->
+
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
@@ -351,7 +357,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
-                  es-lang="Capacitación"               
+                  es-lang="Capacitación"
                   >Training</a></li>
                 <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
@@ -359,7 +365,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
-                  es-lang="Guías de la API"               
+                  es-lang="Guías de la API"
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
                   zh-tw-lang="參考資源"
@@ -367,7 +373,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
-                  es-lang="Referencia"               
+                  es-lang="Referencia"
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
                   zh-tw-lang="相關工具"
@@ -387,22 +393,36 @@ onkeyup="return search_changed(event, false, '/')" />
                 
             </ul>
         </div>
-        
     </div>
     <!-- /Sendondary x-nav -->
-  
-
-
-
 
   
+
+    <div id="searchResults" class="wrap" style="display:none;">
+      <h2 id="searchTitle">Results</h2>
+      <div id="leftSearchControl" class="search-control">Loading...</div>
+    </div>
+  </div> <!--end header-wrapper -->
+
+  <div id="sticky-header">
+    <div>
+      <a class="logo" href="#top"></a>
+      <a class="top" href="#top"></a>
+      <ul class="breadcrumb">
+
+        <li class="current">R.styleable</li>
+      </ul>
+    </div>
+  </div>
+
+
+
 
 
   
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
-<a class="totop" href="#top" data-g-event="left-nav-top">to top</a>
 
 
 
@@ -934,7 +954,7 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">GlobalSearch_searchLabel</a></td>
-        <td class="jd-descrcol" width="100%"><p>A localized string to identify this apps data within the global search app.</td>
+        <td class="jd-descrcol" width="100%"><p>A localized string to identify this app's data within the global search app.</td>
     </tr>
     
     
@@ -945,6 +965,51 @@ Summary:
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">IMECorpus_inputEnabled</a></td>
+        <td class="jd-descrcol" width="100%"><p>Whether or not this corpus could be useful input for IME.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">IMECorpus_sourceClass</a></td>
+        <td class="jd-descrcol" width="100%"><p>Class of the source.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">IMECorpus_toAddressesSection</a></td>
+        <td class="jd-descrcol" width="100%"><p>Sections containing entities communicated with in a given document.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">IMECorpus_userInputSection</a></td>
+        <td class="jd-descrcol" width="100%"><p>If this section is non-empty, the document is considered to be input by the user if
+        either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
+        value.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">IMECorpus_userInputTag</a></td>
+        <td class="jd-descrcol" width="100%"><p>Tag name for documents that contain data input by the user.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">IMECorpus_userInputValue</a></td>
+        <td class="jd-descrcol" width="100%"><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+        to be considered input by user.</td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraBearing">MapAttrs_cameraBearing</a></td>
@@ -1106,6 +1171,151 @@ Summary:
     </tr>
     
     
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">WalletFragmentOptions_environment</a></td>
+        <td class="jd-descrcol" width="100%"><p>Google Wallet environment to use
+
+
+          <p>Must be one of the following constant values.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">WalletFragmentOptions_fragmentMode</a></td>
+        <td class="jd-descrcol" width="100%"><p>Fragment mode
+
+
+          <p>Must be one of the following constant values.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">WalletFragmentOptions_fragmentStyle</a></td>
+        <td class="jd-descrcol" width="100%"><p>A style resource specifing attributes to customize the look and feel of WalletFragment
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_theme">WalletFragmentOptions_theme</a></td>
+        <td class="jd-descrcol" width="100%"><p>Theme to be used for the Wallet selector
+
+
+          <p>Must be one of the following constant values.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">WalletFragmentStyle_buyButtonAppearance</a></td>
+        <td class="jd-descrcol" width="100%"><p>Appearance of the buy button.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">WalletFragmentStyle_buyButtonHeight</a></td>
+        <td class="jd-descrcol" width="100%"><p>Height of the buy button.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonText">WalletFragmentStyle_buyButtonText</a></td>
+        <td class="jd-descrcol" width="100%"><p>Text on the buy button.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">WalletFragmentStyle_buyButtonWidth</a></td>
+        <td class="jd-descrcol" width="100%"><p>Width of the buy button.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsBackground">WalletFragmentStyle_maskedWalletDetailsBackground</a></td>
+        <td class="jd-descrcol" width="100%"><p>Masked wallet details background
+
+
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonBackground">WalletFragmentStyle_maskedWalletDetailsButtonBackground</a></td>
+        <td class="jd-descrcol" width="100%"><p>"Change" button background in masked wallet details view
+
+
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance">WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance</a></td>
+        <td class="jd-descrcol" width="100%"><p>TextAppearance for the "Change" button in masked wallet details view
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance">WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance</a></td>
+        <td class="jd-descrcol" width="100%"><p>TextAppearance for headers describing masked wallet details
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoImageType">WalletFragmentStyle_maskedWalletDetailsLogoImageType</a></td>
+        <td class="jd-descrcol" width="100%"><p>Type of the wallet logo image in masked wallet details view
+
+
+          <p>Must be one of the following constant values.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoTextColor">WalletFragmentStyle_maskedWalletDetailsLogoTextColor</a></td>
+        <td class="jd-descrcol" width="100%"><p>Color of the Google Wallet logo text in masked wallet details view
+
+
+          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsTextAppearance">WalletFragmentStyle_maskedWalletDetailsTextAppearance</a></td>
+        <td class="jd-descrcol" width="100%"><p>TextAppearance for masked wallet details
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+    </tr>
+
+
 
 </table>
 
@@ -1207,12 +1417,24 @@ Summary:
           static
           final
           int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus">IMECorpus</a></td>
+          <td class="jd-descrcol" width="100%">Each <code>Corpus</code> element should include a <code>IMECorpus</code> element if the
+    corpus is to be used for IME input.</td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></td>
           <td class="jd-descrcol" width="100%">Attributes that can be used with a MapAttrs.</td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1223,7 +1445,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1234,6 +1456,45 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions">WalletFragmentOptions</a></td>
+          <td class="jd-descrcol" width="100%">Attributes for the WalletFragment &lt;fragment&gt; tag
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">com.google.android.gms:environment</a></code></code></td><td> Google Wallet environment to use </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">com.google.android.gms:fragmentMode</a></code></code></td><td> Fragment mode </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">com.google.android.gms:fragmentStyle</a></code></code></td><td> A style resource specifing attributes to customize the look and feel of WalletFragment </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_theme">com.google.android.gms:theme</a></code></code></td><td> Theme to be used for the Wallet selector </td></tr>
+           </table></td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle">WalletFragmentStyle</a></td>
+          <td class="jd-descrcol" width="100%">Attributes that may be specified in a style resource to customize the look and feel of
+         WalletFragment
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">com.google.android.gms:buyButtonAppearance</a></code></code></td><td> Appearance of the buy button.</td>
+      </tr>
+
+
 
 </table>
 
@@ -1970,7 +2231,7 @@ containing a value of this type.
       element did not exist. 
  Allow shortcuts to global search results from this corpus to be created. If set to
       <code>true</code>, the global search app may allow the user to create shortcuts to results, for
-      example on the users home screen. The short cuts may be long lived, and may persist after the
+      example on the users home screen. The shortcuts may be long lived, and may persist after the
       linked document has been deleted. The activity that handles the global search result intent
       should be able to deal with this gracefully. Defaults to <code>false</code>. 
 
@@ -2317,7 +2578,7 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>A localized string to identify this apps data within the global search app. Required. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>A localized string to identify this app's data within the global search app. Required.
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2383,6 +2644,298 @@ containing a value of this type.
             
                 2
                 (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_inputEnabled"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        IMECorpus_inputEnabled
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not this corpus could be useful input for IME. Optional; defaults to
+        <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>IMECorpus</code>
+        element did not exist.
+
+
+          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_sourceClass"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        IMECorpus_sourceClass
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Class of the source. One of the following: email, contact, and instant-message.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>email</code></td><td>0</td><td></td></tr>
+<tr><td><code>contact</code></td><td>1</td><td></td></tr>
+<tr><td><code>instant_message</code></td><td>2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                1
+                (0x00000001)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_toAddressesSection"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        IMECorpus_toAddressesSection
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>Sections containing entities communicated with in a given document.
+        Entities can be names, email addresses or phone numbers.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                5
+                (0x00000005)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_userInputSection"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        IMECorpus_userInputSection
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>If this section is non-empty, the document is considered to be input by the user if
+        either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
+        value.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                3
+                (0x00000003)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_userInputTag"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        IMECorpus_userInputTag
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>Tag name for documents that contain data input by the user. Optional.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                2
+                (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus_userInputValue"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        IMECorpus_userInputValue
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+        to be considered input by user.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                4
+                (0x00000004)
             
         </span>
         </div>
@@ -2664,17 +3217,17 @@ containing a value of this type.</p></div>
 <tr><td><code>hybrid</code></td><td>4</td><td></td></tr>
 </table></p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 0
                 (0x00000000)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2682,24 +3235,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_uiCompass"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_uiCompass
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2765,10 +3318,10 @@ containing a value of this type.</p></div>
             
                 7
                 (0x00000007)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2776,24 +3329,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_uiScrollGestures"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_uiScrollGestures
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2805,17 +3358,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 8
                 (0x00000008)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2823,24 +3376,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_uiTiltGestures"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_uiTiltGestures
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2852,17 +3405,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 9
                 (0x00000009)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2870,24 +3423,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_uiZoomControls"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_uiZoomControls
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2899,17 +3452,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 10
                 (0x0000000a)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2917,24 +3470,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_uiZoomGestures"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_uiZoomGestures
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2946,17 +3499,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 11
                 (0x0000000b)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2964,24 +3517,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_useViewLifecycle"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_useViewLifecycle
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -2993,17 +3546,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 12
                 (0x0000000c)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3011,24 +3564,24 @@ containing a value of this type.</p></div>
 
 <A NAME="MapAttrs_zOrderOnTop"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MapAttrs_zOrderOnTop
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3040,17 +3593,17 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 13
                 (0x0000000d)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3058,25 +3611,25 @@ containing a value of this type.</p></div>
 
 <A NAME="SectionFeature_featureType"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         SectionFeature_featureType
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>The type of this feature. Required. 
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>The type of this feature. Required.
 
 
           <p>Must be one of the following constant values.</p>
@@ -3092,11 +3645,604 @@ containing a value of this type.</p></div>
 </table>
           <p>This is a private symbol.</p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_indexPrefixes"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_indexPrefixes
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should support prefix matching. Optional; defaults to
+      <code>false</code>.
+
+
+          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                4
+                (0x00000004)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_noIndex"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_noIndex
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should not be indexed. Optional; defaults to <code>false</code>.
+
+
+          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                2
+                (0x00000002)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_sectionFormat"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_sectionFormat
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>The format of the section. Optional; default to <code>plain</code>.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>plain</code></td><td>0</td><td></td></tr>
+<tr><td><code>html</code></td><td>1</td><td></td></tr>
+<tr><td><code>rfc822</code></td><td>2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_sectionId"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_sectionId
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>The ID of the section. Required. This string must not change between configurations.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_sectionWeight"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_sectionWeight
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>The weight of the section. Optional; defaults to 1.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                3
+                (0x00000003)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="Section_subsectionSeparator"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_subsectionSeparator
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Subsection separator. Optional. If not provided, the section is not split into
+      subsections.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                5
+                (0x00000005)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentOptions_environment"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentOptions_environment
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Google Wallet environment to use
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>production</code></td><td>1</td><td></td></tr>
+<tr><td><code>sandbox</code></td><td>0</td><td></td></tr>
+<tr><td><code>strict_sandbox</code></td><td>2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentOptions_fragmentMode"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentOptions_fragmentMode
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Fragment mode
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>buyButton</code></td><td>1</td><td></td></tr>
+<tr><td><code>selectionDetails</code></td><td>2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                3
+                (0x00000003)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentOptions_fragmentStyle"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentOptions_fragmentStyle
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>A style resource specifing attributes to customize the look and feel of WalletFragment
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                2
+                (0x00000002)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentOptions_theme"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentOptions_theme
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Theme to be used for the Wallet selector
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>holo_dark</code></td><td>0</td><td></td></tr>
+<tr><td><code>holo_light</code></td><td>1</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_buyButtonAppearance"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentStyle_buyButtonAppearance
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Appearance of the buy button. Must be one of "classic", "grayscale" and "monochrome"
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>classic</code></td><td>1</td><td></td></tr>
+<tr><td><code>grayscale</code></td><td>2</td><td></td></tr>
+<tr><td><code>monochrome</code></td><td>3</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                3
+                (0x00000003)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_buyButtonHeight"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        WalletFragmentStyle_buyButtonHeight
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Height of the buy button. This includes an 8dp padding (4dp on each side) used for
+             pressed and focused states of the button. The value can be a specific height, e.g.
+             "48dp", or special values "match_parent" and "wrap_content".
+
+
+          <p>May be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+<p>May be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>match_parent</code></td><td>-1</td><td></td></tr>
+<tr><td><code>wrap_content</code></td><td>-2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
                 0
                 (0x00000000)
             
@@ -3108,7 +4254,7 @@ containing a value of this type.</p></div>
 
 
 
-<A NAME="Section_indexPrefixes"></A>
+<A NAME="WalletFragmentStyle_buyButtonText"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3118,7 +4264,7 @@ containing a value of this type.</p></div>
         final 
         int
       </span>
-        Section_indexPrefixes
+        WalletFragmentStyle_buyButtonText
     </h4>
       <div class="api-level">
         
@@ -3128,63 +4274,19 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should support prefix matching. Optional; defaults to
-      <code>false</code>. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>Text on the buy button. Must be one of "buy_with_google", "buy_now" and "book_now"
 
 
-          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-          <p>This is a private symbol.</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                4
-                (0x00000004)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="Section_noIndex"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        Section_noIndex
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should not be indexed. Optional; defaults to <code>false</code>. 
-
-
-          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>buy_with_google</code></td><td>1</td><td></td></tr>
+<tr><td><code>buy_now</code></td><td>2</td><td></td></tr>
+<tr><td><code>book_now</code></td><td>3</td><td></td></tr>
+</table>
           <p>This is a private symbol.</p></div>
 
     
@@ -3203,7 +4305,7 @@ containing a value of this type.
 
 
 
-<A NAME="Section_sectionFormat"></A>
+<A NAME="WalletFragmentStyle_buyButtonWidth"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3213,7 +4315,7 @@ containing a value of this type.
         final 
         int
       </span>
-        Section_sectionFormat
+        WalletFragmentStyle_buyButtonWidth
     </h4>
       <div class="api-level">
         
@@ -3223,18 +4325,27 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>The format of the section. Optional; default to <code>plain</code>. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>Width of the buy button. This includes an 8dp padding (4dp on each side) used for
+             pressed and focused states of the button. The value can be a specific width, e.g.
+             "300dp", or special values "match_parent" and "wrap_content".
 
 
-          <p>Must be one of the following constant values.</p>
+          <p>May be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+<p>May be one of the following constant values.</p>
 <table>
 <colgroup align="left" />
 <colgroup align="left" />
 <colgroup align="left" />
 <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>plain</code></td><td>0</td><td></td></tr>
-<tr><td><code>html</code></td><td>1</td><td></td></tr>
-<tr><td><code>rfc822</code></td><td>2</td><td></td></tr>
+<tr><td><code>match_parent</code></td><td>-1</td><td></td></tr>
+<tr><td><code>wrap_content</code></td><td>-2</td><td></td></tr>
 </table>
           <p>This is a private symbol.</p></div>
 
@@ -3254,7 +4365,7 @@ containing a value of this type.
 
 
 
-<A NAME="Section_sectionId"></A>
+<A NAME="WalletFragmentStyle_maskedWalletDetailsBackground"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3264,7 +4375,7 @@ containing a value of this type.
         final 
         int
       </span>
-        Section_sectionId
+        WalletFragmentStyle_maskedWalletDetailsBackground
     </h4>
       <div class="api-level">
         
@@ -3274,15 +4385,13 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>The ID of the section. Required. This string must not change between configurations. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>Masked wallet details background
 
 
-          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           <p>This is a private symbol.</p></div>
 
     
@@ -3290,8 +4399,8 @@ containing a value of this type.
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                0
-                (0x00000000)
+                6
+                (0x00000006)
             
         </span>
         </div>
@@ -3301,7 +4410,7 @@ containing a value of this type.
 
 
 
-<A NAME="Section_sectionWeight"></A>
+<A NAME="WalletFragmentStyle_maskedWalletDetailsButtonBackground"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3311,7 +4420,7 @@ containing a value of this type.
         final 
         int
       </span>
-        Section_sectionWeight
+        WalletFragmentStyle_maskedWalletDetailsButtonBackground
     </h4>
       <div class="api-level">
         
@@ -3321,15 +4430,13 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>The weight of the section. Optional; defaults to 1. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>"Change" button background in masked wallet details view
 
 
-          <p>Must be an integer value, such as "<code>100</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           <p>This is a private symbol.</p></div>
 
     
@@ -3337,8 +4444,8 @@ containing a value of this type.
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                3
-                (0x00000003)
+                8
+                (0x00000008)
             
         </span>
         </div>
@@ -3348,7 +4455,7 @@ containing a value of this type.
 
 
 
-<A NAME="Section_subsectionSeparator"></A>
+<A NAME="WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3358,7 +4465,7 @@ containing a value of this type.
         final 
         int
       </span>
-        Section_subsectionSeparator
+        WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance
     </h4>
       <div class="api-level">
         
@@ -3368,16 +4475,54 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>Subsection separator. Optional. If not provided, the section is not split into
-      subsections. 
+  <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for the "Change" button in masked wallet details view
 
 
-          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                7
+                (0x00000007)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for headers describing masked wallet details
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
           <p>This is a private symbol.</p></div>
 
     
@@ -3387,6 +4532,147 @@ containing a value of this type.
             
                 5
                 (0x00000005)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_maskedWalletDetailsLogoImageType"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        WalletFragmentStyle_maskedWalletDetailsLogoImageType
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>Type of the wallet logo image in masked wallet details view
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>classic</code></td><td>1</td><td></td></tr>
+<tr><td><code>monochrome</code></td><td>2</td><td></td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                10
+                (0x0000000a)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_maskedWalletDetailsLogoTextColor"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        WalletFragmentStyle_maskedWalletDetailsLogoTextColor
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>Color of the Google Wallet logo text in masked wallet details view
+
+
+          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                9
+                (0x00000009)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle_maskedWalletDetailsTextAppearance"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        WalletFragmentStyle_maskedWalletDetailsTextAppearance
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for masked wallet details
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                4
+                (0x00000004)
             
         </span>
         </div>
@@ -3611,7 +4897,7 @@ containing a value of this type.
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentActivity">com.google.android.gms:defaultIntentActivity</a></code></code></td><td> The default value for the global search section <code>default_intent_aactivity</code>.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentData">com.google.android.gms:defaultIntentData</a></code></code></td><td> The default value for the global search section <code>default_intent_data</code>.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchEnabled">com.google.android.gms:searchEnabled</a></code></code></td><td> Whether or not global search is enabled for this app.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">com.google.android.gms:searchLabel</a></code></code></td><td> A localized string to identify this apps data within the global search app.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">com.google.android.gms:searchLabel</a></code></code></td><td> A localized string to identify this app's data within the global search app.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_settingsDescription">com.google.android.gms:settingsDescription</a></code></code></td><td> A localized string to describe this apps data within the global search apps settings.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
@@ -3710,6 +4996,56 @@ containing a value of this type.
   </div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="IMECorpus"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int[]
+      </span>
+        IMECorpus
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Each <code>Corpus</code> element should include a <code>IMECorpus</code> element if the
+    corpus is to be used for IME input. This element contains several <code><a href="/">ERROR(/#IMESection)</a></code>
+    elements describing which sections should be included.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">com.google.android.gms:inputEnabled</a></code></code></td><td> Whether or not this corpus could be useful input for IME.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">com.google.android.gms:sourceClass</a></code></code></td><td> Class of the source.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">com.google.android.gms:toAddressesSection</a></code></code></td><td> Sections containing entities communicated with in a given document.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">com.google.android.gms:userInputSection</a></code></code></td><td> If this section is non-empty, the document is considered to be input by the user if
+        either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
+        value.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">com.google.android.gms:userInputTag</a></code></code></td><td> Tag name for documents that contain data input by the user.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">com.google.android.gms:userInputValue</a></code></code></td><td> If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+        to be considered input by user.</td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">IMECorpus_inputEnabled</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">IMECorpus_sourceClass</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">IMECorpus_toAddressesSection</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">IMECorpus_userInputSection</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">IMECorpus_userInputTag</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">IMECorpus_userInputValue</a></code></li>
+      </ul>
+  </div>
+
+
     </div>
 </div>
 
@@ -3852,6 +5188,100 @@ containing a value of this type.
   </div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentOptions"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int[]
+      </span>
+        WalletFragmentOptions
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes for the WalletFragment &lt;fragment&gt; tag
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">com.google.android.gms:environment</a></code></code></td><td> Google Wallet environment to use </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">com.google.android.gms:fragmentMode</a></code></code></td><td> Fragment mode </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">com.google.android.gms:fragmentStyle</a></code></code></td><td> A style resource specifing attributes to customize the look and feel of WalletFragment </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_theme">com.google.android.gms:theme</a></code></code></td><td> Theme to be used for the Wallet selector </td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">WalletFragmentOptions_environment</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">WalletFragmentOptions_fragmentMode</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">WalletFragmentOptions_fragmentStyle</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_theme">WalletFragmentOptions_theme</a></code></li>
+      </ul>
+  </div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="WalletFragmentStyle"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int[]
+      </span>
+        WalletFragmentStyle
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that may be specified in a style resource to customize the look and feel of
+         WalletFragment
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">com.google.android.gms:buyButtonAppearance</a></code></code></td><td> Appearance of the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">com.google.android.gms:buyButtonHeight</a></code></code></td><td> Height of the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonText">com.google.android.gms:buyButtonText</a></code></code></td><td> Text on the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">com.google.android.gms:buyButtonWidth</a></code></code></td><td> Width of the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsBackground">com.google.android.gms:maskedWalletDetailsBackground</a></code></code></td><td> Masked wallet details background </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonBackground">com.google.android.gms:maskedWalletDetailsButtonBackground</a></code></code></td><td> "Change" button background in masked wallet details view </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance">com.google.android.gms:maskedWalletDetailsButtonTextAppearance</a></code></code></td><td> TextAppearance for the "Change" button in masked wallet details view </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance">com.google.android.gms:maskedWalletDetailsHeaderTextAppearance</a></code></code></td><td> TextAppearance for headers describing masked wallet details </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoImageType">com.google.android.gms:maskedWalletDetailsLogoImageType</a></code></code></td><td> Type of the wallet logo image in masked wallet details view </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoTextColor">com.google.android.gms:maskedWalletDetailsLogoTextColor</a></code></code></td><td> Color of the Google Wallet logo text in masked wallet details view </td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsTextAppearance">com.google.android.gms:maskedWalletDetailsTextAppearance</a></code></code></td><td> TextAppearance for masked wallet details </td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">WalletFragmentStyle_buyButtonAppearance</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">WalletFragmentStyle_buyButtonHeight</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonText">WalletFragmentStyle_buyButtonText</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">WalletFragmentStyle_buyButtonWidth</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsBackground">WalletFragmentStyle_maskedWalletDetailsBackground</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonBackground">WalletFragmentStyle_maskedWalletDetailsButtonBackground</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance">WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance">WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoImageType">WalletFragmentStyle_maskedWalletDetailsLogoImageType</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoTextColor">WalletFragmentStyle_maskedWalletDetailsLogoTextColor</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsTextAppearance">WalletFragmentStyle_maskedWalletDetailsTextAppearance</a></code></li>
+      </ul>
+  </div>
+
+
     </div>
 </div>
 
