@@ -25,21 +25,26 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
- * A simple container for route information.
+ * Represents a network route.
  * <p>
  * This is used both to describe static network configuration and live network
- * configuration information.  In the static case the interface name (retrieved
- * via {@link #getInterface}) should be {@code null} as that information will not
- * yet be known.
+ * configuration information.
  *
- * A route may be configured with:
+ * A route contains three pieces of information:
  * <ul>
- * <li>a destination {@link LinkAddress} for directly-connected subnets,
- * <li>a gateway {@link InetAddress} for default routes,
- * <li>or both for a subnet.
+ * <li>a destination {@link LinkAddress} for directly-connected subnets.  If this is
+ *     {@code null} it indicates a default route of the address family (IPv4 or IPv6)
+ *     implied by the gateway IP address.
+ * <li>a gateway {@link InetAddress} for default routes.  If this is {@code null} it
+ *     indicates a directly-connected route.
+ * <li>an interface (which may be unspecified).
  * </ul>
+ * Either the destination or the gateway may be {@code null}, but not both.  If the
+ * destination and gateway are both specified, they must be of the same address family
+ * (IPv4 or IPv6).
  */
 public class RouteInfo implements Parcelable {
     /**
@@ -69,14 +74,12 @@ public class RouteInfo implements Parcelable {
      * if the gateway is an instance of {@link Inet4Address}, or the IPv6 default
      * route <code>::/0</code> if gateway is an instance of
      * {@link Inet6Address}.
-     *
+     * <p>
      * destination and gateway may not both be null.
      *
      * @param destination the destination prefix
      * @param gateway the IP address to route packets through
      * @param iface the interface name to send packets on
-     *
-     * @hide
      */
     public RouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
         if (destination == null) {
@@ -103,6 +106,12 @@ public class RouteInfo implements Parcelable {
 
         mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
                 destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
+        if ((destination.getAddress() instanceof Inet4Address &&
+                 (gateway instanceof Inet4Address == false)) ||
+                (destination.getAddress() instanceof Inet6Address &&
+                 (gateway instanceof Inet6Address == false))) {
+            throw new IllegalArgumentException("address family mismatch in RouteInfo constructor");
+        }
         mGateway = gateway;
         mInterface = iface;
         mIsDefault = isDefault();
@@ -138,10 +147,11 @@ public class RouteInfo implements Parcelable {
     /**
      * Constructs a {@code RouteInfo} object representing a direct connected subnet.
      *
-     * @param host the {@link LinkAddress} describing the address and prefix length of the subnet.
+     * @param destination the {@link LinkAddress} describing the address and prefix
+     *                    length of the subnet.
      */
-    public RouteInfo(LinkAddress host) {
-        this(host, null, null);
+    public RouteInfo(LinkAddress destination) {
+        this(destination, null, null);
     }
 
     /**
@@ -186,7 +196,7 @@ public class RouteInfo implements Parcelable {
     /**
      * Retrieves the destination address and prefix length in the form of a {@link LinkAddress}.
      *
-     * @return {@link LinkAddress} specifying the destination.
+     * @return {@link LinkAddress} specifying the destination.  This is never {@code null}.
      */
     public LinkAddress getDestination() {
         return mDestination;
@@ -195,15 +205,15 @@ public class RouteInfo implements Parcelable {
     /**
      * Retrieves the gateway or next hop {@link InetAddress} for this route.
      *
-     * @return {@link InetAddress} specifying the gateway or next hop.
+     * @return {@link InetAddress} specifying the gateway or next hop.  This may be
+     &                             {@code null} for a directly-connected route."
      */
     public InetAddress getGateway() {
         return mGateway;
     }
 
     /**
-     * Retrieves the interface used for this route, if known.  Note that for static
-     * network configurations, this won't be set.
+     * Retrieves the interface used for this route if specified, else {@code null}.
      *
      * @return The name of the interface used for this route.
      */
@@ -214,7 +224,7 @@ public class RouteInfo implements Parcelable {
     /**
      * Indicates if this route is a default route (ie, has no destination specified).
      *
-     * @return {@code true} if the destination is null or has a prefix length of 0.
+     * @return {@code true} if the destination has a prefix length of 0.
      */
     public boolean isDefaultRoute() {
         return mIsDefault;
@@ -224,6 +234,7 @@ public class RouteInfo implements Parcelable {
      * Indicates if this route is a host route (ie, matches only a single host address).
      *
      * @return {@code true} if the destination has a prefix length of 32/128 for v4/v6.
+     * @hide
      */
     public boolean isHostRoute() {
         return mIsHost;
@@ -234,15 +245,20 @@ public class RouteInfo implements Parcelable {
      * ({@code false}).
      *
      * @return {@code true} if a gateway is specified
+     * @hide
      */
     public boolean hasGateway() {
         return mHasGateway;
     }
 
     /**
-     * @hide
+     * Determines whether the destination and prefix of this route includes the specified
+     * address.
+     *
+     * @param destination A {@link InetAddress} to test to see if it would match this route.
+     * @return {@code true} if the destination and prefix length cover the given address.
      */
-    protected boolean matches(InetAddress destination) {
+    public boolean matches(InetAddress destination) {
         if (destination == null) return false;
 
         // match the route destination and destination with prefix length
@@ -293,20 +309,9 @@ public class RouteInfo implements Parcelable {
 
         RouteInfo target = (RouteInfo) obj;
 
-        boolean sameDestination = ( mDestination == null) ?
-                target.getDestination() == null
-                : mDestination.equals(target.getDestination());
-
-        boolean sameAddress = (mGateway == null) ?
-                target.getGateway() == null
-                : mGateway.equals(target.getGateway());
-
-        boolean sameInterface = (mInterface == null) ?
-                target.getInterface() == null
-                : mInterface.equals(target.getInterface());
-
-        return sameDestination && sameAddress && sameInterface
-                && mIsDefault == target.mIsDefault;
+        return Objects.equals(mDestination, target.getDestination()) &&
+                Objects.equals(mGateway, target.getGateway()) &&
+                Objects.equals(mInterface, target.getInterface());
     }
 
     public int hashCode() {

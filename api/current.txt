@@ -16065,6 +16065,7 @@ package android.net {
   }
 
   public class RouteInfo implements android.os.Parcelable {
+    ctor public RouteInfo(android.net.LinkAddress, java.net.InetAddress, java.lang.String);
     ctor public RouteInfo(android.net.LinkAddress, java.net.InetAddress);
     ctor public RouteInfo(java.net.InetAddress);
     ctor public RouteInfo(android.net.LinkAddress);
@@ -16072,9 +16073,8 @@ package android.net {
     method public android.net.LinkAddress getDestination();
     method public java.net.InetAddress getGateway();
     method public java.lang.String getInterface();
-    method public boolean hasGateway();
     method public boolean isDefaultRoute();
-    method public boolean isHostRoute();
+    method public boolean matches(java.net.InetAddress);
     method public void writeToParcel(android.os.Parcel, int);
   }
 
