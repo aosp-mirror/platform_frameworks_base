@@ -32,6 +32,9 @@ public final class WebViewFactory {
     private static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
 
+    private static final String NULL_WEBVIEW_FACTORY =
+            "com.android.webview.nullwebview.NullWebViewFactoryProvider";
+
     private static final String LOGTAG = "WebViewFactory";
 
     private static final boolean DEBUG = false;
@@ -112,6 +115,11 @@ public final class WebViewFactory {
     }
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
-        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
+        try {
+            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
+        } catch (ClassNotFoundException e) {
+            Log.e(LOGTAG, "Chromium WebView does not exist");
+            return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+        }
     }
 }
