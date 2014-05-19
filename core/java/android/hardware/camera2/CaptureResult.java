@@ -539,9 +539,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for
      * metering.</p>
-     * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
-     * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
@@ -557,8 +554,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
-    public static final Key<int[]> CONTROL_AE_REGIONS =
-            new Key<int[]>("android.control.aeRegions", int[].class);
+    public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AE_REGIONS =
+            new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.aeRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
     /**
      * <p>Range over which fps can be adjusted to
@@ -812,26 +809,23 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for focus
      * estimation.</p>
-     * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
-     * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
-     * <p>If all regions have 0 weight, then no specific focus area
-     * needs to be used by the camera device. If the focusing region is
-     * outside the the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture
-     * result metadata, the camera device will ignore the sections outside
-     * the region and output the used sections in the result metadata.</p>
+     * <p>If all regions have 0 weight, then no specific metering area
+     * needs to be used by the camera device. If the metering region is
+     * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
+     * the camera device will ignore the sections outside the region and output the
+     * used sections in the result metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
-    public static final Key<int[]> CONTROL_AF_REGIONS =
-            new Key<int[]>("android.control.afRegions", int[].class);
+    public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AF_REGIONS =
+            new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.afRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
     /**
      * <p>Whether the camera device will trigger autofocus for this request.</p>
@@ -1295,27 +1289,23 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for illuminant
      * estimation.</p>
-     * <p>Only used in AUTO mode.</p>
-     * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
-     * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
-     * <p>If all regions have 0 weight, then no specific auto-white balance (AWB) area
-     * needs to be used by the camera device. If the AWB region is
-     * outside the the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
+     * <p>If all regions have 0 weight, then no specific metering area
+     * needs to be used by the camera device. If the metering region is
+     * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
      * the camera device will ignore the sections outside the region and output the
      * used sections in the result metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
-    public static final Key<int[]> CONTROL_AWB_REGIONS =
-            new Key<int[]>("android.control.awbRegions", int[].class);
+    public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AWB_REGIONS =
+            new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.awbRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
     /**
      * <p>Information to the camera device 3A (auto-exposure,
