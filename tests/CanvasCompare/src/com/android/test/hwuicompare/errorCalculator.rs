@@ -5,8 +5,8 @@ int REGION_SIZE;
 int WIDTH;
 int HEIGHT;
 
-const uchar4 *ideal;
-const uchar4 *given;
+rs_allocation ideal;
+rs_allocation given;
 
 void countInterestingRegions(const int32_t *v_in, int32_t *v_out) {
     int y = v_in[0];
@@ -14,10 +14,10 @@ void countInterestingRegions(const int32_t *v_in, int32_t *v_out) {
 
     for (int x = 0; x < HEIGHT; x += REGION_SIZE) {
         bool interestingRegion = false;
-        int regionColor = (int)ideal[y * WIDTH + x];
+        int regionColor = (int) rsGetElementAt_uchar4(ideal, x, y);
         for (int i = 0; i < REGION_SIZE && !interestingRegion; i++) {
             for (int j = 0; j < REGION_SIZE && !interestingRegion; j++) {
-                interestingRegion |= (int)(ideal[(y + i) * WIDTH + (x + j)]) != regionColor;
+                interestingRegion |= ((int) rsGetElementAt_uchar4(ideal, x + j, y + i)) != regionColor;
             }
         }
         if (interestingRegion) {
@@ -31,8 +31,9 @@ void accumulateError(const int32_t *v_in, int32_t *v_out) {
     int error = 0;
     for (int y = startY; y < startY + REGION_SIZE; y++) {
         for (int x = 0; x < HEIGHT; x++) {
-            uchar4 idealPixel = ideal[y * WIDTH + x];
-            uchar4 givenPixel = given[y * WIDTH + x];
+            uchar4 idealPixel = rsGetElementAt_uchar4(ideal, x, y);
+            uchar4 givenPixel = rsGetElementAt_uchar4(given, x, y);
+
             error += abs(idealPixel.x - givenPixel.x);
             error += abs(idealPixel.y - givenPixel.y);
             error += abs(idealPixel.z - givenPixel.z);
@@ -43,8 +44,8 @@ void accumulateError(const int32_t *v_in, int32_t *v_out) {
 }
 
 void displayDifference(const uchar4 *v_in, uchar4 *v_out, uint32_t x, uint32_t y) {
-    float4 idealPixel = rsUnpackColor8888(ideal[y * WIDTH + x]);
-    float4 givenPixel = rsUnpackColor8888(given[y * WIDTH + x]);
+    float4 idealPixel = rsGetElementAt_float4(ideal, x, y);
+    float4 givenPixel = rsGetElementAt_float4(given, x, y);
 
     float4 diff = idealPixel - givenPixel;
     float totalDiff = diff.x + diff.y + diff.z + diff.w;

@@ -16,9 +16,6 @@
 
 package com.android.test.hwuicompare;
 
-import com.android.test.hwuicompare.R;
-import com.android.test.hwuicompare.ScriptC_errorCalculator;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -52,7 +49,6 @@ public class ErrorCalculator {
         int height = resources.getDimensionPixelSize(R.dimen.layer_height);
         mOutputRowRegions = new int[height / REGION_SIZE];
 
-/*
         mRS = RenderScript.create(c);
         int[] rowIndices = new int[height / REGION_SIZE];
         for (int i = 0; i < rowIndices.length; i++)
@@ -68,15 +64,12 @@ public class ErrorCalculator {
         mInputRowsAllocation.copyFrom(rowIndices);
         mOutputRegionsAllocation = Allocation.createSized(mRS, Element.I32(mRS),
                 mOutputRowRegions.length, Allocation.USAGE_SCRIPT);
-*/
     }
 
 
     private static long startMillis, middleMillis;
 
     public float calcErrorRS(Bitmap ideal, Bitmap given) {
-        if (true)
-            return calcError(ideal, given);
         if (LOG_TIMING) {
             startMillis = System.currentTimeMillis();
         }
@@ -86,8 +79,8 @@ public class ErrorCalculator {
         mGivenPixelsAllocation = Allocation.createFromBitmap(mRS, given,
                 Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
 
-        mScript.bind_ideal(mIdealPixelsAllocation);
-        mScript.bind_given(mGivenPixelsAllocation);
+        mScript.set_ideal(mIdealPixelsAllocation);
+        mScript.set_given(mGivenPixelsAllocation);
 
         mScript.forEach_countInterestingRegions(mInputRowsAllocation, mOutputRegionsAllocation);
         mOutputRegionsAllocation.copyTo(mOutputRowRegions);
@@ -127,8 +120,8 @@ public class ErrorCalculator {
         mGivenPixelsAllocation = Allocation.createFromBitmap(mRS, given,
                 Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
 
-        mScript.bind_ideal(mIdealPixelsAllocation);
-        mScript.bind_given(mGivenPixelsAllocation);
+        mScript.set_ideal(mIdealPixelsAllocation);
+        mScript.set_given(mGivenPixelsAllocation);
 
         mOutputPixelsAllocation = Allocation.createFromBitmap(mRS, output,
                 Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
