@@ -31,8 +31,10 @@ public class Constants {
             public static final boolean EnableTaskStackClipping = false;
             // Enables the use of theme colors as the task bar background
             public static final boolean EnableTaskBarThemeColors = true;
-            // Enables the info pane on long-press
+            // Enables the info pane on long-pressing the task
             public static final boolean EnableInfoPane = false;
+            // Enables app-info pane on long-pressing the icon
+            public static final boolean EnableDevAppInfoOnLongPress = true;
             // Enables the search bar layout
             public static final boolean EnableSearchLayout = true;
             // Enables the dynamic shadows behind each task

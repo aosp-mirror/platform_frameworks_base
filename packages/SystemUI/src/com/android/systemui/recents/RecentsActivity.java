@@ -83,8 +83,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             Console.log(Constants.Log.App.SystemUIHandshake,
                     "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
             if (action.equals(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                // Dismiss recents, launching the focused task
-                dismissRecentsIfVisible();
+                if (intent.getBooleanExtra(RecentsService.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
+                    // Dismiss recents, launching the focused task
+                    dismissRecentsIfVisible();
+                } else {
+                    // Otherwise, just finish the activity without launching any other activities
+                    finish();
+                }
             } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // Try and unfilter and filtered stacks
                 if (!mRecentsView.unfilterFilteredStacks()) {
