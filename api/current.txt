@@ -16285,6 +16285,11 @@ package android.net {
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
+    field public static final java.lang.String EXTRA_NETWORK = "network";
+    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1;
+    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2;
     field public static final int TYPE_BLUETOOTH = 7; // 0x7
     field public static final int TYPE_DUMMY = 8; // 0x8
     field public static final int TYPE_ETHERNET = 9; // 0x9
