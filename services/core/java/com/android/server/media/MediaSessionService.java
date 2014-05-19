@@ -61,6 +61,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private static final int WAKELOCK_TIMEOUT = 5000;
+
     private final SessionManagerImpl mSessionManagerImpl;
     // private final MediaRouteProviderWatcher mRouteProviderWatcher;
     private final MediaSessionStack mPriorityStack;
@@ -676,9 +678,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
 
             try {
-                if (needWakeLock) {
-                    mMediaEventWakeLock.acquire();
-                }
                 synchronized (mLock) {
                     MediaSessionRecord mbSession = mPriorityStack
                             .getDefaultMediaButtonSession(mCurrentUserId);
@@ -686,9 +685,18 @@ public class MediaSessionService extends SystemService implements Monitor {
                         if (DEBUG) {
                             Log.d(TAG, "Sending media key to " + mbSession.getSessionInfo());
                         }
+                        if (needWakeLock) {
+                            mKeyEventReceiver.aquireWakeLockLocked();
+                        }
+                        // If we don't need a wakelock use -1 as the id so we
+                        // won't release it later
                         mbSession.sendMediaButton(keyEvent,
-                                needWakeLock ? mKeyEventDoneReceiver : null);
+                                needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
+                                mKeyEventReceiver);
                     } else {
+                        if (needWakeLock) {
+                            mMediaEventWakeLock.acquire();
+                        }
                         if (DEBUG) {
                             Log.d(TAG, "Sending media key ordered broadcast");
                         }
@@ -743,14 +751,66 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        ResultReceiver mKeyEventDoneReceiver = new ResultReceiver(mHandler) {
+        private KeyEventWakeLockReceiver mKeyEventReceiver = new KeyEventWakeLockReceiver(mHandler);
+
+        class KeyEventWakeLockReceiver extends ResultReceiver implements Runnable {
+            private final Handler mHandler;
+            private int mRefCount = 0;
+            private int mLastTimeoutId = 0;
+
+            public KeyEventWakeLockReceiver(Handler handler) {
+                super(handler);
+                mHandler = handler;
+            }
+
+            public void onTimeout() {
+                synchronized (mLock) {
+                    if (mRefCount == 0) {
+                        // We've already released it, so just return
+                        return;
+                    }
+                    mLastTimeoutId++;
+                    mRefCount = 0;
+                    releaseWakeLockLocked();
+                }
+            }
+
+            public void aquireWakeLockLocked() {
+                if (mRefCount == 0) {
+                    mMediaEventWakeLock.acquire();
+                }
+                mRefCount++;
+                mHandler.removeCallbacks(this);
+                mHandler.postDelayed(this, WAKELOCK_TIMEOUT);
+
+            }
+
+            @Override
+            public void run() {
+                onTimeout();
+            }
+
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                synchronized (mLock) {
-                    if (mMediaEventWakeLock.isHeld()) {
-                        mMediaEventWakeLock.release();
+                if (resultCode < mLastTimeoutId) {
+                    // Ignore results from calls that were before the last
+                    // timeout, just in case.
+                    return;
+                } else {
+                    synchronized (mLock) {
+                        if (mRefCount > 0) {
+                            mRefCount--;
+                            if (mRefCount == 0) {
+                                releaseWakeLockLocked();
+                            }
+                        }
                     }
                 }
+            }
+
+            private void releaseWakeLockLocked() {
+                mMediaEventWakeLock.release();
+                mHandler.removeCallbacks(this);
             }
         };
 

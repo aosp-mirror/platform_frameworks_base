@@ -119,13 +119,6 @@ public final class MediaSession {
      */
     public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
 
-    /**
-     * Status code indicating the call was handled.
-     *
-     * @hide
-     */
-    public static final int RESULT_SUCCESS = 0;
-
     private static final int MSG_MEDIA_BUTTON = 1;
     private static final int MSG_COMMAND = 2;
     private static final int MSG_ROUTE_CHANGE = 3;
@@ -563,14 +556,17 @@ public final class MediaSession {
         }
 
         @Override
-        public void onMediaButton(Intent mediaButtonIntent, ResultReceiver cb)
+        public void onMediaButton(Intent mediaButtonIntent, int sequenceNumber, ResultReceiver cb)
                 throws RemoteException {
             MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.postMediaButton(mediaButtonIntent);
-            }
-            if (cb != null) {
-                cb.send(RESULT_SUCCESS, null);
+            try {
+                if (session != null) {
+                    session.postMediaButton(mediaButtonIntent);
+                }
+            } finally {
+                if (cb != null) {
+                    cb.send(sequenceNumber, null);
+                }
             }
         }
 

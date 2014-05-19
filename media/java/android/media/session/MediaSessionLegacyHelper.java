@@ -137,6 +137,8 @@ public class MediaSessionLegacyHelper {
             return;
         }
         holder.mMediaButtonListener = new MediaButtonListener(pi, context);
+        // TODO determine if handling transport performer commands should also
+        // set this flag
         holder.mFlags |= MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
         holder.mSession.setFlags(holder.mFlags);
         holder.mSession.getTransportPerformer().addListener(holder.mMediaButtonListener, mHandler);
