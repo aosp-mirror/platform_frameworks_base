@@ -779,7 +779,8 @@ public class Activity extends ContextThemeWrapper
     final Handler mHandler = new Handler();
 
     private ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
-    SharedElementListener mTransitionListener = new SharedElementListener();
+    SharedElementListener mEnterTransitionListener = SharedElementListener.NULL_LISTENER;
+    SharedElementListener mExitTransitionListener = SharedElementListener.NULL_LISTENER;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -5557,16 +5558,32 @@ public class Activity extends ContextThemeWrapper
     /**
      * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
      * android.view.View, String)} was used to start an Activity, <var>listener</var>
-     * will be called to handle shared elements. This requires
+     * will be called to handle shared elements on the <i>launched</i> Activity. This requires
      * {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      *
-     * @param listener Used to manipulate how shared element transitions function.
+     * @param listener Used to manipulate shared element transitions on the launched Activity.
      */
-    public void setSharedElementListener(SharedElementListener listener) {
+    public void setEnterSharedElementListener(SharedElementListener listener) {
         if (listener == null) {
-            listener = new SharedElementListener();
+            listener = SharedElementListener.NULL_LISTENER;
         }
-        mTransitionListener = listener;
+        mEnterTransitionListener = listener;
+    }
+
+    /**
+     * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
+     * android.view.View, String)} was used to start an Activity, <var>listener</var>
+     * will be called to handle shared elements on the <i>launching</i> Activity. Most
+     * calls will only come when returning from the started Activity.
+     * This requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @param listener Used to manipulate shared element transitions on the launching Activity.
+     */
+    public void setExitSharedElementListener(SharedElementListener listener) {
+        if (listener == null) {
+            listener = SharedElementListener.NULL_LISTENER;
+        }
+        mExitTransitionListener = listener;
     }
 
     // ------------------ Internal API ------------------
@@ -5882,7 +5899,8 @@ public class Activity extends ContextThemeWrapper
      * have completed drawing. This is necessary only after an {@link Activity} has been made
      * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn
      * translucent again following a call to {@link
-     * Activity#convertToTranslucent(TranslucentConversionListener)}.
+     * Activity#convertToTranslucent(android.app.Activity.TranslucentConversionListener,
+     * ActivityOptions)}
      *
      * @hide
      */
