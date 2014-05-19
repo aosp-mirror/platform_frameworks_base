@@ -610,8 +610,8 @@ public final class ObjectAnimator extends ValueAnimator {
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation). This variant supplies a <code>TypeConverter</code> to
      * convert from the animated values to the type of the property. If only one value is
-     * supplied, the <code>TypeConverter</code> must implement
-     * {@link TypeConverter#convertBack(Object)} to retrieve the current value.
+     * supplied, the <code>TypeConverter</code> must be a
+     * {@link android.animation.BidirectionalTypeConverter} to retrieve the current value.
      *
      * @param target The object whose property is to be animated.
      * @param property The property being animated.
