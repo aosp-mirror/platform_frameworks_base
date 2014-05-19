@@ -25,7 +25,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- * A route can support multiple interfaces for a {@link Session} to
+ * A route can support multiple interfaces for a {@link MediaSession} to
  * interact with. To use a specific interface with a route a
  * MediaSessionRouteInterface needs to be retrieved from the route. An
  * implementation of the specific interface, like
@@ -33,6 +33,7 @@ import java.util.ArrayList;
  * and reduce errors on that interface.
  *
  * @see RoutePlaybackControls for an example
+ * @hide
  */
 public final class RouteInterface {
     private static final String TAG = "RouteInterface";
@@ -67,7 +68,7 @@ public final class RouteInterface {
 
     private final Route mRoute;
     private final String mIface;
-    private final Session mSession;
+    private final MediaSession mSession;
 
     private final Object mLock = new Object();
     private final ArrayList<EventHandler> mListeners = new ArrayList<EventHandler>();
@@ -75,7 +76,7 @@ public final class RouteInterface {
     /**
      * @hide
      */
-    RouteInterface(Route route, String iface, Session session) {
+    RouteInterface(Route route, String iface, MediaSession session) {
         mRoute = route;
         mIface = iface;
         mSession = session;

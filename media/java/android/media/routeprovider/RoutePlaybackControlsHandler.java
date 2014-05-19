@@ -28,6 +28,7 @@ import android.util.Log;
  * Standard wrapper for using playback controls over a {@link RouteInterfaceHandler}.
  * This is the provider half of the interface. Sessions should use
  * {@link RoutePlaybackControls} to interact with this interface.
+ * @hide
  */
 public final class RoutePlaybackControlsHandler {
     private static final String TAG = "RoutePlaybackControls";

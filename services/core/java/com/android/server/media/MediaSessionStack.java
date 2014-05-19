@@ -17,7 +17,7 @@
 package com.android.server.media;
 
 import android.media.session.PlaybackState;
-import android.media.session.Session;
+import android.media.session.MediaSession;
 import android.os.UserHandle;
 
 import java.io.PrintWriter;
@@ -62,7 +62,7 @@ public class MediaSessionStack {
      */
     public void addSession(MediaSessionRecord record) {
         mSessions.add(record);
-        if ((record.getFlags() & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+        if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
             mGlobalPrioritySession = record;
         }
         clearCache();
@@ -134,7 +134,7 @@ public class MediaSessionStack {
     public ArrayList<MediaSessionRecord> getTransportControlSessions(int userId) {
         if (mCachedTransportControlList == null) {
             mCachedTransportControlList = getPriorityListLocked(true,
-                    Session.FLAG_HANDLES_TRANSPORT_CONTROLS, userId);
+                    MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS, userId);
         }
         return mCachedTransportControlList;
     }
@@ -170,7 +170,7 @@ public class MediaSessionStack {
             return mCachedButtonReceiver;
         }
         ArrayList<MediaSessionRecord> records = getPriorityListLocked(true,
-                Session.FLAG_HANDLES_MEDIA_BUTTONS, userId);
+                MediaSession.FLAG_HANDLES_MEDIA_BUTTONS, userId);
         if (records.size() > 0) {
             mCachedButtonReceiver = records.get(0);
         }

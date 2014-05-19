@@ -21,7 +21,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 
 /**
- * Playback state for a {@link Session}. This includes a state like
+ * Playback state for a {@link MediaSession}. This includes a state like
  * {@link PlaybackState#PLAYSTATE_PLAYING}, the current playback position,
  * and the current control capabilities.
  */
@@ -160,6 +160,7 @@ public final class PlaybackState implements Parcelable {
      * route. Depending on the implementation you may return to the previous
      * state when the connection finishes or enter {@link #PLAYSTATE_NONE}. If
      * the connection failed {@link #PLAYSTATE_ERROR} should be used.
+     * @hide
      */
     public final static int PLAYSTATE_CONNECTING = 8;
 

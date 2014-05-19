@@ -17,7 +17,7 @@ package com.android.onemedia;
 
 
 import android.app.Activity;
-import android.media.session.MediaMetadata;
+import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.util.Log;

@@ -40,7 +40,7 @@ public class MediaSessionLegacyHelper {
     private static final Object sLock = new Object();
     private static MediaSessionLegacyHelper sInstance;
 
-    private SessionManager mSessionManager;
+    private MediaSessionManager mSessionManager;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     // The legacy APIs use PendingIntents to register/unregister media button
     // receivers and these are associated with RCC.
@@ -48,7 +48,7 @@ public class MediaSessionLegacyHelper {
             = new ArrayMap<PendingIntent, SessionHolder>();
 
     private MediaSessionLegacyHelper(Context context) {
-        mSessionManager = (SessionManager) context
+        mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
     }
 
@@ -64,7 +64,7 @@ public class MediaSessionLegacyHelper {
         return sInstance;
     }
 
-    public Session getSession(PendingIntent pi) {
+    public MediaSession getSession(PendingIntent pi) {
         SessionHolder holder = mSessions.get(pi);
         return holder == null ? null : holder.mSession;
     }
@@ -96,7 +96,7 @@ public class MediaSessionLegacyHelper {
         }
         performer.addListener(listener, mHandler);
         holder.mRccListener = listener;
-        holder.mFlags |= Session.FLAG_HANDLES_TRANSPORT_CONTROLS;
+        holder.mFlags |= MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
         holder.mSession.setFlags(holder.mFlags);
         holder.update();
         if (DEBUG) {
@@ -112,7 +112,7 @@ public class MediaSessionLegacyHelper {
         if (holder != null && holder.mRccListener != null) {
             holder.mSession.getTransportPerformer().removeListener(holder.mRccListener);
             holder.mRccListener = null;
-            holder.mFlags &= ~Session.FLAG_HANDLES_TRANSPORT_CONTROLS;
+            holder.mFlags &= ~MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
             holder.mSession.setFlags(holder.mFlags);
             holder.update();
             if (DEBUG) {
@@ -137,7 +137,7 @@ public class MediaSessionLegacyHelper {
             return;
         }
         holder.mMediaButtonListener = new MediaButtonListener(pi, context);
-        holder.mFlags |= Session.FLAG_HANDLES_MEDIA_BUTTONS;
+        holder.mFlags |= MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
         holder.mSession.setFlags(holder.mFlags);
         holder.mSession.getTransportPerformer().addListener(holder.mMediaButtonListener, mHandler);
 
@@ -155,7 +155,7 @@ public class MediaSessionLegacyHelper {
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mMediaButtonListener != null) {
             holder.mSession.getTransportPerformer().removeListener(holder.mMediaButtonListener);
-            holder.mFlags &= ~Session.FLAG_HANDLES_MEDIA_BUTTONS;
+            holder.mFlags &= ~MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
             holder.mSession.setFlags(holder.mFlags);
             holder.mMediaButtonListener = null;
 
@@ -171,7 +171,7 @@ public class MediaSessionLegacyHelper {
     private SessionHolder getHolder(PendingIntent pi, boolean createIfMissing) {
         SessionHolder holder = mSessions.get(pi);
         if (holder == null && createIfMissing) {
-            Session session = mSessionManager.createSession(TAG);
+            MediaSession session = mSessionManager.createSession(TAG);
             session.setActive(true);
             holder = new SessionHolder(session, pi);
             mSessions.put(pi, holder);
@@ -189,7 +189,7 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    private static final class MediaButtonReceiver extends Session.Callback {
+    private static final class MediaButtonReceiver extends MediaSession.Callback {
         private final PendingIntent mPendingIntent;
         private final Context mContext;
 
@@ -266,14 +266,14 @@ public class MediaSessionLegacyHelper {
     }
 
     private class SessionHolder {
-        public final Session mSession;
+        public final MediaSession mSession;
         public final PendingIntent mPi;
         public MediaButtonListener mMediaButtonListener;
         public MediaButtonReceiver mMediaButtonReceiver;
         public TransportPerformer.Listener mRccListener;
         public int mFlags;
 
-        public SessionHolder(Session session, PendingIntent pi) {
+        public SessionHolder(MediaSession session, PendingIntent pi) {
             mSession = session;
             mPi = pi;
         }

@@ -15,8 +15,8 @@
 
 package android.media.session;
 
+import android.media.MediaMetadata;
 import android.media.session.ISessionController;
-import android.media.session.MediaMetadata;
 import android.media.session.RouteOptions;
 import android.media.session.RouteCommand;
 import android.media.session.RouteInfo;

@@ -20,17 +20,17 @@ import android.media.session.ISessionController;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class SessionToken implements Parcelable {
+public class MediaSessionToken implements Parcelable {
     private ISessionController mBinder;
 
     /**
      * @hide
      */
-    SessionToken(ISessionController binder) {
+    MediaSessionToken(ISessionController binder) {
         mBinder = binder;
     }
 
-    private SessionToken(Parcel in) {
+    private MediaSessionToken(Parcel in) {
         mBinder = ISessionController.Stub.asInterface(in.readStrongBinder());
     }
 
@@ -51,16 +51,16 @@ public class SessionToken implements Parcelable {
         dest.writeStrongBinder(mBinder.asBinder());
     }
 
-    public static final Parcelable.Creator<SessionToken> CREATOR
-            = new Parcelable.Creator<SessionToken>() {
+    public static final Parcelable.Creator<MediaSessionToken> CREATOR
+            = new Parcelable.Creator<MediaSessionToken>() {
         @Override
-        public SessionToken createFromParcel(Parcel in) {
-            return new SessionToken(in);
+        public MediaSessionToken createFromParcel(Parcel in) {
+            return new MediaSessionToken(in);
         }
 
         @Override
-        public SessionToken[] newArray(int size) {
-            return new SessionToken[size];
+        public MediaSessionToken[] newArray(int size) {
+            return new MediaSessionToken[size];
         }
     };
 }

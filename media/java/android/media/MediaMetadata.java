@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.session;
+package android.media;
 
 import android.graphics.Bitmap;
-import android.media.MediaMetadataEditor;
-import android.media.MediaMetadataRetriever;
-import android.media.Rating;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -27,7 +27,6 @@ package android {
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
-    field public static final java.lang.String BIND_ROUTE_PROVIDER = "android.permission.BIND_ROUTE_PROVIDER";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
@@ -14246,6 +14245,49 @@ package android.media {
     field public static final java.lang.String KEY_WIDTH = "width";
   }
 
+  public final class MediaMetadata implements android.os.Parcelable {
+    method public boolean containsKey(java.lang.String);
+    method public int describeContents();
+    method public android.graphics.Bitmap getBitmap(java.lang.String);
+    method public long getLong(java.lang.String);
+    method public android.media.Rating getRating(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public int size();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
+    field public static final java.lang.String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
+    field public static final java.lang.String METADATA_KEY_ART = "android.media.metadata.ART";
+    field public static final java.lang.String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
+    field public static final java.lang.String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
+    field public static final java.lang.String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
+    field public static final java.lang.String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
+    field public static final java.lang.String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
+    field public static final java.lang.String METADATA_KEY_DATE = "android.media.metadata.DATE";
+    field public static final java.lang.String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
+    field public static final java.lang.String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
+    field public static final java.lang.String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
+    field public static final java.lang.String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
+    field public static final java.lang.String METADATA_KEY_RATING = "android.media.metadata.RATING";
+    field public static final java.lang.String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
+    field public static final java.lang.String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
+    field public static final java.lang.String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
+    field public static final java.lang.String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
+    field public static final java.lang.String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
+  }
+
+  public static final class MediaMetadata.Builder {
+    ctor public MediaMetadata.Builder();
+    ctor public MediaMetadata.Builder(android.media.MediaMetadata);
+    method public android.media.MediaMetadata build();
+    method public android.media.MediaMetadata.Builder putBitmap(java.lang.String, android.graphics.Bitmap);
+    method public android.media.MediaMetadata.Builder putLong(java.lang.String, long);
+    method public android.media.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
+    method public android.media.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
+  }
+
   public abstract class MediaMetadataEditor {
     method public synchronized void addEditableKey(int);
     method public abstract void apply();
@@ -15341,109 +15383,61 @@ package android.media.effect {
 
 }
 
-package android.media.routeprovider {
-
-  public final class RouteConnection {
-    ctor public RouteConnection(android.media.routeprovider.RouteProviderService, android.media.session.RouteInfo);
-    method public android.media.routeprovider.RouteInterfaceHandler addRouteInterface(java.lang.String);
-    method public android.media.routeprovider.RouteInterfaceHandler getRouteInterface(java.lang.String);
-    method public void shutDown();
-  }
-
-  public final class RouteInterfaceHandler {
-    method public void addListener(android.media.routeprovider.RouteInterfaceHandler.CommandListener, android.os.Handler);
-    method public java.lang.String getName();
-    method public void removeListener(android.media.routeprovider.RouteInterfaceHandler.CommandListener);
-    method public void sendEvent(java.lang.String, android.os.Bundle);
-    method public static void sendResult(android.os.ResultReceiver, int, android.os.Bundle);
-  }
-
-  public static abstract class RouteInterfaceHandler.CommandListener {
-    ctor public RouteInterfaceHandler.CommandListener();
-    method public abstract boolean onCommand(android.media.routeprovider.RouteInterfaceHandler, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-  }
-
-  public final class RoutePlaybackControlsHandler {
-    method public void addListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener);
-    method public void addListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener, android.os.Handler);
-    method public static android.media.routeprovider.RoutePlaybackControlsHandler addTo(android.media.routeprovider.RouteConnection);
-    method public void removeListener(android.media.routeprovider.RoutePlaybackControlsHandler.Listener);
-    method public void sendPlaybackChangeEvent(int);
-  }
-
-  public static abstract class RoutePlaybackControlsHandler.Listener extends android.media.routeprovider.RouteInterfaceHandler.CommandListener {
-    ctor public RoutePlaybackControlsHandler.Listener();
-    method public boolean fastForward();
-    method public long getCapabilities();
-    method public long getCurrentPosition();
-    method public final boolean onCommand(android.media.routeprovider.RouteInterfaceHandler, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public boolean pause();
-    method public void playNow(java.lang.String, android.os.ResultReceiver);
-    method public boolean resume();
-  }
-
-  public abstract class RouteProviderService extends android.app.Service {
-    ctor public RouteProviderService();
-    method public abstract android.media.routeprovider.RouteConnection connect(android.media.session.RouteInfo, android.media.routeprovider.RouteRequest);
-    method public abstract java.util.List<android.media.session.RouteInfo> getMatchingRoutes(java.util.List<android.media.routeprovider.RouteRequest>);
-    method public android.os.IBinder onBind(android.content.Intent);
-    method public void updateDiscoveryRequests(java.util.List<android.media.routeprovider.RouteRequest>);
-    field public static final java.lang.String SERVICE_INTERFACE = "com.android.media.session.MediaRouteProvider";
-  }
-
-  public final class RouteRequest implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.media.session.RouteOptions getConnectionOptions();
-    method public android.media.session.SessionInfo getSessionInfo();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-}
-
 package android.media.session {
 
-  public final class MediaMetadata implements android.os.Parcelable {
-    method public boolean containsKey(java.lang.String);
-    method public int describeContents();
-    method public android.graphics.Bitmap getBitmap(java.lang.String);
-    method public long getLong(java.lang.String);
-    method public android.media.Rating getRating(java.lang.String);
-    method public java.lang.String getString(java.lang.String);
-    method public int size();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final java.lang.String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
-    field public static final java.lang.String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
-    field public static final java.lang.String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
-    field public static final java.lang.String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
-    field public static final java.lang.String METADATA_KEY_ART = "android.media.metadata.ART";
-    field public static final java.lang.String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
-    field public static final java.lang.String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
-    field public static final java.lang.String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
-    field public static final java.lang.String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
-    field public static final java.lang.String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
-    field public static final java.lang.String METADATA_KEY_DATE = "android.media.metadata.DATE";
-    field public static final java.lang.String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
-    field public static final java.lang.String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
-    field public static final java.lang.String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
-    field public static final java.lang.String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
-    field public static final java.lang.String METADATA_KEY_RATING = "android.media.metadata.RATING";
-    field public static final java.lang.String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
-    field public static final java.lang.String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
-    field public static final java.lang.String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
-    field public static final java.lang.String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
-    field public static final java.lang.String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
+  public final class MediaController {
+    method public void addCallback(android.media.session.MediaController.Callback);
+    method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
+    method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
+    method public android.media.session.TransportController getTransportController();
+    method public void removeCallback(android.media.session.MediaController.Callback);
+    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void sendMediaButton(int);
   }
 
-  public static final class MediaMetadata.Builder {
-    ctor public MediaMetadata.Builder();
-    ctor public MediaMetadata.Builder(android.media.session.MediaMetadata);
-    method public android.media.session.MediaMetadata build();
-    method public android.media.session.MediaMetadata.Builder putBitmap(java.lang.String, android.graphics.Bitmap);
-    method public android.media.session.MediaMetadata.Builder putLong(java.lang.String, long);
-    method public android.media.session.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
-    method public android.media.session.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
+  public static abstract class MediaController.Callback {
+    ctor public MediaController.Callback();
+    method public void onEvent(java.lang.String, android.os.Bundle);
+  }
+
+  public final class MediaSession {
+    method public void addCallback(android.media.session.MediaSession.Callback);
+    method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
+    method public android.media.session.MediaSessionToken getSessionToken();
+    method public android.media.session.TransportPerformer getTransportPerformer();
+    method public boolean isActive();
+    method public void release();
+    method public void removeCallback(android.media.session.MediaSession.Callback);
+    method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public void setActive(boolean);
+    method public void setFlags(int);
+    field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
+    field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
+  }
+
+  public static abstract class MediaSession.Callback {
+    ctor public MediaSession.Callback();
+    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void onMediaButton(android.content.Intent);
+  }
+
+  public final class MediaSessionInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getId();
+    method public java.lang.String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class MediaSessionManager {
+    method public android.media.session.MediaSession createSession(java.lang.String);
+    method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
+  }
+
+  public class MediaSessionToken implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class PlaybackState implements android.os.Parcelable {
@@ -15474,7 +15468,6 @@ package android.media.session {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
     field public static final int PLAYSTATE_BUFFERING = 6; // 0x6
-    field public static final int PLAYSTATE_CONNECTING = 8; // 0x8
     field public static final int PLAYSTATE_ERROR = 7; // 0x7
     field public static final int PLAYSTATE_FAST_FORWARDING = 4; // 0x4
     field public static final int PLAYSTATE_NONE = 0; // 0x0
@@ -15486,160 +15479,11 @@ package android.media.session {
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
   }
 
-  public final class Route {
-    method public android.media.session.RouteInterface getInterface(java.lang.String);
-    method public android.media.session.RouteOptions getOptions();
-    method public android.media.session.RouteInfo getRouteInfo();
-  }
-
-  public final class RouteInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.util.List<android.media.session.RouteOptions> getConnectionMethods();
-    method public java.lang.String getId();
-    method public java.lang.String getName();
-    method public java.lang.String getProvider();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static final class RouteInfo.Builder {
-    ctor public RouteInfo.Builder(android.media.session.RouteInfo);
-    ctor public RouteInfo.Builder();
-    method public android.media.session.RouteInfo.Builder addRouteOptions(android.media.session.RouteOptions);
-    method public android.media.session.RouteInfo build();
-    method public android.media.session.RouteInfo.Builder clearRouteOptions();
-    method public int getOptionsSize();
-    method public android.media.session.RouteInfo.Builder setId(java.lang.String);
-    method public android.media.session.RouteInfo.Builder setName(java.lang.String);
-  }
-
-  public final class RouteInterface {
-    method public void addListener(android.media.session.RouteInterface.EventListener);
-    method public void addListener(android.media.session.RouteInterface.EventListener, android.os.Handler);
-    method public void removeListener(android.media.session.RouteInterface.EventListener);
-    method public boolean sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    field public static final int RESULT_COMMAND_NOT_SUPPORTED = -3; // 0xfffffffd
-    field public static final int RESULT_ERROR = -1; // 0xffffffff
-    field public static final int RESULT_INTERFACE_NOT_SUPPORTED = -2; // 0xfffffffe
-    field public static final int RESULT_NOT_CONNECTED = -5; // 0xfffffffb
-    field public static final int RESULT_ROUTE_IS_STALE = -4; // 0xfffffffc
-    field public static final int RESULT_SUCCESS = 1; // 0x1
-  }
-
-  public static abstract class RouteInterface.EventListener {
-    ctor public RouteInterface.EventListener();
-    method public abstract void onEvent(java.lang.String, android.os.Bundle);
-  }
-
-  public final class RouteOptions implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.os.Bundle getConnectionParams();
-    method public java.util.List<java.lang.String> getInterfaceNames();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static final class RouteOptions.Builder {
-    ctor public RouteOptions.Builder();
-    method public android.media.session.RouteOptions.Builder addInterface(java.lang.String);
-    method public android.media.session.RouteOptions build();
-    method public android.media.session.RouteOptions.Builder setParameters(android.os.Bundle);
-  }
-
-  public final class RoutePlaybackControls {
-    method public void addListener(android.media.session.RoutePlaybackControls.Listener);
-    method public void addListener(android.media.session.RoutePlaybackControls.Listener, android.os.Handler);
-    method public void fastForward();
-    method public static android.media.session.RoutePlaybackControls from(android.media.session.Route);
-    method public void getCapabilities(android.os.ResultReceiver);
-    method public void getCurrentPosition(android.os.ResultReceiver);
-    method public void pause();
-    method public void playNow(java.lang.String);
-    method public void removeListener(android.media.session.RoutePlaybackControls.Listener);
-    method public void resume();
-    field public static final java.lang.String NAME = "android.media.session.RoutePlaybackControls";
-  }
-
-  public static abstract class RoutePlaybackControls.Listener extends android.media.session.RouteInterface.EventListener {
-    ctor public RoutePlaybackControls.Listener();
-    method public final void onEvent(java.lang.String, android.os.Bundle);
-    method public void onMetadataUpdate(android.media.session.MediaMetadata);
-    method public void onPlaybackStateChange(int);
-  }
-
-  public final class Session {
-    method public void addCallback(android.media.session.Session.Callback);
-    method public void addCallback(android.media.session.Session.Callback, android.os.Handler);
-    method public void connect(android.media.session.RouteInfo, android.media.session.RouteOptions);
-    method public void disconnect();
-    method public android.media.session.SessionToken getSessionToken();
-    method public android.media.session.TransportPerformer getTransportPerformer();
-    method public boolean isActive();
-    method public void release();
-    method public void removeCallback(android.media.session.Session.Callback);
-    method public void sendEvent(java.lang.String, android.os.Bundle);
-    method public void setActive(boolean);
-    method public void setFlags(int);
-    method public void setRouteOptions(java.util.List<android.media.session.RouteOptions>);
-    field public static final int DISCONNECT_REASON_PROVIDER_DISCONNECTED = 2; // 0x2
-    field public static final int DISCONNECT_REASON_ROUTE_CHANGED = 3; // 0x3
-    field public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5; // 0x5
-    field public static final int DISCONNECT_REASON_SESSION_DISCONNECTED = 4; // 0x4
-    field public static final int DISCONNECT_REASON_USER_STOPPING = 1; // 0x1
-    field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
-    field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
-  }
-
-  public static abstract class Session.Callback {
-    ctor public Session.Callback();
-    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onMediaButton(android.content.Intent);
-    method public void onRequestRouteChange(android.media.session.RouteInfo);
-    method public void onRouteConnected(android.media.session.Route);
-    method public void onRouteDisconnected(android.media.session.Route, int);
-  }
-
-  public final class SessionController {
-    method public void addCallback(android.media.session.SessionController.Callback);
-    method public void addCallback(android.media.session.SessionController.Callback, android.os.Handler);
-    method public static android.media.session.SessionController fromToken(android.media.session.SessionToken);
-    method public android.media.session.TransportController getTransportController();
-    method public void removeCallback(android.media.session.SessionController.Callback);
-    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void sendMediaButton(int);
-    method public void showRoutePicker();
-  }
-
-  public static abstract class SessionController.Callback {
-    ctor public SessionController.Callback();
-    method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onRouteChanged(android.media.session.RouteInfo);
-  }
-
-  public final class SessionInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.lang.String getId();
-    method public java.lang.String getPackageName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public final class SessionManager {
-    method public android.media.session.Session createSession(java.lang.String);
-    method public java.util.List<android.media.session.SessionController> getActiveSessions(android.content.ComponentName);
-  }
-
-  public class SessionToken implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public final class TransportController {
     method public void addStateListener(android.media.session.TransportController.TransportStateListener);
     method public void addStateListener(android.media.session.TransportController.TransportStateListener, android.os.Handler);
     method public void fastForward();
-    method public android.media.session.MediaMetadata getMetadata();
+    method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
     method public int getRatingType();
     method public void next();
@@ -15655,7 +15499,7 @@ package android.media.session {
 
   public static abstract class TransportController.TransportStateListener {
     ctor public TransportController.TransportStateListener();
-    method public void onMetadataChanged(android.media.session.MediaMetadata);
+    method public void onMetadataChanged(android.media.MediaMetadata);
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
   }
 
@@ -15663,7 +15507,7 @@ package android.media.session {
     method public void addListener(android.media.session.TransportPerformer.Listener);
     method public void addListener(android.media.session.TransportPerformer.Listener, android.os.Handler);
     method public void removeListener(android.media.session.TransportPerformer.Listener);
-    method public final void setMetadata(android.media.session.MediaMetadata);
+    method public final void setMetadata(android.media.MediaMetadata);
     method public final void setPlaybackState(android.media.session.PlaybackState);
   }
 

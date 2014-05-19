@@ -25,6 +25,7 @@ import java.util.List;
 /**
  * Information about a route, including its display name, a way to identify it,
  * and the ways it can be connected to.
+ * @hide
  */
 public final class RouteInfo implements Parcelable {
     private final String mName;

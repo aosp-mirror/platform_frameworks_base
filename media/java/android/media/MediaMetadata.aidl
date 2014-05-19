@@ -13,6 +13,6 @@
 ** limitations under the License.
 */
 
-package android.media.session;
+package android.media;
 
-parcelable SessionToken;
+parcelable MediaMetadata;

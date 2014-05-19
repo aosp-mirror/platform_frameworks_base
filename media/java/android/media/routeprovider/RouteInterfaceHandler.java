@@ -16,7 +16,7 @@
 package android.media.routeprovider;
 
 import android.media.session.Route;
-import android.media.session.Session;
+import android.media.session.MediaSession;
 import android.media.session.RouteInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * connected media route.
  * <p>
  * A {@link RouteProviderService} may expose multiple interfaces on a
- * {@link RouteConnection} for a {@link Session} to interact with. A
+ * {@link RouteConnection} for a {@link MediaSession} to interact with. A
  * provider creates an interface with
  * {@link RouteConnection#addRouteInterface(String)} to allow messages to be
  * routed appropriately. Events are then sent through a specific interface and
@@ -47,6 +47,7 @@ import java.util.ArrayList;
  * It is recommended you wrap this interface with a standard implementation to
  * avoid errors, but for simple interfaces this class may be used directly. TODO
  * add link to sample code.
+ * @hide
  */
 public final class RouteInterfaceHandler {
     private static final String TAG = "RouteInterfaceHandler";
@@ -184,7 +185,7 @@ public final class RouteInterfaceHandler {
     public abstract static class CommandListener {
         /**
          * This is called when a command is received that matches this
-         * interface. Commands are sent by a {@link Session} that is
+         * interface. Commands are sent by a {@link MediaSession} that is
          * connected to the route this interface is registered with.
          *
          * @param iface The interface the command was received on.
@@ -197,7 +198,7 @@ public final class RouteInterfaceHandler {
          *         true may be returned if the command will be handled
          *         asynchronously.
          * @see Route
-         * @see Session
+         * @see MediaSession
          */
         public abstract boolean onCommand(RouteInterfaceHandler iface, String command, Bundle args,
                 ResultReceiver cb);

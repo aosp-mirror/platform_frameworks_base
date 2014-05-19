@@ -24,16 +24,16 @@ import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
-import android.media.session.SessionController;
-import android.media.session.MediaMetadata;
+import android.media.session.MediaController;
 import android.media.session.RouteCommand;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.media.session.RouteEvent;
-import android.media.session.Session;
-import android.media.session.SessionInfo;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionInfo;
 import android.media.session.RouteInterface;
 import android.media.session.PlaybackState;
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.os.Bundle;
 import android.os.Handler;
@@ -85,7 +85,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final int mOwnerPid;
     private final int mOwnerUid;
     private final int mUserId;
-    private final SessionInfo mSessionInfo;
+    private final MediaSessionInfo mSessionInfo;
     private final String mTag;
     private final ControllerStub mController;
     private final SessionStub mSession;
@@ -120,7 +120,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
-        mSessionInfo = new SessionInfo(UUID.randomUUID().toString(), ownerPackageName);
+        mSessionInfo = new MediaSessionInfo(UUID.randomUUID().toString(), ownerPackageName);
         mTag = tag;
         mController = new ControllerStub();
         mSession = new SessionStub();
@@ -130,7 +130,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the binder for the {@link Session}.
+     * Get the binder for the {@link MediaSession}.
      *
      * @return The session binder apps talk to.
      */
@@ -139,7 +139,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the binder for the {@link SessionController}.
+     * Get the binder for the {@link MediaController}.
      *
      * @return The controller binder apps talk to.
      */
@@ -170,7 +170,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return Info that identifies this session.
      */
-    public SessionInfo getSessionInfo() {
+    public MediaSessionInfo getSessionInfo() {
         return mSessionInfo;
     }
 
@@ -209,7 +209,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @return True if this is a system priority session, false otherwise
      */
     public boolean isSystemPriority() {
-        return (mFlags & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
+        return (mFlags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
     }
 
     /**
@@ -221,7 +221,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     public void selectRoute(RouteInfo route) {
         synchronized (mLock) {
             if (route != mRoute) {
-                disconnect(Session.DISCONNECT_REASON_ROUTE_CHANGED);
+                disconnect(MediaSession.DISCONNECT_REASON_ROUTE_CHANGED);
             }
             mRoute = route;
         }
@@ -335,7 +335,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     public boolean isTransportControlEnabled() {
-        return hasFlag(Session.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        return hasFlag(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
 
     @Override
@@ -353,7 +353,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             if (isConnected()) {
-                disconnectLocked(Session.DISCONNECT_REASON_SESSION_DESTROYED);
+                disconnectLocked(MediaSession.DISCONNECT_REASON_SESSION_DESTROYED);
             }
             mRoute = null;
             mRequest = null;
@@ -540,7 +540,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void disconnect() {
-            MediaSessionRecord.this.disconnect(Session.DISCONNECT_REASON_PROVIDER_DISCONNECTED);
+            MediaSessionRecord.this.disconnect(MediaSession.DISCONNECT_REASON_PROVIDER_DISCONNECTED);
         }
     };
 
@@ -569,7 +569,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setFlags(int flags) {
-            if ((flags & Session.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+            if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
                 int pid = getCallingPid();
                 int uid = getCallingUid();
                 mService.enforcePhoneStatePermission(pid, uid);
@@ -627,7 +627,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void disconnectFromRoute(RouteInfo route) {
             if (route != null && mRoute != null
                     && TextUtils.equals(route.getId(), mRoute.getId())) {
-                disconnect(Session.DISCONNECT_REASON_SESSION_DISCONNECTED);
+                disconnect(MediaSession.DISCONNECT_REASON_SESSION_DISCONNECTED);
             }
         }
 

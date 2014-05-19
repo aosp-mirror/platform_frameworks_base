@@ -36,21 +36,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Allows interaction with media controllers, media routes, volume keys, media
- * buttons, and transport controls.
+ * Allows interaction with media controllers, volume keys, media buttons, and
+ * transport controls.
  * <p>
  * A MediaSession should be created when an app wants to publish media playback
- * information or negotiate with a media route. In general an app only needs one
- * session for all playback, though multiple sessions can be created for sending
- * media to multiple routes or to provide finer grain controls of media.
+ * information or handle media keys. In general an app only needs one session
+ * for all playback, though multiple sessions can be created to provide finer
+ * grain controls of media.
  * <p>
  * A MediaSession is created by calling
- * {@link SessionManager#createSession(String)}. Once a session is created apps
- * that have the MEDIA_CONTENT_CONTROL permission can interact with the session
- * through
- * {@link SessionManager#getActiveSessions(android.content.ComponentName)}. The
- * owner of the session may also use {@link #getSessionToken()} to allow apps
- * without this permission to create a {@link SessionController} to interact
+ * {@link MediaSessionManager#createSession(String)}. Once a session is created
+ * apps that have the MEDIA_CONTENT_CONTROL permission can interact with the
+ * session through
+ * {@link MediaSessionManager#getActiveSessions(android.content.ComponentName)}.
+ * The owner of the session may also use {@link #getSessionToken()} to allow
+ * apps without this permission to create a {@link MediaController} to interact
  * with this session.
  * <p>
  * To receive commands, media keys, and other events a Callback must be set with
@@ -61,7 +61,7 @@ import java.util.List;
  * <p>
  * MediaSession objects are thread safe
  */
-public final class Session {
+public final class MediaSession {
     private static final String TAG = "Session";
 
     /**
@@ -89,28 +89,33 @@ public final class Session {
     /**
      * Indicates the session was disconnected because the user that the session
      * belonged to is stopping.
+     * @hide
      */
     public static final int DISCONNECT_REASON_USER_STOPPING = 1;
 
     /**
      * Indicates the session was disconnected because the provider disconnected
      * the route.
+     * @hide
      */
     public static final int DISCONNECT_REASON_PROVIDER_DISCONNECTED = 2;
 
     /**
      * Indicates the session was disconnected because the route has changed.
+     * @hide
      */
     public static final int DISCONNECT_REASON_ROUTE_CHANGED = 3;
 
     /**
      * Indicates the session was disconnected because the session owner
      * requested it disconnect.
+     * @hide
      */
     public static final int DISCONNECT_REASON_SESSION_DISCONNECTED = 4;
 
     /**
      * Indicates the session was disconnected because it was destroyed.
+     * @hide
      */
     public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
 
@@ -133,7 +138,7 @@ public final class Session {
 
     private final Object mLock = new Object();
 
-    private final SessionToken mSessionToken;
+    private final MediaSessionToken mSessionToken;
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
@@ -150,7 +155,7 @@ public final class Session {
     /**
      * @hide
      */
-    public Session(ISession binder, CallbackStub cbStub) {
+    public MediaSession(ISession binder, CallbackStub cbStub) {
         mBinder = binder;
         mCbStub = cbStub;
         ISessionController controllerBinder = null;
@@ -159,7 +164,7 @@ public final class Session {
         } catch (RemoteException e) {
             throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
         }
-        mSessionToken = new SessionToken(controllerBinder);
+        mSessionToken = new MediaSessionToken(controllerBinder);
         mPerformer = new TransportPerformer(mBinder);
     }
 
@@ -174,7 +179,7 @@ public final class Session {
 
     /**
      * Add a callback to receive updates for the MediaSession. This includes
-     * events like route updates, media buttons, and focus changes.
+     * media button and volume events.
      *
      * @param callback The callback to receive updates on.
      * @param handler The handler that events should be posted on.
@@ -295,13 +300,13 @@ public final class Session {
 
     /**
      * Retrieve a token object that can be used by apps to create a
-     * {@link SessionController} for interacting with this session. The owner of
+     * {@link MediaController} for interacting with this session. The owner of
      * the session is responsible for deciding how to distribute these tokens.
      *
      * @return A token that can be used to create a MediaController for this
      *         session
      */
-    public SessionToken getSessionToken() {
+    public MediaSessionToken getSessionToken() {
         return mSessionToken;
     }
 
@@ -311,8 +316,8 @@ public final class Session {
      * Connection updates will be sent to the callback's
      * {@link Callback#onRouteConnected(Route)} and
      * {@link Callback#onRouteDisconnected(Route, int)} methods. If the
-     * connection fails {@link Callback#onRouteDisconnected(Route, int)}
-     * will be called.
+     * connection fails {@link Callback#onRouteDisconnected(Route, int)} will be
+     * called.
      * <p>
      * If you already have a connection to this route it will be disconnected
      * before the new connection is established. TODO add an easy way to compare
@@ -320,6 +325,7 @@ public final class Session {
      *
      * @param route The route the app is trying to connect to.
      * @param request The connection request to use.
+     * @hide
      */
     public void connect(RouteInfo route, RouteOptions request) {
         if (route == null) {
@@ -338,6 +344,8 @@ public final class Session {
     /**
      * Disconnect from the current route. After calling you will be switched
      * back to the default route.
+     *
+     * @hide
      */
     public void disconnect() {
         if (mRoute != null) {
@@ -354,6 +362,7 @@ public final class Session {
      * will be used for picking valid routes.
      *
      * @param options The set of route options your app may use to connect.
+     * @hide
      */
     public void setRouteOptions(List<RouteOptions> options) {
         try {
@@ -498,6 +507,7 @@ public final class Session {
          * ongoing playback if necessary.
          *
          * @param route
+         * @hide
          */
         public void onRequestRouteChange(RouteInfo route) {
         }
@@ -507,6 +517,7 @@ public final class Session {
          * are now valid.
          *
          * @param route The route that was connected
+         * @hide
          */
         public void onRouteConnected(Route route) {
         }
@@ -526,6 +537,7 @@ public final class Session {
          *
          * @param route The route that disconnected
          * @param reason The reason for the disconnect
+         * @hide
          */
         public void onRouteDisconnected(Route route, int reason) {
         }
@@ -535,16 +547,16 @@ public final class Session {
      * @hide
      */
     public static class CallbackStub extends ISessionCallback.Stub {
-        private WeakReference<Session> mMediaSession;
+        private WeakReference<MediaSession> mMediaSession;
 
-        public void setMediaSession(Session session) {
-            mMediaSession = new WeakReference<Session>(session);
+        public void setMediaSession(MediaSession session) {
+            mMediaSession = new WeakReference<MediaSession>(session);
         }
 
         @Override
         public void onCommand(String command, Bundle extras, ResultReceiver cb)
                 throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postCommand(command, extras, cb);
             }
@@ -553,7 +565,7 @@ public final class Session {
         @Override
         public void onMediaButton(Intent mediaButtonIntent, ResultReceiver cb)
                 throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postMediaButton(mediaButtonIntent);
             }
@@ -564,7 +576,7 @@ public final class Session {
 
         @Override
         public void onRequestRouteChange(RouteInfo route) throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postRequestRouteChange(route);
             }
@@ -572,7 +584,7 @@ public final class Session {
 
         @Override
         public void onRouteConnected(RouteInfo route, RouteOptions options) {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postRouteConnected(route, options);
             }
@@ -580,7 +592,7 @@ public final class Session {
 
         @Override
         public void onRouteDisconnected(RouteInfo route, int reason) {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postRouteDisconnected(route, reason);
             }
@@ -588,7 +600,7 @@ public final class Session {
 
         @Override
         public void onPlay() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -599,7 +611,7 @@ public final class Session {
 
         @Override
         public void onPause() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -610,7 +622,7 @@ public final class Session {
 
         @Override
         public void onStop() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -621,7 +633,7 @@ public final class Session {
 
         @Override
         public void onNext() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -632,7 +644,7 @@ public final class Session {
 
         @Override
         public void onPrevious() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -643,7 +655,7 @@ public final class Session {
 
         @Override
         public void onFastForward() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -654,7 +666,7 @@ public final class Session {
 
         @Override
         public void onRewind() throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -665,7 +677,7 @@ public final class Session {
 
         @Override
         public void onSeekTo(long pos) throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -676,7 +688,7 @@ public final class Session {
 
         @Override
         public void onRate(Rating rating) throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
@@ -687,7 +699,7 @@ public final class Session {
 
         @Override
         public void onRouteEvent(RouteEvent event) throws RemoteException {
-            Session session = mMediaSession.get();
+            MediaSession session = mMediaSession.get();
             if (session != null) {
                 RouteInterface.EventListener iface
                         = session.mInterfaceListeners.get(event.getIface());
@@ -708,9 +720,9 @@ public final class Session {
     }
 
     private class MessageHandler extends Handler {
-        private Session.Callback mCallback;
+        private MediaSession.Callback mCallback;
 
-        public MessageHandler(Looper looper, Session.Callback callback) {
+        public MessageHandler(Looper looper, MediaSession.Callback callback) {
             super(looper, null, true);
             mCallback = callback;
         }

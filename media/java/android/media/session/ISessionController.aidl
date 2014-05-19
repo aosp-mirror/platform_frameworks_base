@@ -16,9 +16,9 @@
 package android.media.session;
 
 import android.content.Intent;
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionControllerCallback;
-import android.media.session.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.ResultReceiver;

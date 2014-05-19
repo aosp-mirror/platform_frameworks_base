@@ -15,6 +15,7 @@
  */
 package android.media.session;
 
+import android.media.MediaMetadata;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -23,6 +24,7 @@ import android.os.ResultReceiver;
  * A standard media control interface for Routes that support queueing and
  * transport controls. Routes may support multiple interfaces for MediaSessions
  * to interact with.
+ * @hide
  */
 public final class RoutePlaybackControls {
     private static final String TAG = "RoutePlaybackControls";

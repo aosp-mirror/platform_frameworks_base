@@ -40,6 +40,7 @@ import java.util.List;
  * interfaces. Use {@link #addRouteInterface(String)} to add an interface and
  * {@link #getRouteInterface(String)} to retrieve the interface's handle anytime
  * after it has been added.
+ * @hide
  */
 public final class RouteConnection {
     private static final String TAG = "RouteConnection";
