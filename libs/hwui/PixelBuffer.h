@@ -175,6 +175,25 @@ public:
         return 0;
     }
 
+    /**
+     * Returns the alpha channel offset in the specified format.
+     *
+     * Supported formats:
+     *      GL_ALPHA
+     *      GL_RGBA
+     */
+    static uint32_t formatAlphaOffset(GLenum format) {
+        switch (format) {
+            case GL_ALPHA:
+                return 0;
+            case GL_RGBA:
+                return 3;
+        }
+
+        ALOGE("unsupported format: %d",format);
+        return 0;
+    }
+
 protected:
     /**
      * Creates a new render buffer in the specified format and dimensions.
