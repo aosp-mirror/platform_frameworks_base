@@ -19,6 +19,8 @@ package com.android.server.media;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +42,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -75,6 +78,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final Handler mHandler = new Handler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
 
+    private KeyguardManager mKeyguardManager;
+
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
 
@@ -98,6 +103,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         Watchdog.getInstance().addMonitor(this);
         updateUser();
+        mKeyguardManager =
+                (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
     }
 
     /**
@@ -601,6 +608,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 "android.media.AudioService.WAKELOCK_ACQUIRED";
         private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; // magic number
 
+        private boolean mVoiceButtonDown = false;
+        private boolean mVoiceButtonHandled = false;
+
         @Override
         public ISession createSession(String packageName, ISessionCallback cb, String tag,
                 int userId) throws RemoteException {
@@ -679,36 +689,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             try {
                 synchronized (mLock) {
-                    MediaSessionRecord mbSession = mPriorityStack
+                    MediaSessionRecord session = mPriorityStack
                             .getDefaultMediaButtonSession(mCurrentUserId);
-                    if (mbSession != null) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Sending media key to " + mbSession.getSessionInfo());
-                        }
-                        if (needWakeLock) {
-                            mKeyEventReceiver.aquireWakeLockLocked();
-                        }
-                        // If we don't need a wakelock use -1 as the id so we
-                        // won't release it later
-                        mbSession.sendMediaButton(keyEvent,
-                                needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                                mKeyEventReceiver);
+                    if (isVoiceKey(keyEvent.getKeyCode())) {
+                        handleVoiceKeyEventLocked(keyEvent, needWakeLock, session);
                     } else {
-                        if (needWakeLock) {
-                            mMediaEventWakeLock.acquire();
-                        }
-                        if (DEBUG) {
-                            Log.d(TAG, "Sending media key ordered broadcast");
-                        }
-                        // Fallback to legacy behavior
-                        Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-                        if (needWakeLock) {
-                            keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
-                                    WAKELOCK_RELEASE_ON_FINISHED);
-                        }
-                        getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
-                                null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
+                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock, session);
                     }
                 }
             } finally {
@@ -749,6 +735,110 @@ public class MediaSessionService extends SystemService implements Monitor {
                     user.dumpLocked(pw, "");
                 }
             }
+        }
+
+        private void handleVoiceKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock,
+                MediaSessionRecord session) {
+            if (session != null && session.hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
+                // If the phone app has priority just give it the event
+                dispatchMediaKeyEventLocked(keyEvent, needWakeLock, session);
+                return;
+            }
+            int action = keyEvent.getAction();
+            boolean isLongPress = (keyEvent.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0;
+            if (action == KeyEvent.ACTION_DOWN) {
+                if (keyEvent.getRepeatCount() == 0) {
+                    mVoiceButtonDown = true;
+                    mVoiceButtonHandled = false;
+                } else if (mVoiceButtonDown && !mVoiceButtonHandled && isLongPress) {
+                    mVoiceButtonHandled = true;
+                    startVoiceInput(needWakeLock);
+                }
+            } else if (action == KeyEvent.ACTION_UP) {
+                if (mVoiceButtonDown) {
+                    mVoiceButtonDown = false;
+                    if (!mVoiceButtonHandled && !keyEvent.isCanceled()) {
+                        // Resend the down then send this event through
+                        KeyEvent downEvent = KeyEvent.changeAction(keyEvent, KeyEvent.ACTION_DOWN);
+                        dispatchMediaKeyEventLocked(downEvent, needWakeLock, session);
+                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock, session);
+                    }
+                }
+            }
+        }
+
+        private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock,
+                MediaSessionRecord session) {
+            if (session != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Sending media key to " + session.getSessionInfo());
+                }
+                if (needWakeLock) {
+                    mKeyEventReceiver.aquireWakeLockLocked();
+                }
+                // If we don't need a wakelock use -1 as the id so we
+                // won't release it later
+                session.sendMediaButton(keyEvent,
+                        needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
+                        mKeyEventReceiver);
+            } else {
+                if (needWakeLock) {
+                    mMediaEventWakeLock.acquire();
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Sending media key ordered broadcast");
+                }
+                // Fallback to legacy behavior
+                Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                if (needWakeLock) {
+                    keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
+                            WAKELOCK_RELEASE_ON_FINISHED);
+                }
+                getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                        null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
+            }
+        }
+
+        private void startVoiceInput(boolean needWakeLock) {
+            Intent voiceIntent = null;
+            // select which type of search to launch:
+            // - screen on and device unlocked: action is ACTION_WEB_SEARCH
+            // - device locked or screen off: action is
+            // ACTION_VOICE_SEARCH_HANDS_FREE
+            // with EXTRA_SECURE set to true if the device is securely locked
+            PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+            boolean isLocked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+            if (!isLocked && pm.isScreenOn()) {
+                voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
+                Log.i(TAG, "voice-based interactions: about to use ACTION_WEB_SEARCH");
+            } else {
+                voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
+                voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE,
+                        isLocked && mKeyguardManager.isKeyguardSecure());
+                Log.i(TAG, "voice-based interactions: about to use ACTION_VOICE_SEARCH_HANDS_FREE");
+            }
+            // start the search activity
+            if (needWakeLock) {
+                mMediaEventWakeLock.acquire();
+            }
+            try {
+                if (voiceIntent != null) {
+                    voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    getContext().startActivityAsUser(voiceIntent, UserHandle.CURRENT);
+                }
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "No activity for search: " + e);
+            } finally {
+                if (needWakeLock) {
+                    mMediaEventWakeLock.release();
+                }
+            }
+        }
+
+        private boolean isVoiceKey(int keyCode) {
+            return keyCode == KeyEvent.KEYCODE_HEADSETHOOK;
         }
 
         private KeyEventWakeLockReceiver mKeyEventReceiver = new KeyEventWakeLockReceiver(mHandler);
