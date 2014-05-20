@@ -498,34 +498,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations.
-     */
-    public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
-        // TODO: Return null if this feature is not supported by hardware.
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            return new BluetoothLeAdvertiser(iGatt);
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get BluetoothLeAdvertiser, error: " + e);
-            return null;
-        }
-    }
-
-    /**
-     * Returns a {@link BluetoothLeScanner} object for Bluetooth LE scan operations.
-     */
-    public BluetoothLeScanner getBluetoothLeScanner() {
-        // TODO: Return null if BLE scan is not supported by hardware.
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            return new BluetoothLeScanner(iGatt);
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get BluetoothLeScanner, error: " + e);
-            return null;
-        }
-    }
-
-    /**
      * Interface for BLE advertising callback.
      *
      * @hide
@@ -2052,10 +2024,6 @@ public final class BluetoothAdapter {
             }
         }
 
-        @Override
-        public void onMultiAdvertiseCallback(int status) {
-            // no op
-        }
         /**
          * Callback reporting LE ATT MTU.
          * @hide

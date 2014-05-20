@@ -581,15 +581,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onAdvertiseStateChange(int state, int status) {
                 if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
                         + state + " status=" + status);
-            }
-
-            /**
-             * @hide
-             */
-            @Override
-            public void onMultiAdvertiseCallback(int status) {
-                // no op.
-            }
+	    }
 
             /**
              * Callback invoked when the MTU for a given connection changes
