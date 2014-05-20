@@ -95,9 +95,11 @@ public class RecentsConfiguration {
                 Configuration.ORIENTATION_LANDSCAPE;
         transposeSearchLayoutWithOrientation =
                 res.getBoolean(R.bool.recents_transpose_search_layout_with_orientation);
-        Console.log(Constants.Log.UI.MeasureAndLayout,
-                "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
-                Console.AnsiGreen);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout,
+                    "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
+                    Console.AnsiGreen);
+        }
 
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
         animationPxMovementPerSecond =

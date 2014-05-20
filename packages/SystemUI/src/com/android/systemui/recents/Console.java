@@ -42,6 +42,9 @@ public class Console {
     public static final String AnsiCyan = "\u001B[36m";     // ClickEvents
     public static final String AnsiWhite = "\u001B[37m";
 
+    // Console enabled state
+    public static final boolean Enabled = false;
+
     /** Logs a key */
     public static void log(String key) {
         log(true, key, "", AnsiReset);

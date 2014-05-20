@@ -354,7 +354,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         float dim = (1f - getScaleX()) / scaleRange;
         dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));
         mDim = Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
-        invalidate();
     }
 
     @Override
