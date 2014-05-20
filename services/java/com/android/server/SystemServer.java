@@ -639,15 +639,15 @@ public final class SystemServer {
                 }
 
                 try {
-                    mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi PasspointService", e);
-                }
-
-                try {
                     mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi Service", e);
+                }
+
+                try {
+                    mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi PasspointService", e);
                 }
 
                 try {
