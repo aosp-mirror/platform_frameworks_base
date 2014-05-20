@@ -266,6 +266,17 @@ public class UserManager {
      */
     public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
 
+    /**
+     * Key for user restrictions. Specifies that the user is not allowed to send or receive
+     * phone calls or text messages. Emergency calls may still be permitted.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_TELEPHONY = "no_telephony";
+
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
     /** @hide */

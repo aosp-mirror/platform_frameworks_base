@@ -789,6 +789,7 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_TELEPHONY);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -941,6 +942,7 @@ public class UserManagerService extends IUserManager.Stub {
                                 UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_TELEPHONY);
                     }
                 }
             }

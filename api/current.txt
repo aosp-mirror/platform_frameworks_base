@@ -21042,6 +21042,7 @@ package android.os {
     field public static final java.lang.String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
     field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
+    field public static final java.lang.String DISALLOW_TELEPHONY = "no_telephony";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
     field public static final java.lang.String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
