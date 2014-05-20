@@ -35,7 +35,7 @@ import android.widget.FrameLayout;
 public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
-    private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .4f;
+    private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .33f;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
