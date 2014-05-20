@@ -289,6 +289,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
+    // The flag describing a full screen app window (where the app takes care of drawing under the
+    // SystemUI bars)
+    private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -3193,8 +3198,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            boolean isFullScreen =
+                    ((win.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
+                            == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    mCurConfiguration.orientation, containingFrame, contentInsets);
+                    mCurConfiguration.orientation, containingFrame, contentInsets, isFullScreen);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
