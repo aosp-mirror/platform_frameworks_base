@@ -38,10 +38,12 @@ import java.io.IOException;
  * order, so the element with the largest index will be drawn on top.
  * <p>
  * It can be defined in an XML file with the <code>&lt;layer-list></code> element.
- * Each Drawable in the layer is defined in a nested <code>&lt;item></code>. For more
- * information, see the guide to <a
- * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+ * Each Drawable in the layer is defined in a nested <code>&lt;item></code>.
+ * <p>
+ * For more information, see the guide to
+ * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
  *
+ * @attr ref android.R.styleable#LayerDrawable_paddingMode
  * @attr ref android.R.styleable#LayerDrawableItem_left
  * @attr ref android.R.styleable#LayerDrawableItem_top
  * @attr ref android.R.styleable#LayerDrawableItem_right
@@ -53,10 +55,16 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * Padding mode used to nest each layer inside the padding of the previous
      * layer.
+     *
+     * @see #setPaddingMode(int)
      */
     public static final int PADDING_MODE_NEST = 0;
 
-    /** Padding mode used to stack each layer directly atop the previous layer. */
+    /**
+     * Padding mode used to stack each layer directly atop the previous layer.
+     *
+     * @see #setPaddingMode(int)
+     */
     public static final int PADDING_MODE_STACK = 1;
 
     LayerState mLayerState;
@@ -127,9 +135,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
 
-        final TypedArray a = obtainAttributes(
-                r, theme, attrs, R.styleable.LayerDrawable);
-        inflateStateFromTypedArray(a);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.LayerDrawable);
+        updateStateFromTypedArray(a);
         a.recycle();
 
         inflateLayers(r, parser, attrs, theme);
@@ -141,25 +148,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * Initializes the constant state from the values in the typed array.
      */
-    private void inflateStateFromTypedArray(TypedArray a) {
+    private void updateStateFromTypedArray(TypedArray a) {
         final LayerState state = mLayerState;
 
         // Extract the theme attributes, if any.
         final int[] themeAttrs = a.extractThemeAttrs();
         state.mThemeAttrs = themeAttrs;
 
-        if (themeAttrs == null || themeAttrs[R.styleable.LayerDrawable_opacity] == 0) {
-            mOpacityOverride = a.getInt(R.styleable.LayerDrawable_opacity, PixelFormat.UNKNOWN);
-        }
+        mOpacityOverride = a.getInt(R.styleable.LayerDrawable_opacity, mOpacityOverride);
 
-        if (themeAttrs == null || themeAttrs[R.styleable.LayerDrawable_autoMirrored] == 0) {
-            state.mAutoMirrored = a.getBoolean(R.styleable.LayerDrawable_autoMirrored, false);
-        }
-
-        if (themeAttrs == null || themeAttrs[R.styleable.LayerDrawableItem_drawable] == 0) {
-            state.mPaddingMode = a.getInteger(
-                    R.styleable.LayerDrawableItem_drawable, PADDING_MODE_NEST);
-        }
+        state.mAutoMirrored = a.getBoolean(R.styleable.LayerDrawable_autoMirrored,
+                state.mAutoMirrored);
+        state.mPaddingMode = a.getInteger(R.styleable.LayerDrawable_paddingMode,
+                state.mPaddingMode);
     }
 
     /**
@@ -181,9 +182,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
-            a = obtainAttributes(
-                    r, theme, attrs, R.styleable.LayerDrawableItem);
+            a = obtainAttributes(r, theme, attrs, R.styleable.LayerDrawableItem);
 
+            final int[] themeAttrs = a.extractThemeAttrs();
             final int left = a.getDimensionPixelOffset(
                     R.styleable.LayerDrawableItem_left, 0);
             final int top = a.getDimensionPixelOffset(
@@ -197,7 +198,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             final int id = a.getResourceId(
                     R.styleable.LayerDrawableItem_id, View.NO_ID);
 
-            // TODO: Cache typed array, if necessary.
             a.recycle();
 
             final Drawable dr;
@@ -214,7 +214,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
             }
 
-            addLayer(dr, id, left, top, right, bottom);
+            addLayer(dr, themeAttrs, id, left, top, right, bottom);
         }
     }
 
@@ -224,7 +224,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         final LayerState state = mLayerState;
         if (state == null) {
-            throw new RuntimeException("Can't apply theme to <layer-list> with no constant state");
+            return;
         }
 
         final int[] themeAttrs = state.mThemeAttrs;
@@ -239,34 +239,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
-            final Drawable layer = array[i].mDrawable;
-            if (layer.canApplyTheme()) {
-                layer.applyTheme(t);
+            final ChildDrawable layer = array[i];
+            final Drawable d = layer.mDrawable;
+            if (d.canApplyTheme()) {
+                d.applyTheme(t);
             }
         }
 
         ensurePadding();
         onStateChange(getState());
-    }
-
-    /**
-     * Updates the constant state from the values in the typed array.
-     */
-    private void updateStateFromTypedArray(TypedArray a) {
-        final LayerState state = mLayerState;
-
-        if (a.hasValue(R.styleable.LayerDrawable_opacity)) {
-            mOpacityOverride = a.getInt(R.styleable.LayerDrawable_opacity, PixelFormat.UNKNOWN);
-        }
-
-        if (a.hasValue(R.styleable.LayerDrawable_autoMirrored)) {
-            state.mAutoMirrored = a.getBoolean(R.styleable.LayerDrawable_autoMirrored, false);
-        }
-
-        if (a.hasValue(R.styleable.LayerDrawableItem_drawable)) {
-            state.mPaddingMode = a.getInteger(
-                    R.styleable.LayerDrawableItem_drawable, PADDING_MODE_NEST);
-        }
     }
 
     @Override
@@ -283,14 +264,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final ChildDrawable[] array = state.mChildren;
         final int N = state.mNum;
         for (int i = 0; i < N; i++) {
-            if (array[i].mDrawable.canApplyTheme()) {
+            final ChildDrawable layer = array[i];
+            if (layer.mThemeAttrs != null || layer.mDrawable.canApplyTheme()) {
                 return true;
             }
         }
 
         return false;
     }
-    
+
     /**
      * @hide
      */
@@ -315,13 +297,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * Add a new layer to this drawable. The new layer is identified by an id.
      *
      * @param layer The drawable to add as a layer.
+     * @param themeAttrs Theme attributes extracted from the layer.
      * @param id The id of the new layer.
      * @param left The left padding of the new layer.
      * @param top The top padding of the new layer.
      * @param right The right padding of the new layer.
      * @param bottom The bottom padding of the new layer.
      */
-    private void addLayer(Drawable layer, int id, int left, int top, int right, int bottom) {
+    private void addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
+            int bottom) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
         final int i = st.mNum;
@@ -339,6 +323,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final ChildDrawable childDrawable = new ChildDrawable();
         st.mChildren[i] = childDrawable;
         childDrawable.mId = id;
+        childDrawable.mThemeAttrs = themeAttrs;
         childDrawable.mDrawable = layer;
         childDrawable.mDrawable.setAutoMirrored(isAutoMirrored());
         childDrawable.mInsetL = left;
@@ -471,8 +456,14 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      *
      * @param mode padding mode, one of:
      *            <ul>
-     *            <li>{@link #PADDING_MODE_NEST} <li>{@link #PADDING_MODE_STACK}
+     *            <li>{@link #PADDING_MODE_NEST} to nest each layer inside the
+     *            padding of the previous layer
+     *            <li>{@link #PADDING_MODE_STACK} to stack each layer directly
+     *            atop the previous layer
      *            </ul>
+     *
+     * @see #getPaddingMode()
+     * @attr ref android.R.styleable#LayerDrawable_paddingMode
      */
     public void setPaddingMode(int mode) {
         if (mLayerState.mPaddingMode != mode) {
@@ -482,7 +473,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @return the current padding mode
+     *
      * @see #setPaddingMode(int)
+     * @attr ref android.R.styleable#LayerDrawable_paddingMode
      */
     public int getPaddingMode() {
       return mLayerState.mPaddingMode;
@@ -905,7 +898,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         private boolean mHaveIsStateful;
         private boolean mIsStateful;
 
-        private boolean mAutoMirrored;
+        private boolean mAutoMirrored = false;
 
         private int mPaddingMode = PADDING_MODE_NEST;
 

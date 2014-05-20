@@ -864,6 +864,7 @@ package android {
     field public static final int paddingBottom = 16842969; // 0x10100d9
     field public static final int paddingEnd = 16843700; // 0x10103b4
     field public static final int paddingLeft = 16842966; // 0x10100d6
+    field public static final int paddingMode = 16843866; // 0x101045a
     field public static final int paddingRight = 16842968; // 0x10100d8
     field public static final int paddingStart = 16843699; // 0x10103b3
     field public static final int paddingTop = 16842967; // 0x10100d7
@@ -11410,16 +11411,6 @@ package android.graphics.drawable {
     method public void reverseTransition(int);
     method public void setCrossFadeEnabled(boolean);
     method public void startTransition(int);
-  }
-
-  public class VectorDrawable extends android.graphics.drawable.Drawable {
-    ctor public VectorDrawable();
-    method public void draw(android.graphics.Canvas);
-    method public int getOpacity();
-    method public void setAlpha(int);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setPadding(android.graphics.Rect);
-    method public void setPadding(int, int, int, int);
   }
 
 }
