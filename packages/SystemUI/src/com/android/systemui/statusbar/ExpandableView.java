@@ -21,34 +21,74 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 /**
  * An abstract view for expandable views.
  */
-public abstract class ExpandableView extends ViewGroup {
+public abstract class ExpandableView extends FrameLayout {
+
+    private final int mMaxNotificationHeight;
 
     private OnHeightChangedListener mOnHeightChangedListener;
     protected int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
+    private ArrayList<View> mMatchParentViews = new ArrayList<View>();
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mMaxNotificationHeight = getResources().getDimensionPixelSize(
+                R.dimen.notification_max_height);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int ownMaxHeight = mMaxNotificationHeight;
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
+        boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
+        if (hasFixedHeight || isHeightLimited) {
+            int size = MeasureSpec.getSize(heightMeasureSpec);
+            ownMaxHeight = Math.min(ownMaxHeight, size);
+        }
+        int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
+        int maxChildHeight = 0;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            int childHeightSpec = newHeightSpec;
+            ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
+            if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+                if (layoutParams.height >= 0) {
+                    // An actual height is set
+                    childHeightSpec = layoutParams.height > ownMaxHeight
+                        ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
+                        : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
+                }
+                child.measure(widthMeasureSpec, childHeightSpec);
+                int childHeight = child.getMeasuredHeight();
+                maxChildHeight = Math.max(maxChildHeight, childHeight);
+            } else {
+                mMatchParentViews.add(child);
+            }
+        }
+        int ownHeight = hasFixedHeight ? ownMaxHeight : maxChildHeight;
+        newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
+        for (View child : mMatchParentViews) {
+            child.measure(widthMeasureSpec, newHeightSpec);
+        }
+        mMatchParentViews.clear();
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, ownHeight);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            int height = child.getMeasuredHeight();
-            int width = child.getMeasuredWidth();
-            int center = getWidth() / 2;
-            int childLeft = center - width / 2;
-            child.layout(childLeft,
-                    0,
-                    childLeft + width,
-                    height);
-        }
+        super.onLayout(changed, left, top, right, bottom);
         if (!mActualHeightInitialized && mActualHeight == 0) {
             mActualHeight = getInitialHeight();
         }
