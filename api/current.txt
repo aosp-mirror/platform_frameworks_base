@@ -12828,15 +12828,14 @@ package android.hardware.usb {
 
   public class UsbConfiguration implements android.os.Parcelable {
     method public int describeContents();
-    method public int getAttributes();
     method public int getId();
     method public android.hardware.usb.UsbInterface getInterface(int);
     method public int getInterfaceCount();
     method public int getMaxPower();
     method public java.lang.String getName();
+    method public boolean isRemoteWakeup();
+    method public boolean isSelfPowered();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int ATTR_REMOTE_WAKEUP_MASK = 32; // 0x20
-    field public static final int ATTR_SELF_POWERED_MASK = 64; // 0x40
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 

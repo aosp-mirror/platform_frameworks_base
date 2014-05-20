@@ -104,7 +104,7 @@ public class UsbDeviceConnection {
      * Sets the current {@link android.hardware.usb.UsbInterface}.
      * Used to select between two interfaces with the same ID but different alternate setting.
      *
-     * @return true if the interface was successfully released
+     * @return true if the interface was successfully selected
      */
     public boolean setInterface(UsbInterface intf) {
         return native_set_interface(intf.getId(), intf.getAlternateSetting());

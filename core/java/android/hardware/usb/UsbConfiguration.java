@@ -44,13 +44,13 @@ public class UsbConfiguration implements Parcelable {
      * Mask for "self-powered" bit in the configuration's attributes.
      * @see #getAttributes
      */
-    public static final int ATTR_SELF_POWERED_MASK = 1 << 6;
+    private static final int ATTR_SELF_POWERED = 1 << 6;
 
     /**
      * Mask for "remote wakeup" bit in the configuration's attributes.
      * @see #getAttributes
      */
-    public static final int ATTR_REMOTE_WAKEUP_MASK = 1 << 5;
+    private static final int ATTR_REMOTE_WAKEUP = 1 << 5;
 
     /**
      * UsbConfiguration should only be instantiated by UsbService implementation
@@ -83,19 +83,23 @@ public class UsbConfiguration implements Parcelable {
     }
 
     /**
-     * Returns the configuration's attributes field.
-     * This field contains a bit field with the following flags:
+     * Returns the self-powered attribute value configuration's attributes field.
+     * This attribute indicates that the device has a power source other than the USB connection.
      *
-     * Bit 7: always set to 1
-     * Bit 6: self-powered
-     * Bit 5: remote wakeup enabled
-     * Bit 0-4: reserved
-     * @see #ATTR_SELF_POWERED_MASK
-     * @see #ATTR_REMOTE_WAKEUP_MASK
-     * @return the configuration's attributes
+     * @return the configuration's self-powered attribute
      */
-    public int getAttributes() {
-        return mAttributes;
+    public boolean isSelfPowered() {
+        return (mAttributes & ATTR_SELF_POWERED) != 0;
+    }
+
+    /**
+     * Returns the remote-wakeup attribute value configuration's attributes field.
+     * This attributes that the device may signal the host to wake from suspend.
+     *
+     * @return the configuration's remote-wakeup attribute
+     */
+    public boolean isRemoteWakeup() {
+        return (mAttributes & ATTR_REMOTE_WAKEUP) != 0;
     }
 
     /**
