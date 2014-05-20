@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"Št. dni: <xliff:g id="DAYS">%1$d</xliff:g>"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> h"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Brez naslova&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -135,6 +146,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinhronizacija"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Preveč izbrisov vsebine <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pomnilnik tabličnega računalnika je poln. Izbrišite nekaj datotek, da sprostite prostor."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Shramba ure je polna. Izbrišite nekaj datotek, da sprostite prostor."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pomnilnik telefona je poln. Izbrišite nekaj datotek, da sprostite prostor."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Omrežje je lahko nadzorovano"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Neznana tretja oseba"</string>
@@ -152,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Vklopi zvonjenje"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Se zaustavlja ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablični računalnik se bo zaustavil."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Ura se bo izklopila."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon bo zaustavljen."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Ali želite izklopiti napravo?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Vnovičen zagon v varnem načinu"</string>
@@ -171,9 +184,12 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Način za letalo"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Način za letalo je VKLOPLJEN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Način za letalo je IZKLOPLJEN"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Nastavitve"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
     <string name="safeMode" msgid="2788228061547930246">"Varni način"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Osebno"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Služba"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Plačljive storitve"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Dovolite stvari, za katere bo morda treba plačati."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaša sporočila"</string>
@@ -256,7 +272,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odstranjevanje bližnjic"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Aplikaciji omogoča odstranjevanje bližnjic z začetnega zaslona brez posredovanja uporabnika."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"preusmeritev odhodnih klicev"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Aplikaciji omogoča, da obdela odhodne klice in spreminja klicne številke. S tem lahko aplikacija nadzira, preusmerja ali preprečuje odhodne klice."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Aplikaciji dovoli ogled klicane številke pri odhodnem klicu in ji omogoča preusmeritev klica na drugo številko ali prekinitev klica."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"prejemanje sporočil (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogoča prejemanje in obdelavo SMS-ov. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prejemanje sporočil (MMS)"</string>
@@ -315,12 +331,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Programu omogoča dostop do vsebine aktivnega okna. Zlonamerni programi lahko dobijo vso vsebino okna in pregledajo njeno besedilo razen gesel."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"začasno omogoči pripomočke za ljudi s posebnimi potrebami"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Aplikaciji omogoča, da v napravi začasno omogoči pripomočke za ljudi s posebnimi potrebami. Zlonamerne aplikacije jih lahko omogočijo brez soglasja uporabnika."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"prenos podatkov o oknih"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Omogoča, da aplikacija iz upravitelja oken pridobiva podatke o oknih. Zlonamerne aplikacije lahko pridobivajo podatke, namenjene za notranjo uporabo v sistemu."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"pridobivanje žetona okna"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Aplikaciji dovoli, da pridobi žeton okna. Zlonamerne aplikacije lahko z oknom aplikacije vzpostavijo stik brez pooblastila in se lažno predstavljajo kot sistem."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"pridobivanje statističnih podatkov o okvirjih"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Aplikaciji dovoli, da zbira statistične podatke o okvirjih. Zlonamerne aplikacije lahko vidijo statistične podatke o okvirjih oken iz drugih aplikacij."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtriranje dogodkov"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Omogoča, da aplikacija registrira vhodni filter, ki pred razpošiljanjem filtrira tok vseh uporabniških dogodkov. Zlonamerne aplikacije lahko nadzirajo uporabniški vmesnik sistema brez posega uporabnika."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"povečevanje zaslona"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Omogoča aplikaciji povečevanje vsebine zaslona. Zlonamerne aplikacije lahko preoblikujejo vsebino zaslona tako, da je naprava neuporabna."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"delna zaustavitev"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Upravitelja dejavnosti preklopi v stanje za zaustavitev. Ne izvede celotne zaustavitve."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>
@@ -382,12 +398,18 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Lastniku omogoča povezovanje z vmesnikom storitve navideznega zasebnega omrežja najvišje ravni. Ne uporabljajte za navadne programe."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"povezovanje z ozadjem"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Imetniku omogoča povezavo z vmesnikom ozadja najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"povezovanje z glasovnim interaktorjem"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Imetniku omogoča povezovanje z vmesnikom storitve glasovne interakcije najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"povezava z oddaljenim prikazom"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Imetniku omogoča povezovanje z vmesnikom oddaljenega prikaza najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"poveži s storitvijo pripomočka"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lastniku omogoča povezovanje z vmesnikom storitve pripomočka najvišje ravni. Tega ni treba nikoli uporabiti za navadne programe."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"Povezava s storitvijo ponudnika poti"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Omogoča imetniku, da se povezuje z registriranimi ponudniki poti. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s skrbnikom naprave"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Omogoča lastniku, da pošlje namere skrbniku naprave. Nikoli se ne uporablja za navadne programe."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"povezava s TV-vhodom"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Imetniku omogoča povezovanje z vmesnikom TV-vhoda najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"dodajanje ali odstranjevanje skrbnikov naprave"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Imetniku omogoča, da doda ali odstrani aktivne skrbnike naprave. Normalne aplikacije tega načeloma ne potrebujejo."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"spreminjanje usmerjenosti zaslona"</string>
@@ -423,8 +445,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Programu omogoča, da uporabi kateri koli dekodirnik večpredstavnosti za predvajanje."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje preverjenih poverilnic"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Aplikaciji dovoli nameščanje in odstranjevanje potrdil overitelja potrdil kot preverjenih poverilnic."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"vezanje na nedejavne storitve"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"To dovoljenje dovoli sistemu Android vezanje nedejavnih storitev aplikacije."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"izvajanje aplikacije ob nedejavnosti"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"To dovoljenje sistemu Android omogoča, da izvaja aplikacijo v ozadju, ko naprava ni v uporabi."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"branje/pisanje v sredstva, ki so v lasti skupine za diagnostiko"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Programu omogoča branje in pisanje na poljuben vir, ki je v lasti skupine za diagnostiko; na primer datoteke v mapi /dev. To lahko vpliva na stabilnost in varnost sistema. To naj uporablja SAMO izdelovalec ali operater za diagnostiko, specifično za strojno opremo."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogočanje ali onemogočanje komponent programa"</string>
@@ -462,6 +484,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Aplikaciji omogoča branje osebnih podatkov v profilu, ki so shranjeni v napravi, na primer ime in podatki za stik. To pomeni, da vas lahko aplikacija prepozna in vaše podatke v profilu pošlje drugim."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"spreminj. vaše osebne vizitke"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogoča spreminjanje ali dodajanje osebnih podatkov v profilu, ki so shranjeni v napravi, na primer ime in podatki za stik. To pomeni, da vas lahko aplikacija prepozna in vaše podatke v profilu pošlje drugim."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"tipala telesnih funkcij (npr. merilniki srčnega utripa)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Aplikaciji dovoli dostop do podatkov tipal, ki jih uporabljate za merjenje procesov v telesu, kot je srčni utrip."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"branje vašega družabnega toka"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogoča dostop do vaših objav in objav vaših prijateljev v družabnih omrežjih ter njihovo sinhronizacijo. Previdno pri objavljanju informacij – aplikacija lahko s tem bere komunikacijo med vami in prijatelji v družabnih omrežjih, ne glede na zasebnost. Opomba: Tega dovoljenja ni mogoče uveljaviti v vseh družabnih omrežjih."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje v vaš družabni tok"</string>
@@ -563,6 +587,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Programu omogoča nadziranje telefonskih funkcij naprave. Program lahko s tem dovoljenjem preklaplja omrežja, vklopi ali izklopi radio v telefonu, ne da bi vas obvestil."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"branje stanja in identitete telefona"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogoča dostop do funkcij telefona v napravi. S tem dovoljenjem lahko aplikacija določi telefonsko številko in ID-je naprave, določi lahko tudi, ali je klic aktiven, in oddaljeno številko, s katero je klic povezan."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"branje natančnih stanj telefona"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Aplikaciji dovoli dostop do natančnih stanj telefona. To dovoljenje aplikaciji omogoča ugotoviti pravo stanje klica; ali je klic aktiven ali v ozadju; neuspele klice; natančno stanje podatkovne povezave in neuspele podatkovne povezave."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"preprečitev prehoda tabličnega računalnika v stanje pripravljenosti"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"preprečevanje prehoda v stanje pripravljenosti telefona"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Omogoča, da program prepreči prehod tabličnega računalnika v stanje pripravljenosti."</string>
@@ -630,6 +656,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Sprememba stanja omrežja WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Aplikaciji omogoča, da vzpostavi povezavo med tabličnim računalnikom in omrežjem WiMAX ter jo prekine."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Aplikaciji omogoča, da vzpostavi povezavo med telefonom in omrežjem WiMAX ter jo prekine."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ocenjevanje omrežij"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Aplikaciji dovoli, da omrežja razvršča in vpliva na to, katera naj tablični računalnik prednostno izbere."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Aplikaciji dovoli, da omrežja razvršča in vpliva na to, katera naj telefon prednostno izbere."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"seznanitev z napravami Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Aplikaciji omogoča ogled konfiguracije Bluetootha tabličnega računalnika ter vzpostavljanje in sprejemanje povezave s seznanjenimi napravami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Aplikaciji omogoča ogled konfiguracije Bluetootha telefona ter ustvarjanje in sprejemanje povezave s seznanjenimi napravami."</string>
@@ -683,10 +712,16 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dovoli aplikaciji, da prenese, razišče in izbriše obvestila, tudi tista, ki so jih objavile druge aplikacije."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"poveži se s storitvijo poslušalca obvestil"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lastniku omogoča povezovanje z vmesnikom storitve poslušalca obvestil najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"povezovanje s storitvijo ponudnika pogojev"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Imetniku omogoča povezovanje z vmesnikom storitve ponudnika pogojev najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"sprožitev operaterjeve aplikacije za konfiguracijo"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lastniku omogoča sproženje operaterjeve aplikacije za konfiguracijo. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"spremljanje razmer v omrežju"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Aplikaciji omogoča spremljanje razmer v omrežju. Pri navadnih aplikacijah to ne bi smelo biti potrebno."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"sprememba umerjanja vhodne naprave"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Aplikaciji dovoli spreminjanje parametrov za umerjanje zaslona na dotik. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"dostop do potrdil za upravljanje digitalnih pravic"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogoča pripravo in uporabo potrdil za upravljanje digitalnih pravic. To naj ne bi bilo nikoli potrebno za običajne aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
@@ -1319,6 +1354,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Aplikaciji omogoča dostop do varne shrambe Keyguard."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Nadzira prikaz in skrivanje zaklepanja tipkovnice"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Aplikaciji omogoča nadzor zaklepanja tipkovnice."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Spremljanje sprememb stanja zaupanja."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Aplikaciji dovoli spremljanje sprememb stanja zaupanja."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Povezovanje s storitvijo posrednikov zaupanja"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Aplikaciji dovoli povezovanje s storitvijo posrednikov zaupanja."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Uporaba sistema za posodobitev in obnovitev"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Aplikaciji dovoli uporabo sistema za obnovitev in posodobitev sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dvakrat se dotaknite za nadzor povečave/pomanjšave"</string>
@@ -1345,6 +1384,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ozadje"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Spreminjanje ozadja"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Poslušalec obvestil"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Ponudnik pogojev"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktiviran"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN je aktiviral program <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Dotaknite se, če želite upravljati omrežje."</string>

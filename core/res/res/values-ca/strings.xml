@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dies"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> hores"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuts"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sense títol&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -135,8 +146,9 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronització"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Massa supressions de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"L\'emmagatzematge de la tauleta és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"L\'emmagatzematge del rellotge està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"És possible que la xarxa estigui supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
@@ -152,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activat"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"S\'està apagant..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"La tauleta s\'apagarà."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"El rellotge s\'apagarà."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"El telèfon s\'apagarà."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vols apagar-lo?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reinicia en mode segur"</string>
@@ -171,9 +184,12 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode d\'avió"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Configuració"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Feina"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Dur a terme activitats de pagament."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Missatges"</string>
@@ -256,7 +272,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstal·la dreceres"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"desviació de les trucades sortints"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet que l\'aplicació processi les trucades sortints i que canviï el número que es marcarà. Aquest permís permet que l\'aplicació supervisi, redirigeixi o bloquegi les trucades sortints."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permet que l\'aplicació vegi el número que s\'està marcant durant una trucada sortint, amb l\'opció de redirigir la trucada a un altre número o bé de cancel·lar-la completament."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recepció de missatges de text (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permet que l\'aplicació rebi i processi missatges SMS. Això vol dir que l\'aplicació pot controlar o suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recepció de missatges de text (MMS)"</string>
@@ -315,12 +331,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permet que l\'aplicació recuperi el contingut de la finestra activa. Les aplicacions malicioses poden recuperar el contingut de tota la finestra i examinar-ne tot el text, excepte les contrasenyes."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activació temporal de l\'accessibilitat"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permet que una aplicació activi temporalment l\'accessibilitat al dispositiu. És possible que les aplicacions malicioses activin l\'accessibilitat sense el consentiment de l\'usuari."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recupera informació de les finestres"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet que una aplicació recuperi informació sobre les finestres del gestor de finestres. Aplicacions malicioses podrien recuperar informació dirigida a la utilització per part del sistema intern."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"recuperació del testimoni de la finestra"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Permet que una aplicació recuperi el testimoni de la finestra. Les aplicacions malicioses poden suplantar la identitat del sistema per dur a terme una interacció no autoritzada amb la finestra de l\'aplicació."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"recuperació d\'estadístiques de fotogrames"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Permet que una aplicació recopili estadístiques de fotogrames. Les aplicacions malicioses poden veure les estadístiques de fotogrames de finestres d\'altres aplicacions."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtra els esdeveniments"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet que una aplicació registri un filtre d\'entrada per a l\'emissió de tots els esdeveniments d\'usuari abans no s\'enviïn. Aplicacions malicioses podrien controlar la IU del sistema sense la intervenció de l\'usuari."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"augment de la pantalla"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permet a una aplicació augmentar el contingut d\'una pantalla. Les aplicacions malicioses poden transformar el contingut de la pantalla de manera que el dispositiu no es pugui fer servir."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"apagar parcialment"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
@@ -382,10 +398,14 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de VPN. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enllaça amb un fons de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"enllaçar amb una eina d\'interacció de veu"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet enllaçar amb la interfície de nivell superior d\'un servei d\'interacció de veu. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincula a una pantalla remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"establir vincles amb un servei d\'aprovisionament de rutes"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permet que el titular estableixi vincles amb els proveïdors de rutes registrats. No hauria de ser mai necessari per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet que el titular enviï intents a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"Vinculació a una entrada de televisor"</string>
@@ -425,8 +445,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permet que l\'aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestiona les credencials de confiança"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet que l\'aplicació instal·li i desinstal·li certificats de CA com a credencials de confiança."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"vincula als serveis inactius"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Amb aquest permís, el sistema Android podrà vincular-se amb els serveis inactius d\'una aplicació."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"executar l\'aplicació durant el temps d\'inactivitat"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Aquest permís permet que el sistema Android executi l\'aplicació en segon pla mentre el dispositiu no està en ús."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>
@@ -436,19 +456,19 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Permet que una aplicació concedeixi o denegui permisos específics per a aquesta o per a altres aplicacions. És possible que les aplicacions malicioses ho facin servir per accedir a funcions a les quals no has concedit accés."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"defineix les aplicacions preferides"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permet que l\'aplicació modifiqui les aplicacions preferides. Les aplicacions malicioses poden canviar silenciosament les aplicacions que s\'executen, falsejar les aplicacions existents o recollir dades privades de l\'usuari."</string>
-    <string name="permlab_writeSettings" msgid="2226195290955224730">"modificació de la configuració del sistema"</string>
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"modificar la configuració del sistema"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Permet que l\'aplicació modifiqui les dades de configuració del sistema. Les aplicacions malicioses poden malmetre la configuració del sistema."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"modificar la configuració de seguretat del sistema"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Permet que l\'aplicació modifiqui les dades de la configuració de seguretat del sistema. No indicat per a les aplicacions normals."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modificar el mapa de serveis de Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Permet que l\'aplicació modifiqui el mapa dels serveis de Google. No la poden fer servir les aplicacions normals."</string>
-    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"execució en iniciar"</string>
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"executar-se a l\'inici"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Permet que l\'aplicació s\'iniciï tan bon punt el sistema hagi acabat d\'arrencar. Això pot fer que es trigui més a iniciar el telèfon i permetre a l\'aplicació alentir-ne el funcionament general en executar-se sempre."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Permet que l\'aplicació s\'iniciï tan bon punt el sistema hagi acabat d\'arrencar. Això pot fer que es trigui més a iniciar el telèfon i permetre a l\'aplicació alentir-ne el funcionament general si s\'executa sempre."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar difusió permanent"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. L\'ús excessiu pot alentir o desestabilitzar la tauleta si li fan utilitzar massa memòria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. L\'ús excessiu pot alentir o desestabilitzar el telèfon si li fan utilitzar massa memòria."</string>
-    <string name="permlab_readContacts" msgid="8348481131899886131">"lectura dels contactes"</string>
+    <string name="permlab_readContacts" msgid="8348481131899886131">"consultar els contactes"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permet que l\'aplicació llegeixi dades sobre els contactes que tinguis emmagatzemats a la tauleta, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb persones concretes. Aquest permís permet que les aplicacions desin les dades dels teus contactes, i és possible que les aplicacions malicioses comparteixin dades dels contactes sense el teu coneixement."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permet que l\'aplicació llegeixi dades sobre els contactes que tinguis emmagatzemats al telèfon, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb persones concretes. Aquest permís permet que les aplicacions desin les dades dels teus contactes, i és possible que les aplicacions malicioses comparteixin dades dels contactes sense el teu coneixement."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"modificar els teus contactes"</string>
@@ -464,6 +484,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permet que l\'aplicació pugui llegir informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que l\'aplicació et pot identificar i enviar la informació del teu perfil a altres persones."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"modificació targeta contacte"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permet que l\'aplicació pugui canviar o afegir informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que l\'aplicació et pot identificar i enviar la informació del teu perfil a altres persones."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"sensors corp. (monitors freq. cardíaca)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permet que l\'aplicació accedeixi a les dades dels sensors que utilitzes per mesurar els signes vitals del teu cos, com ara la freqüència cardíaca."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"llegeix el teu tauler d\'activitat social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permet que l\'aplicació accedeixi i sincronitzi actualitzacions socials teves i dels teus amics. Vés amb compte en compartir informació: això permet que l\'aplicació llegeixi comunicacions entre tu i els teus amics a les xarxes socials, independentment de la confidencialitat. Nota: És possible que aquest permís no s\'apliqui a totes les xarxes socials."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escriu al tauler d\'activitat social"</string>
@@ -510,7 +532,7 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet que l\'aplicació enregistri àudio amb el micròfon. Aquest permís permet que l\'aplicació enregistri àudio en qualsevol moment sense la teva confirmació."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicació SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permet que l\'aplicació enviï ordres a la SIM. Això és molt perillós."</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"fes fotos i vídeos"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"fer fotos i vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet que l\'aplicació faci fotos i vídeos amb la càmera. Aquest permís permet que l\'aplicació utilitzi la càmera en qualsevol moment sense la teva confirmació."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desactiva la transmissió del LED indicador en fer servir la càmera"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet que una aplicació dels sistema preinstal·lada desactivi el LED indicador d\'ús de la càmera."</string>
@@ -565,6 +587,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permet que l\'aplicació controli les funcions de telèfon del dispositiu. Una aplicació amb aquest permís pot canviar de xarxa, activar i desactivar el senyal mòbil i dur a terme accions semblants sense notificar-t\'ho."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"veure l\'estat i la identitat del telèfon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"llegeix els estats exactes del telèfon"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permet que l\'aplicació accedeixi als estats exactes del telèfon. Amb aquest permís, l\'aplicació pot determinar l\'estat real de la trucada, si la trucada està activa o en segon pla, si s\'ha produït algun error, l\'estat exacte de la connexió de dades i els errors de la connexió de dades."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode d\'inactivitat"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el telèfon entri en mode de repòs"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
@@ -598,7 +622,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Permet que l\'aplicació obtingui la llista de comptes coneguts pel telèfon. Això pot incloure tots els comptes que hagin creat les aplicacions que tens instal·lades."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"creació de comptes i definició de contrasenyes"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permet que l\'aplicació utilitzi les funcions d\'autenticador de comptes del gestor de comptes, incloses la creació de comptes i l\'obtenció i la definició de les seves contrasenyes."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"addició o eliminació de comptes"</string>
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"afegir o eliminar comptes"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permet que l\'aplicació dugui a terme operacions com ara afegir i eliminar comptes i suprimir-ne la contrasenya."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"fer servir comptes del dispositiu"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permet que l\'aplicació sol·liciti testimonis d\'autenticació."</string>
@@ -632,16 +656,19 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permet que l\'aplicació connecti i desconnecti la tauleta de les xarxes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet que l\'aplicació connecti i desconnecti el telèfon de les xarxes WiMAX."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"puntuar les xarxes"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Permet que l\'aplicació classifiqui les xarxes i indiqui quines han de ser les xarxes preferides de la tauleta."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Permet que l\'aplicació classifiqui les xarxes i indiqui quines han de ser les xarxes preferides del telèfon."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"emparella amb dispositius Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració de Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"controla Near Field Communication (NFC)"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicació de camp proper (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada telefònica entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activació o desactivació de la sincronització"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet que una aplicació modifiqui la configuració de sincronització d\'un compte. Per exemple, aquesta acció es pot fer servir per activar la sincronització de l\'aplicació Persones amb un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"llegir les estadístiques de sincronització"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permet que una aplicació llegeixi les estadístiques de sincronització d\'un compte, inclòs l\'historial d\'esdeveniments sincronitzats i quantes dades se sincronitzen."</string>
@@ -653,7 +680,7 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet que l\'aplicació llegeixi les paraules, els noms i les frases que l\'usuari pot haver emmagatzemat al seu diccionari."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"afegeix paraules al diccionari definit per l\'usuari"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet que l\'aplicació escrigui paraules noves al diccionari de l\'usuari."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lectura contingut emmagat. USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"consultar contingut emmagatzematge USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lectura del contingut de la targeta SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permet que l\'aplicació llegeixi el contingut de l\'emmagatzematge USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permet que l\'aplicació llegeixi el contingut de la targeta SD."</string>
@@ -683,22 +710,28 @@
     <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Permet que l\'aplicació modifiqui les marques de sòcols per a l\'encaminament"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accedeix a les notificacions"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei de processament de notificacions"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei de processament de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei oient de notificacions"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"enllaçar amb el servei de proveïdor de condicions"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet enllaçar amb la interfície de nivell superior d\'un servei de proveïdor de condicions. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"canviar el calibratge del dispositiu d\'entrada"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accedir als certificats de DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats de gestió de drets digitals (DRM, Digital Rights Management). No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar intents de desbloqueig de pantalla"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Canvia la contrasenya de desbloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Canvia la contrasenya de desbloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueig de pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborra totes les dades"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense avisar, restablint les dades de fàbrica."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Defineix el servidor intermediari global del dispositiu"</string>
@@ -708,7 +741,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar les càmeres"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de les càmeres del dispositiu."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Des. funcions en bloq. tecles"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedeix l\'ús d\'algunes funcions en bloqueig de tecles."</string>
   <string-array name="phoneTypes">
@@ -1321,6 +1354,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permet que una aplicació accedeixi a l\'emmagatzematge protegit per contrasenya."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Controla si es mostra o s\'amaga el bloqueig de les tecles."</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permet que una aplicació controli el bloqueig de les tecles."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Escoltar els canvis de l\'estat de confiança"</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permet que una aplicació escolti els canvis en l\'estat de confiança."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Enllaçar amb el servei d\'un agent de confiança"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permet que una aplicació es vinculi amb el servei d\'un agent de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacciona amb el sistema de recuperació i amb les actualitzacions"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permet que una aplicació interaccioni amb el sistema de recuperació i amb les actualitzacions del sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos cops per controlar el zoom"</string>
@@ -1346,7 +1383,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Processador de notificacions"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveïdor de condicions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ha activat VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca per gestionar la xarxa."</string>

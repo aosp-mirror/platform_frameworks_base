@@ -28,6 +28,28 @@
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
     <skip />
+    <!-- no translation found for durationDays (6652371460511178259) -->
+    <skip />
+    <!-- no translation found for durationDayHours (2713107458736744435) -->
+    <skip />
+    <!-- no translation found for durationDayHour (7293789639090958917) -->
+    <skip />
+    <!-- no translation found for durationHours (4266858287167358988) -->
+    <skip />
+    <!-- no translation found for durationHourMinutes (9029176248692041549) -->
+    <skip />
+    <!-- no translation found for durationHourMinute (2741677355177402539) -->
+    <skip />
+    <!-- no translation found for durationMinutes (3134226679883579347) -->
+    <skip />
+    <!-- no translation found for durationMinuteSeconds (1424656185379003751) -->
+    <skip />
+    <!-- no translation found for durationMinuteSecond (3989228718067466680) -->
+    <skip />
+    <!-- no translation found for durationSeconds (8050088505238241405) -->
+    <skip />
+    <!-- no translation found for durationSecond (985669622276420331) -->
+    <skip />
     <!-- no translation found for untitled (4638956954852782576) -->
     <skip />
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
@@ -160,6 +182,8 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Memia blers cuntegns stizzads (<xliff:g id="CONTENT_TYPE">%s</xliff:g>)."</string>
     <!-- no translation found for low_memory (6494019234102154896) -->
     <skip />
+    <!-- no translation found for low_memory (4415914910770005166) -->
+    <skip />
     <!-- no translation found for low_memory (3475999286680000541) -->
     <skip />
     <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
@@ -185,6 +209,8 @@
     <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Vegn serrà..."</string>
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm (3490275567476369184) -->
     <skip />
     <!-- no translation found for shutdown_confirm (649792175242821353) -->
     <skip />
@@ -214,10 +240,16 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modus d\'aviun"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Il modus d\'aviun è activà"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Il modus d\'aviun è deactivà."</string>
+    <!-- no translation found for global_action_settings (1756531602592545966) -->
+    <skip />
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
     <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
+    <!-- no translation found for user_owner_label (2804351898001038951) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (6260850669674791528) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servetschs che custan"</string>
     <!-- no translation found for permgroupdesc_costMoney (3293301903409869495) -->
     <skip />
@@ -363,7 +395,7 @@
     <skip />
     <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
     <skip />
-    <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
+    <!-- no translation found for permdesc_processOutgoingCalls (5156385005547315876) -->
     <skip />
     <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
     <skip />
@@ -478,17 +510,17 @@
     <skip />
     <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
     <skip />
-    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <!-- no translation found for permlab_retrieveWindowToken (7154762602367758602) -->
     <skip />
-    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <!-- no translation found for permdesc_retrieveWindowToken (668173747687795074) -->
+    <skip />
+    <!-- no translation found for permlab_frameStats (7056374987314361639) -->
+    <skip />
+    <!-- no translation found for permdesc_frameStats (4758001089491284919) -->
     <skip />
     <!-- no translation found for permlab_filter_events (8675535648807427389) -->
     <skip />
     <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
-    <skip />
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
     <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"serrar parzialmain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Metta l\'administratur dad activitads en in stadi da pausa. El na vegn betg serrà dal tut."</string>
@@ -598,6 +630,10 @@
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sa fixar vid in fund davos"</string>
     <!-- no translation found for permdesc_bindWallpaper (7108428692595491668) -->
     <skip />
+    <!-- no translation found for permlab_bindVoiceInteraction (5334852580713715068) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
+    <skip />
     <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
     <skip />
     <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
@@ -606,8 +642,16 @@
     <skip />
     <!-- no translation found for permdesc_bindRemoteViews (4717987810137692572) -->
     <skip />
+    <!-- no translation found for permlab_bindRouteProvider (4869394607915096847) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRouteProvider (4703804520859960329) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <!-- no translation found for permdesc_bindDeviceAdmin (569715419543907930) -->
+    <skip />
+    <!-- no translation found for permlab_bindTvInput (5601264742478168987) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTvInput (2371008331852001924) -->
     <skip />
     <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
     <skip />
@@ -678,9 +722,9 @@
     <skip />
     <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
     <skip />
-    <!-- no translation found for permlab_bindIdleService (7521398788076342815) -->
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
     <skip />
-    <!-- no translation found for permdesc_bindIdleService (7747505810143356528) -->
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
     <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->
@@ -751,6 +795,10 @@
     <!-- no translation found for permlab_writeProfile (907793628777397643) -->
     <skip />
     <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors (4871091374767171066) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors (2998865085124153531) -->
     <skip />
     <!-- no translation found for permlab_readSocialStream (1268920956152419170) -->
     <skip />
@@ -935,6 +983,10 @@
     <skip />
     <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
     <skip />
+    <!-- no translation found for permlab_readPrecisePhoneState (5476483020282007597) -->
+    <skip />
+    <!-- no translation found for permdesc_readPrecisePhoneState (6648009074263855418) -->
+    <skip />
     <!-- no translation found for permlab_wakeLock (1531731435011495015) -->
     <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar ch\'il telefon midia en il modus stand-by"</string>
@@ -1057,6 +1109,12 @@
     <skip />
     <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
     <skip />
+    <!-- no translation found for permlab_scoreNetworks (6445777779383587181) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1304304745850215556) -->
+    <skip />
+    <!-- no translation found for permdesc_scoreNetworks (1831501848178651379) -->
+    <skip />
     <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
     <skip />
     <!-- no translation found for permdesc_bluetooth (3480722181852438628) -->
@@ -1158,6 +1216,10 @@
     <skip />
     <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
     <skip />
+    <!-- no translation found for permlab_bindConditionProviderService (1180107672332704641) -->
+    <skip />
+    <!-- no translation found for permdesc_bindConditionProviderService (1680513931165058425) -->
+    <skip />
     <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
     <skip />
     <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
@@ -1165,6 +1227,14 @@
     <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
     <skip />
     <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
+    <skip />
+    <!-- no translation found for permlab_setInputCalibration (4902620118878467615) -->
+    <skip />
+    <!-- no translation found for permdesc_setInputCalibration (4527511047549456929) -->
+    <skip />
+    <!-- no translation found for permlab_accessDrmCertificates (7436886640723203615) -->
+    <skip />
+    <!-- no translation found for permdesc_accessDrmCertificates (8073288354426159089) -->
     <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
@@ -2104,6 +2174,14 @@
     <skip />
     <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
     <skip />
+    <!-- no translation found for permlab_trust_listener (1765718054003704476) -->
+    <skip />
+    <!-- no translation found for permdesc_trust_listener (8233895334214716864) -->
+    <skip />
+    <!-- no translation found for permlab_bind_trust_agent_service (8242093169457695334) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_trust_agent_service (7041930026024507515) -->
+    <skip />
     <!-- no translation found for permlab_recovery (3157024487744125846) -->
     <skip />
     <!-- no translation found for permdesc_recovery (8511774533266359571) -->
@@ -2139,6 +2217,8 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fund davos"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Midar il fund davos"</string>
     <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
+    <!-- no translation found for condition_provider_service_binding_label (1321343352906524564) -->
     <skip />
     <!-- no translation found for vpn_title (19615213552042827) -->
     <skip />

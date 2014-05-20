@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ngày"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ngày <xliff:g id="HOURS">%2$d</xliff:g> giờ"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ngày <xliff:g id="HOURS">%2$d</xliff:g> giờ"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> giờ"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> giờ <xliff:g id="MINUTES">%2$d</xliff:g> phút"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> giờ <xliff:g id="MINUTES">%2$d</xliff:g> phút"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> phút"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> phút <xliff:g id="SECONDS">%2$d</xliff:g> giây"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> phút <xliff:g id="SECONDS">%2$d</xliff:g> giây"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Không có tiêu đề&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -135,6 +146,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Đồng bộ hóa"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Quá nhiều lần xóa <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Bộ nhớ máy tính bảng đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Bộ nhớ đồng hồ đã đầy. Hãy xóa một số tệp để giải phóng dung lượng."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Bộ nhớ điện thoại đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mạng có thể được giám sát"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bởi một bên thứ ba không xác định"</string>
@@ -152,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Bật chuông"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Đang tắt…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Máy tính bảng của bạn sẽ tắt."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Đồng hồ của bạn sẽ tắt."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Điện thoại của bạn sẽ tắt."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Bạn có muốn tắt không?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Khởi động lại ở chế độ an toàn"</string>
@@ -171,9 +184,12 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Chế độ trên máy bay"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Chế độ trên máy bay BẬT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Chế độ trên máy bay TẮT"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Cài đặt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Cá nhân"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Cơ quan"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dịch vụ tính tiền của bạn"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Thực hiện những tác vụ mà bạn có thể phải trả tiền."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tin nhắn của bạn"</string>
@@ -256,7 +272,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"gỡ cài đặt lối tắt"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Cho phép ứng dụng xóa lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"định tuyến lại cuộc gọi đi"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Cho phép ứng dụng xử lý cuộc gọi đi và thay đổi số được gọi. Quyền này cho phép ứng dụng theo dõi, chuyển hướng hoặc chặn cuộc gọi đi."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Cho phép ứng dụng xem số được gọi trong một cuộc gọi đi với tùy chọn chuyển hướng cuộc gọi đến một số khác hoặc hủy cuộc gọi đó hoàn toàn."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"nhận tin nhắn văn bản (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Cho phép ứng dụng nhận và xử lý tin nhắn SMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"nhận tin nhắn văn bản (MMS)"</string>
@@ -315,20 +331,20 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Cho phép ứng dụng truy xuất nội dung của cửa sổ hiện hành. Ứng dụng độc hại có thể truy xuất toàn bộ nội dung của cửa sổ cũng như xem xét toàn bộ văn bản của cửa sổ ngoại trừ mật khẩu."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"tạm thời bật trợ năng"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Cho phép ứng dụng tạm thời bật trợ năng trên thiết bị. Các ứng dụng độc hại có thể bật trợ năng mà không có sự đồng ý của người dùng."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"truy xuất thông tin cửa sổ"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Cho phép ứng dụng truy xuất thông tin về các cửa sổ từ trình quản lý cửa sổ. Các ứng dụng độc hại có thể truy xuất thông tin được dành để sử dụng trong hệ thống nội bộ."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"truy xuất mã thông báo cửa sổ"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Cho phép một ứng dụng truy xuất mã thông báo cửa sổ. Các ứng dụng độc hại có thể thực hiện hoạt động tương tác trái phép với cửa sổ ứng dụng mạo danh hệ thống."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"truy xuất số liệu thống kê về khung"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Cho phép một ứng dụng thu thập số liệu thống kê về khung. Ứng dụng độc hại có thể quan sát số liệu thống kê về khung của cửa sổ từ ứng dụng khác."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"lọc sự kiện"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Cho phép ứng dụng đăng ký bộ lọc dữ liệu nhập để lọc luồng tất cả các sự kiện người dùng trước khi chúng được gửi đi. Ứng dụng độc hại có thể kiểm soát Giao diện người dùng hệ thống mà không cần sự can thiệp của người dùng."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"thu phóng màn hình"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Cho phép ứng dụng thu phóng nội dung trên màn hình. Ứng dụng độc hại có thể biến đổi nội dung trên màn hình theo cách kết xuất thiết bị không thể sử dụng được."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"tắt từng phần"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Đặt trình quản lý hoạt động sang trạng thái tắt. Không thực hiện tắt hoàn toàn."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ngăn chuyển đổi ứng dụng"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Ngăn người dùng chuyển sang ứng dụng khác."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"truy cập thông tin ứng dụng hiện tại"</string>
     <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Cho phép chủ sở hữu truy xuất thông tin cá nhân về ứng dụng hiện tại ở nền trước của màn hình."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"giám sát và kiểm soát tất cả hoạt động khởi chạy ứng dụng"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Cho phép ứng dụng giám sát và kiểm soát cách hệ thống khởi chạy các hoạt động. Ứng dụng độc hại hoàn toàn có thể làm tổn hại hệ thống. Quyền này chỉ cần cho mục đích phát triển, không dành cho mục đích sử dụng thông thường."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"giám sát và kiểm soát tất cả hoạt động chạy ứng dụng"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Cho phép ứng dụng giám sát và kiểm soát cách hệ thống chạy các hoạt động. Ứng dụng độc hại hoàn toàn có thể làm tổn hại hệ thống. Quyền này chỉ cần cho mục đích phát triển, không dành cho mục đích sử dụng thông thường."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"gửi truyền phát đã xóa của gói"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Cho phép ứng dụng truyền phát thông báo cho biết rằng gói ứng dụng đã bị xóa. Ứng dụng độc hại có thể sử dụng quyền này để loại bỏ bất kỳ ứng dụng nào khác đang chạy."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"gửi truyền phát SMS nhận được"</string>
@@ -350,7 +366,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"kiểm soát sao lưu và khôi phục hệ thống"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Cho phép ứng dụng kiểm soát cơ chế sao lưu và khôi phục của hệ thống. Không dành cho các ứng dụng thông thường."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"xác nhận bản sao lưu đầy đủ hoặc khôi phục hoạt động"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Cho phép ứng dụng khởi chạy UI xác nhận sao lưu toàn bộ. Không dành cho bất kỳ ứng dụng nào."</string>
+    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Cho phép ứng dụng chạy UI xác nhận sao lưu toàn bộ. Không dành cho bất kỳ ứng dụng nào."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"hiển thị các cửa sổ trái phép"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Cho phép ứng dụng tạo các cửa sổ dùng cho giao diện người dùng hệ thống nội bộ. Không dành cho các ứng dụng thông thường."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"vẽ trên ứng dụng khác"</string>
@@ -382,12 +398,18 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ Vpn. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"liên kết với hình nền"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của hình nền. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"liên kết với trình tương tác bằng giọng nói"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ tương tác bằng giọng nói. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"liên kết với màn hình từ xa"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của màn hình từ xa. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"liên kết với dịch vụ tiện ích con"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ tiện ích con. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"liên kết với dịch vụ nhà cung cấp định tuyến"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Cho phép chủ sở hữu liên kết với bất kỳ nhà cung cấp định tuyến đã đăng ký nào. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"tương tác với quản trị viên thiết bị"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Cho phép chủ sở hữu gửi các ý định đến quản trị viên thiết bị. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"liên kết với đầu vào TV"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của đầu vào TV. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"thêm hoặc xóa quản trị viên thiết bị"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Cho phép chủ sở hữu thêm hoặc xóa quản trị viên thiết bị đang hoạt động. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"thay đổi hướng màn hình"</string>
@@ -423,8 +445,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Cho phép ứng dụng sử dụng bất kỳ trình giải mã phương tiện nào đã cài đặt nhằm giải mã để phát lại."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"quản lý thông tin xác thực đáng tin cậy"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Cho phép ứng dụng cài đặt và gỡ cài đặt chứng chỉ CA dưới dạng thông tin xác thực đáng tin cậy."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"liên kết với dịch vụ không dùng đến"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Quyền này cho phép hệ thống Android liên kết với các dịch vụ ở trạng thái rảnh của ứng dụng."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"chạy ứng dụng trong thời gian rảnh"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Quyền này cho phép hệ thống Android chạy ứng dụng trong nền khi thiết bị không được sử dụng."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"đọc/ghi vào tài nguyên do chẩn đoán sở hữu"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và tính bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể của nhà sản xuất hoặc nhà cung cấp."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"bật hoặc tắt cấu phần ứng dụng"</string>
@@ -441,8 +463,8 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"sửa đổi bản đồ dịch vụ của Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Cho phép ứng dụng sửa đổi bản đồ dịch vụ của Google. Không dành cho ứng dụng thông thường."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"chạy khi khởi động"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Cho phép ứng dụng tự khởi chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Cho phép ứng dụng tự khởi chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến điện thoại mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ điện thoại do ứng dụng luôn chạy."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Cho phép ứng dụng tự chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Cho phép ứng dụng tự chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến điện thoại mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ điện thoại do ứng dụng luôn chạy."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"gửi truyền phát hấp dẫn người xem"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho máy tính bảng bị chậm hoặc không ổn định do khiến máy tính bảng sử dụng quá nhiều bộ nhớ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho điện thoại bị chậm hoặc không ổn định do khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
@@ -462,6 +484,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Cho phép ứng dụng đọc thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"sửa đổi thẻ liên hệ của riêng bạn"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Cho phép ứng dụng thay đổi hoặc thêm vào thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"cảm biến cơ thể (như máy đo nhịp tim)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Cho phép ứng dụng truy cập dữ liệu từ cảm biến mà bạn sử dụng để đo những gì đang diễn ra bên trong cơ thể của bạn, chẳng hạn như nhịp tim."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"đọc luồng xã hội của bạn"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Cho phép ứng dụng truy cập và đồng bộ hóa các cập nhật xã hội của bạn và bạn bè bạn. Hãy cẩn trọng khi chia sẻ thông tin -- việc này có thể cho phép ứng dụng đọc thông tin liên lạc giữa bạn và bạn bè bạn trên các mạng xã hội, bất kể tính bí mật là gì. Lưu ý: quyền này có thể không được thực thi trên tất cả các mạng xã hội."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ghi luồng xã hội của bạn"</string>
@@ -563,6 +587,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Cho phép ứng dụng kiểm soát các tính năng điện thoại của thiết bị. Ứng dụng có quyền này có thể chuyển đổi mạng, bật và tắt radio điện thoại cũng như thực hiện các tác vụ tương tự mà không cần thông báo cho bạn."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"đọc trạng thái và nhận dạng của điện thoại"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"đọc trạng thái điện thoại chính xác"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Cho phép ứng dụng truy cập trạng thái điện thoại chính xác. Quyền này cho phép ứng dụng xác định trạng thái cuộc gọi thực, cuộc gọi đang hoạt động hay trong nền, cuộc gọi không thành công, trạng thái kết nối dữ liệu chính xác và kết nối dữ liệu không thành công."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
@@ -630,6 +656,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Thay đổi trạng thái WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Cho phép ứng dụng kết nối máy tính bảng và ngắt kết nối máy tính bảng khỏi mạng WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Cho phép ứng dụng kết nối điện thoại và ngắt kết nối điện thoại khỏi mạng WiMAX."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"mạng điểm số"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Cho phép ứng dụng xếp hạng mạng và ảnh hưởng đến việc máy tính bảng nên ưu tiên mạng nào."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Cho phép ứng dụng xếp hạng các mạng và ảnh hưởng đến việc điện thoại nên ưu tiên mạng nào."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ghép nối với thiết bị Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
@@ -683,10 +712,16 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Cho phép ứng dụng truy xuất, kiểm tra và xóa thông báo, bao gồm những thông báo được đăng bởi các ứng dụng khác."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"liên kết với dịch vụ trình xử lý thông báo"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ trình xử lý thông báo. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"liên kết với dịch vụ trình cung cấp điều kiện"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ trình cung cấp điều kiện. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Cho phép chủ sở hữu gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"quan sát các điều kiện mạng"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Cho phép ứng dụng quan sát các điều kiện mạng. Không bao giờ cần cho ứng dụng thông thường."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"thay đổi hiệu chỉnh thiết bị đầu vào"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Cho phép ứng dụng sửa đổi các thông số hiệu chỉnh của màn hình cảm ứng. Không cần cho ứng dụng thông thường."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"truy cập chứng chỉ DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Cho phép ứng dụng cung cấp và sử dụng chứng chỉ DRM. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kiểm soát độ dài và ký tự được phép trong mật khẩu mở khóa màn hình."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Giám sát những lần thử mở khóa màn hình"</string>
@@ -1149,7 +1184,7 @@
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Trang không phản hồi.\n\nBạn có muốn đóng trang không?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Đã chuyển hướng ứng dụng"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> hiện đang chạy."</string>
-    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> được khởi chạy trước tiên."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> được chạy trước tiên."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Tỷ lệ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Luôn hiển thị"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Bật lại chế độ này trong cài đặt Hệ thống &gt; Ứng dụng &gt; Đã tải xuống."</string>
@@ -1319,6 +1354,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Cho phép ứng dụng truy cập bộ nhớ an toàn khóa"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Kiểm soát việc hiển thị và ẩn tính năng bảo vệ phím"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Cho phép ứng dụng kiểm soát tính năng bảo vệ phím."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Quan sát các thay đổi ở trạng thái đáng tin cậy."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Cho phép ứng dụng quan sát các thay đổi ở trạng thái đáng tin cậy."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Liên kết với một dịch vụ của đại lý đáng tin cậy"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Cho phép ứng dụng liên kết với một dịch vụ của đại lý đáng tin cậy."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Tương tác với hệ thống khôi phục và bản cập nhật"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Cho phép ứng dụng tương tác với hệ thống khôi phục và bản cập nhật hệ thống."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Chạm hai lần để kiểm soát thu phóng"</string>
@@ -1345,6 +1384,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hình nền"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Thay đổi hình nền"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Trình xử lý thông báo"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Trình cung cấp điều kiện"</string>
     <string name="vpn_title" msgid="19615213552042827">"Đã kích hoạt VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN được <xliff:g id="APP">%s</xliff:g> kích hoạt"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Chạm để quản lý mạng."</string>
@@ -1430,7 +1470,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Chọn một ứng dụng"</string>
-    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Không thể khởi chạy <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Không thể chạy <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Chia sẻ với"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Chia sẻ với <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Tay trượt. Chạm &amp; giữ."</string>
@@ -1479,7 +1519,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Chia sẻ với"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Đang gửi…"</string>
-    <string name="launchBrowserDefault" msgid="2057951947297614725">"Khởi chạy trình duyệt?"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Chạy trình duyệt?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Chấp nhận cuộc gọi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Luôn chọn"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Chỉ một lần"</string>
