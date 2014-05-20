@@ -53,6 +53,7 @@ public final class HdmiControlService extends SystemService {
 
     @Override
     public void onStart() {
+        mIoThread.start();
         mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
             mCecController.initializeLocalDevices(getContext().getResources()
