@@ -64,7 +64,6 @@ import java.util.Arrays;
  * List Resource</a>.</p>
  */
 public class ColorStateList implements Parcelable {
-
     private int[][] mStateSpecs; // must be parallel to mColors
     private int[] mColors;      // must be parallel to mStateSpecs
     private int mDefaultColor = 0xffff0000;
@@ -100,9 +99,9 @@ public class ColorStateList implements Parcelable {
     public static ColorStateList valueOf(int color) {
         // TODO: should we collect these eventually?
         synchronized (sCache) {
-            WeakReference<ColorStateList> ref = sCache.get(color);
-            ColorStateList csl = ref != null ? ref.get() : null;
+            final WeakReference<ColorStateList> ref = sCache.get(color);
 
+            ColorStateList csl = ref != null ? ref.get() : null;
             if (csl != null) {
                 return csl;
             }
@@ -118,8 +117,7 @@ public class ColorStateList implements Parcelable {
      */
     public static ColorStateList createFromXml(Resources r, XmlPullParser parser)
             throws XmlPullParserException, IOException {
-
-        AttributeSet attrs = Xml.asAttributeSet(parser);
+        final AttributeSet attrs = Xml.asAttributeSet(parser);
 
         int type;
         while ((type=parser.next()) != XmlPullParser.START_TAG
@@ -133,22 +131,22 @@ public class ColorStateList implements Parcelable {
         return createFromXmlInner(r, parser, attrs);
     }
 
-    /* Create from inside an XML document.  Called on a parser positioned at
-     * a tag in an XML document, tries to create a ColorStateList from that tag.
-     * Returns null if the tag is not a valid ColorStateList.
+    /**
+     * Create from inside an XML document. Called on a parser positioned at a
+     * tag in an XML document, tries to create a ColorStateList from that tag.
+     *
+     * @throws XmlPullParserException if the current tag is not &lt;selector>
+     * @return A color state list for the current tag.
      */
     private static ColorStateList createFromXmlInner(Resources r, XmlPullParser parser,
             AttributeSet attrs) throws XmlPullParserException, IOException {
-
-        ColorStateList colorStateList;
-
+        final ColorStateList colorStateList;
         final String name = parser.getName();
-
         if (name.equals("selector")) {
             colorStateList = new ColorStateList();
         } else {
             throw new XmlPullParserException(
-                parser.getPositionDescription() + ": invalid drawable tag " + name);
+                    parser.getPositionDescription() + ": invalid drawable tag " + name);
         }
 
         colorStateList.inflate(r, parser, attrs);
@@ -161,9 +159,8 @@ public class ColorStateList implements Parcelable {
      * (0-255).
      */
     public ColorStateList withAlpha(int alpha) {
-        int[] colors = new int[mColors.length];
-
-        int len = colors.length;
+        final int[] colors = new int[mColors.length];
+        final int len = colors.length;
         for (int i = 0; i < len; i++) {
             colors[i] = (mColors[i] & 0xFFFFFF) | (alpha << 24);
         }
@@ -176,7 +173,6 @@ public class ColorStateList implements Parcelable {
      */
     private void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-
         int type;
 
         final int innerDepth = parser.getDepth()+1;
@@ -259,10 +255,25 @@ public class ColorStateList implements Parcelable {
         System.arraycopy(stateSpecList, 0, mStateSpecs, 0, listSize);
     }
 
+    /**
+     * Indicates whether this color state list contains more than one state spec
+     * and will change color based on state.
+     *
+     * @return True if this color state list changes color based on state, false
+     *         otherwise.
+     * @see #getColorForState(int[], int)
+     */
     public boolean isStateful() {
         return mStateSpecs.length > 1;
     }
 
+    /**
+     * Indicates whether this color state list is opaque, which means that every
+     * color returned from {@link #getColorForState(int[], int)} has an alpha
+     * value of 255.
+     *
+     * @return True if this color state list is opaque.
+     */
     public boolean isOpaque() {
         final int n = mColors.length;
         for (int i = 0; i < n; i++) {

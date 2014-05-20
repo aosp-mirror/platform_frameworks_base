@@ -512,13 +512,12 @@ public abstract class Drawable {
     }
 
     /**
-     * Indicates whether this view will change its appearance based on state.
-     * Clients can use this to determine whether it is necessary to calculate
-     * their state and call setState.
+     * Indicates whether this drawable will change its appearance based on
+     * state. Clients can use this to determine whether it is necessary to
+     * calculate their state and call setState.
      *
-     * @return True if this view changes its appearance based on state, false
-     *         otherwise.
-     *
+     * @return True if this drawable changes its appearance based on state,
+     *         false otherwise.
      * @see #setState(int[])
      */
     public boolean isStateful() {
