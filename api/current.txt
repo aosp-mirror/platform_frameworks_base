@@ -3916,6 +3916,8 @@ package android.app {
     ctor public Notification(android.os.Parcel);
     method public android.app.Notification clone();
     method public int describeContents();
+    method public java.lang.String getGroup();
+    method public java.lang.String getSortKey();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -3942,6 +3944,7 @@ package android.app {
     field public static final java.lang.String EXTRA_TITLE_BIG = "android.title.big";
     field public static final int FLAG_AUTO_CANCEL = 16; // 0x10
     field public static final int FLAG_FOREGROUND_SERVICE = 64; // 0x40
+    field public static final int FLAG_GROUP_SUMMARY = 512; // 0x200
     field public static final deprecated int FLAG_HIGH_PRIORITY = 128; // 0x80
     field public static final int FLAG_INSISTENT = 4; // 0x4
     field public static final int FLAG_LOCAL_ONLY = 256; // 0x100
@@ -3985,6 +3988,7 @@ package android.app {
     method public android.app.Notification.Action clone();
     method public int describeContents();
     method public android.os.Bundle getExtras();
+    method public android.app.RemoteInput[] getRemoteInputs();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public android.app.PendingIntent actionIntent;
@@ -3992,12 +3996,18 @@ package android.app {
     field public java.lang.CharSequence title;
   }
 
-  public static class Notification.Action.Builder {
+  public static final class Notification.Action.Builder {
     ctor public Notification.Action.Builder(int, java.lang.CharSequence, android.app.PendingIntent);
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
+    method public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
+    method public android.app.Notification.Action.Builder apply(android.app.Notification.Action.Builder.Extender);
     method public android.app.Notification.Action build();
     method public android.os.Bundle getExtras();
+  }
+
+  public static abstract interface Notification.Action.Builder.Extender {
+    method public abstract android.app.Notification.Action.Builder applyTo(android.app.Notification.Action.Builder);
   }
 
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
@@ -4022,6 +4032,7 @@ package android.app {
     method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addAction(android.app.Notification.Action);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
+    method public android.app.Notification.Builder apply(android.app.Notification.Builder.Extender);
     method public android.app.Notification build();
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();
@@ -4035,6 +4046,8 @@ package android.app {
     method public android.app.Notification.Builder setDeleteIntent(android.app.PendingIntent);
     method public android.app.Notification.Builder setExtras(android.os.Bundle);
     method public android.app.Notification.Builder setFullScreenIntent(android.app.PendingIntent, boolean);
+    method public android.app.Notification.Builder setGroup(java.lang.String);
+    method public android.app.Notification.Builder setGroupSummary(boolean);
     method public android.app.Notification.Builder setLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.Builder setLights(int, int, int);
     method public android.app.Notification.Builder setLocalOnly(boolean);
@@ -4046,6 +4059,7 @@ package android.app {
     method public android.app.Notification.Builder setShowWhen(boolean);
     method public android.app.Notification.Builder setSmallIcon(int);
     method public android.app.Notification.Builder setSmallIcon(int, int);
+    method public android.app.Notification.Builder setSortKey(java.lang.String);
     method public android.app.Notification.Builder setSound(android.net.Uri);
     method public android.app.Notification.Builder setSound(android.net.Uri, int);
     method public android.app.Notification.Builder setStyle(android.app.Notification.Style);
@@ -4055,6 +4069,10 @@ package android.app {
     method public android.app.Notification.Builder setUsesChronometer(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
     method public android.app.Notification.Builder setWhen(long);
+  }
+
+  public static abstract interface Notification.Builder.Extender {
+    method public abstract android.app.Notification.Builder applyTo(android.app.Notification.Builder);
   }
 
   public static class Notification.InboxStyle extends android.app.Notification.Style {
@@ -4158,6 +4176,31 @@ package android.app {
     method public static android.app.ProgressDialog show(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, boolean, boolean, android.content.DialogInterface.OnCancelListener);
     field public static final int STYLE_HORIZONTAL = 1; // 0x1
     field public static final int STYLE_SPINNER = 0; // 0x0
+  }
+
+  public final class RemoteInput implements android.os.Parcelable {
+    method public static void addResultsToIntent(android.app.RemoteInput[], android.content.Intent, android.os.Bundle);
+    method public int describeContents();
+    method public boolean getAllowFreeFormInput();
+    method public java.lang.CharSequence[] getChoices();
+    method public android.os.Bundle getExtras();
+    method public java.lang.CharSequence getLabel();
+    method public java.lang.String getResultKey();
+    method public static android.os.Bundle getResultsFromIntent(android.content.Intent);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String EXTRA_RESULTS_DATA = "android.remoteinput.resultsData";
+    field public static final java.lang.String RESULTS_CLIP_LABEL = "android.remoteinput.results";
+  }
+
+  public static final class RemoteInput.Builder {
+    ctor public RemoteInput.Builder(java.lang.String);
+    method public android.app.RemoteInput.Builder addExtras(android.os.Bundle);
+    method public android.app.RemoteInput build();
+    method public android.os.Bundle getExtras();
+    method public android.app.RemoteInput.Builder setAllowFreeFormInput(boolean);
+    method public android.app.RemoteInput.Builder setChoices(java.lang.CharSequence[]);
+    method public android.app.RemoteInput.Builder setLabel(java.lang.CharSequence);
   }
 
   public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
