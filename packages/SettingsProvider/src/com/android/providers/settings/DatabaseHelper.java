@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 102;
+    private static final int DATABASE_VERSION = 103;
 
     private Context mContext;
     private int mUserHandle;
@@ -1632,6 +1632,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 102;
         }
 
+        if (upgradeVersion == 102) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                // The INSTALL_NON_MARKET_APPS setting is becoming per-user rather
+                // than device-global.
+                if (mUserHandle == UserHandle.USER_OWNER) {
+                    // In the owner user, the global table exists so we can migrate the
+                    // entry from there to the secure table, preserving its value.
+                    String[] globalToSecure = {
+                            Settings.Secure.INSTALL_NON_MARKET_APPS
+                    };
+                    moveSettingsToNewTable(db, TABLE_GLOBAL, TABLE_SECURE, globalToSecure, true);
+                } else {
+                    // Secondary users' dbs don't have the global table, so institute the
+                    // default.
+                    stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                            + " VALUES(?,?);");
+                    loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
+                            R.bool.def_install_non_market_apps);
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 103;
+        }
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2191,6 +2219,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadStringSetting(stmt, Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                         R.string.def_immersive_mode_confirmations);
 
+            loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
+                    R.bool.def_install_non_market_apps);
+
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2288,9 +2319,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Global.NETSTATS_ENABLED,
                     R.bool.def_netstats_enabled);
-
-            loadBooleanSetting(stmt, Settings.Global.INSTALL_NON_MARKET_APPS,
-                    R.bool.def_install_non_market_apps);
 
             loadBooleanSetting(stmt, Settings.Global.USB_MASS_STORAGE_ENABLED,
                     R.bool.def_usb_mass_storage_enabled);

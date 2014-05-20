@@ -1088,6 +1088,9 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_COUNT);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_DELAY_MS);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS);
+
+            // At one time in System, then Global, but now back in Secure
+            MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
         }
 
         private static final HashSet<String> MOVED_TO_GLOBAL;
@@ -1102,7 +1105,6 @@ public final class Settings {
             MOVED_TO_SECURE_THEN_GLOBAL.add(Global.BLUETOOTH_ON);
             MOVED_TO_SECURE_THEN_GLOBAL.add(Global.DATA_ROAMING);
             MOVED_TO_SECURE_THEN_GLOBAL.add(Global.DEVICE_PROVISIONED);
-            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_SECURE_THEN_GLOBAL.add(Global.USB_MASS_STORAGE_ENABLED);
             MOVED_TO_SECURE_THEN_GLOBAL.add(Global.HTTP_PROXY);
 
@@ -2573,10 +2575,10 @@ public final class Settings {
         public static final String HTTP_PROXY = Global.HTTP_PROXY;
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#INSTALL_NON_MARKET_APPS} instead
+         * @deprecated Use {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS} instead
          */
         @Deprecated
-        public static final String INSTALL_NON_MARKET_APPS = Global.INSTALL_NON_MARKET_APPS;
+        public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
@@ -2814,7 +2816,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.DISPLAY_SIZE_FORCED);
             MOVED_TO_GLOBAL.add(Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
             MOVED_TO_GLOBAL.add(Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
-            MOVED_TO_GLOBAL.add(Settings.Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_GLOBAL.add(Settings.Global.MOBILE_DATA);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_DEV_BUCKET_DURATION);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_DEV_DELETE_AGE);
@@ -3404,10 +3405,13 @@ public final class Settings {
         public static final String HTTP_PROXY = Global.HTTP_PROXY;
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#INSTALL_NON_MARKET_APPS} instead
+         * Whether applications can be installed for this user via the system's
+         * {@link Intent#ACTION_INSTALL_PACKAGE} mechanism.
+         *
+         * <p>1 = permit app installation via the system package installer intent
+         * <p>0 = do not allow use of the package installer
          */
-        @Deprecated
-        public static final String INSTALL_NON_MARKET_APPS = Global.INSTALL_NON_MARKET_APPS;
+        public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
 
         /**
          * Comma-separated list of location providers that activities may access. Do not rely on
@@ -5066,13 +5070,10 @@ public final class Settings {
                "download_manager_recommended_max_bytes_over_mobile";
 
        /**
-        * Whether the package installer should allow installation of apps downloaded from
-        * sources other than Google Play.
-        *
-        * 1 = allow installing from other sources
-        * 0 = only allow installing from Google Play
+        * @deprecated Use {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS} instead
         */
-       public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
+       @Deprecated
+       public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
 
        /**
         * Whether mobile data connections are allowed by the user.  See
@@ -6238,6 +6239,13 @@ public final class Settings {
                     CALL_METHOD_GET_GLOBAL,
                     CALL_METHOD_PUT_GLOBAL);
 
+        // Certain settings have been moved from global to the per-user secure namespace
+        private static final HashSet<String> MOVED_TO_SECURE;
+        static {
+            MOVED_TO_SECURE = new HashSet<String>(1);
+            MOVED_TO_SECURE.add(Settings.Global.INSTALL_NON_MARKET_APPS);
+        }
+
         /**
          * Look up a name in the database.
          * @param resolver to access the database with
@@ -6251,6 +6259,11 @@ public final class Settings {
         /** @hide */
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
+                        + " to android.provider.Settings.Secure, returning read-only value.");
+                return Secure.getStringForUser(resolver, name, userHandle);
+            }
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
         }
 
@@ -6272,6 +6285,12 @@ public final class Settings {
             if (LOCAL_LOGV) {
                 Log.v(TAG, "Global.putString(name=" + name + ", value=" + value
                         + " for " + userHandle);
+            }
+            // Global and Secure have the same access policy so we can forward writes
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
+                        + " to android.provider.Settings.Secure, value is unchanged.");
+                return Secure.putStringForUser(resolver, name, value, userHandle);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, userHandle);
         }
