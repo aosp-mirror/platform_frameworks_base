@@ -3087,7 +3087,14 @@ public class AudioManager {
      * @hide
      */
     public int setAudioPortGain(AudioPort port, AudioGainConfig gain) {
-        return ERROR_INVALID_OPERATION;
+        if (port == null || gain == null) {
+            return ERROR_BAD_VALUE;
+        }
+        AudioPortConfig activeConfig = port.activeConfig();
+        AudioPortConfig config = new AudioPortConfig(port, activeConfig.samplingRate(),
+                                        activeConfig.channelMask(), activeConfig.format(), gain);
+        config.mConfigMask = AudioPortConfig.GAIN;
+        return AudioSystem.setAudioPortConfig(config);
     }
 
     /**
