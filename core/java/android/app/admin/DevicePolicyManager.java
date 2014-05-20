@@ -2051,6 +2051,68 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device or profile owner to block or unblock packages. When a package is blocked it
+     * is unavailable for use, but the data and actual package file remain.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to block or unblock.
+     * @param blocked {@code true} if the package should be blocked, {@code false} if it should be
+     *                 unblocked.
+     * @return boolean Whether the blocked setting of the package was successfully updated.
+     */
+    public boolean setApplicationBlocked(ComponentName admin, String packageName,
+            boolean blocked) {
+        if (mService != null) {
+            try {
+                return mService.setApplicationBlocked(admin, packageName, blocked);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by profile or device owner to block or unblock currently installed packages. This
+     * should only be called by a profile or device owner running within a managed profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param intent An intent matching the app(s) to be updated. All apps that resolve for this
+     *               intent will be updated in the current profile.
+     * @param blocked {@code true} if the packages should be blocked, {@code false} if they should
+     *                 be unblocked.
+     * @return int The number of activities that matched the intent and were updated.
+     */
+    public int setApplicationsBlocked(ComponentName admin, Intent intent, boolean blocked) {
+        if (mService != null) {
+            try {
+                return mService.setApplicationsBlocked(admin, intent, blocked);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by device or profile owner to determine if a package is blocked.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to retrieve the blocked status of.
+     * @return boolean {@code true} if the package is blocked, {@code false} otherwise.
+     */
+    public boolean isApplicationBlocked(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.isApplicationBlocked(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by profile or device owner to re-enable a system app that was disabled by default
      * when the managed profile was created. This should only be called from a profile or device
      * owner running within a managed profile.
