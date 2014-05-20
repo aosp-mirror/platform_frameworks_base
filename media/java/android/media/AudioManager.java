@@ -3003,7 +3003,7 @@ public class AudioManager {
      * @hide
      */
     public int listAudioPorts(ArrayList<AudioPort> ports) {
-        return ERROR_INVALID_OPERATION;
+        return updateAudioPortCache(ports, null);
     }
 
     /**
@@ -3012,7 +3012,17 @@ public class AudioManager {
      * @hide
      */
     public int listAudioDevicePorts(ArrayList<AudioPort> devices) {
-        return ERROR_INVALID_OPERATION;
+        ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
+        int status = updateAudioPortCache(ports, null);
+        if (status == SUCCESS) {
+            devices.clear();
+            for (int i = 0; i < ports.size(); i++) {
+                if (ports.get(i) instanceof AudioDevicePort) {
+                    devices.add(ports.get(i));
+                }
+            }
+        }
+        return status;
     }
 
     /**
@@ -3041,7 +3051,7 @@ public class AudioManager {
     public int createAudioPatch(AudioPatch[] patch,
                                  AudioPortConfig[] sources,
                                  AudioPortConfig[] sinks) {
-        return ERROR_INVALID_OPERATION;
+        return AudioSystem.createAudioPatch(patch, sources, sinks);
     }
 
     /**
@@ -3056,7 +3066,7 @@ public class AudioManager {
      * @hide
      */
     public int releaseAudioPatch(AudioPatch patch) {
-        return  ERROR_INVALID_OPERATION;
+        return AudioSystem.releaseAudioPatch(patch);
     }
 
     /**
@@ -3065,7 +3075,7 @@ public class AudioManager {
      * @hide
      */
     public int listAudioPatches(ArrayList<AudioPatch> patches) {
-        return ERROR_INVALID_OPERATION;
+        return updateAudioPortCache(null, patches);
     }
 
     /**
@@ -3113,5 +3123,115 @@ public class AudioManager {
      * @hide
      */
     public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
+    }
+
+    //
+    // AudioPort implementation
+    //
+
+    static final int AUDIOPORT_GENERATION_INIT = 0;
+    Integer mAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
+    ArrayList<AudioPort> mAudioPortsCached = new ArrayList<AudioPort>();
+    ArrayList<AudioPatch> mAudioPatchesCached = new ArrayList<AudioPatch>();
+
+    int resetAudioPortGeneration() {
+        int generation;
+        synchronized (mAudioPortGeneration) {
+            generation = mAudioPortGeneration;
+            mAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
+        }
+        return generation;
+    }
+
+    int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
+        synchronized (mAudioPortGeneration) {
+
+            if (mAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
+                int[] patchGeneration = new int[1];
+                int[] portGeneration = new int[1];
+                int status;
+                ArrayList<AudioPort> newPorts = new ArrayList<AudioPort>();
+                ArrayList<AudioPatch> newPatches = new ArrayList<AudioPatch>();
+
+                do {
+                    newPorts.clear();
+                    status = AudioSystem.listAudioPorts(newPorts, portGeneration);
+                    Log.i(TAG, "updateAudioPortCache AudioSystem.listAudioPorts() status: "+
+                                    status+" num ports: "+ newPorts.size() +" portGeneration: "+portGeneration[0]);
+                    if (status != SUCCESS) {
+                        return status;
+                    }
+                    newPatches.clear();
+                    status = AudioSystem.listAudioPatches(newPatches, patchGeneration);
+                    Log.i(TAG, "updateAudioPortCache AudioSystem.listAudioPatches() status: "+
+                            status+" num patches: "+ newPatches.size() +" patchGeneration: "+patchGeneration[0]);
+                    if (status != SUCCESS) {
+                        return status;
+                    }
+                } while (patchGeneration[0] != portGeneration[0]);
+
+                for (int i = 0; i < newPatches.size(); i++) {
+                    for (int j = 0; j < newPatches.get(i).sources().length; j++) {
+                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sources()[j], newPorts);
+                        if (portCfg == null) {
+                            return ERROR;
+                        }
+                        newPatches.get(i).sources()[j] = portCfg;
+                    }
+                    for (int j = 0; j < newPatches.get(i).sinks().length; j++) {
+                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sinks()[j], newPorts);
+                        if (portCfg == null) {
+                            return ERROR;
+                        }
+                        newPatches.get(i).sinks()[j] = portCfg;
+                    }
+                }
+
+                mAudioPortsCached = newPorts;
+                mAudioPatchesCached = newPatches;
+                mAudioPortGeneration = portGeneration[0];
+            }
+            if (ports != null) {
+                ports.clear();
+                ports.addAll(mAudioPortsCached);
+            }
+            if (patches != null) {
+                patches.clear();
+                patches.addAll(mAudioPatchesCached);
+            }
+        }
+        return SUCCESS;
+    }
+
+    AudioPortConfig updatePortConfig(AudioPortConfig portCfg, ArrayList<AudioPort> ports) {
+        AudioPort port = portCfg.port();
+        int k;
+        for (k = 0; k < ports.size(); k++) {
+            // compare handles because the port returned by JNI is not of the correct
+            // subclass
+            if (ports.get(k).handle().equals(port.handle())) {
+                Log.i(TAG, "updatePortConfig match found for port handle: "+
+                            port.handle().id()+" port: "+ k);
+                port = ports.get(k);
+                break;
+            }
+        }
+        if (k == ports.size()) {
+            // this hould never happen
+            Log.e(TAG, "updatePortConfig port not found for handle: "+port.handle().id());
+            return null;
+        }
+        AudioGainConfig gainCfg = portCfg.gain();
+        if (gainCfg != null) {
+            AudioGain gain = port.gain(gainCfg.index());
+            gainCfg = gain.buildConfig(gainCfg.mode(),
+                                       gainCfg.channelMask(),
+                                       gainCfg.values(),
+                                       gainCfg.rampDurationMs());
+        }
+        return port.buildConfig(portCfg.samplingRate(),
+                                                 portCfg.channelMask(),
+                                                 portCfg.format(),
+                                                 gainCfg);
     }
 }
