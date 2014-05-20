@@ -457,7 +457,7 @@ public class NotificationManagerService extends SystemService {
     {
         final StatusBarNotification sbn;
         SingleNotificationStats stats;
-        IBinder statusBarKey;
+        boolean isCanceled;
 
         // These members are used by NotificationSignalExtractors
         // to communicate with the ranking module.
@@ -472,6 +472,7 @@ public class NotificationManagerService extends SystemService {
         public Notification getNotification() { return sbn.getNotification(); }
         public int getFlags() { return sbn.getNotification().flags; }
         public int getUserId() { return sbn.getUserId(); }
+        public String getKey() { return sbn.getKey(); }
 
         void dump(PrintWriter pw, String prefix, Context baseContext) {
             final Notification notification = sbn.getNotification();
@@ -1668,7 +1669,7 @@ public class NotificationManagerService extends SystemService {
                         "pkg=" + pkg + " canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
                     NotificationRecord old = null;
-                    int index = indexOfNotificationLocked(pkg, tag, id, userId);
+                    int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
@@ -1677,12 +1678,8 @@ public class NotificationManagerService extends SystemService {
                         mNotificationList.set(index, r);
                         mUsageStats.registerUpdatedByApp(r, old);
                         // Make sure we don't lose the foreground service state.
-                        if (old != null) {
-                            notification.flags |=
-                                old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
-                        }
-                    }
-                    if (old != null) {
+                        notification.flags |=
+                            old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
                         mNotificationsByKey.remove(old.sbn.getKey());
                     }
                     mNotificationsByKey.put(n.getKey(), r);
@@ -1705,18 +1702,17 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     if (notification.icon != 0) {
-                        if (old != null && old.statusBarKey != null) {
-                            r.statusBarKey = old.statusBarKey;
+                        if (old != null && !old.isCanceled) {
                             final long identity = Binder.clearCallingIdentity();
                             try {
-                                mStatusBar.updateNotification(r.statusBarKey, n);
+                                mStatusBar.updateNotification(n);
                             } finally {
                                 Binder.restoreCallingIdentity(identity);
                             }
                         } else {
                             final long identity = Binder.clearCallingIdentity();
                             try {
-                                r.statusBarKey = mStatusBar.addNotification(n);
+                                mStatusBar.addNotification(n);
                                 if ((n.getNotification().flags & Notification.FLAG_SHOW_LIGHTS) != 0
                                         && canInterrupt) {
                                     mAttentionLight.pulse();
@@ -1733,10 +1729,10 @@ public class NotificationManagerService extends SystemService {
                         mListeners.notifyPostedLocked(r.sbn, cloneNotificationListLocked());
                     } else {
                         Slog.e(TAG, "Not posting notification with icon==0: " + notification);
-                        if (old != null && old.statusBarKey != null) {
+                        if (old != null && !old.isCanceled) {
                             final long identity = Binder.clearCallingIdentity();
                             try {
-                                mStatusBar.removeNotification(old.statusBarKey);
+                                mStatusBar.removeNotification(r.getKey());
                             } finally {
                                 Binder.restoreCallingIdentity(identity);
                             }
@@ -2120,11 +2116,11 @@ public class NotificationManagerService extends SystemService {
         if (r.getNotification().icon != 0) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mStatusBar.removeNotification(r.statusBarKey);
+                mStatusBar.removeNotification(r.getKey());
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-            r.statusBarKey = null;
+            r.isCanceled = true;
             mListeners.notifyRemovedLocked(r.sbn, cloneNotificationListLocked());
         }
 
@@ -2391,6 +2387,18 @@ public class NotificationManagerService extends SystemService {
         }
         return -1;
     }
+
+    // lock on mNotificationList
+    int indexOfNotificationLocked(String key) {
+        NotificationRecord r = mNotificationsByKey.get(key);
+        if (r == null) {
+            return -1;
+        }
+        int index = Collections.binarySearch(mNotificationList, r, mRankingComparator);
+        // Guarantee to return -1 when not found.
+        return (index >= 0) ? index : -1;
+    }
+
 
     private void updateNotificationPulse() {
         synchronized (mNotificationList) {

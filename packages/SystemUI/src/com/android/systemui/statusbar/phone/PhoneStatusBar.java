@@ -1027,18 +1027,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return new UserHandle(mCurrentUserId);
     }
 
-    public void addNotification(IBinder key, StatusBarNotification notification) {
+    @Override
+    public void addNotification(StatusBarNotification notification) {
         if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
-        Entry shadeEntry = createNotificationViews(key, notification);
+        Entry shadeEntry = createNotificationViews(notification);
         if (shadeEntry == null) {
             return;
         }
-        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(key, notification)) {
+        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification)) {
             return;
         }
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-            Entry interruptionCandidate = new Entry(key, notification, null);
+            Entry interruptionCandidate = new Entry(notification, null);
             ViewGroup holder = mHeadsUpNotificationView.getHolder();
             if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
                 mInterruptingNotificationTime = System.currentTimeMillis();
@@ -1070,7 +1071,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             // show the ticker if there isn't already a heads up
             if (mInterruptingNotificationEntry == null) {
-                tick(null, notification, true);
+                tick(notification, true);
             }
         }
         addNotificationViews(shadeEntry);
@@ -1089,12 +1090,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        super.updateNotification(key, notification);
-        mIntercepted.update(key, notification);
+    public void updateNotification(StatusBarNotification notification) {
+        super.updateNotification(notification);
+        mIntercepted.update(notification);
     }
 
-    public void removeNotification(IBinder key) {
+    @Override
+    public void removeNotification(String key) {
         StatusBarNotification old = removeNotificationViews(key);
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
@@ -2019,7 +2021,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void setHardKeyboardStatus(boolean available, boolean enabled) {}
 
     @Override
-    protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
+    protected void tick(StatusBarNotification n, boolean firstTime) {
         // no ticking in lights-out mode
         if (!areLightsOn()) return;
 
