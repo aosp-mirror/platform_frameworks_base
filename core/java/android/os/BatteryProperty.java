@@ -56,7 +56,7 @@ public class BatteryProperty implements Parcelable {
     /**
      * Battery remaining energy in nanowatt-hours, as a long integer.
      */
-    public static final int ENERGY_COUNTER = 4;
+    public static final int ENERGY_COUNTER = 5;
 
     private long mValueLong;
 
