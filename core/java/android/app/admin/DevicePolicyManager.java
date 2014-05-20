@@ -32,6 +32,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
 
@@ -2181,4 +2182,42 @@ public class DevicePolicyManager {
         }
         return false;
     }
+
+    /**
+     * Called by device owners to update {@link Settings.Global} settings. Validation that the value
+     * of the setting is in the correct form for the setting type should be performed by the caller.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param setting The name of the setting to update.
+     * @param value The value to update the setting to.
+     */
+    public void setGlobalSetting(ComponentName admin, String setting, String value) {
+        if (mService != null) {
+            try {
+                mService.setGlobalSetting(admin, setting, value);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by profile or device owners to update {@link Settings.Secure} settings. Validation
+     * that the value of the setting is in the correct form for the setting type should be performed
+     * by the caller.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param setting The name of the setting to update.
+     * @param value The value to update the setting to.
+     */
+    public void setSecureSetting(ComponentName admin, String setting, String value) {
+        if (mService != null) {
+            try {
+                mService.setSecureSetting(admin, setting, value);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
 }

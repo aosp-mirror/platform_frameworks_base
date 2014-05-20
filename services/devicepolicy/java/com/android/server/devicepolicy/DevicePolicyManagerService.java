@@ -3595,4 +3595,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         return false;
     }
+
+    @Override
+    public void setGlobalSetting(ComponentName who, String setting, String value) {
+        final ContentResolver contentResolver = mContext.getContentResolver();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                Settings.Global.putString(contentResolver, setting, value);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
+    public void setSecureSetting(ComponentName who, String setting, String value) {
+        int callingUserId = UserHandle.getCallingUserId();
+        final ContentResolver contentResolver = mContext.getContentResolver();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putStringForUser(contentResolver, setting, value, callingUserId);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
 }
