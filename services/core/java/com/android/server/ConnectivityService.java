@@ -45,7 +45,6 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -911,8 +910,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             switch (config.radio) {
                 case TYPE_DUMMY:
                     return new DummyDataStateTracker(targetNetworkType, config.name);
-                case TYPE_BLUETOOTH:
-                    return BluetoothTetheringDataTracker.getInstance();
                 case TYPE_WIMAX:
                     return makeWimaxStateTracker(mContext, mTrackerHandler);
                 case TYPE_PROXY:
