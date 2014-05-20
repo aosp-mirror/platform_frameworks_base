@@ -21,6 +21,7 @@ import android.app.ITransientNotification;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
@@ -43,6 +44,8 @@ interface INotificationManager
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
+    // TODO: Remove this when callers have been migrated to the equivalent
+    // INotificationListener method.
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
@@ -52,8 +55,7 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
-    StatusBarNotification[] getActiveNotificationsFromListener(in INotificationListener token, in String[] keys);
-    String[] getActiveNotificationKeysFromListener(in INotificationListener token);
+    ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token);
 
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
