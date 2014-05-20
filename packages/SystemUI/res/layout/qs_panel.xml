@@ -23,6 +23,7 @@
         android:background="@drawable/qs_panel_background" >
     <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
+            android:background="#0000"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 </FrameLayout>
