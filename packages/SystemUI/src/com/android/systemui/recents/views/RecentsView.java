@@ -301,24 +301,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return insets.consumeSystemWindowInsets(false, false, false, true);
     }
 
-    /** Closes any open info panes */
-    public boolean closeOpenInfoPanes() {
-        if (mBSP != null) {
-            // Get the first stack view
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = getChildAt(i);
-                if (child instanceof TaskStackView) {
-                    TaskStackView stackView = (TaskStackView) child;
-                    if (stackView.closeOpenInfoPanes()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     /** Unfilters any filtered stacks */
     public boolean unfilterFilteredStacks() {
         if (mBSP != null) {
@@ -345,9 +327,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mCb != null) {
             mCb.onTaskLaunching();
         }
-
-        // Close any open info panes
-        closeOpenInfoPanes();
 
         final Runnable launchRunnable = new Runnable() {
             @Override

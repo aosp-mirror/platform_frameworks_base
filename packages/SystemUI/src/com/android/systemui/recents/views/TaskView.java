@@ -44,8 +44,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskIconClicked(TaskView tv);
-        public void onTaskInfoPanelShown(TaskView tv);
-        public void onTaskInfoPanelHidden(TaskView tv);
         public void onTaskAppInfoClicked(TaskView tv);
         public void onTaskDismissed(TaskView tv);
 
@@ -58,14 +56,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     Task mTask;
     boolean mTaskDataLoaded;
-    boolean mTaskInfoPaneVisible;
     boolean mIsFocused;
     Point mLastTouchDown = new Point();
     Path mRoundedRectClipPath = new Path();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
-    TaskInfoView mInfoView;
     TaskViewCallbacks mCb;
 
 
@@ -94,7 +90,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
-        mInfoView = (TaskInfoView) findViewById(R.id.task_view_info_pane);
 
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
@@ -280,63 +275,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         return outRect;
     }
 
-    /** Returns whether this task has an info pane visible */
-    boolean isInfoPaneVisible() {
-        return mTaskInfoPaneVisible;
-    }
-
-    /** Shows the info pane if it is not visible. */
-    void showInfoPane(Rect taskVisibleRect) {
-        if (mTaskInfoPaneVisible) return;
-
-        // Remove the bar view from the visible rect and update the info pane contents
-        taskVisibleRect.top += mBarView.getMeasuredHeight();
-        mInfoView.updateContents(taskVisibleRect);
-
-        // Show the info pane and animate it into view
-        mInfoView.setVisibility(View.VISIBLE);
-        mInfoView.animateCircularClip(mLastTouchDown, 0f, 1f, null, true);
-        mInfoView.setOnClickListener(this);
-        mTaskInfoPaneVisible = true;
-
-        // Notify any callbacks
-        if (mCb != null) {
-            mCb.onTaskInfoPanelShown(this);
-        }
-    }
-
-    /** Hides the info pane if it is visible. */
-    void hideInfoPane() {
-        if (!mTaskInfoPaneVisible) return;
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-
-        // Cancel any circular clip animation
-        mInfoView.cancelCircularClipAnimation();
-
-        // Animate the info pane out
-        mInfoView.animate()
-                .alpha(0f)
-                .setDuration(config.taskViewInfoPaneAnimDuration)
-                .setInterpolator(config.defaultBezierInterpolator)
-                .withLayer()
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mInfoView.setVisibility(View.INVISIBLE);
-                        mInfoView.setOnClickListener(null);
-
-                        mInfoView.setAlpha(1f);
-                    }
-                })
-                .start();
-        mTaskInfoPaneVisible = false;
-
-        // Notify any callbacks
-        if (mCb != null) {
-            mCb.onTaskInfoPanelHidden(this);
-        }
-    }
-
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -408,11 +346,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     @Override
     public void onTaskDataLoaded(boolean reloadingTaskData) {
-        if (mThumbnailView != null && mBarView != null && mInfoView != null) {
+        if (mThumbnailView != null && mBarView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask, reloadingTaskData);
             mBarView.rebindToTask(mTask, reloadingTaskData);
-            mInfoView.rebindToTask(mTask, reloadingTaskData);
             // Rebind any listeners
             mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);
@@ -424,16 +361,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
                 }
             }
-            if (Constants.DebugFlags.App.EnableInfoPane) {
-                mInfoView.mAppInfoButton.setOnClickListener(this);
-            }
         }
         mTaskDataLoaded = true;
     }
 
     @Override
     public void onTaskDataUnloaded() {
-        if (mThumbnailView != null && mBarView != null && mInfoView != null) {
+        if (mThumbnailView != null && mBarView != null) {
             // Unbind each of the views from the task data and remove the task callback
             mTask.setCallbacks(null);
             mThumbnailView.unbindFromTask();
@@ -444,18 +378,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mBarView.mApplicationIcon.setOnLongClickListener(null);
             }
-            if (Constants.DebugFlags.App.EnableInfoPane) {
-                mInfoView.mAppInfoButton.setOnClickListener(null);
-            }
         }
         mTaskDataLoaded = false;
     }
 
     @Override
     public void onClick(View v) {
-        if (v == mInfoView) {
-            hideInfoPane();
-        } else if (v == mBarView.mApplicationIcon) {
+        if (v == mBarView.mApplicationIcon) {
             mCb.onTaskIconClicked(this);
         } else if (v == mBarView.mDismissButton) {
             // Animate out the view and call the callback
@@ -466,8 +395,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     mCb.onTaskDismissed(tv);
                 }
             });
-        } else if (v == mInfoView.mAppInfoButton) {
-            mCb.onTaskAppInfoClicked(this);
         }
     }
 
