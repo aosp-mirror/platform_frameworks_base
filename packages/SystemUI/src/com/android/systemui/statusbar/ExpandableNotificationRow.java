@@ -258,11 +258,4 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void notifyContentUpdated() {
         mPrivateLayout.notifyContentUpdated();
     }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int newHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
-        mVetoButton.measure(widthMeasureSpec, newHeightSpec);
-    }
 }
