@@ -84,7 +84,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCollapsedSize;
     private int mBottomStackSlowDownHeight;
     private int mBottomStackPeekSize;
-    private int mEmptyMarginBottom;
     private int mPaddingBetweenElements;
     private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
@@ -178,6 +177,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) getLayoutHeight();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+            y = getHeight() - getEmptyBottomMargin();
+            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
     }
 
@@ -201,8 +202,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 .getDimensionPixelSize(R.dimen.notification_min_height);
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
-        mEmptyMarginBottom = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_stack_margin_bottom);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
         mPaddingBetweenElementsDimmed = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
@@ -242,7 +241,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     (int) (centerX + width / 2.0f),
                     (int) height);
         }
-        setMaxLayoutHeight(getHeight() - mEmptyMarginBottom);
+        setMaxLayoutHeight(getHeight());
         updateContentHeight();
         updateScrollPositionIfNecessary();
         requestChildrenUpdate();
@@ -297,10 +296,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         last child is not in the bottom stack.
      */
     private boolean needsHeightAdaption() {
-        View lastChild = getLastChildNotGone();
-        View firstChild = getFirstChildNotGone();
-        boolean isLastChildExpanded = isViewExpanded(lastChild);
-        return isLastChildExpanded && lastChild != firstChild;
+        return getNotGoneChildCount() > 1;
     }
 
     private boolean isViewExpanded(View view) {
@@ -1429,6 +1425,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         int emptyMargin = mMaxLayoutHeight - mContentHeight;
         if (needsHeightAdaption()) {
             emptyMargin = emptyMargin - mBottomStackSlowDownHeight - mBottomStackPeekSize;
+        } else {
+            emptyMargin = emptyMargin - mBottomStackPeekSize;
         }
         return Math.max(emptyMargin, 0);
     }

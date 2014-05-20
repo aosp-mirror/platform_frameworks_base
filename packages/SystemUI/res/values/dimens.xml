@@ -233,9 +233,6 @@
          in dps over one second of time. -->
     <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>
 
-    <!-- Space below the notification stack -->
-    <dimen name="notification_stack_margin_bottom">0dp</dimen>
-
     <!-- Space reserved for the cards behind the top card in the top stack -->
     <dimen name="top_stack_peek_amount">12dp</dimen>
 

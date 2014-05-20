@@ -27,23 +27,32 @@ import android.view.animation.PathInterpolator;
  */
 public class FlingAnimationUtils {
 
-    private static final float LINEAR_OUT_SLOW_IN_Y2 = 0.35f;
-    private static final float MAX_LENGTH_SECONDS = 0.4f;
+    private static final float LINEAR_OUT_SLOW_IN_X2 = 0.35f;
+    private static final float LINEAR_OUT_FASTER_IN_Y2 = 0.7f;
     private static final float MIN_VELOCITY_DP_PER_SECOND = 250;
 
     /**
      * Crazy math. http://en.wikipedia.org/wiki/B%C3%A9zier_curve
      */
-    private static final float LINEAR_OUT_SLOW_IN_START_GRADIENT = 1/LINEAR_OUT_SLOW_IN_Y2;
+    private static final float LINEAR_OUT_SLOW_IN_START_GRADIENT = 1.0f / LINEAR_OUT_SLOW_IN_X2;
+    private static final float LINEAR_OUT_FASTER_IN_START_GRADIENT = LINEAR_OUT_FASTER_IN_Y2;
 
     private Interpolator mLinearOutSlowIn;
     private Interpolator mFastOutSlowIn;
-    private float mMinVelocityPxPerSecond;
+    private Interpolator mFastOutLinearIn;
+    private Interpolator mLinearOutFasterIn;
 
-    public FlingAnimationUtils(Context ctx) {
-        mLinearOutSlowIn = new PathInterpolator(0, 0, LINEAR_OUT_SLOW_IN_Y2, 1);
+    private float mMinVelocityPxPerSecond;
+    private float mMaxLengthSeconds;
+
+    public FlingAnimationUtils(Context ctx, float maxLengthSeconds) {
+        mMaxLengthSeconds = maxLengthSeconds;
+        mLinearOutSlowIn = new PathInterpolator(0, 0, LINEAR_OUT_SLOW_IN_X2, 1);
+        mLinearOutFasterIn = new PathInterpolator(0, 0, 1, LINEAR_OUT_FASTER_IN_Y2);
         mFastOutSlowIn
                 = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_slow_in);
+        mFastOutLinearIn
+                = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_linear_in);
         mMinVelocityPxPerSecond
                 = MIN_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
     }
@@ -58,15 +67,33 @@ public class FlingAnimationUtils {
      * @param velocity the current velocity of the motion
      */
     public void apply(ValueAnimator animator, float currValue, float endValue, float velocity) {
+        apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion.
+     *
+     * @param animator the animator to apply
+     * @param currValue the current value
+     * @param endValue the end value of the animator
+     * @param velocity the current velocity of the motion
+     * @param maxDistance the maximum distance for this interaction; the maximum animation length
+     *                    gets multiplied by the ratio between the actual distance and this value
+     */
+    public void apply(ValueAnimator animator, float currValue, float endValue, float velocity,
+            float maxDistance) {
+        float maxLengthSeconds = (float) (mMaxLengthSeconds
+                * Math.sqrt(Math.abs(endValue - currValue) / maxDistance));
         float diff = Math.abs(endValue - currValue);
         float velAbs = Math.abs(velocity);
         float durationSeconds = LINEAR_OUT_SLOW_IN_START_GRADIENT * diff / velAbs;
-        if (durationSeconds <= MAX_LENGTH_SECONDS) {
+        if (durationSeconds <= maxLengthSeconds) {
             animator.setInterpolator(mLinearOutSlowIn);
         } else if (velAbs >= mMinVelocityPxPerSecond) {
 
             // Cross fade between fast-out-slow-in and linear interpolator with current velocity.
-            durationSeconds = MAX_LENGTH_SECONDS;
+            durationSeconds = maxLengthSeconds;
             VelocityInterpolator velocityInterpolator
                     = new VelocityInterpolator(durationSeconds, velAbs, diff);
             InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
@@ -75,10 +102,57 @@ public class FlingAnimationUtils {
         } else {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
-            durationSeconds = MAX_LENGTH_SECONDS;
+            durationSeconds = maxLengthSeconds;
             animator.setInterpolator(mFastOutSlowIn);
         }
         animator.setDuration((long) (durationSeconds * 1000));
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion for the case when the animation is making something
+     * disappear.
+     *
+     * @param animator the animator to apply
+     * @param currValue the current value
+     * @param endValue the end value of the animator
+     * @param velocity the current velocity of the motion
+     * @param maxDistance the maximum distance for this interaction; the maximum animation length
+     *                    gets multiplied by the ratio between the actual distance and this value
+     */
+    public void applyDismissing(ValueAnimator animator, float currValue, float endValue,
+            float velocity, float maxDistance) {
+        float maxLengthSeconds = (float) (mMaxLengthSeconds
+                * Math.pow(Math.abs(endValue - currValue) / maxDistance, 0.5f));
+        float diff = Math.abs(endValue - currValue);
+        float velAbs = Math.abs(velocity);
+        float durationSeconds = LINEAR_OUT_FASTER_IN_START_GRADIENT * diff / velAbs;
+        if (durationSeconds <= maxLengthSeconds) {
+            animator.setInterpolator(mLinearOutFasterIn);
+        } else if (velAbs >= mMinVelocityPxPerSecond) {
+
+            // Cross fade between linear-out-faster-in and linear interpolator with current
+            // velocity.
+            durationSeconds = maxLengthSeconds;
+            VelocityInterpolator velocityInterpolator
+                    = new VelocityInterpolator(durationSeconds, velAbs, diff);
+            InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
+                    velocityInterpolator, mLinearOutFasterIn, mLinearOutSlowIn);
+            animator.setInterpolator(superInterpolator);
+        } else {
+
+            // Just use a normal interpolator which doesn't take the velocity into account.
+            durationSeconds = maxLengthSeconds;
+            animator.setInterpolator(mFastOutLinearIn);
+        }
+        animator.setDuration((long) (durationSeconds * 1000));
+    }
+
+    /**
+     * @return the minimum velocity a gesture needs to have to be considered a fling
+     */
+    public float getMinVelocityPxPerSecond() {
+        return mMinVelocityPxPerSecond;
     }
 
     /**
