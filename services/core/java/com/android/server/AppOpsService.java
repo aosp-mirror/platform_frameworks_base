@@ -1253,7 +1253,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void removeUser(int userHandle) throws RemoteException {
         checkSystemUid("removeUser");
         mOpRestrictions.remove(userHandle);
-        mProfileOwnerUids.removeAt(mProfileOwnerUids.indexOfKey(userHandle));
+        final int index = mProfileOwnerUids.indexOfKey(userHandle);
+        if (index >= 0) {
+            mProfileOwnerUids.removeAt(index);
+        }
     }
 
     private void checkSystemUid(String function) {
