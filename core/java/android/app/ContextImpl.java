@@ -1377,7 +1377,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
-                    AppOpsManager.OP_NONE, true, false, user.getIdentifier());
+                    appOp, true, false, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
