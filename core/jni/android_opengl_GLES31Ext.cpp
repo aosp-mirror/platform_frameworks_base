@@ -19,8 +19,8 @@
 #include <GLES3/gl31.h>
 #include <GLES2/gl2ext.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
+#include <jni.h>
+#include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <assert.h>
