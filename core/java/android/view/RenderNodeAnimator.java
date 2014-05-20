@@ -48,6 +48,8 @@ public final class RenderNodeAnimator extends Animator {
     public static final int Y = 9;
     public static final int Z = 10;
     public static final int ALPHA = 11;
+    // The last value in the enum, used for array size initialization
+    public static final int LAST_VALUE = ALPHA;
 
     // Keep in sync with enum PaintFields in Animator.h
     public static final int PAINT_STROKE_WIDTH = 0;
@@ -86,7 +88,7 @@ public final class RenderNodeAnimator extends Animator {
     private boolean mStarted = false;
     private boolean mFinished = false;
 
-    public int mapViewPropertyToRenderProperty(int viewProperty) {
+    public static int mapViewPropertyToRenderProperty(int viewProperty) {
         return sViewPropertyAnimatorMap.get(viewProperty);
     }
 
@@ -125,11 +127,15 @@ public final class RenderNodeAnimator extends Animator {
         }
     }
 
+    static boolean isNativeInterpolator(TimeInterpolator interpolator) {
+        return interpolator.getClass().isAnnotationPresent(HasNativeInterpolator.class);
+    }
+
     private void applyInterpolator() {
         if (mInterpolator == null) return;
 
         long ni;
-        if (mInterpolator.getClass().isAnnotationPresent(HasNativeInterpolator.class)) {
+        if (isNativeInterpolator(mInterpolator)) {
             ni = ((NativeInterpolatorFactory)mInterpolator).createNativeInterpolator();
         } else {
             long duration = nGetDuration(mNativePtr.get());
