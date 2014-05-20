@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Prostredie"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Správa o chybách sa zaznamenala"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Dotykom môžete zdieľať správu o chybách"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Hlásenie o chybách bolo vytvorené"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"Hlásenie o chybách môžete zdielať klepnutím"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Správy o chybách obsahujú údaje z rôznych súborov denníkov systému vrátane osobných a súkromných informácií. Zdieľajte ich iba s dôveryhodnými aplikáciami a ľuďmi."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Zobraziť túto správu nabudúce"</string>
 </resources>
