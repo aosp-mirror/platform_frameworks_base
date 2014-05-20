@@ -45,6 +45,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
@@ -924,6 +925,35 @@ public class WallpaperManager {
      */
     public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
         try {
+            /**
+             * The framework makes no attempt to limit the window size
+             * to the maximum texture size. Any window larger than this
+             * cannot be composited.
+             *
+             * Read maximum texture size from system property and scale down
+             * minimumWidth and minimumHeight accordingly.
+             */
+            int maximumTextureSize;
+            try {
+                maximumTextureSize = SystemProperties.getInt("sys.max_texture_size", 0);
+            } catch (Exception e) {
+                maximumTextureSize = 0;
+            }
+
+            if (maximumTextureSize > 0) {
+                if ((minimumWidth > maximumTextureSize) ||
+                    (minimumHeight > maximumTextureSize)) {
+                    float aspect = (float)minimumHeight / (float)minimumWidth;
+                    if (minimumWidth > minimumHeight) {
+                        minimumWidth = maximumTextureSize;
+                        minimumHeight = (int)((minimumWidth * aspect) + 0.5);
+                    } else {
+                        minimumHeight = maximumTextureSize;
+                        minimumWidth = (int)((minimumHeight / aspect) + 0.5);
+                    }
+                }
+            }
+
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
             } else {
