@@ -179,10 +179,4 @@ public class KeyguardUpdateMonitorCallback {
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onScreenTurnedOff(int why) { }
-
-    /**
-     * Called when the NFC Service has found a tag that is registered for NFC unlock.
-     */
-    public void onNfcUnlock() { }
-
 }

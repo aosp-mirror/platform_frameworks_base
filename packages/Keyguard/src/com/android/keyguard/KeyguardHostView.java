@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import android.nfc.NfcUnlock;
-
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
@@ -46,6 +44,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -262,12 +261,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                     if (DEBUGXPORT) Log.v(TAG, "update widget: play state changed");
                     KeyguardHostView.this.post(mSwitchPageRunnable);
                 }
-            }
-        }
-        @Override
-        public void onNfcUnlock() {
-            if (NfcUnlock.getPropertyEnabled()) {
-                dismiss(true);
             }
         }
     };
