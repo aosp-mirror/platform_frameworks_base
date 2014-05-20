@@ -65,11 +65,11 @@ page.tags="users, growth, promotion"
 </p>
 
 <div class="headerLine">
-  <h1 id="link-to-your-apps">
+  <h2 id="link-to-your-apps">
     Link to Your Apps in Google Play
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -101,12 +101,12 @@ page.tags="users, growth, promotion"
   </li>
 </ul>
 
-<div class="headerLine clearfloat">
-  <h1 id="use-the-google-play-badge">
+<div class="headerLine">
+  <h2 id="use-the-google-play-badge">
     Use the Google Play Badge
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="margin:0 3em;">
@@ -126,12 +126,12 @@ page.tags="users, growth, promotion"
   also easy to make and available in multiple languages.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="cross-promote-from-your-other-apps">
+<div class="headerLine">
+  <h2 id="cross-promote-from-your-other-apps">
     Cross-Promote from Your Other Apps
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure-right">
@@ -158,11 +158,11 @@ page.tags="users, growth, promotion"
 </p>
 
 <div class="headerLine">
-  <h1 id="hold-a-contest">
+  <h2 id="hold-a-contest">
     Hold a Contest
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -180,11 +180,11 @@ page.tags="users, growth, promotion"
 </p>
 
 <div class="headerLine">
-  <h1 id="leverage-pr">
+  <h2 id="leverage-pr">
     Leverage PR
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -196,11 +196,11 @@ page.tags="users, growth, promotion"
 </p>
 
 <div class="headerLine">
-  <h1 id="use-social-media">
+  <h2 id="use-social-media">
     Use Social Media
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -220,12 +220,12 @@ page.tags="users, growth, promotion"
   review your apps. A review on the right blog is a great promotion.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="publish-youtube-videos">
+<div class="headerLine">
+  <h2 id="publish-youtube-videos">
     Publish YouTube Videos
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="center-img" style="padding-top:1em;">
@@ -240,11 +240,11 @@ page.tags="users, growth, promotion"
 </p>
 
 <div class="headerLine">
-  <h1 id="advertise">
+  <h2 id="advertise">
     Advertise
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -262,12 +262,12 @@ page.tags="users, growth, promotion"
   Sign up for an AdMob account</a> to get started.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="maximize-your-marketing-spend">
+<div class="headerLine">
+  <h2 id="maximize-your-marketing-spend">
     Maximize your Marketing Spend
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="margin: 0 3em;">
@@ -285,12 +285,12 @@ page.tags="users, growth, promotion"
   platforms simultaneously helps you maximize your return on investment.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="related-resources">
+<div class="headerLine">
+  <h2 id="related-resources">
     Related Resources
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"
