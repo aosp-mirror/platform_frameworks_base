@@ -121,7 +121,7 @@ public class BarController {
                 }
             } else {
                 vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
-                vis = (vis & View.SYSTEM_UI_TRANSPARENT) | (oldVis & View.SYSTEM_UI_TRANSPARENT);
+                vis = (vis & ~View.SYSTEM_UI_TRANSPARENT) | (oldVis & View.SYSTEM_UI_TRANSPARENT);
             }
         }
         return vis;
