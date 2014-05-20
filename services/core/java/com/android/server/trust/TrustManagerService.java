@@ -324,8 +324,6 @@ public class TrustManagerService extends SystemService {
                 mTrustListeners.get(i).onTrustChanged(enabled, userId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Exception while notifying TrustListener. Removing listener.", e);
-                mTrustListeners.get(i);
-                i--;
             }
         }
     }
