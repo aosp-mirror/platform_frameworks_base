@@ -11413,6 +11413,16 @@ package android.graphics.drawable {
     method public void startTransition(int);
   }
 
+  public class VectorDrawable extends android.graphics.drawable.Drawable {
+    ctor public VectorDrawable();
+    method public void draw(android.graphics.Canvas);
+    method public int getOpacity();
+    method public void setAlpha(int);
+    method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setPadding(android.graphics.Rect);
+    method public void setPadding(int, int, int, int);
+  }
+
 }
 
 package android.graphics.drawable.shapes {
