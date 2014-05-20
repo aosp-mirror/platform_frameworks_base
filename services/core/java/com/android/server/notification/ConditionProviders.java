@@ -88,6 +88,8 @@ public class ConditionProviders extends ManagedServices {
             for (int i = 0; i < mRecords.size(); i++) {
                 pw.print("      "); pw.println(mRecords.get(i));
             }
+            pw.print("    mCountdownHelper: ");
+            pw.println(mCountdownHelper.getCurrentConditionDescription());
         }
     }
 
@@ -472,6 +474,16 @@ public class ConditionProviders extends ManagedServices {
                         ACTION, ts(time), time - now, span, ts(now)));
                 alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
             }
+        }
+
+        public String getCurrentConditionDescription() {
+            if (mCurrent == 0) return null;
+            final long time = mCurrent;
+            final long now = System.currentTimeMillis();
+            final CharSequence span =
+                    DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+            return String.format("Scheduled for %s, %s in the future (%s), now=%s",
+                    ts(time), time - now, span, ts(now));
         }
 
         private String ts(long time) {
