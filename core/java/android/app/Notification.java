@@ -45,6 +45,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -370,6 +371,14 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_LOCAL_ONLY         = 0x00000100;
 
+    /**
+     * Bit to be bitswise-ored into the {@link #flags} field that should be
+     * set if this notification is the group summary for a group of notifications.
+     * Grouped notifications may display in a cluster or stack on devices which
+     * support such rendering. Requires a group key also be set using {@link Builder#setGroup}.
+     */
+    public static final int FLAG_GROUP_SUMMARY      = 0x00000200;
+
     public int flags;
 
     /** @hide */
@@ -539,6 +548,34 @@ public class Notification implements Parcelable
      */
     public String category;
 
+    private String mGroupKey;
+
+    /**
+     * Get the key used to group this notification into a cluster or stack
+     * with other notifications on devices which support such rendering.
+     */
+    public String getGroup() {
+        return mGroupKey;
+    }
+
+    private String mSortKey;
+
+    /**
+     * Get a sort key that orders this notification among other notifications from the
+     * same package. This can be useful if an external sort was already applied and an app
+     * would like to preserve this. Notifications will be sorted lexicographically using this
+     * value, although providing different priorities in addition to providing sort key may
+     * cause this value to be ignored.
+     *
+     * <p>This sort key can also be used to order members of a notification group. See
+     * {@link Builder#setGroup}.
+     *
+     * @see String#compareTo(String)
+     */
+    public String getSortKey() {
+        return mSortKey;
+    }
+
     /**
      * Additional semantic data to be carried around with this Notification.
      * <p>
@@ -706,15 +743,18 @@ public class Notification implements Parcelable
      */
     public static class Action implements Parcelable {
         private final Bundle mExtras;
+        private RemoteInput[] mRemoteInputs;
 
         /**
          * Small icon representing the action.
          */
         public int icon;
+
         /**
          * Title of the action.
          */
         public CharSequence title;
+
         /**
          * Intent to send when the user invokes this action. May be null, in which case the action
          * may be rendered in a disabled presentation by the system UI.
@@ -728,19 +768,23 @@ public class Notification implements Parcelable
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
             mExtras = in.readBundle();
+            mRemoteInputs = in.createTypedArray(RemoteInput.CREATOR);
         }
+
         /**
          * Use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}.
          */
         public Action(int icon, CharSequence title, PendingIntent intent) {
-            this(icon, title, intent, new Bundle());
+            this(icon, title, intent, new Bundle(), null);
         }
 
-        private Action(int icon, CharSequence title, PendingIntent intent, Bundle extras) {
+        private Action(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+                RemoteInput[] remoteInputs) {
             this.icon = icon;
             this.title = title;
             this.actionIntent = intent;
             this.mExtras = extras != null ? extras : new Bundle();
+            this.mRemoteInputs = remoteInputs;
         }
 
         /**
@@ -751,13 +795,22 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Get the list of inputs to be collected from the user when this action is sent.
+         * May return null if no remote inputs were added.
+         */
+        public RemoteInput[] getRemoteInputs() {
+            return mRemoteInputs;
+        }
+
+        /**
          * Builder class for {@link Action} objects.
          */
-        public static class Builder {
+        public static final class Builder {
             private final int mIcon;
             private final CharSequence mTitle;
             private final PendingIntent mIntent;
             private final Bundle mExtras;
+            private ArrayList<RemoteInput> mRemoteInputs;
 
             /**
              * Construct a new builder for {@link Action} object.
@@ -766,7 +819,7 @@ public class Notification implements Parcelable
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
             public Builder(int icon, CharSequence title, PendingIntent intent) {
-                this(icon, title, intent, new Bundle());
+                this(icon, title, intent, new Bundle(), null);
             }
 
             /**
@@ -775,14 +828,20 @@ public class Notification implements Parcelable
              * @param action the action to read fields from.
              */
             public Builder(Action action) {
-                this(action.icon, action.title, action.actionIntent, new Bundle(action.mExtras));
+                this(action.icon, action.title, action.actionIntent, new Bundle(action.mExtras),
+                        action.getRemoteInputs());
             }
 
-            private Builder(int icon, CharSequence title, PendingIntent intent, Bundle extras) {
+            private Builder(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+                    RemoteInput[] remoteInputs) {
                 mIcon = icon;
                 mTitle = title;
                 mIntent = intent;
                 mExtras = extras;
+                if (remoteInputs != null) {
+                    mRemoteInputs = new ArrayList<RemoteInput>(remoteInputs.length);
+                    Collections.addAll(mRemoteInputs, remoteInputs);
+                }
             }
 
             /**
@@ -809,22 +868,62 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Add an input to be collected from the user when this action is sent.
+             * Response values can be retrieved from the fired intent by using the
+             * {@link RemoteInput#getResultsFromIntent} function.
+             * @param remoteInput a {@link RemoteInput} to add to the action
+             * @return this object for method chaining
+             */
+            public Builder addRemoteInput(RemoteInput remoteInput) {
+                if (mRemoteInputs == null) {
+                    mRemoteInputs = new ArrayList<RemoteInput>();
+                }
+                mRemoteInputs.add(remoteInput);
+                return this;
+            }
+
+            /**
+             * Apply an extender to this action builder. Extenders may be used to add
+             * metadata or change options on this builder.
+             */
+            public Builder apply(Extender extender) {
+                extender.applyTo(this);
+                return this;
+            }
+
+            /**
+             * Extender interface for use with {@link #apply}. Extenders may be used to add
+             * metadata or change options on this builder.
+             */
+            public interface Extender {
+                /**
+                 * Apply this extender to a notification action builder.
+                 * @param builder the builder to be modified.
+                 * @return the build object for chaining.
+                 */
+                public Builder applyTo(Builder builder);
+            }
+
+            /**
              * Combine all of the options that have been set and return a new {@link Action}
              * object.
              * @return the built action
              */
             public Action build() {
-                return new Action(mIcon, mTitle, mIntent, mExtras);
+                RemoteInput[] remoteInputs = mRemoteInputs != null
+                        ? mRemoteInputs.toArray(new RemoteInput[mRemoteInputs.size()]) : null;
+                return new Action(mIcon, mTitle, mIntent, mExtras, remoteInputs);
             }
         }
 
         @Override
         public Action clone() {
             return new Action(
-                this.icon,
-                this.title,
-                this.actionIntent, // safe to alias
-                new Bundle(this.mExtras));
+                    icon,
+                    title,
+                    actionIntent, // safe to alias
+                    new Bundle(mExtras),
+                    getRemoteInputs());
         }
         @Override
         public int describeContents() {
@@ -841,6 +940,7 @@ public class Notification implements Parcelable
                 out.writeInt(0);
             }
             out.writeBundle(mExtras);
+            out.writeTypedArray(mRemoteInputs, flags);
         }
         public static final Parcelable.Creator<Action> CREATOR =
                 new Parcelable.Creator<Action>() {
@@ -960,6 +1060,10 @@ public class Notification implements Parcelable
 
         category = parcel.readString();
 
+        mGroupKey = parcel.readString();
+
+        mSortKey = parcel.readString();
+
         extras = parcel.readBundle(); // may be null
 
         actions = parcel.createTypedArray(Action.CREATOR); // may be null
@@ -1036,6 +1140,10 @@ public class Notification implements Parcelable
         that.priority = this.priority;
 
         that.category = this.category;
+
+        that.mGroupKey = this.mGroupKey;
+
+        that.mSortKey = this.mSortKey;
 
         if (this.extras != null) {
             try {
@@ -1188,6 +1296,10 @@ public class Notification implements Parcelable
 
         parcel.writeString(category);
 
+        parcel.writeString(mGroupKey);
+
+        parcel.writeString(mSortKey);
+
         parcel.writeBundle(extras); // null ok
 
         parcel.writeTypedArray(actions, 0); // null ok
@@ -1325,7 +1437,18 @@ public class Notification implements Parcelable
         sb.append(" flags=0x");
         sb.append(Integer.toHexString(this.flags));
         sb.append(String.format(" color=0x%08x", this.color));
-        sb.append(" category="); sb.append(this.category);
+        if (this.category != null) {
+            sb.append(" category=");
+            sb.append(this.category);
+        }
+        if (this.mGroupKey != null) {
+            sb.append(" groupKey=");
+            sb.append(this.mGroupKey);
+        }
+        if (this.mSortKey != null) {
+            sb.append(" sortKey=");
+            sb.append(this.mSortKey);
+        }
         if (actions != null) {
             sb.append(" ");
             sb.append(actions.length);
@@ -1408,6 +1531,8 @@ public class Notification implements Parcelable
         private int mProgress;
         private boolean mProgressIndeterminate;
         private String mCategory;
+        private String mGroupKey;
+        private String mSortKey;
         private Bundle mExtras;
         private int mPriority;
         private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
@@ -1839,6 +1964,51 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Set this notification to be part of a group of notifications sharing the same key.
+         * Grouped notifications may display in a cluster or stack on devices which
+         * support such rendering.
+         *
+         * <p>To make this notification the summary for its group, also call
+         * {@link #setGroupSummary}. A sort order can be specified for group members by using
+         * {@link #setSortKey}.
+         * @param groupKey The group key of the group.
+         * @return this object for method chaining
+         */
+        public Builder setGroup(String groupKey) {
+            mGroupKey = groupKey;
+            return this;
+        }
+
+        /**
+         * Set this notification to be the group summary for a group of notifications.
+         * Grouped notifications may display in a cluster or stack on devices which
+         * support such rendering. Requires a group key also be set using {@link #setGroup}.
+         * @param isGroupSummary Whether this notification should be a group summary.
+         * @return this object for method chaining
+         */
+        public Builder setGroupSummary(boolean isGroupSummary) {
+            setFlag(FLAG_GROUP_SUMMARY, isGroupSummary);
+            return this;
+        }
+
+        /**
+         * Set a sort key that orders this notification among other notifications from the
+         * same package. This can be useful if an external sort was already applied and an app
+         * would like to preserve this. Notifications will be sorted lexicographically using this
+         * value, although providing different priorities in addition to providing sort key may
+         * cause this value to be ignored.
+         *
+         * <p>This sort key can also be used to order members of a notification group. See
+         * {@link Builder#setGroup}.
+         *
+         * @see String#compareTo(String)
+         */
+        public Builder setSortKey(String sortKey) {
+            mSortKey = sortKey;
+            return this;
+        }
+
+        /**
          * Merge additional metadata into this notification.
          *
          * <p>Values within the Bundle will replace existing extras values in this Builder.
@@ -1949,7 +2119,7 @@ public class Notification implements Parcelable
 
         /**
          * Specify the value of {@link #visibility}.
-
+         *
          * @param visibility One of {@link #VISIBILITY_PRIVATE} (the default),
          * {@link #VISIBILITY_SECRET}, or {@link #VISIBILITY_PUBLIC}.
          *
@@ -1969,6 +2139,28 @@ public class Notification implements Parcelable
         public Builder setPublicVersion(Notification n) {
             mPublicVersion = n;
             return this;
+        }
+
+        /**
+         * Apply an extender to this notification builder. Extenders may be used to add
+         * metadata or change options on this builder.
+         */
+        public Builder apply(Extender extender) {
+            extender.applyTo(this);
+            return this;
+        }
+
+        /**
+         * Extender interface for use with {@link #apply}. Extenders may be used to add
+         * metadata or change options on this builder.
+         */
+        public interface Extender {
+            /**
+             * Apply this extender to a notification builder.
+             * @param builder the builder to be modified.
+             * @return the build object for chaining.
+             */
+            public Builder applyTo(Builder builder);
         }
 
         private void setFlag(int mask, boolean value) {
@@ -2298,6 +2490,8 @@ public class Notification implements Parcelable
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
             n.category = mCategory;
+            n.mGroupKey = mGroupKey;
+            n.mSortKey = mSortKey;
             n.priority = mPriority;
             if (mActions.size() > 0) {
                 n.actions = new Action[mActions.size()];
