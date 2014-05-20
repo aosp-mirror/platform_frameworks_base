@@ -23,7 +23,7 @@
     <string name="label_destination" msgid="9132510997381599275">"印刷先"</string>
     <string name="label_copies" msgid="3634531042822968308">"部数"</string>
     <string name="label_paper_size" msgid="8681895607876809323">"用紙サイズ"</string>
-    <string name="label_color" msgid="1108690305218188969">"カラー"</string>
+    <string name="label_color" msgid="1108690305218188969">"カラー選択"</string>
     <string name="label_orientation" msgid="2853142581990496477">"方向"</string>
     <string name="label_pages" msgid="6300874667546617333">"ページ（<xliff:g id="PAGE_COUNT">%1$s</xliff:g>）"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"例: 1-5,8,11-13"</string>
@@ -66,7 +66,7 @@
     <string name="print_error_default_message" msgid="8568506918983980567">"印刷ジョブを生成できませんでした"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"モノクロ"</item>
-    <item msgid="2762241247228983754">"色"</item>
+    <item msgid="2762241247228983754">"カラー"</item>
   </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"縦向き"</item>
