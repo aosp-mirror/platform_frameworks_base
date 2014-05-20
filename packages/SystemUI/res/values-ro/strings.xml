@@ -202,9 +202,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Ecran de afișare a transmisiunii"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminozitate"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMAT"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"Mod de inversare a culorilor"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"Mod contrast îmbunătățit"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inversați culori"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Mod de corectare a culorilor"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Mai multe setări"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"RECENTE"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informații despre aplicație"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"căutare"</string>
@@ -221,6 +223,8 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"Încă %d"</item>
   </plurals>
+    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
+    <skip />
     <string name="notification_tap_again" msgid="7590196980943943842">"Atingeți din nou pentru a deschide"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Glisați în sus pentru a debloca"</string>
 </resources>

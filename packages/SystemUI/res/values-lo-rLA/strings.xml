@@ -78,6 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"ແອັບຯຫຼ້າສຸດ"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ຊອກຫາ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ກ້ອງ"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"ໂທລະສັບ"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ປຸ່ມສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ປຸ່ມຊູມທີ່ໃຊ້ຮ່ວມກັນໄດ້."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ຊູມຈໍນ້ອຍໄປເປັນຈໍຂະຫນາດໃຫຍ່."</string>
@@ -201,11 +202,28 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ດຶງໜ້າຈໍ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ຄວາມແຈ້ງ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ອັດຕະໂນມັດ"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"ໂໝດສະລັບສີ"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"ໂໝດຄວາມຕ່າງແສງ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"​ສະ​ລັບ​ສີ"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"ໂໝດການແກ້ໄຂສີ"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"​ການ​ປ່ອນ​ສັນ​ຍານ"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"​ຮັອດ​ສະ​ປອດ"</string>
+    <string name="recents_empty_message" msgid="2269156590813544104">"ບໍ່​ດົນ​ມາ​ນີ້"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"ເຄືອຄ່າຍອາດ\nຖືກຕິດຕາມ"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ຊອກຫາ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"ເລື່ອນຂຶ້ນເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"ເລື່ອນໄປທາງຊ້າຍເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+  <plurals name="zen_mode_notification_title">
+    <item quantity="one" msgid="7809876956258040354">"ເຊື່ອງ​ການ​ແຈ້ງ​ເຕ​ືອນ​ແລ້ວ"</item>
+    <item quantity="other" msgid="7388721375827338153">"ເຊື່ອງ %d ການ​ແຈ້ງ​ເຕືອນ​ແລ້ວ"</item>
+  </plurals>
+    <string name="zen_mode_notification_text" msgid="8336623711388065713">"​ແຕະ​ເພື່ອ​ສະ​ແດງ"</string>
+    <string name="zen_mode_title" msgid="8793432092004749188">"ຫ້າມລົບກວນ"</string>
+  <plurals name="keyguard_more_overflow_text">
+    <item quantity="other" msgid="9180696159506883684">"%d ເພີ່ມ​ເຕີມ"</item>
+  </plurals>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"ເລື່ອນ​ຂຶ້ນ​ເພື່ອ​ປົດ​ລັອກ"</string>
 </resources>

@@ -78,6 +78,7 @@
     <string name="accessibility_recent" msgid="8571350598987952883">"Aplicaciones recientes"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Buscar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Cámara"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"Teléfono"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
@@ -198,14 +199,31 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"No conectado"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hay red."</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivado"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Pantalla de Cast"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Enviar contenido a pantalla"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"Modo de inversión de color"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"Modo de contraste mejorado"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Invertir colores"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Modo de corrección de color"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Más opciones"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Anclaje a red"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona Wi-Fi"</string>
+    <string name="recents_empty_message" msgid="2269156590813544104">"RECIENTES"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Información de la aplicación"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"buscar"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"La red se\npuede supervisar"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Buscar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Desliza el dedo hacia arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Desliza el dedo hacia la izquierda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+  <plurals name="zen_mode_notification_title">
+    <item quantity="one" msgid="7809876956258040354">"Notification oculta"</item>
+    <item quantity="other" msgid="7388721375827338153">"%d notificaciones ocultas"</item>
+  </plurals>
+    <string name="zen_mode_notification_text" msgid="8336623711388065713">"Toca para mostrar"</string>
+    <string name="zen_mode_title" msgid="8793432092004749188">"No molestar"</string>
+  <plurals name="keyguard_more_overflow_text">
+    <item quantity="other" msgid="9180696159506883684">"%d más"</item>
+  </plurals>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgente abajo"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Toca de nuevo para abrir"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear"</string>
 </resources>

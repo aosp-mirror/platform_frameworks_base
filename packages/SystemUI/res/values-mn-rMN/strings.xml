@@ -202,9 +202,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Дамжуулах дэлгэц"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Тодрол"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОМАТ"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"Өнгө урвуулах горим"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"Сайжруулсан ялгаралтай горим"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Өнгийг урвуулах"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Өнгө залруулах горим"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Өөр тохиргоо"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"СҮҮЛИЙН"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Аппликешны мэдээлэл"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"хайх"</string>
@@ -221,6 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"өөр %d"</item>
   </plurals>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нээхийн тулд дахин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Түгжээг тайлах бол шудрана уу"</string>
 </resources>

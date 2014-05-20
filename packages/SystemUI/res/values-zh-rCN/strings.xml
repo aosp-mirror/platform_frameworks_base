@@ -132,7 +132,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙共享网络。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -204,9 +204,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"投射屏幕"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"颜色反转模式"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"增强对比度模式"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"反色"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"颜色校正模式"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"更多设置"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"网络共享"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"热点"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"最近"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"应用信息"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
@@ -223,6 +225,8 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"还有%d条"</item>
   </plurals>
+    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
+    <skip />
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
 </resources>
