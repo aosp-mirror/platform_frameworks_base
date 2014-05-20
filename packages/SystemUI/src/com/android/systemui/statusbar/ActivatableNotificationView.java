@@ -89,7 +89,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.onFinishInflate();
         mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
-        updateBackgroundResource();
+        updateBackgroundResources();
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -215,9 +215,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
             if (fade) {
-                fadeBackgroundResource();
+                fadeBackground();
             } else {
-                updateBackgroundResource();
+                updateBackground();
             }
         }
     }
@@ -233,14 +233,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBgTint = bgTint;
         mDimmedBgResId = dimmedBgResId;
         mDimmedBgTint = dimmedTint;
-        updateBackgroundResource();
+        updateBackgroundResources();
     }
 
     public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
         setBackgroundResourceIds(bgResId, 0, dimmedBgResId, 0);
     }
 
-    private void fadeBackgroundResource() {
+    private void fadeBackground() {
         if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
         } else {
@@ -256,7 +256,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundAnimator.removeAllListeners();
             mBackgroundAnimator.cancel();
             if (duration <= 0) {
-                updateBackgroundResource();
+                updateBackground();
                 return;
             }
         }
@@ -279,17 +279,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundAnimator.start();
     }
 
-    private void updateBackgroundResource() {
+    private void updateBackground() {
         if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
-            mBackgroundDimmed.setCustomBackground(mDimmedBgResId, mDimmedBgTint);
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else {
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
-            mBackgroundNormal.setCustomBackground(mBgResId, mBgTint);
             mBackgroundNormal.setAlpha(1f);
         }
+    }
+
+    private void updateBackgroundResources() {
+        mBackgroundDimmed.setCustomBackground(mDimmedBgResId, mDimmedBgTint);
+        mBackgroundNormal.setCustomBackground(mBgResId, mBgTint);
     }
 
     @Override
