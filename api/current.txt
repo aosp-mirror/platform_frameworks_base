@@ -1640,7 +1640,6 @@ package android {
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
     field public static final int selectedIcon = 16908302; // 0x102000e
-    field public static final int shared_element = 16908354; // 0x1020042
     field public static final int startSelectingText = 16908328; // 0x1020028
     field public static final int stopSelectingText = 16908329; // 0x1020029
     field public static final int summary = 16908304; // 0x1020010
@@ -3341,6 +3340,8 @@ package android.app {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public final void setDefaultKeyMode(int);
+    method public void setEnterSharedElementListener(android.app.SharedElementListener);
+    method public void setExitSharedElementListener(android.app.SharedElementListener);
     method public final void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public final void setFeatureDrawableAlpha(int, int);
     method public final void setFeatureDrawableResource(int, int);
@@ -3356,7 +3357,6 @@ package android.app {
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
     method public final void setSecondaryProgress(int);
-    method public void setSharedElementListener(android.app.SharedElementListener);
     method public void setTaskDescription(android.app.ActivityManager.TaskDescription);
     method public void setTitle(java.lang.CharSequence);
     method public void setTitle(int);
@@ -4815,7 +4815,7 @@ package android.app {
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
   }
 
-  public class SharedElementListener {
+  public abstract class SharedElementListener {
     ctor public SharedElementListener();
     method public void handleRejectedSharedElements(java.util.List<android.view.View>);
     method public void remapSharedElements(java.util.List<java.lang.String>, java.util.Map<java.lang.String, android.view.View>);

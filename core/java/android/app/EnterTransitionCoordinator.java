@@ -51,7 +51,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final long MAX_WAIT_MS = 1500;
 
     private boolean mSharedElementTransitionStarted;
-    private boolean mIsReturning;
     private Activity mActivity;
     private boolean mHasStopped;
     private Handler mHandler;
@@ -61,9 +60,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             ArrayList<String> sharedElementNames,
             ArrayList<String> acceptedNames, ArrayList<String> mappedNames) {
         super(activity.getWindow(), sharedElementNames, acceptedNames, mappedNames,
-                activity.mTransitionListener);
+                getListener(activity, acceptedNames), acceptedNames != null);
         mActivity = activity;
-        mIsReturning = acceptedNames != null;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -78,6 +76,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             };
             mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
         }
+    }
+
+    private static SharedElementListener getListener(Activity activity,
+            ArrayList<String> acceptedNames) {
+        boolean isReturning = acceptedNames != null;
+        return isReturning ? activity.mExitTransitionListener : activity.mEnterTransitionListener;
     }
 
     @Override
@@ -299,7 +303,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (sharedElementBundle != null) {
                 Bitmap bitmap = sharedElementBundle.getParcelable(KEY_BITMAP);
                 View snapshot = new View(context);
-                snapshot.setId(com.android.internal.R.id.shared_element);
                 Resources resources = getWindow().getContext().getResources();
                 snapshot.setBackground(new BitmapDrawable(resources, bitmap));
                 snapshot.setViewName(name);
@@ -420,12 +423,4 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    @Override
-    protected Transition getViewsTransition() {
-        return getWindow().getEnterTransition();
-    }
-
-    protected Transition getSharedElementTransition() {
-        return getWindow().getSharedElementEnterTransition();
-    }
 }

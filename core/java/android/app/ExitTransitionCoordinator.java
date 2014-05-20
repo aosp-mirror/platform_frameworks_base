@@ -53,18 +53,20 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private boolean mIsBackgroundReady;
 
-    private boolean mIsReturning;
-
     private boolean mIsCanceled;
 
     private Handler mHandler;
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
-        super(activity.getWindow(), names, accepted, mapped, activity.mTransitionListener);
-        mIsReturning = isReturning;
+        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning),
+                isReturning);
         mIsBackgroundReady = !mIsReturning;
         mActivity = activity;
+    }
+
+    private static SharedElementListener getListener(Activity activity, boolean isReturning) {
+        return isReturning ? activity.mExitTransitionListener : activity.mEnterTransitionListener;
     }
 
     @Override
@@ -270,14 +272,5 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         }
         return -1;
-    }
-
-    @Override
-    protected Transition getViewsTransition() {
-        return getWindow().getExitTransition();
-    }
-
-    protected Transition getSharedElementTransition() {
-        return getWindow().getSharedElementExitTransition();
     }
 }

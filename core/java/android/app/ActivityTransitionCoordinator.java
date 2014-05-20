@@ -189,15 +189,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     final protected SharedElementListener mListener;
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
+    final protected boolean mIsReturning;
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
             ArrayList<String> accepted, ArrayList<String> localNames,
-            SharedElementListener listener) {
+            SharedElementListener listener, boolean isReturning) {
         super(new Handler());
         mWindow = window;
         mListener = listener;
         mAllSharedElementNames = allSharedElementNames;
+        mIsReturning = isReturning;
         setSharedElements(accepted, localNames);
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
@@ -330,7 +332,21 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mResultReceiver = resultReceiver;
     }
 
-    protected abstract Transition getViewsTransition();
+    protected Transition getViewsTransition() {
+        if (mIsReturning) {
+            return getWindow().getExitTransition();
+        } else {
+            return getWindow().getEnterTransition();
+        }
+    }
+
+    protected Transition getSharedElementTransition() {
+        if (mIsReturning) {
+            return getWindow().getSharedElementExitTransition();
+        } else {
+            return getWindow().getSharedElementEnterTransition();
+        }
+    }
 
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
         private Rect mEpicenter;
@@ -342,4 +358,5 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             return mEpicenter;
         }
     }
+
 }

@@ -2186,7 +2186,6 @@
   <public-padding type="id" name="l_resource_pad" end="0x01020040" />
 
   <public type="id" name="mask" />
-  <public type="id" name="shared_element" />
 
   <public-padding type="style" name="l_resource_pad" end="0x01030200" />
 
