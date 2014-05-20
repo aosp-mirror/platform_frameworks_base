@@ -1878,7 +1878,7 @@ public class Notification implements Parcelable
          * cause this value to be ignored.
          *
          * <p>This sort key can also be used to order members of a notification group. See
-         * {@link Builder#setGroup}.
+         * {@link #setGroup}.
          *
          * @see String#compareTo(String)
          */

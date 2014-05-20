@@ -153,7 +153,7 @@ public final class RemoteInput implements Parcelable {
          * Specifies choices available to the user to satisfy this input.
          * @param choices an array of pre-defined choices for users input.
          *        You must provide a non-null and non-empty array if
-         *        you set {@link #mAllowFreeFormInput} to {@code false}.
+         *        you disabled free form input using {@link #setAllowFreeFormInput}.
          * @return this object for method chaining
          */
         public Builder setChoices(CharSequence[] choices) {
