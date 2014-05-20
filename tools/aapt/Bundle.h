@@ -67,7 +67,7 @@ public:
           mAssetSourceDir(NULL),
           mCrunchedOutputDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
-          mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
+          mRClassDir(NULL), mResourceIntermediatesDir(NULL), mForcedPackageId(-1), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL), mExtraPackages(NULL),
           mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false), mProduct(NULL),
@@ -159,6 +159,8 @@ public:
     const android::Vector<const char*>& getNoCompressExtensions() const { return mNoCompressExtensions; }
     void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
 
+    int getForcedPackageId() const { return mForcedPackageId; }
+    void setForcedPackageId(int val) { mForcedPackageId = val; }
     const char*  getManifestMinSdkVersion() const { return mManifestMinSdkVersion; }
     void setManifestMinSdkVersion(const char*  val) { mManifestMinSdkVersion = val; }
     const char*  getMinSdkVersion() const { return mMinSdkVersion; }
@@ -283,6 +285,7 @@ private:
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mResourceSourceDirs;
 
+    int mForcedPackageId;
     const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;
