@@ -3439,7 +3439,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
-            p.println("  mSystemReady=" + mSystemReady + " mScreenOn=" + mScreenOn);
+            p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mScreenOn);
         }
 
         p.println(" ");
