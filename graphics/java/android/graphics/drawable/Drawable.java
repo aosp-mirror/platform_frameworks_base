@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.graphics.Insets;
 import android.graphics.Xfermode;
 import android.os.Trace;
@@ -816,11 +817,12 @@ public abstract class Drawable {
     /**
      * Return in padding the insets suggested by this Drawable for placing
      * content inside the drawable's bounds. Positive values move toward the
-     * center of the Drawable (set Rect.inset). Returns true if this drawable
-     * actually has a padding, else false. When false is returned, the padding
-     * is always set to 0.
+     * center of the Drawable (set Rect.inset).
+     *
+     * @return true if this drawable actually has a padding, else false. When false is returned,
+     * the padding is always set to 0.
      */
-    public boolean getPadding(Rect padding) {
+    public boolean getPadding(@NonNull Rect padding) {
         padding.set(0, 0, 0, 0);
         return false;
     }
@@ -841,13 +843,16 @@ public abstract class Drawable {
      * This method will be called by a View on its background Drawable after bounds change, or its
      * Drawable is invalidated, if the View's Outline isn't set explicitly. This allows the
      * background Drawable to define the shape of the shadow cast by the View.
-     *
+     * <p>
      * The default behavior defines the outline to be the bounding rectangle. Subclasses that wish
      * to convey a different shape must override this method.
      *
+     * @return true if this drawable actually has an outline, else false. The outline must be
+     *         populated by the drawable if true is returned.
+     *
      * @see View#setOutline(android.graphics.Outline)
      */
-    public boolean getOutline(Outline outline) {
+    public boolean getOutline(@NonNull Outline outline) {
         outline.setRect(getBounds());
         return true;
     }

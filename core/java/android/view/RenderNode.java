@@ -366,10 +366,8 @@ public class RenderNode {
      * Deep copies the data into native to simplify reference ownership.
      */
     public void setOutline(Outline outline) {
-        if (outline == null) {
+        if (outline == null || outline.isEmpty()) {
             nSetOutlineEmpty(mNativeRenderNode);
-        } else if (!outline.isValid()) {
-            throw new IllegalArgumentException("Outline must be valid");
         } else if (outline.mRect != null) {
             nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
                     outline.mRect.right, outline.mRect.bottom, outline.mRadius);

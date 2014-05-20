@@ -10680,24 +10680,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the outline of the view, which defines the shape of the shadow it
-     * casts.
+     * Sets the {@link Outline} of the view, which defines the shape of the shadow it
+     * casts, and enables outline clipping.
      * <p>
-     * If the outline is not set or is null, shadows will be cast from the
+     * By default, a View queries its Outline from its background drawable, via
+     * {@link Drawable#getOutline(Outline)}. Manually setting the Outline with this method allows
+     * this behavior to be overridden.
+     * <p>
+     * If the outline is empty or is null, shadows will be cast from the
      * bounds of the View.
+     * <p>
+     * Only outlines that return true from {@link Outline#canClip()} may be used for clipping.
      *
      * @param outline The new outline of the view.
-     *         Must be {@link android.graphics.Outline#isValid() valid.}
+     *
+     * @see #setClipToOutline(boolean)
+     * @see #getClipToOutline()
      */
     public void setOutline(@Nullable Outline outline) {
-        if (outline != null && !outline.isValid()) {
-            throw new IllegalArgumentException("Outline must not be invalid");
-        }
-
         mPrivateFlags3 |= PFLAG3_OUTLINE_DEFINED;
 
-        if (outline == null) {
-            mOutline = null;
+        if (outline == null || outline.isEmpty()) {
+            if (mOutline != null) {
+                mOutline.setEmpty();
+            }
         } else {
             // always copy the path since caller may reuse
             if (mOutline == null) {
@@ -10708,12 +10714,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mRenderNode.setOutline(mOutline);
     }
 
+    /**
+     * Returns whether the Outline should be used to clip the contents of the View.
+     * <p>
+     * Note that this flag will only be respected if the View's Outline returns true from
+     * {@link Outline#canClip()}.
+     *
+     * @see #setOutline(Outline)
+     * @see #setClipToOutline(boolean)
+     */
     public final boolean getClipToOutline() {
         return mRenderNode.getClipToOutline();
     }
 
+    /**
+     * Sets whether the View's Outline should be used to clip the contents of the View.
+     * <p>
+     * Note that this flag will only be respected if the View's Outline returns true from
+     * {@link Outline#canClip()}.
+     *
+     * @see #setOutline(Outline)
+     * @see #getClipToOutline()
+     */
     public void setClipToOutline(boolean clipToOutline) {
-        // TODO: add a fast invalidation here
+        damageInParent();
         if (getClipToOutline() != clipToOutline) {
             mRenderNode.setClipToOutline(clipToOutline);
         }
@@ -10726,10 +10750,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mOutline = new Outline();
             } else {
                 //invalidate outline, to ensure background calculates it
-                mOutline.reset();
+                mOutline.setEmpty();
             }
             if (mBackground.getOutline(mOutline)) {
-                if (!mOutline.isValid()) {
+                if (mOutline.isEmpty()) {
                     throw new IllegalStateException("Background drawable failed to build outline");
                 }
                 mRenderNode.setOutline(mOutline);
