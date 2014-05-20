@@ -81,7 +81,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
-        mMaxNotificationHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        mMaxNotificationHeight = getResources().getDimensionPixelSize(
+                R.dimen.notification_max_height);
         setClipChildren(false);
         setClipToPadding(false);
     }

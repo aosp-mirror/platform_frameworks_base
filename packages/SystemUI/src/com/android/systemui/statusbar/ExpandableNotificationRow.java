@@ -53,6 +53,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
     private boolean mIsBelowSpeedBump;
+    private View mVetoButton;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,6 +64,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
+        mVetoButton = findViewById(R.id.veto);
     }
 
     @Override
@@ -255,5 +257,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void notifyContentUpdated() {
         mPrivateLayout.notifyContentUpdated();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int newHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
+        mVetoButton.measure(widthMeasureSpec, newHeightSpec);
     }
 }
