@@ -407,6 +407,19 @@ public class RemoteControlClient
     }
 
     /**
+     * Get a {@link MediaSession} associated with this RCC. It will only have a
+     * session while it is registered with
+     * {@link AudioManager#registerRemoteControlClient}. The session returned
+     * should not be modified directly by the application but may be used with
+     * other APIs that require a session.
+     *
+     * @return A media session object or null.
+     */
+    public MediaSession getMediaSession() {
+        return mSession;
+    }
+
+    /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.
      * Use {@link RemoteControlClient#editMetadata(boolean)} to create an instance of an editor,
      * on which you set the metadata for the RemoteControlClient instance. Once all the information
