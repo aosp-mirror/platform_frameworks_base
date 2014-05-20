@@ -46,7 +46,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -137,6 +138,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int SET_OCCLUDED = 12;
     private static final int KEYGUARD_TIMEOUT = 13;
     private static final int DISMISS = 17;
+    private static final int START_KEYGUARD_EXIT_ANIM = 18;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -179,6 +181,9 @@ public class KeyguardViewMediator extends SystemUI {
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
+
+    /** High level access to the window manager for dismissing keyguard animation */
+    private IWindowManager mWM;
 
     /** UserManager for querying number of users */
     private UserManager mUserManager;
@@ -440,6 +445,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void setup() {
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWM = WindowManagerGlobal.getWindowManagerService();
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
@@ -1076,6 +1082,9 @@ public class KeyguardViewMediator extends SystemUI {
                 case DISMISS:
                     handleDismiss();
                     break;
+                case START_KEYGUARD_EXIT_ANIM:
+                    handleStartKeyguardExitAnimation((Long) msg.obj);
+                    break;
             }
         }
     };
@@ -1207,6 +1216,19 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleHide() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
+            try {
+
+                // Don't actually hide the Keyguard at the moment, wait for window manager until
+                // it tells us it's safe to do so with startKeyguardExitAnimation.
+                mWM.keyguardGoingAway();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error while calling WindowManager", e);
+            }
+        }
+    }
+
+    private void handleStartKeyguardExitAnimation(long fadeoutDuration) {
+        synchronized (KeyguardViewMediator.this) {
 
             // only play "unlock" noises if not on a call (since the incall UI
             // disables the keyguard)
@@ -1322,6 +1344,11 @@ public class KeyguardViewMediator extends SystemUI {
         mStatusBarKeyguardViewManager.registerStatusBar(phoneStatusBar, container,
                 statusBarWindowManager, scrimController);
         return mStatusBarKeyguardViewManager;
+    }
+
+    public void startKeyguardExitAnimation(long fadeoutDuration) {
+        Message msg = mHandler.obtainMessage(START_KEYGUARD_EXIT_ANIM, fadeoutDuration);
+        mHandler.sendMessage(msg);
     }
 
     public ViewMediatorCallback getViewMediatorCallback() {

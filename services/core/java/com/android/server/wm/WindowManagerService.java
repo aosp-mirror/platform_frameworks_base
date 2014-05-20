@@ -5126,6 +5126,18 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void keyguardGoingAway() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires DISABLE_KEYGUARD permission");
+        }
+        synchronized (mWindowMap) {
+            mAnimator.mKeyguardGoingAway = true;
+            requestTraversalLocked();
+        }
+    }
+
+    @Override
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             final int numDisplays = mDisplayContents.size();
@@ -7148,9 +7160,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int TAP_OUTSIDE_STACK = 31;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
-        public static final int REMOVE_STARTING_TIMEOUT = 33;
-
-        public static final int SHOW_DISPLAY_MASK = 34;
+        public static final int SHOW_DISPLAY_MASK = 33;
 
         @Override
         public void handleMessage(Message msg) {

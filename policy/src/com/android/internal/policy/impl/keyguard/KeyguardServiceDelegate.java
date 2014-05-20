@@ -274,6 +274,12 @@ public class KeyguardServiceDelegate {
         mKeyguardState.currentUser = newUserId;
     }
 
+    public void startKeyguardExitAnimation(long fadeoutDuration) {
+        if (mKeyguardService != null) {
+            mKeyguardService.startKeyguardExitAnimation(fadeoutDuration);
+        }
+    }
+
     private static final View createScrim(Context context) {
         View view = new View(context);
 
