@@ -18,6 +18,7 @@ package android.service.fingerprint;
 
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -25,6 +26,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 /**
@@ -33,7 +35,7 @@ import android.util.Log;
 
 public class FingerprintManager {
     private static final String TAG = "FingerprintManager";
-    protected static final boolean DEBUG = true;
+    private static final boolean DEBUG = true;
     private static final String FINGERPRINT_SERVICE_PACKAGE = "com.android.service.fingerprint";
     private static final String FINGERPRINT_SERVICE_CLASS =
             "com.android.service.fingerprint.FingerprintService";
@@ -58,6 +60,7 @@ public class FingerprintManager {
 
     private IFingerprintService mService;
     private FingerprintManagerReceiver mClientReceiver;
+    private Context mContext;
 
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -80,6 +83,7 @@ public class FingerprintManager {
     };
 
     public FingerprintManager(Context context) {
+        mContext = context;
         // Connect to service...
         Intent intent = new Intent();
         intent.setClassName(FINGERPRINT_SERVICE_PACKAGE, FINGERPRINT_SERVICE_CLASS);
@@ -127,6 +131,17 @@ public class FingerprintManager {
             mHandler.obtainMessage(MSG_REMOVED, fingerprintId, 0).sendToTarget();
         }
     };
+
+    /**
+     * Determine whether the user has at least one fingerprint enrolled and enabled.
+     *
+     * @return true if at least one is enrolled and enabled
+     */
+    public boolean enrolledAndEnabled() {
+        ContentResolver res = mContext.getContentResolver();
+        return Settings.Secure.getInt(res, "fingerprint_enabled", 0) != 0
+                && FingerprintUtils.getFingerprintIdsForUser(res, getCurrentUserId()).length > 0;
+    }
 
     /**
      * Start the enrollment process.  Timeout dictates how long to wait for the user to

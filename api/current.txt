@@ -25607,10 +25607,10 @@ package android.service.fingerprint {
   public class FingerprintManager {
     ctor public FingerprintManager(android.content.Context);
     method public void enroll(long);
+    method public boolean enrolledAndEnabled();
     method public void remove(int);
     method public void startListening(android.service.fingerprint.FingerprintManagerReceiver);
     method public void stopListening();
-    field protected static final boolean DEBUG = true;
     field public static final int FINGERPRINT_ERROR = -1; // 0xffffffff
     field public static final int FINGERPRINT_ERROR_BAD_CAPTURE = 2; // 0x2
     field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
