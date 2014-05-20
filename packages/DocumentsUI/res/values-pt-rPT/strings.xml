@@ -29,6 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Guardar"</string>
     <string name="menu_share" msgid="3075149983979628146">"Partilhar"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Eliminar"</string>
+    <string name="menu_select" msgid="8711270657353563424">"Selecionar \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selecionado(s)"</string>
     <string name="sort_name" msgid="9183560467917256779">"Por nome"</string>
     <string name="sort_date" msgid="586080032956151448">"Por data de modificação"</string>
@@ -44,7 +45,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Atalhos"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivos"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Mais aplicações"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Apresentar dispositivos avançados"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"Ver dispositivos avançados"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"Apresentar tamanho do ficheiro"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Apresentar tamanho do dispositivo"</string>
     <string name="empty" msgid="7858882803708117596">"Sem itens"</string>

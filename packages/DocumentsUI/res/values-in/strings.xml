@@ -22,13 +22,14 @@
     <string name="menu_create_dir" msgid="5947289605844398389">"Buat folder"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Tampilan kisi"</string>
     <string name="menu_list" msgid="7279285939892417279">"Tampilan daftar"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Sortir menurut"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Urutkan menurut"</string>
     <string name="menu_search" msgid="3816712084502856974">"Telusuri"</string>
     <string name="menu_settings" msgid="6008033148948428823">"Setelan"</string>
     <string name="menu_open" msgid="432922957274920903">"Buka"</string>
     <string name="menu_save" msgid="2394743337684426338">"Simpan"</string>
     <string name="menu_share" msgid="3075149983979628146">"Bagikan"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Hapus"</string>
+    <string name="menu_select" msgid="8711270657353563424">"Pilih \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> dipilih"</string>
     <string name="sort_name" msgid="9183560467917256779">"Menurut nama"</string>
     <string name="sort_date" msgid="586080032956151448">"Menurut tanggal diubah"</string>
