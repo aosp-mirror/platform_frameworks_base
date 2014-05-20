@@ -110,16 +110,20 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     TaskView tv = (TaskView) stackView.getChildAt(j);
                     Task task = tv.getTask();
                     if (tv.isFocusedTask()) {
-                        Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
-                                "Found focused Task");
+                        if (Console.Enabled) {
+                            Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
+                                    "Found focused Task");
+                        }
                         onTaskLaunched(stackView, tv, stack, task);
                         return true;
                     }
                 }
             }
         }
-        Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
-                "No Tasks focused");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
+                    "No Tasks focused");
+        }
         return false;
     }
 
@@ -168,9 +172,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 mSearchBar.setVisibility(mHasTasks ? View.VISIBLE : View.GONE);
                 addView(mSearchBar);
 
-                Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsView|setSearchBar]",
-                        "" + (mSearchBar.getVisibility() == View.VISIBLE),
-                        Console.AnsiBlue);
+                if (Console.Enabled) {
+                    Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsView|setSearchBar]",
+                            "" + (mSearchBar.getVisibility() == View.VISIBLE),
+                            Console.AnsiBlue);
+                }
             }
         }
     }
@@ -185,10 +191,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|measure]",
-                "width: " + width + " height: " + height, Console.AnsiGreen);
-        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|measure]",
+                    "width: " + width + " height: " + height, Console.AnsiGreen);
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
+        }
 
         // Get the search bar bounds and measure the search bar layout
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -227,10 +235,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|layout]",
-                new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
-        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onLayout");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|layout]",
+                    new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onLayout");
+        }
 
         // Get the search bar bounds so that we lay it out
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -283,15 +293,19 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        Console.log(Constants.Log.UI.Draw, "[RecentsView|dispatchDraw]", "",
-                Console.AnsiPurple);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Draw, "[RecentsView|dispatchDraw]", "",
+                    Console.AnsiPurple);
+        }
         super.dispatchDraw(canvas);
     }
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        Console.log(Constants.Log.UI.MeasureAndLayout,
-                "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout,
+                    "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
+        }
 
         // Update the configuration with the latest system insets and trigger a relayout
         RecentsConfiguration config = RecentsConfiguration.getInstance();

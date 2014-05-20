@@ -80,8 +80,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Console.log(Constants.Log.App.SystemUIHandshake,
-                    "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
+            if (Console.Enabled) {
+                Console.log(Constants.Log.App.SystemUIHandshake,
+                        "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
+            }
             if (action.equals(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY)) {
                 if (intent.getBooleanExtra(RecentsService.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // Dismiss recents, launching the focused task
@@ -164,10 +166,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
                     appWidgetId = -1;
                 }
-                Console.log(Constants.Log.App.SystemUIHandshake,
-                        "[RecentsActivity|onCreate|settings|appWidgetId]",
-                        "Id: " + appWidgetId,
-                        Console.AnsiBlue);
+                if (Console.Enabled) {
+                    Console.log(Constants.Log.App.SystemUIHandshake,
+                            "[RecentsActivity|onCreate|settings|appWidgetId]",
+                            "Id: " + appWidgetId,
+                            Console.AnsiBlue);
+                }
             }
 
             // If there is no id, then bind a new search app widget
@@ -175,10 +179,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Pair<Integer, AppWidgetProviderInfo> widgetInfo =
                         ssp.bindSearchAppWidget(mAppWidgetHost);
                 if (widgetInfo != null) {
-                    Console.log(Constants.Log.App.SystemUIHandshake,
-                            "[RecentsActivity|onCreate|searchWidget]",
-                            "Id: " + widgetInfo.first + " Info: " + widgetInfo.second,
-                            Console.AnsiBlue);
+                    if (Console.Enabled) {
+                        Console.log(Constants.Log.App.SystemUIHandshake,
+                                "[RecentsActivity|onCreate|searchWidget]",
+                                "Id: " + widgetInfo.first + " Info: " + widgetInfo.second,
+                                Console.AnsiBlue);
+                    }
 
                     // Save the app widget id into the settings
                     config.updateSearchBarAppWidgetId(this, widgetInfo.first);
@@ -194,10 +200,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             int appWidgetId = config.searchBarAppWidgetId;
             if (appWidgetId >= 0) {
-                Console.log(Constants.Log.App.SystemUIHandshake,
-                "[RecentsActivity|onCreate|addSearchAppWidgetView]",
-                        "Id: " + appWidgetId,
-                        Console.AnsiBlue);
+                if (Console.Enabled) {
+                    Console.log(Constants.Log.App.SystemUIHandshake,
+                            "[RecentsActivity|onCreate|addSearchAppWidgetView]",
+                            "Id: " + appWidgetId,
+                            Console.AnsiBlue);
+                }
                 mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
                         mSearchAppWidgetInfo);
                 Bundle opts = new Bundle();
@@ -230,11 +238,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Console.logDivider(Constants.Log.App.SystemUIHandshake);
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onCreate]",
-                getIntent().getAction() + " visible: " + mVisible, Console.AnsiRed);
-        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey, "onCreate");
+        if (Console.Enabled) {
+            Console.logDivider(Constants.Log.App.SystemUIHandshake);
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onCreate]",
+                    getIntent().getAction() + " visible: " + mVisible, Console.AnsiRed);
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "onCreate");
+        }
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
@@ -277,11 +287,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Reset the task launched flag if we encounter an onNewIntent() before onStop()
         mTaskLaunched = false;
 
-        Console.logDivider(Constants.Log.App.SystemUIHandshake);
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onNewIntent]",
-                intent.getAction() + " visible: " + mVisible, Console.AnsiRed);
-        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey, "onNewIntent");
+        if (Console.Enabled) {
+            Console.logDivider(Constants.Log.App.SystemUIHandshake);
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onNewIntent]",
+                    intent.getAction() + " visible: " + mVisible, Console.AnsiRed);
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "onNewIntent");
+        }
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
@@ -296,8 +308,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onStart() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStart]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStart]", "",
+                    Console.AnsiRed);
+        }
         super.onStart();
         mAppWidgetHost.startListening();
         mVisible = true;
@@ -305,16 +319,20 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onResume() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onResume]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onResume]", "",
+                    Console.AnsiRed);
+        }
         super.onResume();
     }
 
     @Override
     public void onAttachedToWindow() {
-        Console.log(Constants.Log.App.SystemUIHandshake,
-                "[RecentsActivity|onAttachedToWindow]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake,
+                    "[RecentsActivity|onAttachedToWindow]", "",
+                    Console.AnsiRed);
+        }
         super.onAttachedToWindow();
 
         // Register the broadcast receiver to handle messages from our service
@@ -334,9 +352,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onDetachedFromWindow() {
-        Console.log(Constants.Log.App.SystemUIHandshake,
-                "[RecentsActivity|onDetachedFromWindow]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake,
+                    "[RecentsActivity|onDetachedFromWindow]", "",
+                    Console.AnsiRed);
+        }
         super.onDetachedFromWindow();
 
         // Unregister any broadcast receivers we have registered
@@ -347,15 +367,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onPause() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onPause]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onPause]", "",
+                    Console.AnsiRed);
+        }
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStop]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStop]", "",
+                    Console.AnsiRed);
+        }
         super.onStop();
 
         mAppWidgetHost.stopListening();
@@ -365,8 +389,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onDestroy() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onDestroy]", "",
-                Console.AnsiRed);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onDestroy]", "",
+                    Console.AnsiRed);
+        }
         super.onDestroy();
     }
 

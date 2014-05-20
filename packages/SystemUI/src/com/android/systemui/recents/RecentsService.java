@@ -45,8 +45,10 @@ class SystemUIMessageHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
-        Console.log(Constants.Log.App.SystemUIHandshake,
-                "[RecentsService|handleMessage]", msg);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake,
+                    "[RecentsService|handleMessage]", msg);
+        }
 
         Context context = mContext.get();
         if (context == null) return;
@@ -139,31 +141,41 @@ public class RecentsService extends Service {
 
     @Override
     public void onCreate() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onCreate]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onCreate]");
+        }
         super.onCreate();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onBind]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onBind]");
+        }
         return mSystemUIMessenger.getBinder();
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onUnbind]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onUnbind]");
+        }
         return super.onUnbind(intent);
     }
 
     @Override
     public void onRebind(Intent intent) {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onRebind]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onRebind]");
+        }
         super.onRebind(intent);
     }
 
     @Override
     public void onDestroy() {
-        Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onDestroy]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsService|onDestroy]");
+        }
         super.onDestroy();
     }
 

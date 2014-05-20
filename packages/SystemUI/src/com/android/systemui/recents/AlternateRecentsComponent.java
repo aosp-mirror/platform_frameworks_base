@@ -64,10 +64,12 @@ public class AlternateRecentsComponent {
                 mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
                 mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
                 mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                Console.log(Constants.Log.App.RecentsComponent,
-                        "[RecentsComponent|RecentsMessageHandler|handleMessage]",
-                        "singleTaskRect: " + mSingleCountFirstTaskRect +
-                        " multipleTaskRect: " + mMultipleCountFirstTaskRect);
+                if (Console.Enabled) {
+                    Console.log(Constants.Log.App.RecentsComponent,
+                            "[RecentsComponent|RecentsMessageHandler|handleMessage]",
+                            "singleTaskRect: " + mSingleCountFirstTaskRect +
+                            " multipleTaskRect: " + mMultipleCountFirstTaskRect);
+                }
 
                 // If we had the update the animation rects as a result of onServiceConnected, then
                 // we check for whether we need to toggle the recents here.
@@ -83,9 +85,11 @@ public class AlternateRecentsComponent {
     class RecentsServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Console.log(Constants.Log.App.RecentsComponent,
-                    "[RecentsComponent|ServiceConnection|onServiceConnected]",
-                    "toggleRecents: " + mToggleRecentsUponServiceBound);
+            if (Console.Enabled) {
+                Console.log(Constants.Log.App.RecentsComponent,
+                        "[RecentsComponent|ServiceConnection|onServiceConnected]",
+                        "toggleRecents: " + mToggleRecentsUponServiceBound);
+            }
             mService = new Messenger(service);
             mServiceIsBound = true;
 
@@ -103,8 +107,10 @@ public class AlternateRecentsComponent {
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
-            Console.log(Constants.Log.App.RecentsComponent,
-                    "[RecentsComponent|ServiceConnection|onServiceDisconnected]");
+            if (Console.Enabled) {
+                Console.log(Constants.Log.App.RecentsComponent,
+                        "[RecentsComponent|ServiceConnection|onServiceDisconnected]");
+            }
             mService = null;
             mServiceIsBound = false;
         }
@@ -159,7 +165,9 @@ public class AlternateRecentsComponent {
     }
 
     public void onStart() {
-        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|start]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|start]");
+        }
 
         // Try to create a long-running connection to the recents service
         bindToRecentsService(false);
@@ -167,7 +175,9 @@ public class AlternateRecentsComponent {
 
     /** Shows the recents */
     public void onShowRecents(boolean triggeredFromAltTab, View statusBarView) {
-        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|showRecents]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|showRecents]");
+        }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = triggeredFromAltTab;
         if (!mServiceIsBound) {
@@ -186,7 +196,9 @@ public class AlternateRecentsComponent {
 
     /** Hides the recents */
     public void onHideRecents(boolean triggeredFromAltTab) {
-        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
+        }
         if (mServiceIsBound) {
             // Notify recents to close it
             try {
@@ -202,12 +214,14 @@ public class AlternateRecentsComponent {
 
     /** Toggles the alternate recents activity */
     public void onToggleRecents(View statusBarView) {
-        Console.logStartTracingTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey);
-        Console.logStartTracingTime(Constants.Log.App.TimeRecentsLaunchTask,
-                Constants.Log.App.TimeRecentsLaunchKey);
-        Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
-                "serviceIsBound: " + mServiceIsBound);
+        if (Console.Enabled) {
+            Console.logStartTracingTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey);
+            Console.logStartTracingTime(Constants.Log.App.TimeRecentsLaunchTask,
+                    Constants.Log.App.TimeRecentsLaunchKey);
+            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
+                    "serviceIsBound: " + mServiceIsBound);
+        }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = false;
         if (!mServiceIsBound) {

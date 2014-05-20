@@ -106,7 +106,8 @@ public class SystemServicesProxy {
                 rti.description = description;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
-                        Bitmap.createBitmap(mDummyIcon), new Random().nextInt());
+                        Bitmap.createBitmap(mDummyIcon),
+                        0xFF000000 | (0xFFFFFF & new Random().nextInt()));
                 } else {
                     rti.taskDescription = new ActivityManager.TaskDescription();
                 }

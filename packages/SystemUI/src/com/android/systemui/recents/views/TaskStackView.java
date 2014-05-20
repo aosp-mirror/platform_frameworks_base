@@ -113,8 +113,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         requestSynchronizeStackViewsWithModel(0);
     }
     void requestSynchronizeStackViewsWithModel(int duration) {
-        Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
-                "[TaskStackView|requestSynchronize]", "" + duration + "ms", Console.AnsiYellow);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
+                    "[TaskStackView|requestSynchronize]", "" + duration + "ms", Console.AnsiYellow);
+        }
         if (!mStackViewsDirty) {
             invalidate();
         }
@@ -221,9 +223,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Synchronizes the views with the model */
     void synchronizeStackViewsWithModel() {
-        Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
-                "[TaskStackView|synchronizeViewsWithModel]",
-                "mStackViewsDirty: " + mStackViewsDirty, Console.AnsiYellow);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
+                    "[TaskStackView|synchronizeViewsWithModel]",
+                    "mStackViewsDirty: " + mStackViewsDirty, Console.AnsiYellow);
+        }
         if (mStackViewsDirty) {
             // XXX: Consider using TaskViewTransform pool to prevent allocations
             // XXX: Iterate children views, update transforms and remove all that are not visible
@@ -277,8 +281,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
 
-            Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
-                    "  [TaskStackView|viewChildren]", "" + getChildCount());
+            if (Console.Enabled) {
+                Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
+                        "  [TaskStackView|viewChildren]", "" + getChildCount());
+            }
 
             mStackViewsAnimationDuration = 0;
             mStackViewsDirty = false;
@@ -445,7 +451,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Focuses the task at the specified index in the stack */
     void focusTask(int taskIndex, boolean scrollToNewPosition) {
-        Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "" + taskIndex);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "" + taskIndex);
+        }
         if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
             mFocusedTaskIndex = taskIndex;
 
@@ -455,7 +463,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Runnable postScrollRunnable = null;
             if (tv != null) {
                 tv.setFocusedTask();
-                Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "Requesting focus");
+                if (Console.Enabled) {
+                    Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]", "Requesting focus");
+                }
             } else {
                 postScrollRunnable = new Runnable() {
                     @Override
@@ -464,8 +474,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         TaskView tv = getChildViewForTask(t);
                         if (tv != null) {
                             tv.setFocusedTask();
-                            Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]",
-                                    "Requesting focus after scroll animation");
+                            if (Console.Enabled) {
+                                Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusTask]",
+                                        "Requesting focus after scroll animation");
+                            }
                         }
                     }
                 };
@@ -487,7 +499,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Focuses the next task in the stack */
     void focusNextTask(boolean forward) {
-        Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusNextTask]", "" + mFocusedTaskIndex);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Focus, "[TaskStackView|focusNextTask]", "" +
+                    mFocusedTaskIndex);
+        }
 
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
@@ -503,9 +518,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Enables the hw layers and increments the hw layer requirement ref count */
     void addHwLayersRefCount(String reason) {
-        Console.log(Constants.Log.UI.HwLayers,
-                "[TaskStackView|addHwLayersRefCount] refCount: " +
-                        mHwLayersRefCount + "->" + (mHwLayersRefCount + 1) + " " + reason);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.HwLayers,
+                    "[TaskStackView|addHwLayersRefCount] refCount: " +
+                            mHwLayersRefCount + "->" + (mHwLayersRefCount + 1) + " " + reason);
+        }
         if (mHwLayersRefCount == 0) {
             // Enable hw layers on each of the children
             int childCount = getChildCount();
@@ -520,9 +537,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Decrements the hw layer requirement ref count and disables the hw layers when we don't
         need them anymore. */
     void decHwLayersRefCount(String reason) {
-        Console.log(Constants.Log.UI.HwLayers,
-                "[TaskStackView|decHwLayersRefCount] refCount: " +
-                        mHwLayersRefCount + "->" + (mHwLayersRefCount - 1) + " " + reason);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.HwLayers,
+                    "[TaskStackView|decHwLayersRefCount] refCount: " +
+                            mHwLayersRefCount + "->" + (mHwLayersRefCount - 1) + " " + reason);
+        }
         mHwLayersRefCount--;
         if (mHwLayersRefCount == 0) {
             // Disable hw layers on each of the children
@@ -562,8 +581,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void dispatchDraw(Canvas canvas) {
-        Console.log(Constants.Log.UI.Draw, "[TaskStackView|dispatchDraw]", "",
-                Console.AnsiPurple);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Draw, "[TaskStackView|dispatchDraw]", "",
+                    Console.AnsiPurple);
+        }
         synchronizeStackViewsWithModel();
         super.dispatchDraw(canvas);
     }
@@ -647,9 +668,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        Console.log(Constants.Log.UI.MeasureAndLayout, "[TaskStackView|measure]",
-                "width: " + width + " height: " + height +
-                " awaitingFirstLayout: " + mAwaitingFirstLayout, Console.AnsiGreen);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout, "[TaskStackView|measure]",
+                    "width: " + width + " height: " + height +
+                            " awaitingFirstLayout: " + mAwaitingFirstLayout, Console.AnsiGreen);
+        }
 
         // Compute our stack/task rects
         RecentsConfiguration config = RecentsConfiguration.getInstance();
@@ -704,8 +727,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Console.log(Constants.Log.UI.MeasureAndLayout, "[TaskStackView|layout]",
-                "" + new Rect(left, top, right, bottom), Console.AnsiGreen);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout, "[TaskStackView|layout]",
+                    "" + new Rect(left, top, right, bottom), Console.AnsiGreen);
+        }
 
         // Debug logging
         if (Constants.Log.UI.MeasureAndLayout) {
@@ -971,7 +996,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public TaskView createView(Context context) {
-        Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|createPoolView]");
+        if (Console.Enabled) {
+            Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|createPoolView]");
+        }
         return (TaskView) mInflater.inflate(R.layout.recents_task_view, this, false);
     }
 
@@ -979,8 +1006,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void prepareViewToEnterPool(TaskView tv) {
         Task task = tv.getTask();
         tv.resetViewProperties();
-        Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|returnToPool]",
-                tv.getTask() + " tv: " + tv);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|returnToPool]",
+                    tv.getTask() + " tv: " + tv);
+        }
 
         // Report that this tasks's data is no longer being used
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -995,8 +1024,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task prepareData, boolean isNewView) {
-        Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|leavePool]",
-                "isNewView: " + isNewView);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|leavePool]",
+                    "isNewView: " + isNewView);
+        }
 
         // Setup and attach the view to the window
         Task task = prepareData;
@@ -1018,8 +1049,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Add/attach the view to the hierarchy
-        Console.log(Constants.Log.ViewPool.PoolCallbacks, "  [TaskStackView|insertIndex]",
-                "" + insertIndex);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.ViewPool.PoolCallbacks, "  [TaskStackView|insertIndex]",
+                    "" + insertIndex);
+        }
         if (isNewView) {
             addView(tv, insertIndex);
 
@@ -1045,9 +1078,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onTaskIconClicked(TaskView tv) {
-        Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Icon]",
-                tv.getTask() + " is currently filtered: " + mStack.hasFilteredTasks(),
-                Console.AnsiCyan);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Icon]",
+                    tv.getTask() + " is currently filtered: " + mStack.hasFilteredTasks(),
+                    Console.AnsiCyan);
+        }
         if (Constants.DebugFlags.App.EnableTaskFiltering) {
             if (mStack.hasFilteredTasks()) {
                 mStack.unfilterTasks();
@@ -1079,8 +1114,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onClick(View v) {
         TaskView tv = (TaskView) v;
         Task task = tv.getTask();
-        Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Thumbnail]",
-                task + " cb: " + mCb);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Thumbnail]",
+                    task + " cb: " + mCb);
+        }
 
         if (mCb != null) {
             mCb.onTaskLaunched(this, tv, mStack, task);
@@ -1190,9 +1227,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Console.log(Constants.Log.UI.TouchEvents,
-                "[TaskStackViewTouchHandler|interceptTouchEvent]",
-                Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.TouchEvents,
+                    "[TaskStackViewTouchHandler|interceptTouchEvent]",
+                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
+        }
 
         // Return early if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
@@ -1274,9 +1313,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
-        Console.log(Constants.Log.UI.TouchEvents,
-                "[TaskStackViewTouchHandler|touchEvent]",
-                Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.TouchEvents,
+                    "[TaskStackViewTouchHandler|touchEvent]",
+                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
+        }
 
         // Short circuit if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
@@ -1377,12 +1418,14 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                             Math.abs((float) velocity / mMaximumVelocity)) *
                             Constants.Values.TaskStackView.TaskStackOverscrollRange);
 
-                    Console.log(Constants.Log.UI.TouchEvents,
-                            "[TaskStackViewTouchHandler|fling]",
-                            "scroll: " + mSv.getStackScroll() + " velocity: " + velocity +
-                                    " maxVelocity: " + mMaximumVelocity +
-                                    " overscrollRange: " + overscrollRange,
-                            Console.AnsiGreen);
+                    if (Console.Enabled) {
+                        Console.log(Constants.Log.UI.TouchEvents,
+                                "[TaskStackViewTouchHandler|fling]",
+                                "scroll: " + mSv.getStackScroll() + " velocity: " + velocity +
+                                        " maxVelocity: " + mMaximumVelocity +
+                                        " overscrollRange: " + overscrollRange,
+                                Console.AnsiGreen);
+                    }
 
                     // Fling scroll
                     mSv.mScroller.fling(0, mSv.getStackScroll(),
