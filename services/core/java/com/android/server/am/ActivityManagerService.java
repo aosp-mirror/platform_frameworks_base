@@ -13837,7 +13837,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (Proxy.PROXY_CHANGE_ACTION.equals(intent.getAction())) {
-            ProxyInfo proxy = intent.getParcelableExtra("proxy");
+            ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
             mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
         }
 
