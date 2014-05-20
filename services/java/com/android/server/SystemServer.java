@@ -125,7 +125,7 @@ public final class SystemServer {
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
     private static final String WIFI_PASSPOINT_SERVICE_CLASS =
-            "com.android.server.wifi.passpoint.WifiPasspointService";
+            "com.android.server.wifi.passpoint.PasspointService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String HDMI_CEC_SERVICE_CLASS =
