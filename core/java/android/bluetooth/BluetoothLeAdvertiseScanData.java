@@ -298,8 +298,7 @@ public final class BluetoothLeAdvertiseScanData {
              * Set data type.
              *
              * @param dataType Data type, could only be
-             *            {@link BluetoothLeAdvertiseScanData#ADVERTISING_DATA} or
-             *            {@link BluetoothLeAdvertiseScanData#SCAN_RESPONSE_DATA}
+             *            {@link BluetoothLeAdvertiseScanData#ADVERTISING_DATA}
              * @throws IllegalArgumentException If the {@code dataType} is invalid.
              */
             public Builder dataType(int dataType) {
