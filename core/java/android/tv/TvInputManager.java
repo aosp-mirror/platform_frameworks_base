@@ -391,8 +391,9 @@ public final class TvInputManager {
          *
          * @param surface A {@link android.view.Surface} used to render video.
          * @throws IllegalStateException if the session has been already released.
+         * @hide
          */
-        void setSurface(Surface surface) {
+        public void setSurface(Surface surface) {
             if (mToken == null) {
                 throw new IllegalStateException("the session has been already released");
             }
