@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -322,8 +323,12 @@ public class TrustManagerService extends SystemService {
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
                 mTrustListeners.get(i).onTrustChanged(enabled, userId);
+            } catch (DeadObjectException e) {
+                if (DEBUG) Slog.d(TAG, "Removing dead TrustListener.");
+                mTrustListeners.remove(i);
+                i--;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying TrustListener. Removing listener.", e);
+                Slog.e(TAG, "Exception while notifying TrustListener.", e);
             }
         }
     }
