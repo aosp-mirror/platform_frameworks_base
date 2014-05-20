@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 
+import android.widget.FrameLayout;
 import com.android.systemui.R;
 
 /**
@@ -29,7 +30,7 @@ import com.android.systemui.R;
  * expanded layout. This class is responsible for clipping the content and and switching between the
  * expanded and contracted view depending on its clipped size.
  */
-public class NotificationContentView extends ExpandableView {
+public class NotificationContentView extends FrameLayout {
 
     private final Rect mClipBounds = new Rect();
 
@@ -37,6 +38,8 @@ public class NotificationContentView extends ExpandableView {
     private View mExpandedChild;
 
     private int mSmallHeight;
+    private int mClipTopAmount;
+    private int mActualHeight;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -69,28 +72,24 @@ public class NotificationContentView extends ExpandableView {
         selectLayout();
     }
 
-    @Override
-    public void setActualHeight(int actualHeight, boolean notifyListeners) {
-        super.setActualHeight(actualHeight, notifyListeners);
+    public void setActualHeight(int actualHeight) {
+        mActualHeight = actualHeight;
         selectLayout();
         updateClipping();
     }
 
-    @Override
     public int getMaxHeight() {
 
         // The maximum height is just the laid out height.
         return getHeight();
     }
 
-    @Override
     public int getMinHeight() {
         return mSmallHeight;
     }
 
-    @Override
     public void setClipTopAmount(int clipTopAmount) {
-        super.setClipTopAmount(clipTopAmount);
+        mClipTopAmount = clipTopAmount;
         updateClipping();
     }
 
@@ -127,7 +126,6 @@ public class NotificationContentView extends ExpandableView {
         selectLayout();
     }
 
-    @Override
     public boolean isContentExpandable() {
         return mExpandedChild != null;
     }

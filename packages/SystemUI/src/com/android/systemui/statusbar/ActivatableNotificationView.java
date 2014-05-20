@@ -45,6 +45,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
+    private final int mMaxNotificationHeight;
 
     private boolean mDimmed;
 
@@ -80,6 +81,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mMaxNotificationHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         setClipChildren(false);
         setClipToPadding(false);
     }
@@ -290,6 +292,27 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundNormal.setCustomBackground(mBgResId, mBgTint);
             mBackgroundNormal.setAlpha(1f);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int newHeightSpec = MeasureSpec.makeMeasureSpec(mMaxNotificationHeight,
+                MeasureSpec.AT_MOST);
+        int maxChildHeight = 0;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child != mBackgroundDimmed && child != mBackgroundNormal) {
+                child.measure(widthMeasureSpec, newHeightSpec);
+                int childHeight = child.getMeasuredHeight();
+                maxChildHeight = Math.max(maxChildHeight, childHeight);
+            }
+        }
+        newHeightSpec = MeasureSpec.makeMeasureSpec(maxChildHeight, MeasureSpec.EXACTLY);
+        mBackgroundDimmed.measure(widthMeasureSpec, newHeightSpec);
+        mBackgroundNormal.measure(widthMeasureSpec, newHeightSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, maxChildHeight);
     }
 
     @Override

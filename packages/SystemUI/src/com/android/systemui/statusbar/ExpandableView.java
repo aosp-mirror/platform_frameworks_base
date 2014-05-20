@@ -20,12 +20,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
 
 /**
  * An abstract view for expandable views.
  */
-public abstract class ExpandableView extends FrameLayout {
+public abstract class ExpandableView extends ViewGroup {
 
     private OnHeightChangedListener mOnHeightChangedListener;
     protected int mActualHeight;
@@ -38,7 +38,17 @@ public abstract class ExpandableView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            int height = child.getMeasuredHeight();
+            int width = child.getMeasuredWidth();
+            int center = getWidth() / 2;
+            int childLeft = center - width / 2;
+            child.layout(childLeft,
+                    0,
+                    childLeft + width,
+                    height);
+        }
         if (!mActualHeightInitialized && mActualHeight == 0) {
             mActualHeight = getInitialHeight();
         }

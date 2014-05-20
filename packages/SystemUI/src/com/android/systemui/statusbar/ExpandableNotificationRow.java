@@ -224,7 +224,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
-        mPrivateLayout.setActualHeight(height, notifyListeners);
+        mPrivateLayout.setActualHeight(height);
         invalidate();
         super.setActualHeight(height, notifyListeners);
     }
