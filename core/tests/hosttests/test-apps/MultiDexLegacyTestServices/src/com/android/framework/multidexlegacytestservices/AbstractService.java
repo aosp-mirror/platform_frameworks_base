@@ -31,7 +31,7 @@ import java.io.RandomAccessFile;
  * Empty service for testing legacy multidex. Access more than 64k methods but some are required at
  * init, some only at verification and others during execution.
  */
-public abstract class AbstractService extends Service {
+public abstract class AbstractService extends Service implements Runnable {
     private final String TAG = "MultidexLegacyTestService" + getId();
 
     private int instanceFieldNotInited;
@@ -47,6 +47,12 @@ public abstract class AbstractService extends Service {
     @Override
     public void onCreate() {
         Log.i(TAG, "onCreate");
+        new Thread(this).start();
+
+    }
+
+    @Override
+    public void run() {
         Context applicationContext = getApplicationContext();
         File resultFile = new File(applicationContext.getFilesDir(), getId());
         try {
@@ -84,7 +90,6 @@ public abstract class AbstractService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
