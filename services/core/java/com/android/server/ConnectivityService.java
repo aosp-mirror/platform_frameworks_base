@@ -398,7 +398,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /**
      * used internally when registering NetworkFactories
-     * obj = Messenger
+     * obj = NetworkFactoryInfo
      */
     private static final int EVENT_REGISTER_NETWORK_FACTORY = 17;
 
@@ -433,6 +433,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * includes a NetworkRequest
      */
     private static final int EVENT_RELEASE_NETWORK_REQUEST = 22;
+
+    /**
+     * used internally when registering NetworkFactories
+     * obj = Messenger
+     */
+    private static final int EVENT_UNREGISTER_NETWORK_FACTORY = 23;
+
 
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
@@ -2889,6 +2896,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return;
         }
 
+        pw.println("NetworkFactories for:");
+        pw.increaseIndent();
+        for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
+            pw.println(nfi.name);
+        }
+        pw.decreaseIndent();
+        pw.println();
+
         NetworkAgentInfo defaultNai = mNetworkForRequestId.get(mDefaultRequest.requestId);
         pw.print("Active default network: ");
         if (defaultNai == null) {
@@ -2983,6 +2998,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (nai == null) {
                         loge("NetworkAgent not found for EVENT_NETWORK_PROPERTIES_CHANGED");
                     } else {
+                        if (VDBG) log("Update of Linkproperties for " + nai.name());
                         LinkProperties oldLp = nai.linkProperties;
                         nai.linkProperties = (LinkProperties)msg.obj;
                         updateLinkProperties(nai, oldLp);
@@ -3096,18 +3112,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void handleAsyncChannelHalfConnect(Message msg) {
         AsyncChannel ac = (AsyncChannel) msg.obj;
-        if (mNetworkFactories.contains(ac)) {
+        if (mNetworkFactoryInfos.containsKey(msg.replyTo)) {
             if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
                 if (VDBG) log("NetworkFactory connected");
                 // A network factory has connected.  Send it all current NetworkRequests.
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+                    if (nri.isRequest == false) continue;
                     NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
                     ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK,
                             (nai != null ? nai.currentScore : 0), 0, nri.request);
                 }
             } else {
                 loge("Error connecting NetworkFactory");
-                mNetworkFactories.remove(ac);
+                mNetworkFactoryInfos.remove(msg.obj);
             }
         } else if (mNetworkAgentInfos.containsKey(msg.replyTo)) {
             if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
@@ -3214,8 +3231,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetworkRequests.put(nri.request, nri);
         if (msg.what == EVENT_REGISTER_NETWORK_REQUEST) {
             if (DBG) log("sending new NetworkRequest to factories");
-            for (AsyncChannel ac : mNetworkFactories) {
-                ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, nri.request);
+            for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
+                nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, nri.request);
             }
         }
     }
@@ -3236,8 +3253,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
 
             if (nri.isRequest) {
-                for (AsyncChannel factory : mNetworkFactories) {
-                    factory.sendMessage(NetworkFactoryProtocol.CMD_CANCEL_REQUEST, nri.request);
+                for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
+                    nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_CANCEL_REQUEST, nri.request);
                 }
 
                 if (affectedNetwork != null) {
@@ -3356,7 +3373,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 }
                 case EVENT_REGISTER_NETWORK_FACTORY: {
-                    handleRegisterNetworkFactory((Messenger)msg.obj);
+                    handleRegisterNetworkFactory((NetworkFactoryInfo)msg.obj);
+                    break;
+                }
+                case EVENT_UNREGISTER_NETWORK_FACTORY: {
+                    handleUnregisterNetworkFactory((Messenger)msg.obj);
                     break;
                 }
                 case EVENT_REGISTER_NETWORK_AGENT: {
@@ -5222,10 +5243,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime, intent);
     }
 
-    private final ArrayList<AsyncChannel> mNetworkFactories = new ArrayList<AsyncChannel>();
+    private final HashMap<Messenger, NetworkFactoryInfo> mNetworkFactoryInfos =
+            new HashMap<Messenger, NetworkFactoryInfo>();
     private final HashMap<NetworkRequest, NetworkRequestInfo> mNetworkRequests =
             new HashMap<NetworkRequest, NetworkRequestInfo>();
 
+    private static class NetworkFactoryInfo {
+        public final String name;
+        public final Messenger messenger;
+        public final AsyncChannel asyncChannel;
+
+        public NetworkFactoryInfo(String name, Messenger messenger, AsyncChannel asyncChannel) {
+            this.name = name;
+            this.messenger = messenger;
+            this.asyncChannel = asyncChannel;
+        }
+    }
 
     private class NetworkRequestInfo implements IBinder.DeathRecipient {
         static final boolean REQUEST = true;
@@ -5262,6 +5295,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             log("ConnectivityService NetworkRequestInfo binderDied(" +
                     request + ", " + mBinder + ")");
             releaseNetworkRequest(request);
+        }
+
+        public String toString() {
+            return (isRequest ? "Request" : "Listen") + " from uid/pid:" + mUid + "/" +
+                    mPid + " for " + request;
         }
     }
 
@@ -5326,24 +5364,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     @Override
-    public void registerNetworkFactory(Messenger messenger) {
+    public void registerNetworkFactory(Messenger messenger, String name) {
         enforceConnectivityInternalPermission();
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_FACTORY, messenger));
+        NetworkFactoryInfo nfi = new NetworkFactoryInfo(name, messenger, new AsyncChannel());
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_FACTORY, nfi));
     }
 
-    private void handleRegisterNetworkFactory(Messenger messenger) {
-        if (VDBG) log("Got NetworkFactory Messenger");
-        AsyncChannel ac = new AsyncChannel();
-        mNetworkFactories.add(ac);
-        ac.connect(mContext, mTrackerHandler, messenger);
-        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            if (nri.isRequest) {
-                int score = 0;
-                NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
-                if (currentNetwork != null) score = currentNetwork.currentScore;
-                ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, nri.request);
-            }
+    private void handleRegisterNetworkFactory(NetworkFactoryInfo nfi) {
+        if (VDBG) log("Got NetworkFactory Messenger for " + nfi.name);
+        mNetworkFactoryInfos.put(nfi.messenger, nfi);
+        nfi.asyncChannel.connect(mContext, mTrackerHandler, nfi.messenger);
+    }
+
+    @Override
+    public void unregisterNetworkFactory(Messenger messenger) {
+        enforceConnectivityInternalPermission();
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_FACTORY, messenger));
+    }
+
+    private void handleUnregisterNetworkFactory(Messenger messenger) {
+        NetworkFactoryInfo nfi = mNetworkFactoryInfos.remove(messenger);
+        if (nfi == null) {
+            if (VDBG) log("Failed to find Messenger in unregisterNetworkFactory");
+            return;
         }
+        if (VDBG) log("unregisterNetworkFactory for " + nfi.name);
     }
 
     /**
@@ -5535,8 +5580,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
         if (VDBG) log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
-        for (AsyncChannel ac : mNetworkFactories) {
-            ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, networkRequest);
+        for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
+            nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, networkRequest);
         }
     }
 
