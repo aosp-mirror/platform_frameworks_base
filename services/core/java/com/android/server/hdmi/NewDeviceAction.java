@@ -103,7 +103,7 @@ final class NewDeviceAction extends FeatureAction {
                 requestVendorId();
                 return true;
             } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1];
+                int requestOpcode = params[1] & 0xff;
                 if (requestOpcode == HdmiCec.MESSAGE_SET_OSD_NAME) {
                     mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
                     requestVendorId();
@@ -113,7 +113,8 @@ final class NewDeviceAction extends FeatureAction {
         } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
             if (opcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
                 if (params.length == 3) {
-                    mVendorId = (params[0] << 16) + (params[1] << 8) + params[2];
+                    mVendorId = ((params[0] & 0xff) << 16) + ((params[1] & 0xff) << 8)
+                        + (params[2] & 0xff);
                 } else {
                     Slog.e(TAG, "Failed to get device vendor ID: ");
                 }
@@ -121,7 +122,7 @@ final class NewDeviceAction extends FeatureAction {
                 finish();
                 return true;
             } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1];
+                int requestOpcode = params[1] & 0xff;
                 if (requestOpcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
                     addDeviceInfo();
                     finish();
