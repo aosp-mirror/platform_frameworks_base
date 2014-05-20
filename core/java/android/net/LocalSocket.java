@@ -186,6 +186,19 @@ public class LocalSocket implements Closeable {
     }
 
     /**
+     * Set the flag to close the fd whcih was opened
+     * externally
+     *
+     * @return none
+     * @throws IOException if socket has been closed
+     * @hide
+     */
+    public void closeExternalFd() throws IOException {
+        implCreateIfNeeded();
+        impl.closeExternalFd();
+    }
+
+    /**
      * Closes the socket.
      *
      * @throws IOException

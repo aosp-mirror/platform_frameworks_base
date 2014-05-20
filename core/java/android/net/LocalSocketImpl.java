@@ -42,6 +42,8 @@ class LocalSocketImpl
     /** whether fd is created internally */
     private boolean mFdCreatedInternally;
 
+    private boolean mFdCreatedExternally = false;
+
     // These fields are accessed by native code;
     /** file descriptor array received during a previous read */
     FileDescriptor[] inboundFileDescriptors;
@@ -266,7 +268,8 @@ class LocalSocketImpl
      */
     public void close() throws IOException {
         synchronized (LocalSocketImpl.this) {
-            if ((fd == null) || (mFdCreatedInternally == false)) {
+            if ((fd == null) || ((mFdCreatedInternally == false) &&
+                                 (mFdCreatedExternally == false))) {
                 fd = null;
                 return;
             }
@@ -372,6 +375,21 @@ class LocalSocketImpl
 
             return fos;
         }
+    }
+
+    /**
+     * Set the flag to close the fd which was opened
+     * externally.
+     *
+     * @return none
+     * @throws IOException if socket has been closed
+     */
+    protected void closeExternalFd() throws IOException
+    {
+        if (fd == null) {
+            throw new IOException("socket not created");
+        }
+        mFdCreatedExternally = true;
     }
 
     /**
