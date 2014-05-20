@@ -619,7 +619,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void hideRecents(boolean triggeredFromAltTab) {
         if (mRecents != null) {
-            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
             mRecents.hideRecents(triggeredFromAltTab);
         }
     }
