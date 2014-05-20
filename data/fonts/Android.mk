@@ -105,8 +105,11 @@ font_src_files := \
 
 ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
 
+$(eval $(call create-font-symlink,Roboto-Black.ttf,Roboto-Bold.ttf))
 $(eval $(call create-font-symlink,Roboto-Light.ttf,Roboto-Regular.ttf))
 $(eval $(call create-font-symlink,Roboto-LightItalic.ttf,Roboto-Italic.ttf))
+$(eval $(call create-font-symlink,Roboto-Medium.ttf,Roboto-Regular.ttf))
+$(eval $(call create-font-symlink,Roboto-MediumItalic.ttf,Roboto-Italic.ttf))
 $(eval $(call create-font-symlink,Roboto-Thin.ttf,Roboto-Regular.ttf))
 $(eval $(call create-font-symlink,Roboto-ThinItalic.ttf,Roboto-Italic.ttf))
 $(eval $(call create-font-symlink,RobotoCondensed-Regular.ttf,Roboto-Regular.ttf))
@@ -116,8 +119,11 @@ $(eval $(call create-font-symlink,RobotoCondensed-BoldItalic.ttf,Roboto-BoldItal
 
 else # !MINIMAL_FONT
 font_src_files += \
+    Roboto-Black.ttf \
     Roboto-Light.ttf \
     Roboto-LightItalic.ttf \
+    Roboto-Medium.ttf \
+    Roboto-MediumItalic.ttf \
     Roboto-Thin.ttf \
     Roboto-ThinItalic.ttf \
     RobotoCondensed-Regular.ttf \

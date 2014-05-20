@@ -68,6 +68,25 @@
 
     <family>
         <nameset>
+            <name>sans-serif-medium</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Medium.ttf</file>
+            <file>Roboto-MediumItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-black</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Black.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
             <name>sans-serif-condensed-light</name>
         </nameset>
         <fileset>
