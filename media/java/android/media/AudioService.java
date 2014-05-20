@@ -67,7 +67,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
-import android.view.VolumePanel;
 import android.view.WindowManager;
 
 import com.android.internal.telephony.ITelephony;
@@ -116,13 +115,21 @@ public class AudioService extends IAudioService.Stub {
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
+    /**
+     * The delay before playing a sound. This small period exists so the user
+     * can press another key (non-volume keys, too) to have it NOT be audible.
+     * <p>
+     * PhoneWindow will implement this part.
+     */
+    public static final int PLAY_SOUND_DELAY = 300;
+
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
     private final boolean mVoiceCapable;
 
-    /** The UI */
-    private VolumePanel mVolumePanel;
+    /** The controller for the volume UI. */
+    private final VolumeController mVolumeController = new VolumeController();
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -477,13 +484,12 @@ public class AudioService extends IAudioService.Stub {
         sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
 
-        mVolumePanel = new VolumePanel(context, this);
         mForcedUseForComm = AudioSystem.FORCE_NONE;
 
         createAudioSystemThread();
 
         mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
-                mContext, /*VolumeController*/ mVolumePanel, this);
+                mContext, mVolumeController, this);
 
         AudioSystem.setErrorCallback(mAudioSystemCallback);
 
@@ -953,7 +959,7 @@ public class AudioService extends IAudioService.Stub {
             if ((direction == AudioManager.ADJUST_RAISE) &&
                     !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
                 Log.e(TAG, "adjustStreamVolume() safe volume index = "+oldIndex);
-                mVolumePanel.postDisplaySafeVolumeWarning(flags);
+                mVolumeController.postDisplaySafeVolumeWarning(flags);
             } else if (streamState.adjustIndex(direction * step, device)) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist). Do not change volume if stream is muted.
@@ -1081,7 +1087,7 @@ public class AudioService extends IAudioService.Stub {
             }
 
             if (!checkSafeMediaVolume(streamTypeAlias, index, device)) {
-                mVolumePanel.postDisplaySafeVolumeWarning(flags);
+                mVolumeController.postDisplaySafeVolumeWarning(flags);
                 mPendingVolumeCommand = new StreamVolumeCommand(
                                                     streamType, index, flags, device);
             } else {
@@ -1202,7 +1208,7 @@ public class AudioService extends IAudioService.Stub {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
-        mVolumePanel.postVolumeChanged(streamType, flags);
+        mVolumeController.postVolumeChanged(streamType, flags);
 
         if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
             oldIndex = (oldIndex + 5) / 10;
@@ -1217,7 +1223,7 @@ public class AudioService extends IAudioService.Stub {
 
     // UI update and Broadcast Intent
     private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
-        mVolumePanel.postMasterVolumeChanged(flags);
+        mVolumeController.postMasterVolumeChanged(flags);
 
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
@@ -1227,7 +1233,7 @@ public class AudioService extends IAudioService.Stub {
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        mVolumePanel.postMasterMuteChanged(flags);
+        mVolumeController.postMasterMuteChanged(flags);
         broadcastMasterMuteStatus(muted);
     }
 
@@ -2589,6 +2595,7 @@ public class AudioService extends IAudioService.Stub {
         return adjustVolumeIndex;
     }
 
+    @Override
     public boolean isStreamAffectedByRingerMode(int streamType) {
         return (mRingerModeAffectedStreams & (1 << streamType)) != 0;
     }
@@ -4309,15 +4316,19 @@ public class AudioService extends IAudioService.Stub {
         mMediaFocusControl.registerRemoteVolumeObserverForRcc(rccId, rvo);
     }
 
+    @Override
     public int getRemoteStreamVolume() {
         return mMediaFocusControl.getRemoteStreamVolume();
     }
 
+    @Override
     public int getRemoteStreamMaxVolume() {
         return mMediaFocusControl.getRemoteStreamMaxVolume();
     }
 
+    @Override
     public void setRemoteStreamVolume(int index) {
+        enforceSelfOrSystemUI("set the remote stream volume");
         mMediaFocusControl.setRemoteStreamVolume(index);
     }
 
@@ -4450,7 +4461,7 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             }
-            mVolumePanel.setLayoutDirection(config.getLayoutDirection());
+            mVolumeController.setLayoutDirection(config.getLayoutDirection());
         } catch (Exception e) {
             Log.e(TAG, "Error handling configuration change: ", e);
         }
@@ -4625,7 +4636,9 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    @Override
     public void disableSafeMediaVolume() {
+        enforceSelfOrSystemUI("disable the safe media volume");
         synchronized (mSafeMediaVolumeState) {
             setSafeMediaVolumeEnabled(false);
             if (mPendingVolumeCommand != null) {
@@ -4681,6 +4694,7 @@ public class AudioService extends IAudioService.Stub {
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
+        pw.print("  mVolumeController="); pw.println(mVolumeController);
     }
 
     // Inform AudioFlinger of our device's low RAM attribute
@@ -4690,5 +4704,40 @@ public class AudioService extends IAudioService.Stub {
         if (status != 0) {
             Log.w(TAG, "AudioFlinger informed of device's low RAM attribute; status " + status);
         }
+    }
+
+    private void enforceSelfOrSystemUI(String action) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                "Only SystemUI can " + action);
+    }
+
+    @Override
+    public void setVolumeController(final IVolumeController controller) {
+        enforceSelfOrSystemUI("set the volume controller");
+
+        // return early if things are not actually changing
+        if (mVolumeController.isSameBinder(controller)) {
+            return;
+        }
+
+        // dismiss the old volume controller
+        mVolumeController.postDismiss();
+        if (controller != null) {
+            // we are about to register a new controller, listen for its death
+            try {
+                controller.asBinder().linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        if (mVolumeController.isSameBinder(controller)) {
+                            Log.w(TAG, "Current remote volume controller died, unregistering");
+                            setVolumeController(null);
+                        }
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                // noop
+            }
+        }
+        mVolumeController.setController(controller);
     }
 }
