@@ -4497,7 +4497,7 @@
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
         <!-- Indicates how layer padding should affect the bounds of subsequent layers.
-            The default value is nest. -->
+             The default padding mode value is nest. -->
         <attr name="paddingMode">
             <!-- Nest each layer inside the padding of the previous layer. -->
             <enum name="nest" value="0" />

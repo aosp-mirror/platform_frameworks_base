@@ -1032,6 +1032,11 @@ public abstract class Drawable {
         return createFromXmlInnerThemed(r, parser, attrs, null);
     }
 
+    /**
+     * Create a themed drawable from inside an XML document. Called on a parser
+     * positioned at a tag in an XML document, tries to create a Drawable from
+     * that tag. Returns null if the tag is not a valid drawable.
+     */
     public static Drawable createFromXmlInnerThemed(Resources r, XmlPullParser parser,
             AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
         final Drawable drawable;

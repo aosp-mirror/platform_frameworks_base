@@ -145,6 +145,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      * Sets the start angle for rotation.
      *
      * @param fromDegrees Starting angle in degrees
+     *
+     * @see #getFromDegrees()
+     * @attr ref android.R.styleable#RotateDrawable_fromDegrees
      */
     public void setFromDegrees(float fromDegrees) {
         if (mState.mFromDegrees != fromDegrees) {
@@ -155,6 +158,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @return The starting angle for rotation in degrees
+     *
+     * @see #setFromDegrees(float)
+     * @attr ref android.R.styleable#RotateDrawable_fromDegrees
      */
     public float getFromDegrees() {
         return mState.mFromDegrees;
@@ -164,6 +170,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      * Sets the end angle for rotation.
      *
      * @param toDegrees Ending angle in degrees
+     *
+     * @see #getToDegrees()
+     * @attr ref android.R.styleable#RotateDrawable_toDegrees
      */
     public void setToDegrees(float toDegrees) {
         if (mState.mToDegrees != toDegrees) {
@@ -174,6 +183,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @return The ending angle for rotation in degrees
+     *
+     * @see #setToDegrees(float)
+     * @attr ref android.R.styleable#RotateDrawable_toDegrees
      */
     public float getToDegrees() {
         return mState.mToDegrees;
@@ -186,7 +198,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      *            relative, the position represents a fraction of the drawable
      *            width. Otherwise, the position represents an absolute value in
      *            pixels.
+     *
      * @see #setPivotXRelative(boolean)
+     * @attr ref android.R.styleable#RotateDrawable_pivotX
      */
     public void setPivotX(float pivotX) {
         if (mState.mPivotX == pivotX) {
@@ -197,7 +211,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @return X position around which to rotate
+     *
      * @see #setPivotX(float)
+     * @attr ref android.R.styleable#RotateDrawable_pivotX
      */
     public float getPivotX() {
         return mState.mPivotX;
@@ -209,6 +225,8 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      *
      * @param relative True if the X pivot represents a fraction of the drawable
      *            width, or false if it represents an absolute value in pixels
+     *
+     * @see #isPivotXRelative()
      */
     public void setPivotXRelative(boolean relative) {
         if (mState.mPivotXRel == relative) {
@@ -220,6 +238,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     /**
      * @return True if the X pivot represents a fraction of the drawable width,
      *         or false if it represents an absolute value in pixels
+     *
      * @see #setPivotXRelative(boolean)
      */
     public boolean isPivotXRelative() {
@@ -233,7 +252,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      *            relative, the position represents a fraction of the drawable
      *            height. Otherwise, the position represents an absolute value
      *            in pixels.
-     * @see #setPivotYRelative(boolean)
+     *
+     * @see #getPivotY()
+     * @attr ref android.R.styleable#RotateDrawable_pivotY
      */
     public void setPivotY(float pivotY) {
         if (mState.mPivotY == pivotY) {
@@ -244,7 +265,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @return Y position around which to rotate
+     *
      * @see #setPivotY(float)
+     * @attr ref android.R.styleable#RotateDrawable_pivotY
      */
     public float getPivotY() {
         return mState.mPivotY;
@@ -256,6 +279,8 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      *
      * @param relative True if the Y pivot represents a fraction of the drawable
      *            height, or false if it represents an absolute value in pixels
+     *
+     * @see #isPivotYRelative()
      */
     public void setPivotYRelative(boolean relative) {
         if (mState.mPivotYRel == relative) {
@@ -267,6 +292,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     /**
      * @return True if the Y pivot represents a fraction of the drawable height,
      *         or false if it represents an absolute value in pixels
+     *
      * @see #setPivotYRelative(boolean)
      */
     public boolean isPivotYRelative() {

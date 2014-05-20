@@ -2177,6 +2177,7 @@
   <public type="attr" name="contentInsetEnd" />
   <public type="attr" name="contentInsetLeft" />
   <public type="attr" name="contentInsetRight" />
+  <public type="attr" name="paddingMode" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
