@@ -57,11 +57,13 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private Handler mHandler;
 
+    private boolean mIsReturning;
+
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
-        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning),
-                isReturning);
-        mIsBackgroundReady = !mIsReturning;
+        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning));
+        mIsReturning = isReturning;
+        mIsBackgroundReady = !isReturning;
         mActivity = activity;
     }
 
@@ -155,8 +157,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition sharedElementTransition = configureTransition(getSharedElementTransition());
         Transition viewsTransition = configureTransition(getViewsTransition());
         viewsTransition = addTargets(viewsTransition, mTransitioningViews);
-        if (sharedElementTransition == null) {
+        if (sharedElementTransition == null || mSharedElements.isEmpty()) {
             sharedElementTransitionComplete();
+            sharedElementTransition = null;
         } else {
             sharedElementTransition.addListener(new Transition.TransitionListenerAdapter() {
                 @Override
@@ -165,8 +168,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             });
         }
-        if (viewsTransition == null) {
+        if (viewsTransition == null || mTransitioningViews.isEmpty()) {
             exitTransitionComplete();
+            viewsTransition = null;
         } else {
             viewsTransition.addListener(new Transition.TransitionListenerAdapter() {
                 @Override
@@ -178,6 +182,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
         TransitionManager.beginDelayedTransition(getDecor(), transition);
+        if (viewsTransition == null && sharedElementTransition != null) {
+            mSharedElements.get(0).requestLayout();
+        }
     }
 
     private void exitTransitionComplete() {
@@ -217,6 +224,23 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
                 mActivity = null;
             }
+        }
+    }
+
+    @Override
+    protected Transition getViewsTransition() {
+        if (mIsReturning) {
+            return getWindow().getEnterTransition();
+        } else {
+            return getWindow().getExitTransition();
+        }
+    }
+
+    protected Transition getSharedElementTransition() {
+        if (mIsReturning) {
+            return getWindow().getSharedElementEnterTransition();
+        } else {
+            return getWindow().getSharedElementExitTransition();
         }
     }
 

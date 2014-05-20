@@ -55,13 +55,15 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mHasStopped;
     private Handler mHandler;
     private boolean mIsCanceled;
+    private boolean mIsReturning;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames,
             ArrayList<String> acceptedNames, ArrayList<String> mappedNames) {
         super(activity.getWindow(), sharedElementNames, acceptedNames, mappedNames,
-                getListener(activity, acceptedNames), acceptedNames != null);
+                getListener(activity, acceptedNames));
         mActivity = activity;
+        mIsReturning = acceptedNames != null;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -147,6 +149,23 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         } else {
             mActivity = null; // all done with it now.
+        }
+    }
+
+    @Override
+    protected Transition getViewsTransition() {
+        if (mIsReturning) {
+            return getWindow().getExitTransition();
+        } else {
+            return getWindow().getEnterTransition();
+        }
+    }
+
+    protected Transition getSharedElementTransition() {
+        if (mIsReturning) {
+            return getWindow().getSharedElementExitTransition();
+        } else {
+            return getWindow().getSharedElementEnterTransition();
         }
     }
 
@@ -397,6 +416,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             return null;
         }
         Bundle bundle = transitionArgs.getBundle(name);
+        if (bundle == null) {
+            return null;
+        }
         int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
         if (scaleTypeInt < 0) {
             return null;
