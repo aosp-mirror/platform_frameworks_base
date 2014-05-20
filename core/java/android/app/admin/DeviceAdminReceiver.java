@@ -166,12 +166,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Broadcast Action: This broadcast is sent to the newly created profile when
-     * the provisioning of a managed profile has completed successfully.
+     * the provisioning of a managed profile has completed successfully. It is used in both the
+     * Profile Owner and the Device Owner provisioning.
      *
-     * <p>The broadcast is limited to the package which started the provisioning as specified in
-     * the extra {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} of the
-     * {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
-     * provisioning. It is also limited to the managed profile.
+     * <p>The broadcast is limited to the DeviceAdminReceiver component specified in the message
+     * that started the provisioning. It is also limited to the managed profile.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
