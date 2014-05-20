@@ -115,13 +115,14 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    public void immersiveModeChanged(String pkg, boolean isImmersiveMode) {
+    public void immersiveModeChanged(String pkg, boolean isImmersiveMode,
+            boolean userSetupComplete) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
             final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
             if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s mConfirmed=%s",
                     disabled, mConfirmed));
-            if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)) {
+            if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed) && userSetupComplete) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
