@@ -20,6 +20,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Bundle;
 
+import java.util.Set;
+
 public class BluetoothInstrumentation extends Instrumentation {
 
     private BluetoothTestUtils mUtils = null;
@@ -66,6 +68,8 @@ public class BluetoothInstrumentation extends Instrumentation {
             getName();
         } else if ("getAddress".equals(command)) {
             getAddress();
+        } else if ("getBondedDevices".equals(command)) {
+            getBondedDevices();
         } else {
             finish(null);
         }
@@ -95,6 +99,16 @@ public class BluetoothInstrumentation extends Instrumentation {
     public void getAddress() {
         String name = getBluetoothAdapter().getAddress();
         mSuccessResult.putString("address", name);
+        finish(mSuccessResult);
+    }
+
+    public void getBondedDevices() {
+        Set<BluetoothDevice> devices = getBluetoothAdapter().getBondedDevices();
+        int i = 0;
+        for (BluetoothDevice device : devices) {
+            mSuccessResult.putString(String.format("device-%02d", i), device.getAddress());
+            i++;
+        }
         finish(mSuccessResult);
     }
 
