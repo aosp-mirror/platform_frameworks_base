@@ -149,6 +149,7 @@ public class TvView extends SurfaceView {
         if (mSession != null) {
             release();
         }
+        mSessionCallback = null;
     }
 
     /**
