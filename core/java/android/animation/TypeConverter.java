@@ -53,16 +53,4 @@ public abstract class TypeConverter<T, V> {
      * @return A value of type V, converted from <code>value</code>.
      */
     public abstract V convert(T value);
-
-    /**
-     * Does a conversion from the target type back to the source type. The subclass
-     * must implement this when a TypeConverter is used in animations and current
-     * values will need to be read for an animation. By default, this will return null,
-     * indicating that back-conversion is not supported.
-     * @param value The Object to convert.
-     * @return A value of type T, converted from <code>value</code>.
-     */
-    public T convertBack(V value) {
-        return null;
-    }
 }

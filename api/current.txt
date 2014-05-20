@@ -2830,6 +2830,12 @@ package android.animation {
     method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
   }
 
+  public abstract class BidirectionalTypeConverter extends android.animation.TypeConverter {
+    ctor public BidirectionalTypeConverter(java.lang.Class<T>, java.lang.Class<V>);
+    method public abstract T convertBack(V);
+    method public android.animation.BidirectionalTypeConverter<V, T> invert();
+  }
+
   public class FloatArrayEvaluator implements android.animation.TypeEvaluator {
     ctor public FloatArrayEvaluator();
     ctor public FloatArrayEvaluator(float[]);
@@ -3008,7 +3014,6 @@ package android.animation {
   public abstract class TypeConverter {
     ctor public TypeConverter(java.lang.Class<T>, java.lang.Class<V>);
     method public abstract V convert(T);
-    method public T convertBack(V);
   }
 
   public abstract interface TypeEvaluator {

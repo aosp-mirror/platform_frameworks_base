@@ -456,7 +456,7 @@ public class PropertyValuesHolder implements Cloneable {
      * cannot automatically interpolate between objects of unknown type. This variant also
      * takes a <code>TypeConverter</code> to convert from animated values to the type
      * of the property. If only one value is supplied, the <code>TypeConverter</code>
-     * must implement {@link TypeConverter#convertBack(Object)} to retrieve the current
+     * must be a {@link android.animation.BidirectionalTypeConverter} to retrieve the current
      * value.
      *
      * @param property The property being animated. Should not be null.
@@ -635,6 +635,8 @@ public class PropertyValuesHolder implements Cloneable {
 
     /**
      * Sets the converter to convert from the values type to the setter's parameter type.
+     * If only one value is supplied, <var>converter</var> must be a
+     * {@link android.animation.BidirectionalTypeConverter}.
      * @param converter The converter to use to convert values.
      */
     public void setConverter(TypeConverter converter) {
@@ -816,12 +818,12 @@ public class PropertyValuesHolder implements Cloneable {
 
     private Object convertBack(Object value) {
         if (mConverter != null) {
-            value = mConverter.convertBack(value);
-            if (value == null) {
+            if (!(mConverter instanceof BidirectionalTypeConverter)) {
                 throw new IllegalArgumentException("Converter "
                         + mConverter.getClass().getName()
-                        + " must implement convertBack and not return null.");
+                        + " must be a BidirectionalTypeConverter");
             }
+            value = ((BidirectionalTypeConverter) mConverter).convertBack(value);
         }
         return value;
     }
