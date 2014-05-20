@@ -109,6 +109,50 @@ public class NetworkUtils {
     public native static void markSocket(int socketfd, int mark);
 
     /**
+     * Binds the current process to the network designated by {@code netId}.  All sockets created
+     * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
+     * {@link Network#socketFactory}) will be bound to this network.  Note that if this
+     * {@code Network} ever disconnects all sockets created in this way will cease to work.  This
+     * is by design so an application doesn't accidentally use sockets it thinks are still bound to
+     * a particular {@code Network}.
+     */
+    public native static void bindProcessToNetwork(int netId);
+
+    /**
+     * Clear any process specific {@code Network} binding.  This reverts a call to
+     * {@link #bindProcessToNetwork}.
+     */
+    public native static void unbindProcessToNetwork();
+
+    /**
+     * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
+     * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
+     */
+    public native static int getNetworkBoundToProcess();
+
+    /**
+     * Binds host resolutions performed by this process to the network designated by {@code netId}.
+     * {@link #bindProcessToNetwork} takes precedence over this setting.
+     *
+     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
+     */
+    public native static void bindProcessToNetworkForHostResolution(int netId);
+
+    /**
+     * Clears any process specific {@link Network} binding for host resolution.  This does
+     * not clear bindings enacted via {@link #bindProcessToNetwork}.
+     *
+     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
+     */
+    public native static void unbindProcessToNetworkForHostResolution();
+
+    /**
+     * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This
+     * overrides any binding via {@link #bindProcessToNetwork}.
+     */
+    public native static void bindSocketToNetwork(int socketfd, int netId);
+
+    /**
      * Convert a IPv4 address from an integer to an InetAddress.
      * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */
