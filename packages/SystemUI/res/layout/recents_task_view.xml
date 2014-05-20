@@ -22,21 +22,6 @@
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <com.android.systemui.recents.views.TaskInfoView
-        android:id="@+id/task_view_info_pane"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:background="@color/recents_task_bar_default_background_color">
-        <Button
-            android:id="@+id/task_view_app_info_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_gravity="top|center_horizontal"
-            android:text="@string/recents_app_info_button_label" />
-    </com.android.systemui.recents.views.TaskInfoView>
     <com.android.systemui.recents.views.TaskBarView
         android:id="@+id/task_view_bar"
         android:layout_width="match_parent"

@@ -394,16 +394,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onBackPressed() {
         boolean interceptedByInfoPanelClose = false;
 
-        // Try and return from any open info panes
-        if (Constants.DebugFlags.App.EnableInfoPane) {
-            interceptedByInfoPanelClose = mRecentsView.closeOpenInfoPanes();
-        }
-
-        // If we haven't been intercepted already, then unfilter any stacks
-        if (!interceptedByInfoPanelClose) {
-            if (!mRecentsView.unfilterFilteredStacks()) {
-                super.onBackPressed();
-            }
+        // Unfilter any stacks
+        if (!mRecentsView.unfilterFilteredStacks()) {
+            super.onBackPressed();
         }
     }
 
