@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.SystemProperties;
 import android.util.Slog;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -34,7 +35,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.ClipRectAnimation;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
-
 import android.view.animation.TranslateAnimation;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.server.AttributeCache;
@@ -500,7 +500,8 @@ public class AppTransition implements Dump {
      */
     Animation createAlternateThumbnailEnterExitAnimationLocked(int thumbTransitState, int appWidth,
                                                     int appHeight, int orientation, int transit,
-                                                    Rect containingFrame, Rect contentInsets) {
+                                                    Rect containingFrame, Rect contentInsets,
+                                                    boolean isFullScreen) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -520,6 +521,9 @@ public class AppTransition implements Dump {
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbHeight = (int) (thumbHeight / scale);
                     mTmpFromClipRect.set(containingFrame);
+                    if (isFullScreen) {
+                        mTmpFromClipRect.top = contentInsets.top;
+                    }
                     mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
                     mTmpToClipRect.set(containingFrame);
                 } else {
@@ -527,7 +531,12 @@ public class AppTransition implements Dump {
                     scale = thumbHeight / (appHeight - contentInsets.top);
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbWidth = (int) (thumbWidth / scale);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
                     mTmpFromClipRect.set(containingFrame);
+                    if (isFullScreen) {
+                        mTmpFromClipRect.top = contentInsets.top;
+                        mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
+                    }
                     mTmpFromClipRect.right = (mTmpFromClipRect.left + unscaledThumbWidth);
                     mTmpToClipRect.set(containingFrame);
                 }
@@ -575,14 +584,22 @@ public class AppTransition implements Dump {
                     int unscaledThumbHeight = (int) (thumbHeight / scale);
                     mTmpFromClipRect.set(containingFrame);
                     mTmpToClipRect.set(containingFrame);
+                    if (isFullScreen) {
+                        mTmpToClipRect.top = contentInsets.top;
+                    }
                     mTmpToClipRect.bottom = (mTmpToClipRect.top + unscaledThumbHeight);
                 } else {
                     // In landscape, we scale the height and clip to the top/left square
                     scale = thumbHeight / (appHeight - contentInsets.top);
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbWidth = (int) (thumbWidth / scale);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
                     mTmpFromClipRect.set(containingFrame);
                     mTmpToClipRect.set(containingFrame);
+                    if (isFullScreen) {
+                        mTmpToClipRect.top = contentInsets.top;
+                        mTmpToClipRect.bottom = (mTmpToClipRect.top + unscaledThumbHeight);
+                    }
                     mTmpToClipRect.right = (mTmpToClipRect.left + unscaledThumbWidth);
                 }
 
@@ -679,7 +696,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                             int appWidth, int appHeight, int orientation,
-                            Rect containingFrame, Rect contentInsets) {
+                            Rect containingFrame, Rect contentInsets, boolean isFullScreen) {
         Animation a;
         if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimation(mNextAppTransitionPackage, enter ?
@@ -702,7 +719,7 @@ public class AppTransition implements Dump {
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             a = createAlternateThumbnailEnterExitAnimationLocked(
                     getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
-                    transit, containingFrame, contentInsets);
+                    transit, containingFrame, contentInsets, isFullScreen);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
