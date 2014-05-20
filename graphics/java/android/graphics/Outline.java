@@ -23,9 +23,9 @@ import android.view.View;
 
 /**
  * Defines a simple shape, used for bounding graphical regions.
- *
+ * <p>
  * Can be used with a View, or computed by a Drawable, to drive the shape of shadows cast by a
- * View.
+ * View, or to clip the contents of the View.
  *
  * @see View#setOutline(Outline)
  * @see Drawable#getOutline(Outline)
@@ -41,7 +41,7 @@ public final class Outline {
     public Path mPath;
 
     /**
-     * Constructs an invalid Outline. Call one of the setter methods to make
+     * Constructs an empty Outline. Call one of the setter methods to make
      * the outline valid for use with a View.
      */
     public Outline() {}
@@ -49,23 +49,31 @@ public final class Outline {
     /**
      * Constructs an Outline with a copy of the data in src.
      */
-    public Outline(@Nullable Outline src) {
+    public Outline(@NonNull Outline src) {
         set(src);
     }
 
-    public void reset() {
+    /**
+     * Sets the outline to be empty.
+     *
+     * @see #isEmpty()
+     */
+    public void setEmpty() {
         mRadius = 0;
         mRect = null;
         mPath = null;
     }
 
     /**
-     * Returns whether the Outline is valid for use with a View.
+     * Returns whether the Outline is empty.
      * <p>
-     * Outlines are invalid when constructed until a setter method is called.
+     * Outlines are empty when constructed, or if {@link #setEmpty()} is called,
+     * until a setter method is called
+     *
+     * @see #setEmpty()
      */
-    public boolean isValid() {
-        return mRect != null || mPath != null;
+    public boolean isEmpty() {
+        return mRect == null && mPath == null;
     }
 
     /**
