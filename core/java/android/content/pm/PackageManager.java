@@ -1405,6 +1405,14 @@ public abstract class PackageManager {
     public static final String FEATURE_MANAGEDPROFILES = "android.software.managedprofiles";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a full implementation of the android.webkit.* APIs. Devices
+     * lacking this feature will not have a functioning WebView implementation.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WEBVIEW = "android.software.webview";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
