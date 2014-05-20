@@ -234,11 +234,17 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100;
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200;
     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
+    public static final int DEVICE_OUT_HDMI = DEVICE_OUT_AUX_DIGITAL;
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
     public static final int DEVICE_OUT_USB_ACCESSORY = 0x2000;
     public static final int DEVICE_OUT_USB_DEVICE = 0x4000;
     public static final int DEVICE_OUT_REMOTE_SUBMIX = 0x8000;
+    public static final int DEVICE_OUT_TELEPHONY_TX = 0x10000;
+    public static final int DEVICE_OUT_LINE = 0x20000;
+    public static final int DEVICE_OUT_HDMI_ARC = 0x40000;
+    public static final int DEVICE_OUT_SPDIF = 0x80000;
+    public static final int DEVICE_OUT_FM = 0x100000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -252,12 +258,17 @@ public class AudioSystem
                                               DEVICE_OUT_BLUETOOTH_A2DP |
                                               DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
                                               DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
-                                              DEVICE_OUT_AUX_DIGITAL |
+                                              DEVICE_OUT_HDMI |
                                               DEVICE_OUT_ANLG_DOCK_HEADSET |
                                               DEVICE_OUT_DGTL_DOCK_HEADSET |
                                               DEVICE_OUT_USB_ACCESSORY |
                                               DEVICE_OUT_USB_DEVICE |
                                               DEVICE_OUT_REMOTE_SUBMIX |
+                                              DEVICE_OUT_TELEPHONY_TX |
+                                              DEVICE_OUT_LINE |
+                                              DEVICE_OUT_HDMI_ARC |
+                                              DEVICE_OUT_SPDIF |
+                                              DEVICE_OUT_FM |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -275,13 +286,20 @@ public class AudioSystem
     public static final int DEVICE_IN_BLUETOOTH_SCO_HEADSET = DEVICE_BIT_IN | 0x8;
     public static final int DEVICE_IN_WIRED_HEADSET = DEVICE_BIT_IN | 0x10;
     public static final int DEVICE_IN_AUX_DIGITAL = DEVICE_BIT_IN | 0x20;
+    public static final int DEVICE_IN_HDMI = DEVICE_IN_AUX_DIGITAL;
     public static final int DEVICE_IN_VOICE_CALL = DEVICE_BIT_IN | 0x40;
+    public static final int DEVICE_IN_TELEPHONY_RX = DEVICE_IN_VOICE_CALL;
     public static final int DEVICE_IN_BACK_MIC = DEVICE_BIT_IN | 0x80;
     public static final int DEVICE_IN_REMOTE_SUBMIX = DEVICE_BIT_IN | 0x100;
     public static final int DEVICE_IN_ANLG_DOCK_HEADSET = DEVICE_BIT_IN | 0x200;
     public static final int DEVICE_IN_DGTL_DOCK_HEADSET = DEVICE_BIT_IN | 0x400;
     public static final int DEVICE_IN_USB_ACCESSORY = DEVICE_BIT_IN | 0x800;
     public static final int DEVICE_IN_USB_DEVICE = DEVICE_BIT_IN | 0x1000;
+    public static final int DEVICE_IN_FM_TUNER = DEVICE_BIT_IN | 0x2000;
+    public static final int DEVICE_IN_TV_TUNER = DEVICE_BIT_IN | 0x4000;
+    public static final int DEVICE_IN_LINE = DEVICE_BIT_IN | 0x8000;
+    public static final int DEVICE_IN_SPDIF = DEVICE_BIT_IN | 0x10000;
+
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -289,14 +307,18 @@ public class AudioSystem
                                              DEVICE_IN_BUILTIN_MIC |
                                              DEVICE_IN_BLUETOOTH_SCO_HEADSET |
                                              DEVICE_IN_WIRED_HEADSET |
-                                             DEVICE_IN_AUX_DIGITAL |
-                                             DEVICE_IN_VOICE_CALL |
+                                             DEVICE_IN_HDMI |
+                                             DEVICE_IN_TELEPHONY_RX |
                                              DEVICE_IN_BACK_MIC |
                                              DEVICE_IN_REMOTE_SUBMIX |
                                              DEVICE_IN_ANLG_DOCK_HEADSET |
                                              DEVICE_IN_DGTL_DOCK_HEADSET |
                                              DEVICE_IN_USB_ACCESSORY |
                                              DEVICE_IN_USB_DEVICE |
+                                             DEVICE_IN_FM_TUNER |
+                                             DEVICE_IN_TV_TUNER |
+                                             DEVICE_IN_LINE |
+                                             DEVICE_IN_SPDIF |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -318,13 +340,19 @@ public class AudioSystem
     public static final String DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME = "bt_a2dp_hp";
     public static final String DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME = "bt_a2dp_spk";
     public static final String DEVICE_OUT_AUX_DIGITAL_NAME = "aux_digital";
+    public static final String DEVICE_OUT_HDMI_NAME = "hdmi";
     public static final String DEVICE_OUT_ANLG_DOCK_HEADSET_NAME = "analog_dock";
     public static final String DEVICE_OUT_DGTL_DOCK_HEADSET_NAME = "digital_dock";
     public static final String DEVICE_OUT_USB_ACCESSORY_NAME = "usb_accessory";
     public static final String DEVICE_OUT_USB_DEVICE_NAME = "usb_device";
     public static final String DEVICE_OUT_REMOTE_SUBMIX_NAME = "remote_submix";
+    public static final String DEVICE_OUT_TELEPHONY_TX_NAME = "telephony_tx";
+    public static final String DEVICE_OUT_LINE_NAME = "line";
+    public static final String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
+    public static final String DEVICE_OUT_SPDIF_NAME = "spdif";
+    public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
 
-    public static String getDeviceName(int device)
+    public static String getOutputDeviceName(int device)
     {
         switch(device) {
         case DEVICE_OUT_EARPIECE:
@@ -347,8 +375,8 @@ public class AudioSystem
             return DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME;
         case DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER:
             return DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME;
-        case DEVICE_OUT_AUX_DIGITAL:
-            return DEVICE_OUT_AUX_DIGITAL_NAME;
+        case DEVICE_OUT_HDMI:
+            return DEVICE_OUT_HDMI_NAME;
         case DEVICE_OUT_ANLG_DOCK_HEADSET:
             return DEVICE_OUT_ANLG_DOCK_HEADSET_NAME;
         case DEVICE_OUT_DGTL_DOCK_HEADSET:
@@ -359,11 +387,22 @@ public class AudioSystem
             return DEVICE_OUT_USB_DEVICE_NAME;
         case DEVICE_OUT_REMOTE_SUBMIX:
             return DEVICE_OUT_REMOTE_SUBMIX_NAME;
+        case DEVICE_OUT_TELEPHONY_TX:
+            return DEVICE_OUT_TELEPHONY_TX_NAME;
+        case DEVICE_OUT_LINE:
+            return DEVICE_OUT_LINE_NAME;
+        case DEVICE_OUT_HDMI_ARC:
+            return DEVICE_OUT_HDMI_ARC_NAME;
+        case DEVICE_OUT_SPDIF:
+            return DEVICE_OUT_SPDIF_NAME;
+        case DEVICE_OUT_FM:
+            return DEVICE_OUT_FM_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return "";
         }
     }
+
 
     // phone state, match audio_mode???
     public static final int PHONE_STATE_OFFCALL = 0;

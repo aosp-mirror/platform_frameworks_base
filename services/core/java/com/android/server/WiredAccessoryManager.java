@@ -264,7 +264,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             } else if (headset == BIT_USB_HEADSET_DGTL) {
                 device = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
             } else if (headset == BIT_HDMI_AUDIO) {
-                device = AudioManager.DEVICE_OUT_AUX_DIGITAL;
+                device = AudioManager.DEVICE_OUT_HDMI;
             } else {
                 Slog.e(TAG, "setDeviceState() invalid headset type: "+headset);
                 return;

@@ -423,7 +423,7 @@ public class AudioService extends IAudioService.Stub {
     public final static int STREAM_REMOTE_MUSIC = -200;
 
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
-    final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_AUX_DIGITAL |
+    final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ALL_USB;
@@ -2895,7 +2895,7 @@ public class AudioService extends IAudioService.Stub {
 
         public String getSettingNameForDevice(int device) {
             String name = mVolumeIndexSettingName;
-            String suffix = AudioSystem.getDeviceName(device);
+            String suffix = AudioSystem.getOutputDeviceName(device);
             if (suffix.isEmpty()) {
                 return name;
             }
@@ -3935,7 +3935,7 @@ public class AudioService extends IAudioService.Stub {
     // sent if none of these devices is connected.
     int mBecomingNoisyIntentDevices =
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
-            AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_AUX_DIGITAL |
+            AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET | AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ALL_USB;
 
@@ -3992,7 +3992,7 @@ public class AudioService extends IAudioService.Stub {
         } else if (device == AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET) {
             connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
             intent.setAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
-        } else if (device == AudioSystem.DEVICE_OUT_AUX_DIGITAL) {
+        } else if (device == AudioSystem.DEVICE_OUT_HDMI) {
             connType = AudioRoutesInfo.MAIN_HDMI;
             intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
         }

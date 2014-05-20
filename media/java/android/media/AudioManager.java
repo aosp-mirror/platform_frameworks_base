@@ -2557,59 +2557,190 @@ public class AudioManager {
     // class is not used by other parts of the framework, which instead use definitions and methods
     // from AudioManager. AudioSystem is an internal class used by AudioManager and AudioService.
 
-    /** {@hide} The audio output device code for the small speaker at the front of the device used
+    /** @hide
+     *  The audio output device code for the small speaker at the front of the device used
      *  when placing calls.  Does not refer to an in-ear headphone without attached microphone,
      *  such as earbuds, earphones, or in-ear monitors (IEM). Those would be handled as a
      *  {@link #DEVICE_OUT_WIRED_HEADPHONE}.
      */
     public static final int DEVICE_OUT_EARPIECE = AudioSystem.DEVICE_OUT_EARPIECE;
-    /** {@hide} The audio output device code for the built-in speaker */
+    /** @hide
+     *  The audio output device code for the built-in speaker */
     public static final int DEVICE_OUT_SPEAKER = AudioSystem.DEVICE_OUT_SPEAKER;
-    /** {@hide} The audio output device code for a wired headset with attached microphone */
+    /** @hide
+     * The audio output device code for a wired headset with attached microphone */
     public static final int DEVICE_OUT_WIRED_HEADSET = AudioSystem.DEVICE_OUT_WIRED_HEADSET;
-    /** {@hide} The audio output device code for a wired headphone without attached microphone */
+    /** @hide
+     * The audio output device code for a wired headphone without attached microphone */
     public static final int DEVICE_OUT_WIRED_HEADPHONE = AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
-    /** {@hide} The audio output device code for generic Bluetooth SCO, for voice */
+    /** @hide
+     * The audio output device code for generic Bluetooth SCO, for voice */
     public static final int DEVICE_OUT_BLUETOOTH_SCO = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
-    /** {@hide} The audio output device code for Bluetooth SCO Headset Profile (HSP) and
-     *  Hands-Free Profile (HFP), for voice
+    /** @hide
+     * The audio output device code for Bluetooth SCO Headset Profile (HSP) and
+     * Hands-Free Profile (HFP), for voice
      */
     public static final int DEVICE_OUT_BLUETOOTH_SCO_HEADSET =
             AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
-    /** {@hide} The audio output device code for Bluetooth SCO car audio, for voice */
+    /** @hide
+     * The audio output device code for Bluetooth SCO car audio, for voice */
     public static final int DEVICE_OUT_BLUETOOTH_SCO_CARKIT =
             AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-    /** {@hide} The audio output device code for generic Bluetooth A2DP, for music */
+    /** @hide
+     * The audio output device code for generic Bluetooth A2DP, for music */
     public static final int DEVICE_OUT_BLUETOOTH_A2DP = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
-    /** {@hide} The audio output device code for Bluetooth A2DP headphones, for music */
+    /** @hide
+     * The audio output device code for Bluetooth A2DP headphones, for music */
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES =
             AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
-    /** {@hide} The audio output device code for Bluetooth A2DP external speaker, for music */
+    /** @hide
+     * The audio output device code for Bluetooth A2DP external speaker, for music */
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER =
             AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
-    /** {@hide} The audio output device code for S/PDIF or HDMI */
+    /** @hide
+     * The audio output device code for S/PDIF (legacy) or HDMI
+     * Deprecated: replaced by {@link #DEVICE_OUT_HDMI} */
     public static final int DEVICE_OUT_AUX_DIGITAL = AudioSystem.DEVICE_OUT_AUX_DIGITAL;
-    /** {@hide} The audio output device code for an analog wired headset attached via a
+    /** @hide
+     * The audio output device code for HDMI */
+    public static final int DEVICE_OUT_HDMI = AudioSystem.DEVICE_OUT_HDMI;
+    /** @hide
+     * The audio output device code for an analog wired headset attached via a
      *  docking station
      */
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
-    /** {@hide} The audio output device code for a digital wired headset attached via a
+    /** @hide
+     * The audio output device code for a digital wired headset attached via a
      *  docking station
      */
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET;
-    /** {@hide} The audio output device code for a USB audio accessory. The accessory is in USB host
+    /** @hide
+     * The audio output device code for a USB audio accessory. The accessory is in USB host
      * mode and the Android device in USB device mode
      */
     public static final int DEVICE_OUT_USB_ACCESSORY = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
-    /** {@hide} The audio output device code for a USB audio device. The device is in USB device
+    /** @hide
+     * The audio output device code for a USB audio device. The device is in USB device
      * mode and the Android device in USB host mode
      */
     public static final int DEVICE_OUT_USB_DEVICE = AudioSystem.DEVICE_OUT_USB_DEVICE;
-    /** {@hide} This is not used as a returned value from {@link #getDevicesForStream}, but could be
+    /** @hide
+     * The audio output device code for projection output.
+     */
+    public static final int DEVICE_OUT_REMOTE_SUBMIX = AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+    /** @hide
+     * The audio output device code the telephony voice TX path.
+     */
+    public static final int DEVICE_OUT_TELEPHONY_TX = AudioSystem.DEVICE_OUT_TELEPHONY_TX;
+    /** @hide
+     * The audio output device code for an analog jack with line impedance detected.
+     */
+    public static final int DEVICE_OUT_LINE = AudioSystem.DEVICE_OUT_LINE;
+    /** @hide
+     * The audio output device code for HDMI Audio Return Channel.
+     */
+    public static final int DEVICE_OUT_HDMI_ARC = AudioSystem.DEVICE_OUT_HDMI_ARC;
+    /** @hide
+     * The audio output device code for S/PDIF digital connection.
+     */
+    public static final int DEVICE_OUT_SPDIF = AudioSystem.DEVICE_OUT_SPDIF;
+    /** @hide
+     * The audio output device code for built-in FM transmitter.
+     */
+    public static final int DEVICE_OUT_FM = AudioSystem.DEVICE_OUT_FM;
+    /** @hide
+     * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
      */
     public static final int DEVICE_OUT_DEFAULT = AudioSystem.DEVICE_OUT_DEFAULT;
+
+    /** @hide
+     * The audio input device code for default built-in microphone
+     */
+    public static final int DEVICE_IN_BUILTIN_MIC = AudioSystem.DEVICE_IN_BUILTIN_MIC;
+    /** @hide
+     * The audio input device code for a Bluetooth SCO headset
+     */
+    public static final int DEVICE_IN_BLUETOOTH_SCO_HEADSET =
+                                    AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET;
+    /** @hide
+     * The audio input device code for wired headset microphone
+     */
+    public static final int DEVICE_IN_WIRED_HEADSET =
+                                    AudioSystem.DEVICE_IN_WIRED_HEADSET;
+    /** @hide
+     * The audio input device code for HDMI
+     */
+    public static final int DEVICE_IN_HDMI =
+                                    AudioSystem.DEVICE_IN_HDMI;
+    /** @hide
+     * The audio input device code for telephony voice RX path
+     */
+    public static final int DEVICE_IN_TELEPHONY_RX =
+                                    AudioSystem.DEVICE_IN_TELEPHONY_RX;
+    /** @hide
+     * The audio input device code for built-in microphone pointing to the back
+     */
+    public static final int DEVICE_IN_BACK_MIC =
+                                    AudioSystem.DEVICE_IN_BACK_MIC;
+    /** @hide
+     * The audio input device code for analog from a docking station
+     */
+    public static final int DEVICE_IN_ANLG_DOCK_HEADSET =
+                                    AudioSystem.DEVICE_IN_ANLG_DOCK_HEADSET;
+    /** @hide
+     * The audio input device code for digital from a docking station
+     */
+    public static final int DEVICE_IN_DGTL_DOCK_HEADSET =
+                                    AudioSystem.DEVICE_IN_DGTL_DOCK_HEADSET;
+    /** @hide
+     * The audio input device code for a USB audio accessory. The accessory is in USB host
+     * mode and the Android device in USB device mode
+     */
+    public static final int DEVICE_IN_USB_ACCESSORY =
+                                    AudioSystem.DEVICE_IN_USB_ACCESSORY;
+    /** @hide
+     * The audio input device code for a USB audio device. The device is in USB device
+     * mode and the Android device in USB host mode
+     */
+    public static final int DEVICE_IN_USB_DEVICE =
+                                    AudioSystem.DEVICE_IN_USB_DEVICE;
+    /** @hide
+     * The audio input device code for a FM radio tuner
+     */
+    public static final int DEVICE_IN_FM_TUNER = AudioSystem.DEVICE_IN_FM_TUNER;
+    /** @hide
+     * The audio input device code for a TV tuner
+     */
+    public static final int DEVICE_IN_TV_TUNER = AudioSystem.DEVICE_IN_TV_TUNER;
+    /** @hide
+     * The audio input device code for an analog jack with line impedance detected
+     */
+    public static final int DEVICE_IN_LINE = AudioSystem.DEVICE_IN_LINE;
+    /** @hide
+     * The audio input device code for a S/PDIF digital connection
+     */
+    public static final int DEVICE_IN_SPDIF = AudioSystem.DEVICE_IN_SPDIF;
+
+    /**
+     * Return true if the device code corresponds to an output device.
+     * @hide
+     */
+    public static boolean isOutputDevice(int device)
+    {
+        return (device & AudioSystem.DEVICE_BIT_IN) == 0;
+    }
+
+    /**
+     * Return true if the device code corresponds to an input device.
+     * @hide
+     */
+    public static boolean isInputDevice(int device)
+    {
+        return (device & AudioSystem.DEVICE_BIT_IN) == AudioSystem.DEVICE_BIT_IN;
+    }
+
 
     /**
      * Return the enabled devices for the specified output stream type.
@@ -2635,9 +2766,17 @@ public class AudioManager {
      *            {@link #DEVICE_OUT_BLUETOOTH_A2DP},
      *            {@link #DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES},
      *            {@link #DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER},
-     *            {@link #DEVICE_OUT_AUX_DIGITAL},
+     *            {@link #DEVICE_OUT_HDMI},
      *            {@link #DEVICE_OUT_ANLG_DOCK_HEADSET},
      *            {@link #DEVICE_OUT_DGTL_DOCK_HEADSET}.
+     *            {@link #DEVICE_OUT_USB_ACCESSORY}.
+     *            {@link #DEVICE_OUT_USB_DEVICE}.
+     *            {@link #DEVICE_OUT_REMOTE_SUBMIX}.
+     *            {@link #DEVICE_OUT_TELEPHONY_TX}.
+     *            {@link #DEVICE_OUT_LINE}.
+     *            {@link #DEVICE_OUT_HDMI_ARC}.
+     *            {@link #DEVICE_OUT_SPDIF}.
+     *            {@link #DEVICE_OUT_FM}.
      *            {@link #DEVICE_OUT_DEFAULT} is not used here.
      *
      * The implementation may support additional device codes beyond those listed, so
