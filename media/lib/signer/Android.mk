@@ -25,7 +25,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
             $(call all-java-files-under, java)
 
-include $(BUILD_STATIC_JAVA_LIBRARY)
+include $(BUILD_JAVA_LIBRARY)
 
 
 # ====  com.android.mediadrm.signer.xml lib def  ========================
