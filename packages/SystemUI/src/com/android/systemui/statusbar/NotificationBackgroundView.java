@@ -31,20 +31,10 @@ public class NotificationBackgroundView extends View {
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
-    private boolean mActualHeightInitialized;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (!mActualHeightInitialized && mActualHeight == 0) {
-            mActualHeight = getHeight();
-        }
-        mActualHeightInitialized = true;
     }
 
     @Override
