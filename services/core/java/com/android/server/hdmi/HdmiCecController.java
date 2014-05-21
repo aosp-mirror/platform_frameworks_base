@@ -442,9 +442,9 @@ final class HdmiCecController {
 
     }
 
-    void sendCommand(HdmiCecMessage cecMessage) {
+    boolean sendCommand(HdmiCecMessage cecMessage) {
         Message message = mIoHandler.obtainMessage(MSG_SEND_CEC_COMMAND, cecMessage);
-        mIoHandler.sendMessage(message);
+        return mIoHandler.sendMessage(message);
     }
 
     /**
@@ -465,7 +465,9 @@ final class HdmiCecController {
      * Called by native when a hotplug event issues.
      */
     private void handleHotplug(boolean connected) {
-        // TODO: Delegate event to main message handler.
+        // TODO: once add port number to cec HAL interface, pass port number
+        // to the service.
+        mService.onHotplug(0, connected);
     }
 
     private static native long nativeInit(HdmiCecController handler);
