@@ -2940,7 +2940,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return 0;
         }
         enforceCrossUserPermission(userHandle);
-        enforceNotManagedProfile(userHandle, "list disabled keyguard features");
         synchronized (this) {
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
@@ -3170,7 +3169,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enforceNotManagedProfile(int userHandle, String message) {
         if(isManagedProfile(userHandle)) {
-            throw new SecurityException("You can not " + message + " from a managed profile. ");
+            throw new SecurityException("You can not " + message + " for a managed profile. ");
         }
     }
 
