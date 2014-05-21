@@ -592,7 +592,7 @@ void FontRenderer::setFont(const SkPaint* paint, const mat4& matrix) {
 }
 
 FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius, const float* positions) {
+        uint32_t startIndex, uint32_t len, int numGlyphs, float radius, const float* positions) {
     checkInit();
 
     DropShadow image;
@@ -613,8 +613,9 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     Rect bounds;
     mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds, positions);
 
-    uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
-    uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
+    uint32_t intRadius = Blur::convertRadiusToInt(radius);
+    uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * intRadius;
+    uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * intRadius;
 
     uint32_t maxSize = Caches::getInstance().maxTextureSize;
     if (paddedWidth > maxSize || paddedHeight > maxSize) {
@@ -635,8 +636,8 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
 
     memset(dataBuffer, 0, size);
 
-    int penX = radius - bounds.left;
-    int penY = radius - bounds.bottom;
+    int penX = intRadius - bounds.left;
+    int penY = intRadius - bounds.bottom;
 
     if ((bounds.right > bounds.left) && (bounds.top > bounds.bottom)) {
         // text has non-whitespace, so draw and blur to create the shadow
@@ -727,9 +728,10 @@ void FontRenderer::removeFont(const Font* font) {
     }
 }
 
-void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius) {
+void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
+    uint32_t intRadius = Blur::convertRadiusToInt(radius);
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
-    if (width * height * radius >= RS_MIN_INPUT_CUTOFF) {
+    if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
         if (mRs == 0) {
@@ -768,12 +770,12 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     }
 #endif
 
-    float *gaussian = new float[2 * radius + 1];
-    Blur::generateGaussianWeights(gaussian, radius);
+    float *gaussian = new float[2 * intRadius + 1];
+    Blur::generateGaussianWeights(gaussian, intRadius);
 
     uint8_t* scratch = new uint8_t[width * height];
-    Blur::horizontal(gaussian, radius, *image, scratch, width, height);
-    Blur::vertical(gaussian, radius, scratch, *image, width, height);
+    Blur::horizontal(gaussian, intRadius, *image, scratch, width, height);
+    Blur::vertical(gaussian, intRadius, scratch, *image, width, height);
 
     delete[] gaussian;
     delete[] scratch;
