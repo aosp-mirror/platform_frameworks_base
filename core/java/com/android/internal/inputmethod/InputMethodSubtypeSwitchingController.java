@@ -16,9 +16,6 @@
 
 package com.android.internal.inputmethod;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
@@ -26,7 +23,9 @@ import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import java.util.ArrayDeque;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,23 +41,7 @@ import java.util.TreeMap;
 public class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();
     private static final boolean DEBUG = false;
-    // TODO: Turn on this flag and add CTS when the platform starts expecting that all IMEs return
-    // true for supportsSwitchingToNextInputMethod().
-    private static final boolean REQUIRE_SWITCHING_SUPPORT = false;
-    private static final int MAX_HISTORY_SIZE = 4;
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
-
-    private static class SubtypeParams {
-        public final InputMethodInfo mImi;
-        public final InputMethodSubtype mSubtype;
-        public final long mTime;
-
-        public SubtypeParams(InputMethodInfo imi, InputMethodSubtype subtype) {
-            mImi = imi;
-            mSubtype = subtype;
-            mTime = System.currentTimeMillis();
-        }
-    }
 
     public static class ImeSubtypeListItem implements Comparable<ImeSubtypeListItem> {
         public final CharSequence mImeName;
@@ -213,7 +196,6 @@ public class InputMethodSubtypeSwitchingController {
         }
     }
 
-    private final ArrayDeque<SubtypeParams> mTypedSubtypeHistory = new ArrayDeque<SubtypeParams>();
     private final Object mLock = new Object();
     private final InputMethodSettings mSettings;
     private InputMethodAndSubtypeList mSubtypeList;
@@ -269,25 +251,7 @@ public class InputMethodSubtypeSwitchingController {
 
     // TODO: write unit tests for this method and the logic that determines the next subtype
     public void onCommitText(InputMethodInfo imi, InputMethodSubtype subtype) {
-        synchronized (mTypedSubtypeHistory) {
-            if (subtype == null) {
-                Slog.w(TAG, "Invalid InputMethodSubtype: " + imi.getId() + ", " + subtype);
-                return;
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "onCommitText: " + imi.getId() + ", " + subtype);
-            }
-            if (REQUIRE_SWITCHING_SUPPORT) {
-                if (!imi.supportsSwitchingToNextInputMethod()) {
-                    Slog.w(TAG, imi.getId() + " doesn't support switching to next input method.");
-                    return;
-                }
-            }
-            if (mTypedSubtypeHistory.size() >= MAX_HISTORY_SIZE) {
-                mTypedSubtypeHistory.poll();
-            }
-            mTypedSubtypeHistory.addFirst(new SubtypeParams(imi, subtype));
-        }
+        // TODO: Implement this.
     }
 
     public void resetCircularListLocked(Context context) {
