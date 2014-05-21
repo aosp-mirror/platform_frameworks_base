@@ -40,7 +40,7 @@
 
     <ImageView
         android:id="@android:id/button1"
-        android:src="@drawable/ic_qs_plus"
+        android:src="@drawable/ic_qs_minus"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"
@@ -50,7 +50,7 @@
 
     <ImageView
         android:id="@android:id/button2"
-        android:src="@drawable/ic_qs_minus"
+        android:src="@drawable/ic_qs_plus"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"
