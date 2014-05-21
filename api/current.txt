@@ -17099,11 +17099,9 @@ package android.net.wifi {
   }
 
   public static final class WifiEnterpriseConfig.Eap {
-    field public static final int AKA = 5; // 0x5
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3
-    field public static final int SIM = 4; // 0x4
     field public static final int TLS = 1; // 0x1
     field public static final int TTLS = 2; // 0x2
   }
@@ -17523,14 +17521,17 @@ package android.net.wifi.p2p.nsd {
 package android.net.wifi.passpoint {
 
   public class WifiPasspointCredential implements android.os.Parcelable {
-    ctor public WifiPasspointCredential(java.lang.String, android.net.wifi.WifiEnterpriseConfig);
+    ctor public WifiPasspointCredential(java.lang.String, java.lang.String, android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
+    method public java.lang.String getCaRootCertPath();
     method public java.lang.String getClientCertPath();
     method public int getEapMethod();
     method public java.lang.String getFqdn();
-    method public java.lang.String getImsi();
     method public java.lang.String getRealm();
     method public java.lang.String getUserName();
+    method public void setCredential(android.net.wifi.WifiEnterpriseConfig);
+    method public void setFqdn(java.lang.String);
+    method public void setRealm(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
   }
 

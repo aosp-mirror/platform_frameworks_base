@@ -443,10 +443,9 @@ public class WifiPasspointManager {
         return null;
     }
 
-    /* TODO: add credential APIs */
-
     /**
-     * Give a list of all saved Passpoint credentials.
+     * Get a list of saved Passpoint credentials. Only those credentials owned
+     * by the caller will be returned.
      *
      * @return The list of credentials
      */

@@ -25,9 +25,13 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * A class representing a Wi-Fi Passpoint credential.
+ */
 public class WifiPasspointCredential implements Parcelable {
 
     private final static String TAG = "PasspointCredential";
+    private String mWifiTreePath;
     private String mWifiSPFQDN;
     private String mCredentialName;
     private String mUpdateIdentifier;
@@ -88,10 +92,11 @@ public class WifiPasspointCredential implements Parcelable {
     /**
      * Constructor
      * @param realm Realm of the passpoint credential
-     * @param config Credential information, must be either EAP-TLS or EAP-TTLS.
+     * @param fqdn Fully qualified domain name (FQDN) of the credential
+     * @param config Credential information, must be either EAP-TLS or EAP-TTLS
      * @see WifiEnterpriseConfig
      */
-    public WifiPasspointCredential(String realm, WifiEnterpriseConfig config) {
+    public WifiPasspointCredential(String realm, String fqdn, WifiEnterpriseConfig config) {
         mRealm = realm;
         switch (config.getEapMethod()) {
             case WifiEnterpriseConfig.Eap.TLS:
@@ -325,10 +330,7 @@ public class WifiPasspointCredential implements Parcelable {
         return mPasswd;
     }
 
-    /**
-     * Get the IMSI of this Passpoint credential, for EAP-SIM / EAP-AKA only.
-     * @return IMSI
-     */
+    /** @hide */
     public String getImsi() {
         return mImsi;
     }
@@ -343,8 +345,11 @@ public class WifiPasspointCredential implements Parcelable {
         return mMnc;
     }
 
-    /** @hide */
-    public String getCaRootCert() {
+    /**
+     * Get the CA root certificate path of this Passpoint credential.
+     * @return CA root certificate path
+     */
+    public String getCaRootCertPath() {
         return mCaRootCert;
     }
 
@@ -357,11 +362,27 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /**
-     * Get the realm of this Passpoint credential, for all EAP methods.
+     * Set credential information of this Passpoint credential.
+     * @param config Credential information, must be either EAP-TLS or EAP-TTLS
+     */
+    public void setCredential(WifiEnterpriseConfig config) {
+        // TODO
+    }
+
+    /**
+     * Get the realm of this Passpoint credential.
      * @return Realm
      */
     public String getRealm() {
         return mRealm;
+    }
+
+    /**
+     * Set the ream of this Passpoint credential.
+     * @param realm Realm
+     */
+    public void setRealm(String realm) {
+        mRealm = realm;
     }
 
     /** @hide */
@@ -374,13 +395,21 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /**
-     * Get the fully qualified domain name (FQDN) of this Passpoint credential,
-     * for all EAP methods.
+     * Get the fully qualified domain name (FQDN) of this Passpoint credential.
      * @return FQDN
      */
     public String getFqdn() {
         return mHomeSpFqdn;
     }
+
+    /**
+     * Set the fully qualified domain name (FQDN) of this Passpoint credential.
+     * @param fqdn FQDN
+     */
+    public void setFqdn(String fqdn) {
+        mHomeSpFqdn = fqdn;
+    }
+
 
     /** @hide */
     public String getOtherhomepartners() {
