@@ -4194,7 +4194,11 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
             int requestCode) {
-        startActivityFromFragment(fragment, intent, requestCode, null);
+        Bundle options = null;
+        if (mWindow.hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+            options = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+        }
+        startActivityFromFragment(fragment, intent, requestCode, options);
     }
 
     /**
@@ -4219,6 +4223,9 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
             int requestCode, @Nullable Bundle options) {
+        if (options != null) {
+            mActivityTransitionState.startExitOutTransition(this, options);
+        }
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, fragment,
