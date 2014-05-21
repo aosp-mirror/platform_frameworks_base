@@ -17,8 +17,8 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -60,9 +60,10 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         if (mController == null) return;
         final boolean rotationLocked = mController.isRotationLocked();
         state.visible = mController.isRotationLockAffordanceVisible();
+        final Resources res = mContext.getResources();
         if (state.value != rotationLocked) {
             state.value = rotationLocked;
-            final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(rotationLocked
+            final AnimationDrawable d = (AnimationDrawable) res.getDrawable(rotationLocked
                     ? R.drawable.ic_qs_rotation_locked
                     : R.drawable.ic_qs_rotation_unlocked);
             state.icon = d;
@@ -82,12 +83,12 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                     : R.string.quick_settings_rotation_locked_label;
             state.label = mContext.getString(label);
             if (state.icon == null) {
-                state.icon = mContext.getDrawable(R.drawable.ic_qs_rotation_15);
+                state.icon = res.getDrawable(R.drawable.ic_qs_rotation_15);
             }
         } else {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
             if (state.icon == null) {
-                state.icon = mContext.getDrawable(R.drawable.ic_qs_rotation_01);
+                state.icon = res.getDrawable(R.drawable.ic_qs_rotation_01);
             }
         }
     }

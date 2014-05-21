@@ -23,7 +23,7 @@
         android:layout_width="32dp"
         android:layout_height="64dp"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/quick_settings_panel_padding"
+        android:layout_marginStart="@dimen/qs_panel_padding"
         android:gravity="center" />
 
     <TextView
@@ -45,7 +45,7 @@
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="48dp"
-        android:padding="@dimen/quick_settings_panel_padding"
+        android:padding="@dimen/qs_panel_padding"
         android:paddingRight="0px" />
 
     <ImageView
@@ -54,6 +54,6 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentEnd="true"
-        android:padding="@dimen/quick_settings_panel_padding" />
+        android:padding="@dimen/qs_panel_padding" />
 
 </RelativeLayout>

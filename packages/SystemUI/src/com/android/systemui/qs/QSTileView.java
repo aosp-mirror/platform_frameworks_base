@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -40,23 +41,26 @@ import com.android.systemui.qs.QSTile.State;
 public class QSTileView extends ViewGroup {
     private static final Typeface CONDENSED = Typeface.create("sans-serif-condensed",
             Typeface.NORMAL);
-    private static final int VERTICAL_PADDING_FACTOR = 8;  // internal padding 1/8 the cell height
 
     protected final Context mContext;
     private final View mIcon;
     private final View mDivider;
     private final H mHandler = new H();
+    private final int mIconSizePx;
 
+    private int mTilePaddingPx;
     private TextView mLabel;
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
+    private RippleDrawable mRipple;
 
     public QSTileView(Context context) {
         super(context);
 
         mContext = context;
         final Resources res = context.getResources();
+        mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
         recreateLabel();
         setClipChildren(false);
 
@@ -64,13 +68,13 @@ public class QSTileView extends ViewGroup {
         addView(mIcon);
 
         mDivider = new View(mContext);
-        mDivider.setBackgroundColor(res.getColor(R.color.quick_settings_tile_divider));
-        final int dh = res.getDimensionPixelSize(R.dimen.quick_settings_tile_divider_height);
+        mDivider.setBackgroundColor(res.getColor(R.color.qs_tile_divider));
+        final int dh = res.getDimensionPixelSize(R.dimen.qs_tile_divider_height);
         mDivider.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, dh));
         addView(mDivider);
 
         setClickable(true);
-        setBackground(getSelectableBackground());
+        setBackground(getTileBackground());
     }
 
     private void recreateLabel() {
@@ -83,11 +87,16 @@ public class QSTileView extends ViewGroup {
         mLabel = new TextView(mDual ? new ContextThemeWrapper(mContext, R.style.QSBorderless_Tiny)
                 : mContext);
         mLabel.setId(android.R.id.title);
-        mLabel.setTextColor(res.getColor(R.color.quick_settings_tile_text));
-        mLabel.setGravity(Gravity.CENTER);
+        mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+        mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+        mLabel.setMinLines(2);
+        mTilePaddingPx = res.getDimensionPixelSize(
+                mDual ? R.dimen.qs_dual_tile_padding : R.dimen.qs_tile_padding);
+        final int bottomPadding = mDual ? 0 : mTilePaddingPx;
+        mLabel.setPadding(mTilePaddingPx, mTilePaddingPx, mTilePaddingPx, bottomPadding);
         mLabel.setTypeface(CONDENSED);
         mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                res.getDimensionPixelSize(R.dimen.quick_settings_tile_text_size));
+                res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
         if (labelText != null) {
             mLabel.setText(labelText);
         }
@@ -124,11 +133,14 @@ public class QSTileView extends ViewGroup {
         return icon;
     }
 
-    private Drawable getSelectableBackground() {
+    private Drawable getTileBackground() {
         final int[] attrs = new int[] { android.R.attr.selectableItemBackground};
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
         ta.recycle();
+        if (d instanceof RippleDrawable) {
+            mRipple = (RippleDrawable) d;
+        }
         return d;
     }
 
@@ -136,14 +148,11 @@ public class QSTileView extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int h = MeasureSpec.getSize(heightMeasureSpec);
-        final int p = h / VERTICAL_PADDING_FACTOR;
-        final int iconSpec = exactly((int)mLabel.getTextSize() * 2);
+        final int iconSpec = exactly(mIconSizePx);
         mIcon.measure(iconSpec, iconSpec);
         mLabel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
         if (mDual) {
             mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
-        } else {
-            mLabel.measure(widthMeasureSpec, exactly(mLabel.getMeasuredHeight() + p * 2));
         }
         setMeasuredDimension(w, h);
     }
@@ -156,16 +165,25 @@ public class QSTileView extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
         final int h = getMeasuredHeight();
-        final int p = h / VERTICAL_PADDING_FACTOR;
-        final int contentHeight = p + mIcon.getMeasuredHeight() + mLabel.getMeasuredHeight()
-                + (mDual ? (p + mDivider.getMeasuredHeight()) : 0);
 
-        int top = (h - contentHeight) / 2 + p;
+        final int contentHeight = mTilePaddingPx + mIcon.getMeasuredHeight()
+                + mLabel.getMeasuredHeight()
+                + (mDual ? (mTilePaddingPx + mDivider.getMeasuredHeight()) : 0);
+
+        int top = Math.max(0, (h - contentHeight) / 2);
+        top += mTilePaddingPx;
         final int iconLeft = (w - mIcon.getMeasuredWidth()) / 2;
         layout(mIcon, iconLeft, top);
+        if (mRipple != null) {
+            // center the touch feedback on the center of the icon, and dial it down a bit
+            final int cx = w / 2;
+            final int cy = mIcon.getTop() + mIcon.getHeight() / 2;
+            final int rad = (int)(mIcon.getHeight() * 1.5);
+            mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
+        }
         top = mIcon.getBottom();
         if (mDual) {
-            top += p;
+            top += mTilePaddingPx;
             layout(mDivider, 0, top);
             top = mDivider.getBottom();
         }

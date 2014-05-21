@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
 
 import com.android.systemui.R;
@@ -64,7 +65,8 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         state.visible = true;
         if (state.value != locationEnabled) {
             state.value = locationEnabled;
-            final AnimationDrawable d = (AnimationDrawable) mContext.getDrawable(locationEnabled
+            final Resources res = mContext.getResources();
+            final AnimationDrawable d = (AnimationDrawable) res.getDrawable(locationEnabled
                     ? R.drawable.ic_qs_location_on
                     : R.drawable.ic_qs_location_off);
             state.icon = d;
