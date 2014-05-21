@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
+import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
@@ -52,7 +53,9 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +90,7 @@ public class TrustManagerService extends SystemService {
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
     private final DevicePolicyReceiver mDevicePolicyReceiver = new DevicePolicyReceiver();
     private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
+    /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
 
     private UserManager mUserManager;
@@ -366,6 +370,61 @@ public class TrustManagerService extends SystemService {
         private void enforceListenerPermission() {
             mContext.enforceCallingPermission(Manifest.permission.TRUST_LISTENER,
                     "register trust listener");
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, final PrintWriter fout, String[] args) {
+            mContext.enforceCallingPermission(Manifest.permission.DUMP,
+                    "dumping TrustManagerService");
+            final UserInfo currentUser;
+            final List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
+            try {
+                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+            mHandler.runWithScissors(new Runnable() {
+                @Override
+                public void run() {
+                    fout.println("Trust manager state:");
+                    for (UserInfo user : userInfos) {
+                        dumpUser(fout, user, user.id == currentUser.id);
+                    }
+                }
+            }, 1500);
+        }
+
+        private void dumpUser(PrintWriter fout, UserInfo user, boolean isCurrent) {
+            fout.printf(" User \"%s\" (id=%d, flags=%#x)",
+                    user.name, user.id, user.flags);
+            if (isCurrent) {
+                fout.print(" (current)");
+            }
+            fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
+            fout.println();
+            fout.println("   Enabled agents:");
+            boolean duplicateSimpleNames = false;
+            ArraySet<String> simpleNames = new ArraySet<String>();
+            for (AgentInfo info : mActiveAgents) {
+                if (info.userId != user.id) { continue; }
+                boolean trusted = info.agent.isTrusted();
+                fout.print("    "); fout.println(info.component.flattenToShortString());
+                fout.print("     connected=" + dumpBool(info.agent.isConnected()));
+                fout.println(", trusted=" + dumpBool(trusted));
+                if (trusted) {
+                    fout.println("      message=\"" + info.agent.getMessage() + "\"");
+                }
+                if (!simpleNames.add(TrustArchive.getSimpleName(info.component))) {
+                    duplicateSimpleNames = true;
+                }
+            }
+            fout.println("   Events:");
+            mArchive.dump(fout, 50, user.id, "    " /* linePrefix */, duplicateSimpleNames);
+            fout.println();
+        }
+
+        private String dumpBool(boolean b) {
+            return b ? "1" : "0";
         }
     };
 
