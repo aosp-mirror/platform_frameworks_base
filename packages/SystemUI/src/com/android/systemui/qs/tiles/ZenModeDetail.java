@@ -49,7 +49,7 @@ import java.util.HashSet;
 public class ZenModeDetail extends RelativeLayout {
     private static final String TAG = "ZenModeDetail";
     private static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
-    private static final int[] MINUTES = new int[] { 15, 30, 45, 60, 120, 180, 240 };
+    private static final int[] MINUTES = new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
 
     private final H mHandler = new H();
 
