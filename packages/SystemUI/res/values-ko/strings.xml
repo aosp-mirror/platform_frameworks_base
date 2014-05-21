@@ -202,9 +202,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"화면 전송"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"밝기"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
-    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"색상 반전 모드"</string>
-    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"향상된 대비 모드"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"색상 반전"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"색상 보정 모드"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"설정 더보기"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"테더링"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"핫스팟"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"최근"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"검색"</string>
@@ -221,6 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d개 더보기"</item>
   </plurals>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
 </resources>
