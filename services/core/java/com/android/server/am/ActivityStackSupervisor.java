@@ -2312,7 +2312,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         checkReadyForSleepLocked();
-        setLockTaskModeLocked(null);
     }
 
     boolean shutdownLocked(int timeout) {
