@@ -174,12 +174,12 @@ public class AccessPointParserHelper {
         public void endElement(String uri, String localName, String tagName) throws SAXException {
             if (tagName.equalsIgnoreCase("accesspoint")) {
                 if (mLinkProperties != null) {
-                    config.ipAssignment = IpAssignment.STATIC;
-                    config.linkProperties = mLinkProperties;
+                    config.setIpAssignment(IpAssignment.STATIC);
+                    config.setLinkProperties(mLinkProperties);
                 } else {
-                    config.ipAssignment = IpAssignment.DHCP;
+                    config.setIpAssignment(IpAssignment.DHCP);
                 }
-                config.proxySettings = ProxySettings.NONE;
+                config.setProxySettings(ProxySettings.NONE);
                 networks.add(config);
                 mLinkProperties = null;
             }

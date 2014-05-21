@@ -233,8 +233,8 @@ public class WifiStressTest
         } else {
             config.preSharedKey = '"' + mPassword + '"';
         }
-        config.ipAssignment = IpAssignment.DHCP;
-        config.proxySettings = ProxySettings.NONE;
+        config.setIpAssignment(IpAssignment.DHCP);
+        config.setProxySettings(ProxySettings.NONE);
 
         assertTrue("Failed to connect to Wi-Fi network: " + mSsid,
                 connectToWifiWithConfiguration(config));
