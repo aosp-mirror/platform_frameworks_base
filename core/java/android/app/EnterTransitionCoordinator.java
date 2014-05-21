@@ -48,20 +48,23 @@ import java.util.Collection;
 class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "EnterTransitionCoordinator";
 
-    private static final long MAX_WAIT_MS = 1500;
+    private static final long MAX_WAIT_MS = 1000;
 
     private boolean mSharedElementTransitionStarted;
     private Activity mActivity;
     private boolean mHasStopped;
     private Handler mHandler;
     private boolean mIsCanceled;
+    private boolean mIsReturning;
+    private ObjectAnimator mBackgroundAnimator;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames,
             ArrayList<String> acceptedNames, ArrayList<String> mappedNames) {
         super(activity.getWindow(), sharedElementNames, acceptedNames, mappedNames,
-                getListener(activity, acceptedNames), acceptedNames != null);
+                getListener(activity, acceptedNames));
         mActivity = activity;
+        mIsReturning = acceptedNames != null;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -150,6 +153,23 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
+    @Override
+    protected Transition getViewsTransition() {
+        if (mIsReturning) {
+            return getWindow().getExitTransition();
+        } else {
+            return getWindow().getEnterTransition();
+        }
+    }
+
+    protected Transition getSharedElementTransition() {
+        if (mIsReturning) {
+            return getWindow().getSharedElementExitTransition();
+        } else {
+            return getWindow().getSharedElementEnterTransition();
+        }
+    }
+
     protected void onTakeSharedElements(Bundle sharedElementState) {
         setEpicenter();
         // Remove rejected shared elements
@@ -212,15 +232,15 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             Drawable background = getDecor().getBackground();
             if (background != null) {
                 background = background.mutate();
-                ObjectAnimator animator = ObjectAnimator.ofInt(background, "alpha", 255);
-                animator.setDuration(FADE_BACKGROUND_DURATION_MS);
-                animator.addListener(new AnimatorListenerAdapter() {
+                mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 255);
+                mBackgroundAnimator.setDuration(FADE_BACKGROUND_DURATION_MS);
+                mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         makeOpaque();
                     }
                 });
-                animator.start();
+                mBackgroundAnimator.start();
             } else if (transition != null) {
                 transition.addListener(new Transition.TransitionListenerAdapter() {
                     @Override
@@ -240,6 +260,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         mActivity = null;
         mIsCanceled = true;
         mResultReceiver = null;
+        if (mBackgroundAnimator != null) {
+            mBackgroundAnimator.cancel();
+            mBackgroundAnimator = null;
+        }
     }
 
     private void makeOpaque() {
@@ -397,6 +421,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             return null;
         }
         Bundle bundle = transitionArgs.getBundle(name);
+        if (bundle == null) {
+            return null;
+        }
         int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
         if (scaleTypeInt < 0) {
             return null;

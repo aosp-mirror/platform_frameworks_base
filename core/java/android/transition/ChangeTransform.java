@@ -69,7 +69,7 @@ public class ChangeTransform extends Transition {
         public void set(View view, float[] values) {
             for (int i = 0; i < values.length; i++) {
                 float value = values[i];
-                if (value != Float.NaN) {
+                if (!Float.isNaN(value)) {
                     sChangedProperties[i].setValue(view, value);
                 }
             }
