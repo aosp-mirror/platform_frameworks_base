@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.net.WebAddress;
+import android.webkit.ValueCallback;
 
 /**
  * Manages the cookies used by an application's {@link WebView} instances.
@@ -72,11 +73,34 @@ public class CookieManager {
      * path and name will be replaced with the new cookie. The cookie being set
      * will be ignored if it is expired.
      *
-     * @param url the URL for which the cookie is set
+     * @param url the URL for which the cookie is to be set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'
      *              HTTP response header
      */
     public void setCookie(String url, String value) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Sets a cookie for the given URL. Any existing cookie with the same host,
+     * path and name will be replaced with the new cookie. The cookie being set
+     * will be ignored if it is expired.
+     * <p>
+     * This method is asynchronous.
+     * If a {@link ValueCallback} is provided,
+     * {@link ValueCallback#onReceiveValue(T) onReceiveValue()} will be called on the current
+     * thread's {@link android.os.Looper} once the operation is complete.
+     * The value provided to the callback indicates whether the cookie was set successfully.
+     * You can pass {@code null} as the callback if you don't need to know when the operation
+     * completes or whether it succeeded, and in this case it is safe to call the method from a
+     * thread without a Looper.
+     *
+     * @param url the URL for which the cookie is to be set
+     * @param value the cookie as a string, using the format of the 'Set-Cookie'
+     *              HTTP response header
+     * @param callback a callback to be executed when the cookie has been set
+     */
+    public void setCookie(String url, String value, ValueCallback<Boolean> callback) {
         throw new MustOverrideException();
     }
 
@@ -120,15 +144,53 @@ public class CookieManager {
     /**
      * Removes all session cookies, which are cookies without an expiration
      * date.
+     * @deprecated use {@link #removeSessionCookies(ValueCallback)} instead.
      */
     public void removeSessionCookie() {
         throw new MustOverrideException();
     }
 
     /**
-     * Removes all cookies.
+     * Removes all session cookies, which are cookies without an expiration
+     * date.
+     * <p>
+     * This method is asynchronous.
+     * If a {@link ValueCallback} is provided,
+     * {@link ValueCallback#onReceiveValue(T) onReceiveValue()} will be called on the current
+     * thread's {@link android.os.Looper} once the operation is complete.
+     * The value provided to the callback indicates whether any cookies were removed.
+     * You can pass {@code null} as the callback if you don't need to know when the operation
+     * completes or whether any cookie were removed, and in this case it is safe to call the
+     * method from a thread without a Looper.
+     * @param callback a callback which is executed when the session cookies have been removed
      */
+    public void removeSessionCookies(ValueCallback<Boolean> callback) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Removes all cookies.
+     * @deprecated Use {@link #removeAllCookies(ValueCallback)} instead.
+     */
+    @Deprecated
     public void removeAllCookie() {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Removes all cookies.
+     * <p>
+     * This method is asynchronous.
+     * If a {@link ValueCallback} is provided,
+     * {@link ValueCallback#onReceiveValue(T) onReceiveValue()} will be called on the current
+     * thread's {@link android.os.Looper} once the operation is complete.
+     * The value provided to the callback indicates whether any cookies were removed.
+     * You can pass {@code null} as the callback if you don't need to know when the operation
+     * completes or whether any cookies were removed, and in this case it is safe to call the
+     * method from a thread without a Looper.
+     * @param callback a callback which is executed when the cookies have been removed
+     */
+    public void removeAllCookies(ValueCallback<Boolean> callback) {
         throw new MustOverrideException();
     }
 
@@ -153,7 +215,9 @@ public class CookieManager {
 
     /**
      * Removes all expired cookies.
+     * @deprecated The WebView handles removing expired cookies automatically.
      */
+    @Deprecated
     public void removeExpiredCookie() {
         throw new MustOverrideException();
     }

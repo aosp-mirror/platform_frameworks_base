@@ -35041,12 +35041,15 @@ package android.webkit {
     method public java.lang.String getCookie(java.lang.String);
     method public static synchronized android.webkit.CookieManager getInstance();
     method public synchronized boolean hasCookies();
-    method public void removeAllCookie();
-    method public void removeExpiredCookie();
-    method public void removeSessionCookie();
+    method public deprecated void removeAllCookie();
+    method public void removeAllCookies(android.webkit.ValueCallback<java.lang.Boolean>);
+    method public deprecated void removeExpiredCookie();
+    method public deprecated void removeSessionCookie();
+    method public void removeSessionCookies(android.webkit.ValueCallback<java.lang.Boolean>);
     method public synchronized void setAcceptCookie(boolean);
     method public static void setAcceptFileSchemeCookies(boolean);
     method public void setCookie(java.lang.String, java.lang.String);
+    method public void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
   }
 
   public final class CookieSyncManager extends android.webkit.WebSyncManager {
