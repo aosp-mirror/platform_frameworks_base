@@ -115,10 +115,6 @@ Xnonavpage=true
   <hr>
 </div>
 
-<div class="figure">
-  <img src="{@docRoot}images/gp-edu-monetize.png">
-</div>
-
 <p>
   In-app purchase is currently not supported with Google Play for Education, so
   a student device will block any transactions. To avoid confusion, be sure to
