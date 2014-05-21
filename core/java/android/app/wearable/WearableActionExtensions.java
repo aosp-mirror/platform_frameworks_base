@@ -38,13 +38,13 @@ import android.os.Parcelable;
 public final class WearableActionExtensions implements Notification.Action.Builder.Extender,
         Parcelable {
     /** Notification action extra which contains wearable extensions */
-    static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
+    private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
     // Flags bitwise-ored to mFlags
-    static final int FLAG_AVAILABLE_OFFLINE = 1 << 0;
+    private static final int FLAG_AVAILABLE_OFFLINE = 1 << 0;
 
     // Default value for flags integer
-    static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
+    private static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
 
     private final int mFlags;
 
@@ -103,7 +103,8 @@ public final class WearableActionExtensions implements Notification.Action.Build
      * Builder for {@link WearableActionExtensions} objects, which adds wearable extensions to
      * notification actions. To extend an action, create an instance of this class, call the set
      * methods present, call {@link #build}, and finally apply the options to a
-     * {@link Notification.Builder} using its {@link android.app.Notification.Builder#apply} method.
+     * {@link Notification.Action.Builder} using its
+     * {@link android.app.Notification.Action.Builder#apply} method.
      */
     public static final class Builder {
         private int mFlags = DEFAULT_FLAGS;
@@ -159,4 +160,17 @@ public final class WearableActionExtensions implements Notification.Action.Build
             }
         }
     }
+
+    public static final Creator<WearableActionExtensions> CREATOR =
+            new Creator<WearableActionExtensions>() {
+        @Override
+        public WearableActionExtensions createFromParcel(Parcel in) {
+            return new WearableActionExtensions(in);
+        }
+
+        @Override
+        public WearableActionExtensions[] newArray(int size) {
+            return new WearableActionExtensions[size];
+        }
+    };
 }
