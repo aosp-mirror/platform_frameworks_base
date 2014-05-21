@@ -86,18 +86,12 @@ public final class WearableNotificationExtensions implements Notification.Builde
     public static final int SIZE_DEFAULT = 0;
 
     /**
-     * Size value for use with {@link Builder#setCustomSizePreset} to show this notification full
-     * screen.
-     */
-    public static final int SIZE_FULLSCREEN = 1 << 4;
-
-    /**
      * Size value for use with {@link Builder#setCustomSizePreset} to show this notification
      * with an extra small size.
      * <p>This value is only applicable for custom display notifications created using
      * {@link Builder#setDisplayIntent}.
      */
-    public static final int SIZE_XSMALL = 1 << 5;
+    public static final int SIZE_XSMALL = 1;
 
     /**
      * Size value for use with {@link Builder#setCustomSizePreset} to show this notification
@@ -105,7 +99,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
      * <p>This value is only applicable for custom display notifications created using
      * {@link Builder#setDisplayIntent}.
      */
-    public static final int SIZE_SMALL = 1 << 6;
+    public static final int SIZE_SMALL = 2;
 
     /**
      * Size value for use with {@link Builder#setCustomSizePreset} to show this notification
@@ -113,7 +107,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
      * <p>This value is only applicable for custom display notifications created using
      * {@link Builder#setDisplayIntent}.
      */
-    public static final int SIZE_MEDIUM = 1 << 7;
+    public static final int SIZE_MEDIUM = 3;
 
     /**
      * Size value for use with {@link Builder#setCustomSizePreset} to show this notification
@@ -121,7 +115,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
      * <p>This value is only applicable for custom display notifications created using
      * {@link Builder#setDisplayIntent}.
      */
-    public static final int SIZE_LARGE = 1 << 8;
+    public static final int SIZE_LARGE = 4;
 
     /** Notification extra which contains wearable extensions */
     static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
@@ -131,18 +125,9 @@ public final class WearableNotificationExtensions implements Notification.Builde
     static final int FLAG_HINT_HIDE_ICON = 1 << 1;
     static final int FLAG_HINT_SHOW_BACKGROUND_ONLY = 1 << 2;
     static final int FLAG_START_SCROLL_BOTTOM = 1 << 3;
-    static final int FLAG_SIZE_FULLSCREEN = SIZE_FULLSCREEN;
-    static final int FLAG_SIZE_XSMALL = SIZE_XSMALL;
-    static final int FLAG_SIZE_SMALL = SIZE_SMALL;
-    static final int FLAG_SIZE_MEDIUM = SIZE_MEDIUM;
-    static final int FLAG_SIZE_LARGE = SIZE_LARGE;
 
     // Default value for flags integer
     static final int DEFAULT_FLAGS = FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE;
-
-    // Mask that will match all mutually exclusive size flags
-    static final int SIZE_FLAGS_MASK = FLAG_SIZE_XSMALL | FLAG_SIZE_SMALL | FLAG_SIZE_MEDIUM
-            | FLAG_SIZE_LARGE | FLAG_SIZE_FULLSCREEN;
 
     private final Notification.Action[] mActions;
     private final int mFlags;
@@ -152,13 +137,14 @@ public final class WearableNotificationExtensions implements Notification.Builde
     private final int mContentIcon;
     private final int mContentIconGravity;
     private final int mContentActionIndex;
+    private final int mCustomSizePreset;
     private final int mCustomContentHeight;
     private final int mGravity;
 
     private WearableNotificationExtensions(Notification.Action[] actions, int flags,
             PendingIntent displayIntent, Notification[] pages, Bitmap background,
             int contentIcon, int contentIconGravity, int contentActionIndex,
-            int customContentHeight, int gravity) {
+            int customSizePreset, int customContentHeight, int gravity) {
         mActions = actions;
         mFlags = flags;
         mDisplayIntent = displayIntent;
@@ -167,6 +153,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
         mContentIcon = contentIcon;
         mContentIconGravity = contentIconGravity;
         mContentActionIndex = contentActionIndex;
+        mCustomSizePreset = customSizePreset;
         mCustomContentHeight = customContentHeight;
         mGravity = gravity;
     }
@@ -180,6 +167,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
         mContentIcon = in.readInt();
         mContentIconGravity = in.readInt();
         mContentActionIndex = in.readInt();
+        mCustomSizePreset = in.readInt();
         mCustomContentHeight = in.readInt();
         mGravity = in.readInt();
     }
@@ -315,7 +303,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
      * See also {@link Builder#setCustomContentHeight} and {@link Builder#setCustomSizePreset}.
      */
     public int getCustomSizePreset() {
-        return mFlags & SIZE_FLAGS_MASK;
+        return mCustomSizePreset;
     }
 
     /**
@@ -380,6 +368,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
         out.writeInt(mContentIcon);
         out.writeInt(mContentIconGravity);
         out.writeInt(mContentActionIndex);
+        out.writeInt(mCustomSizePreset);
         out.writeInt(mCustomContentHeight);
         out.writeInt(mGravity);
     }
@@ -416,6 +405,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
         private int mContentIconGravity = Gravity.END;
         private int mContentActionIndex = UNSET_ACTION_INDEX;
         private int mCustomContentHeight;
+        private int mCustomSizePreset = SIZE_DEFAULT;
         private int mGravity = Gravity.BOTTOM;
 
         /**
@@ -452,6 +442,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
             mContentIconGravity = other.mContentIconGravity;
             mContentActionIndex = other.mContentActionIndex;
             mCustomContentHeight = other.mCustomContentHeight;
+            mCustomSizePreset = other.mCustomSizePreset;
             mGravity = other.mGravity;
         }
 
@@ -618,8 +609,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
          * {@link #getCustomSizePreset}.
          */
         public Builder setCustomSizePreset(int sizePreset) {
-            mFlags &= ~SIZE_FLAGS_MASK;  // Clear existing size preset bits
-            mFlags |= sizePreset & SIZE_FLAGS_MASK;  // And merge in the new value with protection
+            mCustomSizePreset = sizePreset;
             return this;
         }
 
@@ -685,7 +675,7 @@ public final class WearableNotificationExtensions implements Notification.Builde
                     mActions.toArray(new Notification.Action[mActions.size()]), mFlags,
                     mDisplayIntent, mPages.toArray(new Notification[mPages.size()]),
                     mBackground, mContentIcon, mContentIconGravity, mContentActionIndex,
-                    mCustomContentHeight, mGravity);
+                    mCustomSizePreset, mCustomContentHeight, mGravity);
         }
 
         private void setFlag(int mask, boolean value) {

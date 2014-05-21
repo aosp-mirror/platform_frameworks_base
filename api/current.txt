@@ -5286,6 +5286,7 @@ package android.app.wearable {
     method public static android.app.wearable.WearableActionExtensions from(android.app.Notification.Action);
     method public boolean isAvailableOffline();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public static final class WearableActionExtensions.Builder {
@@ -5318,11 +5319,10 @@ package android.app.wearable {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int SIZE_DEFAULT = 0; // 0x0
-    field public static final int SIZE_FULLSCREEN = 16; // 0x10
-    field public static final int SIZE_LARGE = 256; // 0x100
-    field public static final int SIZE_MEDIUM = 128; // 0x80
-    field public static final int SIZE_SMALL = 64; // 0x40
-    field public static final int SIZE_XSMALL = 32; // 0x20
+    field public static final int SIZE_LARGE = 4; // 0x4
+    field public static final int SIZE_MEDIUM = 3; // 0x3
+    field public static final int SIZE_SMALL = 2; // 0x2
+    field public static final int SIZE_XSMALL = 1; // 0x1
     field public static final int UNSET_ACTION_INDEX = -1; // 0xffffffff
   }
 
