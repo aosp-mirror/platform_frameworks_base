@@ -791,11 +791,17 @@ public class AudioTrack
 
    /**
     * Poll for a timestamp on demand.
-    *
-    * Use if you need to get the most recent timestamp outside of the event callback handler.
-    * Calling this method too often may be inefficient;
-    * if you need a high-resolution mapping between frame position and presentation time,
+    * <p>
+    * If you need to track timestamps during initial warmup or after a routing or mode change,
+    * you should request a new timestamp once per second until the reported timestamps
+    * show that the audio clock is stable.
+    * Thereafter, query for a new timestamp approximately once every 10 seconds to once per minute.
+    * Calling this method more often is inefficient.
+    * It is also counter-productive to call this method more often than recommended,
+    * because the short-term differences between successive timestamp reports are not meaningful.
+    * If you need a high-resolution mapping between frame position and presentation time,
     * consider implementing that at application level, based on low-resolution timestamps.
+    * <p>
     * The audio data at the returned position may either already have been
     * presented, or may have not yet been presented but is committed to be presented.
     * It is not possible to request the time corresponding to a particular position,
@@ -811,6 +817,8 @@ public class AudioTrack
     *         be presented.
     *         In the case that no timestamp is available, any supplied instance is left unaltered.
     */
+    // Add this text when the "on new timestamp" API is added:
+    //   Use if you need to get the most recent timestamp outside of the event callback handler.
     public boolean getTimestamp(AudioTimestamp timestamp)
     {
         if (timestamp == null) {
