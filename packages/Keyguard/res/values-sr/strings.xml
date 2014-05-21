@@ -20,6 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Заштита тастера"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Унесите PIN кôд"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Унесите SIM PUK кôд и нови PIN кôд"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK кôд"</string>
@@ -118,7 +119,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодови се не подударају"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Превише покушаја уноса шаблона"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (адреса е-поште)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (имејл адреса)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
