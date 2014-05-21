@@ -3739,32 +3739,27 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
     /**
-     * This flag is used to break out "documents" into separate tasks that can
-     * be reached via the Recents mechanism. Such a document is any kind of
-     * item for which an application may want to maintain multiple simultaneous
-     * instances. Examples might be text files, web pages, spreadsheets, or
-     * emails. Each such document will be in a separate task in the Recents list.
+     * This flag is used to open a document into a new task rooted at the activity launched
+     * by this Intent. Through the use of this flag, or its equivalent attribute,
+     * {@link android.R.attr#documentLaunchMode} multiple instances of the same activity
+     * containing different douments will appear in the recent tasks list.
      *
-     * <p>When set, the activity specified by this Intent will launch into a
-     * separate task rooted at that activity. The activity launched must be
-     * defined with {@link android.R.attr#launchMode} <code>standard</code>
-     * or <code>singleTop</code>.
+     * <p>The use of the activity attribute form of this,
+     * {@link android.R.attr#documentLaunchMode}, is
+     * preferred over the Intent flag described here. The attribute form allows the
+     * Activity to specify multiple document behavior for all launchers of the Activity
+     * whereas using this flag requires each Intent that launches the Activity to specify it.
      *
-     * <p>If FLAG_ACTIVITY_NEW_DOCUMENT is used without
-     * {@link #FLAG_ACTIVITY_MULTIPLE_TASK} then the activity manager will
-     * search for an existing task with a matching target activity and Intent
-     * data URI and relaunch that task, first finishing all activities down to
-     * the root activity and then calling the root activity's
-     * {@link android.app.Activity#onNewIntent(Intent)} method. If no existing
-     * task's root activity matches the Intent's data URI then a new task will
-     * be launched with the target activity as root.
+     * <p>FLAG_ACTIVITY_NEW_DOCUMENT may be used in conjunction with {@link
+     * #FLAG_ACTIVITY_MULTIPLE_TASK}. When used alone it is the
+     * equivalent of the Activity manifest specifying {@link
+     * android.R.attr#documentLaunchMode}="intoExisting". When used with
+     * FLAG_ACTIVITY_MULTIPLE_TASK it is the equivalent of the Activity manifest specifying
+     * {@link android.R.attr#documentLaunchMode}="always".
      *
-     * <p>When paired with {@link #FLAG_ACTIVITY_MULTIPLE_TASK} this will
-     * always create a new task. Thus the same document may be made to appear
-     * more than one time in Recents.
+     * Refer to {@link android.R.attr#documentLaunchMode} for more information.
      *
-     * <p>This is equivalent to the attribute {@link android.R.attr#documentLaunchMode}.
-     *
+     * @see android.R.attr#documentLaunchMode
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      */
     public static final int FLAG_ACTIVITY_NEW_DOCUMENT =
