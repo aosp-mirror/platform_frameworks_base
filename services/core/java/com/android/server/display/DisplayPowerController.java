@@ -544,6 +544,7 @@ final class DisplayPowerController {
 
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
+        mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
         // Initialize screen state for battery stats.
         try {
@@ -567,6 +568,13 @@ final class DisplayPowerController {
         }
         @Override
         public void onAnimationCancel(Animator animation) {
+        }
+    };
+
+    private final RampAnimator.Listener mRampAnimatorListener = new RampAnimator.Listener() {
+        @Override
+        public void onAnimationEnd() {
+            sendUpdatePowerState();
         }
     };
 
@@ -753,6 +761,7 @@ final class DisplayPowerController {
                 && !mScreenOnWasBlocked
                 && !mElectronBeamOnAnimator.isStarted()
                 && !mElectronBeamOffAnimator.isStarted()
+                && !mScreenBrightnessRampAnimator.isAnimating()
                 && mPowerState.waitUntilClean(mCleanListener)) {
             synchronized (mLock) {
                 if (!mPendingRequestChangedLocked) {
@@ -1289,6 +1298,9 @@ final class DisplayPowerController {
         pw.println("  mUsingScreenAutoBrightness=" + mUsingScreenAutoBrightness);
         pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
         pw.println("  mTwilight.getCurrentState()=" + mTwilight.getCurrentState());
+
+        pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
+                mScreenBrightnessRampAnimator.isAnimating());
 
         if (mElectronBeamOnAnimator != null) {
             pw.println("  mElectronBeamOnAnimator.isStarted()=" +
