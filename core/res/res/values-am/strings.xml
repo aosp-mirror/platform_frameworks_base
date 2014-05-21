@@ -116,7 +116,7 @@
     <string name="fcError" msgid="3327560126588500777">"የተያያዥ ችግር ወይም  ትክከል ያልሆነኮድ ባህሪ።"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"እሺ"</string>
     <string name="httpError" msgid="7956392511146698522">"የአውታረ መረብ ስህተት ነበር።"</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"ዩ አር ኤል ማግኘት አልተቻለም።"</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"ዩአርኤል ማግኘት አልተቻለም።"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"የድረገፁ ማረጋገጫ ሙሉ ምስርት አይደገፍም።"</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"ማረጋገጥ አልተቻለም።"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"ማረጋገጫ በእጅ አዙር አገልጋይ በኩል አልተሳካም።"</string>
@@ -331,7 +331,7 @@
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"የአሁኑ የመተግበሪያ መረጃ ያግኙ"</string>
     <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ያዢው በማያ ገጹ ፊት ላይ ስላለው የአሁኑ መተግበሪያ የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ሁሉንም መተግበሪያ ማስነሻ አሳይ እና ተቆጣጠር"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ክብረ ገመና ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ግላዊነት ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"አካታች የተወገደለት ስርጭት ላክ"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"የመተግበሪያ ፓኬጅ መወገዱን ማሳወቂያዎችን ለማሰራጨት ለመተግበሪያው ይፈቅዳሉ፡፡ ማንኛውንም እየሄደ ያለን ሌላ መተግበሪያ ለመግደል ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙት ይችላሉ፡፡"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"የ SMS ደርስዋል ስርጭት ላክ"</string>
