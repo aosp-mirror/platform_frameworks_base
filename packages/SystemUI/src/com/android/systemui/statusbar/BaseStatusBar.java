@@ -581,7 +581,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    private boolean isMediaNotification(NotificationData.Entry entry) {
+    public boolean isMediaNotification(NotificationData.Entry entry) {
         // TODO: confirm that there's a valid media key
         return entry.expandedBig != null &&
                entry.expandedBig.findViewById(com.android.internal.R.id.media_action_area) != null;
