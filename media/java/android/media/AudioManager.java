@@ -2818,18 +2818,22 @@ public class AudioManager {
     }
 
      /**
-     * Indicate A2DP sink connection state change.
+     * Indicate A2DP source or sink connection state change.
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param profile profile for the A2DP device
+     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
+     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
      * @return a delay in ms that the caller should wait before broadcasting
      * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
      * {@hide}
      */
-    public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state) {
+    public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state,
+            int profile) {
         IAudioService service = getService();
         int delay = 0;
         try {
-            delay = service.setBluetoothA2dpDeviceConnectionState(device, state);
+            delay = service.setBluetoothA2dpDeviceConnectionState(device, state, profile);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setBluetoothA2dpDeviceConnectionState "+e);
         } finally {
