@@ -81,6 +81,8 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener {
     public static final String TAG = "StatusBar";
@@ -208,33 +210,47 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
-        public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
+        public boolean onClickHandler(
+                final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
-                try {
-                    // The intent we are sending is for the application, which
-                    // won't have permission to immediately start an activity after
-                    // the user switches to home.  We know it is safe to do at this
-                    // point, so make sure new activity switches are now allowed.
-                    ActivityManagerNative.getDefault().resumeAppSwitches();
-                    // Also, notifications can be launched from the lock screen,
-                    // so dismiss the lock screen when the activity starts.
-                    ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-                } catch (RemoteException e) {
-                }
-            }
+                startNotificationActivity(new OnDismissAction() {
+                    @Override
+                    public boolean onDismiss() {
+                        try {
+                            // The intent we are sending is for the application, which
+                            // won't have permission to immediately start an activity after
+                            // the user switches to home.  We know it is safe to do at this
+                            // point, so make sure new activity switches are now allowed.
+                            ActivityManagerNative.getDefault().resumeAppSwitches();
+                            // Also, notifications can be launched from the lock screen,
+                            // so dismiss the lock screen when the activity starts.
+                            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                        } catch (RemoteException e) {
+                        }
 
-            boolean handled = super.onClickHandler(view, pendingIntent, fillInIntent);
+                        boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
 
-            if (isActivity && handled) {
-                // close the shade if it was open
-                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                visibilityChanged(false);
+                        // close the shade if it was open
+                        if (handled) {
+                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                            visibilityChanged(false);
+                        }
+                        return handled; // Wait for activity start.
+                    }
+                });
+                return true;
+            } else {
+                return super.onClickHandler(view, pendingIntent, fillInIntent);
             }
-            return handled;
+        }
+
+        private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
+                Intent fillInIntent) {
+            return super.onClickHandler(view, pendingIntent, fillInIntent);
         }
     };
 
@@ -379,6 +395,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             return notificationUserId == UserHandle.USER_ALL
                     || mCurrentProfiles.get(notificationUserId) != null;
         }
+    }
+
+    /**
+     * Takes the necessary steps to prepare the status bar for starting an activity, then starts it.
+     * @param action A dismiss action that is called if it's safe to start the activity.
+     */
+    protected void startNotificationActivity(OnDismissAction action) {
+        action.onDismiss();
     }
 
     @Override
@@ -930,47 +954,55 @@ public abstract class BaseStatusBar extends SystemUI implements
             mIsHeadsUp = forHun;
         }
 
-        public void onClick(View v) {
-            try {
-                // The intent we are sending is for the application, which
-                // won't have permission to immediately start an activity after
-                // the user switches to home.  We know it is safe to do at this
-                // point, so make sure new activity switches are now allowed.
-                ActivityManagerNative.getDefault().resumeAppSwitches();
-                // Also, notifications can be launched from the lock screen,
-                // so dismiss the lock screen when the activity starts.
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-            }
+        public void onClick(final View v) {
+            startNotificationActivity(new OnDismissAction() {
+                public boolean onDismiss() {
+                    try {
+                        // The intent we are sending is for the application, which
+                        // won't have permission to immediately start an activity after
+                        // the user switches to home.  We know it is safe to do at this
+                        // point, so make sure new activity switches are now allowed.
+                        ActivityManagerNative.getDefault().resumeAppSwitches();
+                        // Also, notifications can be launched from the lock screen,
+                        // so dismiss the lock screen when the activity starts.
+                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                    } catch (RemoteException e) {
+                    }
 
-            if (mIntent != null) {
-                int[] pos = new int[2];
-                v.getLocationOnScreen(pos);
-                Intent overlay = new Intent();
-                overlay.setSourceBounds(
-                        new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
-                try {
-                    mIntent.send(mContext, 0, overlay);
-                } catch (PendingIntent.CanceledException e) {
-                    // the stack trace isn't very helpful here.  Just log the exception message.
-                    Log.w(TAG, "Sending contentIntent failed: " + e);
+                    boolean sent = false;
+                    if (mIntent != null) {
+                        int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+                        Intent overlay = new Intent();
+                        overlay.setSourceBounds(new Rect(pos[0], pos[1],
+                                pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+                        try {
+                            mIntent.send(mContext, 0, overlay);
+                            sent = true;
+                        } catch (PendingIntent.CanceledException e) {
+                            // the stack trace isn't very helpful here.
+                            // Just log the exception message.
+                            Log.w(TAG, "Sending contentIntent failed: " + e);
+                        }
+                    }
+
+                    try {
+                        if (mIsHeadsUp) {
+                            mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                        }
+                        mBarService.onNotificationClick(mNotificationKey);
+                    } catch (RemoteException ex) {
+                        // system process is dead if we're here.
+                    }
+
+                    // close the shade if it was open
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                    visibilityChanged(false);
+
+                    boolean waitForActivityLaunch = sent && mIntent.isActivity();
+                    return waitForActivityLaunch;
                 }
-
-                KeyguardTouchDelegate.getInstance(mContext).dismiss();
-            }
-
-            try {
-                if (mIsHeadsUp) {
-                    mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
-                }
-                mBarService.onNotificationClick(mNotificationKey);
-            } catch (RemoteException ex) {
-                // system process is dead if we're here.
-            }
-
-            // close the shade if it was open
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-            visibilityChanged(false);
+            });
         }
     }
 
