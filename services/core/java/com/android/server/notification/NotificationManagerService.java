@@ -533,6 +533,8 @@ public class NotificationManagerService extends SystemService {
                 pw.println(prefix + "  }");
             }
             pw.println(prefix + "  stats=" + stats.toString());
+            pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
+            pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         }
 
         @Override
