@@ -96,5 +96,6 @@ abstract class RequestArcAction extends FeatureAction {
             return;
         }
         disableArcTransmission();
+        finish();
     }
 }
