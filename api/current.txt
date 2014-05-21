@@ -6992,7 +6992,6 @@ package android.content {
     field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
-    field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
     field public static final java.lang.String HDMI_CEC_SERVICE = "hdmi_cec";
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
@@ -26020,36 +26019,6 @@ package android.service.dreams {
     method public void setScreenBright(boolean);
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";
-  }
-
-}
-
-package android.service.fingerprint {
-
-  public class FingerprintManager {
-    ctor public FingerprintManager(android.content.Context);
-    method public void enroll(long);
-    method public boolean enrolledAndEnabled();
-    method public void remove(int);
-    method public void startListening(android.service.fingerprint.FingerprintManagerReceiver);
-    method public void stopListening();
-    field public static final int FINGERPRINT_ERROR = -1; // 0xffffffff
-    field public static final int FINGERPRINT_ERROR_BAD_CAPTURE = 2; // 0x2
-    field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
-    field public static final int FINGERPRINT_ERROR_NO_RECEIVER = -10; // 0xfffffff6
-    field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
-    field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
-    field public static final int FINGERPRINT_SCANNED = 1; // 0x1
-    field public static final int FINGERPRINT_TEMPLATE_ENROLLING = 2; // 0x2
-    field public static final int FINGERPRINT_TEMPLATE_REMOVED = 4; // 0x4
-  }
-
-  public class FingerprintManagerReceiver {
-    ctor public FingerprintManagerReceiver();
-    method public void onEnrollResult(int, int);
-    method public void onError(int);
-    method public void onRemoved(int);
-    method public void onScanned(int, int);
   }
 
 }
