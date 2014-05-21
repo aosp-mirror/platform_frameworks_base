@@ -39,6 +39,8 @@ final class RampAnimator<T> {
 
     private boolean mFirstTime = true;
 
+    private Listener mListener;
+
     public RampAnimator(T object, IntProperty<T> property) {
         mObject = object;
         mProperty = property;
@@ -92,6 +94,20 @@ final class RampAnimator<T> {
         return changed;
     }
 
+    /**
+     * Returns true if the animation is running.
+     */
+    public boolean isAnimating() {
+        return mAnimating;
+    }
+
+    /**
+     * Sets a listener to watch for animation events.
+     */
+    public void setListener(Listener listener) {
+        mListener = listener;
+    }
+
     private void postCallback() {
         mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mCallback, null);
     }
@@ -131,7 +147,14 @@ final class RampAnimator<T> {
                 postCallback();
             } else {
                 mAnimating = false;
+                if (mListener != null) {
+                    mListener.onAnimationEnd();
+                }
             }
         }
     };
+
+    public interface Listener {
+        void onAnimationEnd();
+    }
 }
