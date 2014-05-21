@@ -634,6 +634,9 @@ int doDump(Bundle* bundle)
     if (&res == NULL) {
         fprintf(stderr, "ERROR: dump failed because no resource table was found\n");
         goto bail;
+    } else if (res.getError() != NO_ERROR) {
+        fprintf(stderr, "ERROR: dump failed because the resource table is invalid/corrupt.\n");
+        goto bail;
     }
 
     if (strcmp("resources", option) == 0) {
