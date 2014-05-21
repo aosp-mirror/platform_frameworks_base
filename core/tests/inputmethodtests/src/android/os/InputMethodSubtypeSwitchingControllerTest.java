@@ -33,12 +33,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTestCase {
-    final private static String DUMMY_PACKAGE_NAME = "dymmy package name";
-    final private static String DUMMY_SETTING_ACTIVITY_NAME = "";
-    final private static boolean DUMMY_IS_AUX_IME = false;
-    final private static boolean DUMMY_FORCE_DEFAULT = false;
-    final private static int DUMMY_IS_DEFAULT_RES_ID = 0;
-    final private static String SYSTEM_LOCALE = "en_US";
+    private static final String DUMMY_PACKAGE_NAME = "dymmy package name";
+    private static final String DUMMY_SETTING_ACTIVITY_NAME = "";
+    private static final boolean DUMMY_IS_AUX_IME = false;
+    private static final boolean DUMMY_FORCE_DEFAULT = false;
+    private static final int DUMMY_IS_DEFAULT_RES_ID = 0;
+    private static final String SYSTEM_LOCALE = "en_US";
 
     private static InputMethodSubtype createDummySubtype(final String locale) {
         final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
