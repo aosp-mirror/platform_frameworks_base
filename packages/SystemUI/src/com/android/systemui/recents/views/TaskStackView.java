@@ -592,18 +592,27 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (Constants.DebugFlags.App.EnableTaskStackClipping) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
             TaskView tv = (TaskView) child;
             TaskView nextTv = null;
-            int curIndex = indexOfChild(tv);
-            if ((curIndex > -1) && (curIndex < (getChildCount() - 1))) {
+            TaskView tmpTv = null;
+            if (tv.shouldClipViewInStack()) {
+                int curIndex = indexOfChild(tv);
+
+                // Find the next view to clip against
+                while (nextTv == null && curIndex < getChildCount()) {
+                    tmpTv = (TaskView) getChildAt(++curIndex);
+                    if (tmpTv != null && tmpTv.shouldClipViewInStack()) {
+                        nextTv = tmpTv;
+                    }
+                }
+
                 // Clip against the next view (if we aren't animating its alpha)
-                nextTv = (TaskView) getChildAt(curIndex + 1);
-                if (nextTv.getAlpha() == 1f) {
+                if (nextTv != null && nextTv.getAlpha() == 1f) {
                     Rect curRect = tv.getClippingRect(mTmpRect);
                     Rect nextRect = nextTv.getClippingRect(mTmpRect2);
-                    RecentsConfiguration config = RecentsConfiguration.getInstance();
-                    // The hit rects are relative to the task view, which needs to be offset by the
-                    // system bar height
+                    // The hit rects are relative to the task view, which needs to be offset by
+                    // the system bar height
                     curRect.offset(0, config.systemInsets.top);
                     nextRect.offset(0, config.systemInsets.top);
                     // Compute the clip region
@@ -1047,6 +1056,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 break;
             }
         }
+
+        // Sanity check, the task view should always be clipping against the stack at this point,
+        // but just in case, re-enable it here
+        tv.setClipViewInStack(true);
 
         // Add/attach the view to the hierarchy
         if (Console.Enabled) {
@@ -1500,6 +1513,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     public void onBeginDrag(View v) {
         // Enable HW layers
         mSv.addHwLayersRefCount("swipeBegin");
+        // Disable clipping with the stack while we are swiping
+        TaskView tv = (TaskView) v;
+        tv.setClipViewInStack(false);
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -1512,13 +1528,18 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         TaskView tv = (TaskView) v;
         mSv.onTaskDismissed(tv);
 
+        // Re-enable clipping with the stack (we will reuse this view)
+        tv.setClipViewInStack(true);
+
         // Disable HW layers
         mSv.decHwLayersRefCount("swipeComplete");
     }
 
     @Override
     public void onSnapBackCompleted(View v) {
-        // Do Nothing
+        // Re-enable clipping with the stack
+        TaskView tv = (TaskView) v;
+        tv.setClipViewInStack(true);
     }
 
     @Override
