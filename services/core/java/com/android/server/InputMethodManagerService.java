@@ -773,8 +773,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
             }
-            // CircularList should be reset when the locale is changed.
-            mSwitchingController.resetCircularListLocked(mContext);
             buildInputMethodListLocked(mMethodList, mMethodMap, resetDefaultEnabledIme);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
@@ -2642,6 +2640,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodEnabledLocked(defaultImiId, true);
             }
         }
+
+        mSwitchingController.resetCircularListLocked(mContext);
     }
 
     // ----------------------------------------------------------------------
