@@ -2446,7 +2446,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onBackPressed() {
         if (!mFragments.popBackStackImmediate()) {
-            finishWithTransition();
+            finishAfterTransition();
         }
     }
 
@@ -4552,7 +4552,7 @@ public class Activity extends ContextThemeWrapper
      * immediately and the Activity exit Transition is run.
      * @see android.app.ActivityOptions#makeSceneTransitionAnimation(Activity, android.util.Pair[])
      */
-    public void finishWithTransition() {
+    public void finishAfterTransition() {
         if (!mActivityTransitionState.startExitBackTransition(this)) {
             finish();
         }

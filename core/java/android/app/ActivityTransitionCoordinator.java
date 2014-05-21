@@ -69,8 +69,8 @@ import java.util.Collection;
  * 10) The calling Activity gets an onStop() call
  *    - onActivityStopped() is called and all exited Views are made VISIBLE.
  *
- * Typical finishWithTransition goes like this:
- * 1) finishWithTransition() creates an ExitTransitionCoordinator and calls startExit()
+ * Typical finishAfterTransition goes like this:
+ * 1) finishAfterTransition() creates an ExitTransitionCoordinator and calls startExit()
  *    - The Window start transitioning to Translucent with a new ActivityOptions.
  *    - If no background exists, a black background is substituted
  *    - The shared elements in the scene are matched against those shared elements
