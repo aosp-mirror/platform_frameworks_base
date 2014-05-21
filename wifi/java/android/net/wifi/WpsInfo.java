@@ -40,7 +40,7 @@ public class WpsInfo implements Parcelable {
     /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public int setup;
 
-    /** @hide */
+    /** Passed with pin method KEYPAD */
     public String BSSID;
 
     /** Passed with pin method configuration */
