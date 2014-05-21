@@ -73,7 +73,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private static SharedElementListener getListener(Activity activity, boolean isReturning) {
-        return isReturning ? activity.mExitTransitionListener : activity.mEnterTransitionListener;
+        return isReturning ? activity.mEnterTransitionListener : activity.mExitTransitionListener;
     }
 
     @Override
