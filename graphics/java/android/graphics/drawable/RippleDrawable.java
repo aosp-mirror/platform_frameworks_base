@@ -460,9 +460,6 @@ public class RippleDrawable extends LayerDrawable {
         invalidateSelf();
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setHotspotBounds(int left, int top, int right, int bottom) {
         mOverrideBounds = true;

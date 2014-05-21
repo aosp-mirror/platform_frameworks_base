@@ -245,6 +245,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setHotspotBounds(int left, int top, int right, int bottom) {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.setHotspotBounds(left, top, right, bottom);
+        }
+    }
+
+    @Override
     protected boolean onStateChange(int[] state) {
         if (mLastDrawable != null) {
             return mLastDrawable.setState(state);
