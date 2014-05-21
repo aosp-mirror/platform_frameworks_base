@@ -57,6 +57,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mIsFocused;
+    boolean mClipViewInStack;
     Point mLastTouchDown = new Point();
     Path mRoundedRectClipPath = new Path();
 
@@ -86,6 +87,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     protected void onFinishInflate() {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         mMaxDim = config.taskStackMaxDim;
+
+        // By default, all views are clipped to other views in their stack
+        mClipViewInStack = true;
 
         // Bind the views
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
@@ -250,6 +254,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Animates the deletion of this task view */
     public void animateRemoval(final Runnable r) {
+        // Disabling clipping with the stack while the view is animating away
+        setClipViewInStack(false);
+
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         animate().translationX(config.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
@@ -261,6 +268,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 @Override
                 public void run() {
                     post(r);
+
+                    // Re-enable clipping with the stack (we will reuse this view)
+                    setClipViewInStack(false);
                 }
             })
             .start();
@@ -283,6 +293,26 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, null);
+    }
+
+    /**
+     * Returns whether this view should be clipped, or any views below should clip against this
+     * view.
+     */
+    boolean shouldClipViewInStack() {
+        return mClipViewInStack;
+    }
+
+    /** Sets whether this view should be clipped, or clipped against. */
+    void setClipViewInStack(boolean clip) {
+        if (clip != mClipViewInStack) {
+            mClipViewInStack = clip;
+            if (getParent() instanceof View) {
+                Rect r = new Rect();
+                getHitRect(r);
+                ((View) getParent()).invalidate(r);
+            }
+        }
     }
 
     /** Update the dim as a function of the scale of this view. */

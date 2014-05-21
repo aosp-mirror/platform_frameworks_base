@@ -28,7 +28,7 @@ public class Constants {
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
             // Enables clipping of tasks against each other
-            public static final boolean EnableTaskStackClipping = false;
+            public static final boolean EnableTaskStackClipping = true;
             // Enables the use of theme colors as the task bar background
             public static final boolean EnableTaskBarThemeColors = true;
             // Enables app-info pane on long-pressing the icon
