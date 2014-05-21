@@ -12140,9 +12140,11 @@ package android.hardware.camera2 {
 
   public static abstract class CameraCaptureSession.CaptureListener {
     ctor public CameraCaptureSession.CaptureListener();
-    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureFailed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureFailure);
-    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraDevice, int, int);
+    method public void onCaptureProgressed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureSequenceAborted(android.hardware.camera2.CameraDevice, int);
+    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraDevice, int, long);
     method public void onCaptureStarted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, long);
   }
 
@@ -12249,9 +12251,11 @@ package android.hardware.camera2 {
 
   public static abstract deprecated class CameraDevice.CaptureListener {
     ctor public CameraDevice.CaptureListener();
-    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureFailed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureFailure);
-    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraDevice, int, int);
+    method public void onCaptureProgressed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureSequenceAborted(android.hardware.camera2.CameraDevice, int);
+    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraDevice, int, long);
     method public void onCaptureStarted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, long);
   }
 
@@ -12542,7 +12546,7 @@ package android.hardware.camera2 {
     method public final int hashCode();
   }
 
-  public final class CaptureResult extends android.hardware.camera2.CameraMetadata {
+  public class CaptureResult extends android.hardware.camera2.CameraMetadata {
     method public T get(android.hardware.camera2.CaptureResult.Key<T>);
     method public int getFrameNumber();
     method public android.hardware.camera2.CaptureRequest getRequest();
@@ -12633,6 +12637,10 @@ package android.hardware.camera2 {
     method public void writeByteBuffer(java.io.OutputStream, android.util.Size, java.nio.ByteBuffer, long) throws java.io.IOException;
     method public void writeImage(java.io.OutputStream, android.media.Image) throws java.io.IOException;
     method public void writeInputStream(java.io.OutputStream, android.util.Size, java.io.InputStream, long) throws java.io.IOException;
+  }
+
+  public final class TotalCaptureResult extends android.hardware.camera2.CaptureResult {
+    method public java.util.List<android.hardware.camera2.CaptureResult> getPartialResults();
   }
 
 }

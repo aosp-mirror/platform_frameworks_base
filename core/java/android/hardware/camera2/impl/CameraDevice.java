@@ -24,6 +24,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.LongParcelable;
@@ -359,7 +360,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                             holder.getListener().onCaptureSequenceCompleted(
                                     CameraDevice.this,
                                     requestId,
-                                    (int)lastFrameNumber);
+                                    lastFrameNumber);
                         }
                     }
                 };
@@ -717,7 +718,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                                 holder.getListener().onCaptureSequenceCompleted(
                                     CameraDevice.this,
                                     requestId,
-                                    (int)lastFrameNumber);
+                                    lastFrameNumber);
                             }
                         }
                     };
@@ -888,12 +889,15 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             }
 
             final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
-            final CaptureResult resultAsCapture = new CaptureResult(result, request, requestId);
+
 
             Runnable resultDispatch = null;
 
             // Either send a partial result or the final capture completed result
             if (quirkIsPartialResult) {
+                final CaptureResult resultAsCapture =
+                        new CaptureResult(result, request, requestId);
+
                 // Partial result
                 resultDispatch = new Runnable() {
                     @Override
@@ -907,6 +911,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                     }
                 };
             } else {
+                final TotalCaptureResult resultAsCapture =
+                        new TotalCaptureResult(result, request, requestId);
+
                 // Final capture result
                 resultDispatch = new Runnable() {
                     @Override

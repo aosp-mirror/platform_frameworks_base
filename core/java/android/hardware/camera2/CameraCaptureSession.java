@@ -508,14 +508,62 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
-         * This method is called when an image capture has completed and the
-         * result metadata is available.
+         * This method is called when an image capture makes partial forward progress; some
+         * (but not all) results from an image capture are available.
+         *
+         * <p>The result provided here will contain some subset of the fields of
+         * a full result. Multiple {@link #onCaptureProgressed} calls may happen per
+         * capture; a given result field will only be present in one partial
+         * capture at most. The final {@link #onCaptureCompleted} call will always
+         * contain all the fields (in particular, the union of all the fields of all
+         * the partial results composing the total result).</p>
+         *
+         * <p>For each request, some result data might be available earlier than others. The typical
+         * delay between each partial result (per request) is a single frame interval.
+         * For performance-oriented use-cases, applications should query the metadata they need
+         * to make forward progress from the partial results and avoid waiting for the completed
+         * result.</p>
+         *
+         * <p>Each request will generate at least {@code 1} partial results, and at most
+         * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT} partial results.</p>
+         *
+         * <p>Depending on the request settings, the number of partial results per request
+         * will vary, although typically the partial count could be the same as long as the
+         * camera device subsystems enabled stay the same.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param camera The CameraDevice sending the callback.
          * @param request The request that was given to the CameraDevice
-         * @param result The output metadata from the capture, including the
+         * @param partialResult The partial output metadata from the capture, which
+         * includes a subset of the {@link TotalCaptureResult} fields.
+         *
+         * @see #capture
+         * @see #captureBurst
+         * @see #setRepeatingRequest
+         * @see #setRepeatingBurst
+         */
+        public void onCaptureProgressed(CameraDevice camera,
+                CaptureRequest request, CaptureResult partialResult) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when an image capture has fully completed and all the
+         * result metadata is available.
+         *
+         * <p>This callback will always fire after the last {@link #onCaptureProgressed};
+         * in other words, no more partial results will be delivered once the completed result
+         * is available.</p>
+         *
+         * <p>For performance-intensive use-cases where latency is a factor, consider
+         * using {@link #onCaptureProgressed} instead.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera The CameraDevice sending the callback.
+         * @param request The request that was given to the CameraDevice
+         * @param result The total output metadata from the capture, including the
          * final capture parameters and the state of the camera system during
          * capture.
          *
@@ -525,7 +573,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingBurst
          */
         public void onCaptureCompleted(CameraDevice camera,
-                CaptureRequest request, CaptureResult result) {
+                CaptureRequest request, TotalCaptureResult result) {
             // default empty implementation
         }
 
@@ -563,24 +611,57 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * when a capture sequence finishes and all {@link CaptureResult}
          * or {@link CaptureFailure} for it have been returned via this listener.
          *
+         * <p>In total, there will be at least one result/failure returned by this listener
+         * before this callback is invoked. If the capture sequence is aborted before any
+         * requests have been processed, {@link #onCaptureSequenceAborted} is invoked instead.</p>
+         *
+         * <p>The default implementation does nothing.</p>
+         *
          * @param camera
          *            The CameraDevice sending the callback.
          * @param sequenceId
          *            A sequence ID returned by the {@link #capture} family of functions.
-         * @param lastFrameNumber
+         * @param frameNumber
          *            The last frame number (returned by {@link CaptureResult#getFrameNumber}
          *            or {@link CaptureFailure#getFrameNumber}) in the capture sequence.
-         *            The last frame number may be equal to NO_FRAMES_CAPTURED if no images
-         *            were captured for this sequence. This can happen, for example, when a
-         *            repeating request or burst is cleared right after being set.
          *
          * @see CaptureResult#getFrameNumber()
          * @see CaptureFailure#getFrameNumber()
          * @see CaptureResult#getSequenceId()
          * @see CaptureFailure#getSequenceId()
+         * @see #onCaptureSequenceAborted
          */
         public void onCaptureSequenceCompleted(CameraDevice camera,
-                int sequenceId, int lastFrameNumber) {
+                int sequenceId, long frameNumber) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called independently of the others in CaptureListener,
+         * when a capture sequence aborts before any {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this listener.
+         *
+         * <p>Due to the asynchronous nature of the camera device, not all submitted captures
+         * are immediately processed. It is possible to clear out the pending requests
+         * by a variety of operations such as {@link CameraDevice#stopRepeating} or
+         * {@link CameraDevice#flush}. When such an event happens,
+         * {@link #onCaptureSequenceCompleted} will not be called.</p>
+         *
+         * <p>The default implementation does nothing.</p>
+         *
+         * @param camera
+         *            The CameraDevice sending the callback.
+         * @param sequenceId
+         *            A sequence ID returned by the {@link #capture} family of functions.
+         *
+         * @see CaptureResult#getFrameNumber()
+         * @see CaptureFailure#getFrameNumber()
+         * @see CaptureResult#getSequenceId()
+         * @see CaptureFailure#getSequenceId()
+         * @see #onCaptureSequenceCompleted
+         */
+        public void onCaptureSequenceAborted(CameraDevice camera,
+                int sequenceId) {
             // default empty implementation
         }
     }
