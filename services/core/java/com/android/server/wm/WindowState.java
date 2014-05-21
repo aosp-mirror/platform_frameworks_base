@@ -1224,7 +1224,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Only a window that was on a non-default display can be detached from it.
             return false;
         }
-        return getDisplayContent().isDefaultDisplay;
+        return displayContent.isDefaultDisplay;
     }
 
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {

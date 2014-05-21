@@ -16,11 +16,13 @@
 
 package com.android.systemui.recents;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
@@ -67,6 +69,8 @@ public class RecentsConfiguration {
 
     public boolean launchedFromAltTab;
     public boolean launchedWithThumbnailAnimation;
+
+    public boolean developerOptionsEnabled;
 
     /** Private constructor */
     private RecentsConfiguration() {}
@@ -139,6 +143,11 @@ public class RecentsConfiguration {
 
         defaultBezierInterpolator = AnimationUtils.loadInterpolator(context,
                         com.android.internal.R.interpolator.fast_out_slow_in);
+
+        // Check if the developer options are enabled
+        ContentResolver cr = context.getContentResolver();
+        developerOptionsEnabled = Settings.Global.getInt(cr,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
 
         // Update the search widget id
         SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
