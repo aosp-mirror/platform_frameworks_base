@@ -171,9 +171,9 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
-	external/libpdfium/core/include/fpdfapi \
-	external/libpdfium/core/include/fpdfdoc \
-	external/libpdfium/fpdfsdk/include \
+	external/pdfrenderer/core/include/fpdfapi \
+	external/pdfrenderer/core/include/fpdfdoc \
+	external/pdfrenderer/fpdfsdk/include \
 	external/skia/src/core \
 	external/skia/src/effects \
 	external/skia/src/images \
@@ -227,7 +227,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libharfbuzz_ng \
 	libz \
 	libaudioutils \
-	libpdfium \
+	libpdfrenderer \
 	libimg_utils \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
