@@ -5131,6 +5131,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         pkg.mScanPath = path;
 
+        if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
+            // We don't do this here during boot because we can do it all
+            // at once after scanning all existing packages.
+            //
+            // We also do this *before* we perform dexopt on this package, so that
+            // we can avoid redundant dexopts, and also to make sure we've got the
+            // code and package path correct.
+            if (!adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
+                    pkg, forceDex, (scanMode & SCAN_DEFER_DEX) != 0)) {
+                mLastScanError = PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
+                return null;
+            }
+        }
+
         if ((scanMode&SCAN_NO_DEX) == 0) {
             if (performDexOptLI(pkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
                     == DEX_OPT_FAILED) {
@@ -5258,16 +5272,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
-            if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
-                // We don't do this here during boot because we can do it all
-                // at once after scanning all existing packages.
-                if (!adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
-                        pkg.applicationInfo.cpuAbi,
-                        forceDex, (scanMode & SCAN_DEFER_DEX) != 0)) {
-                    mLastScanError = PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
-                    return null;
-                }
-            }
             // We don't expect installation to fail beyond this point,
             if ((scanMode&SCAN_MONITOR) != 0) {
                 mAppDirs.put(pkg.mPath, pkg);
@@ -5611,19 +5615,43 @@ public class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
+    /**
+     * Adjusts ABIs for a set of packages belonging to a shared user so that they all match.
+     * i.e, so that all packages can be run inside a single process if required.
+     *
+     * Optionally, callers can pass in a parsed package via {@code newPackage} in which case
+     * this function will either try and make the ABI for all packages in {@code packagesForUser}
+     * match {@code scannedPackage} or will update the ABI of {@code scannedPackage} to match
+     * the ABI selected for {@code packagesForUser}. This variant is used when installing or
+     * updating a package that belongs to a shared user.
+     */
     private boolean adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
-            String requiredInstructionSet, boolean forceDexOpt, boolean deferDexOpt) {
+            PackageParser.Package scannedPackage, boolean forceDexOpt, boolean deferDexOpt) {
+        String requiredInstructionSet = null;
+        if (scannedPackage != null && scannedPackage.applicationInfo.cpuAbi != null) {
+            requiredInstructionSet = VMRuntime.getInstructionSet(
+                     scannedPackage.applicationInfo.cpuAbi);
+        }
+
         PackageSetting requirer = null;
         for (PackageSetting ps : packagesForUser) {
-            if (ps.cpuAbiString != null) {
+            // If packagesForUser contains scannedPackage, we skip it. This will happen
+            // when scannedPackage is an update of an existing package. Without this check,
+            // we will never be able to change the ABI of any package belonging to a shared
+            // user, even if it's compatible with other packages.
+            if (scannedPackage == null || ! scannedPackage.packageName.equals(ps.name)) {
+                if (ps.cpuAbiString == null) {
+                    continue;
+                }
+
                 final String instructionSet = VMRuntime.getInstructionSet(ps.cpuAbiString);
                 if (requiredInstructionSet != null) {
                     if (!instructionSet.equals(requiredInstructionSet)) {
                         // We have a mismatch between instruction sets (say arm vs arm64).
                         // bail out.
                         String errorMessage = "Instruction set mismatch, "
-                                + ((requirer == null) ? "[caller]" : requirer.pkg)
-                                + " requires " + requiredInstructionSet + " whereas " + ps.pkg
+                                + ((requirer == null) ? "[caller]" : requirer)
+                                + " requires " + requiredInstructionSet + " whereas " + ps
                                 + " requires " + instructionSet;
                         Slog.e(TAG, errorMessage);
 
@@ -5639,20 +5667,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (requiredInstructionSet != null) {
-            for (PackageSetting ps : packagesForUser) {
-                if (ps.cpuAbiString == null) {
-                    ps.cpuAbiString = requirer.cpuAbiString;
-                    if (ps.pkg != null) {
-                        ps.pkg.applicationInfo.cpuAbi = requirer.cpuAbiString;
-                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + ps.cpuAbiString);
+            String adjustedAbi;
+            if (requirer != null) {
+                // requirer != null implies that either scannedPackage was null or that scannedPackage
+                // did not require an ABI, in which case we have to adjust scannedPackage to match
+                // the ABI of the set (which is the same as requirer's ABI)
+                adjustedAbi = requirer.cpuAbiString;
+                if (scannedPackage != null) {
+                    scannedPackage.applicationInfo.cpuAbi = adjustedAbi;
+                }
+            } else {
+                // requirer == null implies that we're updating all ABIs in the set to
+                // match scannedPackage.
+                adjustedAbi =  scannedPackage.applicationInfo.cpuAbi;
+            }
 
-                        if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
-                            ps.cpuAbiString = null;
-                            ps.pkg.applicationInfo.cpuAbi = null;
-                            return false;
-                        } else {
-                            mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
-                        }
+            for (PackageSetting ps : packagesForUser) {
+                if (scannedPackage == null || ! scannedPackage.packageName.equals(ps.name)) {
+                    if (ps.cpuAbiString != null) {
+                        continue;
+                    }
+
+                    ps.cpuAbiString = adjustedAbi;
+                    ps.pkg.applicationInfo.cpuAbi = adjustedAbi;
+                    Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
+
+                    if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
+                        ps.cpuAbiString = null;
+                        ps.pkg.applicationInfo.cpuAbi = null;
+                        return false;
+                    } else {
+                        mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
                     }
                 }
             }
