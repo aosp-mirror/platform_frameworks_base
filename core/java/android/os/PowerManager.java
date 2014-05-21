@@ -302,6 +302,12 @@ public final class PowerManager {
      */
     public static final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
 
+    /**
+     * Go to sleep flag: Skip dozing state and directly go to full sleep.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
+
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
@@ -490,8 +496,15 @@ public final class PowerManager {
      * @see #wakeUp
      */
     public void goToSleep(long time) {
+        goToSleep(time, GO_TO_SLEEP_REASON_USER, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public void goToSleep(long time, int reason, int flags) {
         try {
-            mService.goToSleep(time, GO_TO_SLEEP_REASON_USER);
+            mService.goToSleep(time, reason, flags);
         } catch (RemoteException e) {
         }
     }
