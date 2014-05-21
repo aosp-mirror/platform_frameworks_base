@@ -174,12 +174,6 @@
     <!-- The distance you can pull a notification before it pops open -->
     <dimen name="one_finger_pop_limit">0dp</dimen>
 
-    <!-- The fixed height of each tile -->
-    <dimen name="quick_settings_cell_height">110dp</dimen>
-
-    <!-- The padding between each tile within the QuickSettings layout -->
-    <dimen name="quick_settings_cell_gap">4dp</dimen>
-
     <!-- Minimum fraction of the screen that should be taken up by the notification panel.
          Not used at this screen size. -->
     <item type="dimen" name="notification_panel_min_height_frac">0%</item>
@@ -193,14 +187,14 @@
     <!-- For phones, this is close_handle_height + header_height -->
     <dimen name="peek_height">84dp</dimen>
 
-    <!-- Quick Settings tile geometry: top interior margin, above icon -->
-    <dimen name="qs_tile_margin_above_icon">27dp</dimen>
-    <!-- Quick Settings tile geometry: gap between icon and text -->
-    <dimen name="qs_tile_margin_below_icon">17dp</dimen>
-    <!-- Quick Settings tile geometry: icon size -->
-    <dimen name="qs_tile_icon_size">32dp</dimen>
-    <!-- Quick Settings CA Cert Warning tile geometry: gap between icon and text -->
-    <dimen name="qs_cawarn_tile_margin_below_icon">3dp</dimen>
+    <dimen name="qs_tile_height">84dp</dimen>
+    <dimen name="qs_tile_padding">8dp</dimen>
+    <dimen name="qs_tile_icon_size">28dp</dimen>
+    <dimen name="qs_tile_text_size">12sp</dimen>
+    <dimen name="qs_tile_divider_height">1dp</dimen>
+    <dimen name="qs_panel_padding">16dp</dimen>
+    <dimen name="qs_dual_tile_height">109dp</dimen>
+    <dimen name="qs_dual_tile_padding">12dp</dimen>
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
@@ -280,12 +274,6 @@
 
     <!-- Lockscreen affordance drag distance for camera and phone. -->
     <dimen name="affordance_drag_distance">100dp</dimen>
-
-    <dimen name="quick_settings_tmp_scrim_stroke_width">8dp</dimen>
-    <dimen name="quick_settings_tmp_scrim_text_size">30dp</dimen>
-    <dimen name="quick_settings_panel_padding">16dp</dimen>
-    <dimen name="quick_settings_tile_text_size">12sp</dimen>
-    <dimen name="quick_settings_tile_divider_height">1dp</dimen>
 
     <dimen name="notifications_top_padding">8dp</dimen>
     
