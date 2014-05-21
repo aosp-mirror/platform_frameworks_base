@@ -29,6 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Speichern"</string>
     <string name="menu_share" msgid="3075149983979628146">"Teilen"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Löschen"</string>
+    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" auswählen"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ausgewählt"</string>
     <string name="sort_name" msgid="9183560467917256779">"Nach Name"</string>
     <string name="sort_date" msgid="586080032956151448">"Nach Änderungsdatum"</string>
@@ -47,7 +48,7 @@
     <string name="pref_advanced_devices" msgid="903257239609301276">"Erweiterte Geräte anzeigen"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"Dateigröße anzeigen"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Geräteabmessungen anzeigen"</string>
-    <string name="empty" msgid="7858882803708117596">"Keine Elemente"</string>
+    <string name="empty" msgid="7858882803708117596">"Keine Dokumente"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Datei kann nicht geöffnet werden."</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Einige Dokumente konnten nicht gelöscht werden."</string>
     <string name="share_via" msgid="8966594246261344259">"Teilen über"</string>
