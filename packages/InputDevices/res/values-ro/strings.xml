@@ -34,4 +34,11 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Slovenă"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Turcă"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ucraineană"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Arabă"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Greacă"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Ebraică"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Lituaniană"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Spaniolă (America Latină)"</string>
+    <!-- no translation found for keyboard_layout_latvian (4405417142306250595) -->
+    <skip />
 </resources>

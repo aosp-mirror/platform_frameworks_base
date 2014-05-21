@@ -34,4 +34,11 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Tiếng Sloven"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Tiếng Thổ Nhĩ Kỳ"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Tiếng Ukraina"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Tiếng Ả rập"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Tiếng Hy Lạp"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Tiếng Do Thái"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Tiếng Lithuania"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Tiếng Tây Ban Nha (La tinh)"</string>
+    <!-- no translation found for keyboard_layout_latvian (4405417142306250595) -->
+    <skip />
 </resources>

@@ -34,4 +34,11 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ສະໂລເວນຽນ"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ເຕີກິສ"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ຢູເຄຣນຽນ"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"ອາຣັບ"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"ກ​ຣີກ"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"ຮີບຣິວ"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"​ລິ​ທົວ​ນຽນ"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"​ສະ​ແປນ​ນິດ (ລາ​ຕິນ)"</string>
+    <!-- no translation found for keyboard_layout_latvian (4405417142306250595) -->
+    <skip />
 </resources>
