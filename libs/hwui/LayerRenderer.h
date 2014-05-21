@@ -47,7 +47,7 @@ public:
     ANDROID_API LayerRenderer(Layer* layer);
     virtual ~LayerRenderer();
 
-    virtual void setViewport(int width, int height);
+    virtual void onViewportInitialized(int width, int height) { /* do nothing */ }
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();

@@ -39,10 +39,6 @@ LayerRenderer::LayerRenderer(Layer* layer): mLayer(layer) {
 LayerRenderer::~LayerRenderer() {
 }
 
-void LayerRenderer::setViewport(int width, int height) {
-    initializeViewport(width, height);
-}
-
 status_t LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
         bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());

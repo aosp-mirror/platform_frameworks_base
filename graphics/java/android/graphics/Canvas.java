@@ -236,8 +236,12 @@ public class Canvas {
      *
      * @hide
      */
-    public void setViewport(int width, int height) {
-    }
+    public void setViewport(int width, int height) {}
+
+    /**
+     * @hide
+     */
+    public void initializeLight(float lightX, float lightY, float lightZ, float lightRadius) {}
 
     /**
      * Return true if the device that the current layer draws into is opaque

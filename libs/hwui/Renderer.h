@@ -89,6 +89,14 @@ public:
     virtual void setViewport(int width, int height) = 0;
 
     /**
+     * Sets the position and size of the spot shadow casting light.
+     *
+     * @param lightCenter The light's Y position, relative to the render target's top left
+     * @param lightRadius The light's radius
+     */
+    virtual void initializeLight(const Vector3& lightCenter, float lightRadius) = 0;
+
+    /**
      * Prepares the renderer to draw a frame. This method must be invoked
      * at the beginning of each frame. When this method is invoked, the
      * entire drawing surface is assumed to be redrawn.

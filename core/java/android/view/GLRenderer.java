@@ -1097,9 +1097,10 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height) {
+    void setup(int width, int height, float lightX, float lightY, float lightZ, float lightRadius) {
         if (validate()) {
             mCanvas.setViewport(width, height);
+            mCanvas.initializeLight(lightX, lightY, lightZ, lightRadius);
             mWidth = width;
             mHeight = height;
         }

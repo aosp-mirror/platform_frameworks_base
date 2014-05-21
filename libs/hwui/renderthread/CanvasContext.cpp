@@ -410,9 +410,10 @@ void CanvasContext::pauseSurface(EGLNativeWindowType window) {
     // and such to prevent from trying to render into this surface
 }
 
-void CanvasContext::setup(int width, int height) {
+void CanvasContext::setup(int width, int height, const Vector3& lightCenter, float lightRadius) {
     if (!mCanvas) return;
     mCanvas->setViewport(width, height);
+    mCanvas->initializeLight(lightCenter, lightRadius);
 }
 
 void CanvasContext::setOpaque(bool opaque) {

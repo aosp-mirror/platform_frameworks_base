@@ -38,6 +38,7 @@ namespace renderthread {
 #define CREATE_BRIDGE2(name, a1, a2) CREATE_BRIDGE(name, a1,a2,,,,,,)
 #define CREATE_BRIDGE3(name, a1, a2, a3) CREATE_BRIDGE(name, a1,a2,a3,,,,,)
 #define CREATE_BRIDGE4(name, a1, a2, a3, a4) CREATE_BRIDGE(name, a1,a2,a3,a4,,,,)
+#define CREATE_BRIDGE5(name, a1, a2, a3, a4, a5) CREATE_BRIDGE(name, a1,a2,a3,a4,a5,,,)
 #define CREATE_BRIDGE(name, a1, a2, a3, a4, a5, a6, a7, a8) \
     typedef struct { \
         a1; a2; a3; a4; a5; a6; a7; a8; \
@@ -146,16 +147,19 @@ void RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE3(setup, CanvasContext* context, int width, int height) {
-    args->context->setup(args->width, args->height);
+CREATE_BRIDGE5(setup, CanvasContext* context, int width, int height,
+        Vector3 lightCenter, int lightRadius) {
+    args->context->setup(args->width, args->height, args->lightCenter, args->lightRadius);
     return NULL;
 }
 
-void RenderProxy::setup(int width, int height) {
+void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float lightRadius) {
     SETUP_TASK(setup);
     args->context = mContext;
     args->width = width;
     args->height = height;
+    args->lightCenter = lightCenter;
+    args->lightRadius = lightRadius;
     post(task);
 }
 

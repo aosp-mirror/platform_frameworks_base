@@ -145,11 +145,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height) {
+    void setup(int width, int height, float lightX, float lightY, float lightZ, float lightRadius) {
         mWidth = width;
         mHeight = height;
         mRootNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
-        nSetup(mNativeProxy, width, height);
+        nSetup(mNativeProxy, width, height, lightX, lightY, lightZ, lightRadius);
     }
 
     @Override
@@ -348,10 +348,9 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native void nPauseSurface(long nativeProxy, Surface window);
-    private static native void nSetup(long nativeProxy, int width, int height);
+    private static native void nSetup(long nativeProxy, int width, int height,
+            float lightX, float lightY, float lightZ, float lightRadius);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native void nSetDisplayListData(long nativeProxy, long displayList,
-            long newData);
     private static native int nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);

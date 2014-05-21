@@ -688,8 +688,8 @@ TextureVertex* Caches::getRegionMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::initTempProperties() {
-    propertyAmbientShadowStrength = 25;
-    propertySpotShadowStrength = 25;
+    propertyAmbientShadowStrength = 12;
+    propertySpotShadowStrength = 48;
 
     propertyLightDiameter = -1.0f;
     propertyLightPosY = -1.0f;
