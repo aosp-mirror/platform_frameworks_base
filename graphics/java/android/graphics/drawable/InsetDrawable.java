@@ -192,6 +192,11 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     }
 
     @Override
+    public void setHotspotBounds(int left, int top, int right, int bottom) {
+        mInsetState.mDrawable.setHotspotBounds(left, top, right, bottom);
+    }
+
+    @Override
     public boolean setVisible(boolean visible, boolean restart) {
         mInsetState.mDrawable.setVisible(visible, restart);
         return super.setVisible(visible, restart);

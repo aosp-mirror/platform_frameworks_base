@@ -571,6 +571,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setHotspotBounds(int left, int top, int right, int bottom) {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.setHotspotBounds(left, top, right, bottom);
+        }
+    }
+
+    @Override
     public boolean setVisible(boolean visible, boolean restart) {
         final boolean changed = super.setVisible(visible, restart);
         final ChildDrawable[] array = mLayerState.mChildren;

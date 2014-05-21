@@ -495,7 +495,7 @@ public abstract class Drawable {
     /**
      * Sets the bounds to which the hotspot is constrained, if they should be
      * different from the drawable bounds.
-     * 
+     *
      * @param left
      * @param top
      * @param right
