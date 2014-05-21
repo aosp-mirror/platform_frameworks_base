@@ -995,13 +995,12 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void addAction(int action) {
         enforceNotSealed();
 
-        AccessibilityAction newAction = getActionSingleton(action);
-        if (newAction == null) {
-            // This means it is not one of the standard actions
-            throw new IllegalArgumentException("Argument is not one of the standard actions");
+        if ((action & ACTION_TYPE_MASK) != 0) {
+            throw new IllegalArgumentException("Action is not a combination of the standard " +
+                    "actions: " + action);
         }
 
-        addAction(newAction);
+        addLegacyStandardActions(action);
     }
 
     /**
