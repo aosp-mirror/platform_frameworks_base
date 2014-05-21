@@ -5715,21 +5715,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             for (PackageSetting ps : packagesForUser) {
-                if (scannedPackage == null || ! scannedPackage.packageName.equals(ps.name)) {
+                if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
                     if (ps.cpuAbiString != null) {
                         continue;
                     }
 
                     ps.cpuAbiString = adjustedAbi;
-                    ps.pkg.applicationInfo.cpuAbi = adjustedAbi;
-                    Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
+                    if (ps.pkg != null && ps.pkg.applicationInfo != null) {
+                        ps.pkg.applicationInfo.cpuAbi = adjustedAbi;
+                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
 
-                    if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
-                        ps.cpuAbiString = null;
-                        ps.pkg.applicationInfo.cpuAbi = null;
-                        return false;
-                    } else {
-                        mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                        if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
+                            ps.cpuAbiString = null;
+                            ps.pkg.applicationInfo.cpuAbi = null;
+                            return false;
+                        } else {
+                            mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                        }
                     }
                 }
             }
