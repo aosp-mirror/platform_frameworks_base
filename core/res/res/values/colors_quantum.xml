@@ -16,11 +16,11 @@
 
 <!-- Colors specific to Quantum themes. -->
 <resources>
-    <color name="background_quantum_dark">@color/black</color>
+    <color name="background_quantum_dark">#ff303030</color>
     <color name="background_quantum_light">@color/white</color>
 
-    <color name="bright_foreground_quantum_dark">@color/background_quantum_light</color>
-    <color name="bright_foreground_quantum_light">@color/background_quantum_dark</color>
+    <color name="bright_foreground_quantum_dark">@color/white</color>
+    <color name="bright_foreground_quantum_light">@color/black</color>
     <!-- TODO: This is 50% alpha black -->
     <color name="bright_foreground_disabled_quantum_dark">#80000000</color>
     <!-- TODO: This is 50% alpha white -->
