@@ -2301,7 +2301,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             // Power off the display
             getIPowerManager().goToSleep(SystemClock.uptimeMillis(),
-                    PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
+                    PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
             // Ensure the device is locked
             getWindowManager().lockNow(null);
         } catch (RemoteException e) {
