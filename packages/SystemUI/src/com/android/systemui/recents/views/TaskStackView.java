@@ -1113,6 +1113,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
+    public void onTaskFocused(TaskView tv) {
+        // Do nothing
+    }
+
+    @Override
     public void onTaskDismissed(TaskView tv) {
         Task task = tv.getTask();
         // Remove the task from the view

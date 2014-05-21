@@ -313,7 +313,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onStart();
-        mAppWidgetHost.startListening();
+
+        // Start listening for widget package changes if there is one bound
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (config.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.startListening();
+        }
+
         mVisible = true;
     }
 
@@ -382,7 +388,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         super.onStop();
 
-        mAppWidgetHost.stopListening();
+        // Stop listening for widget package changes if there was one bound
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (config.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.stopListening();
+        }
+
         mVisible = false;
         mTaskLaunched = false;
     }

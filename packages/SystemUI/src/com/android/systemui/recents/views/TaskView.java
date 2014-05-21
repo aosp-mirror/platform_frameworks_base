@@ -18,15 +18,14 @@ package com.android.systemui.recents.views;
 
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,6 +44,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     interface TaskViewCallbacks {
         public void onTaskIconClicked(TaskView tv);
         public void onTaskAppInfoClicked(TaskView tv);
+        public void onTaskFocused(TaskView tv);
         public void onTaskDismissed(TaskView tv);
 
         // public void onTaskViewReboundToTask(TaskView tv, Task t);
@@ -227,7 +227,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.setAlpha(0f);
         mBarView.animate()
                 .alpha(1f)
-                .setStartDelay(250)
+                .setStartDelay(300)
                 .setInterpolator(config.defaultBezierInterpolator)
                 .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
@@ -345,6 +345,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public void setFocusedTask() {
         mIsFocused = true;
         requestFocus();
+        invalidate();
+        mCb.onTaskFocused(this);
     }
 
     /**
@@ -355,6 +357,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
         if (!gainFocus) {
             mIsFocused = false;
+            invalidate();
         }
     }
 
@@ -383,10 +386,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                ContentResolver cr = getContext().getContentResolver();
-                boolean devOptsEnabled = Settings.Global.getInt(cr,
-                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
-                if (devOptsEnabled) {
+                RecentsConfiguration config = RecentsConfiguration.getInstance();
+                if (config.developerOptionsEnabled) {
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
                 }
             }

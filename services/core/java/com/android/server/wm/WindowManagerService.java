@@ -5815,13 +5815,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         Bitmap bm = Bitmap.createBitmap(width, height, force565 ? Config.RGB_565 : rawss.getConfig());
+        bm.eraseColor(0xFF000000);
         frame.scale(scale);
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
         // TODO: Test for RTL vs. LTR and use frame.right-width instead of -frame.left
         matrix.postTranslate(-FloatMath.ceil(frame.left), -FloatMath.ceil(frame.top));
         Canvas canvas = new Canvas(bm);
-        canvas.drawColor(0xFF000000);
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
 

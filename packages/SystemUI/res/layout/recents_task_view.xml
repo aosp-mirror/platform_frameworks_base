@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|left"
             android:layout_marginStart="@dimen/recents_task_view_application_icon_size"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/recents_task_view_application_icon_size"
             android:textSize="22sp"
             android:textColor="#ffffffff"
             android:text="@string/recents_empty_message"
