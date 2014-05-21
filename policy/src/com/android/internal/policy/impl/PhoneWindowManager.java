@@ -479,6 +479,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
+    private static final int MSG_DISPATCH_SHOW_RECENTS = 5;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -495,6 +496,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK:
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
+                    break;
+                case MSG_DISPATCH_SHOW_RECENTS:
+                    showRecentApps(false);
                     break;
             }
         }
@@ -2453,6 +2457,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // re-acquire status bar service next time it is needed.
             mStatusBarService = null;
         }
+    }
+
+    @Override
+    public void showRecentApps() {
+        mHandler.removeMessages(MSG_DISPATCH_SHOW_RECENTS);
+        mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_RECENTS);
     }
 
     private void showRecentApps(boolean triggeredFromAltTab) {
