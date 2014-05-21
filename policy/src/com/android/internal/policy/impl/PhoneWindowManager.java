@@ -134,6 +134,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean ENABLE_CAR_DOCK_HOME_CAPTURE = true;
     static final boolean ENABLE_DESK_DOCK_HOME_CAPTURE = false;
 
+    static final int SHORT_PRESS_POWER_NOTHING = 0;
+    static final int SHORT_PRESS_POWER_GO_TO_SLEEP = 1;
+    static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
+    static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME = 3;
+
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
@@ -291,6 +296,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     boolean mLidControlsSleep;
+    int mShortPressOnPowerBehavior = -1;
     int mLongPressOnPowerBehavior = -1;
     boolean mScreenOnEarly = false;
     boolean mScreenOnFully = false;
@@ -715,6 +721,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void cancelPendingScreenshotChordAction() {
         mHandler.removeCallbacks(mScreenshotRunnable);
+    }
+
+    private void powerShortPress(long eventTime) {
+        if (mShortPressOnPowerBehavior < 0) {
+            mShortPressOnPowerBehavior = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_shortPressOnPowerBehavior);
+        }
+
+        switch (mShortPressOnPowerBehavior) {
+            case SHORT_PRESS_POWER_NOTHING:
+                break;
+            case SHORT_PRESS_POWER_GO_TO_SLEEP:
+                mPowerManager.goToSleep(eventTime,
+                        PowerManager.GO_TO_SLEEP_REASON_USER, 0);
+                break;
+            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
+                mPowerManager.goToSleep(eventTime,
+                        PowerManager.GO_TO_SLEEP_REASON_USER,
+                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                break;
+            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
+                mPowerManager.goToSleep(eventTime,
+                        PowerManager.GO_TO_SLEEP_REASON_USER,
+                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                launchHomeFromHotKey();
+                break;
+        }
     }
 
     private final Runnable mPowerLongPress = new Runnable() {
@@ -4009,7 +4042,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mPowerKeyTriggered = false;
                     cancelPendingScreenshotChordAction();
                     if (interceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
-                        mPowerManager.goToSleep(event.getEventTime());
+                        powerShortPress(event.getEventTime());
                         isWakeKey = false;
                     }
                     mPendingPowerKeyUpCanceled = false;
@@ -4864,7 +4897,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void applyLidSwitchState() {
         if (mLidState == LID_CLOSED && mLidControlsSleep) {
-            mPowerManager.goToSleep(SystemClock.uptimeMillis());
+            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+                    PowerManager.GO_TO_SLEEP_REASON_USER,
+                    PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         }
     }
 
@@ -5337,9 +5372,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(mLidKeyboardAccessibility);
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
                 pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
-        pw.print(prefix); pw.print("mLongPressOnPowerBehavior=");
-                pw.print(mLongPressOnPowerBehavior);
-                pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
+        pw.print(prefix);
+                pw.print("mShortPressOnPowerBehavior="); pw.print(mShortPressOnPowerBehavior);
+                pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
+        pw.print(prefix); pw.print("mHasSoftInput="); pw.println(mHasSoftInput);
         pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
                 pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
                 pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);

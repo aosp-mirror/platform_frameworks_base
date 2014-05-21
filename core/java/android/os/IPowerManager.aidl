@@ -35,7 +35,7 @@ interface IPowerManager
 
     void userActivity(long time, int event, int flags);
     void wakeUp(long time);
-    void goToSleep(long time, int reason);
+    void goToSleep(long time, int reason, int flags);
     void nap(long time);
     boolean isInteractive();
 
