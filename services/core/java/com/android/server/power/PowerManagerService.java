@@ -898,9 +898,9 @@ public final class PowerManagerService extends com.android.server.SystemService
         return true;
     }
 
-    private void goToSleepInternal(long eventTime, int reason) {
+    private void goToSleepInternal(long eventTime, int reason, int flags) {
         synchronized (mLock) {
-            if (goToSleepNoUpdateLocked(eventTime, reason)) {
+            if (goToSleepNoUpdateLocked(eventTime, reason, flags)) {
                 updatePowerStateLocked();
             }
         }
@@ -909,9 +909,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     // This method is called goToSleep for historical reasons but we actually start
     // dozing before really going to sleep.
     @SuppressWarnings("deprecation")
-    private boolean goToSleepNoUpdateLocked(long eventTime, int reason) {
+    private boolean goToSleepNoUpdateLocked(long eventTime, int reason, int flags) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "goToSleepNoUpdateLocked: eventTime=" + eventTime + ", reason=" + reason);
+            Slog.d(TAG, "goToSleepNoUpdateLocked: eventTime=" + eventTime
+                    + ", reason=" + reason + ", flags=" + flags);
         }
 
         if (eventTime < mLastWakeTime
@@ -954,6 +955,11 @@ public final class PowerManagerService extends com.android.server.SystemService
             }
         }
         EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numWakeLocksCleared);
+
+        // Skip dozing if requested.
+        if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
+            reallyGoToSleepNoUpdateLocked(eventTime);
+        }
         return true;
     }
 
@@ -1357,7 +1363,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                     changed = napNoUpdateLocked(time);
                 } else {
                     changed = goToSleepNoUpdateLocked(time,
-                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
                 }
             }
         }
@@ -1504,7 +1510,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 // Dream has ended or will be stopped.  Update the power state.
                 if (isItBedTimeYetLocked()) {
                     goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
                     updatePowerStateLocked();
                 } else {
                     wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
@@ -2630,7 +2636,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         @Override // Binder call
-        public void goToSleep(long eventTime, int reason) {
+        public void goToSleep(long eventTime, int reason, int flags) {
             if (eventTime > SystemClock.uptimeMillis()) {
                 throw new IllegalArgumentException("event time must not be in the future");
             }
@@ -2640,7 +2646,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                goToSleepInternal(eventTime, reason);
+                goToSleepInternal(eventTime, reason, flags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
