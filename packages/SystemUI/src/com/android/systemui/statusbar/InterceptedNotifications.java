@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.view.View;
@@ -59,6 +60,7 @@ public class InterceptedNotifications {
 
     public boolean tryIntercept(IBinder key, StatusBarNotification notification) {
         if (!notification.getNotification().extras.getBoolean(EXTRA_INTERCEPT)) return false;
+        if (shouldDisplayIntercepted()) return false;
         mIntercepted.put(key, notification);
         updateSyntheticNotification();
         return true;
@@ -78,6 +80,11 @@ public class InterceptedNotifications {
         if (mIntercepted.containsKey(key)) {
             mIntercepted.put(key, notification);
         }
+    }
+
+    private boolean shouldDisplayIntercepted() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.DISPLAY_INTERCEPTED_NOTIFICATIONS, 0) != 0;
     }
 
     private void updateSyntheticNotification() {
