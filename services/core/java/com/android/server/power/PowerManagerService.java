@@ -147,20 +147,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
     private static final int USER_ACTIVITY_SCREEN_DIM = 1 << 1;
 
-    // Default and minimum screen off timeout in milliseconds.
+    // Default timeout in milliseconds.  This is only used until the settings
+    // provider populates the actual default value (R.integer.def_screen_off_timeout).
     private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
-    private static final int MINIMUM_SCREEN_OFF_TIMEOUT = 10 * 1000;
-
-    // The screen dim duration, in milliseconds.
-    // This is subtracted from the end of the screen off timeout so the
-    // minimum screen off timeout should be longer than this.
-    private static final int SCREEN_DIM_DURATION = 7 * 1000;
-
-    // The maximum screen dim time expressed as a ratio relative to the screen
-    // off timeout.  If the screen off timeout is very short then we want the
-    // dim timeout to also be quite short so that most of the time is spent on.
-    // Otherwise the user won't get much screen on time before dimming occurs.
-    private static final float MAXIMUM_SCREEN_DIM_RATIO = 0.2f;
 
     // The name of the boot animation service in init.rc.
     private static final String BOOT_ANIMATION_SERVICE = "bootanim";
@@ -336,6 +325,20 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // True if dreams should be activated on dock.
     private boolean mDreamsActivateOnDockSetting;
+
+    // The minimum screen off timeout, in milliseconds.
+    private int mMinimumScreenOffTimeoutConfig;
+
+    // The screen dim duration, in milliseconds.
+    // This is subtracted from the end of the screen off timeout so the
+    // minimum screen off timeout should be longer than this.
+    private int mMaximumScreenDimDurationConfig;
+
+    // The maximum screen dim time expressed as a ratio relative to the screen
+    // off timeout.  If the screen off timeout is very short then we want the
+    // dim timeout to also be quite short so that most of the time is spent on.
+    // Otherwise the user won't get much screen on time before dimming occurs.
+    private float mMaximumScreenDimRatioConfig;
 
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
@@ -565,6 +568,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                 com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenNotPowered);
         mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
                 com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
+        mMinimumScreenOffTimeoutConfig = resources.getInteger(
+                com.android.internal.R.integer.config_minimumScreenOffTimeout);
+        mMaximumScreenDimDurationConfig = resources.getInteger(
+                com.android.internal.R.integer.config_maximumScreenDimDuration);
+        mMaximumScreenDimRatioConfig = resources.getFraction(
+                com.android.internal.R.fraction.config_maximumScreenDimRatio, 1, 1);
     }
 
     private void updateSettingsLocked() {
@@ -1317,12 +1326,12 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (mUserActivityTimeoutOverrideFromWindowManager >= 0) {
             timeout = (int)Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
         }
-        return Math.max(timeout, MINIMUM_SCREEN_OFF_TIMEOUT);
+        return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
     }
 
     private int getScreenDimDurationLocked(int screenOffTimeout) {
-        return Math.min(SCREEN_DIM_DURATION,
-                (int)(screenOffTimeout * MAXIMUM_SCREEN_DIM_RATIO));
+        return Math.min(mMaximumScreenDimDurationConfig,
+                (int)(screenOffTimeout * mMaximumScreenDimRatioConfig));
     }
 
     /**
@@ -2085,6 +2094,9 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
+            pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
+            pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
+            pw.println("  mMaximumScreenDimRatioConfig=" + mMaximumScreenDimRatioConfig);
             pw.println("  mScreenOffTimeoutSetting=" + mScreenOffTimeoutSetting);
             pw.println("  mMaximumScreenOffTimeoutFromDeviceAdmin="
                     + mMaximumScreenOffTimeoutFromDeviceAdmin + " (enforced="
