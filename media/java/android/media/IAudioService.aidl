@@ -26,6 +26,7 @@ import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
+import android.media.IVolumeController;
 import android.media.Rating;
 import android.net.Uri;
 import android.view.KeyEvent;
@@ -236,4 +237,10 @@ interface IAudioService {
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
     boolean isCameraSoundForced();
+
+    void setVolumeController(in IVolumeController controller);
+
+    boolean isStreamAffectedByRingerMode(int streamType);
+
+    void disableSafeMediaVolume();
 }

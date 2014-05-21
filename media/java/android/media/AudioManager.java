@@ -37,7 +37,6 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.VolumePanel;
 
 import java.util.HashMap;
 
@@ -498,7 +497,7 @@ public class AudioManager {
         int keyCode = event.getKeyCode();
         if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
                 && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
-                && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
+                && mVolumeKeyUpTime + AudioService.PLAY_SOUND_DELAY
                         > SystemClock.uptimeMillis()) {
             /*
              * The user has hit another key during the delay (e.g., 300ms)
@@ -2892,4 +2891,79 @@ public class AudioManager {
         return AudioSystem.getOutputLatency(streamType);
     }
 
+    /**
+     * Registers a global volume controller interface.  Currently limited to SystemUI.
+     *
+     * @hide
+     */
+    public void setVolumeController(IVolumeController controller) {
+        try {
+            getService().setVolumeController(controller);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error setting volume controller", e);
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public int getRemoteStreamVolume() {
+        try {
+            return getService().getRemoteStreamVolume();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error getting remote stream volume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public int getRemoteStreamMaxVolume() {
+        try {
+            return getService().getRemoteStreamMaxVolume();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error getting remote stream max volume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public void setRemoteStreamVolume(int index) {
+        try {
+            getService().setRemoteStreamVolume(index);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error setting remote stream volume", e);
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public boolean isStreamAffectedByRingerMode(int streamType) {
+        try {
+            return getService().isStreamAffectedByRingerMode(streamType);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling isStreamAffectedByRingerMode", e);
+            return false;
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public void disableSafeMediaVolume() {
+        try {
+            getService().disableSafeMediaVolume();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error disabling safe media volume", e);
+        }
+    }
 }

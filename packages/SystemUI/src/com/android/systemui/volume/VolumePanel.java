@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.systemui.volume;
 
 import com.android.internal.R;
 
@@ -32,12 +32,18 @@ import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.RingtoneManager;
 import android.media.ToneGenerator;
-import android.media.VolumeController;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -46,27 +52,15 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import java.util.HashMap;
 
 /**
- * Handle the volume up and down keys.
- *
- * This code really should be moved elsewhere.
- *
- * Seriously, it really really should be moved elsewhere.  This is used by
- * android.media.AudioService, which actually runs in the system process, to
- * show the volume dialog when the user changes the volume.  What a mess.
+ * Handles the user interface for the volume keys.
  *
  * @hide
  */
-public class VolumePanel extends Handler implements VolumeController {
+public class VolumePanel extends Handler {
     private static final String TAG = VolumePanel.class.getSimpleName();
     private static boolean LOGD = false;
 
-    /**
-     * The delay before playing a sound. This small period exists so the user
-     * can press another key (non-volume keys, too) to have it NOT be audible.
-     * <p>
-     * PhoneWindow will implement this part.
-     */
-    public static final int PLAY_SOUND_DELAY = 300;
+    private static final int PLAY_SOUND_DELAY = AudioService.PLAY_SOUND_DELAY;
 
     /**
      * The delay before vibrating. This small period exists so if the user is
@@ -99,9 +93,8 @@ public class VolumePanel extends Handler implements VolumeController {
     private static final int STREAM_MASTER = -100;
     // Pseudo stream type for remote volume is defined in AudioService.STREAM_REMOTE_MUSIC
 
-    protected Context mContext;
-    private AudioManager mAudioManager;
-    protected AudioService mAudioService;
+    protected final Context mContext;
+    private final AudioManager mAudioManager;
     private boolean mRingIsSilent;
     private boolean mShowCombinedVolumes;
     private boolean mVoiceCapable;
@@ -252,10 +245,9 @@ public class VolumePanel extends Handler implements VolumeController {
     }
 
 
-    public VolumePanel(Context context, AudioService volumeService) {
+    public VolumePanel(Context context) {
         mContext = context;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        mAudioService = volumeService;
 
         // For now, only show master volume if master volume is supported
         final Resources res = context.getResources();
@@ -367,7 +359,7 @@ public class VolumePanel extends Handler implements VolumeController {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.isMasterMute();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return (mAudioService.getRemoteStreamVolume() <= 0);
+            return (mAudioManager.getRemoteStreamVolume() <= 0);
         } else {
             return mAudioManager.isStreamMute(streamType);
         }
@@ -377,7 +369,7 @@ public class VolumePanel extends Handler implements VolumeController {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.getMasterMaxVolume();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return mAudioService.getRemoteStreamMaxVolume();
+            return mAudioManager.getRemoteStreamMaxVolume();
         } else {
             return mAudioManager.getStreamMaxVolume(streamType);
         }
@@ -387,7 +379,7 @@ public class VolumePanel extends Handler implements VolumeController {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.getMasterVolume();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return mAudioService.getRemoteStreamVolume();
+            return mAudioManager.getRemoteStreamVolume();
         } else {
             return mAudioManager.getStreamVolume(streamType);
         }
@@ -397,7 +389,7 @@ public class VolumePanel extends Handler implements VolumeController {
         if (streamType == STREAM_MASTER) {
             mAudioManager.setMasterVolume(index, flags);
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            mAudioService.setRemoteStreamVolume(index);
+            mAudioManager.setRemoteStreamVolume(index);
         } else {
             mAudioManager.setStreamVolume(streamType, index, flags);
         }
@@ -531,7 +523,6 @@ public class VolumePanel extends Handler implements VolumeController {
         obtainMessage(MSG_VOLUME_CHANGED, streamType, flags).sendToTarget();
     }
 
-    @Override
     public void postRemoteVolumeChanged(int streamType, int flags) {
         if (hasMessages(MSG_REMOTE_VOLUME_CHANGED)) return;
         synchronized (this) {
@@ -543,7 +534,6 @@ public class VolumePanel extends Handler implements VolumeController {
         obtainMessage(MSG_REMOTE_VOLUME_CHANGED, streamType, flags).sendToTarget();
     }
 
-    @Override
     public void postRemoteSliderVisibility(boolean visible) {
         obtainMessage(MSG_SLIDER_VISIBILITY_CHANGED,
                 AudioService.STREAM_REMOTE_MUSIC, visible ? 1 : 0).sendToTarget();
@@ -560,7 +550,6 @@ public class VolumePanel extends Handler implements VolumeController {
      * as a request to update the volume), the application will likely set a new volume. If the UI
      * is still up, we need to refresh the display to show this new value.
      */
-    @Override
     public void postHasNewRemotePlaybackInfo() {
         if (hasMessages(MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN)) return;
         // don't create or prevent resources to be freed, if they disappear, this update came too
@@ -590,6 +579,11 @@ public class VolumePanel extends Handler implements VolumeController {
     public void postDisplaySafeVolumeWarning(int flags) {
         if (hasMessages(MSG_DISPLAY_SAFE_VOLUME_WARNING)) return;
         obtainMessage(MSG_DISPLAY_SAFE_VOLUME_WARNING, flags, 0).sendToTarget();
+    }
+
+    public void postDismiss() {
+        removeMessages(MSG_TIMEOUT);
+        sendEmptyMessage(MSG_TIMEOUT);
     }
 
     /**
@@ -751,7 +745,7 @@ public class VolumePanel extends Handler implements VolumeController {
         // Do a little vibrate if applicable (only when going into vibrate mode)
         if ((streamType != AudioService.STREAM_REMOTE_MUSIC) &&
                 ((flags & AudioManager.FLAG_VIBRATE) != 0) &&
-                mAudioService.isStreamAffectedByRingerMode(streamType) &&
+                mAudioManager.isStreamAffectedByRingerMode(streamType) &&
                 mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
         }
@@ -874,7 +868,7 @@ public class VolumePanel extends Handler implements VolumeController {
                                             new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mAudioService.disableSafeMediaVolume();
+                                mAudioManager.disableSafeMediaVolume();
                             }
                         })
                         .setNegativeButton(com.android.internal.R.string.no, null)
