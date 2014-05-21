@@ -400,8 +400,14 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public static final int AUTO_JOIN_ENABLED                   = 0;
+    /** @hide
+     * if this is set, the WifiConfiguration cannot use linkages so as to bump
+     * it's relative priority.
+     * */
+    public static final int AUTO_JOIN_TEMPORARY_DISABLED  = 1;
     /** @hide */
-    public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 1;
+    public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 2;
+
     /**
      * @hide
      */
