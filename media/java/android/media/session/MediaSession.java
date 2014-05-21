@@ -16,7 +16,10 @@
 
 package android.media.session;
 
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.Rating;
 import android.media.session.ISessionController;
 import android.media.session.ISession;
@@ -89,6 +92,7 @@ public final class MediaSession {
     /**
      * Indicates the session was disconnected because the user that the session
      * belonged to is stopping.
+     *
      * @hide
      */
     public static final int DISCONNECT_REASON_USER_STOPPING = 1;
@@ -218,6 +222,16 @@ public final class MediaSession {
     }
 
     /**
+     * Set an intent for launching UI for this Session. This can be used as a
+     * quick link to an ongoing media screen.
+     *
+     * @param pi The intent to launch to show UI for this Session.
+     */
+    public void setLaunchPendingIntent(PendingIntent pi) {
+        // TODO
+    }
+
+    /**
      * Set any flags for the session.
      *
      * @param flags The flags to set for this session.
@@ -228,6 +242,38 @@ public final class MediaSession {
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setFlags.", e);
         }
+    }
+
+    /**
+     * Set the attributes for this session's local playback. This will affect
+     * the system's default volume handling for this session. If
+     * {@link #useRemotePlayback} was previously called it will stop receiving
+     * volume commands and the system will begin handling volume changes.
+     * <p>
+     * By default sessions use {@link AudioAttributes#USAGE_MEDIA}.
+     *
+     * @param attributes The {@link AudioAttributes} for this session's
+     *            playback.
+     */
+    public void useLocalPlayback(AudioAttributes attributes) {
+        // TODO
+    }
+
+    /**
+     * Configure this session to use remote volume handling. This must be called
+     * to receive volume button events, otherwise the system will adjust the
+     * current stream volume for this session. If {@link #useLocalPlayback} was
+     * previously called that stream will stop receiving volume changes for this
+     * session.
+     *
+     * @param volumeProvider The provider that will handle volume changes. May
+     *            not be null.
+     */
+    public void useRemotePlayback(RemoteVolumeProvider volumeProvider) {
+        if (volumeProvider == null) {
+            throw new IllegalArgumentException("volumeProvider may not be null!");
+        }
+        // TODO
     }
 
     /**
@@ -461,7 +507,7 @@ public final class MediaSession {
     /**
      * Receives commands or updates from controllers and routes. An app can
      * specify what commands and buttons it supports by setting them on the
-     * MediaSession (TODO).
+     * MediaSession.
      */
     public abstract static class Callback {
 
