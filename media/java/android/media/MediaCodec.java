@@ -744,12 +744,35 @@ final public class MediaCodec {
         setParameters(keys, values);
     }
 
+    /**
+     * Sets the codec listener for actionable MediaCodec events.
+     * <p>Call this method with a null listener to stop receiving event notifications.
+     *
+     * @param cb The listener that will run.
+     */
     public void setNotificationCallback(NotificationCallback cb) {
         mNotificationCallback = cb;
     }
 
-    public interface NotificationCallback {
-        void onCodecNotify(MediaCodec codec);
+    /**
+     * MediaCodec listener interface.  Used to notify the user of MediaCodec
+     * when there are available input and/or output buffers, a change in
+     * configuration or when a codec error happened.
+     */
+    public static abstract class NotificationCallback {
+        /**
+         * Called on the listener to notify that there is an actionable
+         * MediaCodec event.  The application should call {@link #dequeueOutputBuffer}
+         * to receive the configuration change event, codec error or an
+         * available output buffer.  It should also call  {@link #dequeueInputBuffer}
+         * to receive any available input buffer.  For best performance, it
+         * is recommended to exhaust both available input and output buffers in
+         * the handling of a single callback, by calling the dequeue methods
+         * repeatedly with a zero timeout until {@link #INFO_TRY_AGAIN_LATER} is returned.
+         *
+         * @param codec the MediaCodec instance that has an actionable event.
+         */
+        public abstract void onCodecNotify(MediaCodec codec);
     }
 
     private void postEventFromNative(

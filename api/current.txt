@@ -14251,7 +14251,8 @@ package android.media {
     field public int numSubSamples;
   }
 
-  public static abstract interface MediaCodec.NotificationCallback {
+  public static abstract class MediaCodec.NotificationCallback {
+    ctor public MediaCodec.NotificationCallback();
     method public abstract void onCodecNotify(android.media.MediaCodec);
   }
 
