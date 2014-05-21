@@ -34,9 +34,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * TODO: doc
+ * Provides APIs for managing Wifi Passpoint credentials.
  */
-public class PasspointManager {
+public class WifiPasspointManager {
 
     private static final String TAG = "PasspointManager";
 
@@ -44,37 +44,58 @@ public class PasspointManager {
 
     /* Passpoint states values */
 
-    /** Passpoint is in an known state. This should only occur in boot time */
-    public static final int PASSPOINT_STATE_UNKNOWN     = 0;
+    /** Passpoint is in an known state. This should only occur in boot time @hide */
+    public static final int PASSPOINT_STATE_UNKNOWN = 0;
 
-    /** Passpoint is disabled. This occurs when wifi is disabled. */
-    public static final int PASSPOINT_STATE_DISABLED    = 1;
+    /** Passpoint is disabled. This occurs when wifi is disabled. @hide */
+    public static final int PASSPOINT_STATE_DISABLED = 1;
 
-    /** Passpoint is enabled and in discovery state. */
-    public static final int PASSPOINT_STATE_DISCOVERY   = 2;
+    /** Passpoint is enabled and in discovery state. @hide */
+    public static final int PASSPOINT_STATE_DISCOVERY = 2;
 
-    /** Passpoint is enabled and in access state. */
-    public static final int PASSPOINT_STATE_ACCESS      = 3;
+    /** Passpoint is enabled and in access state. @hide */
+    public static final int PASSPOINT_STATE_ACCESS = 3;
 
-    /** Passpoint is enabled and in provisioning state. */
-    public static final int PASSPOINT_STATE_PROVISION   = 4;
+    /** Passpoint is enabled and in provisioning state. @hide */
+    public static final int PASSPOINT_STATE_PROVISION = 4;
 
     /* Passpoint callback error codes */
 
-    /** Indicates that the operation failed due to an internal error */
-    public static final int ERROR           = 0;
+    /** Indicates that the operation failed due to an internal error @hide */
+    public static final int ERROR = 0;
 
-    /** Indicates that the operation failed because wifi is disabled */
-    public static final int WIFI_DISABLED   = 1;
+    /** Indicates that the operation failed because wifi is disabled @hide */
+    public static final int WIFI_DISABLED = 1;
 
-    /** Indicates that the operation failed because the framework is busy */
-    public static final int BUSY            = 2;
+    /** Indicates that the operation failed because the framework is busy @hide */
+    public static final int BUSY = 2;
+
+    /**
+     * protocol supported for Passpoint
+     * @hide
+     */
+    public static final String PROTOCOL_DM = "OMA-DM-ClientInitiated";
+
+    /**
+     * protocol supported for Passpoint
+     * @hide
+     */
+    public static final String PROTOCOL_SOAP = "SPP-ClientInitiated";
 
     /* Passpoint broadcasts */
 
     /**
+     * Broadcast intent action indicating that Passpoint online sign up is
+     * avaiable.
+     * @hide
+     */
+    public static final String PASSPOINT_OSU_AVAILABLE =
+            "android.net.wifi.passpoint.OSU_AVAILABLE";
+
+    /**
      * Broadcast intent action indicating that the state of Passpoint
      * connectivity has changed
+     * @hide
      */
     public static final String PASSPOINT_STATE_CHANGED_ACTION =
             "android.net.wifi.passpoint.STATE_CHANGE";
@@ -82,6 +103,7 @@ public class PasspointManager {
     /**
      * Broadcast intent action indicating that the saved Passpoint credential
      * list has changed
+     * @hide
      */
     public static final String PASSPOINT_CRED_CHANGED_ACTION =
             "android.net.wifi.passpoint.CRED_CHANGE";
@@ -101,9 +123,9 @@ public class PasspointManager {
     public static final String PASSPOINT_USER_REM_REQ_ACTION =
             "android.net.wifi.passpoint.USER_REM_REQ";
 
-
     /**
      * Interface for callback invocation when framework channel is lost
+     * @hide
      */
     public interface ChannelListener {
         /**
@@ -115,6 +137,7 @@ public class PasspointManager {
 
     /**
      * Interface for callback invocation on an application action
+     * @hide
      */
     public interface ActionListener {
         /** The operation succeeded */
@@ -163,6 +186,7 @@ public class PasspointManager {
      * A channel that connects the application to the wifi passpoint framework.
      * Most passpoint operations require a Channel as an argument.
      * An instance of Channel is obtained by doing a call on {@link #initialize}
+     * @hide
      */
     public static class Channel {
         private final static int INVALID_LISTENER_KEY = 0;
@@ -193,7 +217,8 @@ public class PasspointManager {
         }
 
         private int putListener(Object listener, int count) {
-            if (listener == null || count <= 0) return INVALID_LISTENER_KEY;
+            if (listener == null || count <= 0)
+                return INVALID_LISTENER_KEY;
             int key;
             synchronized (mListenerMapLock) {
                 do {
@@ -207,13 +232,15 @@ public class PasspointManager {
 
         private Object getListener(int key, boolean force) {
             Log.d(TAG, "getListener() key=" + key + " force=" + force);
-            if (key == INVALID_LISTENER_KEY) return null;
+            if (key == INVALID_LISTENER_KEY)
+                return null;
             synchronized (mListenerMapLock) {
                 if (!force) {
                     int count = mListenerMapCount.get(key);
                     Log.d(TAG, "count=" + count);
                     mListenerMapCount.put(key, --count);
-                    if (count > 0) return null;
+                    if (count > 0)
+                        return null;
                 }
                 Log.d(TAG, "remove key");
                 mListenerMapCount.remove(key);
@@ -223,12 +250,14 @@ public class PasspointManager {
 
         private void anqpRequestStart(ScanResult sr) {
             Log.d(TAG, "anqpRequestStart sr.bssid=" + sr.BSSID);
-            synchronized(mAnqpRequestLock) { mAnqpRequest.add(sr); }
+            synchronized (mAnqpRequestLock) {
+                mAnqpRequest.add(sr);
+            }
         }
 
-        private void anqpRequestFinish(PasspointInfo result) {
+        private void anqpRequestFinish(WifiPasspointInfo result) {
             Log.d(TAG, "anqpRequestFinish pi.bssid=" + result.bssid);
-            synchronized(mAnqpRequestLock) {
+            synchronized (mAnqpRequestLock) {
                 for (ScanResult sr : mAnqpRequest)
                     if (sr.BSSID.equals(result.bssid)) {
                         Log.d(TAG, "find hit " + result.bssid);
@@ -242,7 +271,7 @@ public class PasspointManager {
 
         private void anqpRequestFinish(ScanResult sr) {
             Log.d(TAG, "anqpRequestFinish sr.bssid=" + sr.BSSID);
-            synchronized(mAnqpRequestLock) {
+            synchronized (mAnqpRequestLock) {
                 for (ScanResult sr1 : mAnqpRequest)
                     if (sr1.BSSID.equals(sr.BSSID)) {
                         mAnqpRequest.remove(sr1);
@@ -268,7 +297,7 @@ public class PasspointManager {
                         break;
 
                     case REQUEST_ANQP_INFO_SUCCEEDED:
-                        PasspointInfo result = (PasspointInfo) message.obj;
+                        WifiPasspointInfo result = (WifiPasspointInfo) message.obj;
                         anqpRequestFinish(result);
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
@@ -277,7 +306,8 @@ public class PasspointManager {
 
                     case REQUEST_ANQP_INFO_FAILED:
                         anqpRequestFinish((ScanResult) message.obj);
-                        if (listener == null) getListener(message.arg2, true);
+                        if (listener == null)
+                            getListener(message.arg2, true);
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
@@ -292,38 +322,36 @@ public class PasspointManager {
 
     }
 
-
     private static final int BASE = Protocol.BASE_WIFI_PASSPOINT_MANAGER;
 
     /** @hide */
-    public static final int REQUEST_ANQP_INFO                       = BASE + 1;
+    public static final int REQUEST_ANQP_INFO = BASE + 1;
 
     /** @hide */
-    public static final int REQUEST_ANQP_INFO_FAILED                = BASE + 2;
+    public static final int REQUEST_ANQP_INFO_FAILED = BASE + 2;
 
     /** @hide */
-    public static final int REQUEST_ANQP_INFO_SUCCEEDED             = BASE + 3;
+    public static final int REQUEST_ANQP_INFO_SUCCEEDED = BASE + 3;
 
     /** @hide */
-    public static final int REQUEST_OSU_INFO                        = BASE + 4;
+    public static final int REQUEST_OSU_INFO = BASE + 4;
 
     /** @hide */
-    public static final int REQUEST_OSU_INFO_FAILED                 = BASE + 5;
+    public static final int REQUEST_OSU_INFO_FAILED = BASE + 5;
 
     /** @hide */
-    public static final int REQUEST_OSU_INFO_SUCCEEDED              = BASE + 6;
-
+    public static final int REQUEST_OSU_INFO_SUCCEEDED = BASE + 6;
 
     private Context mContext;
-    IPasspointManager mService;
-
+    IWifiPasspointManager mService;
 
     /**
      * TODO: doc
      * @param context
      * @param service
+     * @hide
      */
-    public PasspointManager(Context context, IPasspointManager service) {
+    public WifiPasspointManager(Context context, IWifiPasspointManager service) {
         mContext = context;
         mService = service;
     }
@@ -338,10 +366,13 @@ public class PasspointManager {
      *            null.
      * @return Channel instance that is necessary for performing any further
      *         passpoint operations
+     *
+     * @hide
      */
     public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
         Messenger messenger = getMessenger();
-        if (messenger == null) return null;
+        if (messenger == null)
+            return null;
 
         Channel c = new Channel(srcContext, srcLooper, listener);
         if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
@@ -366,49 +397,33 @@ public class PasspointManager {
         }
     }
 
-    /**
-     * Get Passpoint state.
-     *
-     * @return One of {@link #PASSPOINT_STATE_DISABLED},
-     *         {@link #PASSPOINT_STATE_DISCOVERY},
-     *         {@link #PASSPOINT_STATE_ACCESS},
-     *         {@link #PASSPOINT_STATE_PROVISION},
-     *         {@link #PASSPOINT_STATE_UNKNOWN}
-     */
+    /** @hide */
     public int getPasspointState() {
-        try{
+        try {
             return mService.getPasspointState();
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             return PASSPOINT_STATE_UNKNOWN;
         }
     }
 
-    /**
-     * TODO: doc
-     *
-     * @param c
-     * @param requested
-     * @param mask
-     * @param listener
-     *
-     * @hide
-     */
+    /** @hide */
     public void requestAnqpInfo(Channel c, List<ScanResult> requested, int mask,
             ActionListener listener) {
         Log.d(TAG, "requestAnqpInfo start");
         Log.d(TAG, "requested.size=" + requested.size());
         checkChannel(c);
         List<ScanResult> list = new ArrayList<ScanResult>();
-        for (ScanResult sr : requested) if (sr.capabilities.contains("[HS20]")) {
-            list.add(sr);
-            c.anqpRequestStart(sr);
-            Log.d(TAG, "adding " + sr.BSSID);
-        }
+        for (ScanResult sr : requested)
+            if (sr.capabilities.contains("[HS20]")) {
+                list.add(sr);
+                c.anqpRequestStart(sr);
+                Log.d(TAG, "adding " + sr.BSSID);
+            }
         int count = list.size();
         Log.d(TAG, "after filter, count=" + count);
         if (count == 0) {
-            if (DBG) Log.d(TAG, "ANQP info request contains no HS20 APs, skipped");
+            if (DBG)
+                Log.d(TAG, "ANQP info request contains no HS20 APs, skipped");
             listener.onSuccess();
             return;
         }
@@ -418,25 +433,13 @@ public class PasspointManager {
         Log.d(TAG, "requestAnqpInfo end");
     }
 
-    /**
-     * TODO: doc
-     *
-     * @param c
-     * @param requested
-     * @param resolution
-     * @param listener
-     */
-    public void requestOsuIcons(Channel c, List<PasspointOsuProvider> requested,
+    /** @hide */
+    public void requestOsuIcons(Channel c, List<WifiPasspointOsuProvider> requested,
             int resolution, ActionListener listener) {
     }
 
-    /**
-     * TODO: doc
-     *
-     * @param requested
-     * @return
-     */
-    public List<PasspointPolicy> requestCredentialMatch(List<ScanResult> requested) {
+    /** @hide */
+    public List<WifiPasspointPolicy> requestCredentialMatch(List<ScanResult> requested) {
         return null;
     }
 
@@ -447,7 +450,7 @@ public class PasspointManager {
      *
      * @return The list of credentials
      */
-    public List<PasspointCredential> getSavedCredentials() {
+    public List<WifiPasspointCredential> getSavedCredentials() {
         return null;
     }
 
@@ -457,32 +460,34 @@ public class PasspointManager {
      * @param cred The credential to be added
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean addCredential(PasspointCredential cred) {
+    public boolean addCredential(WifiPasspointCredential cred) {
         return true;
     }
 
     /**
-     * Update an existing Passpoint credential.
+     * Update an existing Passpoint credential. Only system or the owner of this
+     * credential has the permission to do this.
      *
      * @param cred The credential to be updated
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean updateCredential(PasspointCredential cred) {
+    public boolean updateCredential(WifiPasspointCredential cred) {
         return true;
     }
 
     /**
-     * Remove an existing Passpoint credential.
+     * Remove an existing Passpoint credential. Only system or the owner of this
+     * credential has the permission to do this.
      *
      * @param cred The credential to be removed
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean removeCredential(PasspointCredential cred) {
+    public boolean removeCredential(WifiPasspointCredential cred) {
         return true;
     }
 
     /** @hide */
-    public void startOsu(Channel c, PasspointOsuProvider selected, OsuRemListener listener) {
+    public void startOsu(Channel c, WifiPasspointOsuProvider selected, OsuRemListener listener) {
 
     }
 
@@ -490,15 +495,12 @@ public class PasspointManager {
     public void startUserRemediation(Channel c, OsuRemListener listener) {
     }
 
-    /**
-     * Select and connect to a Passpoint network.
-     *
-     * @param selected Selected Passpoint network, see {@link PasspointPolicy}
-     */
-    public void connect(PasspointPolicy selected) {
+    /** @hide */
+    public void connect(WifiPasspointPolicy selected) {
     }
 
     private static void checkChannel(Channel c) {
-        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
+        if (c == null)
+            throw new IllegalArgumentException("Channel needs to be initialized");
     }
 }

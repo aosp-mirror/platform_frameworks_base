@@ -19,11 +19,11 @@ package android.net.wifi.passpoint;
 import android.os.Messenger;
 
 /**
- * Interface that allows controlling and querying Passpoint connectivity.
+ * Interface that allows controlling and querying Wifi Passpoint connectivity.
  *
  * {@hide}
  */
-interface IPasspointManager
+interface IWifiPasspointManager
 {
     Messenger getMessenger();
     int getPasspointState();

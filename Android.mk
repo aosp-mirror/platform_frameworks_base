@@ -333,7 +333,7 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	wifi/java/android/net/wifi/passpoint/IPasspointManager.aidl \
+	wifi/java/android/net/wifi/passpoint/IWifiPasspointManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/IWifiScanner.aidl \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \

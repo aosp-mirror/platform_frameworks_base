@@ -16,4 +16,4 @@
 
 package android.net.wifi.passpoint;
 
-parcelable PasspointOsuProvider;
+parcelable WifiPasspointCredential;

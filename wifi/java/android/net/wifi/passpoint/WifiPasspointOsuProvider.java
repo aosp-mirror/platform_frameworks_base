@@ -19,18 +19,22 @@ package android.net.wifi.passpoint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * TODO: doc
- */
-public class PasspointOsuProvider implements Parcelable {
+/** @hide */
+public class WifiPasspointOsuProvider implements Parcelable {
 
-    /** TODO: doc */
+    /** TODO: doc
+     * @hide
+     */
     public static final int OSU_METHOD_UNKNOWN = -1;
 
-    /** TODO: doc */
+    /** TODO: doc
+     * @hide
+     */
     public static final int OSU_METHOD_OMADM = 0;
 
-    /** TODO: doc */
+    /** TODO: doc
+     * @hide
+     */
     public static final int OSU_METHOD_SOAP = 1;
 
     /** TODO: doc */
@@ -39,10 +43,14 @@ public class PasspointOsuProvider implements Parcelable {
     /** TODO: doc */
     public String friendlyName;
 
-    /** TODO: doc */
+    /** TODO: doc
+     * @hide
+     */
     public String serverUri;
 
-    /** TODO: doc */
+    /** TODO: doc
+     * @hide
+     */
     public int osuMethod = OSU_METHOD_UNKNOWN;
 
     /** TODO: doc */
@@ -66,14 +74,13 @@ public class PasspointOsuProvider implements Parcelable {
     /** TODO: doc */
     public String osuService;
 
-
     /** default constructor @hide */
-    public PasspointOsuProvider() {
+    public WifiPasspointOsuProvider() {
         // TODO
     }
 
     /** copy constructor @hide */
-    public PasspointOsuProvider(PasspointOsuProvider source) {
+    public WifiPasspointOsuProvider(WifiPasspointOsuProvider source) {
         // TODO
     }
 
@@ -88,9 +95,9 @@ public class PasspointOsuProvider implements Parcelable {
         sb.append(" osuMethod: ").append(osuMethod);
         if (iconFileName != null) {
             sb.append(" icon: [").append(iconWidth).append("x")
-              .append(iconHeight).append(" ")
-              .append(iconType).append(" ")
-              .append(iconFileName);
+                    .append(iconHeight).append(" ")
+                    .append(iconType).append(" ")
+                    .append(iconFileName);
         }
         if (osuNai != null)
             sb.append(" osuNai: ").append(osuNai);
@@ -119,27 +126,27 @@ public class PasspointOsuProvider implements Parcelable {
         // TODO: icon image?
     }
 
-    public static final Parcelable.Creator<PasspointOsuProvider> CREATOR =
-            new Parcelable.Creator<PasspointOsuProvider>() {
-        @Override
-        public PasspointOsuProvider createFromParcel(Parcel in) {
-            PasspointOsuProvider osu = new PasspointOsuProvider();
-            osu.ssid = (String) in.readValue(String.class.getClassLoader());
-            osu.friendlyName = (String) in.readValue(String.class.getClassLoader());
-            osu.serverUri = (String) in.readValue(String.class.getClassLoader());
-            osu.osuMethod = in.readInt();
-            osu.iconWidth = in.readInt();
-            osu.iconHeight = in.readInt();
-            osu.iconType = (String) in.readValue(String.class.getClassLoader());
-            osu.iconFileName = (String) in.readValue(String.class.getClassLoader());
-            osu.osuNai = (String) in.readValue(String.class.getClassLoader());
-            osu.osuService = (String) in.readValue(String.class.getClassLoader());
-            return osu;
-        }
+    public static final Parcelable.Creator<WifiPasspointOsuProvider> CREATOR =
+            new Parcelable.Creator<WifiPasspointOsuProvider>() {
+                @Override
+                public WifiPasspointOsuProvider createFromParcel(Parcel in) {
+                    WifiPasspointOsuProvider osu = new WifiPasspointOsuProvider();
+                    osu.ssid = (String) in.readValue(String.class.getClassLoader());
+                    osu.friendlyName = (String) in.readValue(String.class.getClassLoader());
+                    osu.serverUri = (String) in.readValue(String.class.getClassLoader());
+                    osu.osuMethod = in.readInt();
+                    osu.iconWidth = in.readInt();
+                    osu.iconHeight = in.readInt();
+                    osu.iconType = (String) in.readValue(String.class.getClassLoader());
+                    osu.iconFileName = (String) in.readValue(String.class.getClassLoader());
+                    osu.osuNai = (String) in.readValue(String.class.getClassLoader());
+                    osu.osuService = (String) in.readValue(String.class.getClassLoader());
+                    return osu;
+                }
 
-        @Override
-        public PasspointOsuProvider[] newArray(int size) {
-            return new PasspointOsuProvider[size];
-        }
-    };
+                @Override
+                public WifiPasspointOsuProvider[] newArray(int size) {
+                    return new WifiPasspointOsuProvider[size];
+                }
+            };
 }
