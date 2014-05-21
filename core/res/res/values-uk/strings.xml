@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"Тб"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> дн."</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> день <xliff:g id="HOURS">%2$d</xliff:g> год"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> дн. <xliff:g id="HOURS">%2$d</xliff:g> год"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> год"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> год <xliff:g id="MINUTES">%2$d</xliff:g> хв"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> год <xliff:g id="MINUTES">%2$d</xliff:g> хв"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> хв"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> хв <xliff:g id="SECONDS">%2$d</xliff:g> с"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> хв <xliff:g id="SECONDS">%2$d</xliff:g> с"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без назви&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -135,8 +146,9 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Забагато видалень <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Пам’ять планшетного ПК заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Пам’ять годинника заповнено. Видаліть файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Пам’ять телефону заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережу можуть відстежувати"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережа може відстежуватися"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Невідомою третьою стороною"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Доменом <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -152,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Дзвінок увімкнено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ваш пристрій буде вимкнено."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Годинник буде вимкнено."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ваш телефон буде вимкнено."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Вимкнути?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Перейти в безпечний режим"</string>
@@ -171,9 +184,12 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим польоту"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим польоту ВВІМК."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим польоту ВИМК."</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Налаштування"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Особистий профіль"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Службовий профіль"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Служби, які потребують оплати"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Виконувати дії, які потребують оплати."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ваші повідомл."</string>
@@ -256,7 +272,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"видаляти ярлики"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Дозволяє програмі самостійно вилучати ярлики з головного екрана."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"переадресовувати вихідні виклики"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Дозволяє програмі обробляти вихідні дзвінки та змінювати номер для виклику. Такий дозвіл дає програмі змогу відстежувати, переадресовувати чи блокувати вихідні дзвінки."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Дозволяє додатку читати номер вихідного дзвінка, переспрямовувати дзвінок на інший номер або переривати його."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"отримувати текстові повідомлення (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Дозволяє програмі отримувати й обробляти SMS-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"отримувати текстові повідомлення (MMS)"</string>
@@ -315,12 +331,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Дозволяє програмі отримувати вміст активного вікна. Шкідливі програми можуть отримувати весь вміст вікна та вивчати весь його текст, окрім паролів."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"тимчасово вмикати доступність"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Дозволяє програмі тимчасового вмикати доступність на пристрої. Шкідливі програми можуть вмикати доступність без згоди користувача."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"отримувати інформацію про вікна"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Дозволяє програмі отримувати інформацію про вікна від диспетчера вікон. Шкідливі програми можуть отримувати інформацію, яка призначена для внутрішнього користування системи."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"отримувати маркер вікна"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Дозволяє додатку отримувати маркер вікна. Шкідливі додатки можуть без дозволу взаємодіяти з вікном додатка, видаючи себе за систему."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"отримувати статистику частоти кадрів"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Дозволяє додатку збирати статистику частоти кадрів. Шкідливі додатки можуть відстежувати частоту кадрів у вікнах інших додатків."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"фільтрувати події"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Дозволяє програмі реєструвати вхідний фільтр, який фільтрує потік усіх подій користувача перед їх надсиланням. Шкідливі програми можуть контролювати інтерфейс системи без втручання користувача."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"збільшити екран"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Дозволяє програмі збільшувати вміст екрана. Зловмисні програми можуть змінювати вміст екрана так, що пристроєм стає неможливо користуватися."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"частк. заверш. роб."</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Переводить диспетчер дій у стан завершення роботи. Не виконує повне завершення роботи."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>
@@ -382,14 +398,18 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня служби VPN. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прив’язати до фонового малюнка"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Дозволяє власнику прив’язуватися до інтерфейсу верхнього рівня фонового малюнка. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"підключитися до служби голосової взаємодії"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби голосової взаємодії. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"прив’язуватися до віддаленого екрана"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня віддаленого екрана. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прив\'язувати до служби віджетів"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня служби віджетів. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"підключитися до служби постачання маршрутів"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Дозволяє власникові підключатися до зареєстрованих постачальників маршрутів. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаємодіяти з адмін. пристрою"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Дозволяє власнику надсилати задавані функції адміністратору пристрою. Ніколи не застосовується для звичайних програм."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"прив’язуватися до вводу телевізора"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня вводу телевізора. Ніколи не застосовується для звичайних додатків."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"підключатися до TV-входу"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Додаток зможе підключатися до інтерфейсу верхнього рівня TV-входу. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"додавати чи вилучати адміністраторів пристрою"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Дозволяє власнику додавати чи вилучати активних адміністраторів пристрою. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"змінювати орієнтацію екрана"</string>
@@ -425,8 +445,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Дозволяє програмі використовувати будь-який установлений медіа-декодер для декодування з метою відтворення."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"керувати захищеними обліковими даними"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Дозволяє програмі встановлювати та видаляти сертифікати центру сертифікації (CA) як захищені облікові дані."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"взаємодіяти з неактивними службами"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Такий дозвіл дає змогу системі Android прив’язуватися до неактивних служб програми."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"запускати додаток, коли пристрій неактивний"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Маючи цей дозвіл, система Android може запускати додаток у фоновому режимі, коли пристрій не використовується."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"чит./зап. на ресури., якими вол. діаг."</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Дозволяє програмі читати та писати на будь-який ресурс, яким володіє діагностична група; наприклад, у файли в папці /dev. Це потенційно може вплинути на стабільність і безпеку системи. Потрібно використовувати ЛИШЕ для певної діагностики обладнання, яку виконує виробник чи оператор."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"вмикати чи вимикати компоненти програми"</string>
@@ -464,6 +484,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Дозволяє програмі читати особисту інформацію профілю, збережену на пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що програма може ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"змінювати картки контактів"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Дозволяє програмі змінювати чи додавати особисту інформацію профілю, збережену на пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що програма може ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"датчики на тілі (як-от пульсометр)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Дозволяє додатку отримувати дані з датчиків, які вимірюють фізіологічні процеси, як-от пульс."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читати ваш соціальний потік"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Дозволяє програмі отримувати доступ до оновлень із соціальних мереж від вас і ваших друзів та синхронізувати їх. Будьте обережні, надаючи доступ до інформації – це дозволяє програмі читати повідомлення, якими ви та ваші друзі обмінювалися в соціальних мережах, незалежно від конфіденційності. Зауважте: цей дозвіл не можна застосовувати в усіх соціальних мережах."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"писати у ваш соціальний потік"</string>
@@ -565,6 +587,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Дозволяє програмі контролювати телефонні функції пристрою. Програма з цим дозволом може переключати мережі, вмикати та вимикати радіо в телефоні тощо без вашого відома."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читати статус та ідентифікаційну інформацію телефону"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"читати точні статуси телефону"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Дозволяє додатку отримувати доступ до статусів телефону. Цей дозвіл дає додатку змогу визначати статус виклику (активний чи у фоновому режимі), помилки викликів, точний статус передавання даних і помилки передавання даних."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозволяє програмі не допускати перехід планшетного ПК у режим сну."</string>
@@ -632,6 +656,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Змінити стан WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Дозволяє програмі під’єднувати планшетний ПК до мереж WiMAX і від’єднувати його від них."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Дозволяє програмі під’єднувати телефон до мереж WiMAX і від’єднувати його від них."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"оцінювати мережі"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Дозволяє додатку оцінювати мережі та впливати на вибір мережі планшетом."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Дозволяє додатку оцінювати мережі та впливати на вибір мережі телефоном."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"створювати пару з пристроями Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Дозволяє програмі переглядати конфігурацію Bluetooth на планшетному ПК, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Дозволяє програмі переглядати конфігурацію Bluetooth на телефоні, а також створювати та приймати з’єднання зі спареними пристроями."</string>
@@ -685,10 +712,16 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Дозволяє програмі отримувати, перевіряти й очищати сповіщення, зокрема опубліковані іншими програмами."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"прив’язуватися до служби читання сповіщень"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Дозволяє власнику прив’язуватися до інтерфейсу верхнього рівня служби читання сповіщень. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"підключитися до служби постачання умов"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби постачання умов. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"викликати надану оператором програму конфігурації"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозволяє програмі прослуховувати дані спостережень за станом мережі. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"змінювати калібрування пристрою введення"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Програма може змінювати параметри калібрування сенсорного екрана. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"отримувати доступ до сертифікатів DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволяє додатку надавати та використовувати сертифікати DRM. Ніколи не застосовується для звичайних додатків."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
@@ -1321,6 +1354,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Дозволяє програмі отримувати доступ до безпечного сховища через клавіатуру."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Керувати відображенням і хованням клавіатури"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Дозволяє програмі керувати клавіатурою."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Відстежувати зміни в стані довіри."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Дозволяє додатку відстежувати зміни в стані довіри."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Прив’язуватися до служби довірчих агентів"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозволяє додатку прив’язуватися до служби довірчих агентів."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаємодіяти з оновленнями системи та системою відновлення."</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Дозволяє додатку взаємодіяти із системою відновлення й оновленнями системи."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Двічі торкніться, щоб керувати масштабом"</string>
@@ -1347,6 +1384,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Служба читання сповіщень"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Постачальник умов"</string>
     <string name="vpn_title" msgid="19615213552042827">"Мережу VPN активовано"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Мережу VPN активовано програмою <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Торкніться, щоб керувати мережею."</string>

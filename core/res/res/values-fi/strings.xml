@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"Tt"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Pt"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> päivää"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> päivä <xliff:g id="HOURS">%2$d</xliff:g> t"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> päivä <xliff:g id="HOURS">%2$d</xliff:g> t"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> t"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> t <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> t <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Nimetön&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -135,6 +146,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkronointi"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Liikaa <xliff:g id="CONTENT_TYPE">%s</xliff:g>-poistoja."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet-laitteen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Kellon tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Verkkoa saatetaan valvoa"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Valvoja on tuntematon kolmas osapuoli."</string>
@@ -152,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Soittoääni: normaali"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Kello sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Haluatko sammuttaa?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Käynnistä vikasietotilassa"</string>
@@ -171,9 +184,12 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Lentokonetila"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Lentokonetila on KÄYTÖSSÄ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Lentokonetila on POIS KÄYTÖSTÄ"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Asetukset"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Suojattu tila"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Henkilökohtainen"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Työ"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Maksulliset palvelut"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Suorita mahdollisesti maksullisia toimintoja."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Omat viestit"</string>
@@ -256,7 +272,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"poista pikakuvakkeita"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Antaa sovelluksen poistaa aloitusruudun pikakuvakkeita ilman käyttäjän toimia."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ohjaa uudelleen lähtevät puhelut"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Antaa sovelluksen käsitellä lähteviä puheluita ja muuttaa kohdenumeroita. Sovellus voi valvoa, uudelleenohjata tai estää lähteviä puheluita."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Sallii sovelluksen nähdä numeron, joka valitaan lähtevää puhelua soitettaessa, ja antaa mahdollisuuden ohjata puhelun eri numeroon tai keskeyttää puhelun kokonaan."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"vastaanota tekstiviestejä (teksti)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Antaa sovelluksen vastaanottaa ja käsitellä tekstiviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"vastaanota tekstiviestejä (multimedia)"</string>
@@ -315,12 +331,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Antaa sovelluksen noutaa aktiivisen ikkunan sisällön. Haitalliset sovellukset voivat noutaa koko ikkunan sisällön ja tarkastella sen kaikkea tekstiä lukuun ottamatta salasanoja."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ota esteettömyystila käyttöön väliaikaisesti"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Antaa sovelluksen ottaa esteettömyystilan käyttöön laitteessa väliaikaisesti. Haitalliset sovellukset voivat ottaa esteettömyystilan käyttöön ilman käyttäjän lupaa."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"nouda ikkunoiden tietoja"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Antaa sovelluksen noutaa ikkunoiden tietoja ikkunanhallinnasta. Haitalliset sovellukset voivat noutaa tietoja, jotka on tarkoitettu järjestelmän sisäiseen käyttöön."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"ikkunan tunnisteen noutaminen"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Antaa sovelluksen noutaa ikkunan tunnisteen. Haitalliset sovellukset saattavat käyttää sovelluksen ikkunaa luvattomasti esiintymällä järjestelmänä."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"kehystilastojen noutaminen"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Antaa sovelluksen kerätä kehystilastoja. Haitalliset sovellukset saattavat tarkkailla toisten sovellusten ikkunoiden kehystilastoja."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"suodata tapahtumat"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Antaa sovelluksen rekisteröidä syöttösuodattimen, joka suodattaa kaikkien käyttäjätapahtumien streamin ennen tapahtumien näyttämistä. Haitalliset sovellukset voivat hallita järjestelmän käyttöliittymää ilman käyttäjän lupaa."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"suurenna ruutu"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Antaa sovelluksen suurentaa ruudun sisällön. Haitalliset sovellukset voivat muuttaa näytettävää sisältöä siten, ettei laitetta enää voi käyttää."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"sulje puhelin osittain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Asettaa toimintojen hallinnan sulkeutumistilaan. Ei sulje puhelinta kokonaan."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"estä sovellusten vaihto"</string>
@@ -382,12 +398,18 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Antaa sovelluksen sitoutua VPN-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sido taustakuvaan"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Antaa sovelluksen sitoutua taustakuvan ylätason käyttöliittymään. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"puheohjauspalveluun sitominen"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Antaa sovelluksen luoda sidoksen puheohjauspalvelun ylätason rajapintaan. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"etänäyttöön sitoutuminen"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Antaa sovelluksen sitoutua etänäytön ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"sitoudu widget-palveluun"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Antaa sovelluksen sitoutua widget-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"reitin tarjoajan palveluun sitominen"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Antaa sovelluksen luoda sidoksen mihin tahansa rekisteröityyn reitin tarjoajaan. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikoi laitteen järjestelmänvalvojan kanssa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Antaa sovelluksen lähettää aikomuksia laitteen järjestelmänvalvojalle. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"sido TV-tuloon"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Antaa sovelluksen sitoutua TV-tulon ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"lisää tai poista laitteen järjestelmänvalvoja"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Haltija voi lisätä tai poistaa aktiivisen laitteen järjestelmänvalvojia. Tätä ei pitäisi tarvita tavallisille sovelluksille."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuta näytön suuntaa"</string>
@@ -423,8 +445,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Sallii sovelluksen käyttää mitä tahansa asennettua tietovälineen koodin purkajaa toistoa varten."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"hallinnoi luotettavia varmenteita"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Antaa sovellukselle luvan asentaa ja poistaa luotettavia CA-varmenteita."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"sido käyttämättömiin palveluihin"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Tämä käyttöoikeus antaa Android-järjestelmän sitoa sovelluksen käyttämättömiä palveluita."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"suorita sovellus laitteen ollessa käyttämättömänä"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Tämä oikeus sallii Android-järjestelmän siirtää sovelluksen suorituksen taustalle, kun laite ei ole käytössä."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lue diag:in omistamia resursseja / kirjoita resursseihin"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Antaa sovelluksen lukea ja kirjoittaa diag-ryhmän omistamiin resursseihin, esimerkiksi /dev-hakemistossa oleviin tiedostoihin. Tämä voi vaikuttaa järjestelmän vakauteen ja turvallisuuteen. Tämä lupa tulee myöntää VAIN valmistajan tai operaattorin laitteistotesteille."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"sovelluskomponenttien ottaminen käyttöön tai pois käytöstä"</string>
@@ -462,6 +484,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Antaa sovelluksen lukea laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimen ja yhteystietoja. Sovellus voi tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"muokkaa omia yhteystietoja"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Antaa sovelluksen muuttaa laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimeä ja yhteystietoja, tai lisätä niitä. Sovellus voi tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"kehon anturit (kuten sykemittarit)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Antaa sovelluksen käyttää tietoja antureista, joita käytetään kehon toimintojen kuten sykkeen mittaamiseen."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lue sosiaalista streamia"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Antaa sovelluksen käyttää ja synkronoida sinun tai kavereidesi päivityksiä sosiaalisista palveluista. Mieti tarkkaan ennen tietojen jakamista: tämän luvan saaneet sovellukset voivat lukea sinun ja kavereidesi välisiä viestejä sosiaalisissa verkkopalveluissa huolimatta viestien arkaluonteisuudesta. Huom: tätä lupaa ei saa ottaa käyttöön kaikissa sosiaalisissa verkkopalveluissa."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"kirjoita sosiaaliseen streamiin"</string>
@@ -563,6 +587,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Antaa sovelluksen hallita laitteen puhelinominaisuuksia. Jos sovelluksella on tämä oikeus, se voi esimerkiksi vaihtaa verkkoa tai ottaa puhelinradion käyttöön tai poistaa sen käytöstä ilmoittamatta käyttäjälle."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lue puhelimen tila ja identiteetti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Sovellus voi määrittää puhelinnumeron ja laitteen tunnuksen, puhelun tilan sekä soitetun numeron."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lue puhelimen tarkat tilat"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Antaa sovelluksen käyttää puhelimen tarkkoja tiloja. Tämän oikeus antaa sovelluksen määrittää puhelun todellisen tilan, eli onko puhelu aktiivinen vai taustalla, puhelujen epäonnistumiset, tietoliikenneyhteyden tarkan tilan ja tietoliikenneyhteyden muodostuksen epäonnistumiset."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"estä tablet-laitetta menemästä virransäästötilaan"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>
@@ -630,6 +656,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Antaa sovelluksen muodostaa puhelimella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"pisteytä verkot"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko tablet-laitteen kannattaa valita."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko puhelimen kannattaa valita."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"muodosta laitepari Bluetooth-laitteiden kanssa"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Antaa sovelluksen tarkastella tablet-laitteen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
@@ -683,10 +712,16 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Antaa sovelluksen noutaa, tutkia ja tyhjentää ilmoituksia (myös muiden sovelluksien lähettämiä)."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sido ilmoituskuuntelijapalveluun"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Antaa sovelluksen sitoutua ilmoituskuuntelijan ylimmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ehtojen toimituspalveluun sitominen"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Antaa sovelluksen luoda sidoksen ehtojen toimituspalvelun ylätason rajapintaan. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Palveluntarjoajan määrityssovelluksen käynnistäminen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Antaa luvanhaltijan käynnistää palveluntarjoajan määrityssovelluksen. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"verkon tilahavaintojen kuunteleminen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Antaa sovellukselle luvan kuunnella verkon tilahavaintoja. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Muuttaa syöttölaitteen kalibrointia."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Antaa sovelluksen muokata kosketusnäytön kalibrointiparametreja. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-varmenteiden käyttö"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Antaa sovelluksen käyttää DRM-varmenteita ja hallita niiden käyttäjiä. Ei tavallisten sovellusten käyttöön."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -1188,8 +1223,8 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Soittoäänet"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Tuntematon soittoääni"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wifi-verkko käytettävissä"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wifi-verkkoja käytettävissä"</item>
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi-verkko käytettävissä"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi-verkkoja käytettävissä"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
     <item quantity="one" msgid="1634101450343277345">"Avoin wifi-verkko käytettävissä"</item>
@@ -1199,10 +1234,10 @@
     <string name="network_available_sign_in" msgid="8495155593358054676">"Kirjaudu verkkoon"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wifi-yhteyden muodostaminen epäonnistui"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-yhteyden muodostaminen epäonnistui"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" : huono internetyhteys."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora wifi-yhteys"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wifi-asiakas/-hotspot poistetaan käytöstä."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran wifi-yhteyden käynnistäminen epäonnistui."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct on käytössä"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tarkastele asetuksia koskettamalla"</string>
@@ -1319,6 +1354,10 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Sallii sovelluksen käyttää salasanalla suojattua tallennustilaa."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Hallinnoi näppäinvahdin näyttämistä ja piilottamista"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Antaa sovelluksen hallita näppäinvahtia."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Seuraa luottamuksen tilamuutoksia."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Antaa sovelluksen seurata luottamuksen tilamuutoksia."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Luotettavaan tahoon sitoutuminen"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Antaa sovelluksen sitoutua luotettavaan tahoon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Vuorovaikutus päivitys- ja palautusjärjestelmän kanssa"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Sallii sovelluksen vuorovaikutuksen palautusjärjestelmän ja järjestelmäpäivitysten kanssa."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
@@ -1345,6 +1384,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Taustakuva"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Vaihda taustakuvaa"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Ilmoituskuuntelija"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Ehtojen toimituspalvelu"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN on aktivoitu"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> on aktivoinut VPN-yhteyden"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Voit hallinnoida verkkoa koskettamalla."</string>
@@ -1451,12 +1491,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilitiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wifi-tiedonsiirto pois käytöstä"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"Ota käyttöön koskettamalla."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiilitiedonsiirtoraja ylitetty"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wifi-tiedonsiirtoraja ylitetty"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> yli asetetun rajan"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustatietojen käyttö"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Poista rajoitus koskettamalla."</string>
