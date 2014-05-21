@@ -40,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -1359,41 +1360,25 @@ public class NotificationManagerService extends SystemService {
          * should be used.
          *
          * @param token The binder for the listener, to check that the caller is allowed
-         * @param keys the notification keys to fetch, or null for all active notifications.
          * @returns The return value will contain the notifications specified in keys, in that
          *      order, or if keys is null, all the notifications, in natural order.
          */
         @Override
-        public StatusBarNotification[] getActiveNotificationsFromListener(
-                INotificationListener token, String[] keys) {
+        public ParceledListSlice<StatusBarNotification> getActiveNotificationsFromListener(
+                INotificationListener token) {
             synchronized (mNotificationList) {
                 final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
                 final ArrayList<StatusBarNotification> list
                         = new ArrayList<StatusBarNotification>();
-                if (keys == null) {
-                    final int N = mNotificationList.size();
-                    for (int i=0; i<N; i++) {
-                        StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                        if (info.enabledAndUserMatches(sbn.getUserId())) {
-                            list.add(sbn);
-                        }
-                    }
-                } else {
-                    final int N = keys.length;
-                    for (int i=0; i<N; i++) {
-                        NotificationRecord r = mNotificationsByKey.get(keys[i]);
-                        if (r != null && info.enabledAndUserMatches(r.sbn.getUserId())) {
-                            list.add(r.sbn);
-                        }
+                final int N = mNotificationList.size();
+                for (int i=0; i<N; i++) {
+                    StatusBarNotification sbn = mNotificationList.get(i).sbn;
+                    if (info.enabledAndUserMatches(sbn.getUserId())) {
+                        list.add(sbn);
                     }
                 }
-                return list.toArray(new StatusBarNotification[list.size()]);
+                return new ParceledListSlice<StatusBarNotification>(list);
             }
-        }
-
-        @Override
-        public String[] getActiveNotificationKeysFromListener(INotificationListener token) {
-            return NotificationManagerService.this.getActiveNotificationKeys(token);
         }
 
         @Override

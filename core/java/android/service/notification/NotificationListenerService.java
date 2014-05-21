@@ -23,12 +23,15 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * A service that receives calls from the system when new notifications are
@@ -95,12 +98,10 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to learn about when the listener is enabled and connected to
-     * the notification manager.  You are safe to call {@link #getActiveNotifications(String[])
+     * the notification manager.  You are safe to call {@link #getActiveNotifications()}
      * at this time.
-     *
-     * @param notificationKeys The notification keys for all currently posted notifications.
      */
-    public void onListenerConnected(String[] notificationKeys) {
+    public void onListenerConnected() {
         // optional
     }
 
@@ -223,34 +224,12 @@ public abstract class NotificationListenerService extends Service {
      * @return An array of active notifications, sorted in natural order.
      */
     public StatusBarNotification[] getActiveNotifications() {
-        return getActiveNotifications(null /*all*/);
-    }
-
-    /**
-     * Request the list of notification keys in their current ranking order.
-     * <p>
-     * You can use the notification keys for subsequent retrieval via
-     * {@link #getActiveNotifications(String[]) or dismissal via
-     * {@link #cancelNotifications(String[]).
-     *
-     * @return An array of active notification keys, in their ranking order.
-     */
-    public String[] getActiveNotificationKeys() {
-        return mRanking.getOrderedKeys();
-    }
-
-    /**
-     * Request the list of outstanding notifications (that is, those that are visible to the
-     * current user). Useful when you don't know what's already been posted.
-     *
-     * @param keys A specific list of notification keys, or {@code null} for all.
-     * @return An array of active notifications, sorted in natural order
-     *   if {@code keys} is {@code null}.
-     */
-    public StatusBarNotification[] getActiveNotifications(String[] keys) {
         if (!isBound()) return null;
         try {
-            return getNotificationInterface().getActiveNotificationsFromListener(mWrapper, keys);
+            ParceledListSlice<StatusBarNotification> parceledList =
+                    getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
+            List<StatusBarNotification> list = parceledList.getList();
+            return list.toArray(new StatusBarNotification[list.size()]);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -359,8 +338,7 @@ public abstract class NotificationListenerService extends Service {
             synchronized (mWrapper) {
                 applyUpdate(update);
                 try {
-                    NotificationListenerService.this.onListenerConnected(
-                            mRanking.getOrderedKeys());
+                    NotificationListenerService.this.onListenerConnected();
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onListenerConnected", t);
                 }
@@ -418,7 +396,7 @@ public abstract class NotificationListenerService extends Service {
          * @return The rank of the notification with the given key; -1 when the
          *      given key is unknown.
          */
-        public int getIndexOfKey(String key) {
+        public int getRank(String key) {
             // TODO: Optimize.
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
             for (int i = 0; i < orderedKeys.length; i++) {
