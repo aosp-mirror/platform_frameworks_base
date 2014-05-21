@@ -28,33 +28,35 @@ import android.view.animation.PathInterpolator;
 public class FlingAnimationUtils {
 
     private static final float LINEAR_OUT_SLOW_IN_X2 = 0.35f;
-    private static final float LINEAR_OUT_FASTER_IN_Y2 = 0.7f;
+    private static final float LINEAR_OUT_FASTER_IN_Y2_MIN = 0.7f;
+    private static final float LINEAR_OUT_FASTER_IN_Y2_MAX = 1f;
     private static final float MIN_VELOCITY_DP_PER_SECOND = 250;
+    private static final float HIGH_VELOCITY_DP_PER_SECOND = 3000;
 
     /**
      * Crazy math. http://en.wikipedia.org/wiki/B%C3%A9zier_curve
      */
     private static final float LINEAR_OUT_SLOW_IN_START_GRADIENT = 1.0f / LINEAR_OUT_SLOW_IN_X2;
-    private static final float LINEAR_OUT_FASTER_IN_START_GRADIENT = LINEAR_OUT_FASTER_IN_Y2;
 
     private Interpolator mLinearOutSlowIn;
     private Interpolator mFastOutSlowIn;
     private Interpolator mFastOutLinearIn;
-    private Interpolator mLinearOutFasterIn;
 
     private float mMinVelocityPxPerSecond;
     private float mMaxLengthSeconds;
+    private float mHighVelocityPxPerSecond;
 
     public FlingAnimationUtils(Context ctx, float maxLengthSeconds) {
         mMaxLengthSeconds = maxLengthSeconds;
         mLinearOutSlowIn = new PathInterpolator(0, 0, LINEAR_OUT_SLOW_IN_X2, 1);
-        mLinearOutFasterIn = new PathInterpolator(0, 0, 1, LINEAR_OUT_FASTER_IN_Y2);
         mFastOutSlowIn
                 = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_slow_in);
         mFastOutLinearIn
                 = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_linear_in);
         mMinVelocityPxPerSecond
                 = MIN_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
+        mHighVelocityPxPerSecond
+                = HIGH_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
     }
 
     /**
@@ -126,7 +128,12 @@ public class FlingAnimationUtils {
                 * Math.pow(Math.abs(endValue - currValue) / maxDistance, 0.5f));
         float diff = Math.abs(endValue - currValue);
         float velAbs = Math.abs(velocity);
-        float durationSeconds = LINEAR_OUT_FASTER_IN_START_GRADIENT * diff / velAbs;
+        float y2 = calculateLinearOutFasterInY2(velAbs);
+
+        // The gradient at the start of the curve is just y2.
+        float startGradient = y2;
+        Interpolator mLinearOutFasterIn = new PathInterpolator(0, 0, 1, y2);
+        float durationSeconds = startGradient * diff / velAbs;
         if (durationSeconds <= maxLengthSeconds) {
             animator.setInterpolator(mLinearOutFasterIn);
         } else if (velAbs >= mMinVelocityPxPerSecond) {
@@ -146,6 +153,20 @@ public class FlingAnimationUtils {
             animator.setInterpolator(mFastOutLinearIn);
         }
         animator.setDuration((long) (durationSeconds * 1000));
+    }
+
+    /**
+     * Calculates the y2 control point for a linear-out-faster-in path interpolator depending on the
+     * velocity. The faster the velocity, the more "linear" the interpolator gets.
+     *
+     * @param velocity the velocity of the gesture.
+     * @return the y2 control point for a cubic bezier path interpolator
+     */
+    private float calculateLinearOutFasterInY2(float velocity) {
+        float t = (velocity - mMinVelocityPxPerSecond)
+                / (mHighVelocityPxPerSecond - mMinVelocityPxPerSecond);
+        t = Math.max(0, Math.min(1, t));
+        return (1 - t) * LINEAR_OUT_FASTER_IN_Y2_MIN + t * LINEAR_OUT_FASTER_IN_Y2_MAX;
     }
 
     /**
