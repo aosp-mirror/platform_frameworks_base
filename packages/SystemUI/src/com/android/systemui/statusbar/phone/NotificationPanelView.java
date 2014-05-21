@@ -150,7 +150,7 @@ public class NotificationPanelView extends PanelView implements
         mMoreCardNotificationAmount =
                 (float) getResources().getDimensionPixelSize(R.dimen.notification_summary_height) /
                         getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mFlingAnimationUtils = new FlingAnimationUtils(getContext());
+        mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.4f);
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
     }
@@ -618,16 +618,14 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected int getMaxPanelHeight() {
-        if (!isInSettings()) {
-            int maxPanelHeight = super.getMaxPanelHeight();
-            int notificationMarginBottom = mStackScrollerContainer.getPaddingBottom();
-            int emptyBottomMargin = notificationMarginBottom
-                    + mNotificationStackScroller.getEmptyBottomMargin();
-            int maxHeight = maxPanelHeight - emptyBottomMargin;
-            maxHeight = Math.max(maxHeight, mStatusBarMinHeight);
-            return maxHeight;
-        }
-        return super.getMaxPanelHeight();
+        // TODO: Figure out transition for collapsing when QS is open, adjust height here.
+        int maxPanelHeight = super.getMaxPanelHeight();
+        int emptyBottomMargin = mStackScrollerContainer.getHeight()
+                - mNotificationStackScroller.getHeight()
+                + mNotificationStackScroller.getEmptyBottomMargin();
+        int maxHeight = maxPanelHeight - emptyBottomMargin;
+        maxHeight = Math.max(maxHeight, mStatusBarMinHeight);
+        return maxHeight;
     }
 
     private boolean isInSettings() {
@@ -637,11 +635,6 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onHeightUpdated(float expandedHeight) {
         mNotificationStackScroller.setStackHeight(expandedHeight);
-    }
-
-    @Override
-    protected int getDesiredMeasureHeight() {
-        return mMaxPanelHeight;
     }
 
     @Override
