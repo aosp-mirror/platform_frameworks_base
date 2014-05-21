@@ -18,7 +18,6 @@ package android.telecomm;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,8 +26,6 @@ import java.util.Set;
  * Represents a connection to a remote endpoint that carries voice traffic.
  */
 public abstract class Connection {
-
-    private static String TAG = Connection.class.getSimpleName();
 
     public interface Listener {
         void onStateChanged(Connection c, int state);
@@ -146,7 +143,7 @@ public abstract class Connection {
      * @hide
      */
     public final void playDtmfTone(char c) {
-        Log.d(TAG, "playDtmfTone " + c);
+        Log.d(this, "playDtmfTone %c", c);
         onPlayDtmfTone(c);
     }
 
@@ -156,7 +153,7 @@ public abstract class Connection {
      * @hide
      */
     public final void stopDtmfTone() {
-        Log.d(TAG, "stopDtmfTone");
+        Log.d(this, "stopDtmfTone");
         onStopDtmfTone();
     }
 
@@ -168,7 +165,7 @@ public abstract class Connection {
      * @hide
      */
     public final void disconnect() {
-        Log.d(TAG, "disconnect");
+        Log.d(this, "disconnect");
         onDisconnect();
     }
 
@@ -180,7 +177,7 @@ public abstract class Connection {
      * @hide
      */
     public final void abort() {
-        Log.d(TAG, "abort");
+        Log.d(this, "abort");
         onAbort();
     }
 
@@ -192,7 +189,7 @@ public abstract class Connection {
      * @hide
      */
     public final void hold() {
-        Log.d(TAG, "hold");
+        Log.d(this, "hold");
         onHold();
     }
 
@@ -204,7 +201,7 @@ public abstract class Connection {
      * @hide
      */
     public final void unhold() {
-        Log.d(TAG, "unhold");
+        Log.d(this, "unhold");
         onUnhold();
     }
 
@@ -216,7 +213,7 @@ public abstract class Connection {
      * @hide
      */
     public final void answer() {
-        Log.d(TAG, "answer");
+        Log.d(this, "answer");
         if (mState == State.RINGING) {
             onAnswer();
         }
@@ -230,7 +227,7 @@ public abstract class Connection {
      * @hide
      */
     public final void reject() {
-        Log.d(TAG, "reject");
+        Log.d(this, "reject");
         if (mState == State.RINGING) {
             onReject();
         }
@@ -242,7 +239,7 @@ public abstract class Connection {
      * @param state The new audio state.
      */
     public void setAudioState(CallAudioState state) {
-        Log.d(TAG, "setAudioState " + state);
+        Log.d(this, "setAudioState %s", state);
         onSetAudioState(state);
     }
 
@@ -265,7 +262,7 @@ public abstract class Connection {
             case State.DISCONNECTED:
                 return "DISCONNECTED";
             default:
-                Log.wtf(TAG, "Unknown state " + state);
+                Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
         }
     }
@@ -276,7 +273,7 @@ public abstract class Connection {
      * @param handle The new handle.
      */
     protected void setHandle(Uri handle) {
-        Log.d(TAG, "setHandle " + handle);
+        Log.d(this, "setHandle %s", handle);
         // TODO: Enforce super called
         mHandle = handle;
         for (Listener l : mListeners) {
@@ -325,7 +322,7 @@ public abstract class Connection {
      */
     protected void setDisconnected(int cause, String message) {
         setState(State.DISCONNECTED);
-        Log.d(TAG, "Disconnected with cause " + cause + " message " + message);
+        Log.d(this, "Disconnected with cause %d message %s", cause, message);
         for (Listener l : mListeners) {
             l.onDisconnected(this, cause, message);
         }
@@ -403,7 +400,7 @@ public abstract class Connection {
     protected void onReject() {}
 
     private void setState(int state) {
-        Log.d(TAG, "setState: " + stateToString(state));
+        Log.d(this, "setState: %s", stateToString(state));
         this.mState = state;
         for (Listener l : mListeners) {
             l.onStateChanged(this, state);

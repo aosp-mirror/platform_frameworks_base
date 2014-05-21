@@ -18,7 +18,6 @@ package android.telecomm;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,13 +27,8 @@ import java.util.Map;
  * processes running on an Android device.
  */
 public abstract class ConnectionService extends CallService {
-    private static final String TAG = ConnectionService.class.getSimpleName();
-
-    // STOPSHIP: Debug Logging should be conditional on a debug flag or use a set of
-    // logging functions that make it automaticaly so.
-
     // Flag controlling whether PII is emitted into the logs
-    private static final boolean PII_DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
     private static final Connection NULL_CONNECTION = new Connection() {};
 
@@ -46,7 +40,7 @@ public abstract class ConnectionService extends CallService {
         @Override
         public void onStateChanged(Connection c, int state) {
             String id = mIdByConnection.get(c);
-            Log.d(TAG, "Adapter set state " + id + " " + Connection.stateToString(state));
+            Log.d(this, "Adapter set state %d %s", id, Connection.stateToString(state));
             switch (state) {
                 case Connection.State.ACTIVE:
                     getAdapter().setActive(id);
@@ -72,7 +66,7 @@ public abstract class ConnectionService extends CallService {
         @Override
         public void onDisconnected(Connection c, int cause, String message) {
             String id = mIdByConnection.get(c);
-            Log.d(TAG, "Adapter set disconnected " + cause + " " + message);
+            Log.d(this, "Adapter set disconnected %d %s", cause, message);
             getAdapter().setDisconnected(id, cause, message);
         }
 
@@ -99,21 +93,21 @@ public abstract class ConnectionService extends CallService {
 
     @Override
     public final void isCompatibleWith(final CallInfo callInfo) {
-        Log.d(TAG, "isCompatibleWith " + callInfo);
+        Log.d(this, "isCompatibleWith %s", callInfo);
         onFindSubscriptions(
                 callInfo.getHandle(),
                 new Response<Uri, Subscription>() {
                     @Override
                     public void onResult(Uri handle, Subscription... result) {
                         boolean isCompatible = result.length > 0;
-                        Log.d(TAG, "adapter setIsCompatibleWith "
+                        Log.d(this, "adapter setIsCompatibleWith "
                                 + callInfo.getId() + " " + isCompatible);
                         getAdapter().setIsCompatibleWith(callInfo.getId(), isCompatible);
                     }
 
                     @Override
                     public void onError(Uri handle, String reason) {
-                        Log.wtf(TAG, "Error in onFindSubscriptions " + callInfo.getHandle()
+                        Log.w(this, "Error in onFindSubscriptions " + callInfo.getHandle()
                                 + " error: " + reason);
                         getAdapter().setIsCompatibleWith(callInfo.getId(), false);
                     }
@@ -123,7 +117,7 @@ public abstract class ConnectionService extends CallService {
 
     @Override
     public final void call(final CallInfo callInfo) {
-        Log.d(TAG, "call " + callInfo);
+        Log.d(this, "call %s", callInfo);
         onCreateConnections(
                 new ConnectionRequest(
                         callInfo.getHandle(),
@@ -132,7 +126,7 @@ public abstract class ConnectionService extends CallService {
                     @Override
                     public void onResult(ConnectionRequest request, Connection... result) {
                         if (result.length != 1) {
-                            Log.d(TAG, "adapter handleFailedOutgoingCall " + callInfo);
+                            Log.d(this, "adapter handleFailedOutgoingCall %s", callInfo);
                             getAdapter().handleFailedOutgoingCall(
                                     callInfo.getId(),
                                     "Created " + result.length + " Connections, expected 1");
@@ -141,8 +135,7 @@ public abstract class ConnectionService extends CallService {
                             }
                         } else {
                             addConnection(callInfo.getId(), result[0]);
-                            Log.d(TAG, "adapter handleSuccessfulOutgoingCall "
-                                    + callInfo.getId());
+                            Log.d(this, "adapter handleSuccessfulOutgoingCall %s", callInfo.getId());
                             getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
                         }
                     }
@@ -157,13 +150,13 @@ public abstract class ConnectionService extends CallService {
 
     @Override
     public final void abort(String callId) {
-        Log.d(TAG, "abort " + callId);
+        Log.d(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").abort();
     }
 
     @Override
     public final void setIncomingCallId(final String callId, Bundle extras) {
-        Log.d(TAG, "setIncomingCallId " + callId + " " + extras);
+        Log.d(this, "setIncomingCallId %s %s", callId, extras);
         onCreateIncomingConnection(
                 new ConnectionRequest(
                         null,  // TODO: Can we obtain this from "extras"?
@@ -172,7 +165,7 @@ public abstract class ConnectionService extends CallService {
                     @Override
                     public void onResult(ConnectionRequest request, Connection... result) {
                         if (result.length != 1) {
-                            Log.d(TAG, "adapter handleFailedOutgoingCall " + callId);
+                            Log.d(this, "adapter handleFailedOutgoingCall %s", callId);
                             getAdapter().handleFailedOutgoingCall(
                                     callId,
                                     "Created " + result.length + " Connections, expected 1");
@@ -181,7 +174,7 @@ public abstract class ConnectionService extends CallService {
                             }
                         } else {
                             addConnection(callId, result[0]);
-                            Log.d(TAG, "adapter notifyIncomingCall " + callId);
+                            Log.d(this, "adapter notifyIncomingCall %s", callId);
                             // TODO: Uri.EMPTY is because CallInfo crashes when Parceled with a
                             // null URI ... need to fix that at its cause!
                             getAdapter().notifyIncomingCall(new CallInfo(
@@ -194,7 +187,7 @@ public abstract class ConnectionService extends CallService {
 
                     @Override
                     public void onError(ConnectionRequest request, String reason) {
-                        Log.d(TAG, "adapter failed setIncomingCallId " + request + " " + reason);
+                        Log.d(this, "adapter failed setIncomingCallId %s %s", request, reason);
                     }
                 }
         );
@@ -202,49 +195,49 @@ public abstract class ConnectionService extends CallService {
 
     @Override
     public final void answer(String callId) {
-        Log.d(TAG, "answer " + callId);
+        Log.d(this, "answer %s", callId);
         findConnectionForAction(callId, "answer").answer();
     }
 
     @Override
     public final void reject(String callId) {
-        Log.d(TAG, "reject " + callId);
+        Log.d(this, "reject %s", callId);
         findConnectionForAction(callId, "reject").reject();
     }
 
     @Override
     public final void disconnect(String callId) {
-        Log.d(TAG, "disconnect " + callId);
+        Log.d(this, "disconnect %s", callId);
         findConnectionForAction(callId, "disconnect").disconnect();
     }
 
     @Override
     public final void hold(String callId) {
-        Log.d(TAG, "hold " + callId);
+        Log.d(this, "hold %s", callId);
         findConnectionForAction(callId, "hold").hold();
     }
 
     @Override
     public final void unhold(String callId) {
-        Log.d(TAG, "unhold " + callId);
+        Log.d(this, "unhold %s", callId);
         findConnectionForAction(callId, "unhold").unhold();
     }
 
     @Override
     public final void playDtmfTone(String callId, char digit) {
-        Log.d(TAG, "playDtmfTone " + callId + " " + Character.toString(digit));
+        Log.d(this, "playDtmfTone %s %c", callId, digit);
         findConnectionForAction(callId, "playDtmfTone").playDtmfTone(digit);
     }
 
     @Override
     public final void stopDtmfTone(String callId) {
-        Log.d(TAG, "stopDtmfTone " + callId);
+        Log.d(this, "stopDtmfTone %s", callId);
         findConnectionForAction(callId, "stopDtmfTone").stopDtmfTone();
     }
 
     @Override
     public final void onAudioStateChanged(String callId, CallAudioState audioState) {
-        Log.d(TAG, "onAudioStateChanged " + callId + " " + audioState);
+        Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
         findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
     }
 
@@ -318,7 +311,7 @@ public abstract class ConnectionService extends CallService {
             case Connection.State.DISCONNECTED:
                 return CallState.DISCONNECTED;
             default:
-                Log.wtf(TAG, "Unknown Connection.State " + connectionState);
+                Log.wtf(this, "Unknown Connection.State %d", connectionState);
                 return CallState.NEW;
         }
     }
@@ -339,7 +332,7 @@ public abstract class ConnectionService extends CallService {
         if (mConnectionById.containsKey(callId)) {
             return mConnectionById.get(callId);
         }
-        Log.wtf(TAG, action + " - Cannot find Connection \"" + callId + "\"");
+        Log.w(this, "%s - Cannot find Connection %s", action, callId);
         return NULL_CONNECTION;
     }
 }
