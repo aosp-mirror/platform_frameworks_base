@@ -582,14 +582,7 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
 
-    const int64_t size64 = info.getSafeSize64(bitmap->rowBytes());
-    if (!sk_64_isS32(size64)) {
-        doThrowIAE(env, "bitmap size exceeds 32bits");
-        return NULL;
-    }
-    const size_t size = sk_64_asS32(size64);
-    SkASSERT(size == info.getSafeSize(bitmap->rowBytes()));
-
+    const size_t size = bitmap->getSize();
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
                                                              gByte_class, size);
