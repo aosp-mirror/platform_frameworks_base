@@ -1547,32 +1547,23 @@ class DrawShadowOp : public DrawOp {
 public:
     DrawShadowOp(const mat4& transformXY, const mat4& transformZ,
             float casterAlpha, bool casterUnclipped,
-            float fallbackWidth, float fallbackHeight,
-            const SkPath* outline, const SkPath* revealClip)
+            const SkPath* casterOutline, const SkPath* revealClip)
             : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
-            mCasterAlpha(casterAlpha), mCasterUnclipped(casterUnclipped),
-            mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight),
-            mOutline(outline), mRevealClip(revealClip) {}
+            mCasterAlpha(casterAlpha), mCasterUnclipped(casterUnclipped) {
+        mOutline = *casterOutline;
+        if (revealClip) {
+            // intersect the outline with the convex reveal clip
+            Op(mOutline, *revealClip, kIntersect_PathOp, &mOutline);
+        }
+    }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        SkPath casterPerimeter;
-        if (!mOutline || mOutline->isEmpty()) {
-            casterPerimeter.addRect(0, 0, mFallbackWidth, mFallbackHeight);
-        } else {
-            casterPerimeter = *mOutline;
-        }
-
-        if (mRevealClip) {
-            // intersect the outline with the convex reveal clip
-            Op(casterPerimeter, *mRevealClip, kIntersect_PathOp, &casterPerimeter);
-        }
-
         return renderer.drawShadow(mTransformXY, mTransformZ,
-                mCasterAlpha, mCasterUnclipped, &casterPerimeter);
+                mCasterAlpha, mCasterUnclipped, &mOutline);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("DrawShadow of outline %p", mOutline);
+        OP_LOGS("DrawShadow");
     }
 
     virtual const char* name() { return "DrawShadow"; }
@@ -1582,12 +1573,7 @@ private:
     const mat4 mTransformZ;
     const float mCasterAlpha;
     const bool mCasterUnclipped;
-    const float mFallbackWidth;
-    const float mFallbackHeight;
-
-    // these point at convex SkPaths owned by RenderProperties, or null
-    const SkPath* mOutline;
-    const SkPath* mRevealClip;
+    SkPath mOutline;
 };
 
 class DrawLayerOp : public DrawOp {

@@ -49,6 +49,10 @@ public:
         mBounds.set(outline->getBounds());
     }
 
+    bool isEmpty() const {
+        return mType == kOutlineType_None;
+    }
+
     void setEmpty() {
         mType = kOutlineType_None;
         mPath.reset();
