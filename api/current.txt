@@ -11621,13 +11621,13 @@ package android.graphics.pdf {
   public final class PdfRenderer implements java.lang.AutoCloseable {
     ctor public PdfRenderer(android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public void close();
-    method public void closePage(android.graphics.pdf.PdfRenderer.Page);
     method public int getPageCount();
     method public android.graphics.pdf.PdfRenderer.Page openPage(int);
     method public boolean shouldScaleForPrinting();
   }
 
-  public final class PdfRenderer.Page {
+  public final class PdfRenderer.Page implements java.lang.AutoCloseable {
+    method public void close();
     method public int getHeight();
     method public int getIndex();
     method public int getWidth();

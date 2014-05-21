@@ -56,15 +56,14 @@ import java.lang.annotation.RetentionPolicy;
  * final int pageCount = renderer.getPageCount();
  * for (int i = 0; i < pageCount; i++) {
  *     Page page = renderer.openPage(i);
- *     Bitmap bitmap = getBitmapReuseIfPossible(page);
  *
  *     // say we render for showing on the screen
- *     page.render(bitmap, getContentBoundsInBitmap(),
- *             getDesiredTransformation(), Page.RENDER_MODE_FOR_DISPLAY);
+ *     page.render(mBitmap, null, null, Page.RENDER_MODE_FOR_DISPLAY);
  *
  *     // do stuff with the bitmap
  *
- *     renderer.closePage(page);
+ *     // close the page
+ *     page.close();
  * }
  *
  * // close the renderer
@@ -165,28 +164,13 @@ public final class PdfRenderer implements AutoCloseable {
      * @param index The page index.
      * @return A page that can be rendered.
      *
-     * @see #closePage(PdfRenderer.Page)
+     * @see android.graphics.pdf.PdfRenderer.Page#close() PdfRenderer.Page.close()
      */
     public Page openPage(int index) {
         throwIfClosed();
         throwIfPageOpened();
         mCurrentPage = new Page(index);
         return mCurrentPage;
-    }
-
-    /**
-     * Closes a page opened for rendering.
-     *
-     * @param page The page to close.
-     *
-     * @see #openPage(int)
-     */
-    public void closePage(@NonNull Page page) {
-        throwIfClosed();
-        throwIfNotCurrentPage(page);
-        throwIfCurrentPageClosed();
-        mCurrentPage.close();
-        mCurrentPage = null;
     }
 
     @Override
@@ -228,22 +212,12 @@ public final class PdfRenderer implements AutoCloseable {
         }
     }
 
-    private void throwIfCurrentPageClosed() {
-        if (mCurrentPage == null) {
-            throw new IllegalStateException("Already closed");
-        }
-    }
-
-    private void throwIfNotCurrentPage(Page page) {
-        if (page != mCurrentPage) {
-            throw new IllegalArgumentException("Page not from document");
-        }
-    }
-
     /**
      * This class represents a PDF document page for rendering.
      */
-    public final class Page {
+    public final class Page implements AutoCloseable {
+
+        private final CloseGuard mCloseGuard = CloseGuard.get();
 
         /**
          * Mode to render the content for display on a screen.
@@ -267,6 +241,7 @@ public final class PdfRenderer implements AutoCloseable {
             mIndex = index;
             mWidth = size.x;
             mHeight = size.y;
+            mCloseGuard.open("close");
         }
 
         /**
@@ -307,7 +282,7 @@ public final class PdfRenderer implements AutoCloseable {
          * You may optionally specify a matrix to transform the content from page coordinates
          * which are in points (1/72") to bitmap coordintates which are in pixels. If this
          * matrix is not provided this method will apply a transformation that will fit the
-         * whole page to the destination clip if profided or the destination bitmap if no
+         * whole page to the destination clip if provided or the destination bitmap if no
          * clip is provided.
          * </p>
          * <p>
@@ -322,8 +297,8 @@ public final class PdfRenderer implements AutoCloseable {
          * </p>
          * <p>
          * <strong>Note: </strong> The optional transformation matrix must be affine as per
-         * {@link android.graphics.Matrix#isAffine()}. Hence, you can specify rotation, scaling,
-         * translation but not a perspective transformation.
+         * {@link android.graphics.Matrix#isAffine() Matrix.isAffine()}. Hence, you can specify
+         * rotation, scaling, translation but not a perspective transformation.
          * </p>
          *
          * @param destination Destination bitmap to which to render.
@@ -373,9 +348,39 @@ public final class PdfRenderer implements AutoCloseable {
                     contentTop, contentRight, contentBottom, transformPtr, renderMode);
         }
 
-        void close() {
+        /**
+         * Closes this page.
+         *
+         * @see android.graphics.pdf.PdfRenderer#openPage(int)
+         */
+        @Override
+        public void close() {
+            throwIfClosed();
+            doClose();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                mCloseGuard.warnIfOpen();
+                if (mNativePage != 0) {
+                    doClose();
+                }
+            } finally {
+                super.finalize();
+            }
+        }
+
+        private void doClose() {
             nativeClosePage(mNativePage);
             mNativePage = 0;
+            mCloseGuard.close();
+        }
+
+        private void throwIfClosed() {
+            if (mNativePage == 0) {
+                throw new IllegalStateException("Already closed");
+            }
         }
     }
 
