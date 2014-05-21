@@ -73,6 +73,8 @@ import android.media.MediaRouter;
 import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.EthernetManager;
+import android.net.IEthernetManager;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
@@ -598,6 +600,13 @@ class ContextImpl extends Context {
                 IWifiScanner service = IWifiScanner.Stub.asInterface(b);
                 return new WifiScanner(ctx.getOuterContext(), service);
             }});
+
+        registerService(ETHERNET_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(ETHERNET_SERVICE);
+                    IEthernetManager service = IEthernetManager.Stub.asInterface(b);
+                    return new EthernetManager(ctx.getOuterContext(), service);
+                }});
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 Display mDefaultDisplay;

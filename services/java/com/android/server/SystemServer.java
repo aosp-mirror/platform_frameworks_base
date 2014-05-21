@@ -130,6 +130,8 @@ public final class SystemServer {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String HDMI_CEC_SERVICE_CLASS =
             "com.android.server.hdmi.HdmiCecService";
+    private static final String ETHERNET_SERVICE_CLASS =
+            "com.android.server.ethernet.EthernetService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -657,6 +659,12 @@ public final class SystemServer {
 
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi Scanning Service", e);
+                }
+
+                try {
+                    mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting Ethernet Service", e);
                 }
 
                 try {
