@@ -328,6 +328,7 @@ public class BluetoothLeAdvertiser {
         private static final int LE_CALLBACK_TIMEOUT_MILLIS = 2000;
         private final AdvertiseCallback mAdvertiseCallback;
         private final AdvertisementData mAdvertisement;
+        private final AdvertisementData mScanResponse;
         private final Settings mSettings;
         private final IBluetoothGatt mBluetoothGatt;
 
@@ -338,10 +339,11 @@ public class BluetoothLeAdvertiser {
         private boolean isAdvertising = false;
 
         public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
-                AdvertisementData advertiseData, Settings settings,
+                AdvertisementData advertiseData, AdvertisementData scanResponse, Settings settings,
                 IBluetoothGatt bluetoothGatt) {
             mAdvertiseCallback = advertiseCallback;
             mAdvertisement = advertiseData;
+            mScanResponse = scanResponse;
             mSettings = settings;
             mBluetoothGatt = bluetoothGatt;
             mLeHandle = 0;
@@ -384,7 +386,8 @@ public class BluetoothLeAdvertiser {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     mLeHandle = clientIf;
                     try {
-                        mBluetoothGatt.startMultiAdvertising(mLeHandle, mAdvertisement, mSettings);
+                        mBluetoothGatt.startMultiAdvertising(mLeHandle, mAdvertisement,
+                                mScanResponse, mSettings);
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le advertise: " + e);
                         mLeHandle = -1;
@@ -540,6 +543,19 @@ public class BluetoothLeAdvertiser {
      */
     public void startAdvertising(Settings settings,
             AdvertisementData advertiseData, final AdvertiseCallback callback) {
+        startAdvertising(settings, advertiseData, null, callback);
+    }
+
+    /**
+     * Start Bluetooth LE Advertising.
+     * @param settings {@link Settings} for Bluetooth LE advertising.
+     * @param advertiseData {@link AdvertisementData} to be advertised in advertisement packet.
+     * @param scanResponse {@link AdvertisementData} for scan response.
+     * @param callback {@link AdvertiseCallback} for advertising status.
+     */
+    public void startAdvertising(Settings settings,
+            AdvertisementData advertiseData, AdvertisementData scanResponse,
+            final AdvertiseCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
@@ -548,8 +564,7 @@ public class BluetoothLeAdvertiser {
             return;
         }
         AdvertiseCallbackWrapper wrapper = new AdvertiseCallbackWrapper(callback, advertiseData,
-                settings,
-                mBluetoothGatt);
+                scanResponse, settings, mBluetoothGatt);
         UUID uuid = UUID.randomUUID();
         try {
             mBluetoothGatt.registerClient(new ParcelUuid(uuid), wrapper);

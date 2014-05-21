@@ -41,7 +41,9 @@ interface IBluetoothGatt {
                               in BluetoothLeScanner.Settings settings,
                               in List<BluetoothLeScanFilter> filters);
     void stopScan(in int appIf, in boolean isServer);
-    void startMultiAdvertising(in int appIf, in BluetoothLeAdvertiseScanData.AdvertisementData data,
+    void startMultiAdvertising(in int appIf,
+                               in BluetoothLeAdvertiseScanData.AdvertisementData advertiseData,
+                               in BluetoothLeAdvertiseScanData.AdvertisementData scanResponse,
                                in BluetoothLeAdvertiser.Settings settings);
     void stopMultiAdvertising(in int appIf);
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);

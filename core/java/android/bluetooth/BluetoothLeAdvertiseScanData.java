@@ -53,9 +53,6 @@ public final class BluetoothLeAdvertiseScanData {
      * Bluetooth LE scan response data, the data will be placed in ScanRspData field of advertising
      * packet.
      * <p>
-     * TODO: unhide when stack supports setting scan response data.
-     *
-     * @hide
      */
     public static final int SCAN_RESPONSE_DATA = 1;
     /**

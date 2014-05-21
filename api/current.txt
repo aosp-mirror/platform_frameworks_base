@@ -6140,6 +6140,7 @@ package android.bluetooth {
     ctor public BluetoothLeAdvertiseScanData();
     field public static final int ADVERTISING_DATA = 0; // 0x0
     field public static final int PARSED_SCAN_RECORD = 2; // 0x2
+    field public static final int SCAN_RESPONSE_DATA = 1; // 0x1
   }
 
   public static abstract class BluetoothLeAdvertiseScanData.AdvertiseBaseData {
@@ -6183,6 +6184,7 @@ package android.bluetooth {
 
   public class BluetoothLeAdvertiser {
     method public void startAdvertising(android.bluetooth.BluetoothLeAdvertiser.Settings, android.bluetooth.BluetoothLeAdvertiseScanData.AdvertisementData, android.bluetooth.BluetoothLeAdvertiser.AdvertiseCallback);
+    method public void startAdvertising(android.bluetooth.BluetoothLeAdvertiser.Settings, android.bluetooth.BluetoothLeAdvertiseScanData.AdvertisementData, android.bluetooth.BluetoothLeAdvertiseScanData.AdvertisementData, android.bluetooth.BluetoothLeAdvertiser.AdvertiseCallback);
     method public void stopAdvertising(android.bluetooth.BluetoothLeAdvertiser.Settings, android.bluetooth.BluetoothLeAdvertiser.AdvertiseCallback);
   }
 
