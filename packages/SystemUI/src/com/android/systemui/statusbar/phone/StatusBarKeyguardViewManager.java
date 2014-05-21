@@ -29,6 +29,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
  * via {@link ViewMediatorCallback} to poke the wake lock and report that the keyguard is done,
@@ -104,6 +106,13 @@ public class StatusBarKeyguardViewManager {
     private void showBouncer() {
         if (!mOccluded) {
             mBouncer.show();
+        }
+        updateStates();
+    }
+
+    public void dismissWithAction(OnDismissAction r) {
+        if (!mOccluded) {
+            mBouncer.showWithDismissAction(r);
         }
         updateStates();
     }
