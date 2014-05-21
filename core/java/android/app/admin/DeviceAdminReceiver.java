@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.accounts.AccountManager;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
@@ -165,12 +166,14 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.ACTION_PASSWORD_EXPIRING";
 
     /**
-     * Broadcast Action: This broadcast is sent to the newly created profile when
-     * the provisioning of a managed profile has completed successfully. It is used in both the
-     * Profile Owner and the Device Owner provisioning.
+     * Broadcast Action: This broadcast is sent to indicate that provisioning of a managed profile
+     * or managed device has completed successfully.
      *
-     * <p>The broadcast is limited to the DeviceAdminReceiver component specified in the message
-     * that started the provisioning. It is also limited to the managed profile.
+     * <p>The broadcast is limited to the profile that will be managed by the application that
+     * requested provisioning. In the device owner case the profile is the primary user.
+     * The broadcast will also be limited to the {@link DeviceAdminReceiver} component
+     * specified in the original intent or NFC bump that started the provisioning process
+     * (@see DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE).
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -307,18 +310,23 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called on the new profile when managed profile provisioning has completed.
-     * Managed profile provisioning is the process of setting up the device so that it has a
-     * separate profile which is managed by the mobile device management(mdm) application that
-     * triggered the provisioning.
+     * Called when provisioning of a managed profile or managed device has completed successfully.
      *
-     * <p>As part of provisioning a new profile is created, the mdm is moved to the new profile and
-     * set as the owner of the profile so that it has full control over it.
-     * This intent is only received by the mdm package that is set as profile owner during
-     * provisioning.
+     * <p> As a prerequisit for the execution of this callback the (@link DeviceAdminReceiver} has
+     * to declare an intent filter for {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}.
+     * Its component must also be specified in the {@link DevicePolicyManager#EXTRA_DEVICE_ADMIN}
+     * of the {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
+     * managed provisioning.
      *
-     * <p>Provisioning can be triggered via an intent with the action
-     * android.managedprovisioning.ACTION_PROVISION_MANAGED_PROFILE.
+     * <p>When provisioning is complete, the managed profile is hidden until the profile owner
+     * calls {DevicePolicyManager#setProfileEnabled(ComponentName admin)}. Typically a profile
+     * owner will enable the profile when it has finished any additional setup such as adding an
+     * account by using the {@link AccountManager} and calling apis to bring the profile into the
+     * desired state.
+     *
+     * <p> Note that provisioning completes without waiting for any server interactions, so the
+     * profile owner needs to wait for data to be available if required (e.g android device ids or
+     * other data that is set as a result of server interactions).
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

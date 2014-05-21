@@ -5253,8 +5253,8 @@ package android.app.admin {
     field public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0; // 0x0
     field public static final java.lang.String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "defaultManagedProfileName";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "deviceAdminPackageName";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "android.app.extra.defaultManagedProfileName";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.deviceAdminPackageName";
     field public static int FLAG_TO_MANAGED_PROFILE;
     field public static int FLAG_TO_PRIMARY_USER;
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
