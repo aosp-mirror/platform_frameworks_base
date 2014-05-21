@@ -47,6 +47,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -135,6 +136,10 @@ public class VibratorService extends IVibratorService.Stub
                 return false;
             }
             return true;
+        }
+
+        public boolean isSystemHapticFeedback() {
+            return (mUid == Process.SYSTEM_UID || mUid == 0) && mRepeat < 0;
         }
     }
 
@@ -622,20 +627,32 @@ public class VibratorService extends IVibratorService.Stub
                 }
             }
         }
-    };
+    }
 
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 synchronized (mVibrations) {
-                    doCancelVibrateLocked();
-
-                    int size = mVibrations.size();
-                    for(int i = 0; i < size; i++) {
-                        unlinkVibration(mVibrations.get(i));
+                    // When the system is entering a non-interactive state, we want
+                    // to cancel vibrations in case a misbehaving app has abandoned
+                    // them.  However it may happen that the system is currently playing
+                    // haptic feedback as part of the transition.  So we don't cancel
+                    // system vibrations.
+                    if (mCurrentVibration != null
+                            && !mCurrentVibration.isSystemHapticFeedback()) {
+                        doCancelVibrateLocked();
                     }
 
-                    mVibrations.clear();
+                    // Clear all remaining vibrations.
+                    Iterator<Vibration> it = mVibrations.iterator();
+                    while (it.hasNext()) {
+                        Vibration vibration = it.next();
+                        if (vibration != mCurrentVibration) {
+                            unlinkVibration(vibration);
+                            it.remove();
+                        }
+                    }
                 }
             }
         }
