@@ -305,7 +305,7 @@ public class IpConfigStore {
             }
         } catch (EOFException ignore) {
         } catch (IOException e) {
-            loge("Error parsing configuration" + e);
+            loge("Error parsing configuration: " + e);
         } finally {
             if (in != null) {
                 try {
