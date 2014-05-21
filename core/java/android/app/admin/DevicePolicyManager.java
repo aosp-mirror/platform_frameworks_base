@@ -98,17 +98,25 @@ public class DevicePolicyManager {
 
     /**
      * Activity action: Starts the provisioning flow which sets up a managed profile.
-     * This intent will typically be sent by a mobile device management application(mdm).
-     * Managed profile provisioning creates a profile, moves the mdm to the profile,
-     * sets the mdm as the profile owner and removes all non required applications from the profile.
-     * As a profile owner the mdm than has full control over the managed profile.
      *
-     * <p>The intent must contain the extras {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} and
-     * {@link #EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME}.
+     * <p>A managed profile allows data separation for example for the usage of a
+     * device as a personal and corporate device. The user which provisioning is started from and
+     * the managed profile share a launcher.
+     *
+     * <p>This intent will typically be sent by a mobile device management application (mdm).
+     * Provisioning adds a managed profile and sets the mdm as the profile owner who has full
+     * control over the profile
+     *
+     * <p>This intent must contain the extras {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}
+     * {@link #EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME} and {@link #EXTRA_DEVICE_ADMIN}.
      *
      * <p> When managed provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
-     * mdm app on the managed profile.
+     * managed profile. The intent is sent to the {@link DeviceAdminReceiver} specified in the
+     * {@link #EXTRA_DEVICE_ADMIN} exclusively.
+     *
+     * If provisioning fails, the managedProfile is removed so the device returns to its previous
+     * state.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -134,7 +142,7 @@ public class DevicePolicyManager {
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
-        = "deviceAdminPackageName";
+        = "android.app.extra.deviceAdminPackageName";
 
     /**
      * An int extra used to identify that during the current setup process the user has already
@@ -154,7 +162,7 @@ public class DevicePolicyManager {
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
      */
     public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
-        = "defaultManagedProfileName";
+        = "android.app.extra.defaultManagedProfileName";
 
     /**
      * A String extra holding the email address of the profile that is created during managed
@@ -887,6 +895,9 @@ public class DevicePolicyManager {
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this
      * method; if it has not, a security exception will be thrown.
+     *
+     * <p> Note that setting the password will automatically reset the expiration time for all
+     * active admins. Active admins do not need to explicitly call this method in that case.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param timeout The limit (in ms) that a password can remain in effect. A value of 0
