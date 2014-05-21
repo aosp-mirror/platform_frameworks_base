@@ -24,7 +24,7 @@
     <string name="restore_confirm_text" msgid="7499866728030461776">"Z pripojeného počítača bolo vyžiadané úplné obnovenie všetkých údajov. Chcete túto akciu povoliť?\n\nAk ste toto obnovenie nevyžiadali vy, túto operáciu nepovoľujte. Táto akcia nahradí všetky údaje v zariadení."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Obnoviť údaje"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Neobnoviť"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Zadajte svoje aktuálne heslo pre zálohu nižšie:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Zadajte svoje aktuálne heslo záloh nižšie:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Zadajte svoje heslo na šifrovanie zariadenia nižšie."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Zadajte svoje heslo na šifrovanie zariadenia nižšie. Bude tiež použité na šifrovanie archívu zálohy."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Zadajte heslo, ktoré sa použije pri šifrovaní údajov úplnej zálohy. Ak pole ponecháte prázdne, použije sa vaše aktuálne heslo zálohy:"</string>
