@@ -2376,8 +2376,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
-                final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
-                        resolvedWindowId, action, arguments);
+                final boolean permissionGranted = mSecurityPolicy.canGetAccessibilityNodeInfoLocked(
+                        this, resolvedWindowId);
                 if (!permissionGranted) {
                     return false;
                 } else {
@@ -3177,30 +3177,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     final class SecurityPolicy {
         public static final int INVALID_WINDOW_ID = -1;
 
-        private static final int VALID_ACTIONS =
-            AccessibilityNodeInfo.ACTION_CLICK
-            | AccessibilityNodeInfo.ACTION_LONG_CLICK
-            | AccessibilityNodeInfo.ACTION_FOCUS
-            | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS
-            | AccessibilityNodeInfo.ACTION_SELECT
-            | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION
-            | AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
-            | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS
-            | AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY
-            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
-            | AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT
-            | AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT
-            | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-            | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-            | AccessibilityNodeInfo.ACTION_COPY
-            | AccessibilityNodeInfo.ACTION_PASTE
-            | AccessibilityNodeInfo.ACTION_CUT
-            | AccessibilityNodeInfo.ACTION_SET_SELECTION
-            | AccessibilityNodeInfo.ACTION_EXPAND
-            | AccessibilityNodeInfo.ACTION_COLLAPSE
-            | AccessibilityNodeInfo.ACTION_DISMISS
-            | AccessibilityNodeInfo.ACTION_SET_TEXT;
-
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED
             | AccessibilityEvent.TYPE_VIEW_FOCUSED
@@ -3452,13 +3428,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return canRetrieveWindowContentLocked(service) && isRetrievalAllowingWindow(windowId);
         }
 
-        public boolean canPerformActionLocked(Service service, int windowId, int action,
-                Bundle arguments) {
-            return canRetrieveWindowContentLocked(service)
-                && isRetrievalAllowingWindow(windowId)
-                && isActionPermitted(action);
-        }
-
         public boolean canRetrieveWindowsLocked(Service service) {
             return canRetrieveWindowContentLocked(service) && service.mRetrieveInteractiveWindows;
         }
@@ -3536,10 +3505,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
             return null;
-        }
-
-        private boolean isActionPermitted(int action) {
-             return (VALID_ACTIONS & action) != 0;
         }
 
         private void enforceCallingPermission(String permission, String function) {
