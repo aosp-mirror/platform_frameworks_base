@@ -318,11 +318,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private static final int ACTION_TYPE_MASK = 0xFF000000;
 
-    /**
-     * Mask to define standard not legacy actions.
-     */
-    private static final int STANDARD_NON_LEGACY_ACTION_MASK = 0x01000000;
-
     // Action arguments
 
     /**
@@ -3262,12 +3257,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param label The label for the new AccessibilityAction.
          */
         public AccessibilityAction(int actionId, @Nullable CharSequence label) {
-            if ((actionId & ACTION_TYPE_MASK) == 0 && Integer.bitCount(actionId) > 1) {
+            if ((actionId & ACTION_TYPE_MASK) == 0 && Integer.bitCount(actionId) != 1) {
                 throw new IllegalArgumentException("Invalid standard action id");
-            }
-
-            if ((actionId & STANDARD_NON_LEGACY_ACTION_MASK) != 0) {
-                throw new IllegalArgumentException("action id not a resource id");
             }
 
             mActionId = actionId;
