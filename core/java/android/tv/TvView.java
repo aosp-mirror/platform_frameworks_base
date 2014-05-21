@@ -18,6 +18,7 @@ package android.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.tv.TvInputManager.Session;
@@ -377,6 +378,24 @@ public class TvView extends SurfaceView {
             mSession = null;
             if (mExternalCallback != null) {
                 mExternalCallback.onSessionReleased(session);
+            }
+        }
+
+        @Override
+        public void onVideoSizeChanged(Session session, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
+            }
+            if (mExternalCallback != null) {
+                mExternalCallback.onVideoSizeChanged(session, width, height);
+            }
+        }
+
+        @Override
+        public void onSessionEvent(TvInputManager.Session session, String eventType,
+                Bundle eventArgs) {
+            if (mExternalCallback != null) {
+                mExternalCallback.onSessionEvent(session, eventType, eventArgs);
             }
         }
     }
