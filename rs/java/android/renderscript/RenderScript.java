@@ -73,14 +73,14 @@ public class RenderScript {
      * latency over peak performance. This is a hint and may have no effect
      * on some implementations.
     */
-    public static final long CREATE_FLAG_LOW_LATENCY = 0x0001;
+    public static final long CREATE_FLAG_LOW_LATENCY = 0x0002;
 
     /*
      * Context creation flag which specifies a context optimized for long
      * battery life over peak performance. This is a hint and may have no effect
      * on some implementations.
     */
-    public static final long CREATE_FLAG_LOW_POWER = 0x0002;
+    public static final long CREATE_FLAG_LOW_POWER = 0x0004;
 
     static {
         sInitialized = false;
@@ -1180,10 +1180,14 @@ public class RenderScript {
             return null;
         }
 
+        if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER)) != 0) {
+            throw new RSIllegalArgumentException("Invalid flags passed.");
+        }
+
         RenderScript rs = new RenderScript(ctx);
 
         rs.mDev = rs.nDeviceCreate();
-        rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion, ct.mID);
+        rs.mContext = rs.nContextCreate(rs.mDev, (int)flags, sdkVersion, ct.mID);
         rs.mContextType = ct;
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
