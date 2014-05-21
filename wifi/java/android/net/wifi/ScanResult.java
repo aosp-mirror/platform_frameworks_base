@@ -192,6 +192,7 @@ public class ScanResult implements Parcelable {
         dest.writeLong(timestamp);
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
+        dest.writeLong(seen);
         if (passpoint != null) {
             dest.writeInt(1);
             passpoint.writeToParcel(dest, flags);
@@ -218,6 +219,7 @@ public class ScanResult implements Parcelable {
                     in.readInt(),
                     in.readInt()
                 );
+                sr.seen = in.readLong();
                 if (in.readInt() == 1) {
                     sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }

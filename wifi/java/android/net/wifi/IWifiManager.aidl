@@ -128,5 +128,9 @@ interface IWifiManager
     void pollBatchedScan();
 
     String getWpsNfcConfigurationToken(int netId);
+
+    void enableVerboseLogging(int verbose);
+
+    int getVerboseLoggingLevel();
 }
 

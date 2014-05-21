@@ -319,27 +319,47 @@ public class WifiConfiguration implements Parcelable {
      * A summary of the RSSI and Band status for that configuration
      * This is used as a temporary value by the auto-join controller
      */
-    public final class Visibility
-    {
+    public final class Visibility {
         public int rssi5;   // strongest 5GHz RSSI
         public int rssi24;  // strongest 2.4GHz RSSI
         public int num5;    // number of BSSIDs on 5GHz
         public int num24;   // number of BSSIDs on 2.4GHz
         public long age5;  // timestamp of the strongest 5GHz BSSID (last time it was seen)
         public long age24;   // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
-        public Visibility()
-        {
+
+        public Visibility() {
             rssi5 = INVALID_RSSI;
             rssi24 = INVALID_RSSI;
         }
-        public Visibility(Visibility source)
-        {
+
+        public Visibility(Visibility source) {
             rssi5 = source.rssi5;
             rssi24 = source.rssi24;
             age24 = source.age24;
             age5 = source.age5;
             num24 = source.num24;
             num5 = source.num5;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("[");
+            if (rssi24 > INVALID_RSSI) {
+                sbuf.append(Integer.toString(rssi24));
+                sbuf.append(",");
+                sbuf.append(Integer.toString(num24));
+            } else {
+                sbuf.append("*");
+            }
+            sbuf.append(" - ");
+            if (rssi5 > INVALID_RSSI) {
+                sbuf.append(Integer.toString(rssi5));
+                sbuf.append(",");
+                sbuf.append(Integer.toString(num5));
+            }
+            sbuf.append("]");
+            return sbuf.toString();
         }
     }
 
@@ -893,6 +913,11 @@ public class WifiConfiguration implements Parcelable {
         }
     }
 
+    /** {@hide} */
+    //public static final int NOTHING_TAG = 0;
+    /** {@hide} */
+    //public static final int SCAN_CACHE_TAG = 1;
+
     /** Implement the Parcelable interface {@hide} */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -922,6 +947,17 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(defaultGwMacAddress);
         dest.writeInt(autoJoinStatus);
         dest.writeInt(selfAdded ? 1 : 0);
+        /*
+        TODO: should we write the cache results to the parcel?
+        if (scanResultCache != null) {
+            dest.writeInt(WifiConfiguration.SCAN_CACHE_TAG);
+            dest.writeInt(scanResultCache.size());
+            for (ScanResult result : scanResultCache.values()) {
+                result.writeToParcel(dest, flags);
+            }
+        } else {
+            dest.writeInt(WifiConfiguration.NOTHING_TAG);
+        }*/
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -954,6 +990,26 @@ public class WifiConfiguration implements Parcelable {
                 config.defaultGwMacAddress = in.readString();
                 config.autoJoinStatus = in.readInt();
                 config.selfAdded = in.readInt() != 0;
+                /*
+                TODO: should we write the cache results to the parcel?
+                boolean done = false;
+                do {
+                    int tag = in.readInt();
+                    switch (tag) {
+                        case WifiConfiguration.SCAN_CACHE_TAG:
+                            int size = in.readInt();
+                            config.scanResultCache = new HashMap<String, ScanResult>();
+                            while (size > 0) {
+                                ScanResult result = ScanResult.CREATOR.createFromParcel(in);
+                                config.scanResultCache.put(result.BSSID, result);
+                                size--;
+                            }
+                            break;
+                        case WifiConfiguration.NOTHING_TAG:
+                            done = true;
+                            break;
+                    }
+                } while (!done);*/
                 return config;
             }
 
