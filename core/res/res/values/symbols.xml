@@ -604,6 +604,14 @@
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
+  <java-symbol type="string" name="lock_to_app_title" />
+  <java-symbol type="string" name="lock_to_app_description" />
+  <java-symbol type="string" name="lock_to_app_negative" />
+  <java-symbol type="string" name="lock_to_app_positive" />
+  <java-symbol type="drawable" name="ic_recent" />
+  <java-symbol type="layout" name="lock_to_app_enter" />
+  <java-symbol type="layout" name="lock_to_app_exit" />
+  <java-symbol type="drawable" name="lock_task_notify_bg" />
   <java-symbol type="string" name="lockscreen_access_pattern_cell_added" />
   <java-symbol type="string" name="lockscreen_access_pattern_cleared" />
   <java-symbol type="string" name="lockscreen_access_pattern_detected" />

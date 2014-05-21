@@ -36,6 +36,9 @@ import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
+import android.content.DialogInterface.OnClickListener;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
@@ -171,8 +174,12 @@ import android.os.SystemProperties;
 import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -186,6 +193,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -1157,6 +1165,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     AlertDialog mUidAlert;
     CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
+
+    private LockToAppRequestDialog mLockToAppRequest;
 
     /**
      * Flag whether the current user is a "monkey", i.e. whether
@@ -2175,6 +2185,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         };
+
+        mLockToAppRequest = new LockToAppRequestDialog(mContext, this);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -3662,6 +3674,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Keep track of the root activity of the task before we finish it
             TaskRecord tr = r.task;
             ActivityRecord rootR = tr.getRootActivity();
+            // Do not allow task to finish in Lock Task mode.
+            if (tr == mStackSupervisor.mLockTaskModeTask) {
+                if (rootR == r) {
+                    return false;
+                }
+            }
             if (mController != null) {
                 // Find the first activity that is not finishing.
                 ActivityRecord next = r.task.stack.topRunningActivityLocked(token, 0);
@@ -3806,13 +3824,25 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean finishActivityAffinity(IBinder token) {
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            boolean res = false;
-            if (r != null) {
-                res = r.task.stack.finishActivityAffinityLocked(r);
+            try {
+                ActivityRecord r = ActivityRecord.isInStackLocked(token);
+
+                ActivityRecord rootR = r.task.getRootActivity();
+                // Do not allow task to finish in Lock Task mode.
+                if (r.task == mStackSupervisor.mLockTaskModeTask) {
+                    if (rootR == r) {
+                        Binder.restoreCallingIdentity(origId);
+                        return false;
+                    }
+                }
+                boolean res = false;
+                if (r != null) {
+                    res = r.task.stack.finishActivityAffinityLocked(r);
+                }
+                return res;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            Binder.restoreCallingIdentity(origId);
-            return res;
         }
     }
 
@@ -7642,12 +7672,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void startLockTaskMode(TaskRecord task) {
+    void startLockTaskMode(TaskRecord task) {
         final String pkg;
         synchronized (this) {
             pkg = task.intent.getComponent().getPackageName();
         }
-        if (!isLockTaskAuthorized(pkg)) {
+        boolean isSystemInitiated = Binder.getCallingUid() == Process.SYSTEM_UID;
+        if (!isSystemInitiated && !isLockTaskAuthorized(pkg)) {
+            final TaskRecord taskRecord = task;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mLockToAppRequest.showLockTaskPrompt(taskRecord);
+                }
+            });
             return;
         }
         long ident = Binder.clearCallingIdentity();
@@ -7659,7 +7697,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if ((mFocusedActivity == null) || (task != mFocusedActivity.task)) {
                         throw new IllegalArgumentException("Invalid task, not in foreground");
                     }
-                    mStackSupervisor.setLockTaskModeLocked(task);
+                    mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated);
                 }
             }
         } finally {
@@ -7704,24 +7742,55 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void startLockTaskModeOnCurrent() throws RemoteException {
+        checkCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS);
+        ActivityRecord r = null;
+        synchronized (this) {
+            r = mStackSupervisor.topRunningActivityLocked();
+        }
+        startLockTaskMode(r.task);
+    }
+
+    @Override
     public void stopLockTaskMode() {
         // Verify that the user matches the package of the intent for the TaskRecord
-        // we are locked to.  This will ensure the same caller for startLockTaskMode and
-        // stopLockTaskMode.
-        try {
-            String pkg = mStackSupervisor.mLockTaskModeTask.intent.getPackage();
-            int uid = mContext.getPackageManager().getPackageUid(pkg,
-                    Binder.getCallingUserHandle().getIdentifier());
-            if (uid != Binder.getCallingUid()) {
-                throw new SecurityException("Invalid uid, expected " + uid);
+        // we are locked to or systtem.  This will ensure the same caller for startLockTaskMode
+        // and stopLockTaskMode.
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            try {
+                String pkg =
+                        mStackSupervisor.mLockTaskModeTask.intent.getComponent().getPackageName();
+                int uid = mContext.getPackageManager().getPackageUid(pkg,
+                        Binder.getCallingUserHandle().getIdentifier());
+                if (uid != callingUid) {
+                    throw new SecurityException("Invalid uid, expected " + uid);
+                }
+            } catch (NameNotFoundException e) {
+                Log.d(TAG, "stopLockTaskMode " + e);
+                return;
             }
-        } catch (NameNotFoundException e) {
-            Log.d(TAG, "stopLockTaskMode " + e);
-            return;
         }
-        // Stop lock task
-        synchronized (this) {
-            mStackSupervisor.setLockTaskModeLocked(null);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Log.d(TAG, "stopLockTaskMode");
+            // Stop lock task
+            synchronized (this) {
+                mStackSupervisor.setLockTaskModeLocked(null, false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void stopLockTaskModeOnCurrent() throws RemoteException {
+        checkCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            stopLockTaskMode();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -16651,7 +16720,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return true;
                 }
 
-                mStackSupervisor.setLockTaskModeLocked(null);
+                mStackSupervisor.setLockTaskModeLocked(null, false);
 
                 final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
                 if (userInfo == null) {
