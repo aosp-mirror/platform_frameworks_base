@@ -903,8 +903,6 @@ public final class ContactsContract {
         /**
          * Flag that reflects whether the contact exists inside the default directory.
          * Ie, whether the contact is designed to only be visible outside search.
-         *
-         * @hide
          */
         public static final String IN_DEFAULT_DIRECTORY = "in_default_directory";
 

@@ -22932,6 +22932,7 @@ package android.provider {
     field public static final java.lang.String CONTACT_LAST_UPDATED_TIMESTAMP = "contact_last_updated_timestamp";
     field public static final java.lang.String DISPLAY_NAME = "display_name";
     field public static final java.lang.String HAS_PHONE_NUMBER = "has_phone_number";
+    field public static final java.lang.String IN_DEFAULT_DIRECTORY = "in_default_directory";
     field public static final java.lang.String IN_VISIBLE_GROUP = "in_visible_group";
     field public static final java.lang.String IS_USER_PROFILE = "is_user_profile";
     field public static final java.lang.String LOOKUP_KEY = "lookup";
