@@ -18,6 +18,8 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "NetdClient.h"
+#include "resolv_netid.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -250,6 +252,36 @@ static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket,
     }
 }
 
+static void android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
+{
+    setNetworkForProcess(netId);
+}
+
+static void android_net_utils_unbindProcessToNetwork(JNIEnv *env, jobject thiz)
+{
+    setNetworkForProcess(NETID_UNSET);
+}
+
+static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz)
+{
+    return getNetworkForProcess();
+}
+
+static void android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz, jint netId)
+{
+    setNetworkForResolv(netId);
+}
+
+static void android_net_utils_unbindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz)
+{
+    setNetworkForResolv(NETID_UNSET);
+}
+
+static void android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket, jint netId)
+{
+    setNetworkForSocket(netId, socket);
+}
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -267,6 +299,12 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
     { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
+    { "bindProcessToNetwork", "(I)V", (void*) android_net_utils_bindProcessToNetwork },
+    { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
+    { "unbindProcessToNetwork", "()V", (void*) android_net_utils_unbindProcessToNetwork },
+    { "bindProcessToNetworkForHostResolution", "(I)V", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
+    { "unbindProcessToNetworkForHostResolution", "()V", (void*) android_net_utils_unbindProcessToNetworkForHostResolution },
+    { "bindSocketToNetwork", "(II)V", (void*) android_net_utils_bindSocketToNetwork },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
