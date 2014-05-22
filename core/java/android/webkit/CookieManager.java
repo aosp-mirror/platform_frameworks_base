@@ -68,7 +68,7 @@ public class CookieManager {
         throw new MustOverrideException();
     }
 
-    /**
+   /**
      * Sets whether the {@link WebView} should allow third party cookies to be set.
      * Allowing third party cookies is a per WebView policy and can be set
      * differently on different WebView instances.
@@ -252,12 +252,20 @@ public class CookieManager {
     }
 
     /**
+     * Ensures all cookies currently accessible through the getCookie API are
+     * written to persistent storage.
+     * This call will block the caller until it is done and may perform I/O.
+     */
+    public void flush() {
+        flushCookieStore();
+    }
+
+    /**
      * Flushes all cookies managed by the Chrome HTTP stack to flash.
      *
      * @hide Package level api, called from CookieSyncManager
      */
     protected void flushCookieStore() {
-        throw new MustOverrideException();
     }
 
     /**

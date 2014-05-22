@@ -23,52 +23,16 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+/*
+ * @deprecated The WebSyncManager no longer does anything.
+ */
+@Deprecated
 abstract class WebSyncManager implements Runnable {
-    // message code for sync message
-    private static final int SYNC_MESSAGE = 101;
-    // time delay in millisec for a sync (now) message
-    private static int SYNC_NOW_INTERVAL = 100; // 100 millisec
-    // time delay in millisec for a sync (later) message
-    private static int SYNC_LATER_INTERVAL = 5 * 60 * 1000; // 5 minutes
-    // thread for syncing
-    private Thread mSyncThread;
-    // Name of thread
-    private String mThreadName;
-    // handler of the sync thread
-    protected Handler mHandler;
-    // database for the persistent storage. Always null.
-    protected WebViewDatabase mDataBase;
-    // Ref count for calls to start/stop sync
-    private int mStartSyncRefCount;
-    // log tag
-    protected static final String LOGTAG = "websync";
-
-    private class SyncHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == SYNC_MESSAGE) {
-                if (DebugFlags.WEB_SYNC_MANAGER) {
-                    Log.v(LOGTAG, "*** WebSyncManager sync ***");
-                }
-                syncFromRamToFlash();
-
-                // send a delayed message to request sync later
-                Message newmsg = obtainMessage(SYNC_MESSAGE);
-                sendMessageDelayed(newmsg, SYNC_LATER_INTERVAL);
-            }
-        }
-    }
+    protected static final java.lang.String LOGTAG = "websync";
+    protected android.webkit.WebViewDatabase mDataBase;
+    protected android.os.Handler mHandler;
 
     protected WebSyncManager(Context context, String name) {
-        this(name);
-    }
-
-    /** @hide */
-    WebSyncManager(String name) {
-        mThreadName = name;
-        mSyncThread = new Thread(this);
-        mSyncThread.setName(mThreadName);
-        mSyncThread.start();
     }
 
     protected Object clone() throws CloneNotSupportedException {
@@ -76,64 +40,24 @@ abstract class WebSyncManager implements Runnable {
     }
 
     public void run() {
-        // prepare Looper for sync handler
-        Looper.prepare();
-        mHandler = new SyncHandler();
-        onSyncInit();
-        // lower the priority after onSyncInit() is done
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-        Message msg = mHandler.obtainMessage(SYNC_MESSAGE);
-        mHandler.sendMessageDelayed(msg, SYNC_LATER_INTERVAL);
-
-        Looper.loop();
     }
 
     /**
      * sync() forces sync manager to sync now
      */
     public void sync() {
-        if (DebugFlags.WEB_SYNC_MANAGER) {
-            Log.v(LOGTAG, "*** WebSyncManager sync ***");
-        }
-        if (mHandler == null) {
-            return;
-        }
-        mHandler.removeMessages(SYNC_MESSAGE);
-        Message msg = mHandler.obtainMessage(SYNC_MESSAGE);
-        mHandler.sendMessageDelayed(msg, SYNC_NOW_INTERVAL);
     }
 
     /**
      * resetSync() resets sync manager's timer
      */
     public void resetSync() {
-        if (DebugFlags.WEB_SYNC_MANAGER) {
-            Log.v(LOGTAG, "*** WebSyncManager resetSync ***");
-        }
-        if (mHandler == null) {
-            return;
-        }
-        mHandler.removeMessages(SYNC_MESSAGE);
-        Message msg = mHandler.obtainMessage(SYNC_MESSAGE);
-        mHandler.sendMessageDelayed(msg, SYNC_LATER_INTERVAL);
     }
 
     /**
      * startSync() requests sync manager to start sync
      */
     public void startSync() {
-        if (DebugFlags.WEB_SYNC_MANAGER) {
-            Log.v(LOGTAG, "***  WebSyncManager startSync ***, Ref count:" + 
-                    mStartSyncRefCount);
-        }
-        if (mHandler == null) {
-            return;
-        }
-        if (++mStartSyncRefCount == 1) {
-            Message msg = mHandler.obtainMessage(SYNC_MESSAGE);
-            mHandler.sendMessageDelayed(msg, SYNC_LATER_INTERVAL);
-        }
     }
 
     /**
@@ -141,16 +65,6 @@ abstract class WebSyncManager implements Runnable {
      * the queue to break the sync loop
      */
     public void stopSync() {
-        if (DebugFlags.WEB_SYNC_MANAGER) {
-            Log.v(LOGTAG, "*** WebSyncManager stopSync ***, Ref count:" + 
-                    mStartSyncRefCount);
-        }
-        if (mHandler == null) {
-            return;
-        }
-        if (--mStartSyncRefCount == 0) {
-            mHandler.removeMessages(SYNC_MESSAGE);
-        }
     }
 
     protected void onSyncInit() {

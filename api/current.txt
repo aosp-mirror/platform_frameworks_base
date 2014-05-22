@@ -35245,6 +35245,7 @@ package android.webkit {
     method public synchronized boolean acceptCookie();
     method public synchronized boolean acceptThirdPartyCookies(android.webkit.WebView);
     method public static boolean allowFileSchemeCookies();
+    method public void flush();
     method public java.lang.String getCookie(java.lang.String);
     method public static synchronized android.webkit.CookieManager getInstance();
     method public synchronized boolean hasCookies();
@@ -35260,10 +35261,10 @@ package android.webkit {
     method public void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
   }
 
-  public final class CookieSyncManager extends android.webkit.WebSyncManager {
+  public final deprecated class CookieSyncManager extends android.webkit.WebSyncManager {
     method public static synchronized android.webkit.CookieSyncManager createInstance(android.content.Context);
     method public static synchronized android.webkit.CookieSyncManager getInstance();
-    method protected void syncFromRamToFlash();
+    method protected deprecated void syncFromRamToFlash();
     field protected static final java.lang.String LOGTAG = "websync";
     field protected android.webkit.WebViewDatabase mDataBase;
     field protected android.os.Handler mHandler;
@@ -35616,7 +35617,7 @@ package android.webkit {
     method public abstract void updateQuota(long);
   }
 
-   abstract class WebSyncManager implements java.lang.Runnable {
+   abstract deprecated class WebSyncManager implements java.lang.Runnable {
     ctor protected WebSyncManager(android.content.Context, java.lang.String);
     method protected void onSyncInit();
     method public void resetSync();

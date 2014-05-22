@@ -21,6 +21,13 @@ import android.util.Log;
 
 
 /**
+ * @deprecated The WebView now automatically syncs cookies as necessary.
+ *             You no longer need to create or use the CookieSyncManager.
+ *             To manually force a sync you can use the CookieManager
+ *             method {@link CookieManager#flush} which is synchronous
+ *             replacement for {@link #sync}.
+ *             <p>
+ *
  * The CookieSyncManager is used to synchronize the browser cookie store
  * between RAM and permanent storage. To get the best performance, browser cookies are
  * saved in RAM. A separate thread saves the cookies between, driven by a timer.
@@ -55,21 +62,21 @@ import android.util.Log;
  * asynchronously, so don't do it just as your activity is shutting
  * down.
  */
+@Deprecated
 public final class CookieSyncManager extends WebSyncManager {
 
     private static CookieSyncManager sRef;
-
     private static boolean sGetInstanceAllowed = false;
 
     private CookieSyncManager() {
-        super("CookieSyncManager");
+        super(null, null);
     }
 
     /**
      * Singleton access to a {@link CookieSyncManager}. An
      * IllegalStateException will be thrown if
      * {@link CookieSyncManager#createInstance(Context)} is not called before.
-     * 
+     *
      * @return CookieSyncManager
      */
     public static synchronized CookieSyncManager getInstance() {
@@ -89,27 +96,53 @@ public final class CookieSyncManager extends WebSyncManager {
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
-
         setGetInstanceIsAllowed();
         return getInstance();
     }
 
+    /**
+     * sync() forces sync manager to sync now
+     * @deprecated Use {@link CookieManager#flush} instead.
+     */
+    @Deprecated
+    public void sync() {
+        CookieManager.getInstance().flush();
+    }
+
+    /**
+     * @deprecated Use {@link CookieManager#flush} instead.
+     */
+    @Deprecated
     protected void syncFromRamToFlash() {
-        if (DebugFlags.COOKIE_SYNC_MANAGER) {
-            Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash STARTS");
-        }
+        CookieManager.getInstance().flush();
+    }
 
-        CookieManager manager = CookieManager.getInstance();
+    /**
+     * resetSync() resets sync manager's timer.
+     * @deprecated Calling resetSync is no longer necessary as the WebView automatically
+     *             syncs cookies.
+     */
+    @Deprecated
+    public void resetSync() {
+    }
 
-        if (!manager.acceptCookie()) {
-            return;
-        }
+    /**
+     * startSync() requests sync manager to start sync.
+     * @deprecated Calling startSync is no longer necessary as the WebView automatically
+     *             syncs cookies.
+     */
+    @Deprecated
+    public void startSync() {
+    }
 
-        manager.flushCookieStore();
-
-        if (DebugFlags.COOKIE_SYNC_MANAGER) {
-            Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash DONE");
-        }
+    /**
+     * stopSync() requests sync manager to stop sync. remove any SYNC_MESSAGE in
+     * the queue to break the sync loop
+     * @deprecated Calling stopSync is no longer useful as the WebView
+     *             automatically syncs cookies.
+     */
+    @Deprecated
+    public void stopSync() {
     }
 
     static void setGetInstanceIsAllowed() {
