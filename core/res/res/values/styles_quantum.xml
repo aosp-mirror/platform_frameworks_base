@@ -364,7 +364,6 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">96dip</item>
-        <item name="elevation">2dip</item>
         <item name="stateListAnimator">@anim/button_state_list_anim_quantum</item>
     </style>
 
