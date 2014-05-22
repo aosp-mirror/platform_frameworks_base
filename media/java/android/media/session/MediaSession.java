@@ -245,17 +245,16 @@ public final class MediaSession {
     }
 
     /**
-     * Set the attributes for this session's local playback. This will affect
-     * the system's default volume handling for this session. If
-     * {@link #useRemotePlayback} was previously called it will stop receiving
-     * volume commands and the system will begin handling volume changes.
+     * Set the stream this session is playing on. This will affect the system's
+     * volume handling for this session. If {@link #useRemotePlayback} was
+     * previously called it will stop receiving volume commands and the system
+     * will begin sending volume changes to the appropriate stream.
      * <p>
-     * By default sessions use {@link AudioAttributes#USAGE_MEDIA}.
+     * By default sessions are on {@link AudioManager#STREAM_MUSIC}.
      *
-     * @param attributes The {@link AudioAttributes} for this session's
-     *            playback.
+     * @param stream The {@link AudioManager} stream this session is playing on.
      */
-    public void useLocalPlayback(AudioAttributes attributes) {
+    public void useLocalPlayback(int stream) {
         // TODO
     }
 
