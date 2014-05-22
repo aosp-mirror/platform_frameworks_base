@@ -715,6 +715,17 @@ public class Notification implements Parcelable
     public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
 
     /**
+     * {@link #extras} key: A
+     * {@link android.content.ContentUris content URI} pointing to an image that can be displayed
+     * in the background when the notification is selected. The URI must point to an image stream
+     * suitable for passing into
+     * {@link android.graphics.BitmapFactory#decodeStream(java.io.InputStream)
+     * BitmapFactory.decodeStream}; all other content types will be ignored. The content provider
+     * URI used for this purpose must require no permissions to read the image data.
+     */
+    public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
+
+    /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.
      * @hide
      */
