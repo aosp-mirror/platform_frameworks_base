@@ -975,11 +975,11 @@
         <!-- The color applied to framework controls in their activated (ex. checked) state. -->
         <attr name="colorControlActivated" format="color" />
 
+        <!-- The color applied to framework control highlights (ex. ripples, selection). -->
+        <attr name="colorControlHighlight" format="color" />
+
         <!-- The color applied to framework buttons in their normal state. -->
         <attr name="colorButtonNormal" format="color" />
-
-        <!-- The color applied to framework buttons in their pressed state. -->
-        <attr name="colorButtonPressed" format="color" />
     </declare-styleable>
 
     <!-- **************************************************************** -->

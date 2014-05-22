@@ -58,7 +58,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryLight">@color/legacy_primary_light</item>
         <item name="colorControlActivated">@color/legacy_control_activated</item>
         <item name="colorControlNormal">@color/legacy_control_normal</item>
-        <item name="colorButtonPressed">@color/legacy_button_pressed</item>
+        <item name="colorControlHighlight">@color/legacy_button_pressed</item>
         <item name="colorButtonNormal">@color/legacy_button_normal</item>
 
         <item name="disabledAlpha">0.5</item>
@@ -455,7 +455,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryLight">@color/legacy_light_primary_light</item>
         <item name="colorControlActivated">@color/legacy_light_control_activated</item>
         <item name="colorControlNormal">@color/legacy_light_control_normal</item>
-        <item name="colorButtonPressed">@color/legacy_light_button_pressed</item>
+        <item name="colorControlHighlight">@color/legacy_light_button_pressed</item>
         <item name="colorButtonNormal">@color/legacy_light_button_normal</item>
         
         <item name="textColorPrimary">@android:color/primary_text_light</item>
@@ -970,7 +970,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryLight">@color/holo_primary_light</item>
         <item name="colorControlActivated">@color/holo_control_activated</item>
         <item name="colorControlNormal">@color/holo_control_normal</item>
-        <item name="colorButtonPressed">@color/holo_button_pressed</item>
+        <item name="colorControlHighlight">@color/holo_button_pressed</item>
         <item name="colorButtonNormal">@color/holo_button_normal</item>
 
         <!-- Text styles -->
@@ -1310,7 +1310,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryLight">@color/holo_light_primary_light</item>
         <item name="colorControlActivated">@color/holo_light_control_activated</item>
         <item name="colorControlNormal">@color/holo_light_control_normal</item>
-        <item name="colorButtonPressed">@color/holo_light_button_pressed</item>
+        <item name="colorControlHighlight">@color/holo_light_button_pressed</item>
         <item name="colorButtonNormal">@color/holo_light_button_normal</item>
 
         <!-- Text styles -->

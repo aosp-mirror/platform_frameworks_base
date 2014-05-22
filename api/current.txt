@@ -390,8 +390,8 @@ package android {
     field public static final int colorBackground = 16842801; // 0x1010031
     field public static final int colorBackgroundCacheHint = 16843435; // 0x10102ab
     field public static final int colorButtonNormal = 16843822; // 0x101042e
-    field public static final int colorButtonPressed = 16843823; // 0x101042f
     field public static final int colorControlActivated = 16843821; // 0x101042d
+    field public static final int colorControlHighlight = 16843823; // 0x101042f
     field public static final int colorControlNormal = 16843820; // 0x101042c
     field public static final int colorFocusedHighlight = 16843663; // 0x101038f
     field public static final int colorForeground = 16842800; // 0x1010030
