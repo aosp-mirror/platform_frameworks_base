@@ -189,15 +189,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     final protected SharedElementListener mListener;
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
+    final protected boolean mIsReturning;
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
             ArrayList<String> accepted, ArrayList<String> localNames,
-            SharedElementListener listener) {
+            SharedElementListener listener, boolean isReturning) {
         super(new Handler());
         mWindow = window;
         mListener = listener;
         mAllSharedElementNames = allSharedElementNames;
+        mIsReturning = isReturning;
         setSharedElements(accepted, localNames);
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
