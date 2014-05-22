@@ -93,7 +93,7 @@ public class CameraDeviceState {
      * {@link CameraDeviceStateListener#onConfiguring()} will be called.
      * </p>
      *
-     * @returns {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
+     * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
     public synchronized int setConfiguring() {
         doStateTransition(STATE_CONFIGURING);
@@ -108,7 +108,7 @@ public class CameraDeviceState {
      * {@link CameraDeviceStateListener#onIdle()} will be called.
      * </p>
      *
-     * @returns {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
+     * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
     public synchronized int setIdle() {
         doStateTransition(STATE_IDLE);
@@ -124,7 +124,7 @@ public class CameraDeviceState {
      * </p>
      *
      * @param request A {@link RequestHolder} containing the request for the current capture.
-     * @returns {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
+     * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
     public synchronized int setCaptureStart(final RequestHolder request) {
         mCurrentRequest = request;
@@ -144,7 +144,7 @@ public class CameraDeviceState {
      *
      * @param request the {@link RequestHolder} request that created this result.
      * @param result the {@link CameraMetadataNative} result to set.
-     * @returns {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
+     * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
     public synchronized int setCaptureResult(final RequestHolder request,
                                              final CameraMetadataNative result) {
