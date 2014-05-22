@@ -32,6 +32,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
@@ -1979,6 +1980,43 @@ public class DevicePolicyManager {
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
+        }
+    }
+
+    /**
+     * Called by a device owner to create a user with the specified name. The UserHandle returned
+     * by this method should not be persisted as user handles are recycled as users are removed and
+     * created. If you need to persist an identifier for this user, use
+     * {@link UserManager#getSerialNumberForUser}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param name the user's name
+     * @see UserHandle
+     * @return the UserHandle object for the created user, or null if the user could not be created.
+     */
+    public UserHandle createUser(ComponentName admin, String name) {
+        try {
+            return mService.createUser(admin, name);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not create a user", re);
+        }
+        return null;
+    }
+
+    /**
+     * Called by a device owner to remove a user and all associated data. The primary user can
+     * not be removed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle the user to remove.
+     * @return {@code true} if the user was removed, {@code false} otherwise.
+     */
+    public boolean removeUser(ComponentName admin, UserHandle userHandle) {
+        try {
+            return mService.removeUser(admin, userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not remove user ", re);
+            return false;
         }
     }
 

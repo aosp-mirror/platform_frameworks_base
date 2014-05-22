@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.RemoteCallback;
+import android.os.UserHandle;
 
 /**
  * Internal IPC interface to the device policy service.
@@ -127,6 +128,9 @@ interface IDevicePolicyManager {
     boolean setApplicationBlocked(in ComponentName admin, in String packageName, boolean blocked);
     int setApplicationsBlocked(in ComponentName admin, in Intent intent, boolean blocked);
     boolean isApplicationBlocked(in ComponentName admin, in String packageName);
+
+    UserHandle createUser(in ComponentName who, in String name);
+    boolean removeUser(in ComponentName who, in UserHandle userHandle);
 
     void enableSystemApp(in ComponentName admin, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in Intent intent);
