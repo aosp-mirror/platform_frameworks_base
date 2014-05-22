@@ -749,6 +749,7 @@ package android {
     field public static final int layout_centerVertical = 16843153; // 0x1010191
     field public static final int layout_column = 16843084; // 0x101014c
     field public static final int layout_columnSpan = 16843645; // 0x101037d
+    field public static final int layout_columnWeight = 16843868; // 0x101045c
     field public static final int layout_gravity = 16842931; // 0x10100b3
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
@@ -760,6 +761,7 @@ package android {
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
+    field public static final int layout_rowWeight = 16843867; // 0x101045b
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
     field public static final int layout_toEndOf = 16843704; // 0x10103b8
@@ -36565,6 +36567,10 @@ package android.widget {
     method public void setRowCount(int);
     method public void setRowOrderPreserved(boolean);
     method public void setUseDefaultMargins(boolean);
+    method public static android.widget.GridLayout.Spec spec(int, int, android.widget.GridLayout.Alignment, float);
+    method public static android.widget.GridLayout.Spec spec(int, android.widget.GridLayout.Alignment, float);
+    method public static android.widget.GridLayout.Spec spec(int, int, float);
+    method public static android.widget.GridLayout.Spec spec(int, float);
     method public static android.widget.GridLayout.Spec spec(int, int, android.widget.GridLayout.Alignment);
     method public static android.widget.GridLayout.Spec spec(int, android.widget.GridLayout.Alignment);
     method public static android.widget.GridLayout.Spec spec(int, int);
