@@ -6010,6 +6010,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             IPackageManager pm, ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                 "checkHoldingPermissionsLocked: uri=" + grantUri + " uid=" + uid);
+        if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
+            return false;
+        }
 
         if (pi.applicationInfo.uid == uid) {
             return true;
