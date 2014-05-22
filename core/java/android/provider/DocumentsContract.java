@@ -287,6 +287,16 @@ public final class DocumentsContract {
         public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 1 << 5;
 
         /**
+         * Flag indicating that a document can be renamed.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#renameDocument(ContentProviderClient, Uri,
+         *      String)
+         * @see DocumentsProvider#renameDocument(String, String)
+         */
+        public static final int FLAG_SUPPORTS_RENAME = 1 << 6;
+
+        /**
          * Flag indicating that document titles should be hidden when viewing
          * this directory in a larger format grid. For example, a directory
          * containing only images may want the image thumbnails to speak for
@@ -493,6 +503,8 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
+    /** {@hide} */
+    public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
     /** {@hide} */
     public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
 
@@ -895,6 +907,45 @@ public final class DocumentsContract {
 
         final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
         return out.getParcelable(DocumentsContract.EXTRA_URI);
+    }
+
+    /**
+     * Change the display name of an existing document.
+     * <p>
+     * If the underlying provider needs to create a new
+     * {@link Document#COLUMN_DOCUMENT_ID} to represent the updated display
+     * name, that new document is returned and the original document is no
+     * longer valid. Otherwise, the original document is returned.
+     *
+     * @param documentUri document with {@link Document#FLAG_SUPPORTS_RENAME}
+     * @param displayName updated name for document
+     * @return the existing or new document after the rename, or {@code null} if
+     *         failed.
+     */
+    public static Uri renameDocument(ContentResolver resolver, Uri documentUri,
+            String displayName) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                documentUri.getAuthority());
+        try {
+            return renameDocument(client, documentUri, displayName);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to rename document", e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static Uri renameDocument(ContentProviderClient client, Uri documentUri,
+            String displayName) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
+        in.putString(Document.COLUMN_DISPLAY_NAME, displayName);
+
+        final Bundle out = client.call(METHOD_RENAME_DOCUMENT, null, in);
+        final Uri outUri = out.getParcelable(DocumentsContract.EXTRA_URI);
+        return (outUri != null) ? outUri : documentUri;
     }
 
     /**
