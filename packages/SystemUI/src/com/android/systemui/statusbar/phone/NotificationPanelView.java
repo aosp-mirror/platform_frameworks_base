@@ -545,6 +545,9 @@ public class NotificationPanelView extends PanelView implements
     }
     private void flingSettings(float vel, boolean expand) {
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
+        if (target == mQsExpansionHeight) {
+            return;
+        }
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
         mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
