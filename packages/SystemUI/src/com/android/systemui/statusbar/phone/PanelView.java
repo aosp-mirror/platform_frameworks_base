@@ -402,7 +402,7 @@ public class PanelView extends FrameLayout {
 
     public void setExpandedHeightInternal(float h) {
         float fh = getMaxPanelHeight();
-        mExpandedHeight = h;
+        mExpandedHeight = Math.min(fh, h);
 
         if (DEBUG) {
             logf("setExpansion: height=%.1f fh=%.1f tracking=%s", h, fh, mTracking ? "T" : "f");
