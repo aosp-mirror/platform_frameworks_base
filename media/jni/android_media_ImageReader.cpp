@@ -764,21 +764,30 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         return -1;
     }
 
-    if (ctx->getBufferFormat() != buffer->format) {
-        // Return the buffer to the queue.
-        consumer->unlockBuffer(*buffer);
-        ctx->returnLockedBuffer(buffer);
+    int imgReaderFmt = ctx->getBufferFormat();
+    int bufFmt = buffer->format;
+    if (imgReaderFmt != bufFmt) {
+        // Special casing for when producer switches format
+        if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 && bufFmt ==
+                HAL_PIXEL_FORMAT_YCrCb_420_SP) {
+            ctx->setBufferFormat(HAL_PIXEL_FORMAT_YCrCb_420_SP);
+            ALOGV("%s: Overriding NV21 to YUV_420_888.", __FUNCTION__);
+        } else {
+            // Return the buffer to the queue.
+            consumer->unlockBuffer(*buffer);
+            ctx->returnLockedBuffer(buffer);
 
-        // Throw exception
-        ALOGE("Producer output buffer format: 0x%x, ImageReader configured format: 0x%x",
-              buffer->format, ctx->getBufferFormat());
-        String8 msg;
-        msg.appendFormat("The producer output buffer format 0x%x doesn't "
-                "match the ImageReader's configured buffer format 0x%x.",
-                buffer->format, ctx->getBufferFormat());
-        jniThrowException(env, "java/lang/UnsupportedOperationException",
-                msg.string());
-        return -1;
+            // Throw exception
+            ALOGE("Producer output buffer format: 0x%x, ImageReader configured format: 0x%x",
+                    buffer->format, ctx->getBufferFormat());
+            String8 msg;
+            msg.appendFormat("The producer output buffer format 0x%x doesn't "
+                    "match the ImageReader's configured buffer format 0x%x.",
+                    buffer->format, ctx->getBufferFormat());
+            jniThrowException(env, "java/lang/UnsupportedOperationException",
+                    msg.string());
+            return -1;
+        }
     }
     // Set SurfaceImage instance member variables
     Image_setBuffer(env, image, buffer);

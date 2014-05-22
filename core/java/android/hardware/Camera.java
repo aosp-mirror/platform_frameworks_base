@@ -169,6 +169,10 @@ public class Camera {
     private boolean mFaceDetectionRunning = false;
     private Object mAutoFocusCallbackLock = new Object();
 
+    private static final int NO_ERROR = 0;
+    private static final int EACCESS = -13;
+    private static final int ENODEV = -19;
+
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
      * the picture has been added to the media store.
@@ -328,6 +332,24 @@ public class Camera {
     }
 
     Camera(int cameraId) {
+        int err = cameraInit(cameraId);
+        if (checkInitErrors(err)) {
+            switch(err) {
+                case EACCESS:
+                    throw new RuntimeException("Fail to connect to camera service");
+                case ENODEV:
+                    throw new RuntimeException("Camera initialization failed");
+                default:
+                    // Should never hit this.
+                    throw new RuntimeException("Unknown camera error");
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public int cameraInit(int cameraId) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -347,7 +369,21 @@ public class Camera {
 
         String packageName = ActivityThread.currentPackageName();
 
-        native_setup(new WeakReference<Camera>(this), cameraId, packageName);
+        return native_setup(new WeakReference<Camera>(this), cameraId, packageName);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean checkInitErrors(int err) {
+        return err != NO_ERROR;
+    }
+
+    /**
+     * @hide
+     */
+    public static Camera openUninitialized() {
+        return new Camera();
     }
 
     /**
@@ -360,7 +396,7 @@ public class Camera {
         release();
     }
 
-    private native final void native_setup(Object camera_this, int cameraId,
+    private native final int native_setup(Object camera_this, int cameraId,
                                            String packageName);
 
     private native final void native_release();
@@ -458,13 +494,16 @@ public class Camera {
      */
     public final void setPreviewDisplay(SurfaceHolder holder) throws IOException {
         if (holder != null) {
-            setPreviewDisplay(holder.getSurface());
+            setPreviewSurface(holder.getSurface());
         } else {
-            setPreviewDisplay((Surface)null);
+            setPreviewSurface((Surface)null);
         }
     }
 
-    private native final void setPreviewDisplay(Surface surface) throws IOException;
+    /**
+     * @hide
+     */
+    public native final void setPreviewSurface(Surface surface) throws IOException;
 
     /**
      * Sets the {@link SurfaceTexture} to be used for live preview.

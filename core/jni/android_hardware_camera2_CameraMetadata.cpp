@@ -518,7 +518,7 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
     SortedVector<String8> vendorSections;
     size_t vendorSectionCount = 0;
 
-    if (vTags != 0) {
+    if (vTags != NULL) {
         vendorSections = vTags->getAllSectionNames();
         vendorSectionCount = vendorSections.size();
     }
@@ -592,7 +592,7 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
                                  "Could not find tag name for key '%s')", key);
             return 0;
         }
-    } else if (vTags != 0) {
+    } else if (vTags != NULL) {
         // Match vendor tags (typically com.*)
         const String8 sectionName(section);
         const String8 tagName(keyTagName);

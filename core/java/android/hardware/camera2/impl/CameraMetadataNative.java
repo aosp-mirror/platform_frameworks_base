@@ -63,7 +63,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     private static final String TAG = "CameraMetadataJV";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
     // this should be in sync with HAL_PIXEL_FORMAT_BLOB defined in graphics.h
-    private static final int NATIVE_JPEG_FORMAT = 0x21;
+    public static final int NATIVE_JPEG_FORMAT = 0x21;
 
     public CameraMetadataNative() {
         super();

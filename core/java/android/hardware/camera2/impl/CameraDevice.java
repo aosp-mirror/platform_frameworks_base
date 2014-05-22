@@ -216,7 +216,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             try {
                 waitUntilIdle();
 
-                // TODO: mRemoteDevice.beginConfigure
+                mRemoteDevice.beginConfigure();
                 // Delete all streams first (to free up HW resources)
                 for (Integer streamId : deleteList) {
                     mRemoteDevice.deleteStream(streamId);
@@ -231,7 +231,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                     mConfiguredOutputs.put(streamId, s);
                 }
 
-                // TODO: mRemoteDevice.endConfigure
+                mRemoteDevice.endConfigure();
             } catch (CameraRuntimeException e) {
                 if (e.getReason() == CAMERA_IN_USE) {
                     throw new IllegalStateException("The camera is currently busy." +

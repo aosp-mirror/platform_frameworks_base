@@ -40,6 +40,7 @@ public class CameraBinderDecorator {
     public static final int ALREADY_EXISTS = -17;
     public static final int BAD_VALUE = -22;
     public static final int DEAD_OBJECT = -32;
+    public static final int INVALID_OPERATION = -38;
 
     /**
      * TODO: add as error codes in Errors.h
@@ -52,6 +53,7 @@ public class CameraBinderDecorator {
     public static final int ENODEV = -19;
     public static final int EOPNOTSUPP = -95;
     public static final int EUSERS = -87;
+
 
     private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -125,6 +127,9 @@ public class CameraBinderDecorator {
             case EOPNOTSUPP:
                 UncheckedThrow.throwAnyException(new CameraRuntimeException(
                         CAMERA_DEPRECATED_HAL));
+            case INVALID_OPERATION:
+                UncheckedThrow.throwAnyException(new IllegalStateException(
+                        "Illegal state encountered in camera service."));
         }
 
         /**
