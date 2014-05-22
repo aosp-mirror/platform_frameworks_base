@@ -2,7 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    android_media_DngCreator.cpp \
     android_media_ImageReader.cpp \
     android_media_MediaCrypto.cpp \
     android_media_MediaCodec.cpp \
@@ -42,7 +41,6 @@ LOCAL_SHARED_LIBRARIES := \
     libjhead \
     libexif \
     libstagefright_amrnb_common \
-    libimg_utils \
 
 LOCAL_REQUIRED_MODULES := \
     libjhead_jni
@@ -55,7 +53,6 @@ LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/av/media/libmedia \
-    frameworks/av/media/img_utils/include \
     frameworks/av/media/libstagefright \
     frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/av/media/libstagefright/codecs/amrnb/common \
