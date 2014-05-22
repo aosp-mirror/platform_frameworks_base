@@ -885,7 +885,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final LinkAddress la = route.getDestination();
         cmd.appendArg(route.getInterface());
         cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
-        cmd.appendArg(route.getGateway().getHostAddress());
+        if (route.hasGateway()) {
+            cmd.appendArg(route.getGateway().getHostAddress());
+        }
 
         try {
             mConnector.execute(cmd);
@@ -1993,14 +1995,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private void modifyLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid, String action) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "legacy", uid, "route", action, netId);
+        final Command cmd = new Command("network", "route", "legacy", uid, action, netId);
 
-        // create quadlet: dest-ip-addr prefixlength gateway-ip-addr iface
+        // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
         final LinkAddress la = routeInfo.getDestination();
-        cmd.appendArg(la.getAddress().getHostAddress());
-        cmd.appendArg(la.getNetworkPrefixLength());
-        cmd.appendArg(routeInfo.getGateway().getHostAddress());
         cmd.appendArg(routeInfo.getInterface());
+        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
+        if (routeInfo.hasGateway()) {
+            cmd.appendArg(routeInfo.getGateway().getHostAddress());
+        }
 
         try {
             mConnector.execute(cmd);
