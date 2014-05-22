@@ -355,7 +355,14 @@ public interface SharedPreferences {
     
     /**
      * Registers a callback to be invoked when a change happens to a preference.
-     * 
+     *
+     * <p class="caution"><strong>Caution:</strong> The preference manager does
+     * not currently store a strong reference to the listener. You must store a
+     * strong reference to the listener, or it will be susceptible to garbage
+     * collection. We recommend you keep a reference to the listener in the
+     * instance data of an object that will exist as long as you need the
+     * listener.</p>
+     *
      * @param listener The callback that will run.
      * @see #unregisterOnSharedPreferenceChangeListener
      */
