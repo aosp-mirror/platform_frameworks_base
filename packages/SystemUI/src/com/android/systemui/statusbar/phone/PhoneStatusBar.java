@@ -1028,7 +1028,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void addNotification(StatusBarNotification notification) {
+    public void addNotificationInternal(StatusBarNotification notification) {
         if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
         Entry shadeEntry = createNotificationViews(notification);
         if (shadeEntry == null) {
@@ -1096,7 +1096,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void removeNotification(String key) {
+    public void removeNotificationInternal(String key) {
         StatusBarNotification old = removeNotificationViews(key);
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
