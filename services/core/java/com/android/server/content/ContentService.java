@@ -230,7 +230,7 @@ public final class ContentService extends IContentService.Stub {
         // Notify for any user other than the caller's own requires permission.
         final int callingUserHandle = UserHandle.getCallingUserId();
         if (userHandle != callingUserHandle) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
                     "no permission to notify other users");
         }
 

@@ -988,7 +988,8 @@ public final class ActiveServices {
                         sInfo.applicationInfo.packageName, sInfo.name);
                 if (userId > 0) {
                     if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
-                            sInfo.name, sInfo.flags)) {
+                            sInfo.name, sInfo.flags)
+                            && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {
                         userId = 0;
                         smap = getServiceMap(0);
                     }
