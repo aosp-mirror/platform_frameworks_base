@@ -19,8 +19,11 @@ package android.content.pm;
 import android.app.PackageInstallObserver;
 import android.app.PackageUninstallObserver;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.FileBridge;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+
+import java.io.OutputStream;
 
 /** {@hide} */
 public class PackageInstaller {
@@ -127,10 +130,17 @@ public class PackageInstaller {
             }
         }
 
-        public ParcelFileDescriptor openWrite(String overlayName, long offsetBytes,
-                long lengthBytes) {
+        /**
+         * Open an APK file for writing, starting at the given offset. You can
+         * then stream data into the file, periodically calling
+         * {@link OutputStream#flush()} to ensure bytes have been written to
+         * disk.
+         */
+        public OutputStream openWrite(String splitName, long offsetBytes, long lengthBytes) {
             try {
-                return mSession.openWrite(overlayName, offsetBytes, lengthBytes);
+                final ParcelFileDescriptor clientSocket = mSession.openWrite(splitName,
+                        offsetBytes, lengthBytes);
+                return new FileBridge.FileBridgeOutputStream(clientSocket.getFileDescriptor());
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }

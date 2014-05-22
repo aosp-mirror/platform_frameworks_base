@@ -32,6 +32,7 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.FileBridge;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -114,7 +115,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mPermissionsConfirmed;
     private boolean mInvalid;
 
-    private ArrayList<WritePipe> mPipes = new ArrayList<>();
+    private ArrayList<FileBridge> mBridges = new ArrayList<>();
 
     private IPackageInstallObserver2 mRemoteObserver;
 
@@ -159,14 +160,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Quick sanity check of state, and allocate a pipe for ourselves. We
         // then do heavy disk allocation outside the lock, but this open pipe
         // will block any attempted install transitions.
-        final WritePipe pipe;
+        final FileBridge bridge;
         synchronized (mLock) {
             if (!mMutationsAllowed) {
                 throw new IllegalStateException("Mutations not allowed");
             }
 
-            pipe = new WritePipe();
-            mPipes.add(pipe);
+            bridge = new FileBridge();
+            mBridges.add(bridge);
         }
 
         try {
@@ -194,9 +195,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Libcore.os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
             }
 
-            pipe.setTargetFd(targetFd);
-            pipe.start();
-            return pipe.getWriteFd();
+            bridge.setTargetFile(targetFd);
+            bridge.start();
+            return new ParcelFileDescriptor(bridge.getClientSocket());
 
         } catch (ErrnoException e) {
             throw new IllegalStateException("Failed to write", e);
@@ -218,8 +219,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all writers are hands-off
         if (mMutationsAllowed) {
-            for (WritePipe pipe : mPipes) {
-                if (!pipe.isClosed()) {
+            for (FileBridge bridge : mBridges) {
+                if (!bridge.isClosed()) {
                     throw new InstallFailedException(INSTALL_FAILED_PACKAGE_CHANGED,
                             "Files still open");
                 }
@@ -479,52 +480,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             sessionDir.delete();
         } finally {
             mCallback.onSessionInvalid(this);
-        }
-    }
-
-    private static class WritePipe extends Thread {
-        private final ParcelFileDescriptor[] mPipe;
-
-        private FileDescriptor mTargetFd;
-
-        private volatile boolean mClosed;
-
-        public WritePipe() {
-            try {
-                mPipe = ParcelFileDescriptor.createPipe();
-            } catch (IOException e) {
-                throw new IllegalStateException("Failed to create pipe");
-            }
-        }
-
-        public boolean isClosed() {
-            return mClosed;
-        }
-
-        public void setTargetFd(FileDescriptor targetFd) {
-            mTargetFd = targetFd;
-        }
-
-        public ParcelFileDescriptor getWriteFd() {
-            return mPipe[1];
-        }
-
-        @Override
-        public void run() {
-            FileInputStream in = null;
-            FileOutputStream out = null;
-            try {
-                // TODO: look at switching to sendfile(2) to speed up
-                in = new FileInputStream(mPipe[0].getFileDescriptor());
-                out = new FileOutputStream(mTargetFd);
-                Streams.copy(in, out);
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed to stream data: " + e);
-            } finally {
-                IoUtils.closeQuietly(mPipe[0]);
-                IoUtils.closeQuietly(mTargetFd);
-                mClosed = true;
-            }
         }
     }
 
