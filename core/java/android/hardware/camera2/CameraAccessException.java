@@ -114,7 +114,10 @@ public class CameraAccessException extends AndroidException {
         mReason = problem;
     }
 
-    private static String getDefaultMessage(int problem) {
+    /**
+     * @hide
+     */
+    public static String getDefaultMessage(int problem) {
         switch (problem) {
             case CAMERA_IN_USE:
                 return "The camera device is in use already";
