@@ -23,7 +23,6 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.NetworkCallbackListener;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_DUMMY;
-import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
@@ -65,7 +64,6 @@ import android.database.ContentObserver;
 import android.net.CaptivePortalTracker;
 import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
-import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
@@ -824,8 +822,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     return BluetoothTetheringDataTracker.getInstance();
                 case TYPE_WIMAX:
                     return makeWimaxStateTracker(mContext, mTrackerHandler);
-                case TYPE_ETHERNET:
-                    return EthernetDataTracker.getInstance();
                 case TYPE_PROXY:
                     return new ProxyDataTracker();
                 default:
