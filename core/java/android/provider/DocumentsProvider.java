@@ -19,9 +19,11 @@ package android.provider;
 import static android.provider.DocumentsContract.EXTRA_THUMBNAIL_SIZE;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_RENAME_DOCUMENT;
 import static android.provider.DocumentsContract.getDocumentId;
 import static android.provider.DocumentsContract.getRootId;
 import static android.provider.DocumentsContract.getSearchDocumentsQuery;
+import static android.provider.DocumentsContract.isViaUri;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -206,7 +208,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            If the MIME type is not supported, the provider must throw.
      * @param displayName the display name of the new document. The provider may
      *            alter this name to meet any internal constraints, such as
-     *            conflicting names.
+     *            avoiding conflicting names.
      */
     @SuppressWarnings("unused")
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
@@ -215,11 +217,33 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Delete the requested document. Upon returning, any URI permission grants
-     * for the given document will be revoked. If additional documents were
-     * deleted as a side effect of this call (such as documents inside a
-     * directory) the implementor is responsible for revoking those permissions
-     * using {@link #revokeDocumentPermission(String)}.
+     * Rename an existing document.
+     * <p>
+     * If a different {@link Document#COLUMN_DOCUMENT_ID} must be used to
+     * represent the renamed document, generate and return it. Any outstanding
+     * URI permission grants will be updated to point at the new document. If
+     * the original {@link Document#COLUMN_DOCUMENT_ID} is still valid after the
+     * rename, return {@code null}.
+     *
+     * @param documentId the document to rename.
+     * @param displayName the updated display name of the document. The provider
+     *            may alter this name to meet any internal constraints, such as
+     *            avoiding conflicting names.
+     */
+    @SuppressWarnings("unused")
+    public String renameDocument(String documentId, String displayName)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Rename not supported");
+    }
+
+    /**
+     * Delete the requested document.
+     * <p>
+     * Upon returning, any URI permission grants for the given document will be
+     * revoked. If additional documents were deleted as a side effect of this
+     * call (such as documents inside a directory) the implementor is
+     * responsible for revoking those permissions using
+     * {@link #revokeDocumentPermission(String)}.
      *
      * @param documentId the document to delete.
      */
@@ -523,24 +547,31 @@ public abstract class DocumentsProvider extends ContentProvider {
                         DocumentsContract.getDocumentId(uri));
 
                 // Caller may only have prefix grant, so extend them a grant to
-                // the narrow Uri. Caller already holds read grant to get here,
-                // so check for any other modes we should extend.
-                int modeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                if (context.checkCallingOrSelfUriPermission(uri,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    modeFlags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                }
-                if (context.checkCallingOrSelfUriPermission(uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    modeFlags |= Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
-                }
+                // the narrow URI.
+                final int modeFlags = getCallingOrSelfUriPermissionModeFlags(context, uri);
                 context.grantUriPermission(getCallingPackage(), narrowUri, modeFlags);
                 return narrowUri;
         }
         return null;
+    }
+
+    private static int getCallingOrSelfUriPermissionModeFlags(Context context, Uri uri) {
+        // TODO: move this to a direct AMS call
+        int modeFlags = 0;
+        if (context.checkCallingOrSelfUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                == PackageManager.PERMISSION_GRANTED) {
+            modeFlags |= Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        }
+        if (context.checkCallingOrSelfUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                == PackageManager.PERMISSION_GRANTED) {
+            modeFlags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        }
+        if (context.checkCallingOrSelfUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                == PackageManager.PERMISSION_GRANTED) {
+            modeFlags |= Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
+        }
+        return modeFlags;
     }
 
     /**
@@ -588,6 +619,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             return super.call(method, arg, extras);
         }
 
+        final Context context = getContext();
         final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
         final String authority = documentUri.getAuthority();
         final String documentId = DocumentsContract.getDocumentId(documentUri);
@@ -605,7 +637,6 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                 final String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
                 final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
-
                 final String newDocumentId = createDocument(documentId, mimeType, displayName);
 
                 // No need to issue new grants here, since caller either has
@@ -614,6 +645,30 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final Uri newDocumentUri = DocumentsContract.buildDocumentMaybeViaUri(documentUri,
                         newDocumentId);
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+
+            } else if (METHOD_RENAME_DOCUMENT.equals(method)) {
+                enforceWritePermissionInner(documentUri);
+
+                final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
+                final String newDocumentId = renameDocument(documentId, displayName);
+
+                if (newDocumentId != null) {
+                    final Uri newDocumentUri = DocumentsContract.buildDocumentMaybeViaUri(
+                            documentUri, newDocumentId);
+
+                    // If caller came in with a narrow grant, issue them a
+                    // narrow grant for the newly renamed document.
+                    if (!isViaUri(newDocumentUri)) {
+                        final int modeFlags = getCallingOrSelfUriPermissionModeFlags(context,
+                                documentUri);
+                        context.grantUriPermission(getCallingPackage(), newDocumentUri, modeFlags);
+                    }
+
+                    out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+
+                    // Original document no longer exists, clean up any grants
+                    revokeDocumentPermission(documentId);
+                }
 
             } else if (METHOD_DELETE_DOCUMENT.equals(method)) {
                 enforceWritePermissionInner(documentUri);

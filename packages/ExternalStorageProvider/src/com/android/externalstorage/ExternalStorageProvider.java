@@ -35,6 +35,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -239,9 +240,12 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (file.canWrite()) {
             if (file.isDirectory()) {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
+                flags |= Document.FLAG_SUPPORTS_DELETE;
+                flags |= Document.FLAG_SUPPORTS_RENAME;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
                 flags |= Document.FLAG_SUPPORTS_DELETE;
+                flags |= Document.FLAG_SUPPORTS_RENAME;
             }
         }
 
@@ -332,9 +336,29 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
+    public String renameDocument(String docId, String displayName) throws FileNotFoundException {
+        final File before = getFileForDocId(docId);
+        final File after = new File(before.getParentFile(), displayName);
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+        if (!before.renameTo(after)) {
+            throw new IllegalStateException("Failed to rename to " + after);
+        }
+        final String afterDocId = getDocIdForFile(after);
+        if (!TextUtils.equals(docId, afterDocId)) {
+            return afterDocId;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
-        // TODO: extend to delete directories
         final File file = getFileForDocId(docId);
+        if (file.isDirectory()) {
+            FileUtils.deleteContents(file);
+        }
         if (!file.delete()) {
             throw new IllegalStateException("Failed to delete " + file);
         }
