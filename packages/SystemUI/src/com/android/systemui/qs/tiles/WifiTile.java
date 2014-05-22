@@ -83,7 +83,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
         boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
-        state.enabled = wifiConnected;
+        state.enabled = cb.enabled;
         state.connected = wifiConnected;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
