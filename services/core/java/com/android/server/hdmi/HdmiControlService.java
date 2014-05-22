@@ -18,30 +18,25 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.hdmi.IHdmiControlCallback;
-import android.hardware.hdmi.IHdmiControlService;
-import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.IHdmiControlService;
+import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseArray;
-
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -53,6 +48,20 @@ public final class HdmiControlService extends SystemService {
 
     // TODO: Rename the permission to HDMI_CONTROL.
     private static final String PERMISSION = "android.permission.HDMI_CEC";
+
+    /**
+     * Interface to report send result.
+     */
+    interface SendMessageCallback {
+        /**
+         * Called when {@link HdmiControlService#sendCecCommand} is completed.
+         *
+         * @param error result of send request. 0 if succeed. Otherwise it will be
+         *        negative value
+         */
+        // TODO: define error code as constants and update javadoc.
+        void onSendCompleted(int error);
+    }
 
     // A thread to handle synchronous IO of CEC and MHL control service.
     // Since all of CEC and MHL HAL interfaces processed in short time (< 200ms)
@@ -205,10 +214,14 @@ public final class HdmiControlService extends SystemService {
      * Transmit a CEC command to CEC bus.
      *
      * @param command CEC command to send out
-     * @return {@code true} if succeeds to send command
+     * @param callback interface used to the result of send command
      */
-    boolean sendCecCommand(HdmiCecMessage command) {
-        return mCecController.sendCommand(command);
+    void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+        mCecController.sendCommand(command, callback);
+    }
+
+    void sendCecCommand(HdmiCecMessage command) {
+        mCecController.sendCommand(command, null);
     }
 
     /**
