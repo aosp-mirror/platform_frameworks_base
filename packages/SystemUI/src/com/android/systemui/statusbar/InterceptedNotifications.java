@@ -18,8 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.Process;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -33,13 +31,14 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 public class InterceptedNotifications {
     private static final String TAG = "InterceptedNotifications";
     private static final String EXTRA_INTERCEPT = "android.intercept";
+    private static final String SYNTHETIC_KEY = "InterceptedNotifications.SYNTHETIC_KEY";
 
     private final Context mContext;
     private final PhoneStatusBar mBar;
-    private final ArrayMap<IBinder, StatusBarNotification> mIntercepted
-            = new ArrayMap<IBinder, StatusBarNotification>();
+    private final ArrayMap<String, StatusBarNotification> mIntercepted
+            = new ArrayMap<String, StatusBarNotification>();
 
-    private Binder mSynKey;
+    private String mSynKey;
 
     public InterceptedNotifications(Context context, PhoneStatusBar bar) {
         mContext = context;
@@ -49,36 +48,35 @@ public class InterceptedNotifications {
     public void releaseIntercepted() {
         final int n = mIntercepted.size();
         for (int i = 0; i < n; i++) {
-            final IBinder key = mIntercepted.keyAt(i);
             final StatusBarNotification sbn = mIntercepted.valueAt(i);
             sbn.getNotification().extras.putBoolean(EXTRA_INTERCEPT, false);
-            mBar.addNotification(key, sbn);
+            mBar.addNotification(sbn);
         }
         mIntercepted.clear();
         updateSyntheticNotification();
     }
 
-    public boolean tryIntercept(IBinder key, StatusBarNotification notification) {
+    public boolean tryIntercept(StatusBarNotification notification) {
         if (!notification.getNotification().extras.getBoolean(EXTRA_INTERCEPT)) return false;
         if (shouldDisplayIntercepted()) return false;
-        mIntercepted.put(key, notification);
+        mIntercepted.put(notification.getKey(), notification);
         updateSyntheticNotification();
         return true;
     }
 
-    public void remove(IBinder key) {
+    public void remove(String key) {
         if (mIntercepted.remove(key) != null) {
             updateSyntheticNotification();
         }
     }
 
     public boolean isSyntheticEntry(Entry ent) {
-        return mSynKey != null && ent.key.equals(mSynKey);
+        return ent.key.equals(SYNTHETIC_KEY);
     }
 
-    public void update(IBinder key, StatusBarNotification notification) {
-        if (mIntercepted.containsKey(key)) {
-            mIntercepted.put(key, notification);
+    public void update(StatusBarNotification notification) {
+        if (mIntercepted.containsKey(notification.getKey())) {
+            mIntercepted.put(notification.getKey(), notification);
         }
     }
 
@@ -108,10 +106,10 @@ public class InterceptedNotifications {
                 TAG.hashCode(), TAG, Process.myUid(), Process.myPid(), 0, n,
                 mBar.getCurrentUserHandle());
         if (mSynKey == null) {
-            mSynKey = new Binder();
-            mBar.addNotification(mSynKey, sbn);
+            mSynKey = sbn.getKey();
+            mBar.addNotification(sbn);
         } else {
-           mBar.updateNotification(mSynKey, sbn);
+           mBar.updateNotification(sbn);
         }
         final NotificationData.Entry entry = mBar.mNotificationData.findByKey(mSynKey);
         entry.row.setOnClickListener(mSynClickListener);

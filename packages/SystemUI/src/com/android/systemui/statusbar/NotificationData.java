@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import android.os.IBinder;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.ImageView;
@@ -29,7 +28,7 @@ import java.util.Comparator;
  */
 public class NotificationData {
     public static final class Entry {
-        public IBinder key;
+        public String key;
         public StatusBarNotification notification;
         public StatusBarIconView icon;
         public ExpandableNotificationRow row; // the outer expanded view
@@ -39,8 +38,8 @@ public class NotificationData {
         public View expandedBig;
         private boolean interruption;
         public Entry() {}
-        public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
-            this.key = key;
+        public Entry(StatusBarNotification n, StatusBarIconView ic) {
+            this.key = n.getKey();
             this.notification = n;
             this.icon = ic;
         }
@@ -63,6 +62,7 @@ public class NotificationData {
             interruption = true;
         }
     }
+
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
         // sort first by score, then by when
@@ -88,9 +88,9 @@ public class NotificationData {
         return mEntries.get(i);
     }
 
-    public Entry findByKey(IBinder key) {
+    public Entry findByKey(String key) {
         for (Entry e : mEntries) {
-            if (e.key == key) {
+            if (e.key.equals(key)) {
                 return e;
             }
         }
@@ -100,7 +100,7 @@ public class NotificationData {
     public int add(Entry entry) {
         int i;
         int N = mEntries.size();
-        for (i=0; i<N; i++) {
+        for (i = 0; i < N; i++) {
             if (mEntryCmp.compare(mEntries.get(i), entry) > 0) {
                 break;
             }
@@ -109,7 +109,7 @@ public class NotificationData {
         return i;
     }
 
-    public Entry remove(IBinder key) {
+    public Entry remove(String key) {
         Entry e = findByKey(key);
         if (e != null) {
             mEntries.remove(e);

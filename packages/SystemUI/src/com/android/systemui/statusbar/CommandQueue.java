@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.service.notification.StatusBarNotification;
 
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -73,11 +72,6 @@ public class CommandQueue extends IStatusBar.Stub {
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
 
-    private class NotificationQueueEntry {
-        IBinder key;
-        StatusBarNotification notification;
-    }
-
     /**
      * These methods are called back on the main thread.
      */
@@ -86,9 +80,9 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void addNotification(IBinder key, StatusBarNotification notification);
-        public void updateNotification(IBinder key, StatusBarNotification notification);
-        public void removeNotification(IBinder key);
+        public void addNotification(StatusBarNotification notification);
+        public void updateNotification(StatusBarNotification notification);
+        public void removeNotification(String key);
         public void disable(int state);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
@@ -106,7 +100,6 @@ public class CommandQueue extends IStatusBar.Stub {
         public void showSearchPanel();
         public void hideSearchPanel();
         public void setWindowState(int window, int state);
-
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -130,25 +123,21 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void addNotification(IBinder key, StatusBarNotification notification) {
+    @Override
+    public void addNotification(StatusBarNotification notification) {
         synchronized (mList) {
-            NotificationQueueEntry ne = new NotificationQueueEntry();
-            ne.key = key;
-            ne.notification = notification;
-            mHandler.obtainMessage(MSG_ADD_NOTIFICATION, 0, 0, ne).sendToTarget();
+            mHandler.obtainMessage(MSG_ADD_NOTIFICATION, 0, 0, notification).sendToTarget();
         }
     }
 
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
+    @Override
+    public void updateNotification(StatusBarNotification notification) {
         synchronized (mList) {
-            NotificationQueueEntry ne = new NotificationQueueEntry();
-            ne.key = key;
-            ne.notification = notification;
-            mHandler.obtainMessage(MSG_UPDATE_NOTIFICATION, 0, 0, ne).sendToTarget();
+            mHandler.obtainMessage(MSG_UPDATE_NOTIFICATION, 0, 0, notification).sendToTarget();
         }
     }
 
-    public void removeNotification(IBinder key) {
+    public void removeNotification(String key) {
         synchronized (mList) {
             mHandler.obtainMessage(MSG_REMOVE_NOTIFICATION, 0, 0, key).sendToTarget();
         }
@@ -291,17 +280,15 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 }
                 case MSG_ADD_NOTIFICATION: {
-                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
-                    mCallbacks.addNotification(ne.key, ne.notification);
+                    mCallbacks.addNotification((StatusBarNotification) msg.obj);
                     break;
                 }
                 case MSG_UPDATE_NOTIFICATION: {
-                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
-                    mCallbacks.updateNotification(ne.key, ne.notification);
+                    mCallbacks.updateNotification((StatusBarNotification) msg.obj);
                     break;
                 }
                 case MSG_REMOVE_NOTIFICATION: {
-                    mCallbacks.removeNotification((IBinder)msg.obj);
+                    mCallbacks.removeNotification((String) msg.obj);
                     break;
                 }
                 case MSG_DISABLE:

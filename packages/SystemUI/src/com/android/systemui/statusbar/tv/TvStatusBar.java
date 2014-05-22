@@ -46,15 +46,15 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void addNotification(IBinder key, StatusBarNotification notification) {
+    public void addNotification(StatusBarNotification notification) {
     }
 
     @Override
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
+    public void updateNotification(StatusBarNotification notification) {
     }
 
     @Override
-    public void removeNotification(IBinder key) {
+    public void removeNotification(String key) {
     }
 
     @Override
@@ -113,7 +113,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
+    protected void tick(StatusBarNotification n, boolean firstTime) {
     }
 
     @Override
