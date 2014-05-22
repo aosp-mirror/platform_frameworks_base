@@ -47,7 +47,7 @@ public class EthernetManager {
     }
 
     /**
-     * Get Ethernet configuration
+     * Get Ethernet configuration.
      * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
      */
     public IpConfiguration getConfiguration() {
@@ -61,8 +61,7 @@ public class EthernetManager {
     }
 
     /**
-     * Set Ethernet configuration
-     * @return true if setting success
+     * Set Ethernet configuration.
      */
     public void setConfiguration(IpConfiguration config) {
         try {
