@@ -75,6 +75,8 @@
     <!-- The recents task bar dark dismiss icon color to be drawn on top of light backgrounds. -->
     <color name="recents_task_bar_dark_dismiss_color">#ff333333</color>
 
+    <color name="keyguard_affordance">#ffffffff</color>
+
     <!-- Our quantum color palette (deep teal) -->
     <color name="primary_color">#ff7fcac3</color>
     <color name="background_color_1">#ff384248</color>
