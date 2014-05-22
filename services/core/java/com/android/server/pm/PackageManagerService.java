@@ -6140,7 +6140,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final String nativeLibraryPath = (new File(libDir, apkName)).getPath();
         pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
-        pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+        // pkgSetting might be null during rescan following uninstall of updates
+        // to a bundled app, so accommodate that possibility.  The settings in
+        // that case will be established later from the parsed package.
+        if (pkgSetting != null) {
+            pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+        }
     }
 
     // Deduces the required ABI of an upgraded system app.
