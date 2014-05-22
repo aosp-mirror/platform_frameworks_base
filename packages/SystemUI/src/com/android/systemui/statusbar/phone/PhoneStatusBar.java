@@ -500,6 +500,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
+    protected void setShowLockscreenNotifications(boolean show) {
+        super.setShowLockscreenNotifications(show);
+        updateStackScrollerState();
+    }
+
+    @Override
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
@@ -2782,7 +2788,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void updateStackScrollerState() {
+        if (mStackScroller == null) return;
         mStackScroller.setDimmed(mState == StatusBarState.KEYGUARD, false /* animate */);
+        mStackScroller.setVisibility(!mShowLockscreenNotifications && mState == StatusBarState.KEYGUARD
+                ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void userActivity() {

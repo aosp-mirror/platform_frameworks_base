@@ -175,6 +175,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      */
     protected int mState;
     protected boolean mBouncerShowing;
+    protected boolean mShowLockscreenNotifications;
 
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
 
@@ -194,6 +195,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int mode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
             setZenMode(mode);
+            final boolean show = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1) != 0;
+            setShowLockscreenNotifications(show);
         }
     };
 
@@ -295,6 +299,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
+                mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
                 mSettingsObserver);
 
         mContext.getContentResolver().registerContentObserver(
@@ -1187,6 +1194,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (!isDeviceProvisioned()) return;
         mZenMode = mode;
         updateNotificationIcons();
+    }
+
+    protected void setShowLockscreenNotifications(boolean show) {
+        mShowLockscreenNotifications = show;
     }
 
     protected abstract void haltTicker();
