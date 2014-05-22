@@ -101,6 +101,17 @@ public class InputMethodSubtypeSwitchingController {
             }
             return mSubtypeName.toString().compareTo(other.mSubtypeName.toString());
         }
+
+        @Override
+        public String toString() {
+            return "ImeSubtypeListItem{"
+                    + "mImeName=" + mImeName
+                    + " mSubtypeName=" + mSubtypeName
+                    + " mSubtypeId=" + mSubtypeId
+                    + " mIsSystemLocale=" + mIsSystemLocale
+                    + " mIsSystemLanguage=" + mIsSystemLanguage
+                    + "}";
+        }
     }
 
     private static class InputMethodAndSubtypeList {
