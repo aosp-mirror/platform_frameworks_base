@@ -40,7 +40,7 @@ public abstract class ConnectionService extends CallService {
         @Override
         public void onStateChanged(Connection c, int state) {
             String id = mIdByConnection.get(c);
-            Log.d(this, "Adapter set state %d %s", id, Connection.stateToString(state));
+            Log.d(this, "Adapter set state %s %s", id, Connection.stateToString(state));
             switch (state) {
                 case Connection.State.ACTIVE:
                     getAdapter().setActive(id);
