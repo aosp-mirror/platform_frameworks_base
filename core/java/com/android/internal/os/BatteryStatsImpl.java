@@ -328,11 +328,13 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mLastDischargeStepLevel;
     long mLastDischargeStepTime;
+    int mMinDischargeStepLevel;
     int mNumDischargeStepDurations;
     final long[] mDischargeStepDurations = new long[MAX_LEVEL_STEPS];
 
     int mLastChargeStepLevel;
     long mLastChargeStepTime;
+    int mMaxChargeStepLevel;
     int mNumChargeStepDurations;
     final long[] mChargeStepDurations = new long[MAX_LEVEL_STEPS];
 
@@ -887,6 +889,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mLastTime = 0;
             mUnpluggedTime = in.readLong();
             timeBase.add(this);
+            if (DEBUG) Log.i(TAG, "**** READ TIMER #" + mType + ": mTotalTime=" + mTotalTime);
         }
 
         Timer(int type, TimeBase timeBase) {
@@ -917,6 +920,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
+            if (DEBUG) Log.i(TAG, "**** WRITING TIMER #" + mType + ": mTotalTime="
+                    + computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs)));
             out.writeInt(mCount);
             out.writeInt(mLoadedCount);
             out.writeInt(mUnpluggedCount);
@@ -5550,6 +5555,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase);
         }
+        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
         mLowPowerModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -5581,7 +5587,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
-        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
@@ -5958,6 +5963,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mNumDischargeStepDurations = 0;
             }
             mLastDischargeStepLevel = level;
+            mMinDischargeStepLevel = level;
             mLastDischargeStepTime = -1;
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
@@ -5996,6 +6002,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             updateTimeBasesLocked(false, !screenOn, uptime, realtime);
             mNumChargeStepDurations = 0;
             mLastChargeStepLevel = level;
+            mMaxChargeStepLevel = level;
             mLastChargeStepTime = -1;
         }
         if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
@@ -6117,19 +6124,21 @@ public final class BatteryStatsImpl extends BatteryStats {
                     addHistoryRecordLocked(elapsedRealtime, uptime);
                 }
                 if (onBattery) {
-                    if (mLastDischargeStepLevel != level) {
+                    if (mLastDischargeStepLevel != level && mMinDischargeStepLevel > level) {
                         mNumDischargeStepDurations = addLevelSteps(mDischargeStepDurations,
                                 mNumDischargeStepDurations, mLastDischargeStepTime,
                                 mLastDischargeStepLevel - level, elapsedRealtime);
                         mLastDischargeStepLevel = level;
+                        mMinDischargeStepLevel = level;
                         mLastDischargeStepTime = elapsedRealtime;
                     }
                 } else {
-                    if (mLastChargeStepLevel != level) {
+                    if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
                         mNumChargeStepDurations = addLevelSteps(mChargeStepDurations,
                                 mNumChargeStepDurations, mLastChargeStepTime,
                                 level - mLastChargeStepLevel, elapsedRealtime);
                         mLastChargeStepLevel = level;
+                        mMaxChargeStepLevel = level;
                         mLastChargeStepTime = elapsedRealtime;
                     }
                 }
@@ -7495,6 +7504,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase,
                     in);
         }
+        mInteractive = false;
+        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
         mPhoneOn = false;
         mLowPowerModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase, in);
@@ -7536,8 +7547,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOn = false;
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
-        mInteractive = false;
-        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
