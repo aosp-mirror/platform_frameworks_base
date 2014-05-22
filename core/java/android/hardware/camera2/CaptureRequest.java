@@ -1308,8 +1308,16 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * camera device. Applications can request lens shading map data by setting
      * {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} to ON, and then the camera device will provide
      * lens shading map data in {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}, with size specified
-     * by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}.</p>
+     * by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}; the returned shading map data will be the one
+     * applied by the camera device for this capture request.</p>
+     * <p>The shading map data may depend on the AE and AWB statistics, therefore the reliability
+     * of the map data may be affected by the AE and AWB algorithms. When AE and AWB are in
+     * AUTO modes({@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} <code>!=</code> OFF and {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} <code>!=</code> OFF),
+     * to get best results, it is recommended that the applications wait for the AE and AWB to
+     * be converged before using the returned shading map data.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
      * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
@@ -1458,7 +1466,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, and {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.
      * These values are always available, and as close as possible to the
      * actually used nonlinear/nonglobal transforms.</p>
-     * <p>If a request is sent with TRANSFORM_MATRIX with the camera device's
+     * <p>If a request is sent with CONTRAST_CURVE with the camera device's
      * provided curve in FAST or HIGH_QUALITY, the image's tonemap will be
      * roughly the same.</p>
      *
