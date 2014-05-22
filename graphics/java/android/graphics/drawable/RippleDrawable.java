@@ -207,35 +207,9 @@ public class RippleDrawable extends LayerDrawable {
         return true;
     }
 
-    /**
-     * Specifies a tint for drawing touch feedback ripples.
-     *
-     * @param tint Color state list to use for tinting touch feedback ripples,
-     *        or null to clear the tint
-     */
-    public void setTint(ColorStateList tint) {
-        if (mState.mTint != tint) {
-            mState.mTint = tint;
-            invalidateSelf();
-        }
-    }
-
-    /**
-     * Returns the tint color for touch feedback ripples.
-     *
-     * @return Color state list to use for tinting touch feedback ripples, or
-     *         null if none set
-     */
-    public ColorStateList getTint() {
-        return mState.mTint;
-    }
-
-    /**
-     * Specifies the blending mode used to draw touch feedback ripples.
-     *
-     * @param tintMode A Porter-Duff blending mode
-     */
-    public void setTintMode(Mode tintMode) {
+    @Override
+    public void setTint(ColorStateList tint, Mode tintMode) {
+        mState.mTint = tint;
         mState.setTintMode(tintMode);
         invalidateSelf();
     }
@@ -243,10 +217,12 @@ public class RippleDrawable extends LayerDrawable {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a = obtainAttributes(
-                r, theme, attrs, R.styleable.RippleDrawable);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.RippleDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
+
+        // Force padding default to STACK before inflating.
+        setPaddingMode(PADDING_MODE_STACK);
 
         super.inflate(r, parser, attrs, theme);
 
@@ -272,6 +248,25 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         return false;
+    }
+
+    /**
+     * Specifies how layer padding should affect the bounds of subsequent
+     * layers. The default and recommended value for RippleDrawable is
+     * {@link #PADDING_MODE_STACK}.
+     *
+     * @param mode padding mode, one of:
+     *            <ul>
+     *            <li>{@link #PADDING_MODE_NEST} to nest each layer inside the
+     *            padding of the previous layer
+     *            <li>{@link #PADDING_MODE_STACK} to stack each layer directly
+     *            atop the previous layer
+     *            </ul>
+     * @see #getPaddingMode()
+     */
+    @Override
+    public void setPaddingMode(int mode) {
+        super.setPaddingMode(mode);
     }
 
     /**
@@ -643,8 +638,7 @@ public class RippleDrawable extends LayerDrawable {
         Drawable mMask;
         boolean mPinned = false;
 
-        public RippleState(
-                RippleState orig, RippleDrawable owner, Resources res) {
+        public RippleState(RippleState orig, RippleDrawable owner, Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
@@ -653,7 +647,6 @@ public class RippleDrawable extends LayerDrawable {
                 mTintXfermode = orig.mTintXfermode;
                 mTintXfermodeInverse = orig.mTintXfermodeInverse;
                 mPinned = orig.mPinned;
-                mMask = orig.mMask;
             }
         }
 
@@ -740,6 +733,8 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         mState = ns;
+        mState.mMask = findDrawableByLayerId(R.id.mask);
+
         mLayerState = ns;
 
         if (ns.mNum > 0) {
@@ -749,7 +744,5 @@ public class RippleDrawable extends LayerDrawable {
         if (needsTheme) {
             applyTheme(theme);
         }
-
-        setPaddingMode(PADDING_MODE_STACK);
     }
 }

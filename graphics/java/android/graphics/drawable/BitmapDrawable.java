@@ -28,6 +28,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -588,44 +589,19 @@ public class BitmapDrawable extends Drawable {
         return mBitmapState.mPaint.getColorFilter();
     }
 
-    /**
-     * Specifies a tint for this drawable.
-     * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
-     *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
-     */
-    public void setTint(ColorStateList tint) {
-        if (mBitmapState.mTint != tint) {
-            mBitmapState.mTint = tint;
-            computeTintFilter();
-            invalidateSelf();
-        }
+    @Override
+    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
+        mBitmapState.mTint = tint;
+        mBitmapState.mTintMode = tintMode;
+        computeTintFilter();
+        invalidateSelf();
     }
 
     /**
-     * Returns the tint color for this drawable.
-     *
-     * @return Color state list to use for tinting this drawable, or null if
-     *         none set
+     * @hide only needed by a hack within ProgressBar
      */
     public ColorStateList getTint() {
         return mBitmapState.mTint;
-    }
-
-    /**
-     * Specifies the blending mode used to apply tint.
-     *
-     * @param tintMode A Porter-Duff blending mode
-     */
-    public void setTintMode(Mode tintMode) {
-        if (mBitmapState.mTintMode != tintMode) {
-            mBitmapState.mTintMode = tintMode;
-            computeTintFilter();
-            invalidateSelf();
-        }
     }
 
     /**
