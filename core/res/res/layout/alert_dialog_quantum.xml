@@ -89,10 +89,11 @@
         android:layout_height="wrap_content"
         android:minHeight="@dimen/alert_dialog_button_bar_height"
         android:orientation="vertical"
+        android:gravity="end"
         android:padding="16dip">
         <LinearLayout
             style="?android:attr/buttonBarStyle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layoutDirection="locale">
             <Button android:id="@+id/button3"
@@ -102,11 +103,6 @@
                 android:layout_marginRight="8dip"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
-            <View
-                android:layout_width="0dp"
-                android:layout_height="@dimen/alert_dialog_button_bar_height"
-                android:layout_weight="1"
-                android:visibility="invisible" />
             <Button android:id="@+id/button2"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
