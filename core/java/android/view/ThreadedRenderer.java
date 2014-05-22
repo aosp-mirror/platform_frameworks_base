@@ -291,6 +291,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    public void notifyFramePending() {
+        nNotifyFramePending(mNativeProxy);
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             nDeleteProxy(mNativeProxy);
@@ -364,4 +369,5 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nDestroyLayer(long nativeProxy, long layer);
 
     private static native void nFence(long nativeProxy);
+    private static native void nNotifyFramePending(long nativeProxy);
 }

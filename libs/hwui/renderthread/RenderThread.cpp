@@ -37,7 +37,7 @@ namespace renderthread {
 static const size_t EVENT_BUFFER_SIZE = 100;
 
 // Slight delay to give the UI time to push us a new frame before we replay
-static const int DISPATCH_FRAME_CALLBACKS_DELAY = 0;
+static const int DISPATCH_FRAME_CALLBACKS_DELAY = 4;
 
 TaskQueue::TaskQueue() : mHead(0), mTail(0) {}
 
@@ -86,6 +86,15 @@ void TaskQueue::queue(RenderTask* task) {
                 }
             }
         }
+    } else {
+        mTail = mHead = task;
+    }
+}
+
+void TaskQueue::queueAtFront(RenderTask* task) {
+    if (mTail) {
+        task->mNext = mHead;
+        mHead = task;
     } else {
         mTail = mHead = task;
     }
@@ -188,20 +197,22 @@ static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
     return latest;
 }
 
-void RenderThread::drainDisplayEventQueue() {
+void RenderThread::drainDisplayEventQueue(bool skipCallbacks) {
+    ATRACE_CALL();
     nsecs_t vsyncEvent = latestVsyncEvent(mDisplayEventReceiver);
     if (vsyncEvent > 0) {
         mVsyncRequested = false;
         mTimeLord.vsyncReceived(vsyncEvent);
-        if (!mFrameCallbackTaskPending) {
+        if (!skipCallbacks && !mFrameCallbackTaskPending) {
+            ATRACE_NAME("queue mFrameCallbackTask");
             mFrameCallbackTaskPending = true;
-            //queueDelayed(mFrameCallbackTask, DISPATCH_FRAME_CALLBACKS_DELAY);
-            queue(mFrameCallbackTask);
+            queueDelayed(mFrameCallbackTask, DISPATCH_FRAME_CALLBACKS_DELAY);
         }
     }
 }
 
 void RenderThread::dispatchFrameCallbacks() {
+    ATRACE_CALL();
     mFrameCallbackTaskPending = false;
 
     std::set<IFrameCallback*> callbacks;
@@ -209,6 +220,15 @@ void RenderThread::dispatchFrameCallbacks() {
 
     for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
         (*it)->doFrame();
+    }
+}
+
+void RenderThread::requestVsync() {
+    if (!mVsyncRequested) {
+        mVsyncRequested = true;
+        status_t status = mDisplayEventReceiver->requestNextVsync();
+        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
+                "requestNextVsync failed with status: %d", status);
     }
 }
 
@@ -236,6 +256,14 @@ bool RenderThread::threadLoop() {
                 timeoutMillis = 0;
             }
         }
+
+        if (mPendingRegistrationFrameCallbacks.size() && !mFrameCallbackTaskPending) {
+            drainDisplayEventQueue(true);
+            mFrameCallbacks.insert(
+                    mPendingRegistrationFrameCallbacks.begin(), mPendingRegistrationFrameCallbacks.end());
+            mPendingRegistrationFrameCallbacks.clear();
+            requestVsync();
+        }
     }
 
     return false;
@@ -250,6 +278,12 @@ void RenderThread::queue(RenderTask* task) {
     }
 }
 
+void RenderThread::queueAtFront(RenderTask* task) {
+    AutoMutex _lock(mLock);
+    mQueue.queueAtFront(task);
+    mLooper->wake();
+}
+
 void RenderThread::queueDelayed(RenderTask* task, int delayMs) {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
     task->mRunAt = now + milliseconds_to_nanoseconds(delayMs);
@@ -262,17 +296,18 @@ void RenderThread::remove(RenderTask* task) {
 }
 
 void RenderThread::postFrameCallback(IFrameCallback* callback) {
-    mFrameCallbacks.insert(callback);
-    if (!mVsyncRequested) {
-        mVsyncRequested = true;
-        status_t status = mDisplayEventReceiver->requestNextVsync();
-        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                "requestNextVsync failed with status: %d", status);
-    }
+    mPendingRegistrationFrameCallbacks.insert(callback);
 }
 
 void RenderThread::removeFrameCallback(IFrameCallback* callback) {
     mFrameCallbacks.erase(callback);
+    mPendingRegistrationFrameCallbacks.erase(callback);
+}
+
+void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {
+    if (mFrameCallbacks.erase(callback)) {
+        mPendingRegistrationFrameCallbacks.insert(callback);
+    }
 }
 
 RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
@@ -281,11 +316,13 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
     if (!next) {
         mNextWakeup = LLONG_MAX;
     } else {
+        mNextWakeup = next->mRunAt;
         // Most tasks won't be delayed, so avoid unnecessary systemTime() calls
         if (next->mRunAt <= 0 || next->mRunAt <= systemTime(SYSTEM_TIME_MONOTONIC)) {
             next = mQueue.next();
+        } else {
+            next = 0;
         }
-        mNextWakeup = next->mRunAt;
     }
     if (nextWakeup) {
         *nextWakeup = mNextWakeup;

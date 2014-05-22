@@ -44,6 +44,7 @@ public:
 
     RenderTask* next();
     void queue(RenderTask* task);
+    void queueAtFront(RenderTask* task);
     RenderTask* peek();
     void remove(RenderTask* task);
 
@@ -66,12 +67,16 @@ public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    ANDROID_API void queueAtFront(RenderTask* task);
     void queueDelayed(RenderTask* task, int delayMs);
     void remove(RenderTask* task);
 
     // Mimics android.view.Choreographer
     void postFrameCallback(IFrameCallback* callback);
     void removeFrameCallback(IFrameCallback* callback);
+    // If the callback is currently registered, it will be pushed back until
+    // the next vsync. If it is not currently registered this does nothing.
+    void pushBackFrameCallback(IFrameCallback* callback);
 
     TimeLord& timeLord() { return mTimeLord; }
 
@@ -87,8 +92,9 @@ private:
 
     void initializeDisplayEventReceiver();
     static int displayEventReceiverCallback(int fd, int events, void* data);
-    void drainDisplayEventQueue();
+    void drainDisplayEventQueue(bool skipCallbacks = false);
     void dispatchFrameCallbacks();
+    void requestVsync();
 
     // Returns the next task to be run. If this returns NULL nextWakeup is set
     // to the time to requery for the nextTask to run. mNextWakeup is also
@@ -104,6 +110,11 @@ private:
     DisplayEventReceiver* mDisplayEventReceiver;
     bool mVsyncRequested;
     std::set<IFrameCallback*> mFrameCallbacks;
+    // We defer the actual registration of these callbacks until
+    // both mQueue *and* mDisplayEventReceiver have been drained off all
+    // immediate events. This makes sure that we catch the next vsync, not
+    // the previous one
+    std::set<IFrameCallback*> mPendingRegistrationFrameCallbacks;
     bool mFrameCallbackTaskPending;
     DispatchFrameCallbacks* mFrameCallbackTask;
 
