@@ -4001,13 +4001,22 @@ package android.app {
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
-    method public android.app.Notification.Action.Builder apply(android.app.Notification.Action.Builder.Extender);
     method public android.app.Notification.Action build();
+    method public android.app.Notification.Action.Builder extend(android.app.Notification.Action.Extender);
     method public android.os.Bundle getExtras();
   }
 
-  public static abstract interface Notification.Action.Builder.Extender {
-    method public abstract android.app.Notification.Action.Builder applyTo(android.app.Notification.Action.Builder);
+  public static abstract interface Notification.Action.Extender {
+    method public abstract android.app.Notification.Action.Builder extend(android.app.Notification.Action.Builder);
+  }
+
+  public static final class Notification.Action.WearableExtender implements android.app.Notification.Action.Extender {
+    ctor public Notification.Action.WearableExtender();
+    ctor public Notification.Action.WearableExtender(android.app.Notification.Action);
+    method public android.app.Notification.Action.WearableExtender clone();
+    method public android.app.Notification.Action.Builder extend(android.app.Notification.Action.Builder);
+    method public boolean isAvailableOffline();
+    method public android.app.Notification.Action.WearableExtender setAvailableOffline(boolean);
   }
 
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
@@ -4032,8 +4041,8 @@ package android.app {
     method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addAction(android.app.Notification.Action);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
-    method public android.app.Notification.Builder apply(android.app.Notification.Builder.Extender);
     method public android.app.Notification build();
+    method public android.app.Notification.Builder extend(android.app.Notification.Extender);
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
@@ -4071,8 +4080,8 @@ package android.app {
     method public android.app.Notification.Builder setWhen(long);
   }
 
-  public static abstract interface Notification.Builder.Extender {
-    method public abstract android.app.Notification.Builder applyTo(android.app.Notification.Builder);
+  public static abstract interface Notification.Extender {
+    method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }
 
   public static class Notification.InboxStyle extends android.app.Notification.Style {
@@ -4092,6 +4101,51 @@ package android.app {
     method protected void internalSetSummaryText(java.lang.CharSequence);
     method public void setBuilder(android.app.Notification.Builder);
     field protected android.app.Notification.Builder mBuilder;
+  }
+
+  public static final class Notification.WearableExtender implements android.app.Notification.Extender {
+    ctor public Notification.WearableExtender();
+    ctor public Notification.WearableExtender(android.app.Notification);
+    method public android.app.Notification.WearableExtender addAction(android.app.Notification.Action);
+    method public android.app.Notification.WearableExtender addActions(java.util.List<android.app.Notification.Action>);
+    method public android.app.Notification.WearableExtender addPage(android.app.Notification);
+    method public android.app.Notification.WearableExtender addPages(java.util.List<android.app.Notification>);
+    method public android.app.Notification.WearableExtender clearActions();
+    method public android.app.Notification.WearableExtender clearPages();
+    method public android.app.Notification.WearableExtender clone();
+    method public android.app.Notification.Builder extend(android.app.Notification.Builder);
+    method public java.util.List<android.app.Notification.Action> getActions();
+    method public android.graphics.Bitmap getBackground();
+    method public int getContentAction();
+    method public int getContentIcon();
+    method public int getContentIconGravity();
+    method public boolean getContentIntentAvailableOffline();
+    method public int getCustomContentHeight();
+    method public int getCustomSizePreset();
+    method public android.app.PendingIntent getDisplayIntent();
+    method public int getGravity();
+    method public boolean getHintHideIcon();
+    method public boolean getHintShowBackgroundOnly();
+    method public java.util.List<android.app.Notification> getPages();
+    method public boolean getStartScrollBottom();
+    method public android.app.Notification.WearableExtender setBackground(android.graphics.Bitmap);
+    method public android.app.Notification.WearableExtender setContentAction(int);
+    method public android.app.Notification.WearableExtender setContentIcon(int);
+    method public android.app.Notification.WearableExtender setContentIconGravity(int);
+    method public android.app.Notification.WearableExtender setContentIntentAvailableOffline(boolean);
+    method public android.app.Notification.WearableExtender setCustomContentHeight(int);
+    method public android.app.Notification.WearableExtender setCustomSizePreset(int);
+    method public android.app.Notification.WearableExtender setDisplayIntent(android.app.PendingIntent);
+    method public android.app.Notification.WearableExtender setGravity(int);
+    method public android.app.Notification.WearableExtender setHintHideIcon(boolean);
+    method public android.app.Notification.WearableExtender setHintShowBackgroundOnly(boolean);
+    method public android.app.Notification.WearableExtender setStartScrollBottom(boolean);
+    field public static final int SIZE_DEFAULT = 0; // 0x0
+    field public static final int SIZE_LARGE = 4; // 0x4
+    field public static final int SIZE_MEDIUM = 3; // 0x3
+    field public static final int SIZE_SMALL = 2; // 0x2
+    field public static final int SIZE_XSMALL = 1; // 0x1
+    field public static final int UNSET_ACTION_INDEX = -1; // 0xffffffff
   }
 
   public class NotificationManager {
@@ -4657,80 +4711,6 @@ package android.app.backup {
     ctor public SharedPreferencesBackupHelper(android.content.Context, java.lang.String...);
     method public void performBackup(android.os.ParcelFileDescriptor, android.app.backup.BackupDataOutput, android.os.ParcelFileDescriptor);
     method public void restoreEntity(android.app.backup.BackupDataInputStream);
-  }
-
-}
-
-package android.app.wearable {
-
-  public final class WearableActionExtensions implements android.app.Notification.Action.Builder.Extender android.os.Parcelable {
-    method public android.app.Notification.Action.Builder applyTo(android.app.Notification.Action.Builder);
-    method public int describeContents();
-    method public static android.app.wearable.WearableActionExtensions from(android.app.Notification.Action);
-    method public boolean isAvailableOffline();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static final class WearableActionExtensions.Builder {
-    ctor public WearableActionExtensions.Builder();
-    ctor public WearableActionExtensions.Builder(android.app.wearable.WearableActionExtensions);
-    method public android.app.wearable.WearableActionExtensions build();
-    method public android.app.wearable.WearableActionExtensions.Builder setAvailableOffline(boolean);
-  }
-
-  public final class WearableNotificationExtensions implements android.app.Notification.Builder.Extender android.os.Parcelable {
-    method public android.app.Notification.Builder applyTo(android.app.Notification.Builder);
-    method public int describeContents();
-    method public static android.app.wearable.WearableNotificationExtensions from(android.app.Notification);
-    method public android.app.Notification.Action getAction(int);
-    method public int getActionCount();
-    method public android.app.Notification.Action[] getActions();
-    method public android.graphics.Bitmap getBackground();
-    method public int getContentAction();
-    method public int getContentIcon();
-    method public int getContentIconGravity();
-    method public boolean getContentIntentAvailableOffline();
-    method public int getCustomContentHeight();
-    method public int getCustomSizePreset();
-    method public android.app.PendingIntent getDisplayIntent();
-    method public int getGravity();
-    method public boolean getHintHideIcon();
-    method public boolean getHintShowBackgroundOnly();
-    method public android.app.Notification[] getPages();
-    method public boolean getStartScrollBottom();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int SIZE_DEFAULT = 0; // 0x0
-    field public static final int SIZE_LARGE = 4; // 0x4
-    field public static final int SIZE_MEDIUM = 3; // 0x3
-    field public static final int SIZE_SMALL = 2; // 0x2
-    field public static final int SIZE_XSMALL = 1; // 0x1
-    field public static final int UNSET_ACTION_INDEX = -1; // 0xffffffff
-  }
-
-  public static final class WearableNotificationExtensions.Builder {
-    ctor public WearableNotificationExtensions.Builder();
-    ctor public WearableNotificationExtensions.Builder(android.app.wearable.WearableNotificationExtensions);
-    method public android.app.wearable.WearableNotificationExtensions.Builder addAction(android.app.Notification.Action);
-    method public android.app.wearable.WearableNotificationExtensions.Builder addActions(java.util.List<android.app.Notification.Action>);
-    method public android.app.wearable.WearableNotificationExtensions.Builder addPage(android.app.Notification);
-    method public android.app.wearable.WearableNotificationExtensions.Builder addPages(java.util.List<android.app.Notification>);
-    method public android.app.wearable.WearableNotificationExtensions build();
-    method public android.app.wearable.WearableNotificationExtensions.Builder clearActions();
-    method public android.app.wearable.WearableNotificationExtensions.Builder clearPages();
-    method public android.app.wearable.WearableNotificationExtensions.Builder setBackground(android.graphics.Bitmap);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setContentAction(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setContentIcon(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setContentIconGravity(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setContentIntentAvailableOffline(boolean);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setCustomContentHeight(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setCustomSizePreset(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setDisplayIntent(android.app.PendingIntent);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setGravity(int);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setHintHideIcon(boolean);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setHintShowBackgroundOnly(boolean);
-    method public android.app.wearable.WearableNotificationExtensions.Builder setStartScrollBottom(boolean);
   }
 
 }
