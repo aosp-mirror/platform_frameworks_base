@@ -2069,6 +2069,9 @@ public abstract class Context {
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
+     *  <dt> {@link #ETHERNET_SERVICE} ("ethernet")
+     *  <dd> A {@link android.net.ethernet.EthernetManager EthernetManager} for
+     * management of Ethernet connectivity.
      * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
      * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
      * for management of input methods.
@@ -2379,6 +2382,18 @@ public abstract class Context {
      * @hide
      */
     public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.ethernet.EthernetManager} for handling management of
+     * Ethernet access.
+     *
+     * @see #getSystemService
+     * @see android.net.ethernet.EthernetManager
+     *
+     * @hide
+     */
+    public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
