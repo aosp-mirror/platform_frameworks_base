@@ -306,6 +306,12 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * last failure
+     */
+    public String lastFailure;
+
+    /**
+     * @hide
      * BSSID list on which this configuration was seen.
      * TODO: prevent this list to grow infinitely, age-out the results
      */
@@ -910,6 +916,8 @@ public class WifiConfiguration implements Parcelable {
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
+
+            lastFailure = source.lastFailure;
         }
     }
 
