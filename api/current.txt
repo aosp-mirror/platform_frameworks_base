@@ -15746,6 +15746,9 @@ package android.media.session {
     method public void sendEvent(java.lang.String, android.os.Bundle);
     method public void setActive(boolean);
     method public void setFlags(int);
+    method public void setLaunchPendingIntent(android.app.PendingIntent);
+    method public void useLocalPlayback(android.media.AudioAttributes);
+    method public void useRemotePlayback(android.media.session.RemoteVolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
   }
@@ -15812,6 +15815,18 @@ package android.media.session {
     field public static final int PLAYSTATE_SKIPPING_BACKWARDS = 9; // 0x9
     field public static final int PLAYSTATE_SKIPPING_FORWARDS = 10; // 0xa
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
+  }
+
+  public abstract class RemoteVolumeProvider {
+    ctor public RemoteVolumeProvider(int, int);
+    method public abstract int getCurrentVolume();
+    method public final int getFlags();
+    method public final int getMaxVolume();
+    method public final void notifyVolumeChanged();
+    method public void onAdjustVolume(int);
+    method public void onSetVolume(int);
+    field public static final int FLAG_VOLUME_ABSOLUTE = 2; // 0x2
+    field public static final int FLAG_VOLUME_RELATIVE = 1; // 0x1
   }
 
   public final class TransportController {
