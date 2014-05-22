@@ -18,7 +18,6 @@
 
 package android.opengl;
 
-/** @hide */
 public class GLES31Ext {
 
     // GL_KHR_blend_equation_advanced

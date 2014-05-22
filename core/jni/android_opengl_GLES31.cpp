@@ -18,8 +18,8 @@
 
 #include <stdint.h>
 #include <GLES3/gl31.h>
-#include "jni.h"
-#include "JNIHelp.h"
+#include <jni.h>
+#include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <assert.h>

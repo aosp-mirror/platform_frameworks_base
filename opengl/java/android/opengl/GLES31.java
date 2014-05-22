@@ -19,7 +19,6 @@
 package android.opengl;
 
 /** OpenGL ES 3.1
- * @hide
  */
 public class GLES31 extends GLES30 {
 
