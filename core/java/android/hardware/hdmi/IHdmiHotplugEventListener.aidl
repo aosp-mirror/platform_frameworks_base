@@ -16,21 +16,14 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiCecMessage;
-import android.hardware.hdmi.IHdmiControlCallback;
-import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.hardware.hdmi.HdmiHotplugEvent;
 
 /**
- * Binder interface that clients running in the application process
- * will use to perform HDMI-CEC features by communicating with other devices
- * on the bus.
+ * Callback interface definition for HDMI client to get informed of
+ * the result of various API invocation.
  *
  * @hide
  */
-interface IHdmiControlService {
-    int[] getSupportedTypes();
-    void oneTouchPlay(IHdmiControlCallback callback);
-    void queryDisplayStatus(IHdmiControlCallback callback);
-    void addHotplugEventListener(IHdmiHotplugEventListener listener);
-    void removeHotplugEventListener(IHdmiHotplugEventListener listener);
+oneway interface IHdmiHotplugEventListener {
+    void onReceived(in HdmiHotplugEvent event);
 }

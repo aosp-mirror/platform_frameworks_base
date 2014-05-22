@@ -17,6 +17,8 @@
 package android.hardware.hdmi;
 
 import android.annotation.Nullable;
+import android.os.RemoteException;
+
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
  * to attached CEC devices.
@@ -30,6 +32,11 @@ import android.annotation.Nullable;
 public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
 
+    // True if we have a logical device of type playback hosted in the system.
+    private final boolean mHasPlaybackDevice;
+    // True if we have a logical device of type TV hosted in the system.
+    private final boolean mHasTvDevice;
+
     /**
      * @hide - hide this constructor because it has a parameter of type
      * IHdmiControlService, which is a system private class. The right way
@@ -38,6 +45,28 @@ public final class HdmiControlManager {
      */
     public HdmiControlManager(IHdmiControlService service) {
         mService = service;
+        int[] types = null;
+        if (mService != null) {
+            try {
+                types = mService.getSupportedTypes();
+            } catch (RemoteException e) {
+                // Do nothing.
+            }
+        }
+        mHasTvDevice = hasDeviceType(types, HdmiCec.DEVICE_TV);
+        mHasPlaybackDevice = hasDeviceType(types, HdmiCec.DEVICE_PLAYBACK);
+    }
+
+    private static boolean hasDeviceType(int[] types, int type) {
+        if (types == null) {
+            return false;
+        }
+        for (int t : types) {
+            if (t == type) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -51,7 +80,7 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiPlaybackClient getPlaybackClient() {
-        if (mService == null) {
+        if (mService == null || !mHasPlaybackDevice) {
             return null;
         }
         return new HdmiPlaybackClient(mService);
@@ -68,9 +97,61 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiTvClient getTvClient() {
-        if (mService == null) {
-            return null;
+        if (mService == null || !mHasTvDevice) {
+                return null;
         }
         return new HdmiTvClient(mService);
+    }
+
+    /**
+     * Listener used to get hotplug event from HDMI port.
+     */
+    public interface HotplugEventListener {
+        void onReceived(HdmiHotplugEvent event);
+    }
+
+    /**
+     * Adds a listener to get informed of {@link HdmiHotplugEvent}.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHotplugeEventListener(HotplugEventListener)}.
+     *
+     * @param listener {@link HotplugEventListener} instance
+     * @see HdmiControlManager#removeHotplugeEventListener(HotplugEventListener)
+     */
+    public void addHotplugEventListener(HotplugEventListener listener) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.addHotplugEventListener(getHotplugEventListenerWrapper(listener));
+        } catch (RemoteException e) {
+            // Do nothing.
+        }
+    }
+
+    /**
+     * Removes a listener to stop getting informed of {@link HdmiHotplugEvent}.
+     *
+     * @param listener {@link HotplugEventListener} instance to be removed
+     */
+    public void removeHotplugeEventListener(HotplugEventListener listener) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.removeHotplugEventListener(getHotplugEventListenerWrapper(listener));
+        } catch (RemoteException e) {
+            // Do nothing.
+        }
+    }
+
+    private IHdmiHotplugEventListener getHotplugEventListenerWrapper(
+            final HotplugEventListener listener) {
+        return new IHdmiHotplugEventListener.Stub() {
+            public void onReceived(HdmiHotplugEvent event) {
+                listener.onReceived(event);;
+            }
+        };
     }
 }
