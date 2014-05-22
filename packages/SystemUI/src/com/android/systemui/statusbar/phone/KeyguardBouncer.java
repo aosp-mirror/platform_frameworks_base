@@ -64,7 +64,6 @@ public class KeyguardBouncer {
         // Keyguard. If we need to authenticate, show the bouncer.
         if (!mKeyguardView.dismiss()) {
             mRoot.setVisibility(View.VISIBLE);
-            mKeyguardView.requestFocus();
             mKeyguardView.onResume();
         }
     }
