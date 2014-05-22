@@ -199,11 +199,7 @@ public final class CameraManager {
     }
 
     /**
-     * Open a connection to a camera with the given ID. Use
-     * {@link #getCameraIdList} to get the list of available camera
-     * devices. Note that even if an id is listed, open may fail if the device
-     * is disconnected between the calls to {@link #getCameraIdList} and
-     * {@link #openCamera}.
+     * Helper for openning a connection to a camera with the given ID.
      *
      * @param cameraId The unique identifier of the camera device to open
      * @param listener The listener for the camera. Must not be null.
@@ -216,20 +212,22 @@ public final class CameraManager {
      * @throws SecurityException if the application does not have permission to
      * access the camera
      * @throws IllegalArgumentException if listener or handler is null.
+     * @return A handle to the newly-created camera device.
      *
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    private void openCameraDeviceUserAsync(String cameraId,
+    private CameraDevice openCameraDeviceUserAsync(String cameraId,
             CameraDevice.StateListener listener, Handler handler)
             throws CameraAccessException {
+        CameraDevice device = null;
         try {
 
             synchronized (mLock) {
 
                 ICameraDeviceUser cameraUser;
 
-                android.hardware.camera2.impl.CameraDevice device =
+                android.hardware.camera2.impl.CameraDevice deviceImpl =
                         new android.hardware.camera2.impl.CameraDevice(
                                 cameraId,
                                 listener,
@@ -237,7 +235,7 @@ public final class CameraManager {
 
                 BinderHolder holder = new BinderHolder();
 
-                ICameraDeviceCallbacks callbacks = device.getCallbacks();
+                ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
                 int id = Integer.parseInt(cameraId);
                 try {
                     mCameraService.connectDevice(callbacks, id, mContext.getPackageName(),
@@ -257,7 +255,8 @@ public final class CameraManager {
                 // TODO: factor out listener to be non-nested, then move setter to constructor
                 // For now, calling setRemoteDevice will fire initial
                 // onOpened/onUnconfigured callbacks.
-                device.setRemoteDevice(cameraUser);
+                deviceImpl.setRemoteDevice(cameraUser);
+                device = deviceImpl;
             }
 
         } catch (NumberFormatException e) {
@@ -268,6 +267,7 @@ public final class CameraManager {
         } catch (RemoteException e) {
             // impossible
         }
+        return device;
     }
 
     /**
@@ -278,20 +278,26 @@ public final class CameraManager {
      * is disconnected between the calls to {@link #getCameraIdList} and
      * {@link #openCamera}.</p>
      *
-     * <p>If the camera successfully opens after this function call returns,
-     * {@link CameraDevice.StateListener#onOpened} will be invoked with the
-     * newly opened {@link CameraDevice} in the unconfigured state.</p>
+     * <p>Once the camera is successfully opened, {@link CameraDevice.StateListener#onOpened} will
+     * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
+     * for operation by calling {@link CameraDevice#createCaptureSession} and
+     * {@link CameraDevice#createCaptureRequest}</p>
      *
+     * <!--
+     * <p>Since the camera device will be opened asynchronously, any asynchronous operations done
+     * on the returned CameraDevice instance will be queued up until the device startup has
+     * completed and the listener's {@link CameraDevice.StateListener#onOpened onOpened} method is
+     * called. The pending operations are then processed in order.</p>
+     * -->
      * <p>If the camera becomes disconnected during initialization
      * after this function call returns,
      * {@link CameraDevice.StateListener#onDisconnected} with a
      * {@link CameraDevice} in the disconnected state (and
      * {@link CameraDevice.StateListener#onOpened} will be skipped).</p>
      *
-     * <p>If the camera fails to initialize after this function call returns,
-     * {@link CameraDevice.StateListener#onError} will be invoked with a
-     * {@link CameraDevice} in the error state (and
-     * {@link CameraDevice.StateListener#onOpened} will be skipped).</p>
+     * <p>If opening the camera device fails, then the device listener's
+     * {@link CameraDevice.StateListener#onError onError} method will be called, and subsequent
+     * calls on the camera device will throw an {@link IllegalStateException}.</p>
      *
      * @param cameraId
      *             The unique identifier of the camera device to open

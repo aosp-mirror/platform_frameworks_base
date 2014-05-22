@@ -242,8 +242,124 @@ public interface CameraDevice extends AutoCloseable {
      * @see StreamConfigurationMap#getOutputFormats()
      * @see StreamConfigurationMap#getOutputSizes(int)
      * @see StreamConfigurationMap#getOutputSizes(Class)
+     * @deprecated Use {@link #createCaptureSession} instead
      */
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
+
+    /**
+     * <p>Create a new camera capture session by providing the target output set of Surfaces to the
+     * camera device.</p>
+     *
+     * <p>The active capture session determines the set of potential output Surfaces for
+     * the camera device for each capture request. A given request may use all
+     * or a only some of the outputs. Once the CameraCaptureSession is created, requests can be
+     * can be submitted with {@link CameraCaptureSession#capture capture},
+     * {@link CameraCaptureSession#captureBurst captureBurst},
+     * {@link CameraCaptureSession#setRepeatingRequest setRepeatingRequest}, or
+     * {@link CameraCaptureSession#setRepeatingBurst setRepeatingBurst}.</p>
+     *
+     * <p>Surfaces suitable for inclusion as a camera output can be created for
+     * various use cases and targets:</p>
+     *
+     * <ul>
+     *
+     * <li>For drawing to a {@link android.view.SurfaceView SurfaceView}: Set the size of the
+     *   Surface with {@link android.view.SurfaceHolder#setFixedSize} to be one of the sizes
+     *   returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceView.class)}
+     *   and then obtain the Surface by calling {@link android.view.SurfaceHolder#getSurface}.</li>
+     *
+     * <li>For accessing through an OpenGL texture via a
+     *   {@link android.graphics.SurfaceTexture SurfaceTexture}: Set the size of
+     *   the SurfaceTexture with
+     *   {@link android.graphics.SurfaceTexture#setDefaultBufferSize} to be one
+     *   of the sizes returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceTexture.class)}
+     *   before creating a Surface from the SurfaceTexture with
+     *   {@link Surface#Surface}.</li>
+     *
+     * <li>For recording with {@link android.media.MediaCodec}: Call
+     *   {@link android.media.MediaCodec#createInputSurface} after configuring
+     *   the media codec to use one of the sizes returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(MediaCodec.class)}
+     *   </li>
+     *
+     * <li>For recording with {@link android.media.MediaRecorder}: Call
+     *   {@link android.media.MediaRecorder#getSurface} after configuring the media recorder to use
+     *   one of the sizes returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(MediaRecorder.class)},
+     *   or configuring it to use one of the supported
+     *   {@link android.media.CamcorderProfile CamcorderProfiles}.</li>
+     *
+     * <li>For efficient YUV processing with {@link android.renderscript}:
+     *   Create a RenderScript
+     *   {@link android.renderscript.Allocation Allocation} with a supported YUV
+     *   type, the IO_INPUT flag, and one of the sizes returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(Allocation.class)},
+     *   Then obtain the Surface with
+     *   {@link android.renderscript.Allocation#getSurface}.</li>
+     *
+     * <li>For access to raw, uncompressed or JPEG data in the application: Create a
+     *   {@link android.media.ImageReader} object with the one of the supported
+     *   {@link StreamConfigurationMap#getOutputFormats() output image formats}, and a
+     *   size from the supported
+     *   {@link StreamConfigurationMap#getOutputSizes(int) sizes for that format}. Then obtain
+     *   a Surface from it with {@link android.media.ImageReader#getSurface}.</li>
+     *
+     * </ul>
+     *
+     * </p>
+     *
+     * <p>The camera device will query each Surface's size and formats upon this
+     * call, so they must be set to a valid setting at this time (in particular:
+     * if the format is user-visible, it must be one of
+     * {@link StreamConfigurationMap#getOutputFormats}; and the size must be one of
+     * {@link StreamConfigurationMap#getOutputSizes(int)}).</p>
+     *
+     * <p>It can take several hundred milliseconds for the session's configuration to complete,
+     * since camera hardware may need to be powered on or reconfigured. Once the configuration is
+     * complete and the session is ready to actually capture data, the provided
+     * {@link CameraCaptureSession.StateListener}'s
+     * {@link CameraCaptureSession.StateListener#onConfigured} callback will be called.</p>
+     *
+     * <p>If a prior CameraCaptureSession already exists when a new one is created, the previous
+     * session is closed. Any in-progress capture requests made on the prior session will be
+     * completed before the new session is configured and is able to start capturing its own
+     * requests. To minimize the transition time, the {@link CameraCaptureSession#abortCaptures}
+     * call can be used to discard the remaining requests for the prior capture session before a new
+     * one is created. Note that once the new session is created, the old one can no longer have its
+     * captures aborted.</p>
+     *
+     * <p>Using larger resolution outputs, or more outputs, can result in slower
+     * output rate from the device.</p>
+     *
+     * <p>Configuring a session with an empty or null list will close the current session, if
+     * any. This can be used to release the current session's target surfaces for another use.</p>
+     *
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured image data.
+     * @param listener The listener to notify about the status of the new capture session.
+     * @param handler The handler on which the listener should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     * <!--
+     * @return A new camera capture session to use, or null if an empty/null set of Surfaces is
+     *         provided.
+     * -->
+     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
+     *                                  the listener is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see CameraCaptureSession
+     * @see StreamConfigurationMap#getOutputFormats()
+     * @see StreamConfigurationMap#getOutputSizes(int)
+     * @see StreamConfigurationMap#getOutputSizes(Class)
+     */
+    public void createCaptureSession(List<Surface> outputs,
+            CameraCaptureSession.StateListener listener, Handler handler)
+            throws CameraAccessException;
 
     /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
@@ -314,6 +430,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException;
@@ -358,6 +475,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #capture
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
@@ -416,6 +534,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      * @see #stopRepeating
      * @see #flush
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException;
@@ -474,6 +593,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      * @see #stopRepeating
      * @see #flush
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
@@ -498,6 +618,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see StateListener#onIdle
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public void stopRepeating() throws CameraAccessException;
 
@@ -534,25 +655,24 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #configureOutputs
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public void flush() throws CameraAccessException;
 
     /**
-     * Close the connection to this camera device.
+     * Close the connection to this camera device as quickly as possible.
      *
-     * <p>After this call, all calls to
-     * the camera device interface will throw a {@link IllegalStateException},
-     * except for calls to close(). Once the device has fully shut down, the
-     * {@link StateListener#onClosed} callback will be called, and the camera is
-     * free to be re-opened.</p>
+     * <p>Immediately after this call, all calls to the camera device or active session interface
+     * will throw a {@link IllegalStateException}, except for calls to close(). Once the device has
+     * fully shut down, the {@link StateListener#onClosed} callback will be called, and the camera
+     * is free to be re-opened.</p>
      *
-     * <p>After this call, besides the final {@link StateListener#onClosed} call, no calls to the
-     * device's {@link StateListener} will occur, and any remaining submitted capture requests will
-     * not fire their {@link CaptureListener} callbacks.</p>
+     * <p>Immediately after this call, besides the final {@link StateListener#onClosed} calls, no
+     * further callbacks from the device or the active session will occur, and any remaining
+     * submitted capture requests will be discarded, as if
+     * {@link CameraCaptureSession#abortCaptures} had been called, except that no success or failure
+     * callbacks will be invoked.</p>
      *
-     * <p>To shut down as fast as possible, call the {@link #flush} method and then {@link #close}
-     * once the flush completes. This will discard some capture requests, but results in faster
-     * shutdown.</p>
      */
     @Override
     public void close();
@@ -569,6 +689,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
+     * @deprecated Use {@link CameraCaptureSession} instead
      */
     public static abstract class CaptureListener {
 
@@ -834,6 +955,7 @@ public interface CameraDevice extends AutoCloseable {
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param camera the camera device has that become unconfigured
+         * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
         public void onUnconfigured(CameraDevice camera) {
             // Default empty implementation
@@ -863,6 +985,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#captureBurst
          * @see CameraDevice#setRepeatingBurst
          * @see CameraDevice#setRepeatingRequest
+         * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
         public void onActive(CameraDevice camera) {
             // Default empty implementation
@@ -896,6 +1019,7 @@ public interface CameraDevice extends AutoCloseable {
          *
          * @see CameraDevice#configureOutputs
          * @see CameraDevice#flush
+         * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
         public void onBusy(CameraDevice camera) {
             // Default empty implementation
@@ -943,6 +1067,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#configureOutputs
          * @see CameraDevice#stopRepeating
          * @see CameraDevice#flush
+         * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
         public void onIdle(CameraDevice camera) {
             // Default empty implementation

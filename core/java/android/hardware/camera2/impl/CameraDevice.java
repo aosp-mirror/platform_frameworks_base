@@ -19,6 +19,7 @@ package android.hardware.camera2.impl;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -250,6 +251,13 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 mDeviceHandler.post(mCallOnUnconfigured);
             }
         }
+    }
+
+    @Override
+    public void createCaptureSession(List<Surface> outputs,
+            CameraCaptureSession.StateListener listener, Handler handler)
+            throws CameraAccessException {
+        // TODO
     }
 
     @Override
