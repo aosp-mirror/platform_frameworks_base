@@ -38,11 +38,11 @@ public class SurfaceControl {
     private static native void nativeDestroy(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers,
-            boolean useIdentityTransform);
+            Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
+            boolean allLayers, boolean useIdentityTransform);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers,
-            boolean useIdentityTransform);
+            Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
+            boolean allLayers, boolean useIdentityTransform);
 
     private static native void nativeOpenTransaction();
     private static native void nativeCloseTransaction();
@@ -597,8 +597,8 @@ public class SurfaceControl {
     public static void screenshot(IBinder display, Surface consumer,
             int width, int height, int minLayer, int maxLayer,
             boolean useIdentityTransform) {
-        screenshot(display, consumer, width, height, minLayer, maxLayer, false,
-                useIdentityTransform);
+        screenshot(display, consumer, new Rect(), width, height, minLayer, maxLayer,
+                false, useIdentityTransform);
     }
 
     /**
@@ -613,7 +613,7 @@ public class SurfaceControl {
      */
     public static void screenshot(IBinder display, Surface consumer,
             int width, int height) {
-        screenshot(display, consumer, width, height, 0, 0, true, false);
+        screenshot(display, consumer, new Rect(), width, height, 0, 0, true, false);
     }
 
     /**
@@ -623,7 +623,7 @@ public class SurfaceControl {
      * @param consumer The {@link Surface} to take the screenshot into.
      */
     public static void screenshot(IBinder display, Surface consumer) {
-        screenshot(display, consumer, 0, 0, 0, 0, true, false);
+        screenshot(display, consumer, new Rect(), 0, 0, 0, 0, true, false);
     }
 
     /**
@@ -634,6 +634,8 @@ public class SurfaceControl {
      * the versions that use a {@link Surface} instead, such as
      * {@link SurfaceControl#screenshot(IBinder, Surface)}.
      *
+     * @param sourceCrop The portion of the screen to capture into the Bitmap;
+     * caller may pass in 'new Rect()' if no cropping is desired.
      * @param width The desired width of the returned bitmap; the raw
      * screen will be scaled down to this size.
      * @param height The desired height of the returned bitmap; the raw
@@ -649,13 +651,13 @@ public class SurfaceControl {
      * if an error occurs. Make sure to call Bitmap.recycle() as soon as
      * possible, once its content is not needed anymore.
      */
-    public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer,
-            boolean useIdentityTransform) {
+    public static Bitmap screenshot(Rect sourceCrop, int width, int height,
+            int minLayer, int maxLayer, boolean useIdentityTransform) {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, minLayer, maxLayer, false,
-                useIdentityTransform);
+        return nativeScreenshot(displayToken, sourceCrop, width, height,
+                minLayer, maxLayer, false, useIdentityTransform);
     }
 
     /**
@@ -674,10 +676,10 @@ public class SurfaceControl {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, 0, 0, true, false);
+        return nativeScreenshot(displayToken, new Rect(), width, height, 0, 0, true, false);
     }
 
-    private static void screenshot(IBinder display, Surface consumer,
+    private static void screenshot(IBinder display, Surface consumer, Rect sourceCrop,
             int width, int height, int minLayer, int maxLayer, boolean allLayers,
             boolean useIdentityTransform) {
         if (display == null) {
@@ -686,7 +688,7 @@ public class SurfaceControl {
         if (consumer == null) {
             throw new IllegalArgumentException("consumer must not be null");
         }
-        nativeScreenshot(display, consumer, width, height, minLayer, maxLayer, allLayers,
-                useIdentityTransform);
+        nativeScreenshot(display, consumer, sourceCrop, width, height,
+                minLayer, maxLayer, allLayers, useIdentityTransform);
     }
 }
