@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
@@ -2343,6 +2344,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     };
+
+    @Override
+    protected void startNotificationActivity(OnDismissAction action) {
+        if (mStatusBarKeyguardViewManager.isShowing()) {
+            mStatusBarKeyguardViewManager.dismissWithAction(action);
+        } else {
+            action.onDismiss();
+        }
+    }
 
     // SystemUIService notifies SystemBars of configuration changes, which then calls down here
     @Override

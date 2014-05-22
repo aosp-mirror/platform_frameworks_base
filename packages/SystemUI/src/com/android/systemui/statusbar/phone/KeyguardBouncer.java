@@ -28,6 +28,7 @@ import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.*;
 
 /**
@@ -67,6 +68,12 @@ public class KeyguardBouncer {
             mKeyguardView.requestFocus();
             mKeyguardView.onResume();
         }
+    }
+
+    public void showWithDismissAction(OnDismissAction r) {
+        ensureView();
+        mKeyguardView.setOnDismissAction(r);
+        show();
     }
 
     public void hide() {

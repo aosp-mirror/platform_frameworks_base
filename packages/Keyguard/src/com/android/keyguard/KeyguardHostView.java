@@ -112,7 +112,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     public interface OnDismissAction {
-        /* returns true if the dismiss should be deferred */
+        /**
+         * @return true if the dismiss should be deferred
+         */
         boolean onDismiss();
     }
 
