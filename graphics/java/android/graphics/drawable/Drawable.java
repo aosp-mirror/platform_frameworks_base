@@ -24,6 +24,7 @@ import android.os.Trace;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -226,7 +227,7 @@ public abstract class Drawable {
      * By default, this returns the full drawable bounds. Custom drawables may
      * override this method to perform more precise invalidation.
      *
-     * @hide
+     * @return The dirty bounds of this drawable
      */
     public Rect getDirtyBounds() {
         return getBounds();
@@ -467,6 +468,18 @@ public abstract class Drawable {
     public void setColorFilter(int color, PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
+
+    /**
+     * Specifies a tint and blending mode for this drawable.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tint Color state list to use for tinting this drawable, or null to
+     *            clear the tint
+     * @param tintMode A Porter-Duff blending mode
+     */
+    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {}
 
     /**
      * Returns the current color filter, or {@code null} if none set.

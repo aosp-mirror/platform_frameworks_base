@@ -28,6 +28,7 @@ import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -327,44 +328,12 @@ public class NinePatchDrawable extends Drawable {
         invalidateSelf();
     }
 
-    /**
-     * Specifies a tint for this drawable.
-     * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
-     *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
-     */
-    public void setTint(ColorStateList tint) {
-        if (mNinePatchState.mTint != tint) {
-            mNinePatchState.mTint = tint;
-            computeTintFilter();
-            invalidateSelf();
-        }
-    }
-
-    /**
-     * Returns the tint color for this drawable.
-     *
-     * @return Color state list to use for tinting this drawable, or null if
-     *         none set
-     */
-    public ColorStateList getTint() {
-        return mNinePatchState.mTint;
-    }
-
-    /**
-     * Specifies the blending mode used to apply tint.
-     *
-     * @param tintMode A Porter-Duff blending mode
-     */
-    public void setTintMode(Mode tintMode) {
-        if (mNinePatchState.mTintMode != tintMode) {
-            mNinePatchState.mTintMode = tintMode;
-            computeTintFilter();
-            invalidateSelf();
-        }
+    @Override
+    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
+        mNinePatchState.mTint = tint;
+        mNinePatchState.mTintMode = tintMode;
+        computeTintFilter();
+        invalidateSelf();
     }
 
     private void computeTintFilter() {
