@@ -5709,10 +5709,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // updateNetworkSettings();
             }
             // notify battery stats service about this network
-//            try {
-                // TODO
-                //BatteryStatsService.getService().noteNetworkInterfaceType(iface, netType);
-//            } catch (RemoteException e) { }
+            try {
+                BatteryStatsService.getService().noteNetworkInterfaceType(
+                        newNetwork.linkProperties.getInterfaceName(),
+                        newNetwork.networkInfo.getType());
+            } catch (RemoteException e) { }
             notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
         } else {
             if (DBG && newNetwork.networkRequests.size() != 0) {

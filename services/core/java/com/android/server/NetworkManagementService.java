@@ -240,9 +240,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mPhoneStateListener = new PhoneStateListener(mDaemonHandler.getLooper()) {
             public void onDataConnectionRealTimeInfoChanged(
                     DataConnectionRealTimeInfo dcRtInfo) {
-                // Disabled for now, until we are getting good data.
-                //notifyInterfaceClassActivity(ConnectivityManager.TYPE_MOBILE,
-                //        dcRtInfo.getDcPowerState(), dcRtInfo.getTime(), true);
+                notifyInterfaceClassActivity(ConnectivityManager.TYPE_MOBILE,
+                        dcRtInfo.getDcPowerState(), dcRtInfo.getTime(), true);
             }
         };
 
