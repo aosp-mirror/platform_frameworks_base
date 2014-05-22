@@ -114,10 +114,10 @@ public final class HdmiControlManager {
      * Adds a listener to get informed of {@link HdmiHotplugEvent}.
      *
      * <p>To stop getting the notification,
-     * use {@link #removeHotplugeEventListener(HotplugEventListener)}.
+     * use {@link #removeHotplugEventListener(HotplugEventListener)}.
      *
      * @param listener {@link HotplugEventListener} instance
-     * @see HdmiControlManager#removeHotplugeEventListener(HotplugEventListener)
+     * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
      */
     public void addHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
@@ -135,7 +135,7 @@ public final class HdmiControlManager {
      *
      * @param listener {@link HotplugEventListener} instance to be removed
      */
-    public void removeHotplugeEventListener(HotplugEventListener listener) {
+    public void removeHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
             return;
         }

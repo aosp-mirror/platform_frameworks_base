@@ -12869,7 +12869,7 @@ package android.hardware.hdmi {
     method public void addHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
     method public android.hardware.hdmi.HdmiTvClient getTvClient();
-    method public void removeHotplugeEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
+    method public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
   }
 
   public static abstract interface HdmiControlManager.HotplugEventListener {
@@ -12877,7 +12877,6 @@ package android.hardware.hdmi {
   }
 
   public final class HdmiHotplugEvent implements android.os.Parcelable {
-    ctor public HdmiHotplugEvent(int, boolean);
     method public int describeContents();
     method public int getPort();
     method public boolean isConnected();
@@ -15763,7 +15762,7 @@ package android.media.session {
     method public void setActive(boolean);
     method public void setFlags(int);
     method public void setLaunchPendingIntent(android.app.PendingIntent);
-    method public void useLocalPlayback(android.media.AudioAttributes);
+    method public void useLocalPlayback(int);
     method public void useRemotePlayback(android.media.session.RemoteVolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
