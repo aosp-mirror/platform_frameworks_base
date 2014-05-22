@@ -14,6 +14,19 @@
      limitations under the License.
 -->
 <resources>
+    <style name="Animation.Micro"/>
+
+    <style name="Animation.Micro.Activity" parent="Animation.Holo.Activity">
+        <item name="activityOpenEnterAnimation">@anim/slide_in_micro</item>
+        <item name="activityOpenExitAnimation">@null</item>
+        <item name="activityCloseEnterAnimation">@null</item>
+        <item name="activityCloseExitAnimation">@anim/slide_out_micro</item>
+        <item name="taskOpenEnterAnimation">@anim/slide_in_micro</item>
+        <item name="taskOpenExitAnimation">@null</item>
+        <item name="taskCloseEnterAnimation">@null</item>
+        <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
+    </style>
+
     <style name="AlertDialog.Micro" parent="AlertDialog.Holo.Light">
         <item name="fullDark">@null</item>
         <item name="topDark">@null</item>
