@@ -106,6 +106,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_STATES = DEBUG || false;
     static final boolean DEBUG_IDLE = DEBUG || false;
+    static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
 

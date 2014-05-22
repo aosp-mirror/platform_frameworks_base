@@ -33,6 +33,7 @@ import static com.android.server.am.ActivityManagerService.VALIDATE_TOKENS;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_APP;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_SCREENSHOTS;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
@@ -342,6 +343,12 @@ final class ActivityStack {
         mWindowManager = mService.mWindowManager;
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
+        // Get the activity screenshot thumbnail dimensions
+        Resources res = mService.mContext.getResources();
+        mThumbnailWidth =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
+        mThumbnailHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
     }
 
     /**
@@ -725,42 +732,54 @@ final class ActivityStack {
         }
     }
 
+    /**
+     * This resets the saved state from the last screenshot, forcing a new screenshot to be taken
+     * again when requested.
+     */
+    private void invalidateLastScreenshot() {
+        mLastScreenshotActivity = null;
+        if (mLastScreenshotBitmap != null) {
+            mLastScreenshotBitmap.recycle();
+        }
+        mLastScreenshotBitmap = null;
+    }
+
     public final Bitmap screenshotActivities(ActivityRecord who) {
+        if (DEBUG_SCREENSHOTS) Slog.d(TAG, "screenshotActivities: " + who);
         if (who.noDisplay) {
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tNo display");
             return null;
         }
 
         TaskRecord tr = who.task;
-        if (mService.getMostRecentTask() != tr && tr.intent != null &&
-                (tr.intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
-            // If this task is being excluded from recents, we don't want to take
-            // the expense of capturing a thumbnail, since we will never show it.
+        if (mService.getMostRecentTask() != tr || isHomeStack()) {
+            // This is an optimization -- since we never show Home or Recents within Recents itself,
+            // we can just go ahead and skip taking the screenshot if this is the home stack.  In
+            // the case where the most recent task is not the task that was supplied, then the stack
+            // has changed, so invalidate the last screenshot().
+            invalidateLastScreenshot();
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tIs Home stack? " + isHomeStack());
             return null;
         }
 
-        Resources res = mService.mContext.getResources();
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
-        if (w < 0) {
-            mThumbnailWidth = w =
-               res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
-            mThumbnailHeight = h =
-               res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
-        }
-
         if (w > 0) {
             if (who != mLastScreenshotActivity || mLastScreenshotBitmap == null
                     || mLastScreenshotActivity.state == ActivityState.RESUMED
                     || mLastScreenshotBitmap.getWidth() != w
                     || mLastScreenshotBitmap.getHeight() != h) {
+                if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tUpdating screenshot");
                 mLastScreenshotActivity = who;
                 mLastScreenshotBitmap = mWindowManager.screenshotApplications(
                         who.appToken, Display.DEFAULT_DISPLAY, w, h, SCREENSHOT_FORCE_565);
             }
             if (mLastScreenshotBitmap != null) {
+                if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tReusing last screenshot");
                 return mLastScreenshotBitmap.copy(mLastScreenshotBitmap.getConfig(), true);
             }
         }
+        Slog.e(TAG, "Invalid thumbnail dimensions: " + w + "x" + h);
         return null;
     }
 
@@ -1031,6 +1050,12 @@ final class ActivityStack {
             }
         } else {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
+        }
+
+        // If we are resuming the activity that we had last screenshotted, then we know it will be
+        // updated, so invalidate the last screenshot to ensure we take a fresh one when requested
+        if (next == mLastScreenshotActivity) {
+            invalidateLastScreenshot();
         }
     }
 
