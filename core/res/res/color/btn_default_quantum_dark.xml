@@ -14,9 +14,7 @@
      limitations under the License.
 -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorControlHighlight">
-    <item android:id="@id/mask">
-        <color android:color="@color/white" />
-    </item>
-</ripple>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:alpha="0.5" android:color="@color/quantum_grey_700"/>
+    <item android:color="@color/quantum_grey_700"/>
+</selector>

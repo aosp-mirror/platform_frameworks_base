@@ -818,7 +818,8 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return mGradientState.mOpaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
+        return (mAlpha == 255 && mGradientState.mOpaque) ?
+                PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
     }
 
     @Override

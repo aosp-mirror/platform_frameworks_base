@@ -320,7 +320,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Quantum.ButtonBar</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Button.Borderless.Small</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Button.Borderless</item>
         <item name="segmentedButtonStyle">@style/Widget.Quantum.SegmentedButton</item>
 
         <!-- SearchView attributes -->
@@ -377,8 +377,9 @@ please see themes_device_defaults.xml.
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorPrimary</item>
-        <item name="colorButtonNormal">@color/quantum_grey_700</item>
-        <item name="colorButtonPressed">@color/quantum_grey_500</item>
+        <item name="colorControlHighlight">#30ffffff</item>
+
+        <item name="colorButtonNormal">@color/btn_default_quantum_dark</item>
     </style>
 
     <!-- Quantum Paper theme (light version). -->
@@ -718,8 +719,9 @@ please see themes_device_defaults.xml.
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorPrimary</item>
-        <item name="colorButtonNormal">@color/quantum_grey_100</item>
-        <item name="colorButtonPressed">@color/quantum_grey_500</item>
+        <item name="colorControlHighlight">#30000000</item>
+
+        <item name="colorButtonNormal">@color/btn_default_quantum_light</item>
     </style>
 
     <!-- Variant of the quantum (light) theme that has a solid (opaque) action bar

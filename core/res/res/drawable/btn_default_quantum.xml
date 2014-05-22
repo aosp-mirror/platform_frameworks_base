@@ -15,20 +15,22 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorButtonPressed">
+    android:tint="?attr/colorControlHighlight">
     <item>
-        <selector>
-            <item android:state_enabled="false">
-                <nine-patch
-                    android:src="@drawable/btn_qntm_alpha"
-                    android:tint="?attr/colorButtonNormal"
-                    android:alpha="?attr/disabledAlpha" />
-            </item>
-            <item>
-                <nine-patch
-                    android:src="@drawable/btn_qntm_alpha"
-                    android:tint="?attr/colorButtonNormal" />
-            </item>
-        </selector>
+        <inset
+            android:insetLeft="4dp"
+            android:insetTop="4dp"
+            android:insetBottom="4dp"
+            android:insetRight="4dp">
+            <shape android:shape="rectangle">
+                <solid android:color="?attr/colorButtonNormal" />
+                <corners android:radius="2dp" />
+                <padding
+                    android:left="4dp"
+                    android:top="4dp"
+                    android:bottom="4dp"
+                    android:right="4dp" />
+            </shape>
+        </inset>
     </item>
 </ripple>

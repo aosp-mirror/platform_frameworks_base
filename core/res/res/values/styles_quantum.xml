@@ -364,6 +364,7 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">96dip</item>
+        <item name="elevation">2dip</item>
         <item name="stateListAnimator">@anim/button_state_list_anim_quantum</item>
     </style>
 
@@ -437,7 +438,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
         <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
+        <item name="popupBackground">@drawable/popup_background_quantum</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton" parent="Widget.CompoundButton"/>
@@ -528,7 +529,10 @@ please see styles_device_defaults.xml.
         <item name="calendarViewShown">true</item>
     </style>
 
-    <style name="Widget.Quantum.ActivityChooserView" parent="Widget.ActivityChooserView"/>
+    <style name="Widget.Quantum.ActivityChooserView" parent="Widget.ActivityChooserView">
+        <item name="background">@drawable/ab_share_pack_quantum</item>
+    </style>
+
     <style name="Widget.Quantum.ImageWell" parent="Widget.ImageWell"/>
 
     <style name="Widget.Quantum.ListView" parent="Widget.ListView">
@@ -610,7 +614,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
         <item name="background">@drawable/spinner_background_quantum</item>
         <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
+        <item name="popupBackground">@drawable/popup_background_quantum</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -805,21 +809,12 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.TextSelectHandle" parent="Widget.Quantum.TextSelectHandle"/>
     <style name="Widget.Quantum.Light.TextSuggestionsPopupWindow" parent="Widget.Quantum.TextSuggestionsPopupWindow"/>
     <style name="Widget.Quantum.Light.AbsListView" parent="Widget.Quantum.AbsListView"/>
-
-    <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.Quantum.AutoCompleteTextView" />
     <style name="Widget.Quantum.Light.CompoundButton" parent="Widget.Quantum.CompoundButton"/>
     <style name="Widget.Quantum.Light.CompoundButton.CheckBox" parent="Widget.Quantum.CompoundButton.CheckBox"/>
     <style name="Widget.Quantum.Light.CompoundButton.RadioButton" parent="Widget.Quantum.CompoundButton.RadioButton"/>
     <style name="Widget.Quantum.Light.CompoundButton.Star" parent="Widget.Quantum.CompoundButton.Star"/>
-
-    <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch">
-        <item name="switchTextAppearance">@style/TextAppearance.Quantum.Widget.Switch</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch" />
     <style name="Widget.Quantum.Light.ListView.DropDown" parent="Widget.Quantum.ListView.DropDown"/>
     <style name="Widget.Quantum.Light.EditText" parent="Widget.Quantum.EditText"/>
     <style name="Widget.Quantum.Light.ExpandableListView" parent="Widget.Quantum.ExpandableListView"/>
@@ -847,11 +842,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Light.DatePicker" parent="Widget.Quantum.DatePicker"/>
-
-    <style name="Widget.Quantum.Light.ActivityChooserView" parent="Widget.Quantum.ActivityChooserView">
-        <item name="background">@drawable/ab_share_pack_quantum</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.ActivityChooserView" parent="Widget.Quantum.ActivityChooserView" />
     <style name="Widget.Quantum.Light.ImageWell" parent="Widget.Quantum.ImageWell"/>
     <style name="Widget.Quantum.Light.ListView" parent="Widget.Quantum.ListView"/>
     <style name="Widget.Quantum.Light.ListView.White" parent="Widget.Quantum.ListView.White"/>
@@ -890,17 +881,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.ScrollView" parent="Widget.Quantum.ScrollView"/>
     <style name="Widget.Quantum.Light.HorizontalScrollView" parent="Widget.Quantum.HorizontalScrollView"/>
-
-    <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner">
-        <item name="background">@drawable/spinner_background_quantum</item>
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
-        <item name="popupBackground">?attr/colorBackground</item>
-        <item name="dropDownVerticalOffset">0dip</item>
-        <item name="dropDownHorizontalOffset">0dip</item>
-        <item name="dropDownWidth">wrap_content</item>
-        <item name="popupPromptView">@layout/simple_dropdown_hint</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner" />
     <style name="Widget.Quantum.Light.Spinner.DropDown" parent="Widget.Quantum.Spinner.DropDown"/>
     <style name="Widget.Quantum.Light.Spinner.DropDown.ActionBar" parent="Widget.Quantum.Spinner.DropDown.ActionBar"/>
     <style name="Widget.Quantum.Light.TabWidget" parent="Widget.Quantum.TabWidget"/>
@@ -924,15 +905,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ActionBar.TabView" parent="Widget.Quantum.ActionBar.TabView"/>
     <style name="Widget.Quantum.Light.ActionBar.TabBar" parent="Widget.Quantum.ActionBar.TabBar"/>
     <style name="Widget.Quantum.Light.ActionBar.TabText" parent="Widget.Quantum.ActionBar.TabText"/>
-
-    <style name="Widget.Quantum.Light.ActionMode" parent="Widget.Quantum.ActionMode">
-        <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionMode.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionMode.Subtitle</item>
-    </style>
-
-    <style name="Widget.Quantum.Light.ActionButton.CloseMode">
-        <item name="background">@drawable/btn_cab_done_quantum</item>
-    </style>
+    <style name="Widget.Quantum.Light.ActionMode" parent="Widget.Quantum.ActionMode" />
+    <style name="Widget.Quantum.Light.ActionButton.CloseMode" parent="Widget.Quantum.ActionButton.CloseMode" />
 
     <style name="Widget.Quantum.Light.ActionBar" parent="Widget.Quantum.ActionBar">
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
@@ -952,10 +926,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Light.FastScroll" parent="Widget.Quantum.FastScroll"/>
-
-    <style name="Widget.Quantum.Light.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton">
-        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_quantum</item>
-    </style>
+    <style name="Widget.Quantum.Light.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton" />
 
     <!-- Animation Styles -->
 

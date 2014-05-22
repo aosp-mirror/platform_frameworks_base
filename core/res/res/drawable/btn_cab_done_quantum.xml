@@ -18,11 +18,11 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     android:autoMirrored="true">
     <item android:state_pressed="true">
-        <color android:color="?attr/colorButtonPressed" />
+        <color android:color="?attr/colorControlHighlight" />
     </item>
     <item android:state_focused="true" android:state_enabled="true">
         <nine-patch android:src="@drawable/btn_cab_done_qntm_alpha"
-            android:tint="?attr/colorButtonPressed" />
+            android:tint="?attr/colorControlHighlight" />
     </item>
     <item android:state_enabled="true">
         <nine-patch android:src="@drawable/btn_cab_done_qntm_alpha"
