@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import com.android.internal.widget.ILockSettingsObserver;
+
 /** {@hide} */
 interface ILockSettings {
     void setBoolean(in String key, in boolean value, in int userId);
@@ -32,4 +34,6 @@ interface ILockSettings {
     boolean havePattern(int userId);
     boolean havePassword(int userId);
     void removeUser(int userId);
+    void registerObserver(in ILockSettingsObserver observer);
+    void unregisterObserver(in ILockSettingsObserver observer);
 }
