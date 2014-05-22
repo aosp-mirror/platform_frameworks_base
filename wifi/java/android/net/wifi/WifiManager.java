@@ -2225,4 +2225,30 @@ public class WifiManager {
             super.finalize();
         }
     }
+
+
+    /**
+     * Set wifi verbose log. Called from developer settings.
+     * @hide
+     */
+    public void enableVerboseLogging (int verbose) {
+        try {
+            mService.enableVerboseLogging(verbose);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * Get the WiFi verbose logging level.This is used by settings
+     * to decide what to show within the picker.
+     * @hide
+     */
+    public int getVerboseLoggingLevel() {
+        try {
+            return mService.getVerboseLoggingLevel();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
 }
