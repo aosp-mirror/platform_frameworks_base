@@ -473,7 +473,7 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslat
 
 template <class T>
 void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler) {
-    if (properties().getAlpha() <= 0.0f) return;
+    if (properties().getAlpha() <= 0.0f || properties().getOutline().isEmpty()) return;
 
     mat4 shadowMatrixXY(transformFromParent);
     applyViewPropertyTransforms(shadowMatrixXY);
@@ -487,6 +487,8 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     const SkPath* revealClipPath = revealClip.hasConvexClip()
             ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
 
+    if (revealClipPath && revealClipPath->isEmpty()) return;
+
     /**
      * The drawing area of the caster is always the same as the its perimeter (which
      * the shadow system uses) *except* in the inverse clip case. Inform the shadow
@@ -498,7 +500,6 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     DisplayListOp* shadowOp  = new (handler.allocator()) DrawShadowOp(
             shadowMatrixXY, shadowMatrixZ,
             properties().getAlpha(), casterUnclipped,
-            properties().getWidth(), properties().getHeight(),
             outlinePath, revealClipPath);
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
