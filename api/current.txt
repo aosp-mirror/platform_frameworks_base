@@ -4538,13 +4538,22 @@ package android.app {
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
-    method public android.app.Notification.Action.Builder apply(android.app.Notification.Action.Builder.Extender);
     method public android.app.Notification.Action build();
+    method public android.app.Notification.Action.Builder extend(android.app.Notification.Action.Extender);
     method public android.os.Bundle getExtras();
   }
 
-  public static abstract interface Notification.Action.Builder.Extender {
-    method public abstract android.app.Notification.Action.Builder applyTo(android.app.Notification.Action.Builder);
+  public static abstract interface Notification.Action.Extender {
+    method public abstract android.app.Notification.Action.Builder extend(android.app.Notification.Action.Builder);
+  }
+
+  public static final class Notification.Action.WearableExtender implements android.app.Notification.Action.Extender {
+    ctor public Notification.Action.WearableExtender();
+    ctor public Notification.Action.WearableExtender(android.app.Notification.Action);
+    method public android.app.Notification.Action.WearableExtender clone();
+    method public android.app.Notification.Action.Builder extend(android.app.Notification.Action.Builder);
+    method public boolean isAvailableOffline();
+    method public android.app.Notification.Action.WearableExtender setAvailableOffline(boolean);
   }
 
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
@@ -4572,6 +4581,7 @@ package android.app {
     method public android.app.Notification.Builder addPerson(java.lang.String);
     method public android.app.Notification.Builder apply(android.app.Notification.Builder.Extender);
     method public android.app.Notification build();
+    method public android.app.Notification.Builder extend(android.app.Notification.Extender);
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
@@ -4613,8 +4623,8 @@ package android.app {
     method public android.app.Notification.Builder setWhen(long);
   }
 
-  public static abstract interface Notification.Builder.Extender {
-    method public abstract android.app.Notification.Builder applyTo(android.app.Notification.Builder);
+  public static abstract interface Notification.Extender {
+    method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }
 
   public static class Notification.InboxStyle extends android.app.Notification.Style {
@@ -4642,6 +4652,51 @@ package android.app {
     method protected void internalSetSummaryText(java.lang.CharSequence);
     method public void setBuilder(android.app.Notification.Builder);
     field protected android.app.Notification.Builder mBuilder;
+  }
+
+  public static final class Notification.WearableExtender implements android.app.Notification.Extender {
+    ctor public Notification.WearableExtender();
+    ctor public Notification.WearableExtender(android.app.Notification);
+    method public android.app.Notification.WearableExtender addAction(android.app.Notification.Action);
+    method public android.app.Notification.WearableExtender addActions(java.util.List<android.app.Notification.Action>);
+    method public android.app.Notification.WearableExtender addPage(android.app.Notification);
+    method public android.app.Notification.WearableExtender addPages(java.util.List<android.app.Notification>);
+    method public android.app.Notification.WearableExtender clearActions();
+    method public android.app.Notification.WearableExtender clearPages();
+    method public android.app.Notification.WearableExtender clone();
+    method public android.app.Notification.Builder extend(android.app.Notification.Builder);
+    method public java.util.List<android.app.Notification.Action> getActions();
+    method public android.graphics.Bitmap getBackground();
+    method public int getContentAction();
+    method public int getContentIcon();
+    method public int getContentIconGravity();
+    method public boolean getContentIntentAvailableOffline();
+    method public int getCustomContentHeight();
+    method public int getCustomSizePreset();
+    method public android.app.PendingIntent getDisplayIntent();
+    method public int getGravity();
+    method public boolean getHintHideIcon();
+    method public boolean getHintShowBackgroundOnly();
+    method public java.util.List<android.app.Notification> getPages();
+    method public boolean getStartScrollBottom();
+    method public android.app.Notification.WearableExtender setBackground(android.graphics.Bitmap);
+    method public android.app.Notification.WearableExtender setContentAction(int);
+    method public android.app.Notification.WearableExtender setContentIcon(int);
+    method public android.app.Notification.WearableExtender setContentIconGravity(int);
+    method public android.app.Notification.WearableExtender setContentIntentAvailableOffline(boolean);
+    method public android.app.Notification.WearableExtender setCustomContentHeight(int);
+    method public android.app.Notification.WearableExtender setCustomSizePreset(int);
+    method public android.app.Notification.WearableExtender setDisplayIntent(android.app.PendingIntent);
+    method public android.app.Notification.WearableExtender setGravity(int);
+    method public android.app.Notification.WearableExtender setHintHideIcon(boolean);
+    method public android.app.Notification.WearableExtender setHintShowBackgroundOnly(boolean);
+    method public android.app.Notification.WearableExtender setStartScrollBottom(boolean);
+    field public static final int SIZE_DEFAULT = 0; // 0x0
+    field public static final int SIZE_LARGE = 4; // 0x4
+    field public static final int SIZE_MEDIUM = 3; // 0x3
+    field public static final int SIZE_SMALL = 2; // 0x2
+    field public static final int SIZE_XSMALL = 1; // 0x1
+    field public static final int UNSET_ACTION_INDEX = -1; // 0xffffffff
   }
 
   public class NotificationManager {
