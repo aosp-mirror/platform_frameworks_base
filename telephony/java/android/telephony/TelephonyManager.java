@@ -2249,4 +2249,25 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /** @hide */
+    @PrivateApi
+    public void setDataEnabled(boolean enable) {
+        try {
+            getITelephony().setDataEnabled(enable);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setDataEnabled", e);
+        }
+    }
+
+    /** @hide */
+    @PrivateApi
+    public boolean getDataEnabled() {
+        try {
+            return getITelephony().getDataEnabled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
+        }
+        return false;
+    }
 }

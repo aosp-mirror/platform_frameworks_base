@@ -35,14 +35,16 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.util.Protocol;
 
 import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
-
-import com.android.internal.util.Protocol;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -940,34 +942,18 @@ public class ConnectivityManager {
     }
 
     /**
-     * Gets the value of the setting for enabling Mobile data.
-     *
-     * @return Whether mobile data is enabled.
-     *
-     * <p>This method requires the call to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
+     * @deprecated Talk to TelephonyManager directly
      */
     public boolean getMobileDataEnabled() {
-        try {
-            return mService.getMobileDataEnabled();
-        } catch (RemoteException e) {
-            return true;
+        IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
+        if (b != null) {
+            try {
+                ITelephony it = ITelephony.Stub.asInterface(b);
+                return it.getDataEnabled();
+            } catch (RemoteException e) { }
         }
-    }
-
-    /**
-     * Sets the persisted value for enabling/disabling Mobile data.
-     *
-     * @param enabled Whether the user wants the mobile data connection used
-     *            or not.
-     * @hide
-     */
-    public void setMobileDataEnabled(boolean enabled) {
-        try {
-            mService.setMobileDataEnabled(enabled);
-        } catch (RemoteException e) {
-        }
+        return false;
     }
 
     /**
