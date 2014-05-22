@@ -436,4 +436,18 @@ interface ITelephony {
      * @return true on success; false on any failure.
      */
     boolean setPreferredNetworkType(int networkType);
+
+    /**
+     * User enable/disable Mobile Data.
+     *
+     * @param enable true to turn on, else false
+     */
+    void setDataEnabled(boolean enable);
+
+    /**
+     * Get the user enabled state of Mobile Data.
+     *
+     * @return true on enabled
+     */
+    boolean getDataEnabled();
 }
