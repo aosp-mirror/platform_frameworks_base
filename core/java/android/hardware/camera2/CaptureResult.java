@@ -1749,8 +1749,11 @@ public final class CaptureResult extends CameraMetadata {
      * output, cropping to a smaller region if necessary to
      * maintain the stream's aspect ratio.</p>
      * <p>HAL2.x uses only (x, y, width)</p>
-     * <p>Any additional per-stream cropping must be done to
-     * maximize the final pixel area of the stream.</p>
+     * <p>The crop region is applied after the RAW to other color space (e.g. YUV)
+     * conversion. Since raw streams (e.g. RAW16) don't have the conversion stage,
+     * it is not croppable. The crop region will be ignored by raw streams.</p>
+     * <p>For non-raw streams, any additional per-stream cropping will
+     * be done to maximize the final pixel area of the stream.</p>
      * <p>For example, if the crop region is set to a 4:3 aspect
      * ratio, then 4:3 streams should use the exact crop
      * region. 16:9 streams should further crop vertically
