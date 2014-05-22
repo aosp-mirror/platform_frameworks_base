@@ -118,6 +118,7 @@ public class WifiStateMachine extends StateMachine {
     private INetworkManagementService mNwService;
     private ConnectivityManager mCm;
 
+    private final boolean mWifiSupported;
     private final boolean mP2pSupported;
     private final AtomicBoolean mP2pConnected = new AtomicBoolean(false);
     private boolean mTemporarilyDisconnectWifi = false;
@@ -657,6 +658,9 @@ public class WifiStateMachine extends StateMachine {
 
         mP2pSupported = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WIFI_DIRECT);
+
+        mWifiSupported = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WIFI);
 
         mWifiNative = new WifiNative(mInterfaceName);
         mWifiConfigStore = new WifiConfigStore(context, mWifiNative);
@@ -1676,7 +1680,7 @@ public class WifiStateMachine extends StateMachine {
         }
 
         if (screenOn) enableAllNetworks();
-        if (mUserWantsSuspendOpt.get()) {
+        if (mWifiSupported && mUserWantsSuspendOpt.get()) {
             if (screenOn) {
                 sendMessage(CMD_SET_SUSPEND_OPT_ENABLED, 0, 0);
             } else {
