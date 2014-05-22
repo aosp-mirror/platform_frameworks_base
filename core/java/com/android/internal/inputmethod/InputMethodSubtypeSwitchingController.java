@@ -37,6 +37,10 @@ import java.util.TreeMap;
 
 /**
  * InputMethodSubtypeSwitchingController controls the switching behavior of the subtypes.
+ * <p>
+ * This class is designed to be used from and only from {@link InputMethodManagerService} by using
+ * {@link InputMethodManagerService#mMethodMap} as a global lock.
+ * </p>
  */
 public class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();
@@ -207,12 +211,11 @@ public class InputMethodSubtypeSwitchingController {
         }
     }
 
-    private final Object mLock = new Object();
     private final InputMethodSettings mSettings;
     private InputMethodAndSubtypeList mSubtypeList;
 
     @VisibleForTesting
-    public static ImeSubtypeListItem getNextInputMethodImpl(List<ImeSubtypeListItem> imList,
+    public static ImeSubtypeListItem getNextInputMethodLockedImpl(List<ImeSubtypeListItem> imList,
             boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
         if (imi == null) {
             return null;
@@ -256,34 +259,34 @@ public class InputMethodSubtypeSwitchingController {
         return null;
     }
 
-    public InputMethodSubtypeSwitchingController(InputMethodSettings settings) {
+    private InputMethodSubtypeSwitchingController(InputMethodSettings settings, Context context) {
         mSettings = settings;
+        resetCircularListLocked(context);
+    }
+
+    public static InputMethodSubtypeSwitchingController createInstanceLocked(
+            InputMethodSettings settings, Context context) {
+        return new InputMethodSubtypeSwitchingController(settings, context);
     }
 
     // TODO: write unit tests for this method and the logic that determines the next subtype
-    public void onCommitText(InputMethodInfo imi, InputMethodSubtype subtype) {
+    public void onCommitTextLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
         // TODO: Implement this.
     }
 
     public void resetCircularListLocked(Context context) {
-        synchronized(mLock) {
-            mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
-        }
+        mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
     }
 
-    public ImeSubtypeListItem getNextInputMethod(
+    public ImeSubtypeListItem getNextInputMethodLocked(
             boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
-        synchronized(mLock) {
-            return getNextInputMethodImpl(mSubtypeList.getSortedInputMethodAndSubtypeList(),
-                    onlyCurrentIme, imi, subtype);
-        }
+        return getNextInputMethodLockedImpl(mSubtypeList.getSortedInputMethodAndSubtypeList(),
+                onlyCurrentIme, imi, subtype);
     }
 
-    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(boolean showSubtypes,
+    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(boolean showSubtypes,
             boolean inputShown, boolean isScreenLocked) {
-        synchronized(mLock) {
-            return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                    showSubtypes, inputShown, isScreenLocked);
-        }
+        return mSubtypeList.getSortedInputMethodAndSubtypeList(
+                showSubtypes, inputShown, isScreenLocked);
     }
 }

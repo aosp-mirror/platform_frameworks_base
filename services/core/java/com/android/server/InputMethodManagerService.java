@@ -692,8 +692,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
         updateCurrentProfileIds();
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
-        mSwitchingController = new InputMethodSubtypeSwitchingController(mSettings);
-        mSwitchingController.resetCircularListLocked(context);
+        synchronized (mMethodMap) {
+            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                    mSettings, context);
+        }
 
         // Just checking if defaultImiId is empty or not
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -702,17 +704,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mImeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
 
-        buildInputMethodListLocked(mMethodList, mMethodMap,
-                !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
+        synchronized (mMethodMap) {
+            buildInputMethodListLocked(mMethodList, mMethodMap,
+                    !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
+        }
         mSettings.enableAllIMEsIfThereIsNoEnabledIME();
 
         if (!mImeSelectedOnBoot) {
             Slog.w(TAG, "No IME selected. Choose the most applicable IME.");
-            resetDefaultImeLocked(context);
+            synchronized (mMethodMap) {
+                resetDefaultImeLocked(context);
+            }
         }
 
         mSettingsObserver = new SettingsObserver(mHandler);
-        updateFromSettingsLocked(true);
+        synchronized (mMethodMap) {
+            updateFromSettingsLocked(true);
+        }
 
         // IMMS wants to receive Intent.ACTION_LOCALE_CHANGED in order to update the current IME
         // according to the new system locale.
@@ -2174,7 +2182,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethod(
+            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
                     onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
@@ -2190,7 +2198,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethod(
+            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
                     false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
@@ -2273,9 +2281,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) {
             Slog.d(TAG, "Got the notification of commitText");
         }
-        final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
-        if (imi != null) {
-            mSwitchingController.onCommitText(imi, mCurrentSubtype);
+        synchronized (mMethodMap) {
+            final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+            if (imi != null) {
+                mSwitchingController.onCommitTextLocked(imi, mCurrentSubtype);
+            }
         }
     }
 
@@ -2698,7 +2708,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             hideInputMethodMenuLocked();
 
             final List<ImeSubtypeListItem> imList =
-                    mSwitchingController.getSortedInputMethodAndSubtypeList(
+                    mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
                             showSubtypes, mInputShown, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
