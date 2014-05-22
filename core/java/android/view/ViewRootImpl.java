@@ -47,7 +47,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1714,7 +1713,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (hwInitialized ||
                         mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
-                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
+                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight,
+                            mAttachInfo.mRootView.getResources().getDisplayMetrics());
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
@@ -2453,7 +2453,7 @@ public final class ViewRootImpl implements ViewParent,
 
                     try {
                         attachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                mSurface);
+                                mSurface, attachInfo.mRootView.getResources().getDisplayMetrics());
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -3151,7 +3151,8 @@ public final class ViewRootImpl implements ViewParent,
                             mFullRedrawNeeded = true;
                             try {
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mSurface);
+                                        mWidth, mHeight, mSurface,
+                                        mAttachInfo.mRootView.getResources().getDisplayMetrics());
                             } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {

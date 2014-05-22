@@ -33,9 +33,6 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define MIN_WRITER_SIZE 4096
-#define OP_MAY_BE_SKIPPED_MASK 0xff000000
-
 // Debug
 #if DEBUG_DISPLAY_LIST
     #define DISPLAY_LIST_LOGD(...) ALOGD(__VA_ARGS__)
@@ -68,7 +65,6 @@ public:
 // ----------------------------------------------------------------------------
 // Frame state operations
 // ----------------------------------------------------------------------------
-    virtual void setViewport(int width, int height);
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
     virtual void interrupt();

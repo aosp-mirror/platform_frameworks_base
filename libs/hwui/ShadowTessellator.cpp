@@ -68,47 +68,40 @@ VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 
 VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
-        const mat4& receiverTransform,
-        int screenWidth, int screenHeight, const Rect& casterBounds,
-        const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
+        const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
+        const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     Caches& caches = Caches::getInstance();
 
-    // A bunch of parameters to tweak the shadow.
-    // TODO: Allow some of these changable by debug settings or APIs.
-    int maximal = max(screenWidth, screenHeight);
-    Vector3 lightCenter(screenWidth * 0.5f, 0, maximal);
-
+    Vector3 adjustedLightCenter(lightCenter);
     if (CC_UNLIKELY(caches.propertyLightPosY > 0)) {
-        lightCenter.y = - caches.propertyLightPosY; // negated since this shifts up
+        adjustedLightCenter.y = - caches.propertyLightPosY; // negated since this shifts up
     }
     if (CC_UNLIKELY(caches.propertyLightPosZ > 0)) {
-        lightCenter.z = caches.propertyLightPosZ;
+        adjustedLightCenter.z = caches.propertyLightPosZ;
     }
 
-
 #if DEBUG_SHADOW
-    ALOGD("light center %f %f %f", lightCenter.x, lightCenter.y, lightCenter.z);
+    ALOGD("light center %f %f %f",
+            adjustedLightCenter.x, adjustedLightCenter.y, adjustedLightCenter.z);
 #endif
 
     // light position (because it's in local space) needs to compensate for receiver transform
     // TODO: should apply to light orientation, not just position
     Matrix4 reverseReceiverTransform;
     reverseReceiverTransform.loadInverse(receiverTransform);
-    reverseReceiverTransform.mapPoint3d(lightCenter);
+    reverseReceiverTransform.mapPoint3d(adjustedLightCenter);
 
-    float lightSize = maximal / 4;
     const int lightVertexCount = 8;
-
     if (CC_UNLIKELY(caches.propertyLightDiameter > 0)) {
-        lightSize = caches.propertyLightDiameter;
+        lightRadius = caches.propertyLightDiameter;
     }
 
     // Now light and caster are both in local space, we will check whether
     // the shadow is within the clip area.
-    Rect lightRect = Rect(lightCenter.x - lightSize, lightCenter.y - lightSize,
-            lightCenter.x + lightSize, lightCenter.y + lightSize);
+    Rect lightRect = Rect(adjustedLightCenter.x - lightRadius, adjustedLightCenter.y - lightRadius,
+            adjustedLightCenter.x + lightRadius, adjustedLightCenter.y + lightRadius);
     lightRect.unionWith(localClip);
     if (!lightRect.intersects(casterBounds)) {
 #if DEBUG_SHADOW
@@ -118,7 +111,7 @@ VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     }
 
     VertexBufferMode mode = SpotShadow::createSpotShadow(isCasterOpaque,
-            casterPolygon, casterVertexCount, lightCenter, lightSize,
+            casterPolygon, casterVertexCount, adjustedLightCenter, lightRadius,
             lightVertexCount, shadowVertexBuffer);
 
 #if DEBUG_SHADOW

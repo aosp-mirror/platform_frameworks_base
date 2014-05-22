@@ -161,9 +161,7 @@ void OpenGLRenderer::initProperties() {
 // Setup
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::setViewport(int width, int height) {
-    initializeViewport(width, height);
-
+void OpenGLRenderer::onViewportInitialized() {
     glDisable(GL_DITHER);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -3240,7 +3238,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
         VertexBuffer spotShadowVertexBuffer;
         VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateSpotShadow(
                 isCasterOpaque, casterPolygon, casterVertexCount,
-                *currentTransform(), getWidth(), getHeight(), casterBounds, localClip,
+                *currentTransform(), mLightCenter, mLightRadius, casterBounds, localClip,
                 spotShadowVertexBuffer);
         drawVertexBuffer(vertexBufferMode, spotShadowVertexBuffer, &paint);
     }

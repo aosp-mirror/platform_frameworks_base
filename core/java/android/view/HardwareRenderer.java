@@ -273,12 +273,16 @@ public abstract class HardwareRenderer {
      *
      * @param width Width of the drawing surface.
      * @param height Height of the drawing surface.
+     * @param lightX X position of the shadow casting light
+     * @param lightY Y position of the shadow casting light
+     * @param lightZ Z position of the shadow casting light
+     * @param lightRadius radius of the shadow casting light
      */
-    abstract void setup(int width, int height);
+    abstract void setup(int width, int height, float lightX, float lightY, float lightZ, float lightRadius);
 
     /**
      * Gets the current width of the surface. This is the width that the surface
-     * was last set to in a call to {@link #setup(int, int)}.
+     * was last set to in a call to {@link #setup(int, int, float, float, float, float)}.
      *
      * @return the current width of the surface
      */
@@ -286,7 +290,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Gets the current height of the surface. This is the height that the surface
-     * was last set to in a call to {@link #setup(int, int)}.
+     * was last set to in a call to {@link #setup(int, int, float, float, float, float)}.
      *
      * @return the current width of the surface
      */
@@ -309,9 +313,6 @@ public abstract class HardwareRenderer {
      * Loads system properties used by the renderer. This method is invoked
      * whenever system properties are modified. Implementations can use this
      * to trigger live updates of the renderer based on properties.
-     *
-     * @param surface The surface to update with the new properties.
-     *                Can be null.
      *
      * @return True if a property has changed.
      */
@@ -443,22 +444,31 @@ public abstract class HardwareRenderer {
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
      * @param surface The surface to hardware accelerate
+     * @param metrics The display metrics used to draw the output.
      *
      * @return true if the surface was initialized, false otherwise. Returning
      *         false might mean that the surface was already initialized.
      */
-    boolean initializeIfNeeded(int width, int height, Surface surface)
+    boolean initializeIfNeeded(int width, int height, Surface surface, DisplayMetrics metrics)
             throws OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
                 if (initialize(surface)) {
-                    setup(width, height);
+                    setup(width, height, metrics);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    void setup(int width, int height, DisplayMetrics metrics) {
+        float lightX = width / 2.0f;
+        float lightY = -400 * metrics.density;
+        float lightZ = 800 * metrics.density;
+        float lightRadius = 800 * metrics.density;
+        setup(width, height, lightX, lightY, lightZ, lightRadius);
     }
 
     /**

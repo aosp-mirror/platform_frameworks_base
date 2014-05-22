@@ -131,7 +131,7 @@ public:
 
     ANDROID_API void initProperties();
 
-    virtual void setViewport(int width, int height);
+    virtual void onViewportInitialized();
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
     virtual void interrupt();

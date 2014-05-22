@@ -56,10 +56,6 @@ DisplayListData* DisplayListRenderer::finishRecording() {
     return data;
 }
 
-void DisplayListRenderer::setViewport(int width, int height) {
-    initializeViewport(width, height);
-}
-
 status_t DisplayListRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
 
