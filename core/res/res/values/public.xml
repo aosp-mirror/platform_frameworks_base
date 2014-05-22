@@ -2181,9 +2181,6 @@
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
-  <public type="dimen" name="recents_thumbnail_height" />
-  <public type="dimen" name="recents_thumbnail_width" />
-
   <public-padding type="id" name="l_resource_pad" end="0x01020040" />
 
   <public type="id" name="mask" />
