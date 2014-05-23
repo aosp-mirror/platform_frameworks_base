@@ -39,14 +39,10 @@ public class StackScrollState {
     private final ViewGroup mHostView;
     private Map<ExpandableView, ViewState> mStateMap;
     private final Rect mClipRect = new Rect();
-    private int mBackgroundRoundedRectCornerRadius;
-    private final Outline mChildOutline = new Outline();
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
         mStateMap = new HashMap<ExpandableView, ViewState>();
-        mBackgroundRoundedRectCornerRadius = hostView.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
     }
 
     public ViewGroup getHostView() {
@@ -66,6 +62,7 @@ public class StackScrollState {
             viewState.height = child.getIntrinsicHeight();
             viewState.gone = child.getVisibility() == View.GONE;
             viewState.alpha = 1;
+            viewState.notGoneIndex = -1;
         }
     }
 
@@ -190,7 +187,7 @@ public class StackScrollState {
         if (nextChild != null) {
             ViewState nextState = getViewStateForView(nextChild);
             boolean startIsAboveNext = nextState.yTranslation > speedBumpStart;
-            speedBump.animateDivider(startIsAboveNext);
+            speedBump.animateDivider(startIsAboveNext, null /* onFinishedRunnable */);
 
             // handle expanded case
             if (speedBump.isExpanded()) {
@@ -270,6 +267,11 @@ public class StackScrollState {
         boolean gone;
         float scale;
         boolean dimmed;
+
+        /**
+         * The index of the view, only accounting for views not equal to GONE
+         */
+        int notGoneIndex;
 
         /**
          * The location this view is currently rendered at.
