@@ -132,6 +132,29 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         assertEquals(nextItem, nextIme);
     }
 
+    private void assertRotationOrder(final ControllerImpl controller,
+            final boolean onlyCurrentIme,
+            final ImeSubtypeListItem... expectedRotationOrderOfImeSubtypeList) {
+        final int N = expectedRotationOrderOfImeSubtypeList.length;
+        for (int i = 0; i < N; i++) {
+            final int currentIndex = i;
+            final int nextIndex = (currentIndex + 1) % N;
+            final ImeSubtypeListItem currentItem =
+                    expectedRotationOrderOfImeSubtypeList[currentIndex];
+            final ImeSubtypeListItem nextItem = expectedRotationOrderOfImeSubtypeList[nextIndex];
+            assertNextInputMethod(controller, onlyCurrentIme, currentItem, nextItem);
+        }
+    }
+
+    private void onUserAction(final ControllerImpl controller,
+            final ImeSubtypeListItem subtypeListItem) {
+        InputMethodSubtype subtype = null;
+        if (subtypeListItem.mSubtypeName != null) {
+            subtype = createDummySubtype(subtypeListItem.mSubtypeName.toString());
+        }
+        controller.onUserActionLocked(subtypeListItem.mImi, subtype);
+    }
+
     @SmallTest
     public void testControllerImpl() throws Exception {
         final List<ImeSubtypeListItem> disabledItems = createDisabledImeSubtypes();
@@ -152,32 +175,19 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         final ControllerImpl controller = new ControllerImpl(enabledItems);
 
         // switching-aware loop
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                latinIme_en_US, latinIme_fr);
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                latinIme_fr, japaneseIme_ja_JP);
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                japaneseIme_ja_JP, latinIme_en_US);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr, japaneseIme_ja_JP);
 
         // switching-unaware loop
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                switchingUnawarelatinIme_hi, subtypeUnawareIme);
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                subtypeUnawareIme, switchUnawareJapaneseIme_ja_JP);
-        assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                switchUnawareJapaneseIme_ja_JP, switchingUnawarelatinIme_en_UK);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi, subtypeUnawareIme,
+                switchUnawareJapaneseIme_ja_JP);
 
         // test onlyCurrentIme == true
-        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+        assertRotationOrder(controller, true /* onlyCurrentIme */,
                 latinIme_en_US, latinIme_fr);
-        assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                latinIme_fr, latinIme_en_US);
-        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+        assertRotationOrder(controller, true /* onlyCurrentIme */,
                 switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
-        assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                switchingUnawarelatinIme_hi, switchingUnawarelatinIme_en_UK);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
                 subtypeUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
@@ -203,4 +213,63 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
                 disabledSubtypeUnawareIme, null);
     }
- }
+
+    @SmallTest
+    public void testControllerImplWithUserAction() throws Exception {
+        final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
+        final ImeSubtypeListItem latinIme_en_US = enabledItems.get(0);
+        final ImeSubtypeListItem latinIme_fr = enabledItems.get(1);
+        final ImeSubtypeListItem switchingUnawarelatinIme_en_UK = enabledItems.get(2);
+        final ImeSubtypeListItem switchingUnawarelatinIme_hi = enabledItems.get(3);
+        final ImeSubtypeListItem subtypeUnawareIme = enabledItems.get(4);
+        final ImeSubtypeListItem japaneseIme_ja_JP = enabledItems.get(5);
+        final ImeSubtypeListItem switchUnawareJapaneseIme_ja_JP = enabledItems.get(6);
+
+        final ControllerImpl controller = new ControllerImpl(enabledItems);
+
+        // === switching-aware loop ===
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr, japaneseIme_ja_JP);
+        // Then notify that a user did something for latinIme_fr.
+        onUserAction(controller, latinIme_fr);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                latinIme_fr, latinIme_en_US, japaneseIme_ja_JP);
+        // Then notify that a user did something for latinIme_fr again.
+        onUserAction(controller, latinIme_fr);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                latinIme_fr, latinIme_en_US, japaneseIme_ja_JP);
+        // Then notify that a user did something for japaneseIme_ja_JP.
+        onUserAction(controller, latinIme_fr);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                japaneseIme_ja_JP, latinIme_fr, latinIme_en_US);
+        // Check onlyCurrentIme == true.
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                japaneseIme_ja_JP, null);
+        assertRotationOrder(controller, true /* onlyCurrentIme */,
+                latinIme_fr, latinIme_en_US);
+        assertRotationOrder(controller, true /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr);
+
+        // === switching-unaware loop ===
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi, subtypeUnawareIme,
+                switchUnawareJapaneseIme_ja_JP);
+        // User action should be ignored for switching unaware IMEs.
+        onUserAction(controller, switchingUnawarelatinIme_hi);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi, subtypeUnawareIme,
+                switchUnawareJapaneseIme_ja_JP);
+        // User action should be ignored for switching unaware IMEs.
+        onUserAction(controller, switchUnawareJapaneseIme_ja_JP);
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi, subtypeUnawareIme,
+                switchUnawareJapaneseIme_ja_JP);
+        // Check onlyCurrentIme == true.
+        assertRotationOrder(controller, true /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                subtypeUnawareIme, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                switchUnawareJapaneseIme_ja_JP, null);
+    }
+}
