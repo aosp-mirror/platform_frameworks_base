@@ -579,6 +579,12 @@ public abstract class HardwareRenderer {
     abstract void fence();
 
     /**
+     * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
+     */
+    public void notifyFramePending() {
+    }
+
+    /**
      * Describes a series of frames that should be drawn on screen as a graph.
      * Each frame is composed of 1 or more elements.
      */

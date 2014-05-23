@@ -360,7 +360,9 @@ void CanvasContext::destroyCanvasAndSurface() {
     setSurface(NULL);
 }
 
-void CanvasContext::setSurface(EGLNativeWindowType window) {
+void CanvasContext::setSurface(ANativeWindow* window) {
+    mNativeWindow = window;
+
     if (mEglSurface != EGL_NO_SURFACE) {
         mGlobalContext->destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -393,7 +395,7 @@ void CanvasContext::requireSurface() {
     makeCurrent();
 }
 
-bool CanvasContext::initialize(EGLNativeWindowType window) {
+bool CanvasContext::initialize(ANativeWindow* window) {
     if (mCanvas) return false;
     setSurface(window);
     mCanvas = new OpenGLRenderer();
@@ -401,11 +403,11 @@ bool CanvasContext::initialize(EGLNativeWindowType window) {
     return true;
 }
 
-void CanvasContext::updateSurface(EGLNativeWindowType window) {
+void CanvasContext::updateSurface(ANativeWindow* window) {
     setSurface(window);
 }
 
-void CanvasContext::pauseSurface(EGLNativeWindowType window) {
+void CanvasContext::pauseSurface(ANativeWindow* window) {
     // TODO: For now we just need a fence, in the future suspend any animations
     // and such to prevent from trying to render into this surface
 }
@@ -456,7 +458,15 @@ void CanvasContext::prepareTree(TreeInfo& info) {
     info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     mRootRenderNode->prepareTree(info);
 
-    if (info.out.hasAnimations) {
+    int runningBehind = 0;
+    // TODO: This query is moderately expensive, investigate adding some sort
+    // of fast-path based off when we last called eglSwapBuffers() as well as
+    // last vsync time. Or something.
+    mNativeWindow->query(mNativeWindow.get(),
+            NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
+    info.out.canDrawThisFrame = !runningBehind;
+
+    if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
         if (info.out.hasFunctors) {
             info.out.requiresUiRedraw = true;
         } else if (!info.out.requiresUiRedraw) {
@@ -465,6 +475,11 @@ void CanvasContext::prepareTree(TreeInfo& info) {
             mRenderThread.postFrameCallback(this);
         }
     }
+}
+
+void CanvasContext::notifyFramePending() {
+    ATRACE_CALL();
+    mRenderThread.pushBackFrameCallback(this);
 }
 
 void CanvasContext::draw(Rect* dirty) {
@@ -515,7 +530,9 @@ void CanvasContext::doFrame() {
     info.prepareTextures = false;
 
     prepareTree(info);
-    draw(NULL);
+    if (info.out.canDrawThisFrame) {
+        draw(NULL);
+    }
 }
 
 void CanvasContext::invokeFunctor(Functor* functor) {

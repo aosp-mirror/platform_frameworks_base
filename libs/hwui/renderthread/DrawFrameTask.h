@@ -24,6 +24,7 @@
 #include "RenderTask.h"
 
 #include "../Rect.h"
+#include "../TreeInfo.h"
 
 namespace android {
 namespace uirenderer {
@@ -65,7 +66,7 @@ public:
 
 private:
     void postAndWait();
-    bool syncFrameState();
+    bool syncFrameState(TreeInfo& info);
     void unblockUiThread();
 
     Mutex mLock;

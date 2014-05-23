@@ -48,9 +48,9 @@ public:
     CanvasContext(bool translucent, RenderNode* rootRenderNode);
     virtual ~CanvasContext();
 
-    bool initialize(EGLNativeWindowType window);
-    void updateSurface(EGLNativeWindowType window);
-    void pauseSurface(EGLNativeWindowType window);
+    bool initialize(ANativeWindow* window);
+    void updateSurface(ANativeWindow* window);
+    void pauseSurface(ANativeWindow* window);
     void setup(int width, int height, const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
     void makeCurrent();
@@ -73,11 +73,15 @@ public:
     ANDROID_API static void setTextureAtlas(const sp<GraphicBuffer>& buffer,
             int64_t* map, size_t mapSize);
 
+    void notifyFramePending();
+
 private:
+    friend class RegisterFrameCallbackTask;
+
     void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
     void prepareTree(TreeInfo& info);
 
-    void setSurface(EGLNativeWindowType window);
+    void setSurface(ANativeWindow* window);
     void swapBuffers();
     void requireSurface();
 
@@ -85,6 +89,7 @@ private:
 
     GlobalContext* mGlobalContext;
     RenderThread& mRenderThread;
+    sp<ANativeWindow> mNativeWindow;
     EGLSurface mEglSurface;
     bool mDirtyRegionsEnabled;
 

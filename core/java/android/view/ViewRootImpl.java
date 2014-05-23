@@ -1000,6 +1000,17 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Notifies the HardwareRenderer that a new frame will be coming soon.
+     * Currently only {@link ThreadedRenderer} cares about this, and uses
+     * this knowledge to adjust the scheduling of off-thread animations
+     */
+    void notifyRendererOfFramePending() {
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.notifyFramePending();
+        }
+    }
+
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
@@ -1009,6 +1020,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mUnbufferedInputDispatch) {
                 scheduleConsumeBatchedInput();
             }
+            notifyRendererOfFramePending();
         }
     }
 

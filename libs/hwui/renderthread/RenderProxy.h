@@ -82,6 +82,7 @@ public:
     ANDROID_API void destroyLayer(DeferredLayerUpdater* layer);
 
     ANDROID_API void fence();
+    ANDROID_API void notifyFramePending();
 
 private:
     RenderThread& mRenderThread;
