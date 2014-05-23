@@ -31,11 +31,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
 
@@ -104,10 +104,10 @@ public class Resources {
     // These are protected by mAccessLock.
     private final Object mAccessLock = new Object();
     private final Configuration mTmpConfig = new Configuration();
-    private final ThemedCaches<ConstantState> mDrawableCache =
-            new ThemedCaches<ConstantState>();
-    private final ThemedCaches<ConstantState> mColorDrawableCache =
-            new ThemedCaches<ConstantState>();
+    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mDrawableCache =
+            new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
+    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mColorDrawableCache =
+            new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
     private final LongSparseArray<WeakReference<ColorStateList>> mColorStateListCache =
             new LongSparseArray<WeakReference<ColorStateList>>();
 
@@ -1261,18 +1261,17 @@ public class Resources {
          * any of the style's attributes are already defined in the theme, the
          * current values in the theme will be overwritten.
          * 
-         * @param resid The resource ID of a style resource from which to
+         * @param resId The resource ID of a style resource from which to
          *              obtain attribute values.
          * @param force If true, values in the style resource will always be
          *              used in the theme; otherwise, they will only be used
          *              if not already defined in the theme.
          */
-        public void applyStyle(int resid, boolean force) {
-            AssetManager.applyThemeStyle(mTheme, resid, force);
+        public void applyStyle(int resId, boolean force) {
+            AssetManager.applyThemeStyle(mTheme, resId, force);
 
-            // TODO: In very rare cases, we may end up with a hybrid theme
-            // that can't map to a single theme ID.
-            mThemeResId = resid;
+            mThemeResId = resId;
+            mKey += Integer.toHexString(resId) + (force ? "! " : " ");
         }
 
         /**
@@ -1288,6 +1287,7 @@ public class Resources {
             AssetManager.copyTheme(mTheme, other.mTheme);
 
             mThemeResId = other.mThemeResId;
+            mKey = other.mKey;
         }
 
         /**
@@ -1577,6 +1577,9 @@ public class Resources {
         /** Resource identifier for the theme. */
         private int mThemeResId = 0;
 
+        /** Unique key for the series of styles applied to this theme. */
+        private String mKey = "";
+
         // Needed by layoutlib.
         /*package*/ long getNativeTheme() {
             return mTheme;
@@ -1584,6 +1587,10 @@ public class Resources {
 
         /*package*/ int getAppliedStyleResId() {
             return mThemeResId;
+        }
+
+        /*package*/ String getKey() {
+            return mKey;
         }
     }
 
@@ -1740,7 +1747,8 @@ public class Resources {
     }
 
     private void clearDrawableCachesLocked(
-            ThemedCaches<ConstantState> caches, int configChanges) {
+            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
+            int configChanges) {
         final int N = caches.size();
         for (int i = 0; i < N; i++) {
             clearDrawableCacheLocked(caches.valueAt(i), configChanges);
@@ -1763,7 +1771,7 @@ public class Resources {
                             configChanges, cs.getChangingConfigurations())) {
                         if (DEBUG_CONFIG) {
                             Log.d(TAG, "FLUSHING #0x"
-                                    + Long.toHexString(mDrawableCache.keyAt(i))
+                                    + Long.toHexString(cache.keyAt(i))
                                     + " / " + cs + " with changes: 0x"
                                     + Integer.toHexString(cs.getChangingConfigurations()));
                         }
@@ -2205,7 +2213,7 @@ public class Resources {
         }
 
         final boolean isColorDrawable;
-        final ThemedCaches<ConstantState> caches;
+        final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches;
         final long key;
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -2258,7 +2266,8 @@ public class Resources {
     }
 
     private void cacheDrawable(TypedValue value, Theme theme, boolean isColorDrawable,
-            ThemedCaches<ConstantState> caches, long key, Drawable dr) {
+            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
+            long key, Drawable dr) {
         final ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
@@ -2287,8 +2296,12 @@ public class Resources {
             }
         } else {
             synchronized (mAccessLock) {
-                final LongSparseArray<WeakReference<ConstantState>> themedCache;
-                themedCache = caches.getOrCreate(theme == null ? 0 : theme.mThemeResId);
+                final String themeKey = theme == null ? "" : theme.mKey;
+                LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
+                if (themedCache == null) {
+                    themedCache = new LongSparseArray<WeakReference<ConstantState>>(1);
+                    caches.put(themeKey, themedCache);
+                }
                 themedCache.put(key, new WeakReference<ConstantState>(cs));
             }
         }
@@ -2347,7 +2360,9 @@ public class Resources {
         return dr;
     }
 
-    private Drawable getCachedDrawable(ThemedCaches<ConstantState> caches, long key, Theme theme) {
+    private Drawable getCachedDrawable(
+            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
+            long key, Theme theme) {
         synchronized (mAccessLock) {
             final int themeKey = theme != null ? theme.mThemeResId : 0;
             final LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
@@ -2583,22 +2598,5 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
-    }
-
-    static class ThemedCaches<T> extends SparseArray<LongSparseArray<WeakReference<T>>> {
-        /**
-         * Returns the cache of drawables styled for the specified theme.
-         * <p>
-         * Drawables that have themeable attributes but were loaded without
-         * specifying a theme are cached at themeResId = 0.
-         */
-        public LongSparseArray<WeakReference<T>> getOrCreate(int themeResId) {
-            LongSparseArray<WeakReference<T>> result = get(themeResId);
-            if (result == null) {
-                result = new LongSparseArray<WeakReference<T>>(1);
-                put(themeResId, result);
-            }
-            return result;
-        }
     }
 }
