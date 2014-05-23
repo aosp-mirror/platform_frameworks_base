@@ -133,10 +133,12 @@ import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.task.ITaskManager;
 import android.app.trust.TrustManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.appwidget.IAppWidgetService.Stub;
 import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.File;
@@ -693,6 +695,12 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                 return new UsageStatsManager(ctx.getOuterContext());
         }});
+
+        registerService(TASK_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(TASK_SERVICE);
+                return new TaskManagerImpl(ITaskManager.Stub.asInterface(b));
+            }});
     }
 
     static ContextImpl getImpl(Context context) {
