@@ -37,6 +37,7 @@ import com.android.server.SystemService;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -66,6 +67,18 @@ public final class HdmiControlService extends SystemService {
          * @see {@link #SEND_RESULT_FAILURE}
          */
         void onSendCompleted(int error);
+    }
+
+    /**
+     * Interface to get a list of available logical devices.
+     */
+    interface DevicePollingCallback {
+        /**
+         * Called when device polling is finished.
+         *
+         * @param ackedAddress a list of logical addresses of available devices
+         */
+        void onPollingFinished(List<Integer> ackedAddress);
     }
 
     // A thread to handle synchronous IO of CEC and MHL control service.
@@ -279,6 +292,17 @@ public final class HdmiControlService extends SystemService {
      */
     void onHotplug(int portNo, boolean connected) {
         // TODO: Start "RequestArcInitiationAction" if ARC port.
+    }
+
+    /**
+     * Poll all remote devices. It sends &lt;Polling Message&gt; to all remote
+     * devices.
+     *
+     * @param callback an interface used to get a list of all remote devices' address
+     * @param retryCount the number of retry used to send polling message to remote devices
+     */
+    void pollDevices(DevicePollingCallback callback, int retryCount) {
+        mCecController.pollDevices(callback, retryCount);
     }
 
     private void handleInitiateArc(HdmiCecMessage message){
