@@ -2779,9 +2779,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void userActivity() {
-        if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardViewMediatorCallback.userActivity();
-        }
+        mHandler.removeCallbacks(mUserActivity);
+        mHandler.post(mUserActivity);
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
@@ -2939,4 +2938,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void onScreenTurnedOn() {
         mStackScroller.setAnimationsEnabled(true);
     }
+
+    private final Runnable mUserActivity = new Runnable() {
+        @Override
+        public void run() {
+            if (mState == StatusBarState.KEYGUARD) {
+                mKeyguardViewMediatorCallback.userActivity();
+            }
+        }
+    };
 }
