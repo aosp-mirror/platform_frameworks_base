@@ -129,7 +129,7 @@ public:
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
     DropShadow renderDropShadow(const SkPaint* paint, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, uint32_t radius, const float* positions);
+            uint32_t len, int numGlyphs, float radius, const float* positions);
 
     void setTextureFiltering(bool linearFiltering) {
         mLinearFiltering = linearFiltering;
@@ -218,7 +218,7 @@ private:
             int32_t width, int32_t height);
 
     // the input image handle may have its pointer replaced (to avoid copies)
-    void blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius);
+    void blurImage(uint8_t** image, int32_t width, int32_t height, float radius);
 };
 
 }; // namespace uirenderer

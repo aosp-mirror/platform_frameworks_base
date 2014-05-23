@@ -19,6 +19,7 @@
 #include <math.h>
 
 #include "Blur.h"
+#include "MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -33,6 +34,17 @@ float Blur::convertRadiusToSigma(float radius) {
 
 float Blur::convertSigmaToRadius(float sigma) {
     return sigma > 0.5f ? (sigma - 0.5f) / BLUR_SIGMA_SCALE : 0.0f;
+}
+
+// if the original radius was on an integer boundary and the resulting radius
+// is within the conversion error tolerance then we attempt to snap to the
+// original integer boundary.
+uint32_t Blur::convertRadiusToInt(float radius) {
+    const float radiusCeil  = ceilf(radius);
+    if (MathUtils::areEqual(radiusCeil, radius)) {
+        return radiusCeil;
+    }
+    return radius;
 }
 
 /**
