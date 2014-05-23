@@ -566,6 +566,9 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public Insets getOpticalInsets() {
         if (mApplyGravity && mBitmapState.mPaint.getShader() == null) {
