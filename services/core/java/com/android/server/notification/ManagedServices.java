@@ -175,7 +175,10 @@ abstract public class ManagedServices {
 
     public void registerService(IInterface service, ComponentName component, int userid) {
         checkNotNull(service);
-        registerServiceImpl(service, component, userid);
+        ManagedServiceInfo info = registerServiceImpl(service, component, userid);
+        if (info != null) {
+            onServiceAdded(info);
+        }
     }
 
     /**
@@ -464,7 +467,7 @@ abstract public class ManagedServices {
         }
     }
 
-    private void registerServiceImpl(final IInterface service,
+    private ManagedServiceInfo registerServiceImpl(final IInterface service,
             final ComponentName component, final int userid) {
         synchronized (mMutex) {
             try {
@@ -472,10 +475,12 @@ abstract public class ManagedServices {
                         true /*isSystem*/, null, Build.VERSION_CODES.L);
                 service.asBinder().linkToDeath(info, 0);
                 mServices.add(info);
+                return info;
             } catch (RemoteException e) {
                 // already dead
             }
         }
+        return null;
     }
 
     /**

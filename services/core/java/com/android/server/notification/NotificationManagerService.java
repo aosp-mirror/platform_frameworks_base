@@ -1264,7 +1264,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("INotificationManager.registerListener");
             mListeners.registerService(listener, component, userid);
         }
 
