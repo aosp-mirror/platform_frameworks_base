@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -54,9 +55,6 @@ final class HdmiCecController {
     private final static int MSG_REPORT_LOGICAL_ADDRESS = 2;
 
     private static final int NUM_LOGICAL_ADDRESS = 16;
-
-    // TODO: define other constants for errors.
-    private static final int ERROR_SUCCESS = 0;
 
     // Handler instance to process synchronous I/O (mainly send) message.
     private Handler mIoHandler;
@@ -210,7 +208,7 @@ final class HdmiCecController {
                 // it as logical address of the device.
                 int error = nativeSendCecCommand(mNativePtr, curAddress, curAddress,
                         EMPTY_BODY);
-                if (error != ERROR_SUCCESS) {
+                if (error != HdmiControlService.SEND_RESULT_SUCCESS) {
                     logicalAddress = curAddress;
                     break;
                 }
@@ -405,6 +403,9 @@ final class HdmiCecController {
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 final int error = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
                         cecMessage.getDestination(), body);
+                if (error != HdmiControlService.SEND_RESULT_SUCCESS) {
+                    Slog.w(TAG, "Failed to send " + cecMessage);
+                }
                 if (callback != null) {
                     runOnServiceThread(new Runnable() {
                         @Override
