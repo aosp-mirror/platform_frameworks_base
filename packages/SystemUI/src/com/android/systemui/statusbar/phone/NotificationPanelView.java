@@ -478,6 +478,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setExpansion(height);
         setQsTranslation(height);
         setQsStackScrollerPadding(height);
+        mStatusBar.userActivity();
     }
 
     private void setQsTranslation(float height) {
