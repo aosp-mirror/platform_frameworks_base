@@ -276,6 +276,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	core/java/com/android/internal/view/IInputSessionCallback.aidl \
 	core/java/com/android/internal/widget/ILockSettings.aidl \
+	core/java/com/android/internal/widget/ILockSettingsObserver.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsAdapterConnection.aidl \
 	keystore/java/android/security/IKeyChainAliasCallback.aidl \

@@ -199,8 +199,8 @@ public class LockPatternUtils {
 
     private ILockSettings getLockSettings() {
         if (mLockSettingsService == null) {
-            mLockSettingsService = ILockSettings.Stub.asInterface(
-                (IBinder) ServiceManager.getService("lock_settings"));
+            mLockSettingsService = LockPatternUtilsCache.getInstance(
+                    ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings")));
         }
         return mLockSettingsService;
     }
