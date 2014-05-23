@@ -315,14 +315,13 @@ public class StackStateAnimator {
                 child.getAlpha(), newEndValue);
         animator.setInterpolator(mFastOutSlowInInterpolator);
         // Handle layer type
-        final int currentLayerType = child.getLayerType();
         child.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         animator.addListener(new AnimatorListenerAdapter() {
             public boolean mWasCancelled;
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                child.setLayerType(currentLayerType, null);
+                child.setLayerType(View.LAYER_TYPE_NONE, null);
                 if (newEndValue == 0 && !mWasCancelled) {
                     child.setVisibility(View.INVISIBLE);
                 }
