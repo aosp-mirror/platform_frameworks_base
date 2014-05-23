@@ -18,11 +18,10 @@ package android.os;
 
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -301,6 +300,16 @@ abstract class CommonBundle implements Parcelable, Cloneable {
         unparcel();
         bundle.unparcel();
         mMap.putAll(bundle.mMap);
+    }
+
+    /**
+     * Inserts all mappings from the given Map into this CommonBundle.
+     *
+     * @param map a Map
+     */
+    void putAll(Map map) {
+        unparcel();
+        mMap.putAll(map);
     }
 
     /**

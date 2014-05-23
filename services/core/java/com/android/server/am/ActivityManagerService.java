@@ -409,7 +409,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * List of intents that were used to start the most recent tasks.
      */
-    final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
+    ArrayList<TaskRecord> mRecentTasks;
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -820,6 +820,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
+
+    /**
+     * Save recent tasks information across reboots.
+     */
+    final TaskPersister mTaskPersister;
 
     /**
      * Current configuration information.  HistoryRecord objects are given
@@ -2138,6 +2143,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mStackSupervisor = new ActivityStackSupervisor(this);
+        mTaskPersister = new TaskPersister(systemDir, mStackSupervisor);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -7084,12 +7090,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     private ActivityManager.RecentTaskInfo createRecentTaskInfoFromTaskRecord(TaskRecord tr) {
         ActivityManager.RecentTaskInfo rti
                 = new ActivityManager.RecentTaskInfo();
-        rti.id = tr.numActivities > 0 ? tr.taskId : -1;
+        rti.id = tr.mActivities.isEmpty() ? -1 : tr.taskId;
         rti.persistentId = tr.taskId;
         rti.baseIntent = new Intent(tr.getBaseIntent());
         rti.origActivity = tr.origActivity;
         rti.description = tr.lastDescription;
-        rti.stackId = tr.stack.mStackId;
+        rti.stackId = tr.stack != null ? tr.stack.mStackId : -1;
         rti.userId = tr.userId;
         rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
         return rti;
@@ -7323,6 +7329,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (tr != null) {
             tr.removeTaskActivitiesLocked(-1, false);
             cleanUpRemovedTaskLocked(tr, flags);
+            if (tr.isPersistable) {
+                notifyTaskPersisterLocked(tr, true);
+            }
             return true;
         }
         return false;
@@ -7562,14 +7571,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             synchronized (this) {
                 TaskRecord tr = recentTaskForIdLocked(taskId);
-                if (tr != null) {
-                    return tr.stack.isHomeStack();
-                }
+                return tr != null && tr.stack != null && tr.stack.isHomeStack();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        return false;
     }
 
     @Override
@@ -8638,6 +8644,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
+        mTaskPersister.notify(task, flush);
+    }
+
     @Override
     public boolean shutdown(int timeout) {
         if (checkCallingPermission(android.Manifest.permission.SHUTDOWN)
@@ -8660,6 +8670,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             mProcessStats.shutdownLocked();
         }
+        notifyTaskPersisterLocked(null, true);
 
         return timedout;
     }
@@ -9565,7 +9576,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (goingCallback != null) goingCallback.run();
                 return;
             }
-            
+
+            mRecentTasks = mTaskPersister.restoreTasksLocked();
+            if (!mRecentTasks.isEmpty()) {
+                mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
+            }
+            mTaskPersister.startPersisting();
+
             // Check to see if there are any update receivers to run.
             if (!mDidUpdate) {
                 if (mWaitingUpdate) {
@@ -17182,7 +17199,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /**
      * An implementation of IAppTask, that allows an app to manage its own tasks via
-     * {@link android.app.ActivityManager#AppTask}.  We keep track of the callingUid to ensure that
+     * {@link android.app.ActivityManager.AppTask}.  We keep track of the callingUid to ensure that
      * only the process that calls getAppTasks() can call the AppTask methods.
      */
     class AppTaskImpl extends IAppTask.Stub {
