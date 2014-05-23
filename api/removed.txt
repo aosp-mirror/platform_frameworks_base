@@ -1,0 +1,8 @@
+package android.media {
+
+  public class AudioFormat {
+    ctor public AudioFormat();
+  }
+
+}
+
