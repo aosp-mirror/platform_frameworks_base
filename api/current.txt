@@ -12204,7 +12204,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_CROPPING_TYPE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_STREAM_CONFIGURATION_MAP;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_BASE_GAIN_FACTOR;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_BLACK_LEVEL_PATTERN;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_CALIBRATION_TRANSFORM1;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_CALIBRATION_TRANSFORM2;
@@ -12610,7 +12609,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_GREEN_SPLIT;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_NEUTRAL_COLOR_POINT;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_SENSITIVITY;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TEST_PATTERN_DATA;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TEST_PATTERN_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TIMESTAMP;

@@ -2062,21 +2062,6 @@ public final class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Long>("android.sensor.timestamp", long.class);
 
     /**
-     * <p>The temperature of the sensor, sampled at the time
-     * exposure began for this frame.</p>
-     * <p>The thermal diode being queried should be inside the sensor PCB, or
-     * somewhere close to it.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     * <p><b>Full capability</b> -
-     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
-     *
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     */
-    public static final Key<Float> SENSOR_TEMPERATURE =
-            new Key<Float>("android.sensor.temperature", float.class);
-
-    /**
      * <p>The estimated camera neutral color in the native sensor colorspace at
      * the time of capture.</p>
      * <p>This value gives the neutral color point encoded as an RGB value in the
