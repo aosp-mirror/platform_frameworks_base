@@ -5541,8 +5541,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
+
         mStatusBarController.dump(pw, prefix);
         mNavigationBarController.dump(pw, prefix);
         PolicyControl.dump(prefix, pw);
+
+        if (mOrientationListener != null) {
+            mOrientationListener.dump(pw, prefix);
+        }
     }
 }
