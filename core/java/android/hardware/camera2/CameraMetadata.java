@@ -247,7 +247,6 @@ public abstract class CameraMetadata<TKey> {
      * <li>Manual sensitivity control<ul>
      * <li>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</li>
      * <li>{@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</li>
-     * <li>{@link CameraCharacteristics#SENSOR_BASE_GAIN_FACTOR android.sensor.baseGainFactor}</li>
      * </ul>
      * </li>
      * <li>Manual lens control<ul>
@@ -268,7 +267,6 @@ public abstract class CameraMetadata<TKey> {
      * result.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
-     * @see CameraCharacteristics#SENSOR_BASE_GAIN_FACTOR
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
      * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
@@ -1292,8 +1290,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>If the flash is available and charged, fire flash
-     * for this capture based on android.flash.firingPower and
-     * android.flash.firingTime.</p>
+     * for this capture.</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_SINGLE = 1;

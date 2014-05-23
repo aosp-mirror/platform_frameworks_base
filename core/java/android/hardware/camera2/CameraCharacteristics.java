@@ -1496,19 +1496,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Rational[]>("android.sensor.forwardMatrix2", Rational[].class);
 
     /**
-     * <p>Gain factor from electrons to raw units when
-     * ISO=100</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     * <p><b>Full capability</b> -
-     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
-     *
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     */
-    public static final Key<Rational> SENSOR_BASE_GAIN_FACTOR =
-            new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
-
-    /**
      * <p>A fixed black level offset for each of the color filter arrangement
      * (CFA) mosaic channels.</p>
      * <p>This tag specifies the zero light value for each of the CFA mosaic
