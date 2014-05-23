@@ -16,7 +16,9 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.CaptureResult.Key;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
 import java.util.Collections;
@@ -35,18 +37,109 @@ import java.util.List;
  * @see CameraDevice
  * @see CameraManager
  */
-public final class CameraCharacteristics extends CameraMetadata {
+public final class CameraCharacteristics extends CameraMetadata<CameraCharacteristics.Key<?>> {
+
+    /**
+     * A {@code Key} is used to do camera characteristics field lookups with
+     * {@link CameraCharacteristics#get}.
+     *
+     * <p>For example, to get the stream configuration map:
+     * <code><pre>
+     * StreamConfigurationMap map = cameraCharacteristics.get(
+     *      CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+     * </pre></code>
+     * </p>
+     *
+     * <p>To enumerate over all possible keys for {@link CameraCharacteristics}, see
+     * {@link CameraCharacteristics#getKeys()}.</p>
+     *
+     * @see CameraCharacteristics#get
+     * @see CameraCharacteristics#getKeys()
+     */
+    public static final class Key<T> {
+        private final CameraMetadataNative.Key<T> mKey;
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, Class<T> type) {
+            mKey = new CameraMetadataNative.Key<T>(name,  type);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
+        public Key(String name, TypeReference<T> typeReference) {
+            mKey = new CameraMetadataNative.Key<T>(name,  typeReference);
+        }
+
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        public String getName() {
+            return mKey.getName();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final int hashCode() {
+            return mKey.hashCode();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        public final boolean equals(Object o) {
+            return o instanceof Key && ((Key<T>)o).mKey.equals(mKey);
+        }
+
+        /**
+         * Visible for CameraMetadataNative implementation only; do not use.
+         *
+         * TODO: Make this private or remove it altogether.
+         *
+         * @hide
+         */
+        public CameraMetadataNative.Key<T> getNativeKey() {
+            return mKey;
+        }
+
+        @SuppressWarnings({
+                "unused", "unchecked"
+        })
+        private Key(CameraMetadataNative.Key<?> nativeKey) {
+            mKey = (CameraMetadataNative.Key<T>) nativeKey;
+        }
+    }
 
     private final CameraMetadataNative mProperties;
-    private List<Key<?>> mAvailableRequestKeys;
-    private List<Key<?>> mAvailableResultKeys;
+    private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
+    private List<CaptureResult.Key<?>> mAvailableResultKeys;
 
     /**
      * Takes ownership of the passed-in properties object
      * @hide
      */
     public CameraCharacteristics(CameraMetadataNative properties) {
-        mProperties = properties;
+        mProperties = CameraMetadataNative.move(properties);
     }
 
     /**
@@ -57,9 +150,52 @@ public final class CameraCharacteristics extends CameraMetadata {
         return new CameraMetadataNative(mProperties);
     }
 
-    @Override
+    /**
+     * Get a camera characteristics field value.
+     *
+     * <p>The field definitions can be
+     * found in {@link CameraCharacteristics}.</p>
+     *
+     * <p>Querying the value for the same key more than once will return a value
+     * which is equal to the previous queried value.</p>
+     *
+     * @throws IllegalArgumentException if the key was not valid
+     *
+     * @param key The characteristics field to read.
+     * @return The value of that key, or {@code null} if the field is not set.
+     */
     public <T> T get(Key<T> key) {
         return mProperties.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T> T getProtected(Key<?> key) {
+        return (T) mProperties.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Class<Key<?>> getKeyClass() {
+        Object thisClass = Key.class;
+        return (Class<Key<?>>)thisClass;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Key<?>> getKeys() {
+        // Force the javadoc for this function to show up on the CameraCharacteristics page
+        return super.getKeys();
     }
 
     /**
@@ -76,9 +212,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      *
      * @return List of keys supported by this CameraDevice for CaptureRequests.
      */
-    public List<Key<?>> getAvailableCaptureRequestKeys() {
+    @SuppressWarnings({"unchecked"})
+    public List<CaptureRequest.Key<?>> getAvailableCaptureRequestKeys() {
         if (mAvailableRequestKeys == null) {
-            mAvailableRequestKeys = getAvailableKeyList(CaptureRequest.class);
+            Object crKey = CaptureRequest.Key.class;
+            Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>)crKey;
+
+            mAvailableRequestKeys = Collections.unmodifiableList(
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped));
         }
         return mAvailableRequestKeys;
     }
@@ -97,9 +238,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      *
      * @return List of keys supported by this CameraDevice for CaptureResults.
      */
-    public List<Key<?>> getAvailableCaptureResultKeys() {
+    @SuppressWarnings({"unchecked"})
+    public List<CaptureResult.Key<?>> getAvailableCaptureResultKeys() {
         if (mAvailableResultKeys == null) {
-            mAvailableResultKeys = getAvailableKeyList(CaptureResult.class);
+            Object crKey = CaptureResult.Key.class;
+            Class<CaptureResult.Key<?>> crKeyTyped = (Class<CaptureResult.Key<?>>)crKey;
+
+            mAvailableResultKeys = Collections.unmodifiableList(
+                    getAvailableKeyList(CaptureResult.class, crKeyTyped));
         }
         return mAvailableResultKeys;
     }
@@ -113,12 +259,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
      *
      * @param metadataClass The subclass of CameraMetadata that you want to get the keys for.
+     * @param keyClass The class of the metadata key, e.g. CaptureRequest.Key.class
      *
      * @return List of keys supported by this CameraDevice for metadataClass.
      *
      * @throws IllegalArgumentException if metadataClass is not a subclass of CameraMetadata
      */
-    private <T extends CameraMetadata> List<Key<?>> getAvailableKeyList(Class<T> metadataClass) {
+    private <TKey> List<TKey>
+    getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass) {
 
         if (metadataClass.equals(CameraMetadata.class)) {
             throw new AssertionError(
@@ -128,7 +276,9 @@ public final class CameraCharacteristics extends CameraMetadata {
                     "metadataClass must be a subclass of CameraMetadata");
         }
 
-        return Collections.unmodifiableList(getKeysStatic(metadataClass, /*instance*/null));
+        List<TKey> staticKeyList = CameraCharacteristics.<TKey>getKeysStatic(
+                metadataClass, keyClass, /*instance*/null);
+        return Collections.unmodifiableList(staticKeyList);
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
