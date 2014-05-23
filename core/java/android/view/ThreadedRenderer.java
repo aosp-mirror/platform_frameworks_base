@@ -33,8 +33,6 @@ import java.io.PrintWriter;
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
  * are currently synchronous.
- * TODO: Make draw() async.
- * TODO: Figure out how to share the DisplayList between two threads (global lock?)
  *
  * The UI thread can block on the RenderThread, but RenderThread must never
  * block on the UI thread.
@@ -117,7 +115,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void destroyHardwareResources(View view) {
         destroyResources(view);
-        // TODO: GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+        nFlushCaches(mNativeProxy, GLES20Canvas.FLUSH_CACHES_LAYERS);
     }
 
     private static void destroyResources(View view) {
@@ -367,6 +365,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
     private static native void nDestroyLayer(long nativeProxy, long layer);
+
+    private static native void nFlushCaches(long nativeProxy, int flushMode);
 
     private static native void nFence(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);

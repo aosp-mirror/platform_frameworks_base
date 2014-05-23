@@ -293,6 +293,12 @@ static void android_view_ThreadedRenderer_destroyLayer(JNIEnv* env, jobject claz
     proxy->destroyLayer(layer);
 }
 
+static void android_view_ThreadedRenderer_flushCaches(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jint flushMode) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->flushCaches(static_cast<Caches::FlushMode>(flushMode));
+}
+
 static void android_view_ThreadedRenderer_fence(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -334,6 +340,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nDestroyLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_destroyLayer },
+    { "nFlushCaches", "(JI)V", (void*) android_view_ThreadedRenderer_flushCaches },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
 #endif

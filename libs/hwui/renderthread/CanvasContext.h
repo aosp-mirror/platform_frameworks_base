@@ -63,6 +63,8 @@ public:
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
+    void flushCaches(Caches::FlushMode flushMode);
+
     void invokeFunctor(Functor* functor);
 
     void runWithGlContext(RenderTask* task);
