@@ -325,8 +325,8 @@ public class RenderNode {
      *
      * @hide
      */
-    public void setCaching(boolean caching) {
-        nSetCaching(mNativeRenderNode, caching);
+    public boolean setCaching(boolean caching) {
+        return nSetCaching(mNativeRenderNode, caching);
     }
 
     /**
@@ -335,8 +335,8 @@ public class RenderNode {
      *
      * @param clipToBounds true if the display list should clip to its bounds
      */
-    public void setClipToBounds(boolean clipToBounds) {
-        nSetClipToBounds(mNativeRenderNode, clipToBounds);
+    public boolean setClipToBounds(boolean clipToBounds) {
+        return nSetClipToBounds(mNativeRenderNode, clipToBounds);
     }
 
     /**
@@ -346,8 +346,8 @@ public class RenderNode {
      * @param shouldProject true if the display list should be projected onto a
      *            containing volume.
      */
-    public void setProjectBackwards(boolean shouldProject) {
-        nSetProjectBackwards(mNativeRenderNode, shouldProject);
+    public boolean setProjectBackwards(boolean shouldProject) {
+        return nSetProjectBackwards(mNativeRenderNode, shouldProject);
     }
 
     /**
@@ -355,8 +355,8 @@ public class RenderNode {
      * DisplayList should draw any descendent DisplayLists with
      * ProjectBackwards=true directly on top of it. Default value is false.
      */
-    public void setProjectionReceiver(boolean shouldRecieve) {
-        nSetProjectionReceiver(mNativeRenderNode, shouldRecieve);
+    public boolean setProjectionReceiver(boolean shouldRecieve) {
+        return nSetProjectionReceiver(mNativeRenderNode, shouldRecieve);
     }
 
     /**
@@ -365,15 +365,16 @@ public class RenderNode {
      *
      * Deep copies the data into native to simplify reference ownership.
      */
-    public void setOutline(Outline outline) {
+    public boolean setOutline(Outline outline) {
         if (outline == null || outline.isEmpty()) {
-            nSetOutlineEmpty(mNativeRenderNode);
+            return nSetOutlineEmpty(mNativeRenderNode);
         } else if (outline.mRect != null) {
-            nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
+            return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
                     outline.mRect.right, outline.mRect.bottom, outline.mRadius);
         } else if (outline.mPath != null) {
-            nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath);
+            return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath);
         }
+        throw new IllegalArgumentException("Unrecognized outline?");
     }
 
     /**
@@ -381,8 +382,8 @@ public class RenderNode {
      *
      * @param clipToOutline true if clipping to the outline.
      */
-    public void setClipToOutline(boolean clipToOutline) {
-        nSetClipToOutline(mNativeRenderNode, clipToOutline);
+    public boolean setClipToOutline(boolean clipToOutline) {
+        return nSetClipToOutline(mNativeRenderNode, clipToOutline);
     }
 
     public boolean getClipToOutline() {
@@ -392,9 +393,9 @@ public class RenderNode {
     /**
      * Controls the RenderNode's circular reveal clip.
      */
-    public void setRevealClip(boolean shouldClip, boolean inverseClip,
+    public boolean setRevealClip(boolean shouldClip, boolean inverseClip,
             float x, float y, float radius) {
-        nSetRevealClip(mNativeRenderNode, shouldClip, inverseClip, x, y, radius);
+        return nSetRevealClip(mNativeRenderNode, shouldClip, inverseClip, x, y, radius);
     }
 
     /**
@@ -403,8 +404,8 @@ public class RenderNode {
      *
      * @param matrix A transform matrix to apply to this display list
      */
-    public void setStaticMatrix(Matrix matrix) {
-        nSetStaticMatrix(mNativeRenderNode, matrix.native_instance);
+    public boolean setStaticMatrix(Matrix matrix) {
+        return nSetStaticMatrix(mNativeRenderNode, matrix.native_instance);
     }
 
     /**
@@ -417,8 +418,8 @@ public class RenderNode {
      *
      * @hide
      */
-    public void setAnimationMatrix(Matrix matrix) {
-        nSetAnimationMatrix(mNativeRenderNode,
+    public boolean setAnimationMatrix(Matrix matrix) {
+        return nSetAnimationMatrix(mNativeRenderNode,
                 (matrix != null) ? matrix.native_instance : 0);
     }
 
@@ -430,8 +431,8 @@ public class RenderNode {
      * @see View#setAlpha(float)
      * @see #getAlpha()
      */
-    public void setAlpha(float alpha) {
-        nSetAlpha(mNativeRenderNode, alpha);
+    public boolean setAlpha(float alpha) {
+        return nSetAlpha(mNativeRenderNode, alpha);
     }
 
     /**
@@ -456,8 +457,8 @@ public class RenderNode {
      * @see android.view.View#hasOverlappingRendering()
      * @see #hasOverlappingRendering()
      */
-    public void setHasOverlappingRendering(boolean hasOverlappingRendering) {
-        nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
+    public boolean setHasOverlappingRendering(boolean hasOverlappingRendering) {
+        return nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
     }
 
     /**
@@ -472,8 +473,8 @@ public class RenderNode {
         return nHasOverlappingRendering(mNativeRenderNode);
     }
 
-    public void setElevation(float lift) {
-        nSetElevation(mNativeRenderNode, lift);
+    public boolean setElevation(float lift) {
+        return nSetElevation(mNativeRenderNode, lift);
     }
 
     public float getElevation() {
@@ -488,8 +489,8 @@ public class RenderNode {
      * @see View#setTranslationX(float)
      * @see #getTranslationX()
      */
-    public void setTranslationX(float translationX) {
-        nSetTranslationX(mNativeRenderNode, translationX);
+    public boolean setTranslationX(float translationX) {
+        return nSetTranslationX(mNativeRenderNode, translationX);
     }
 
     /**
@@ -509,8 +510,8 @@ public class RenderNode {
      * @see View#setTranslationY(float)
      * @see #getTranslationY()
      */
-    public void setTranslationY(float translationY) {
-        nSetTranslationY(mNativeRenderNode, translationY);
+    public boolean setTranslationY(float translationY) {
+        return nSetTranslationY(mNativeRenderNode, translationY);
     }
 
     /**
@@ -528,8 +529,8 @@ public class RenderNode {
      * @see View#setTranslationZ(float)
      * @see #getTranslationZ()
      */
-    public void setTranslationZ(float translationZ) {
-        nSetTranslationZ(mNativeRenderNode, translationZ);
+    public boolean setTranslationZ(float translationZ) {
+        return nSetTranslationZ(mNativeRenderNode, translationZ);
     }
 
     /**
@@ -549,8 +550,8 @@ public class RenderNode {
      * @see View#setRotation(float)
      * @see #getRotation()
      */
-    public void setRotation(float rotation) {
-        nSetRotation(mNativeRenderNode, rotation);
+    public boolean setRotation(float rotation) {
+        return nSetRotation(mNativeRenderNode, rotation);
     }
 
     /**
@@ -570,8 +571,8 @@ public class RenderNode {
      * @see View#setRotationX(float)
      * @see #getRotationX()
      */
-    public void setRotationX(float rotationX) {
-        nSetRotationX(mNativeRenderNode, rotationX);
+    public boolean setRotationX(float rotationX) {
+        return nSetRotationX(mNativeRenderNode, rotationX);
     }
 
     /**
@@ -591,8 +592,8 @@ public class RenderNode {
      * @see View#setRotationY(float)
      * @see #getRotationY()
      */
-    public void setRotationY(float rotationY) {
-        nSetRotationY(mNativeRenderNode, rotationY);
+    public boolean setRotationY(float rotationY) {
+        return nSetRotationY(mNativeRenderNode, rotationY);
     }
 
     /**
@@ -612,8 +613,8 @@ public class RenderNode {
      * @see View#setScaleX(float)
      * @see #getScaleX()
      */
-    public void setScaleX(float scaleX) {
-        nSetScaleX(mNativeRenderNode, scaleX);
+    public boolean setScaleX(float scaleX) {
+        return nSetScaleX(mNativeRenderNode, scaleX);
     }
 
     /**
@@ -633,8 +634,8 @@ public class RenderNode {
      * @see View#setScaleY(float)
      * @see #getScaleY()
      */
-    public void setScaleY(float scaleY) {
-        nSetScaleY(mNativeRenderNode, scaleY);
+    public boolean setScaleY(float scaleY) {
+        return nSetScaleY(mNativeRenderNode, scaleY);
     }
 
     /**
@@ -654,8 +655,8 @@ public class RenderNode {
      * @see View#setPivotX(float)
      * @see #getPivotX()
      */
-    public void setPivotX(float pivotX) {
-        nSetPivotX(mNativeRenderNode, pivotX);
+    public boolean setPivotX(float pivotX) {
+        return nSetPivotX(mNativeRenderNode, pivotX);
     }
 
     /**
@@ -675,8 +676,8 @@ public class RenderNode {
      * @see View#setPivotY(float)
      * @see #getPivotY()
      */
-    public void setPivotY(float pivotY) {
-        nSetPivotY(mNativeRenderNode, pivotY);
+    public boolean setPivotY(float pivotY) {
+        return nSetPivotY(mNativeRenderNode, pivotY);
     }
 
     /**
@@ -702,8 +703,8 @@ public class RenderNode {
      * @see View#setCameraDistance(float)
      * @see #getCameraDistance()
      */
-    public void setCameraDistance(float distance) {
-        nSetCameraDistance(mNativeRenderNode, distance);
+    public boolean setCameraDistance(float distance) {
+        return nSetCameraDistance(mNativeRenderNode, distance);
     }
 
     /**
@@ -723,8 +724,8 @@ public class RenderNode {
      * @see View#setLeft(int)
      * @see #getLeft()
      */
-    public void setLeft(int left) {
-        nSetLeft(mNativeRenderNode, left);
+    public boolean setLeft(int left) {
+        return nSetLeft(mNativeRenderNode, left);
     }
 
     /**
@@ -744,8 +745,8 @@ public class RenderNode {
      * @see View#setTop(int)
      * @see #getTop()
      */
-    public void setTop(int top) {
-        nSetTop(mNativeRenderNode, top);
+    public boolean setTop(int top) {
+        return nSetTop(mNativeRenderNode, top);
     }
 
     /**
@@ -765,8 +766,8 @@ public class RenderNode {
      * @see View#setRight(int)
      * @see #getRight()
      */
-    public void setRight(int right) {
-        nSetRight(mNativeRenderNode, right);
+    public boolean setRight(int right) {
+        return nSetRight(mNativeRenderNode, right);
     }
 
     /**
@@ -786,8 +787,8 @@ public class RenderNode {
      * @see View#setBottom(int)
      * @see #getBottom()
      */
-    public void setBottom(int bottom) {
-        nSetBottom(mNativeRenderNode, bottom);
+    public boolean setBottom(int bottom) {
+        return nSetBottom(mNativeRenderNode, bottom);
     }
 
     /**
@@ -812,8 +813,8 @@ public class RenderNode {
      * @see View#setRight(int)
      * @see View#setBottom(int)
      */
-    public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
-        nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
+    public boolean setLeftTopRightBottom(int left, int top, int right, int bottom) {
+        return nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
     }
 
     /**
@@ -824,8 +825,8 @@ public class RenderNode {
      *
      * @see View#offsetLeftAndRight(int)
      */
-    public void offsetLeftAndRight(float offset) {
-        nOffsetLeftAndRight(mNativeRenderNode, offset);
+    public boolean offsetLeftAndRight(float offset) {
+        return nOffsetLeftAndRight(mNativeRenderNode, offset);
     }
 
     /**
@@ -836,8 +837,8 @@ public class RenderNode {
      *
      * @see View#offsetTopAndBottom(int)
      */
-    public void offsetTopAndBottom(float offset) {
-        nOffsetTopAndBottom(mNativeRenderNode, offset);
+    public boolean offsetTopAndBottom(float offset) {
+        return nOffsetTopAndBottom(mNativeRenderNode, offset);
     }
 
     /**
@@ -890,42 +891,42 @@ public class RenderNode {
 
     // Properties
 
-    private static native void nOffsetTopAndBottom(long renderNode, float offset);
-    private static native void nOffsetLeftAndRight(long renderNode, float offset);
-    private static native void nSetLeftTopRightBottom(long renderNode, int left, int top,
+    private static native boolean nOffsetTopAndBottom(long renderNode, float offset);
+    private static native boolean nOffsetLeftAndRight(long renderNode, float offset);
+    private static native boolean nSetLeftTopRightBottom(long renderNode, int left, int top,
             int right, int bottom);
-    private static native void nSetBottom(long renderNode, int bottom);
-    private static native void nSetRight(long renderNode, int right);
-    private static native void nSetTop(long renderNode, int top);
-    private static native void nSetLeft(long renderNode, int left);
-    private static native void nSetCameraDistance(long renderNode, float distance);
-    private static native void nSetPivotY(long renderNode, float pivotY);
-    private static native void nSetPivotX(long renderNode, float pivotX);
-    private static native void nSetCaching(long renderNode, boolean caching);
-    private static native void nSetClipToBounds(long renderNode, boolean clipToBounds);
-    private static native void nSetProjectBackwards(long renderNode, boolean shouldProject);
-    private static native void nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
-    private static native void nSetOutlineRoundRect(long renderNode, int left, int top,
+    private static native boolean nSetBottom(long renderNode, int bottom);
+    private static native boolean nSetRight(long renderNode, int right);
+    private static native boolean nSetTop(long renderNode, int top);
+    private static native boolean nSetLeft(long renderNode, int left);
+    private static native boolean nSetCameraDistance(long renderNode, float distance);
+    private static native boolean nSetPivotY(long renderNode, float pivotY);
+    private static native boolean nSetPivotX(long renderNode, float pivotX);
+    private static native boolean nSetCaching(long renderNode, boolean caching);
+    private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
+    private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
+    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
+    private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
             int right, int bottom, float radius);
-    private static native void nSetOutlineConvexPath(long renderNode, long nativePath);
-    private static native void nSetOutlineEmpty(long renderNode);
-    private static native void nSetClipToOutline(long renderNode, boolean clipToOutline);
-    private static native void nSetRevealClip(long renderNode,
+    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath);
+    private static native boolean nSetOutlineEmpty(long renderNode);
+    private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
+    private static native boolean nSetRevealClip(long renderNode,
             boolean shouldClip, boolean inverseClip, float x, float y, float radius);
-    private static native void nSetAlpha(long renderNode, float alpha);
-    private static native void nSetHasOverlappingRendering(long renderNode,
+    private static native boolean nSetAlpha(long renderNode, float alpha);
+    private static native boolean nSetHasOverlappingRendering(long renderNode,
             boolean hasOverlappingRendering);
-    private static native void nSetElevation(long renderNode, float lift);
-    private static native void nSetTranslationX(long renderNode, float translationX);
-    private static native void nSetTranslationY(long renderNode, float translationY);
-    private static native void nSetTranslationZ(long renderNode, float translationZ);
-    private static native void nSetRotation(long renderNode, float rotation);
-    private static native void nSetRotationX(long renderNode, float rotationX);
-    private static native void nSetRotationY(long renderNode, float rotationY);
-    private static native void nSetScaleX(long renderNode, float scaleX);
-    private static native void nSetScaleY(long renderNode, float scaleY);
-    private static native void nSetStaticMatrix(long renderNode, long nativeMatrix);
-    private static native void nSetAnimationMatrix(long renderNode, long animationMatrix);
+    private static native boolean nSetElevation(long renderNode, float lift);
+    private static native boolean nSetTranslationX(long renderNode, float translationX);
+    private static native boolean nSetTranslationY(long renderNode, float translationY);
+    private static native boolean nSetTranslationZ(long renderNode, float translationZ);
+    private static native boolean nSetRotation(long renderNode, float rotation);
+    private static native boolean nSetRotationX(long renderNode, float rotationX);
+    private static native boolean nSetRotationY(long renderNode, float rotationY);
+    private static native boolean nSetScaleX(long renderNode, float scaleX);
+    private static native boolean nSetScaleY(long renderNode, float scaleY);
+    private static native boolean nSetStaticMatrix(long renderNode, long nativeMatrix);
+    private static native boolean nSetAnimationMatrix(long renderNode, long animationMatrix);
 
     private static native boolean nHasOverlappingRendering(long renderNode);
     private static native boolean nGetClipToOutline(long renderNode);

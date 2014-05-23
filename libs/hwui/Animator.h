@@ -117,7 +117,7 @@ protected:
     virtual void setValue(RenderNode* target, float value);
 
 private:
-    typedef void (RenderProperties::*SetFloatProperty)(float value);
+    typedef bool (RenderProperties::*SetFloatProperty)(float value);
     typedef float (RenderProperties::*GetFloatProperty)() const;
 
     struct PropertyAccessors;
