@@ -159,7 +159,8 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
-        // TODO: support color filter
+        mVectorState.mVPathRenderer.setColorFilter(colorFilter);
+        invalidateSelf();
     }
 
     @Override
@@ -365,14 +366,15 @@ public class VectorDrawable extends Drawable {
         private VPath[] mCurrentPaths;
         private Paint mStrokePaint;
         private Paint mFillPaint;
+        private ColorFilter mColorFilter;
         private PathMeasure mPathMeasure;
 
         private VGroup mCurrentGroup = new VGroup();
 
-        float mBaseWidth = 1;
-        float mBaseHeight = 1;
-        float mViewportWidth;
-        float mViewportHeight;
+        float mBaseWidth = 0;
+        float mBaseHeight = 0;
+        float mViewportWidth = 0;
+        float mViewportHeight = 0;
 
         public VPathRenderer() {
         }
@@ -410,6 +412,18 @@ public class VectorDrawable extends Drawable {
                 if (path.canApplyTheme()) {
                     path.applyTheme(t);
                 }
+            }
+        }
+
+        public void setColorFilter(ColorFilter colorFilter) {
+            mColorFilter = colorFilter;
+
+            if (mFillPaint != null) {
+                mFillPaint.setColorFilter(colorFilter);
+            }
+
+            if (mStrokePaint != null) {
+                mStrokePaint.setColorFilter(colorFilter);
             }
         }
 
@@ -470,6 +484,7 @@ public class VectorDrawable extends Drawable {
             if (vPath.mFillColor != 0) {
                 if (mFillPaint == null) {
                     mFillPaint = new Paint();
+                    mFillPaint.setColorFilter(mColorFilter);
                     mFillPaint.setStyle(Paint.Style.FILL);
                     mFillPaint.setAntiAlias(true);
                 }
@@ -481,6 +496,7 @@ public class VectorDrawable extends Drawable {
             if (vPath.mStrokeColor != 0) {
                 if (mStrokePaint == null) {
                     mStrokePaint = new Paint();
+                    mStrokePaint.setColorFilter(mColorFilter);
                     mStrokePaint.setStyle(Paint.Style.STROKE);
                     mStrokePaint.setAntiAlias(true);
                 }
@@ -516,24 +532,34 @@ public class VectorDrawable extends Drawable {
         private void parseViewport(Resources r, AttributeSet attrs)
                 throws XmlPullParserException {
             final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableViewport);
-            mViewportWidth = a.getFloat(R.styleable.VectorDrawableViewport_viewportWidth, 0);
-            mViewportHeight = a.getFloat(R.styleable.VectorDrawableViewport_viewportHeight, 0);
-            if (mViewportWidth == 0 || mViewportHeight == 0) {
-                throw new XmlPullParserException(a.getPositionDescription()+
-                        "<viewport> tag requires viewportWidth & viewportHeight to be set");
+            mViewportWidth = a.getFloat(R.styleable.VectorDrawableViewport_viewportWidth, mViewportWidth);
+            mViewportHeight = a.getFloat(R.styleable.VectorDrawableViewport_viewportHeight, mViewportHeight);
+
+            if (mViewportWidth <= 0) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        "<viewport> tag requires viewportWidth > 0");
+            } else if (mViewportHeight <= 0) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        "<viewport> tag requires viewportHeight > 0");
             }
+
             a.recycle();
         }
 
         private void parseSize(Resources r, AttributeSet attrs)
                 throws XmlPullParserException  {
             final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableSize);
-            mBaseWidth = a.getDimension(R.styleable.VectorDrawableSize_width, 0);
-            mBaseHeight = a.getDimension(R.styleable.VectorDrawableSize_height, 0);
-            if (mBaseWidth == 0 || mBaseHeight == 0) {
-                throw new XmlPullParserException(a.getPositionDescription()+
-                        "<size> tag requires width & height to be set");
+            mBaseWidth = a.getDimension(R.styleable.VectorDrawableSize_width, mBaseWidth);
+            mBaseHeight = a.getDimension(R.styleable.VectorDrawableSize_height, mBaseHeight);
+
+            if (mBaseWidth <= 0) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        "<size> tag requires width > 0");
+            } else if (mBaseHeight <= 0) {
+                throw new XmlPullParserException(a.getPositionDescription() +
+                        "<size> tag requires height > 0");
             }
+
             a.recycle();
         }
 
