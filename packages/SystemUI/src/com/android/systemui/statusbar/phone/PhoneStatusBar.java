@@ -2768,6 +2768,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateStackScrollerState();
         updatePublicMode();
         updateRowStates();
+        updateSpeedBump();
         checkBarModes();
         updateNotificationIcons();
         updateCarrierLabelVisibility(false);

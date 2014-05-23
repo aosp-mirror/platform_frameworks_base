@@ -184,7 +184,7 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
     }
 
     public void performVisibilityAnimation(boolean nowVisible) {
-        animateDivider(nowVisible);
+        animateDivider(nowVisible, null /* onFinishedRunnable */);
 
         // Animate explanation Text
         if (mIsExpanded) {
@@ -192,7 +192,14 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
         }
     }
 
-    public void animateDivider(boolean nowVisible) {
+    /**
+     * Animate the divider to a new visibility.
+     *
+     * @param nowVisible should it now be visible
+     * @param onFinishedRunnable A runnable which should be run when the animation is
+     *        finished.
+     */
+    public void animateDivider(boolean nowVisible, Runnable onFinishedRunnable) {
         if (nowVisible != mDividerVisible) {
             // Animate dividers
             float endValue = nowVisible ? 1.0f : 0.0f;
@@ -204,7 +211,8 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
                     .scaleX(endValue)
                     .scaleY(endValue)
                     .translationX(endTranslationXLeft)
-                    .setInterpolator(mFastOutSlowInInterpolator);
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .withEndAction(onFinishedRunnable);
             mLineRight.animate()
                     .alpha(endValue)
                     .withLayer()
@@ -216,6 +224,10 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
             // Animate dots
             mDots.performVisibilityAnimation(nowVisible);
             mDividerVisible = nowVisible;
+        } else {
+            if (onFinishedRunnable != null) {
+                onFinishedRunnable.run();
+            }
         }
     }
 
@@ -248,6 +260,16 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
         if (mIsExpanded) {
             animateExplanationTextInternal(nowVisible);
         }
+    }
+
+    @Override
+    public void performRemoveAnimation(float translationDirection, Runnable onFinishedRunnable) {
+        performVisibilityAnimation(false);
+    }
+
+    @Override
+    public void performAddAnimation(long delay) {
+        performVisibilityAnimation(true);
     }
 
     private void resetExplanationText() {

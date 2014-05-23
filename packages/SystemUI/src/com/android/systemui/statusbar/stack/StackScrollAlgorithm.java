@@ -208,6 +208,8 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
+                StackScrollState.ViewState viewState = resultState.getViewStateForView(v);
+                viewState.notGoneIndex = state.visibleChildren.size();
                 state.visibleChildren.add(v);
             }
         }

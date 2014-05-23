@@ -18,8 +18,8 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.graphics.Outline;
+import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.widget.FrameLayout;
 
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
@@ -27,9 +27,12 @@ import android.widget.FrameLayout;
 public abstract class ExpandableOutlineView extends ExpandableView {
 
     private final Outline mOutline = new Outline();
+    private boolean mCustomOutline;
+    private float mDensity;
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mDensity = getResources().getDisplayMetrics().density;
     }
 
     @Override
@@ -50,11 +53,37 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         updateOutline();
     }
 
-    private void updateOutline() {
-        mOutline.setRect(0,
-                mClipTopAmount,
-                getWidth(),
-                Math.max(mActualHeight, mClipTopAmount));
+    protected void setOutlineRect(RectF rect) {
+        if (rect != null) {
+            setOutlineRect(rect.left, rect.top, rect.right, rect.bottom);
+        } else {
+            mCustomOutline = false;
+            updateOutline();
+        }
+    }
+
+    protected void setOutlineRect(float left, float top, float right, float bottom) {
+        mCustomOutline = true;
+
+        int rectLeft = (int) left;
+        int rectTop = (int) top;
+        int rectRight = (int) right;
+        int rectBottom = (int) bottom;
+
+        // Outlines need to be at least 1 dp
+        rectBottom = (int) Math.max(top + mDensity, rectBottom);
+        rectRight = (int) Math.max(left + mDensity, rectRight);
+        mOutline.setRect(rectLeft, rectTop, rectRight, rectBottom);
         setOutline(mOutline);
+    }
+
+    private void updateOutline() {
+        if (!mCustomOutline) {
+            mOutline.setRect(0,
+                    mClipTopAmount,
+                    getWidth(),
+                    Math.max(mActualHeight, mClipTopAmount));
+            setOutline(mOutline);
+        }
     }
 }

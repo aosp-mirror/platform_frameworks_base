@@ -214,7 +214,7 @@ public class NotificationPanelView extends PanelView implements
                         mClockAnimationTarget = -1;
                     }
                 });
-                StackStateAnimator.startInstantly(mClockAnimator);
+                mClockAnimator.start();
                 return true;
             }
         });

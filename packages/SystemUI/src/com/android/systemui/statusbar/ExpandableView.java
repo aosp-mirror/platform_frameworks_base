@@ -205,6 +205,21 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
+     * Perform a remove animation on this view.
+     *
+     * @param translationDirection The direction value from [-1 ... 1] indicating in which the
+     *                             animation should be performed. A value of -1 means that The
+     *                             remove animation should be performed upwards,
+     *                             such that the  child appears to be going away to the top. 1
+     *                             Should mean the opposite.
+     * @param onFinishedRunnable A runnable which should be run when the animation is finished.
+     */
+    public abstract void performRemoveAnimation(float translationDirection,
+            Runnable onFinishedRunnable);
+
+    public abstract void performAddAnimation(long delay);
+
+    /**
      * A listener notifying when {@link #getActualHeight} changes.
      */
     public interface OnHeightChangedListener {

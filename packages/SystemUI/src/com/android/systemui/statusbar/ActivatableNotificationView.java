@@ -21,15 +21,25 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
-
 import com.android.systemui.R;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -40,6 +50,36 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private static final long DOUBLETAP_TIMEOUT_MS = 1200;
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
+
+    /**
+     * The amount of width, which is kept in the end when performing a disappear animation (also
+     * the amount from which the horizontal appearing begins)
+     */
+    private static final float HORIZONTAL_COLLAPSED_REST_PARTIAL = 0.05f;
+
+    /**
+     * At which point from [0,1] does the horizontal collapse animation end (or start when
+     * expanding)? 1.0 meaning that it ends immediately and 0.0 that it is continuously animated.
+     */
+    private static final float HORIZONTAL_ANIMATION_END = 0.2f;
+
+    /**
+     * At which point from [0,1] does the alpha animation end (or start when
+     * expanding)? 1.0 meaning that it ends immediately and 0.0 that it is continuously animated.
+     */
+    private static final float ALPHA_ANIMATION_END = 0.0f;
+
+    /**
+     * At which point from [0,1] does the horizontal collapse animation start (or start when
+     * expanding)? 1.0 meaning that it starts immediately and 0.0 that it is animated at all.
+     */
+    private static final float HORIZONTAL_ANIMATION_START = 1.0f;
+
+    /**
+     * At which point from [0,1] does the vertical collapse animation start (or end when
+     * expanding) 1.0 meaning that it starts immediately and 0.0 that it is animated at all.
+     */
+    private static final float VERTICAL_ANIMATION_START = 1.0f;
 
     private static final Interpolator ACTIVATE_INVERSE_INTERPOLATOR
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
@@ -53,6 +93,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private int mBgTint = 0;
     private int mDimmedBgTint = 0;
+    private final int mRoundedRectCornerRadius;
 
     /**
      * Flag to indicate that the notification has been touched once and the second touch will
@@ -66,22 +107,41 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private OnActivatedListener mOnActivatedListener;
 
-    private Interpolator mLinearOutSlowInInterpolator;
-    private Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mSlowOutFastInInterpolator;
+    private final Interpolator mSlowOutLinearInInterpolator;
+    private final Interpolator mLinearInterpolator;
+    private Interpolator mCurrentAppearInterpolator;
+    private Interpolator mCurrentAlphaInterpolator;
 
     private NotificationBackgroundView mBackgroundNormal;
     private NotificationBackgroundView mBackgroundDimmed;
     private ObjectAnimator mBackgroundAnimator;
+    private RectF mAppearAnimationRect = new RectF();
+    private PorterDuffColorFilter mAppearAnimationFilter;
+    private float mAnimationTranslationY;
+    private boolean mDrawingAppearAnimation;
+    private Paint mAppearPaint = new Paint();
+    private ValueAnimator mAppearAnimator;
+    private float mAppearAnimationFraction = -1.0f;
+    private float mAppearAnimationTranslation;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mFastOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
+        mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
+        mLinearInterpolator = new LinearInterpolator();
         setClipChildren(false);
         setClipToPadding(false);
+        mAppearAnimationFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
+        mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
     }
 
     @Override
@@ -314,6 +374,202 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.setClipTopAmount(clipTopAmount);
         mBackgroundNormal.setClipTopAmount(clipTopAmount);
         mBackgroundDimmed.setClipTopAmount(clipTopAmount);
+    }
+
+    @Override
+    public void performRemoveAnimation(float translationDirection, Runnable onFinishedRunnable) {
+        enableAppearDrawing(true);
+        if (mDrawingAppearAnimation) {
+            startAppearAnimation(false /* isAppearing */, translationDirection,
+                    0, onFinishedRunnable);
+        }
+    }
+
+    @Override
+    public void performAddAnimation(long delay) {
+        enableAppearDrawing(true);
+        if (mDrawingAppearAnimation) {
+            startAppearAnimation(true /* isAppearing */, -1.0f, delay, null);
+        }
+    }
+
+    private void startAppearAnimation(boolean isAppearing,
+            float translationDirection, long delay, final Runnable onFinishedRunnable) {
+        if (mAppearAnimator != null) {
+            mAppearAnimator.cancel();
+        }
+        mAnimationTranslationY = translationDirection * mActualHeight;
+        if (mAppearAnimationFraction == -1.0f) {
+            // not initialized yet, we start anew
+            if (isAppearing) {
+                mAppearAnimationFraction = 0.0f;
+                mAppearAnimationTranslation = mAnimationTranslationY;
+            } else {
+                mAppearAnimationFraction = 1.0f;
+                mAppearAnimationTranslation = 0;
+            }
+        }
+
+        float targetValue;
+        if (isAppearing) {
+            mCurrentAppearInterpolator = mSlowOutFastInInterpolator;
+            mCurrentAlphaInterpolator = mLinearOutSlowInInterpolator;
+            targetValue = 1.0f;
+        } else {
+            mCurrentAppearInterpolator = mFastOutSlowInInterpolator;
+            mCurrentAlphaInterpolator = mSlowOutLinearInInterpolator;
+            targetValue = 0.0f;
+        }
+        mAppearAnimator = ValueAnimator.ofFloat(mAppearAnimationFraction,
+                targetValue);
+        mAppearAnimator.setInterpolator(mLinearInterpolator);
+        mAppearAnimator.setDuration(
+                (long) (StackStateAnimator.ANIMATION_DURATION_APPEAR_DISAPPEAR
+                        * Math.abs(mAppearAnimationFraction - targetValue)));
+        mAppearAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mAppearAnimationFraction = (float) animation.getAnimatedValue();
+                updateAppearAnimationAlpha();
+                updateAppearRect();
+                invalidate();
+            }
+        });
+        if (delay > 0) {
+            // we need to apply the initial state already to avoid drawn frames in the wrong state
+            updateAppearAnimationAlpha();
+            updateAppearRect();
+            mAppearAnimator.setStartDelay(delay);
+        }
+        mAppearAnimator.addListener(new AnimatorListenerAdapter() {
+            private boolean mWasCancelled;
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (onFinishedRunnable != null) {
+                    onFinishedRunnable.run();
+                }
+                if (!mWasCancelled) {
+                    mAppearAnimationFraction = -1;
+                    setOutlineRect(null);
+                    enableAppearDrawing(false);
+                }
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWasCancelled = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mWasCancelled = true;
+            }
+        });
+        mAppearAnimator.start();
+    }
+
+    private void updateAppearRect() {
+        float inverseFraction = (1.0f - mAppearAnimationFraction);
+        float translationFraction = mCurrentAppearInterpolator.getInterpolation(inverseFraction);
+        float translateYTotalAmount = translationFraction * mAnimationTranslationY;
+        mAppearAnimationTranslation = translateYTotalAmount;
+
+        // handle width animation
+        float widthFraction = (inverseFraction - (1.0f - HORIZONTAL_ANIMATION_START))
+                / (HORIZONTAL_ANIMATION_START - HORIZONTAL_ANIMATION_END);
+        widthFraction = Math.min(1.0f, Math.max(0.0f, widthFraction));
+        widthFraction = mCurrentAppearInterpolator.getInterpolation(widthFraction);
+        float left = (getWidth() * (0.5f - HORIZONTAL_COLLAPSED_REST_PARTIAL / 2.0f) *
+                widthFraction);
+        float right = getWidth() - left;
+
+        // handle top animation
+        float heightFraction = (inverseFraction - (1.0f - VERTICAL_ANIMATION_START)) /
+                VERTICAL_ANIMATION_START;
+        heightFraction = Math.max(0.0f, heightFraction);
+        heightFraction = mCurrentAppearInterpolator.getInterpolation(heightFraction);
+
+        float top;
+        float bottom;
+        if (mAnimationTranslationY > 0.0f) {
+            bottom = mActualHeight - heightFraction * mAnimationTranslationY * 0.1f
+                    - translateYTotalAmount;
+            top = bottom * heightFraction;
+        } else {
+            top = heightFraction * (mActualHeight + mAnimationTranslationY) * 0.1f -
+                    translateYTotalAmount;
+            bottom = mActualHeight * (1 - heightFraction) + top * heightFraction;
+        }
+        mAppearAnimationRect.set(left, top, right, bottom);
+        setOutlineRect(left, top + mAppearAnimationTranslation, right,
+                bottom + mAppearAnimationTranslation);
+    }
+
+    private void updateAppearAnimationAlpha() {
+        int backgroundColor = getBackgroundColor();
+        if (backgroundColor != -1) {
+            float contentAlphaProgress = mAppearAnimationFraction;
+            contentAlphaProgress = contentAlphaProgress / (1.0f - ALPHA_ANIMATION_END);
+            contentAlphaProgress = Math.min(1.0f, contentAlphaProgress);
+            contentAlphaProgress = mCurrentAlphaInterpolator.getInterpolation(contentAlphaProgress);
+            int sourceColor = Color.argb((int) (255 * (1.0f - contentAlphaProgress)),
+                    Color.red(backgroundColor), Color.green(backgroundColor),
+                    Color.blue(backgroundColor));
+            mAppearAnimationFilter.setColor(sourceColor);
+            mAppearPaint.setColorFilter(mAppearAnimationFilter);
+        }
+    }
+
+    private int getBackgroundColor() {
+        // TODO: get real color
+        return 0xfffafafa;
+    }
+
+    /**
+     * When we draw the appear animation, we render the view in a bitmap and render this bitmap
+     * as a shader of a rect. This call creates the Bitmap and switches the drawing mode,
+     * such that the normal drawing of the views does not happen anymore.
+     *
+     * @param enable Should it be enabled.
+     */
+    private void enableAppearDrawing(boolean enable) {
+        if (enable != mDrawingAppearAnimation) {
+            if (enable) {
+                if (getWidth() == 0 || getActualHeight() == 0) {
+                    // TODO: This should not happen, but it can during expansion. Needs
+                    // investigation
+                    return;
+                }
+                Bitmap bitmap = Bitmap.createBitmap(getWidth(), getActualHeight(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                draw(canvas);
+                mAppearPaint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP,
+                        Shader.TileMode.CLAMP));
+            } else {
+                mAppearPaint.setShader(null);
+            }
+            mDrawingAppearAnimation = enable;
+            invalidate();
+        }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (!mDrawingAppearAnimation) {
+            super.dispatchDraw(canvas);
+        } else {
+            drawAppearRect(canvas);
+        }
+    }
+
+    private void drawAppearRect(Canvas canvas) {
+        canvas.save();
+        canvas.translate(0, mAppearAnimationTranslation);
+        canvas.drawRoundRect(mAppearAnimationRect, mRoundedRectCornerRadius,
+                mRoundedRectCornerRadius, mAppearPaint);
+        canvas.restore();
     }
 
     public void setOnActivatedListener(OnActivatedListener onActivatedListener) {
