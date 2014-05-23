@@ -23,10 +23,12 @@ limitations under the License.
         android:viewportHeight="512"
         android:viewportWidth="512" />
 
-    <path
-        android:name="002b"
-        android:pathData="M100,200c0,-100 150,-100 150,0s150,100 150,0t-200,299"
-        android:stroke="#FF0000FF"
-        android:strokeWidth="4" />
+    <group>
+        <path
+            android:name="002b"
+            android:pathData="M100,200c0,-100 150,-100 150,0s150,100 150,0t-200,299"
+            android:stroke="#FF0000FF"
+            android:strokeWidth="4" />
+    </group>
 
 </vector>

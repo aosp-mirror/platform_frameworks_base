@@ -68,7 +68,6 @@ public class VectorDrawablePerformance extends Activity {
         TextView t = new TextView(this);
         DecimalFormat df = new DecimalFormat("#.##");
         t.setText("avgL=" + df.format(time / (icon.length * 1000000.)) + " ms");
-        t.setBackgroundColor(0xFF000000);
         container.addView(t);
         time =  android.os.SystemClock.elapsedRealtimeNanos();
         for (int i = 0; i < icon.length; i++) {
@@ -81,7 +80,6 @@ public class VectorDrawablePerformance extends Activity {
         time =  android.os.SystemClock.elapsedRealtimeNanos()-time;
         t = new TextView(this);
         t.setText("avgS=" + df.format(time / (icon.length * 1000000.)) + " ms");
-        t.setBackgroundColor(0xFF000000);
         container.addView(t);
     }
 }

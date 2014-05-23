@@ -24,12 +24,13 @@
         android:viewportHeight="480"
         android:viewportWidth="480" />
 
-    <path
-        android:name="box1"
-        android:fill="?android:attr/colorControlActivated"
-        android:pathData="m20,200l100,90l180,-180l-35,-35l-145,145l-60,-60l-40,40z"
-        android:stroke="?android:attr/colorControlActivated"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round" />
-
+    <group>
+        <path
+            android:name="box1"
+            android:pathData="m20,200l100,90l180,-180l-35,-35l-145,145l-60,-60l-40,40z"
+            android:fill="?android:attr/colorControlActivated"
+            android:stroke="?android:attr/colorControlActivated"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
 </vector>

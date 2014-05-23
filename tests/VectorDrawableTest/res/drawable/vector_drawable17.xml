@@ -1,5 +1,4 @@
-<!--
- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,20 +15,21 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-        android:height="64dp"
-        android:width="64dp" />
+            android:width="64dp"
+            android:height="64dp"/>
 
-    <viewport
-        android:viewportHeight="600"
-        android:viewportWidth="1200" />
+    <viewport android:viewportWidth="1200"
+          android:viewportHeight="600"/>
 
-    <path
-        android:name="house"
-        android:pathData="M200,300 Q400,50 600,300 T1000,300"
-        android:pivotX="600"
-        android:pivotY="300"
-        android:rotation="360"
-        android:stroke="#FFFF0000"
-        android:strokeWidth="10" />
+    <group>
+        <path
+                android:name="house"
+                android:pathData="M200,300 Q400,50 600,300 T1000,300"
+                android:stroke="#FFFF0000"
+                android:strokeWidth="10"
+                android:rotation="360"
+                android:pivotX="600"
+                android:pivotY="300"/>
+    </group>
 
 </vector>

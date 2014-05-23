@@ -23,13 +23,15 @@
         android:viewportHeight="200"
         android:viewportWidth="200" />
 
-    <path
-        android:name="house"
-        android:pathData="M 100,10 v 90 M 10,100 h 90"
-        android:pivotX="100"
-        android:pivotY="100"
-        android:rotation="360"
-        android:stroke="#FF00FF00"
-        android:strokeWidth="10" />
+    <group>
+        <path
+            android:name="house"
+            android:pathData="M 100,10 v 90 M 10,100 h 90"
+            android:pivotX="100"
+            android:pivotY="100"
+            android:rotation="360"
+            android:stroke="#FF00FF00"
+            android:strokeWidth="10" />
+    </group>
 
 </vector>
