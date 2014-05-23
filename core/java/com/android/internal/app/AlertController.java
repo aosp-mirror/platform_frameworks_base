@@ -1026,7 +1026,7 @@ public class AlertController {
                         ? dialog.mSingleChoiceItemLayout : dialog.mListItemLayout;
                 if (mCursor == null) {
                     adapter = (mAdapter != null) ? mAdapter
-                            : new ArrayAdapter<CharSequence>(mContext, layout, R.id.text1, mItems);
+                            : new CheckedItemAdapter(mContext, layout, R.id.text1, mItems);
                 } else {
                     adapter = new SimpleCursorAdapter(mContext, layout, 
                             mCursor, new String[]{mLabelColumn}, new int[]{R.id.text1});
@@ -1081,4 +1081,20 @@ public class AlertController {
         }
     }
 
+    private static class CheckedItemAdapter extends ArrayAdapter<CharSequence> {
+        public CheckedItemAdapter(Context context, int resource, int textViewResourceId,
+                CharSequence[] objects) {
+            super(context, resource, textViewResourceId, objects);
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+    }
 }

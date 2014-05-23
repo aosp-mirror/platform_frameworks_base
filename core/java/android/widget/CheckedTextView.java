@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -156,8 +157,34 @@ public class CheckedTextView extends TextView implements Checkable {
             mCheckMarkWidth = 0;
         }
         mCheckMarkDrawable = d;
-        // Do padding resolution. This will call internalSetPadding() and do a requestLayout() if needed.
+
+        // Do padding resolution. This will call internalSetPadding() and do a
+        // requestLayout() if needed.
         resolvePadding();
+    }
+
+    @RemotableViewMethod
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+
+        if (mCheckMarkDrawable != null) {
+            mCheckMarkDrawable.setVisible(visibility == VISIBLE, false);
+        }
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+
+        if (mCheckMarkDrawable != null) {
+            mCheckMarkDrawable.jumpToCurrentState();
+        }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return who == mCheckMarkDrawable || super.verifyDrawable(who);
     }
 
     /**
@@ -249,6 +276,11 @@ public class CheckedTextView extends TextView implements Checkable {
             }
             checkMarkDrawable.setBounds(mScrollX + left, top, mScrollX + right, bottom);
             checkMarkDrawable.draw(canvas);
+
+            final Drawable background = getBackground();
+            if (background != null) {
+                background.setHotspotBounds(mScrollX + left, top, mScrollX + right, bottom);
+            }
         }
     }
     

@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -91,6 +92,9 @@ public class BitmapDrawable extends Drawable {
      // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
+
+    /** Optical insets due to gravity. */
+    private Insets mOpticalInsets = null;
 
     // Mirroring matrix for using with Shaders
     private Matrix mMirrorMatrix;
@@ -456,9 +460,9 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     protected void onBoundsChange(Rect bounds) {
-        super.onBoundsChange(bounds);
         mApplyGravity = true;
-        Shader shader = mBitmapState.mPaint.getShader();
+
+        final Shader shader = mBitmapState.mPaint.getShader();
         if (shader != null) {
             if (needMirroring()) {
                 updateMirrorMatrix(bounds.right - bounds.left);
@@ -517,9 +521,7 @@ public class BitmapDrawable extends Drawable {
         final boolean needMirroring = needMirroring();
         if (shader == null) {
             if (mApplyGravity) {
-                final int layoutDirection = getLayoutDirection();
-                Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
-                        getBounds(), mDstRect, layoutDirection);
+                applyGravity();
                 mApplyGravity = false;
             }
 
@@ -562,6 +564,28 @@ public class BitmapDrawable extends Drawable {
         if (restoreAlpha >= 0) {
             paint.setAlpha(restoreAlpha);
         }
+    }
+
+    @Override
+    public Insets getOpticalInsets() {
+        if (mApplyGravity && mBitmapState.mPaint.getShader() == null) {
+            applyGravity();
+            mApplyGravity = false;
+        }
+        return mOpticalInsets == null ? Insets.NONE : mOpticalInsets;
+    }
+
+    private void applyGravity() {
+        final Rect bounds = getBounds();
+        final int layoutDirection = getLayoutDirection();
+        Gravity.apply(mBitmapState.mGravity, mBitmapWidth, mBitmapHeight,
+                bounds, mDstRect, layoutDirection);
+
+        final int left = mDstRect.left - bounds.left;
+        final int top = mDstRect.top - bounds.top;
+        final int right = bounds.right - mDstRect.right;
+        final int bottom = bounds.bottom - mDstRect.bottom;
+        mOpticalInsets = Insets.of(left, top, right, bottom);
     }
 
     @Override

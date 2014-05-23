@@ -390,7 +390,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Button.Toggle">
-        <item name="background">@drawable/btn_toggle_holo_dark</item>
+        <item name="background">@drawable/btn_toggle_quantum</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
         <item name="textAppearance">?attr/textAppearanceSmall</item>
@@ -459,13 +459,13 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.CompoundButton.Switch">
         <item name="track">@drawable/switch_track_quantum</item>
-        <item name="thumb">@drawable/switch_inner_quantum</item>
+        <item name="thumb">@drawable/switch_thumb_quantum_anim</item>
         <item name="splitTrack">true</item>
         <item name="switchTextAppearance">@style/TextAppearance.Quantum.Widget.Switch</item>
         <item name="textOn"></item>
         <item name="textOff"></item>
-        <item name="switchMinWidth">72dip</item>
-        <item name="switchPadding">16dip</item>
+        <item name="switchMinWidth">4dip</item>
+        <item name="switchPadding">4dip</item>
         <item name="background">?attr/selectableItemBackground</item>
     </style>
 
@@ -579,7 +579,7 @@ please see styles_device_defaults.xml.
         <item name="indeterminateOnly">false</item>
         <item name="progressDrawable">@drawable/scrubber_progress_horizontal_quantum</item>
         <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_quantum</item>
-        <item name="thumb">@drawable/scrubber_control_selector_quantum</item>
+        <item name="thumb">@drawable/scrubber_control_quantum_anim</item>
         <item name="splitTrack">true</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
@@ -784,15 +784,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.Button.Borderless" parent="Widget.Quantum.Button.Borderless"/>
     <style name="Widget.Quantum.Light.Button.Borderless.Small" parent="Widget.Quantum.Button.Borderless.Small"/>
     <style name="Widget.Quantum.Light.Button.Inset" parent="Widget.Quantum.Button.Inset"/>
-
-    <style name="Widget.Quantum.Light.Button.Toggle">
-        <item name="background">@drawable/btn_toggle_holo_light</item>
-        <item name="textOn">@string/capital_on</item>
-        <item name="textOff">@string/capital_off</item>
-        <item name="textAppearance">?attr/textAppearanceSmall</item>
-        <item name="minHeight">48dip</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.Button.Toggle" parent="Widget.Quantum.Button.Toggle" />
     <style name="Widget.Quantum.Light.ButtonBar" parent="Widget.Quantum.ButtonBar"/>
     <style name="Widget.Quantum.Light.ButtonBar.AlertDialog" parent="Widget.Quantum.ButtonBar.AlertDialog"/>
 
