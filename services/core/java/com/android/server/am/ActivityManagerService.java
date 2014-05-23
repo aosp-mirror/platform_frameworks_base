@@ -283,7 +283,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // before we decide it's never going to come up for real, when the process was
     // started with a wrapper for instrumentation (such as Valgrind) because it
     // could take much longer than usual.
-    static final int PROC_START_TIMEOUT_WITH_WRAPPER = 300*1000;
+    static final int PROC_START_TIMEOUT_WITH_WRAPPER = 1200*1000;
 
     // How long to wait after going idle before forcing apps to GC.
     static final int GC_TIMEOUT = 5*1000;
