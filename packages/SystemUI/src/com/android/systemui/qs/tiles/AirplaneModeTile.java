@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.provider.Settings.Global;
 
 import com.android.systemui.R;
@@ -52,10 +53,9 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     private void setEnabled(boolean enabled) {
-        mSetting.setValue(enabled ? 1 : 0);
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", enabled);
-        mContext.sendBroadcast(intent);
+        final ConnectivityManager mgr =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mgr.setAirplaneMode(enabled);
     }
 
     @Override
