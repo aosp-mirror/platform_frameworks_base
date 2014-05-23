@@ -446,6 +446,22 @@ public abstract class CameraMetadata {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5;
 
     //
+    // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
+    //
+
+    /**
+     * <p>The camera device will only support centered crop regions.</p>
+     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
+     */
+    public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0;
+
+    /**
+     * <p>The camera device will support arbitrarily chosen crop regions.</p>
+     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
+     */
+    public static final int SCALER_CROPPING_TYPE_FREEFORM = 1;
+
+    //
     // Enumeration values for CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
     //
 

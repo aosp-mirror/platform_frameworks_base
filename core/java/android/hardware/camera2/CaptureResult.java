@@ -369,9 +369,9 @@ public final class CaptureResult extends CameraMetadata {
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the camera device. If the metering region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
-     * will ignore the sections outside the region and output the
-     * used sections in the frame metadata.</p>
+     * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
+     * the camera device will ignore the sections outside the region and output the
+     * used sections in the result metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -642,9 +642,9 @@ public final class CaptureResult extends CameraMetadata {
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific focus area
      * needs to be used by the camera device. If the focusing region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
-     * will ignore the sections outside the region and output the
-     * used sections in the frame metadata.</p>
+     * outside the the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture
+     * result metadata, the camera device will ignore the sections outside
+     * the region and output the used sections in the result metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -1126,9 +1126,9 @@ public final class CaptureResult extends CameraMetadata {
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific auto-white balance (AWB) area
      * needs to be used by the camera device. If the AWB region is
-     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the camera device
-     * will ignore the sections outside the region and output the
-     * used sections in the frame metadata.</p>
+     * outside the the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
+     * the camera device will ignore the sections outside the region and output the
+     * used sections in the result metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE

@@ -1046,6 +1046,28 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<android.hardware.camera2.params.StreamConfigurationMap>("android.scaler.streamConfigurationMap", android.hardware.camera2.params.StreamConfigurationMap.class);
 
     /**
+     * <p>The crop type that this camera device supports.</p>
+     * <p>When passing a non-centered crop region ({@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}) to a camera
+     * device that only supports CENTER_ONLY cropping, the camera device will move the
+     * crop region to the center of the sensor active array ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize})
+     * and keep the crop region width and height unchanged. The camera device will return the
+     * final used crop region in metadata result {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
+     * <p>Camera devices that support FREEFORM cropping will support any crop region that
+     * is inside of the active array. The camera device will apply the same crop region and
+     * return the final used crop region in capture result metadata {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
+     * <p>FULL capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL) will support
+     * FREEFORM cropping.</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see #SCALER_CROPPING_TYPE_CENTER_ONLY
+     * @see #SCALER_CROPPING_TYPE_FREEFORM
+     */
+    public static final Key<Integer> SCALER_CROPPING_TYPE =
+            new Key<Integer>("android.scaler.croppingType", int.class);
+
+    /**
      * <p>Area of raw data which corresponds to only
      * active pixels.</p>
      * <p>It is smaller or equal to

@@ -12199,6 +12199,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PARTIAL_RESULT_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_MAX_DEPTH;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_CROPPING_TYPE;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_STREAM_CONFIGURATION_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
@@ -12410,6 +12411,8 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
+    field public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0; // 0x0
+    field public static final int SCALER_CROPPING_TYPE_FREEFORM = 1; // 0x1
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3; // 0x3
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG = 2; // 0x2
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG = 1; // 0x1
