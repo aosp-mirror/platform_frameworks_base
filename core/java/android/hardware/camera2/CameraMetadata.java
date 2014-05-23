@@ -16,8 +16,7 @@
 
 package android.hardware.camera2;
 
-import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.utils.TypeReference;
+import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -36,7 +35,7 @@ import java.util.List;
  *
  * <p>
  * All instances of CameraMetadata are immutable. The list of keys with {@link #getKeys()}
- * never changes, nor do the values returned by any key with {@link #get} throughout
+ * never changes, nor do the values returned by any key with {@code #get} throughout
  * the lifetime of the object.
  * </p>
  *
@@ -44,7 +43,10 @@ import java.util.List;
  * @see CameraManager
  * @see CameraCharacteristics
  **/
-public abstract class CameraMetadata {
+public abstract class CameraMetadata<TKey> {
+
+    private static final String TAG = "CameraMetadataAb";
+    private static final boolean VERBOSE = false;
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
@@ -74,8 +76,15 @@ public abstract class CameraMetadata {
      *
      * @param key The metadata field to read.
      * @return The value of that key, or {@code null} if the field is not set.
+     *
+     * @hide
      */
-    public abstract <T> T get(Key<T> key);
+     protected abstract <T> T getProtected(TKey key);
+
+     /**
+      * @hide
+      */
+     protected abstract Class<TKey> getKeyClass();
 
     /**
      * Returns a list of the keys contained in this map.
@@ -83,14 +92,16 @@ public abstract class CameraMetadata {
      * <p>The list returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
      *
-     * <p>All values retrieved by a key from this list with {@link #get} are guaranteed to be
+     * <p>All values retrieved by a key from this list with {@code #get} are guaranteed to be
      * non-{@code null}. Each key is only listed once in the list. The order of the keys
      * is undefined.</p>
      *
      * @return List of the keys contained in this map.
      */
-    public List<Key<?>> getKeys() {
-        return Collections.unmodifiableList(getKeysStatic(this.getClass(), this));
+    @SuppressWarnings("unchecked")
+    public List<TKey> getKeys() {
+        Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
+        return Collections.unmodifiableList(getKeysStatic(thisClass, getKeyClass(), this));
     }
 
     /**
@@ -101,137 +112,37 @@ public abstract class CameraMetadata {
      * Optionally, if {@code instance} is not null, then filter out any keys with null values.
      * </p>
      */
-    /*package*/ static ArrayList<Key<?>> getKeysStatic(Class<? extends CameraMetadata> type,
-            CameraMetadata instance) {
-        ArrayList<Key<?>> keyList = new ArrayList<Key<?>>();
+     /*package*/ @SuppressWarnings("unchecked")
+    static <TKey> ArrayList<TKey> getKeysStatic(
+             Class<?> type, Class<TKey> keyClass,
+             CameraMetadata<TKey> instance) {
+
+        if (VERBOSE) Log.v(TAG, "getKeysStatic for " + type);
+
+        ArrayList<TKey> keyList = new ArrayList<TKey>();
 
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
             // Filter for Keys that are public
-            if (field.getType().isAssignableFrom(Key.class) &&
+            if (field.getType().isAssignableFrom(keyClass) &&
                     (field.getModifiers() & Modifier.PUBLIC) != 0) {
-                Key<?> key;
+
+                TKey key;
                 try {
-                    key = (Key<?>) field.get(instance);
+                    key = (TKey) field.get(instance);
                 } catch (IllegalAccessException e) {
                     throw new AssertionError("Can't get IllegalAccessException", e);
                 } catch (IllegalArgumentException e) {
                     throw new AssertionError("Can't get IllegalArgumentException", e);
                 }
-                if (instance == null || instance.get(key) != null) {
+
+                if (instance == null || instance.getProtected(key) != null) {
                     keyList.add(key);
                 }
             }
         }
 
         return keyList;
-    }
-
-    // TODO: make final or abstract
-    public static class Key<T> {
-
-        private boolean mHasTag;
-        private int mTag;
-        private final Class<T> mType;
-        private final TypeReference<T> mTypeReference;
-        private final String mName;
-
-        /**
-         * @hide
-         */
-        public Key(String name, Class<T> type) {
-            if (name == null) {
-                throw new NullPointerException("Key needs a valid name");
-            } else if (type == null) {
-                throw new NullPointerException("Type needs to be non-null");
-            }
-            mName = name;
-            mType = type;
-            mTypeReference = TypeReference.createSpecializedTypeReference(type);
-        }
-
-        /**
-         * @hide
-         */
-        @SuppressWarnings("unchecked")
-        public Key(String name, TypeReference<T> typeReference) {
-            if (name == null) {
-                throw new NullPointerException("Key needs a valid name");
-            } else if (typeReference == null) {
-                throw new NullPointerException("TypeReference needs to be non-null");
-            }
-            mName = name;
-            mType = (Class<T>)typeReference.getRawType();
-            mTypeReference = typeReference;
-        }
-
-        public final String getName() {
-            return mName;
-        }
-
-        @Override
-        public final int hashCode() {
-            return mName.hashCode() ^ mTypeReference.hashCode();
-        }
-
-        @Override
-        public final boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (!(o instanceof Key)) {
-                return false;
-            }
-
-            Key<?> lhs = (Key<?>)o;
-            return mName.equals(lhs.mName) && mTypeReference.equals(lhs.mTypeReference);
-        }
-
-        /**
-         * <p>
-         * Get the tag corresponding to this key. This enables insertion into the
-         * native metadata.
-         * </p>
-         *
-         * <p>This value is looked up the first time, and cached subsequently.</p>
-         *
-         * @return The tag numeric value corresponding to the string
-         *
-         * @hide
-         */
-        public final int getTag() {
-            if (!mHasTag) {
-                mTag = CameraMetadataNative.getTag(mName);
-                mHasTag = true;
-            }
-            return mTag;
-        }
-
-        /**
-         * Get the raw class backing the type {@code T} for this key.
-         *
-         * <p>The distinction is only important if {@code T} is a generic, e.g.
-         * {@code Range<Integer>} since the nested type will be erased.</p>
-         *
-         * @hide
-         */
-        public final Class<T> getType() {
-            // TODO: remove this; other places should use #getTypeReference() instead
-            return mType;
-        }
-
-        /**
-         * Get the type reference backing the type {@code T} for this key.
-         *
-         * <p>The distinction is only important if {@code T} is a generic, e.g.
-         * {@code Range<Integer>} since the nested type will be retained.</p>
-         *
-         * @hide
-         */
-        public final TypeReference<T> getTypeReference() {
-            return mTypeReference;
-        }
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
