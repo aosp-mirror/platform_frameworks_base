@@ -259,13 +259,17 @@ abstract public class ManagedServices {
                     userIds[i]));
         }
 
-        ManagedServiceInfo[] toRemove = new ManagedServiceInfo[mServices.size()];
+        ArrayList<ManagedServiceInfo> toRemove = new ArrayList<ManagedServiceInfo>();
         final SparseArray<ArrayList<ComponentName>> toAdd
                 = new SparseArray<ArrayList<ComponentName>>();
 
         synchronized (mMutex) {
-            // unbind and remove all existing services
-            toRemove = mServices.toArray(toRemove);
+            // Unbind automatically bound services, retain system services.
+            for (ManagedServiceInfo service : mServices) {
+                if (!service.isSystem) {
+                    toRemove.add(service);
+                }
+            }
 
             final ArraySet<ComponentName> newEnabled = new ArraySet<ComponentName>();
             final ArraySet<String> newPackages = new ArraySet<String>();
