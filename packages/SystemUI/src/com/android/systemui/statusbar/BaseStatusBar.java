@@ -299,14 +299,13 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
-        ArrayList<IBinder> notificationKeys = new ArrayList<IBinder>();
         ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
 
         int[] switches = new int[8];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
+            mBarService.registerStatusBar(mCommandQueue, iconList, notifications,
                     switches, binders);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
@@ -332,15 +331,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        // Set up the initial notification state
-        N = notificationKeys.size();
-        if (N == notifications.size()) {
-            for (int i=0; i<N; i++) {
-                addNotification(notificationKeys.get(i), notifications.get(i));
-            }
-        } else {
-            Log.wtf(TAG, "Notification list length mismatch: keys=" + N
-                    + " notifications=" + notifications.size());
+        // Set up the initial notification state.
+        N = notifications.size();
+        for (int i=0; i<N; i++) {
+            addNotification(notifications.get(i));
         }
 
         if (DEBUG) {
@@ -1018,8 +1012,8 @@ public abstract class BaseStatusBar extends SystemUI implements
      *
      * WARNING: this will call back into us.  Don't hold any locks.
      */
-    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
-        removeNotification(key);
+    void handleNotificationError(StatusBarNotification n, String message) {
+        removeNotification(n.getKey());
         try {
             mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(),
                     n.getInitialPid(), message, n.getUserId());
@@ -1028,7 +1022,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected StatusBarNotification removeNotificationViews(IBinder key) {
+    protected StatusBarNotification removeNotificationViews(String key) {
         NotificationData.Entry entry = mNotificationData.remove(key);
         if (entry == null) {
             Log.w(TAG, "removeNotification for unknown key: " + key);
@@ -1043,10 +1037,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry.notification;
     }
 
-    protected NotificationData.Entry createNotificationViews(IBinder key,
-            StatusBarNotification notification) {
+    protected NotificationData.Entry createNotificationViews(StatusBarNotification notification) {
         if (DEBUG) {
-            Log.d(TAG, "createNotificationViews(key=" + key + ", notification=" + notification);
+            Log.d(TAG, "createNotificationViews(notification=" + notification);
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
@@ -1061,13 +1054,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                     notification.getNotification().number,
                     notification.getNotification().tickerText);
         if (!iconView.set(ic)) {
-            handleNotificationError(key, notification, "Couldn't create icon: " + ic);
+            handleNotificationError(notification, "Couldn't create icon: " + ic);
             return null;
         }
         // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
+        NotificationData.Entry entry = new NotificationData.Entry(notification, iconView);
         if (!inflateViews(entry, mStackScroller)) {
-            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
+            handleNotificationError(notification, "Couldn't expand RemoteViews for: "
                     + notification);
             return null;
         }
@@ -1087,8 +1080,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateRowStates();
     }
 
-    private void addNotificationViews(IBinder key, StatusBarNotification notification) {
-        addNotificationViews(createNotificationViews(key, notification));
+    private void addNotificationViews(StatusBarNotification notification) {
+        addNotificationViews(createNotificationViews(notification));
     }
 
     /**
@@ -1160,7 +1153,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotificationIcons();
-    protected abstract void tick(IBinder key, StatusBarNotification n, boolean firstTime);
+    protected abstract void tick(StatusBarNotification n, boolean firstTime);
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract boolean shouldDisableNavbarGestures();
 
@@ -1168,12 +1161,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         return parent != null && parent.indexOfChild(entry.row) == 0;
     }
 
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Log.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
+    public void updateNotification(StatusBarNotification notification) {
+        if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
-        final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
+        final NotificationData.Entry oldEntry = mNotificationData.findByKey(notification.getKey());
         if (oldEntry == null) {
-            Log.w(TAG, "updateNotification for unknown key: " + key);
+            Log.w(TAG, "updateNotification for unknown key: " + notification.getKey());
             return;
         }
 
@@ -1252,7 +1245,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
         if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged && publicUnchanged
                 && (orderUnchanged || isTopAnyway)) {
-            if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "reusing notification for key: " + notification.getKey());
             oldEntry.notification = notification;
             try {
                 updateNotificationViews(oldEntry, notification);
@@ -1276,7 +1269,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         notification.getNotification().number,
                         notification.getNotification().tickerText);
                 if (!oldEntry.icon.set(ic)) {
-                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
+                    handleNotificationError(notification, "Couldn't update icon: " + ic);
                     return;
                 }
                 updateRowStates();
@@ -1284,17 +1277,18 @@ public abstract class BaseStatusBar extends SystemUI implements
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
                 Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
-                removeNotificationViews(key);
-                addNotificationViews(key, notification);
+                removeNotificationViews(notification.getKey());
+                addNotificationViews(notification);
             }
         } else {
-            if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "not reusing notification for key: " + notification.getKey());
             if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
-            removeNotificationViews(key);
-            addNotificationViews(key, notification);  // will also replace the heads up
-            final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
+            removeNotificationViews(notification.getKey());
+            addNotificationViews(notification);  // will also replace the heads up
+            final NotificationData.Entry newEntry = mNotificationData.findByKey(
+                    notification.getKey());
             final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
             if (userChangedExpansion) {
                 boolean userExpanded = oldEntry.row.isUserExpanded();
@@ -1314,7 +1308,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Restart the ticker if it's still running
         if (updateTicker && isForCurrentUser) {
             haltTicker();
-            tick(key, notification, false);
+            tick(notification, false);
         }
 
         // Recalculate the position of the sliding windows and the titles.

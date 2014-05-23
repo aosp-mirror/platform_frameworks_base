@@ -23,7 +23,7 @@ import android.service.notification.StatusBarNotification;
 
 public interface StatusBarManagerInternal {
     void setNotificationDelegate(NotificationDelegate delegate);
-    IBinder addNotification(StatusBarNotification notification);
-    void updateNotification(IBinder key, StatusBarNotification notification);
-    void removeNotification(IBinder key);
+    void addNotification(StatusBarNotification notification);
+    void updateNotification(StatusBarNotification notification);
+    void removeNotification(String key);
 }
