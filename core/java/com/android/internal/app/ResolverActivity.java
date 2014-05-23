@@ -484,8 +484,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
             mList.clear();
             if (mBaseResolveList != null) {
-                currentResolveList = mBaseResolveList;
-                mOrigResolveList = null;
+                currentResolveList = mOrigResolveList = mBaseResolveList;
             } else {
                 currentResolveList = mOrigResolveList = mPm.queryIntentActivities(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
