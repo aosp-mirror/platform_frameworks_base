@@ -256,6 +256,16 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
+    public void invalidateDrawable(Drawable dr) {
+        super.invalidateDrawable(dr);
+
+        if (dr == mThumb) {
+            // Handle changes to thumb width and height.
+            requestLayout();
+        }
+    }
+
+    @Override
     void onProgressRefresh(float scale, boolean fromUser) {
         super.onProgressRefresh(scale, fromUser);
 

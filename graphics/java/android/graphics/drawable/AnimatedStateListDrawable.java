@@ -80,6 +80,22 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         this(null, null);
     }
 
+    @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        final boolean changed = super.setVisible(visible, restart);
+        if (mAnim != null) {
+            if (visible) {
+                if (changed || restart) {
+                    // TODO: Should this support restart?
+                    mAnim.end();
+                }
+            } else {
+                mAnim.end();
+            }
+        }
+        return changed;
+    }
+
     /**
      * Add a new drawable to the set of keyframes.
      *
