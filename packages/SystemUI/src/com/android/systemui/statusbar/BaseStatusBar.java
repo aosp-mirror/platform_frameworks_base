@@ -22,6 +22,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +47,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -79,6 +81,7 @@ import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
@@ -88,6 +91,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
+    private static final boolean USE_NOTIFICATION_LISTENER = false;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -160,6 +164,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
+
     protected abstract void refreshLayout(int layoutDirection);
 
     protected Display mDisplay;
@@ -273,6 +278,49 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    private final NotificationListenerService mNotificationListener =
+            new NotificationListenerService() {
+        @Override
+        public void onListenerConnected() {
+            if (DEBUG) Log.d(TAG, "onListenerConnected");
+            final StatusBarNotification[] notifications = getActiveNotifications();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (StatusBarNotification sbn : notifications) {
+                        addNotificationInternal(sbn);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onNotificationPosted(final StatusBarNotification sbn) {
+            if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mNotificationData.findByKey(sbn.getKey()) != null) {
+                        updateNotificationInternal(sbn);
+                    } else {
+                        addNotificationInternal(sbn);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onNotificationRemoved(final StatusBarNotification sbn) {
+            if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    removeNotificationInternal(sbn.getKey());
+                }
+            });
+        }
+    };
+
     private void updateCurrentProfilesCache() {
         synchronized (mCurrentProfiles) {
             mCurrentProfiles.clear();
@@ -355,10 +403,21 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         // Set up the initial notification state.
-        N = notifications.size();
-        for (int i=0; i<N; i++) {
-            addNotification(notifications.get(i));
+        if (USE_NOTIFICATION_LISTENER) {
+            try {
+                mNotificationListener.registerAsSystemService(
+                        new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),
+                        UserHandle.USER_ALL);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to register notification listener", e);
+            }
+        } else {
+            N = notifications.size();
+            for (int i=0; i<N; i++) {
+                addNotification(notifications.get(i));
+            }
         }
+
 
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -1204,7 +1263,32 @@ public abstract class BaseStatusBar extends SystemUI implements
         return parent != null && parent.indexOfChild(entry.row) == 0;
     }
 
+
+    @Override
+    public void addNotification(StatusBarNotification notification) {
+        if (!USE_NOTIFICATION_LISTENER) {
+            addNotificationInternal(notification);
+        }
+    }
+
+    public abstract void addNotificationInternal(StatusBarNotification notification);
+
+    @Override
+    public void removeNotification(String key) {
+        if (!USE_NOTIFICATION_LISTENER) {
+            removeNotificationInternal(key);
+        }
+    }
+
+    protected abstract void removeNotificationInternal(String key);
+
     public void updateNotification(StatusBarNotification notification) {
+        if (!USE_NOTIFICATION_LISTENER) {
+            updateNotificationInternal(notification);
+        }
+    }
+
+    public void updateNotificationInternal(StatusBarNotification notification) {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(notification.getKey());
@@ -1280,11 +1364,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean orderUnchanged =
                    notification.getNotification().when == oldNotification.getNotification().when
                 && notification.getScore() == oldNotification.getScore();
-                // score now encompasses/supersedes isOngoing()
+        // score now encompasses/supersedes isOngoing()
 
         boolean updateTicker = notification.getNotification().tickerText != null
                 && !TextUtils.equals(notification.getNotification().tickerText,
-                        oldEntry.notification.getNotification().tickerText);
+                oldEntry.notification.getNotification().tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
         if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged && publicUnchanged
                 && (orderUnchanged || isTopAnyway)) {
