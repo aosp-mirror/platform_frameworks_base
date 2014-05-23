@@ -4057,6 +4057,9 @@
         The default is one.
         See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_rowSpan" format="integer" min="1" />
+        <!-- The relative proportion of horizontal space that should be allocated to this view
+        during excess space distribution. -->
+        <attr name="layout_rowWeight" format="float" />
         <!-- The column boundary delimiting the left of the group of cells
         occupied by this view. -->
         <attr name="layout_column" />
@@ -4065,6 +4068,9 @@
         The default is one.
         See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_columnSpan" format="integer" min="1" />
+        <!-- The relative proportion of vertical space that should be allocated to this view
+        during excess space distribution. -->
+        <attr name="layout_columnWeight" format="float" />
         <!-- Gravity specifies how a component should be placed in its group of cells.
         The default is LEFT | BASELINE.
         See {@link android.widget.GridLayout.LayoutParams#setGravity(int)}. -->
