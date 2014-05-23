@@ -951,9 +951,8 @@ public class Switch extends CompoundButton {
 
         final int[] myDrawableState = getDrawableState();
 
-        if (mThumbDrawable != null && mThumbDrawable.setState(myDrawableState)) {
-            // Handle changes to thumb width and height.
-            requestLayout();
+        if (mThumbDrawable != null) {
+            mThumbDrawable.setState(myDrawableState);
         }
 
         if (mTrackDrawable != null) {
@@ -961,6 +960,16 @@ public class Switch extends CompoundButton {
         }
 
         invalidate();
+    }
+
+    @Override
+    public void invalidateDrawable(Drawable drawable) {
+        super.invalidateDrawable(drawable);
+
+        if (drawable == mThumbDrawable) {
+            // Handle changes to thumb width and height.
+            requestLayout();
+        }
     }
 
     @Override

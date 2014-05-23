@@ -187,6 +187,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.setBounds(bounds);
+
+            // Must obtain optical insets after setting bounds.
+            mInsets = mCurrDrawable.getOpticalInsets();
         }
     }
 
@@ -385,7 +388,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
-                mInsets = d.getOpticalInsets();
                 d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
@@ -402,6 +404,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
                 d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+
+                // Must obtain optical insets after setting bounds.
+                mInsets = d.getOpticalInsets();
             } else {
                 mInsets = Insets.NONE;
             }
