@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.view.Display;
 import android.view.Surface;
@@ -32,6 +33,10 @@ class CircularDisplayMask {
     private static final String TAG = "CircularDisplayMask";
 
     private static final int STROKE_WIDTH = 2;
+    // half the screen size
+    private static final int CIRCLE_RADIUS = 160;
+    // size of the chin
+    private static final int SCREEN_OFFSET = 30;
 
     private final SurfaceControl mSurfaceControl;
     private final Surface mSurface = new Surface();
@@ -40,12 +45,13 @@ class CircularDisplayMask {
     private boolean mDrawNeeded;
     private Paint mPaint;
     private int mRotation;
+    private boolean mVisible;
 
     public CircularDisplayMask(Display display, SurfaceSession session, int zOrder) {
         SurfaceControl ctrl = null;
         try {
             ctrl = new SurfaceControl(session, "CircularDisplayMask",
-                320, 290, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+                320, 320, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
             ctrl.setLayerStack(display.getLayerStack());
             ctrl.setLayer(zOrder);
             ctrl.setPosition(0, 0);
@@ -63,12 +69,12 @@ class CircularDisplayMask {
     }
 
     private void drawIfNeeded() {
-        if (!mDrawNeeded) {
+        if (!mDrawNeeded || !mVisible) {
             return;
         }
         mDrawNeeded = false;
 
-        Rect dirty = new Rect(0, 0, mLastDW, mLastDH);
+        Rect dirty = new Rect(0, 0, 320, 320);
         Canvas c = null;
         try {
             c = mSurface.lockCanvas(dirty);
@@ -78,27 +84,23 @@ class CircularDisplayMask {
         if (c == null) {
             return;
         }
-        int cx = 160;
-        int cy = 160;
+        c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
         switch (mRotation) {
-            case Surface.ROTATION_0:
-            case Surface.ROTATION_90:
-                // chin bottom or right
-                cx = 160;
-                cy = 160;
-                break;
-            case Surface.ROTATION_180:
-                // chin top
-                cx = 160;
-                cy = 145;
-                break;
-            case Surface.ROTATION_270:
-                cx = 145;
-                cy = 160;
-                break;
+        case Surface.ROTATION_0:
+        case Surface.ROTATION_90:
+            // chin bottom or right
+            mSurfaceControl.setPosition(0, 0);
+            break;
+        case Surface.ROTATION_180:
+            // chin top
+            mSurfaceControl.setPosition(0, -SCREEN_OFFSET);
+            break;
+        case Surface.ROTATION_270:
+            // chin left
+            mSurfaceControl.setPosition(-SCREEN_OFFSET, 0);
+            break;
         }
-        c.drawCircle(cx, cy, 160, mPaint);
-
+        c.drawCircle(CIRCLE_RADIUS, CIRCLE_RADIUS, CIRCLE_RADIUS, mPaint);
         mSurface.unlockCanvasAndPost(c);
     }
 
@@ -108,6 +110,7 @@ class CircularDisplayMask {
         if (mSurfaceControl == null) {
             return;
         }
+        mVisible = on;
         drawIfNeeded();
         if (on) {
             mSurfaceControl.show();
@@ -117,14 +120,14 @@ class CircularDisplayMask {
     }
 
     void positionSurface(int dw, int dh, int rotation) {
-        if (mLastDW == dw && mLastDH == dh) {
+        if (mLastDW == dw && mLastDH == dh && mRotation == rotation) {
             return;
         }
         mLastDW = dw;
         mLastDH = dh;
-        mSurfaceControl.setSize(dw, dh);
         mDrawNeeded = true;
         mRotation = rotation;
+        drawIfNeeded();
     }
 
 }
