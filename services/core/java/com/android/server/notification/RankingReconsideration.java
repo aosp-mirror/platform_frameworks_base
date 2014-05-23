@@ -15,14 +15,16 @@
  */
 package com.android.server.notification;
 
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import com.android.server.notification.NotificationManagerService.NotificationRecord;
 
-public abstract class RankingFuture
-        implements ScheduledFuture<NotificationManagerService.NotificationRecord> {
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Represents future work required to extract signals from notifications for ranking.
+ *
+ * {@hide}
+ */
+public abstract class RankingReconsideration implements Runnable {
     private static final long IMMEDIATE = 0l;
 
     private static final int START = 0;
@@ -32,16 +34,20 @@ public abstract class RankingFuture
 
     private int mState;
     private long mDelay;
-    protected NotificationManagerService.NotificationRecord mRecord;
+    protected String mKey;
 
-    public RankingFuture(NotificationManagerService.NotificationRecord record) {
-        this(record, IMMEDIATE);
+    public RankingReconsideration(String key) {
+        this(key, IMMEDIATE);
     }
 
-    public RankingFuture(NotificationManagerService.NotificationRecord record, long delay) {
+    public RankingReconsideration(String key, long delay) {
         mDelay = delay;
-        mRecord = record;
+        mKey = key;
         mState = START;
+    }
+
+    public String getKey() {
+        return mKey;
     }
 
     public void run() {
@@ -57,18 +63,10 @@ public abstract class RankingFuture
         }
     }
 
-    @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(mDelay, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    public int compareTo(Delayed another) {
-        return Long.compare(getDelay(TimeUnit.MILLISECONDS),
-                another.getDelay(TimeUnit.MILLISECONDS));
-    }
-
-    @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         if (mState == START) {  // can't cancel if running or done
             mState = CANCELLED;
@@ -77,42 +75,25 @@ public abstract class RankingFuture
         return false;
     }
 
-    @Override
     public boolean isCancelled() {
         return mState == CANCELLED;
     }
 
-    @Override
     public boolean isDone() {
         return mState == DONE;
     }
 
-    @Override
-    public NotificationManagerService.NotificationRecord get()
-            throws InterruptedException, ExecutionException {
-        while (!isDone()) {
-            synchronized (this) {
-                this.wait();
-            }
-        }
-        return mRecord;
-    }
-
-    @Override
-    public NotificationManagerService.NotificationRecord get(long timeout, TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException {
-        long timeoutMillis = unit.convert(timeout, TimeUnit.MILLISECONDS);
-        long start = System.currentTimeMillis();
-        long now = System.currentTimeMillis();
-        while (!isDone() && (now - start) < timeoutMillis) {
-            try {
-                wait(timeoutMillis - (now - start));
-            } catch (InterruptedException e) {
-                now = System.currentTimeMillis();
-            }
-        }
-        return mRecord;
-    }
-
+    /**
+     * Analyse the notification.  This will be called on a worker thread. To
+     * avoid concurrency issues, do not use held references to modify the
+     * {@link NotificationRecord}.
+     */
     public abstract void work();
+
+    /**
+     * Apply any computed changes to the notification record.  This method will be
+     * called on the main service thread, synchronized on he mNotificationList.
+     * @param record The locked record to be updated.
+     */
+    public abstract void applyChangesLocked(NotificationRecord record);
 }

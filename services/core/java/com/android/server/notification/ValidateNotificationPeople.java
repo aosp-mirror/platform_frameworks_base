@@ -59,7 +59,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // maps raw person handle to resolved person object
     private LruCache<String, LookupResult> mPeopleCache;
 
-    private RankingFuture validatePeople(NotificationRecord record) {
+    private RankingReconsideration validatePeople(final NotificationRecord record) {
         float affinity = NONE;
         Bundle extras = record.getNotification().extras;
         if (extras == null) {
@@ -99,11 +99,11 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
 
         if (DEBUG) Slog.d(TAG, "Pending: future work scheduled for: " + record.sbn.getKey());
-        return new RankingFuture(record) {
+        return new RankingReconsideration(record.getKey()) {
+            float mContactAffinity = NONE;
             @Override
             public void work() {
-                if (INFO) Slog.i(TAG, "Executing: validation for: " + mRecord.sbn.getKey());
-                float affinity = NONE;
+                if (INFO) Slog.i(TAG, "Executing: validation for: " + record.getKey());
                 for (final String handle: pendingLookups) {
                     LookupResult lookupResult = null;
                     final Uri uri = Uri.parse(handle);
@@ -124,13 +124,16 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                         synchronized (mPeopleCache) {
                             mPeopleCache.put(handle, lookupResult);
                         }
-                        affinity = Math.max(affinity, lookupResult.getAffinity());
+                        mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
                     }
                 }
-                float affinityBound = mRecord.getContactAffinity();
-                affinity = Math.max(affinity, affinityBound);
-                mRecord.setContactAffinity(affinity);
-                if (INFO) Slog.i(TAG, "final affinity: " + affinity);
+            }
+
+            @Override
+            public void applyChangesLocked(NotificationRecord operand) {
+                float affinityBound = operand.getContactAffinity();
+                operand.setContactAffinity(Math.max(mContactAffinity, affinityBound));
+                if (INFO) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
             }
         };
     }
@@ -229,7 +232,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 mContext.getContentResolver(), SETTING_ENABLE_PEOPLE_VALIDATOR, 1);
     }
 
-    public RankingFuture process(NotificationManagerService.NotificationRecord record) {
+    public RankingReconsideration process(NotificationRecord record) {
         if (!mEnabled) {
             if (INFO) Slog.i(TAG, "disabled");
             return null;

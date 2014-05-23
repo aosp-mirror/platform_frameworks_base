@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.content.Context;
 import android.util.Slog;
 
-import com.android.internal.R;
 import com.android.server.notification.NotificationManagerService.NotificationRecord;
 
 /**
@@ -39,7 +38,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
     }
 
-    public RankingFuture process(NotificationRecord record) {
+    public RankingReconsideration process(NotificationRecord record) {
         if (record == null || record.getNotification() == null) {
             if (DBG) Slog.d(TAG, "skipping empty notification");
             return null;
@@ -54,10 +53,15 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
             record.setRecentlyIntusive(true);
         }
 
-        return new RankingFuture(record, HANG_TIME_MS) {
+        return new RankingReconsideration(record.getKey(), HANG_TIME_MS) {
             @Override
             public void work() {
-                mRecord.setRecentlyIntusive(false);
+                // pass
+            }
+
+            @Override
+            public void applyChangesLocked(NotificationRecord record) {
+                record.setRecentlyIntusive(false);
             }
         };
     }

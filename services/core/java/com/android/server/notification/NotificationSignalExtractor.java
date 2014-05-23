@@ -18,6 +18,8 @@ package com.android.server.notification;
 
 import android.content.Context;
 
+import com.android.server.notification.NotificationManagerService.NotificationRecord;
+
 /**
  * Extracts signals that will be useful to the {@link NotificationComparator} and caches them
  *  on the {@link NotificationManagerService.NotificationRecord} object. These annotations will
@@ -32,10 +34,10 @@ public interface NotificationSignalExtractor {
      * Called once per notification that is posted or updated.
      *
      * @return null if the work is done, or a future if there is more to do. The
-     * {@link RankingFuture} will be run on a worker thread, and if notifications are re-ordered
-     * by that execution, the {@link NotificationManagerService} may send order update
-     * events to the {@link android.service.notification.NotificationListenerService}s.
+     * {@link RankingReconsideration} will be run on a worker thread, and if notifications
+     * are re-ordered by that execution, the {@link NotificationManagerService} may send order
+     * update events to the {@link android.service.notification.NotificationListenerService}s.
      */
-    public RankingFuture process(NotificationManagerService.NotificationRecord notification);
+    public RankingReconsideration process(NotificationRecord notification);
 
 }

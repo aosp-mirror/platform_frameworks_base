@@ -111,7 +111,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
@@ -453,8 +452,7 @@ public class NotificationManagerService extends SystemService {
 
 
 
-    public static final class NotificationRecord
-    {
+    public static final class NotificationRecord {
         final StatusBarNotification sbn;
         SingleNotificationStats stats;
         boolean isCanceled;
@@ -556,12 +554,12 @@ public class NotificationManagerService extends SystemService {
             return mContactAffinity;
         }
 
-        public boolean isRecentlyIntrusive() {
-            return mRecentlyIntrusive;
-        }
-
         public void setRecentlyIntusive(boolean recentlyIntrusive) {
             mRecentlyIntrusive = recentlyIntrusive;
+        }
+
+        public boolean isRecentlyIntrusive() {
+            return mRecentlyIntrusive;
         }
     }
 
@@ -1635,8 +1633,8 @@ public class NotificationManagerService extends SystemService {
                 if (!mSignalExtractors.isEmpty()) {
                     for (NotificationSignalExtractor extractor : mSignalExtractors) {
                         try {
-                            RankingFuture future = extractor.process(r);
-                            scheduleRankingReconsideration(future);
+                            RankingReconsideration recon = extractor.process(r);
+                            scheduleRankingReconsideration(recon);
                         } catch (Throwable t) {
                             Slog.w(TAG, "NotificationSignalExtractor failed.", t);
                         }
@@ -1982,37 +1980,38 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void scheduleRankingReconsideration(RankingFuture future) {
-        if (future != null) {
-            Message m = Message.obtain(mRankingHandler, MESSAGE_RECONSIDER_RANKING, future);
-            long delay = future.getDelay(TimeUnit.MILLISECONDS);
+    private void scheduleRankingReconsideration(RankingReconsideration recon) {
+        if (recon != null) {
+            Message m = Message.obtain(mRankingHandler, MESSAGE_RECONSIDER_RANKING, recon);
+            long delay = recon.getDelay(TimeUnit.MILLISECONDS);
             mRankingHandler.sendMessageDelayed(m, delay);
         }
     }
 
     private void handleRankingReconsideration(Message message) {
-        if (!(message.obj instanceof RankingFuture)) return;
-
-        RankingFuture future = (RankingFuture) message.obj;
-        future.run();
-        try {
-            NotificationRecord record = future.get();
-            synchronized (mNotificationList) {
-                int before = mNotificationList.indexOf(record);
-                if (before != -1) {
-                    Collections.sort(mNotificationList, mRankingComparator);
-                    int after = mNotificationList.indexOf(record);
-
-                    if (before != after) {
-                        scheduleSendRankingUpdate();
-                    }
-                }
+        if (!(message.obj instanceof RankingReconsideration)) return;
+        RankingReconsideration recon = (RankingReconsideration) message.obj;
+        recon.run();
+        boolean orderChanged;
+        synchronized (mNotificationList) {
+            final NotificationRecord record = mNotificationsByKey.get(recon.getKey());
+            if (record == null) {
+                return;
             }
-        } catch (InterruptedException e) {
-            // we're running the future explicitly, so this should never happen
-        } catch (ExecutionException e) {
-            // we're running the future explicitly, so this should never happen
+            int before = findNotificationRecordIndexLocked(record);
+            recon.applyChangesLocked(record);
+            Collections.sort(mNotificationList, mRankingComparator);
+            int after = findNotificationRecordIndexLocked(record);
+            orderChanged = before != after;
         }
+        if (orderChanged) {
+            scheduleSendRankingUpdate();
+        }
+    }
+
+    // lock on mNotificationList
+    private int findNotificationRecordIndexLocked(NotificationRecord target) {
+        return Collections.binarySearch(mNotificationList, target, mRankingComparator);
     }
 
     private void scheduleSendRankingUpdate() {
