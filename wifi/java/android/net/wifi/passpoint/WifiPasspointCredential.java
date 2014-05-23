@@ -36,6 +36,7 @@ public class WifiPasspointCredential implements Parcelable {
     private String mCredentialName;
     private String mUpdateIdentifier;
     private String mSubscriptionUpdateMethod;
+    private WifiEnterpriseConfig mEnterpriseConfig;
     private String mType;
     private String mInnerMethod;
     private String mCertType;
@@ -93,17 +94,15 @@ public class WifiPasspointCredential implements Parcelable {
      * Constructor
      * @param realm Realm of the passpoint credential
      * @param fqdn Fully qualified domain name (FQDN) of the credential
-     * @param config Credential information, must be either EAP-TLS or EAP-TTLS
+     * @param config Enterprise config, must be either EAP-TLS or EAP-TTLS
      * @see WifiEnterpriseConfig
      */
     public WifiPasspointCredential(String realm, String fqdn, WifiEnterpriseConfig config) {
         mRealm = realm;
         switch (config.getEapMethod()) {
             case WifiEnterpriseConfig.Eap.TLS:
-                // TODO;
-                break;
             case WifiEnterpriseConfig.Eap.TTLS:
-                // TODO;
+                mEnterpriseConfig = new WifiEnterpriseConfig(config);
                 break;
             default:
                 // ignore
@@ -299,11 +298,21 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /**
-     * Get EAP method of this Passpoint credential.
-     * @return EAP method, refer to {@link WifiEnterpriseConfig.Eap} for possible return values
+     * Get enterprise config of this Passpoint credential.
+     * @return Enterprise config
+     * @see WifiEnterpriseConfig
      */
-    public int getEapMethod() {
-        return 0;
+    public WifiEnterpriseConfig getEnterpriseConfig() {
+        return new WifiEnterpriseConfig(mEnterpriseConfig);
+    }
+
+    /**
+     * Set enterprise config of this Passpoint credential.
+     * @param config Enterprise config, must be either EAP-TLS or EAP-TTLS
+     * @see WifiEnterpriseConfig
+     */
+    public void setEnterpriseConfig(WifiEnterpriseConfig config) {
+        // TODO
     }
 
     /** @hide */
@@ -316,10 +325,7 @@ public class WifiPasspointCredential implements Parcelable {
         return mCertSha256Fingerprint;
     }
 
-    /**
-     * Get the user name of this Passpoint credential, for EAP-TTLS only.
-     * @return user name
-     */
+    /** @hide */
     public String getUserName() {
         return mUsername;
     }
@@ -345,28 +351,14 @@ public class WifiPasspointCredential implements Parcelable {
         return mMnc;
     }
 
-    /**
-     * Get the CA root certificate path of this Passpoint credential.
-     * @return CA root certificate path
-     */
+    /** @hide */
     public String getCaRootCertPath() {
         return mCaRootCert;
     }
 
-    /**
-     * Get the client certificate path of this Passpoint credential, for EAP-TLS only.
-     * @return client certificate path
-     */
+    /** @hide */
     public String getClientCertPath() {
         return mClientCert;
-    }
-
-    /**
-     * Set credential information of this Passpoint credential.
-     * @param config Credential information, must be either EAP-TLS or EAP-TTLS
-     */
-    public void setCredential(WifiEnterpriseConfig config) {
-        // TODO
     }
 
     /**

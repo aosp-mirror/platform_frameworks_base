@@ -17526,13 +17526,10 @@ package android.net.wifi.passpoint {
   public class WifiPasspointCredential implements android.os.Parcelable {
     ctor public WifiPasspointCredential(java.lang.String, java.lang.String, android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
-    method public java.lang.String getCaRootCertPath();
-    method public java.lang.String getClientCertPath();
-    method public int getEapMethod();
+    method public android.net.wifi.WifiEnterpriseConfig getEnterpriseConfig();
     method public java.lang.String getFqdn();
     method public java.lang.String getRealm();
-    method public java.lang.String getUserName();
-    method public void setCredential(android.net.wifi.WifiEnterpriseConfig);
+    method public void setEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
     method public void setFqdn(java.lang.String);
     method public void setRealm(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
