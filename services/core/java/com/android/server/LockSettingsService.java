@@ -47,12 +47,14 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.ILockSettingsObserver;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,6 +67,9 @@ import java.util.List;
 public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String PERMISSION = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
+
+    private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
     private final DatabaseHelper mOpenHelper;
     private static final String TAG = "LockSettingsService";
 
@@ -84,6 +89,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final Context mContext;
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
+
+    private final ArrayList<LockSettingsObserver> mObservers = new ArrayList<>();
 
     public LockSettingsService(Context context) {
         mContext = context;
@@ -220,6 +227,52 @@ public class LockSettingsService extends ILockSettings.Stub {
         checkReadPermission(key, userId);
 
         return readFromDb(key, defaultValue, userId);
+    }
+
+    @Override
+    public void registerObserver(ILockSettingsObserver remote) throws RemoteException {
+        synchronized (mObservers) {
+            for (int i = 0; i < mObservers.size(); i++) {
+                if (mObservers.get(i).remote.asBinder() == remote.asBinder()) {
+                    boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                    if (isDebuggable) {
+                        throw new IllegalStateException("Observer was already registered.");
+                    } else {
+                        Log.e(TAG, "Observer was already registered.");
+                        return;
+                    }
+                }
+            }
+            LockSettingsObserver o = new LockSettingsObserver();
+            o.remote = remote;
+            o.remote.asBinder().linkToDeath(o, 0);
+            mObservers.add(o);
+        }
+    }
+
+    @Override
+    public void unregisterObserver(ILockSettingsObserver remote) throws RemoteException {
+        synchronized (mObservers) {
+            for (int i = 0; i < mObservers.size(); i++) {
+                if (mObservers.get(i).remote.asBinder() == remote.asBinder()) {
+                    mObservers.remove(i);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void notifyObservers(String key, int userId) {
+        synchronized (mObservers) {
+            for (int i = 0; i < mObservers.size(); i++) {
+                try {
+                    mObservers.get(i).remote.onLockSettingChanged(key, userId);
+                } catch (RemoteException e) {
+                    // The stack trace is not really helpful here.
+                    Log.e(TAG, "Failed to notify ILockSettingsObserver: " + e);
+                }
+            }
+        }
     }
 
     private String getLockPatternFilename(int userId) {
@@ -438,6 +491,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void writeToDb(String key, String value, int userId) {
         writeToDb(mOpenHelper.getWritableDatabase(), key, value, userId);
+        notifyObservers(key, userId);
     }
 
     private void writeToDb(SQLiteDatabase db, String key, String value, int userId) {
@@ -582,5 +636,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             return IMountService.Stub.asInterface(service);
         }
         return null;
+    }
+
+    private class LockSettingsObserver implements DeathRecipient {
+        ILockSettingsObserver remote;
+
+        @Override
+        public void binderDied() {
+            mObservers.remove(this);
+        }
     }
 }
