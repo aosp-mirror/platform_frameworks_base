@@ -50,7 +50,15 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void addNotificationInternal(StatusBarNotification notification) {
+    }
+
+    @Override
     public void updateNotification(StatusBarNotification notification) {
+    }
+
+    @Override
+    protected void removeNotificationInternal(String key) {
     }
 
     @Override
