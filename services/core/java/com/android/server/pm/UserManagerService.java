@@ -1140,53 +1140,57 @@ public class UserManagerService extends IUserManager.Stub {
      */
     public boolean removeUser(int userHandle) {
         checkManageUsersPermission("Only the system can remove users");
-        final UserInfo user;
-        synchronized (mPackagesLock) {
-            user = mUsers.get(userHandle);
-            if (userHandle == 0 || user == null) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            final UserInfo user;
+            synchronized (mPackagesLock) {
+                user = mUsers.get(userHandle);
+                if (userHandle == 0 || user == null) {
+                    return false;
+                }
+                mRemovingUserIds.put(userHandle, true);
+                try {
+                    mAppOpsService.removeUser(userHandle);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
+                }
+                // Set this to a partially created user, so that the user will be purged
+                // on next startup, in case the runtime stops now before stopping and
+                // removing the user completely.
+                user.partial = true;
+                // Mark it as disabled, so that it isn't returned any more when
+                // profiles are queried.
+                user.flags |= UserInfo.FLAG_DISABLED;
+                writeUserLocked(user);
+            }
+
+            if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                    && user.isManagedProfile()) {
+                // Send broadcast to notify system that the user removed was a
+                // managed user.
+                sendProfileRemovedBroadcast(user.profileGroupId, user.id);
+            }
+
+            if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
+            int res;
+            try {
+                res = ActivityManagerNative.getDefault().stopUser(userHandle,
+                        new IStopUserCallback.Stub() {
+                            @Override
+                            public void userStopped(int userId) {
+                                finishRemoveUser(userId);
+                            }
+                            @Override
+                            public void userStopAborted(int userId) {
+                            }
+                        });
+            } catch (RemoteException e) {
                 return false;
             }
-            mRemovingUserIds.put(userHandle, true);
-            try {
-                mAppOpsService.removeUser(userHandle);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
-            }
-            // Set this to a partially created user, so that the user will be purged
-            // on next startup, in case the runtime stops now before stopping and
-            // removing the user completely.
-            user.partial = true;
-            // Mark it as disabled, so that it isn't returned any more when
-            // profiles are queried.
-            user.flags |= UserInfo.FLAG_DISABLED;
-            writeUserLocked(user);
+            return res == ActivityManager.USER_OP_SUCCESS;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-
-        if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                && user.isManagedProfile()) {
-            // Send broadcast to notify system that the user removed was a
-            // managed user.
-            sendProfileRemovedBroadcast(user.profileGroupId, user.id);
-        }
-
-        if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
-        int res;
-        try {
-            res = ActivityManagerNative.getDefault().stopUser(userHandle,
-                    new IStopUserCallback.Stub() {
-                        @Override
-                        public void userStopped(int userId) {
-                            finishRemoveUser(userId);
-                        }
-                        @Override
-                        public void userStopAborted(int userId) {
-                        }
-            });
-        } catch (RemoteException e) {
-            return false;
-        }
-
-        return res == ActivityManager.USER_OP_SUCCESS;
     }
 
     void finishRemoveUser(final int userHandle) {
