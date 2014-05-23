@@ -25,8 +25,9 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
-import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
+import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
+import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
     private static final boolean DUMMY_FORCE_DEFAULT = false;
     private static final int DUMMY_IS_DEFAULT_RES_ID = 0;
     private static final String SYSTEM_LOCALE = "en_US";
+    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
 
     private static InputMethodSubtype createDummySubtype(final String locale) {
         final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
@@ -64,142 +66,141 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         si.exported = true;
         si.nonLocalizedLabel = imeLabel;
         ri.serviceInfo = si;
-        final List<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        for (String subtypeLocale : subtypeLocales) {
-            subtypes.add(createDummySubtype(subtypeLocale));
+        List<InputMethodSubtype> subtypes = null;
+        if (subtypeLocales != null) {
+            subtypes = new ArrayList<InputMethodSubtype>();
+            for (String subtypeLocale : subtypeLocales) {
+                subtypes.add(createDummySubtype(subtypeLocale));
+            }
         }
         final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
                 DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
                 DUMMY_FORCE_DEFAULT, supportsSwitchingToNextInputMethod);
-        for (int i = 0; i < subtypes.size(); ++i) {
-            final String subtypeLocale = subtypeLocales.get(i);
-            items.add(new ImeSubtypeListItem(imeName, subtypeLocale, imi, i, subtypeLocale,
-                    SYSTEM_LOCALE));
+        if (subtypes == null) {
+            items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
+                    NOT_A_SUBTYPE_ID, null, SYSTEM_LOCALE));
+        } else {
+            for (int i = 0; i < subtypes.size(); ++i) {
+                final String subtypeLocale = subtypeLocales.get(i);
+                items.add(new ImeSubtypeListItem(imeName, subtypeLocale, imi, i, subtypeLocale,
+                        SYSTEM_LOCALE));
+            }
         }
     }
 
-    private static List<ImeSubtypeListItem> createTestData() {
+    private static List<ImeSubtypeListItem> createEnabledImeSubtypes() {
         final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
-        addDummyImeSubtypeListItems(items, "switchAwareLatinIme", "switchAwareLatinIme",
-                Arrays.asList("en_US", "es_US", "fr"),
+        addDummyImeSubtypeListItems(items, "LatinIme", "LatinIme", Arrays.asList("en_US", "fr"),
                 true /* supportsSwitchingToNextInputMethod*/);
-        addDummyImeSubtypeListItems(items, "nonSwitchAwareLatinIme", "nonSwitchAwareLatinIme",
+        addDummyImeSubtypeListItems(items, "switchUnawareLatinIme", "switchUnawareLatinIme",
                 Arrays.asList("en_UK", "hi"),
                 false /* supportsSwitchingToNextInputMethod*/);
-        addDummyImeSubtypeListItems(items, "switchAwareJapaneseIme", "switchAwareJapaneseIme",
-                Arrays.asList("ja_JP"),
+        addDummyImeSubtypeListItems(items, "subtypeUnawareIme", "subtypeUnawareIme", null,
+                false /* supportsSwitchingToNextInputMethod*/);
+        addDummyImeSubtypeListItems(items, "JapaneseIme", "JapaneseIme", Arrays.asList("ja_JP"),
                 true /* supportsSwitchingToNextInputMethod*/);
-        addDummyImeSubtypeListItems(items, "nonSwitchAwareJapaneseIme", "nonSwitchAwareJapaneseIme",
-                Arrays.asList("ja_JP"),
+        addDummyImeSubtypeListItems(items, "switchUnawareJapaneseIme", "switchUnawareJapaneseIme",
+                Arrays.asList("ja_JP"), false /* supportsSwitchingToNextInputMethod*/);
+        return items;
+    }
+
+    private static List<ImeSubtypeListItem> createDisabledImeSubtypes() {
+        final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
+        addDummyImeSubtypeListItems(items,
+                "UnknownIme", "UnknownIme",
+                Arrays.asList("en_US", "hi"),
+                true /* supportsSwitchingToNextInputMethod*/);
+        addDummyImeSubtypeListItems(items,
+                "UnknownSwitchingUnawareIme", "UnknownSwitchingUnawareIme",
+                Arrays.asList("en_US"),
+                false /* supportsSwitchingToNextInputMethod*/);
+        addDummyImeSubtypeListItems(items, "UnknownSubtypeUnawareIme",
+                "UnknownSubtypeUnawareIme", null,
                 false /* supportsSwitchingToNextInputMethod*/);
         return items;
     }
 
-    @SmallTest
-    public void testGetNextInputMethodImplWithNotOnlyCurrentIme() throws Exception {
-        final List<ImeSubtypeListItem> imList = createTestData();
-
-        final boolean ONLY_CURRENT_IME = false;
-        ImeSubtypeListItem currentIme;
-        ImeSubtypeListItem nextIme;
-
-        // "switchAwareLatinIme/en_US" -> "switchAwareLatinIme/es_US"
-        currentIme = imList.get(0);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(1), nextIme);
-        // "switchAwareLatinIme/es_US" -> "switchAwareLatinIme/fr"
-        currentIme = imList.get(1);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(2), nextIme);
-        // "switchAwareLatinIme/fr" -> "switchAwareJapaneseIme/ja_JP"
-        currentIme = imList.get(2);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(5), nextIme);
-        // "switchAwareJapaneseIme/ja_JP" -> "switchAwareLatinIme/en_US"
-        currentIme = imList.get(5);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(0), nextIme);
-
-        // "nonSwitchAwareLatinIme/en_UK" -> "nonSwitchAwareLatinIme/hi"
-        currentIme = imList.get(3);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(4), nextIme);
-        // "nonSwitchAwareLatinIme/hi" -> "nonSwitchAwareJapaneseIme/ja_JP"
-        currentIme = imList.get(4);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(6), nextIme);
-        // "nonSwitchAwareJapaneseIme/ja_JP" -> "nonSwitchAwareLatinIme/en_UK"
-        currentIme = imList.get(6);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(3), nextIme);
+    private void assertNextInputMethod(final ControllerImpl controller,
+            final boolean onlyCurrentIme,
+            final ImeSubtypeListItem currentItem, final ImeSubtypeListItem nextItem) {
+        InputMethodSubtype subtype = null;
+        if (currentItem.mSubtypeName != null) {
+            subtype = createDummySubtype(currentItem.mSubtypeName.toString());
+        }
+        final ImeSubtypeListItem nextIme = controller.getNextInputMethod(onlyCurrentIme,
+                currentItem.mImi, subtype);
+        assertEquals(nextItem, nextIme);
     }
 
     @SmallTest
-    public void testGetNextInputMethodImplWithOnlyCurrentIme() throws Exception {
-        final List<ImeSubtypeListItem> imList = createTestData();
+    public void testControllerImpl() throws Exception {
+        final List<ImeSubtypeListItem> disabledItems = createDisabledImeSubtypes();
+        final ImeSubtypeListItem disabledIme_en_US = disabledItems.get(0);
+        final ImeSubtypeListItem disabledIme_hi = disabledItems.get(1);
+        final ImeSubtypeListItem disabledSwitchingUnawareIme = disabledItems.get(2);
+        final ImeSubtypeListItem disabledSubtypeUnawareIme = disabledItems.get(3);
 
-        final boolean ONLY_CURRENT_IME = true;
-        ImeSubtypeListItem currentIme;
-        ImeSubtypeListItem nextIme;
+        final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
+        final ImeSubtypeListItem latinIme_en_US = enabledItems.get(0);
+        final ImeSubtypeListItem latinIme_fr = enabledItems.get(1);
+        final ImeSubtypeListItem switchingUnawarelatinIme_en_UK = enabledItems.get(2);
+        final ImeSubtypeListItem switchingUnawarelatinIme_hi = enabledItems.get(3);
+        final ImeSubtypeListItem subtypeUnawareIme = enabledItems.get(4);
+        final ImeSubtypeListItem japaneseIme_ja_JP = enabledItems.get(5);
+        final ImeSubtypeListItem switchUnawareJapaneseIme_ja_JP = enabledItems.get(6);
 
-        // "switchAwareLatinIme/en_US" -> "switchAwareLatinIme/es_US"
-        currentIme = imList.get(0);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(1), nextIme);
-        // "switchAwareLatinIme/es_US" -> "switchAwareLatinIme/fr"
-        currentIme = imList.get(1);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(2), nextIme);
-        // "switchAwareLatinIme/fr" -> "switchAwareLatinIme/en_US"
-        currentIme = imList.get(2);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(0), nextIme);
+        final ControllerImpl controller = new ControllerImpl(enabledItems);
 
-        // "nonSwitchAwareLatinIme/en_UK" -> "nonSwitchAwareLatinIme/hi"
-        currentIme = imList.get(3);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(4), nextIme);
-        // "nonSwitchAwareLatinIme/hi" -> "switchAwareLatinIme/en_UK"
-        currentIme = imList.get(4);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertEquals(imList.get(3), nextIme);
+        // switching-aware loop
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                latinIme_fr, japaneseIme_ja_JP);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                japaneseIme_ja_JP, latinIme_en_US);
 
-        // "switchAwareJapaneseIme/ja_JP" -> null
-        currentIme = imList.get(5);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertNull(nextIme);
+        // switching-unaware loop
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_hi, subtypeUnawareIme);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                subtypeUnawareIme, switchUnawareJapaneseIme_ja_JP);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                switchUnawareJapaneseIme_ja_JP, switchingUnawarelatinIme_en_UK);
 
-        // "nonSwitchAwareJapaneseIme/ja_JP" -> null
-        currentIme = imList.get(6);
-        nextIme = InputMethodSubtypeSwitchingController.getNextInputMethodLockedImpl(
-                imList, ONLY_CURRENT_IME, currentIme.mImi, createDummySubtype(
-                        currentIme.mSubtypeName.toString()));
-        assertNull(nextIme);
+        // test onlyCurrentIme == true
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                latinIme_fr, latinIme_en_US);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                switchingUnawarelatinIme_hi, switchingUnawarelatinIme_en_UK);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                subtypeUnawareIme, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                japaneseIme_ja_JP, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                switchUnawareJapaneseIme_ja_JP, null);
+
+        // Make sure that disabled IMEs are not accepted.
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                disabledIme_en_US, null);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                disabledIme_hi, null);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                disabledSwitchingUnawareIme, null);
+        assertNextInputMethod(controller, false /* onlyCurrentIme */,
+                disabledSubtypeUnawareIme, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                disabledIme_en_US, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                disabledIme_hi, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                disabledSwitchingUnawareIme, null);
+        assertNextInputMethod(controller, true /* onlyCurrentIme */,
+                disabledSubtypeUnawareIme, null);
     }
  }
