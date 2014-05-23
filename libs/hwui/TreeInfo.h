@@ -52,6 +52,7 @@ struct TreeInfo {
             : hasFunctors(false)
             , hasAnimations(false)
             , requiresUiRedraw(false)
+            , canDrawThisFrame(true)
         {}
         bool hasFunctors;
         // This is only updated if evaluateAnimations is true
@@ -60,6 +61,13 @@ struct TreeInfo {
         // animate itself, such as if hasFunctors is true
         // This is only set if hasAnimations is true
         bool requiresUiRedraw;
+        // This is set to true if draw() can be called this frame
+        // false means that we must delay until the next vsync pulse as frame
+        // production is outrunning consumption
+        // NOTE that if this is false CanvasContext will set either requiresUiRedraw
+        // *OR* will post itself for the next vsync automatically, use this
+        // only to avoid calling draw()
+        bool canDrawThisFrame;
     } out;
 
     // TODO: Damage calculations

@@ -112,7 +112,7 @@ bool RenderProxy::loadSystemProperties() {
     return (bool) postAndWait(task);
 }
 
-CREATE_BRIDGE2(initialize, CanvasContext* context, EGLNativeWindowType window) {
+CREATE_BRIDGE2(initialize, CanvasContext* context, ANativeWindow* window) {
     return (void*) args->context->initialize(args->window);
 }
 
@@ -123,7 +123,7 @@ bool RenderProxy::initialize(const sp<ANativeWindow>& window) {
     return (bool) postAndWait(task);
 }
 
-CREATE_BRIDGE2(updateSurface, CanvasContext* context, EGLNativeWindowType window) {
+CREATE_BRIDGE2(updateSurface, CanvasContext* context, ANativeWindow* window) {
     args->context->updateSurface(args->window);
     return NULL;
 }
@@ -135,7 +135,7 @@ void RenderProxy::updateSurface(const sp<ANativeWindow>& window) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(pauseSurface, CanvasContext* context, EGLNativeWindowType window) {
+CREATE_BRIDGE2(pauseSurface, CanvasContext* context, ANativeWindow* window) {
     args->context->pauseSurface(args->window);
     return NULL;
 }
@@ -290,6 +290,17 @@ CREATE_BRIDGE0(fence) {
 void RenderProxy::fence() {
     SETUP_TASK(fence);
     postAndWait(task);
+}
+
+CREATE_BRIDGE1(notifyFramePending, CanvasContext* context) {
+    args->context->notifyFramePending();
+    return NULL;
+}
+
+void RenderProxy::notifyFramePending() {
+    SETUP_TASK(notifyFramePending);
+    args->context = mContext;
+    mRenderThread.queueAtFront(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

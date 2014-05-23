@@ -87,7 +87,13 @@ void DrawFrameTask::postAndWait() {
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
-    bool canUnblockUiThread = syncFrameState();
+    bool canUnblockUiThread;
+    bool canDrawThisFrame;
+    {
+        TreeInfo info;
+        canUnblockUiThread = syncFrameState(info);
+        canDrawThisFrame = info.out.canDrawThisFrame;
+    }
 
     // Grab a copy of everything we need
     Rect dirty(mDirty);
@@ -98,7 +104,9 @@ void DrawFrameTask::run() {
         unblockUiThread();
     }
 
-    context->draw(&dirty);
+    if (CC_LIKELY(canDrawThisFrame)) {
+        context->draw(&dirty);
+    }
 
     if (!canUnblockUiThread) {
         unblockUiThread();
@@ -111,12 +119,11 @@ static void initTreeInfo(TreeInfo& info) {
     info.evaluateAnimations = true;
 }
 
-bool DrawFrameTask::syncFrameState() {
+bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     mRenderThread->timeLord().vsyncReceived(mFrameTimeNanos);
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
-    TreeInfo info;
     initTreeInfo(info);
     mContext->prepareDraw(&mLayers, info);
     if (info.out.hasAnimations) {

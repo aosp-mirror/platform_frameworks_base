@@ -299,6 +299,12 @@ static void android_view_ThreadedRenderer_fence(JNIEnv* env, jobject clazz,
     proxy->fence();
 }
 
+static void android_view_ThreadedRenderer_notifyFramePending(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->notifyFramePending();
+}
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -329,6 +335,7 @@ static JNINativeMethod gMethods[] = {
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nDestroyLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_destroyLayer },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
+    { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
 #endif
 };
 
