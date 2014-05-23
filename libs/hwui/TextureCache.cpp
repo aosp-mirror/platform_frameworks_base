@@ -34,7 +34,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 TextureCache::TextureCache():
-        mCache(LruCache<const SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<const SkPixelRef*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE) {
     char property[PROPERTY_VALUE_MAX];
@@ -58,7 +58,7 @@ TextureCache::TextureCache():
 }
 
 TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(LruCache<const SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<const SkPixelRef*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     init();
 }
@@ -103,7 +103,7 @@ void TextureCache::setFlushRate(float flushRate) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::operator()(const SkBitmap*&, Texture*& texture) {
+void TextureCache::operator()(const SkPixelRef*&, Texture*& texture) {
     // This will be called already locked
     if (texture) {
         mSize -= texture->bitmapSize;
@@ -122,7 +122,7 @@ void TextureCache::operator()(const SkBitmap*&, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TextureCache::resetMarkInUse() {
-    LruCache<const SkBitmap*, Texture*>::Iterator iter(mCache);
+    LruCache<const SkPixelRef*, Texture*>::Iterator iter(mCache);
     while (iter.next()) {
         iter.value()->isInUse = false;
     }
@@ -140,7 +140,7 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
 Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
-    Texture* texture = mCache.get(bitmap);
+    Texture* texture = mCache.get(bitmap->pixelRef());
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
@@ -170,7 +170,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
             if (mDebugEnabled) {
                 ALOGD("Texture created, size = %d", size);
             }
-            mCache.put(bitmap, texture);
+            mCache.put(bitmap->pixelRef(), texture);
         }
     } else if (!texture->isInUse && bitmap->getGenerationID() != texture->generation) {
         // Texture was in the cache but is dirty, re-upload
@@ -218,7 +218,7 @@ Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
 }
 
 void TextureCache::remove(const SkBitmap* bitmap) {
-    mCache.remove(bitmap);
+    mCache.remove(bitmap->pixelRef());
 }
 
 void TextureCache::removeDeferred(const SkBitmap* bitmap) {
@@ -231,7 +231,7 @@ void TextureCache::clearGarbage() {
     size_t count = mGarbage.size();
     for (size_t i = 0; i < count; i++) {
         const SkBitmap* bitmap = mGarbage.itemAt(i);
-        mCache.remove(bitmap);
+        mCache.remove(bitmap->pixelRef());
         delete bitmap;
     }
     mGarbage.clear();
