@@ -1994,6 +1994,7 @@ public abstract class Context {
             WIFI_PASSPOINT_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
+            //@hide: ETHERNET_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             MEDIA_ROUTER_SERVICE,
@@ -2069,9 +2070,6 @@ public abstract class Context {
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
-     *  <dt> {@link #ETHERNET_SERVICE} ("ethernet")
-     *  <dd> A {@link android.net.ethernet.EthernetManager EthernetManager} for
-     * management of Ethernet connectivity.
      * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
      * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
      * for management of input methods.
