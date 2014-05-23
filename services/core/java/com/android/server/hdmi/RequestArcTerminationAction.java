@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCecMessage;
-import android.util.Slog;
 
 /**
  * Feature action to handle <Request ARC Termination>.
@@ -43,11 +42,10 @@ final class RequestArcTerminationAction extends RequestArcAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == 0) {
+                if (error == HdmiControlService.SEND_RESULT_SUCCESS) {
                     mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
                     addTimer(mState, TIMEOUT_MS);
                 } else {
-                    Slog.w(TAG, "Failed to send <Request ARC Initiation>");
                     // If failed to send <Request ARC Termination>, start "Disabled" ARC
                     // transmission action.
                     disableArcTransmission();
