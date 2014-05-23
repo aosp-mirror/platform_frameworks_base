@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
 /**
@@ -37,17 +38,24 @@ final class RequestArcInitiationAction extends RequestArcAction {
 
     @Override
     boolean start() {
-        if (sendCommand(
-                HdmiCecMessageBuilder.buildRequestArcInitiation(mSourceAddress, mAvrAddress))) {
-            mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
-            addTimer(mState, TIMEOUT_MS);
-        } else {
-            Slog.w(TAG, "Failed to send <Request ARC Initiation>");
-            // If failed to send <Request ARC Initiation>, start "Disabled" ARC transmission
-            // action.
-            disableArcTransmission();
-            finish();
-        }
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildRequestArcInitiation(mSourceAddress,
+                mAvrAddress);
+        sendCommand(command, new HdmiControlService.SendMessageCallback() {
+            @Override
+            public void onSendCompleted(int error) {
+                // success.
+                if (error == 0) {
+                    mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
+                    addTimer(mState, TIMEOUT_MS);
+                } else {
+                    Slog.w(TAG, "Failed to send <Request ARC Initiation>");
+                    // If failed to send <Request ARC Initiation>, start "Disabled"
+                    // ARC transmission action.
+                    disableArcTransmission();
+                    finish();
+                }
+            }
+        });
         return true;
     }
 }

@@ -164,8 +164,13 @@ abstract class FeatureAction {
         mActionTimer.sendTimerMessage(state, delayMillis);
     }
 
-    protected final boolean sendCommand(HdmiCecMessage cmd) {
-        return mService.sendCecCommand(cmd);
+    protected final void sendCommand(HdmiCecMessage cmd) {
+        mService.sendCecCommand(cmd);
+    }
+
+    protected final void sendCommand(HdmiCecMessage cmd,
+            HdmiControlService.SendMessageCallback callback) {
+        mService.sendCecCommand(cmd, callback);
     }
 
     /**
