@@ -66,8 +66,6 @@ public class LinearGradient extends Shader {
         mPositions = positions;
         mTileMode = tile;
         native_instance = nativeCreate1(x0, y0, x1, y1, colors, positions, tile.nativeInt);
-        native_shader = nativePostCreate1(native_instance, x0, y0, x1, y1, colors, positions,
-                tile.nativeInt);
     }
 
     /** Create a shader that draws a linear gradient along a line.
@@ -90,8 +88,6 @@ public class LinearGradient extends Shader {
         mColor1 = color1;
         mTileMode = tile;
         native_instance = nativeCreate2(x0, y0, x1, y1, color0, color1, tile.nativeInt);
-        native_shader = nativePostCreate2(native_instance, x0, y0, x1, y1, color0, color1,
-                tile.nativeInt);
     }
 
     /**
@@ -119,9 +115,5 @@ public class LinearGradient extends Shader {
     private native long nativeCreate1(float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode);
     private native long nativeCreate2(float x0, float y0, float x1, float y1,
-            int color0, int color1, int tileMode);
-    private native long nativePostCreate1(long native_shader, float x0, float y0, float x1, float y1,
-            int colors[], float positions[], int tileMode);
-    private native long nativePostCreate2(long native_shader, float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode);
 }

@@ -302,6 +302,36 @@ public abstract class DisplayModifier {
                             paint.setShader(ResourceModifiers.instance().mVertGradient);
                         }
                     });
+                    put("radGradient", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setShader(ResourceModifiers.instance().mRadGradient);
+                        }
+                    });
+                    put("sweepGradient", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setShader(ResourceModifiers.instance().mSweepGradient);
+                        }
+                    });
+                    put("composeShader", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setShader(ResourceModifiers.instance().mComposeShader);
+                        }
+                    });
+                    put("bad composeShader", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setShader(ResourceModifiers.instance().mBadComposeShader);
+                        }
+                    });
+                    put("bad composeShader 2", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setShader(ResourceModifiers.instance().mAnotherBadComposeShader);
+                        }
+                    });
                 }
             });
 

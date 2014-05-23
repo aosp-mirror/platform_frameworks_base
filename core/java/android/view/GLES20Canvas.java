@@ -41,10 +41,6 @@ import android.text.TextUtils;
  * An implementation of Canvas on top of OpenGL ES 2.0.
  */
 class GLES20Canvas extends HardwareCanvas {
-    // Must match modifiers used in the JNI layer
-    private static final int MODIFIER_NONE = 0;
-    private static final int MODIFIER_SHADER = 2;
-
     private final boolean mOpaque;
     protected long mRenderer;
 
@@ -650,13 +646,8 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawArc(mRenderer, oval.left, oval.top, oval.right, oval.bottom,
-                    startAngle, sweepAngle, useCenter, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawArc(mRenderer, oval.left, oval.top, oval.right, oval.bottom,
+                startAngle, sweepAngle, useCenter, paint.mNativePaint);
     }
 
     private static native void nDrawArc(long renderer, float left, float top,
@@ -672,7 +663,6 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing patches
         final long nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
@@ -682,7 +672,6 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing patches
         final long nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
@@ -694,14 +683,8 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing bitmaps
-        int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
-        try {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, nativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, nativePaint);
     }
 
     private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
@@ -710,15 +693,9 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing bitmaps
-        int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
-        try {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer,
-                    matrix.native_instance, nativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer,
+                matrix.native_instance, nativePaint);
     }
 
     private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
@@ -727,55 +704,43 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing bitmaps
-        int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
-        try {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
 
-            int left, top, right, bottom;
-            if (src == null) {
-                left = top = 0;
-                right = bitmap.getWidth();
-                bottom = bitmap.getHeight();
-            } else {
-                left = src.left;
-                right = src.right;
-                top = src.top;
-                bottom = src.bottom;
-            }
-
-            nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
-                    dst.left, dst.top, dst.right, dst.bottom, nativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        int left, top, right, bottom;
+        if (src == null) {
+            left = top = 0;
+            right = bitmap.getWidth();
+            bottom = bitmap.getHeight();
+        } else {
+            left = src.left;
+            right = src.right;
+            top = src.top;
+            bottom = src.bottom;
         }
+
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         throwIfCannotDraw(bitmap);
-        // Shaders are ignored when drawing bitmaps
-        int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
-        try {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
-    
-            float left, top, right, bottom;
-            if (src == null) {
-                left = top = 0;
-                right = bitmap.getWidth();
-                bottom = bitmap.getHeight();
-            } else {
-                left = src.left;
-                right = src.right;
-                top = src.top;
-                bottom = src.bottom;
-            }
-    
-            nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
-                    dst.left, dst.top, dst.right, dst.bottom, nativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+
+        float left, top, right, bottom;
+        if (src == null) {
+            left = top = 0;
+            right = bitmap.getWidth();
+            bottom = bitmap.getHeight();
+        } else {
+            left = src.left;
+            right = src.right;
+            top = src.top;
+            bottom = src.bottom;
         }
+
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
     private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
@@ -805,7 +770,6 @@ class GLES20Canvas extends HardwareCanvas {
             throw new ArrayIndexOutOfBoundsException();
         }
 
-        // Shaders are ignored when drawing bitmaps
         final long nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, colors, offset, stride, x, y,
                 width, height, hasAlpha, nativePaint);
@@ -817,7 +781,6 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
             int width, int height, boolean hasAlpha, Paint paint) {
-        // Shaders are ignored when drawing bitmaps
         drawBitmap(colors, offset, stride, (float) x, (float) y, width, height, hasAlpha, paint);
     }
 
@@ -840,14 +803,9 @@ class GLES20Canvas extends HardwareCanvas {
             checkRange(colors.length, colorOffset, count);
         }
 
-        int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
-        try {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
-                    verts, vertOffset, colors, colorOffset, nativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
+                verts, vertOffset, colors, colorOffset, nativePaint);
     }
 
     private static native void nDrawBitmapMesh(long renderer, long bitmap, byte[] buffer,
@@ -856,12 +814,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawCircle(mRenderer, cx, cy, radius, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawCircle(mRenderer, cx, cy, radius, paint.mNativePaint);
     }
 
     private static native void nDrawCircle(long renderer, float cx, float cy,
@@ -906,12 +859,7 @@ class GLES20Canvas extends HardwareCanvas {
         if ((offset | count) < 0 || offset + count > pts.length) {
             throw new IllegalArgumentException("The lines array must contain 4 elements per line.");
         }
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawLines(mRenderer, pts, offset, count, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawLines(mRenderer, pts, offset, count, paint.mNativePaint);
     }
 
     private static native void nDrawLines(long renderer, float[] points,
@@ -924,12 +872,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawOval(RectF oval, Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawOval(mRenderer, oval.left, oval.top, oval.right, oval.bottom, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawOval(mRenderer, oval.left, oval.top, oval.right, oval.bottom, paint.mNativePaint);
     }
 
     private static native void nDrawOval(long renderer, float left, float top,
@@ -944,17 +887,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPath(Path path, Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            if (path.isSimplePath) {
-                if (path.rects != null) {
-                    nDrawRects(mRenderer, path.rects.mNativeRegion, paint.mNativePaint);
-                }
-            } else {
-                nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
+        if (path.isSimplePath) {
+            if (path.rects != null) {
+                nDrawRects(mRenderer, path.rects.mNativeRegion, paint.mNativePaint);
             }
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        } else {
+            nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
         }
     }
 
@@ -962,12 +900,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDrawRects(long renderer, long region, long paint);
 
     void drawRects(float[] rects, int count, Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawRects(mRenderer, rects, count, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawRects(mRenderer, rects, count, paint.mNativePaint);
     }
 
     private static native void nDrawRects(long renderer, float[] rects, int count, long paint);
@@ -1029,12 +962,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPoints(float[] pts, int offset, int count, Paint paint) {
         if (count < 2) return;
 
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawPoints(mRenderer, pts, offset, count, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawPoints(mRenderer, pts, offset, count, paint.mNativePaint);
     }
 
     private static native void nDrawPoints(long renderer, float[] points,
@@ -1047,12 +975,7 @@ class GLES20Canvas extends HardwareCanvas {
             throw new IndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawPosText(mRenderer, text, index, count, pos, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawPosText(mRenderer, text, index, count, pos, paint.mNativePaint);
     }
 
     private static native void nDrawPosText(long renderer, char[] text, int index, int count,
@@ -1065,12 +988,7 @@ class GLES20Canvas extends HardwareCanvas {
             throw new ArrayIndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawPosText(mRenderer, text, 0, text.length(), pos, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawPosText(mRenderer, text, 0, text.length(), pos, paint.mNativePaint);
     }
 
     private static native void nDrawPosText(long renderer, String text, int start, int end,
@@ -1079,12 +997,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
         if (left == right || top == bottom) return;
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawRect(mRenderer, left, top, right, bottom, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawRect(mRenderer, left, top, right, bottom, paint.mNativePaint);
     }
 
     private static native void nDrawRect(long renderer, float left, float top,
@@ -1108,12 +1021,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
             Paint paint) {
-        int modifiers = setupModifiers(paint, MODIFIER_SHADER);
-        try {
-            nDrawRoundRect(mRenderer, left, top, right, bottom, rx, ry, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawRoundRect(mRenderer, left, top, right, bottom, rx, ry, paint.mNativePaint);
     }
 
     private static native void nDrawRoundRect(long renderer, float left, float top,
@@ -1125,13 +1033,8 @@ class GLES20Canvas extends HardwareCanvas {
             throw new IndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint,
-                paint.mNativeTypeface);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawText(mRenderer, text, index, count, x, y,
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
     
     private static native void nDrawText(long renderer, char[] text, int index, int count,
@@ -1139,24 +1042,18 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
-        int modifiers = setupModifiers(paint);
-        try {
-            if (text instanceof String || text instanceof SpannedString ||
-                    text instanceof SpannableString) {
-                nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
-                        paint.mNativePaint, paint.mNativeTypeface);
-            } else if (text instanceof GraphicsOperations) {
-                ((GraphicsOperations) text).drawText(this, start, end, x, y,
-                                                         paint);
-            } else {
-                char[] buf = TemporaryBuffer.obtain(end - start);
-                TextUtils.getChars(text, start, end, buf, 0);
-                nDrawText(mRenderer, buf, 0, end - start, x, y,
-                        paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
-                TemporaryBuffer.recycle(buf);
-            }
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
+                    paint.mNativePaint, paint.mNativeTypeface);
+        } else if (text instanceof GraphicsOperations) {
+            ((GraphicsOperations) text).drawText(this, start, end, x, y, paint);
+        } else {
+            char[] buf = TemporaryBuffer.obtain(end - start);
+            TextUtils.getChars(text, start, end, buf, 0);
+            nDrawText(mRenderer, buf, 0, end - start, x, y,
+                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+            TemporaryBuffer.recycle(buf);
         }
     }
 
@@ -1166,13 +1063,8 @@ class GLES20Canvas extends HardwareCanvas {
             throw new IndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint,
-                paint.mNativeTypeface);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawText(mRenderer, text, start, end, x, y,
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     private static native void nDrawText(long renderer, String text, int start, int end,
@@ -1180,13 +1072,8 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags,
-                    paint.mNativePaint, paint.mNativeTypeface);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawText(mRenderer, text, 0, text.length(), x, y,
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     @Override
@@ -1196,13 +1083,8 @@ class GLES20Canvas extends HardwareCanvas {
             throw new ArrayIndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawTextOnPath(mRenderer, text, index, count, path.mNativePath, hOffset, vOffset,
-                    paint.mBidiFlags, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawTextOnPath(mRenderer, text, index, count, path.mNativePath, hOffset, vOffset,
+                paint.mBidiFlags, paint.mNativePaint);
     }
 
     private static native void nDrawTextOnPath(long renderer, char[] text, int index, int count,
@@ -1212,13 +1094,8 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
         if (text.length() == 0) return;
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawTextOnPath(mRenderer, text, 0, text.length(), path.mNativePath, hOffset, vOffset,
-                    paint.mBidiFlags, paint.mNativePaint);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawTextOnPath(mRenderer, text, 0, text.length(), path.mNativePath, hOffset, vOffset,
+                paint.mBidiFlags, paint.mNativePaint);
     }
 
     private static native void nDrawTextOnPath(long renderer, String text, int start, int end,
@@ -1234,13 +1111,8 @@ class GLES20Canvas extends HardwareCanvas {
             throw new IllegalArgumentException("Unknown direction: " + dir);
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, dir,
-                    paint.mNativePaint, paint.mNativeTypeface);
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
-        }
+        nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, dir,
+                paint.mNativePaint, paint.mNativeTypeface);
     }
 
     private static native void nDrawTextRun(long renderer, char[] text, int index, int count,
@@ -1253,27 +1125,22 @@ class GLES20Canvas extends HardwareCanvas {
             throw new IndexOutOfBoundsException();
         }
 
-        int modifiers = setupModifiers(paint);
-        try {
-            int flags = dir == 0 ? 0 : 1;
-            if (text instanceof String || text instanceof SpannedString ||
-                    text instanceof SpannableString) {
-                nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
-                        contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
-            } else if (text instanceof GraphicsOperations) {
-                ((GraphicsOperations) text).drawTextRun(this, start, end,
-                        contextStart, contextEnd, x, y, flags, paint);
-            } else {
-                int contextLen = contextEnd - contextStart;
-                int len = end - start;
-                char[] buf = TemporaryBuffer.obtain(contextLen);
-                TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-                nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
-                        x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
-                TemporaryBuffer.recycle(buf);
-            }
-        } finally {
-            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        int flags = dir == 0 ? 0 : 1;
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
+                    contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+        } else if (text instanceof GraphicsOperations) {
+            ((GraphicsOperations) text).drawTextRun(this, start, end,
+                    contextStart, contextEnd, x, y, flags, paint);
+        } else {
+            int contextLen = contextEnd - contextStart;
+            int len = end - start;
+            char[] buf = TemporaryBuffer.obtain(contextLen);
+            TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+            nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
+                    x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+            TemporaryBuffer.recycle(buf);
         }
     }
 
@@ -1286,40 +1153,4 @@ class GLES20Canvas extends HardwareCanvas {
             int indexOffset, int indexCount, Paint paint) {
         // TODO: Implement
     }
-
-    private int setupModifiers(Bitmap b, Paint paint) {
-        if (b.getConfig() != Bitmap.Config.ALPHA_8) {
-            return MODIFIER_NONE;
-        } else {
-            return setupModifiers(paint);
-        }
-    }
-
-    private int setupModifiers(Paint paint) {
-        int modifiers = MODIFIER_NONE;
-
-        final Shader shader = paint.getShader();
-        if (shader != null) {
-            nSetupShader(mRenderer, shader.native_shader);
-            modifiers |= MODIFIER_SHADER;
-        }
-
-        return modifiers;
-    }
-
-    private int setupModifiers(Paint paint, int flags) {
-        int modifiers = MODIFIER_NONE;
-
-        final Shader shader = paint.getShader();
-        if (shader != null && (flags & MODIFIER_SHADER) != 0) {
-            nSetupShader(mRenderer, shader.native_shader);
-            modifiers |= MODIFIER_SHADER;
-        }
-
-        return modifiers;
-    }
-
-    private static native void nSetupShader(long renderer, long shader);
-
-    private static native void nResetModifiers(long renderer, int modifiers);
 }
