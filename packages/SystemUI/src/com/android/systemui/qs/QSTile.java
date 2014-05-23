@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.TetheringController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.volume.VolumeComponent;
 
 import java.util.List;
 import java.util.Objects;
@@ -49,12 +51,12 @@ import java.util.Objects;
 public abstract class QSTile<TState extends State> implements Listenable {
     protected final String TAG = "QSTile." + getClass().getSimpleName();
     protected static final boolean DEBUG = false;
-    public static final int FEEDBACK_START_DELAY = 400;
 
     protected final Host mHost;
     protected final Context mContext;
     protected final H mHandler;
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    private final int mFeedbackStartDelay;
 
     private Callback mCallback;
     protected final TState mState = newTileState();
@@ -68,6 +70,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHost = host;
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
+        mFeedbackStartDelay = mContext.getResources().getInteger(R.integer.feedback_start_delay);
     }
 
     public boolean supportsDualTargets() {
@@ -114,6 +117,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId).sendToTarget();
+    }
+
+    protected void postAfterFeedback(Runnable runnable) {
+        mHandler.postDelayed(runnable, mFeedbackStartDelay);
     }
 
     // call only on tile worker looper
@@ -213,6 +220,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         ZenModeController getZenModeController();
         TetheringController getTetheringController();
         CastController getCastController();
+        VolumeComponent getVolumeComponent();
     }
 
     public static class State {

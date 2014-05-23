@@ -65,12 +65,12 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
-        mHandler.postDelayed(new Runnable() {
+        postAfterFeedback(new Runnable() {
             public void run() {
                 mHost.collapsePanels();
                 mUiHandler.post(mShowDialog);
             }
-        }, FEEDBACK_START_DELAY);
+        });
     }
 
     @Override

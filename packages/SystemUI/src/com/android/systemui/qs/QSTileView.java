@@ -84,7 +84,8 @@ public class QSTileView extends ViewGroup {
             removeView(mLabel);
         }
         final Resources res = mContext.getResources();
-        mLabel = new TextView(mDual ? new ContextThemeWrapper(mContext, R.style.QSBorderless_Tiny)
+        mLabel = new TextView(mDual
+                ? new ContextThemeWrapper(mContext, R.style.BorderlessButton_Tiny)
                 : mContext);
         mLabel.setId(android.R.id.title);
         mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
