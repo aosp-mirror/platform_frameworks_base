@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.hardware.camera2;
 
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.location.Location;
+import android.media.ExifInterface;
+import android.media.Image;
 import android.util.Size;
 
 import java.io.IOException;
@@ -266,6 +266,7 @@ public final class DngCreator implements AutoCloseable {
      * </p>
      *
      * @param dngOutput an {@link java.io.OutputStream} to write the DNG file to.
+     * @param size the {@link Size} of the image to write, in pixels.
      * @param pixels an {@link java.nio.ByteBuffer} of pixel data to write.
      * @param offset the offset of the raw image in bytes.  This indicates how many bytes will
      *               be skipped in the input before any pixel data is read.
@@ -362,7 +363,6 @@ public final class DngCreator implements AutoCloseable {
                                                             long offset) throws IOException;
 
     static {
-        System.loadLibrary("media_jni");
         nativeClassInit();
     }
 }

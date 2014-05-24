@@ -54,7 +54,7 @@ using namespace img_utils;
         return; \
     }
 
-#define ANDROID_MEDIA_DNGCREATOR_CTX_JNI_ID     "mNativeContext"
+#define ANDROID_DNGCREATOR_CTX_JNI_ID     "mNativeContext"
 
 static struct {
     jfieldID mNativeContext;
@@ -163,9 +163,10 @@ static void DngCreator_nativeClassInit(JNIEnv* env, jclass clazz) {
     ALOGV("%s:", __FUNCTION__);
 
     gDngCreatorClassInfo.mNativeContext = env->GetFieldID(clazz,
-            ANDROID_MEDIA_DNGCREATOR_CTX_JNI_ID, "J");
+            ANDROID_DNGCREATOR_CTX_JNI_ID, "J");
     LOG_ALWAYS_FATAL_IF(gDngCreatorClassInfo.mNativeContext == NULL,
-            "can't find android/media/DngCreator.%s", ANDROID_MEDIA_DNGCREATOR_CTX_JNI_ID);
+            "can't find android/hardware/camera2/DngCreator.%s",
+            ANDROID_DNGCREATOR_CTX_JNI_ID);
 
     jclass outputStreamClazz = env->FindClass("java/io/OutputStream");
     LOG_ALWAYS_FATAL_IF(outputStreamClazz == NULL, "Can't find java/io/OutputStream class");
@@ -766,7 +767,8 @@ static JNINativeMethod gDngCreatorMethods[] = {
             (void*) DngCreator_nativeWriteInputStream},
 };
 
-int register_android_media_DngCreator(JNIEnv *env) {
+int register_android_hardware_camera2_DngCreator(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,
-                   "android/media/DngCreator", gDngCreatorMethods, NELEM(gDngCreatorMethods));
+                   "android/hardware/camera2/DngCreator", gDngCreatorMethods,
+                   NELEM(gDngCreatorMethods));
 }
