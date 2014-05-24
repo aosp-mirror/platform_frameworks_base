@@ -885,41 +885,57 @@
          be passed a persistable Bundle in their Intent.extras. -->
     <attr name="persistable" format="boolean" />
 
-    <!-- Specify whether this activity should always be launched in doc-centric mode. For
-         values other than <code>none</code> the activity must be defined with
-         {@link android.R.attr#launchMode} <code>standard</code> or <code>singleTop</code>.
-         This attribute can be overridden by {@link
-         android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}.
+    <!-- This attribute specifies that an activity shall become the root activity of a
+         new task each time it is launched. Using this attribute permits the user to
+         have multiple documents from the same applications appear in the recent tasks list.
 
-         <p>If this attribute is not specified, <code>none</code> will be used.
-         Note that this launch behavior can be changed in some ways at runtime
-         through the {@link android.content.Intent} flags
-         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}. -->
+         <p>Such a document is any kind of item for which an application may want to
+         maintain multiple simultaneous instances. Examples might be text files, web
+         pages, spreadsheets, or emails. Each such document will be in a separate
+         task in the recent taskss list.
+
+         <p>This attribute is equivalent to adding the flag {@link
+         android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} to every Intent used to launch
+         the activity.
+
+         <p>The documentLaunchMode attribute may be assigned one of three values, "none",
+         "intoExisting" and "always", described in detail below. For values other than
+         <code>none</code> the activity must be defined with
+         {@link android.R.attr#launchMode} <code>standard</code> or <code>singleTop</code>.
+         If this attribute is not specified, <code>none</code> will be used.
+         Note that <code>none</code> can be overridden at run time if the Intent used
+         to launch it contains the flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}.
+         Similarly <code>intoExisting</code> will be overridden by the flag
+         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} combined with
+         {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}. -->
     <attr name="documentLaunchMode">
         <!-- The default mode, which will create a new task only when
              {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
              Intent.FLAG_ACTIVITY_NEW_TASK} is set. -->
         <enum name="none" value="0" />
-        <!-- All tasks will be searched for a matching Intent. If one is found
-             That task will cleared and restarted with the root activity receiving a call
+        <!-- All tasks will be searched for one whose base Intent's ComponentName and
+             data URI match those of the launching Intent. If such a task is found
+             that task will be cleared and restarted with the root activity receiving a call
              to {@link android.app.Activity#onNewIntent Activity.onNewIntent}. If no
              such task is found a new task will be created.
-             This is the equivalent of with {@link
+             <p>This is the equivalent of launching an activity with {@link
              android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
-             without {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
-             Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. -->
+             set and without {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+             Intent.FLAG_ACTIVITY_MULTIPLE_TASK} set. -->
         <enum name="intoExisting" value="1" />
-        <!-- A new task rooted at this activity will be created.
-             This is the equivalent of with {@link
+        <!-- A new task rooted at this activity will be created. This will happen whether or
+             not there is an existing task whose ComponentName and data URI match
+             that of the launcing intent This is the equivalent of launching an activity
+             with {@link
              android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
-             paired with {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
-             Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. -->
+             and {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+             Intent.FLAG_ACTIVITY_MULTIPLE_TASK} both set. -->
         <enum name="always" value="2" />
     </attr>
 
-    <!-- Tasks launched by activities with this attribute will remain in the recent task
+    <!-- Tasks launched by activities with this attribute will remain in the recent tasks
          list until the last activity in the task is completed. When that happens the task
-         will be automatically removed from the recent task list.
+         will be automatically removed from the recent tasks list.
 
          This attribute is the equivalent of {@link
          android.content.Intent#FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS
