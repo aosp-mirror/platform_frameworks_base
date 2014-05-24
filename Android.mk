@@ -379,55 +379,14 @@ LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_STATIC_JAVA_LIBRARIES := framework-base
 LOCAL_DX_FLAGS := --core-library
 
-# Packages to include, use \* wildcard to include descendants.
+# List of packages to include along with their descendants.
 LOCAL_JAR_PACKAGES := \
-	android \
-	android.accessibilityservice\* \
-	android.accounts\* \
-	android.alsa\* \
-	android.animation\* \
-	android.annotation\* \
-	android.app\* \
-	android.appwidget\* \
-	android.bluetooth\* \
-	android.content\* \
-	android.content\* \
-	android.database\* \
-	android.ddm\* \
-	android.drm\* \
-	android.emoji\* \
-	android.filterfw\* \
-	android.filterpacks\* \
-	android.gesture\* \
-	android.graphics\* \
-	android.inputmethodservice\* \
-	android.location\* \
-	android.media\* \
-	android.mtp\* \
-	android.net\* \
-	android.nfc\* \
-	android.opengl\* \
-	android.os\* \
-	android.preference\* \
-	android.print\* \
-	android.printservice\* \
-	android.provider\* \
-	android.renderscript\* \
-	android.sax\* \
-	android.security\* \
-	android.service\* \
-	android.speech\* \
-	android.system\* \
-	android.telecomm\* \
-	android.telephony\* \
-	android.test\* \
-	android.text\* \
-	android.transition\* \
-	android.tv\* \
-	android.util\* \
-	android.view\* \
-	android.webkit\* \
-	android.widget\*
+    android
+
+# List of packages to exclude along with their descendants.
+# Overrides inclusion.
+LOCAL_JAR_EXCLUDE_PACKAGES := \
+    android.hardware
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
@@ -445,16 +404,11 @@ LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_STATIC_JAVA_LIBRARIES := framework-base
 LOCAL_DX_FLAGS := --core-library
 
-# Packages to include, use \* wildcard to include descendants.
-# 'android' is required to be able to include 'android.hardware',
-# however, it causes classes in 'android' to be part of framework
-# and framework2.
-# TODO: Finer grained matching.
+# List of packages to include along with their descendants.
 LOCAL_JAR_PACKAGES := \
-	android \
-	android.hardware\* \
-	com\* \
-	javax\*
+    android.hardware \
+    com \
+    javax
 
 include $(BUILD_JAVA_LIBRARY)
 framework2_module := $(LOCAL_INSTALLED_MODULE)
