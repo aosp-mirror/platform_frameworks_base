@@ -84,9 +84,8 @@ public final class CameraManager {
         try {
             CameraBinderDecorator.throwOnError(
                     CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor());
-        } catch(CameraRuntimeException e) {
-            throw new IllegalStateException("Failed to setup camera vendor tags",
-                    e.asChecked());
+        } catch (CameraRuntimeException e) {
+            handleRecoverableSetupErrors(e, "Failed to set up vendor tags");
         }
 
         try {
@@ -422,6 +421,18 @@ public final class CameraManager {
 
         }
         return mDeviceIdList;
+    }
+
+    private void handleRecoverableSetupErrors(CameraRuntimeException e, String msg) {
+        int problem = e.getReason();
+        switch (problem) {
+            case CameraAccessException.CAMERA_DISCONNECTED:
+                String errorMsg = CameraAccessException.getDefaultMessage(problem);
+                Log.w(TAG, msg + ": " + errorMsg);
+                break;
+            default:
+                throw new IllegalStateException(msg, e.asChecked());
+        }
     }
 
     // TODO: this class needs unit tests
