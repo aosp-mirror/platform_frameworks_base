@@ -2342,7 +2342,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             // Only care about partial wake locks, since full wake locks
             // will be canceled when the user puts the screen to sleep.
             aggregateLastWakeupUptimeLocked(uptime);
-            historyName = historyName == null || mRecordAllWakeLocks ? name : historyName;
+            if (mRecordAllWakeLocks) {
+                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_START, name, uid, 0)) {
+                    addHistoryEventLocked(elapsedRealtime, uptime,
+                            HistoryItem.EVENT_WAKE_LOCK_START, name, uid);
+                }
+            }
+            historyName = historyName == null ? name : historyName;
             if (mWakeLockNesting == 0) {
                 mHistoryCur.states |= HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
@@ -2352,7 +2358,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.wakelockTag.uid = mInitialAcquireWakeUid = uid;
                 mWakeLockImportant = !unimportantForLogging;
                 addHistoryRecordLocked(elapsedRealtime, uptime);
-            } else if (!mRecordAllWakeLocks && !mWakeLockImportant && !unimportantForLogging) {
+            } else if (!mWakeLockImportant && !unimportantForLogging) {
                 if (mHistoryLastWritten.wakelockTag != null) {
                     // We'll try to update the last tag.
                     mHistoryLastWritten.wakelockTag = null;
@@ -2362,14 +2368,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     addHistoryRecordLocked(elapsedRealtime, uptime);
                 }
                 mWakeLockImportant = true;
-            } else if (mRecordAllWakeLocks) {
-                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_START, historyName,
-                        uid, 0)) {
-                    mWakeLockNesting++;
-                    return;
-                }
-                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_WAKE_LOCK_START,
-                        historyName, uid);
             }
             mWakeLockNesting++;
         }
@@ -2387,28 +2385,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
-            historyName = historyName == null || mRecordAllWakeLocks ? name : historyName;
+            if (mRecordAllWakeLocks) {
+                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_FINISH, name, uid, 0)) {
+                    addHistoryEventLocked(elapsedRealtime, uptime,
+                            HistoryItem.EVENT_WAKE_LOCK_FINISH, name, uid);
+                }
+            }
             if (mWakeLockNesting == 0) {
                 mHistoryCur.states &= ~HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Stop wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
-                if (mRecordAllWakeLocks
-                        || (historyName != null && !historyName.equals(mInitialAcquireWakeName))
-                        || uid != mInitialAcquireWakeUid) {
-                    mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
-                    mHistoryCur.wakelockTag.string = historyName;
-                    mHistoryCur.wakelockTag.uid = uid;
-                }
                 mInitialAcquireWakeName = null;
                 mInitialAcquireWakeUid = -1;
                 addHistoryRecordLocked(elapsedRealtime, uptime);
-            } else if (mRecordAllWakeLocks) {
-                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_FINISH, historyName,
-                        uid, 0)) {
-                    return;
-                }
-                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_WAKE_LOCK_FINISH,
-                        historyName, uid);
             }
         }
         if (uid >= 0) {

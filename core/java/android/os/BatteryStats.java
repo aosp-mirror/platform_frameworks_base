@@ -2443,8 +2443,10 @@ public abstract class BatteryStats implements Parcelable {
             pw.print(prefix); pw.print("    Capacity: ");
                     printmAh(pw, helper.getPowerProfile().getBatteryCapacity());
                     pw.print(", Computed drain: "); printmAh(pw, helper.getComputedPower());
-                    pw.print(", Min drain: "); printmAh(pw, helper.getMinDrainedPower());
-                    pw.print(", Max drain: "); printmAh(pw, helper.getMaxDrainedPower());
+                    pw.print(", actual drain: "); printmAh(pw, helper.getMinDrainedPower());
+                    if (helper.getMinDrainedPower() != helper.getMaxDrainedPower()) {
+                        pw.print("-"); printmAh(pw, helper.getMaxDrainedPower());
+                    }
                     pw.println();
             for (int i=0; i<sippers.size(); i++) {
                 BatterySipper bs = sippers.get(i);
@@ -3351,7 +3353,10 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 hprinter.printNextItem(pw, rec, baseTime, checkin,
                         (flags&DUMP_VERBOSE) != 0);
-            } else if (rec.eventCode != HistoryItem.EVENT_NONE) {
+            } else if (false && rec.eventCode != HistoryItem.EVENT_NONE) {
+                // This is an attempt to aggregate the previous state and generate
+                // fake events to reflect that state at the point where we start
+                // printing real events.  It doesn't really work right, so is turned off.
                 if (tracker == null) {
                     tracker = new HistoryEventTracker();
                 }
