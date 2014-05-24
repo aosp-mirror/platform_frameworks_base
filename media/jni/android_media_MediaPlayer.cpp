@@ -884,7 +884,6 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
 
-extern int register_android_media_DngCreator(JNIEnv *env);
 extern int register_android_media_ImageReader(JNIEnv *env);
 extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_Drm(JNIEnv *env);
@@ -913,11 +912,6 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
         goto bail;
     }
     assert(env != NULL);
-
-    if (register_android_media_DngCreator(env) < 0) {
-        ALOGE("ERROR: ImageReader native registration failed");
-        goto bail;
-    }
 
     if (register_android_media_ImageReader(env) < 0) {
         ALOGE("ERROR: ImageReader native registration failed");
