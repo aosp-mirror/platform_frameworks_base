@@ -3303,7 +3303,8 @@ public abstract class BatteryStats implements Parcelable {
             if (rec.time >= histStart) {
                 if (histStart >= 0 && !printed) {
                     if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
-                            || rec.cmd == HistoryItem.CMD_RESET) {
+                            || rec.cmd == HistoryItem.CMD_RESET
+                            || rec.cmd == HistoryItem.CMD_START) {
                         printed = true;
                         hprinter.printNextItem(pw, rec, baseTime, checkin,
                                 (flags&DUMP_VERBOSE) != 0);
