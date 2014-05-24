@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 
@@ -28,6 +29,7 @@ public class ObservableScrollView extends ScrollView {
 
     private Listener mListener;
     private int mLastOverscrollAmount;
+    private boolean mDispatchingTouchEvent;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,6 +43,10 @@ public class ObservableScrollView extends ScrollView {
         return getScrollY() == getMaxScrollY();
     }
 
+    public boolean isDispatchingTouchEvent() {
+        return mDispatchingTouchEvent;
+    }
+
     private int getMaxScrollY() {
         int scrollRange = 0;
         if (getChildCount() > 0) {
@@ -49,6 +55,14 @@ public class ObservableScrollView extends ScrollView {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        mDispatchingTouchEvent = true;
+        boolean result = super.dispatchTouchEvent(ev);
+        mDispatchingTouchEvent = false;
+        return result;
     }
 
     @Override
