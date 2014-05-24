@@ -216,8 +216,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
 	core/java/android/tv/ITvInputClient.aidl \
-	core/java/android/tv/ITvInputHardware.aidl \
-	core/java/android/tv/ITvInputHardwareCallback.aidl \
 	core/java/android/tv/ITvInputManager.aidl \
 	core/java/android/tv/ITvInputService.aidl \
 	core/java/android/tv/ITvInputServiceCallback.aidl \
