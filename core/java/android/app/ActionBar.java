@@ -1291,6 +1291,7 @@ public abstract class ActionBar {
 
         public LayoutParams(int width, int height) {
             super(width, height);
+            this.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
         }
 
         public LayoutParams(int width, int height, int gravity) {
@@ -1305,6 +1306,7 @@ public abstract class ActionBar {
 
         public LayoutParams(LayoutParams source) {
             super(source);
+            this.gravity = source.gravity;
         }
 
         public LayoutParams(ViewGroup.LayoutParams source) {

@@ -69,6 +69,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     /** @hide */
     public void setPresenter(ActionMenuPresenter presenter) {
         mPresenter = presenter;
+        mPresenter.setMenuView(this);
     }
 
     @Override
@@ -488,7 +489,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mPresenter.dismissPopupMenus();
+        dismissPopupMenus();
     }
 
     /** @hide */
@@ -575,6 +576,56 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
 
         return mMenu;
+    }
+
+    /**
+     * Returns the current menu or null if one has not yet been configured.
+     * @hide Internal use only for action bar integration
+     */
+    public MenuBuilder peekMenu() {
+        return mMenu;
+    }
+
+    /**
+     * Show the overflow items from the associated menu.
+     *
+     * @return true if the menu was able to be shown, false otherwise
+     */
+    public boolean showOverflowMenu() {
+        return mPresenter != null && mPresenter.showOverflowMenu();
+    }
+
+    /**
+     * Hide the overflow items from the associated menu.
+     *
+     * @return true if the menu was able to be hidden, false otherwise
+     */
+    public boolean hideOverflowMenu() {
+        return mPresenter != null && mPresenter.hideOverflowMenu();
+    }
+
+    /**
+     * Check whether the overflow menu is currently showing. This may not reflect
+     * a pending show operation in progress.
+     *
+     * @return true if the overflow menu is currently showing
+     */
+    public boolean isOverflowMenuShowing() {
+        return mPresenter != null && mPresenter.isOverflowMenuShowing();
+    }
+
+    /** @hide */
+    public boolean isOverflowMenuShowPending() {
+        return mPresenter != null && mPresenter.isOverflowMenuShowPending();
+    }
+
+    /**
+     * Dismiss any popups associated with this menu view.
+     */
+    public void dismissPopupMenus() {
+        if (mPresenter != null) {
+            mPresenter.dismissPopupMenus();
+        }
     }
 
     /**

@@ -35852,10 +35852,14 @@ package android.widget {
   public class ActionMenuView extends android.widget.LinearLayout {
     ctor public ActionMenuView(android.content.Context);
     ctor public ActionMenuView(android.content.Context, android.util.AttributeSet);
+    method public void dismissPopupMenus();
     method public android.view.Menu getMenu();
+    method public boolean hideOverflowMenu();
+    method public boolean isOverflowMenuShowing();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onDetachedFromWindow();
     method public void setOnMenuItemClickListener(android.widget.ActionMenuView.OnMenuItemClickListener);
+    method public boolean showOverflowMenu();
   }
 
   public static class ActionMenuView.LayoutParams extends android.widget.LinearLayout.LayoutParams {
@@ -38033,6 +38037,8 @@ package android.widget {
     ctor public Toolbar(android.content.Context, android.util.AttributeSet);
     ctor public Toolbar(android.content.Context, android.util.AttributeSet, int);
     ctor public Toolbar(android.content.Context, android.util.AttributeSet, int, int);
+    method public void collapseActionView();
+    method public void dismissPopupMenus();
     method public int getContentInsetEnd();
     method public int getContentInsetLeft();
     method public int getContentInsetRight();
@@ -38043,7 +38049,10 @@ package android.widget {
     method public android.graphics.drawable.Drawable getNavigationIcon();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
+    method public boolean hasExpandedActionView();
+    method public boolean hideOverflowMenu();
     method public void inflateMenu(int);
+    method public boolean isOverflowMenuShowing();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setContentInsetsAbsolute(int, int);
     method public void setContentInsetsRelative(int, int);
@@ -38051,6 +38060,8 @@ package android.widget {
     method public void setLogo(android.graphics.drawable.Drawable);
     method public void setLogoDescription(int);
     method public void setLogoDescription(java.lang.CharSequence);
+    method public void setNavigationContentDescription(java.lang.CharSequence);
+    method public void setNavigationContentDescription(int);
     method public void setNavigationDescription(int);
     method public void setNavigationDescription(java.lang.CharSequence);
     method public void setNavigationIcon(int);
@@ -38061,17 +38072,18 @@ package android.widget {
     method public void setSubtitle(java.lang.CharSequence);
     method public void setTitle(int);
     method public void setTitle(java.lang.CharSequence);
+    method public boolean showOverflowMenu();
   }
 
-  public static class Toolbar.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
+  public static class Toolbar.LayoutParams extends android.app.ActionBar.LayoutParams {
     ctor public Toolbar.LayoutParams(android.content.Context, android.util.AttributeSet);
     ctor public Toolbar.LayoutParams(int, int);
     ctor public Toolbar.LayoutParams(int, int, int);
     ctor public Toolbar.LayoutParams(int);
     ctor public Toolbar.LayoutParams(android.widget.Toolbar.LayoutParams);
+    ctor public Toolbar.LayoutParams(android.app.ActionBar.LayoutParams);
     ctor public Toolbar.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
     ctor public Toolbar.LayoutParams(android.view.ViewGroup.LayoutParams);
-    field public int gravity;
   }
 
   public static abstract interface Toolbar.OnMenuItemClickListener {

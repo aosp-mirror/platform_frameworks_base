@@ -3179,7 +3179,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         com.android.internal.R.attr.dialogTitleDecorLayout, res, true);
                 layoutResource = res.resourceId;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
-                layoutResource = com.android.internal.R.layout.screen_action_bar;
+                layoutResource = a.getResourceId(
+                        com.android.internal.R.styleable.Window_windowActionBarFullscreenDecorLayout,
+                        com.android.internal.R.layout.screen_action_bar);
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }

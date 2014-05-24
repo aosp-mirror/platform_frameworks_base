@@ -36,7 +36,7 @@ import android.widget.FrameLayout;
 public class ActionBarContainer extends FrameLayout {
     private boolean mIsTransitioning;
     private View mTabContainer;
-    private ActionBarView mActionBarView;
+    private View mActionBarView;
 
     private Drawable mBackground;
     private Drawable mStackedBackground;
@@ -76,7 +76,7 @@ public class ActionBarContainer extends FrameLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
+        mActionBarView = findViewById(com.android.internal.R.id.action_bar);
     }
 
     public void setPrimaryBackground(Drawable bg) {
@@ -251,6 +251,10 @@ public class ActionBarContainer extends FrameLayout {
         return null;
     }
 
+    private boolean isCollapsed(View view) {
+        return view == null || view.getVisibility() == GONE || view.getMeasuredHeight() == 0;
+    }
+
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mActionBarView == null &&
@@ -263,7 +267,7 @@ public class ActionBarContainer extends FrameLayout {
         if (mActionBarView == null) return;
 
         final LayoutParams lp = (LayoutParams) mActionBarView.getLayoutParams();
-        final int actionBarViewHeight = mActionBarView.isCollapsed() ? 0 :
+        final int actionBarViewHeight = isCollapsed(mActionBarView) ? 0 :
                 mActionBarView.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
 
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
@@ -298,9 +302,8 @@ public class ActionBarContainer extends FrameLayout {
             }
         } else {
             if (mBackground != null) {
-                final ActionBarView actionBarView = mActionBarView;
-                mBackground.setBounds(actionBarView.getLeft(), actionBarView.getTop(),
-                        actionBarView.getRight(), actionBarView.getBottom());
+                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
+                        mActionBarView.getRight(), mActionBarView.getBottom());
                 needsInvalidate = true;
             }
             mIsStacked = hasTabs;

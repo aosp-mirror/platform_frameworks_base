@@ -1862,6 +1862,7 @@
   <java-symbol type="attr" name="toolbarStyle" />
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />
+  <java-symbol type="attr" name="windowActionBarFullscreenDecorLayout" />
   <java-symbol type="drawable" name="ic_lock_bugreport" />
   <java-symbol type="id" name="icon_frame" />
   <java-symbol type="style" name="Animation.VolumePanel" />
