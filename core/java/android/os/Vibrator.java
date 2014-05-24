@@ -74,6 +74,7 @@ public abstract class Vibrator {
      * @param streamHint An {@link AudioManager} stream type corresponding to the vibration type.
      *        For example, specify {@link AudioManager#STREAM_ALARM} for alarm vibrations or
      *        {@link AudioManager#STREAM_RING} for vibrations associated with incoming calls.
+     * @hide
      */
     public void vibrate(long milliseconds, int streamHint) {
         vibrate(Process.myUid(), mPackageName, milliseconds, streamHint);
@@ -125,6 +126,7 @@ public abstract class Vibrator {
      * @param streamHint An {@link AudioManager} stream type corresponding to the vibration type.
      *        For example, specify {@link AudioManager#STREAM_ALARM} for alarm vibrations or
      *        {@link AudioManager#STREAM_RING} for vibrations associated with incoming calls.
+     * @hide
      */
     public void vibrate(long[] pattern, int repeat, int streamHint) {
         vibrate(Process.myUid(), mPackageName, pattern, repeat, streamHint);
