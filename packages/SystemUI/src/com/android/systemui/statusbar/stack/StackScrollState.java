@@ -37,12 +37,15 @@ public class StackScrollState {
     private static final String CHILD_NOT_FOUND_TAG = "StackScrollStateNoSuchChild";
 
     private final ViewGroup mHostView;
+    private final int mRoundedRectCornerRadius;
     private Map<ExpandableView, ViewState> mStateMap;
     private final Rect mClipRect = new Rect();
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
         mStateMap = new HashMap<ExpandableView, ViewState>();
+        mRoundedRectCornerRadius = mHostView.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
     }
 
     public ViewGroup getHostView() {
@@ -155,11 +158,15 @@ public class StackScrollState {
                 // apply clipping and shadow
                 float newNotificationEnd = newYTranslation + newHeight;
 
+                // In the unlocked shade we have to clip a little bit higher because of the rounded
+                // corners of the notifications.
+                float clippingCorrection = state.dimmed ? 0 : mRoundedRectCornerRadius;
+
                 // When the previous notification is swiped, we don't clip the content to the
                 // bottom of it.
                 float clipHeight = previousNotificationIsSwiped
                         ? newHeight
-                        : newNotificationEnd - (previousNotificationEnd);
+                        : newNotificationEnd - (previousNotificationEnd - clippingCorrection);
 
                 updateChildClippingAndBackground(child, newHeight,
                         clipHeight,
