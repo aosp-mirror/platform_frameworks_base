@@ -1012,6 +1012,8 @@ public class GridLayout extends ViewGroup {
             LayoutParams lp = getLayoutParams(c);
             if (firstPass) {
                 measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, lp.height);
+                mHorizontalAxis.recordOriginalMeasurement(i);
+                mVerticalAxis.recordOriginalMeasurement(i);
             } else {
                 boolean horizontal = (mOrientation == HORIZONTAL);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
@@ -1239,6 +1241,11 @@ public class GridLayout extends ViewGroup {
         public int[] locations;
         public boolean locationsValid = false;
 
+        public boolean hasWeights;
+        public boolean hasWeightsValid = false;
+        public int[] originalMeasurements;
+        public int[] deltas;
+
         boolean orderPreserved = DEFAULT_ORDER_PRESERVED;
 
         private MutableInt parentMin = new MutableInt(0);
@@ -1315,7 +1322,10 @@ public class GridLayout extends ViewGroup {
                 // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                groupBounds.getValue(i).include(GridLayout.this, c, spec, this);
+                int size = !hasWeights() ?
+                        getMeasurementIncludingMargin(c, horizontal) :
+                        getOriginalMeasurements()[i] + getDeltas()[i];
+                groupBounds.getValue(i).include(GridLayout.this, c, spec, this, size);
             }
         }
 
@@ -1691,50 +1701,67 @@ public class GridLayout extends ViewGroup {
             solve(getArcs(), a);
         }
 
-        private void resetDeltas() {
-            Bounds[] values = getGroupBounds().values;
-            for (int i = 0, N = values.length; i < N; i++) {
-                values[i].shareOfDelta = 0;
-            }
-        }
-
-        private boolean requiresWeightDistribution() {
-            Bounds[] values = getGroupBounds().values;
-            for (int i = 0, N = values.length; i < N; i++) {
-                if (values[i].weight != 0) {
+        private boolean computeHasWeights() {
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                LayoutParams lp = getLayoutParams(getChildAt(i));
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+                if (spec.weight != 0) {
                     return true;
                 }
             }
             return false;
         }
 
-        private void shareOutDelta(int[] locations) {
-            PackedMap<Spec, Bounds> groupBounds = getGroupBounds();
-            Spec[] specs = groupBounds.keys;
-            Bounds[] bounds = groupBounds.values;
+        private boolean hasWeights() {
+            if (!hasWeightsValid) {
+                hasWeights = computeHasWeights();
+                hasWeightsValid = true;
+            }
+            return hasWeights;
+        }
+
+        public int[] getOriginalMeasurements() {
+            if (originalMeasurements == null) {
+                originalMeasurements = new int[getChildCount()];
+            }
+            return originalMeasurements;
+        }
+
+        private void recordOriginalMeasurement(int i) {
+            if (hasWeights()) {
+                getOriginalMeasurements()[i] = getMeasurementIncludingMargin(getChildAt(i), horizontal);
+            }
+        }
+
+        public int[] getDeltas() {
+            if (deltas == null) {
+                deltas = new int[getChildCount()];
+            }
+            return deltas;
+        }
+
+        private void shareOutDelta() {
             int totalDelta = 0;
             float totalWeight = 0;
-            final int N = bounds.length;
-
-            for (int i = 0; i < N; i++) {
-                Spec spec = specs[i];
-                Bounds bound = bounds[i];
-                if (bound.weight != 0) {
-                    int minSize = bound.size(true);
-                    Interval span = spec.span;
-                    int actualSize = locations[span.max] - locations[span.min];
-                    int delta = actualSize - minSize;
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                View c = getChildAt(i);
+                LayoutParams lp = getLayoutParams(c);
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+                float weight = spec.weight;
+                if (weight != 0) {
+                    int delta = getMeasurement(c, horizontal) - getOriginalMeasurements()[i];
                     totalDelta += delta;
-                    totalWeight += bound.weight;
+                    totalWeight += weight;
                 }
             }
-            for (int i = 0; i < N; i++) {
-                Bounds bound = bounds[i];
-                float weight = bound.weight;
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                LayoutParams lp = getLayoutParams(getChildAt(i));
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+                float weight = spec.weight;
                 if (weight != 0) {
                     int delta = Math.round((weight * totalDelta / totalWeight));
-                    bound.shareOfDelta = delta;
-                    // the two adjustments below compensate for the rounding above
+                    deltas[i] = delta;
+                    // the two adjustments below are to counter the above rounding and avoid off-by-ones at the end
                     totalDelta -= delta;
                     totalWeight -= weight;
                 }
@@ -1742,19 +1769,22 @@ public class GridLayout extends ViewGroup {
         }
 
         private void solveAndDistributeSpace(int[] a) {
-            resetDeltas();
+            Arrays.fill(getDeltas(), 0);
             solve(a);
-            if (requiresWeightDistribution()) {
-                shareOutDelta(a);
-                arcsValid = false;
-                forwardLinksValid = false;
-                backwardLinksValid = false;
-                solve(a);
-            }
+            shareOutDelta();
+            arcsValid = false;
+            forwardLinksValid = false;
+            backwardLinksValid = false;
+            groupBoundsValid = false;
+            solve(a);
         }
 
         private void computeLocations(int[] a) {
-            solveAndDistributeSpace(a);
+            if (!hasWeights()) {
+                solve(a);
+            } else {
+                solveAndDistributeSpace(a);
+            }
             if (!orderPreserved) {
                 // Solve returns the smallest solution to the constraint system for which all
                 // values are positive. One value is therefore zero - though if the row/col
@@ -1837,6 +1867,10 @@ public class GridLayout extends ViewGroup {
 
             locations = null;
 
+            originalMeasurements = null;
+            deltas = null;
+            hasWeightsValid = false;
+
             invalidateValues();
         }
 
@@ -1872,21 +1906,7 @@ public class GridLayout extends ViewGroup {
      * method.
      * <p>
      * The weight property is also included in Spec and specifies the proportion of any
-     * excess space that is due to the enclosing row or column.
-     * GridLayout's model of flexibility and weight is broadly based on the physical properties of
-     * systems of mechanical springs. For example, a column in a GridLayout is modeled as
-     * if a set of springs were attached in parallel at their ends. Columns are therefore
-     * flexible only if and only if all views inside them are flexible. Similarly, the combined
-     * weight of a column is defined as the <em>minimum</em> of the weights of the components it
-     * contains. So, if any one component in a column of components has a weight of zero,
-     * the entire group has a weight of zero and will not receive any of the
-     * excess space that GridLayout distributes in its second
-     * (internal) layout pass. The default weight of a component is zero,
-     * reflecting inflexibility, but the default weight of a column (with nothing in it)
-     * is effectively infinite, reflecting the fact that a parallel group of
-     * springs is infinitely flexible when it contains no springs.
-     * <p>
-     * The above comments apply equally to rows and groups of rows and columns.
+     * excess space that is due to the associated view.
      *
      * <h4>WRAP_CONTENT and MATCH_PARENT</h4>
      *
@@ -2361,11 +2381,10 @@ public class GridLayout extends ViewGroup {
             return before - a.getAlignmentValue(c, size, gl.getLayoutMode());
         }
 
-        protected final void include(GridLayout gl, View c, Spec spec, Axis axis) {
+        protected final void include(GridLayout gl, View c, Spec spec, Axis axis, int size) {
             this.flexibility &= spec.getFlexibility();
             weight = Math.min(weight, spec.weight);
             boolean horizontal = axis.horizontal;
-            int size = gl.getMeasurementIncludingMargin(c, horizontal);
             Alignment alignment = gl.getAlignment(spec.alignment, horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
             int before = alignment.getAlignmentValue(c, size, gl.getLayoutMode());
