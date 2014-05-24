@@ -47,6 +47,10 @@
     <dimen name="text_size_menu_quantum">14sp</dimen>
     <dimen name="text_size_button_quantum">14sp</dimen>
 
+    <dimen name="text_size_large_quantum">22sp</dimen>
+    <dimen name="text_size_medium_quantum">18sp</dimen>
+    <dimen name="text_size_small_quantum">14sp</dimen>
+
     <dimen name="floating_window_z">16dp</dimen>
     <dimen name="floating_window_margin">32dp</dimen>
 

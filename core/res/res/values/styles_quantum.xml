@@ -182,7 +182,10 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Large" parent="TextAppearance.Quantum.Headline" />
+    <style name="TextAppearance.Quantum.Large">
+        <item name="textSize">@dimen/text_size_large_quantum</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+    </style>
 
     <style name="TextAppearance.Quantum.Large.Inverse">
         <item name="textColor">?attr/textColorPrimaryInverse</item>
@@ -191,7 +194,10 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Medium" parent="TextAppearance.Quantum.Body1" />
+    <style name="TextAppearance.Quantum.Medium">
+        <item name="textSize">@dimen/text_size_medium_quantum</item>
+        <item name="textColor">?attr/textColorSecondary</item>
+    </style>
 
     <style name="TextAppearance.Quantum.Medium.Inverse">
         <item name="textColor">?attr/textColorSecondaryInverse</item>
@@ -200,7 +206,10 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Small" parent="TextAppearance.Quantum.Caption" />
+    <style name="TextAppearance.Quantum.Small">
+        <item name="textSize">@dimen/text_size_small_quantum</item>
+        <item name="textColor">?attr/textColorTertiary</item>
+    </style>
 
     <style name="TextAppearance.Quantum.Small.Inverse">
         <item name="textColor">?attr/textColorTertiaryInverse</item>
@@ -349,6 +358,38 @@ please see styles_device_defaults.xml.
         <item name="textAllCaps">true</item>
         <item name="textColor">?attr/textColorSecondary</item>
         <item name="textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum" />
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent">
+        <item name="android:textColor">#90000000</item>
+        <item name="android:textSize">@dimen/notification_text_size</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent.Title">
+        <item name="android:textColor">#DD000000</item>
+        <item name="android:textSize">@dimen/notification_title_text_size</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent.Line2">
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent.Info">
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent.Time">
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Quantum.EventContent.Emphasis">
+        <item name="android:textColor">#66000000</item>
+    </style>
+
+    <style name="Widget.StatusBar.Quantum.ProgressBar" parent="Widget.Quantum.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/notification_quantum_media_progress</item>
     </style>
 
     <!-- Widget Styles -->
