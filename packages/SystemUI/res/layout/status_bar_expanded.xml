@@ -61,6 +61,7 @@
             android:layout_height="match_parent"
             android:visibility="invisible"
             android:scrollbars="none"
+            android:overScrollMode="never"
             android:fillViewport="true">
             <LinearLayout
                 android:layout_width="match_parent"
