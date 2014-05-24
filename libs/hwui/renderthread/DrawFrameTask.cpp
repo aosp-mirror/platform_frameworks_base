@@ -34,6 +34,8 @@ DrawFrameTask::DrawFrameTask()
         : mRenderThread(NULL)
         , mContext(NULL)
         , mFrameTimeNanos(0)
+        , mRecordDurationNanos(0)
+        , mDensity(1.0f) // safe enough default
         , mSyncResult(kSync_OK) {
 }
 
@@ -64,15 +66,17 @@ void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
     mDirty.set(left, top, right, bottom);
 }
 
-int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos) {
+int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     mSyncResult = kSync_OK;
     mFrameTimeNanos = frameTimeNanos;
+    mRecordDurationNanos = recordDurationNanos;
     postAndWait();
 
     // Reset the single-frame data
     mFrameTimeNanos = 0;
+    mRecordDurationNanos = 0;
     mDirty.setEmpty();
 
     return mSyncResult;
@@ -86,6 +90,9 @@ void DrawFrameTask::postAndWait() {
 
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
+
+    mContext->profiler().setDensity(mDensity);
+    mContext->profiler().startFrame(mRecordDurationNanos);
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;

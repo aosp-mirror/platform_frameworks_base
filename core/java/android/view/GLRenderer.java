@@ -61,6 +61,7 @@ import android.view.Surface.OutOfResourcesException;
 
 import com.google.android.gles_jni.EGLImpl;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,6 @@ public class GLRenderer extends HardwareRenderer {
 
     private static final String[] VISUALIZERS = {
             PROFILE_PROPERTY_VISUALIZE_BARS,
-            PROFILE_PROPERTY_VISUALIZE_LINES
     };
 
     private static final String[] OVERDRAW = {
@@ -674,7 +674,7 @@ public class GLRenderer extends HardwareRenderer {
             mProfilePaint = null;
 
             if (value) {
-                mDebugDataProvider = new DrawPerformanceDataProvider(graphType);
+                mDebugDataProvider = new GraphDataProvider(graphType);
             } else {
                 mDebugDataProvider = null;
             }
@@ -742,7 +742,7 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    void dumpGfxInfo(PrintWriter pw) {
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd) {
         if (mProfileEnabled) {
             pw.printf("\n\tDraw\tProcess\tExecute\n");
 
@@ -761,11 +761,6 @@ public class GLRenderer extends HardwareRenderer {
                 mProfileLock.unlock();
             }
         }
-    }
-
-    @Override
-    long getFrameCount() {
-        return mFrameCount;
     }
 
     /**
@@ -1446,7 +1441,18 @@ public class GLRenderer extends HardwareRenderer {
 
     private static native void nPrepareTree(long displayListPtr);
 
-    class DrawPerformanceDataProvider extends GraphDataProvider {
+    class GraphDataProvider {
+        /**
+         * Draws the graph as bars. Frame elements are stacked on top of
+         * each other.
+         */
+        public static final int GRAPH_TYPE_BARS = 0;
+        /**
+         * Draws the graph as lines. The number of series drawn corresponds
+         * to the number of elements.
+         */
+        public static final int GRAPH_TYPE_LINES = 1;
+
         private final int mGraphType;
 
         private int mVerticalUnit;
@@ -1454,11 +1460,10 @@ public class GLRenderer extends HardwareRenderer {
         private int mHorizontalMargin;
         private int mThresholdStroke;
 
-        DrawPerformanceDataProvider(int graphType) {
+        public GraphDataProvider(int graphType) {
             mGraphType = graphType;
         }
 
-        @Override
         void prepare(DisplayMetrics metrics) {
             final float density = metrics.density;
 
@@ -1468,64 +1473,52 @@ public class GLRenderer extends HardwareRenderer {
             mThresholdStroke = dpToPx(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH, density);
         }
 
-        @Override
         int getGraphType() {
             return mGraphType;
         }
 
-        @Override
         int getVerticalUnitSize() {
             return mVerticalUnit;
         }
 
-        @Override
         int getHorizontalUnitSize() {
             return mHorizontalUnit;
         }
 
-        @Override
         int getHorizontaUnitMargin() {
             return mHorizontalMargin;
         }
 
-        @Override
         float[] getData() {
             return mProfileData;
         }
 
-        @Override
         float getThreshold() {
             return 16;
         }
 
-        @Override
         int getFrameCount() {
             return mProfileData.length / PROFILE_FRAME_DATA_COUNT;
         }
 
-        @Override
         int getElementCount() {
             return PROFILE_FRAME_DATA_COUNT;
         }
 
-        @Override
         int getCurrentFrame() {
             return mProfileCurrentFrame / PROFILE_FRAME_DATA_COUNT;
         }
 
-        @Override
         void setupGraphPaint(Paint paint, int elementIndex) {
             paint.setColor(PROFILE_DRAW_COLORS[elementIndex]);
             if (mGraphType == GRAPH_TYPE_LINES) paint.setStrokeWidth(mThresholdStroke);
         }
 
-        @Override
         void setupThresholdPaint(Paint paint) {
             paint.setColor(PROFILE_DRAW_THRESHOLD_COLOR);
             paint.setStrokeWidth(mThresholdStroke);
         }
 
-        @Override
         void setupCurrentFramePaint(Paint paint) {
             paint.setColor(PROFILE_DRAW_CURRENT_FRAME_COLOR);
             if (mGraphType == GRAPH_TYPE_LINES) paint.setStrokeWidth(mThresholdStroke);

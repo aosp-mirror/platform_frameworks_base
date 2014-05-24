@@ -93,6 +93,17 @@ void RenderNode::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
 }
 
+int RenderNode::getDebugSize() {
+    int size = sizeof(RenderNode);
+    if (mStagingDisplayListData) {
+        size += mStagingDisplayListData->allocator.usedSize();
+    }
+    if (mDisplayListData && mDisplayListData != mStagingDisplayListData) {
+        size += mDisplayListData->allocator.usedSize();
+    }
+    return size;
+}
+
 void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
 

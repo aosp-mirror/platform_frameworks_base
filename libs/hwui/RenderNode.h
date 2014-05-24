@@ -119,6 +119,7 @@ public:
     void replayNodeInParent(ReplayStateStruct& replayStruct, const int level);
 
     ANDROID_API void output(uint32_t level = 1);
+    ANDROID_API int getDebugSize();
 
     bool isRenderable() const {
         return mDisplayListData && mDisplayListData->hasDrawOps;

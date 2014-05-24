@@ -99,16 +99,20 @@ void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
     post(task);
 }
 
-CREATE_BRIDGE0(loadSystemProperties) {
+CREATE_BRIDGE1(loadSystemProperties, CanvasContext* context) {
     bool needsRedraw = false;
     if (Caches::hasInstance()) {
         needsRedraw = Caches::getInstance().initProperties();
+    }
+    if (args->context->profiler().loadSystemProperties()) {
+        needsRedraw = true;
     }
     return (void*) needsRedraw;
 }
 
 bool RenderProxy::loadSystemProperties() {
     SETUP_TASK(loadSystemProperties);
+    args->context = mContext;
     return (bool) postAndWait(task);
 }
 
@@ -175,10 +179,11 @@ void RenderProxy::setOpaque(bool opaque) {
     post(task);
 }
 
-int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos,
-        int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
+int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
+        float density, int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
     mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
-    return mDrawFrameTask.drawFrame(frameTimeNanos);
+    mDrawFrameTask.setDensity(density);
+    return mDrawFrameTask.drawFrame(frameTimeNanos, recordDurationNanos);
 }
 
 CREATE_BRIDGE1(destroyCanvasAndSurface, CanvasContext* context) {
@@ -313,6 +318,18 @@ void RenderProxy::notifyFramePending() {
     SETUP_TASK(notifyFramePending);
     args->context = mContext;
     mRenderThread.queueAtFront(task);
+}
+
+CREATE_BRIDGE2(dumpProfileInfo, CanvasContext* context, int fd) {
+    args->context->profiler().dumpData(args->fd);
+    return NULL;
+}
+
+void RenderProxy::dumpProfileInfo(int fd) {
+    SETUP_TASK(dumpProfileInfo);
+    args->context = mContext;
+    args->fd = fd;
+    postAndWait(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

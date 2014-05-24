@@ -850,6 +850,13 @@ public class RenderNode {
         nOutput(mNativeRenderNode);
     }
 
+    /**
+     * Gets the size of the DisplayList for debug purposes.
+     */
+    public int getDebugSize() {
+        return nGetDebugSize(mNativeRenderNode);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Animations
     ///////////////////////////////////////////////////////////////////////////
@@ -941,6 +948,7 @@ public class RenderNode {
     private static native float nGetPivotX(long renderNode);
     private static native float nGetPivotY(long renderNode);
     private static native void nOutput(long renderNode);
+    private static native int nGetDebugSize(long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // Animations
