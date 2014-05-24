@@ -121,6 +121,9 @@ interface IDevicePolicyManager {
     void setApplicationRestrictions(in ComponentName who, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
 
+    void setRestrictionsProvider(in ComponentName who, in ComponentName provider);
+    ComponentName getRestrictionsProvider(int userHandle);
+
     void setUserRestriction(in ComponentName who, in String key, boolean enable);
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);

@@ -2695,6 +2695,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.content.RestrictionsManager} for retrieving application restrictions
+     * and requesting permissions for restricted operations.
+     * @see #getSystemService
+     * @see android.content.RestrictionsManager
+     */
+    public static final String RESTRICTIONS_SERVICE = "restrictions";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.AppOpsManager} for tracking application operations
      * on the device.
      *

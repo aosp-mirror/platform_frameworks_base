@@ -258,6 +258,12 @@
     <protected-broadcast
         android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
 
+    <!-- Defined in RestrictionsManager -->
+    <protected-broadcast
+        android:name="android.intent.action.PERMISSION_RESPONSE_RECEIVED" />
+    <!-- Defined in RestrictionsManager -->
+    <protected-broadcast android:name="android.intent.action.REQUEST_PERMISSION" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->

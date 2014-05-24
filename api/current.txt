@@ -5229,6 +5229,7 @@ package android.app.admin {
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
     method public void setProfileEnabled(android.content.ComponentName);
+    method public void setRestrictionsProvider(android.content.ComponentName, android.content.ComponentName);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void wipeData(int);
@@ -7024,6 +7025,7 @@ package android.content {
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
     field public static final java.lang.String POWER_SERVICE = "power";
     field public static final java.lang.String PRINT_SERVICE = "print";
+    field public static final java.lang.String RESTRICTIONS_SERVICE = "restrictions";
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
@@ -7780,12 +7782,14 @@ package android.content {
     ctor public RestrictionEntry(java.lang.String, java.lang.String);
     ctor public RestrictionEntry(java.lang.String, boolean);
     ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
+    ctor public RestrictionEntry(java.lang.String, int);
     ctor public RestrictionEntry(android.os.Parcel);
     method public int describeContents();
     method public java.lang.String[] getAllSelectedStrings();
     method public java.lang.String[] getChoiceEntries();
     method public java.lang.String[] getChoiceValues();
     method public java.lang.String getDescription();
+    method public int getIntValue();
     method public java.lang.String getKey();
     method public boolean getSelectedState();
     method public java.lang.String getSelectedString();
@@ -7797,6 +7801,7 @@ package android.content {
     method public void setChoiceValues(java.lang.String[]);
     method public void setChoiceValues(android.content.Context, int);
     method public void setDescription(java.lang.String);
+    method public void setIntValue(int);
     method public void setSelectedState(boolean);
     method public void setSelectedString(java.lang.String);
     method public void setTitle(java.lang.String);
@@ -7805,8 +7810,34 @@ package android.content {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int TYPE_BOOLEAN = 1; // 0x1
     field public static final int TYPE_CHOICE = 2; // 0x2
+    field public static final int TYPE_INTEGER = 5; // 0x5
     field public static final int TYPE_MULTI_SELECT = 4; // 0x4
     field public static final int TYPE_NULL = 0; // 0x0
+  }
+
+  public class RestrictionsManager {
+    method public android.os.Bundle getApplicationRestrictions();
+    method public java.util.List<android.content.RestrictionEntry> getManifestRestrictions(java.lang.String);
+    method public boolean hasRestrictionsProvider();
+    method public void notifyPermissionResponse(java.lang.String, android.os.Bundle);
+    method public void requestPermission(java.lang.String, android.os.Bundle);
+    field public static final java.lang.String ACTION_PERMISSION_RESPONSE_RECEIVED = "android.intent.action.PERMISSION_RESPONSE_RECEIVED";
+    field public static final java.lang.String ACTION_REQUEST_PERMISSION = "android.intent.action.REQUEST_PERMISSION";
+    field public static final java.lang.String EXTRA_PACKAGE_NAME = "package_name";
+    field public static final java.lang.String EXTRA_REQUEST_BUNDLE = "request_bundle";
+    field public static final java.lang.String EXTRA_RESPONSE_BUNDLE = "response_bundle";
+    field public static final java.lang.String EXTRA_TEMPLATE_ID = "template_id";
+    field public static final java.lang.String REQUEST_KEY_APPROVE_LABEL = "android.req_template.accept";
+    field public static final java.lang.String REQUEST_KEY_DATA = "android.req_template.data";
+    field public static final java.lang.String REQUEST_KEY_DENY_LABEL = "android.req_template.reject";
+    field public static final java.lang.String REQUEST_KEY_DEVICE_NAME = "android.req_template.device";
+    field public static final java.lang.String REQUEST_KEY_ICON = "android.req_template.icon";
+    field public static final java.lang.String REQUEST_KEY_ID = "android.req_template.req_id";
+    field public static final java.lang.String REQUEST_KEY_MESSAGE = "android.req_template.mesg";
+    field public static final java.lang.String REQUEST_KEY_REQUESTOR_NAME = "android.req_template.requestor";
+    field public static final java.lang.String REQUEST_KEY_TITLE = "android.req_template.title";
+    field public static final java.lang.String REQUEST_TEMPLATE_QUESTION = "android.req_template.type.simple";
+    field public static final java.lang.String RESPONSE_KEY_BOOLEAN = "android.req_template.response";
   }
 
   public class SearchRecentSuggestionsProvider extends android.content.ContentProvider {
