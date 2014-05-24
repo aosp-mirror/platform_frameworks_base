@@ -70,23 +70,12 @@ public class SpeedBumpDotsState {
         for (int i = 0; i < childCount; i++) {
             View child = mHostView.getChildAt(i);
             ViewState viewState = mStateMap.get(child);
-            float translationX = child.getTranslationX();
-            float translationY = child.getTranslationY();
-            float scale = child.getScaleX();
-            float alpha = child.getAlpha();
-            if (translationX != viewState.xTranslation) {
-                child.setTranslationX(viewState.xTranslation);
-            }
-            if (translationY != viewState.yTranslation) {
-                child.setTranslationY(viewState.yTranslation);
-            }
-            if (scale != viewState.scale) {
-                child.setScaleX(viewState.scale);
-                child.setScaleY(viewState.scale);
-            }
-            if (alpha != viewState.alpha) {
-                child.setAlpha(viewState.alpha);
-            }
+
+            child.setTranslationX(viewState.xTranslation);
+            child.setTranslationY(viewState.yTranslation);
+            child.setScaleX(viewState.scale);
+            child.setScaleY(viewState.scale);
+            child.setAlpha(viewState.alpha);
         }
     }
 
@@ -115,7 +104,7 @@ public class SpeedBumpDotsState {
             ViewState viewState = mStateMap.get(child);
             child.animate().setInterpolator(mFastOutSlowInInterpolator)
                     .setStartDelay(startDelay)
-                    .alpha(viewState.alpha).withLayer()
+                    .alpha(viewState.alpha)
                     .translationX(viewState.xTranslation)
                     .translationY(viewState.yTranslation)
                     .scaleX(viewState.scale).scaleY(viewState.scale);

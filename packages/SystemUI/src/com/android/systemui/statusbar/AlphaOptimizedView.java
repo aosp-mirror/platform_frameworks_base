@@ -17,36 +17,34 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Outline;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * An single dot of the {@link com.android.systemui.statusbar.SpeedBumpDotsLayout}
+ * A View which does not have overlapping renderings commands and therefore does not need a
+ * layer when alpha is changed.
  */
-public class SpeedBumpDotView extends View {
-
-    private final Paint mPaint = new Paint();
-
-    public SpeedBumpDotView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mPaint.setAntiAlias(true);
+public class AlphaOptimizedView extends View
+{
+    public AlphaOptimizedView(Context context) {
+        super(context);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        float radius = getWidth() / 2.0f;
-        canvas.drawCircle(radius, radius, radius, mPaint);
+    public AlphaOptimizedView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public AlphaOptimizedView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public AlphaOptimizedView(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
     public boolean hasOverlappingRendering() {
         return false;
-    }
-
-    public void setColor(int color) {
-        mPaint.setColor(color);
     }
 }

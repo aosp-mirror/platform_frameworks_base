@@ -37,8 +37,8 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
     private final int mDotsHeight;
     private final int mTextPaddingInset;
     private SpeedBumpDotsLayout mDots;
-    private View mLineLeft;
-    private View mLineRight;
+    private AlphaOptimizedView mLineLeft;
+    private AlphaOptimizedView mLineRight;
     private boolean mIsExpanded;
     private boolean mDividerVisible = true;
     private ValueAnimator mCurrentAnimator;
@@ -89,8 +89,8 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDots = (SpeedBumpDotsLayout) findViewById(R.id.speed_bump_dots_layout);
-        mLineLeft = findViewById(R.id.speedbump_line_left);
-        mLineRight = findViewById(R.id.speedbump_line_right);
+        mLineLeft = (AlphaOptimizedView) findViewById(R.id.speedbump_line_left);
+        mLineRight = (AlphaOptimizedView) findViewById(R.id.speedbump_line_right);
         mExplanationText = (TextView) findViewById(R.id.speed_bump_text);
         resetExplanationText();
 
@@ -176,8 +176,7 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
                     .scaleX(scale)
                     .scaleY(scale)
                     .translationY(translationY)
-                    .setListener(needsHideListener ? mHideExplanationListener : null)
-                    .withLayer();
+                    .setListener(needsHideListener ? mHideExplanationListener : null);
             mExplanationTextVisible = visible;
         }
     }
@@ -211,7 +210,6 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
             float endTranslationXRight = nowVisible ? 0.0f : mCenterX - mLineRight.getLeft();
             mLineLeft.animate()
                     .alpha(endValue)
-                    .withLayer()
                     .scaleX(endValue)
                     .scaleY(endValue)
                     .translationX(endTranslationXLeft)
@@ -219,7 +217,6 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
                     .withEndAction(onFinishedRunnable);
             mLineRight.animate()
                     .alpha(endValue)
-                    .withLayer()
                     .scaleX(endValue)
                     .scaleY(endValue)
                     .translationX(endTranslationXRight)
