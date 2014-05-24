@@ -212,13 +212,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mShowingPublic ? mRowMinHeight : mMaxExpandHeight;
     }
 
-    /**
-     * @return the potential height this view could expand in addition.
-     */
-    public int getExpandPotential() {
-        return getIntrinsicHeight() - getActualHeight();
-    }
-
     @Override
     public boolean isContentExpandable() {
         NotificationContentView showingLayout = getShowingLayout();
