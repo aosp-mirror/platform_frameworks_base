@@ -2349,8 +2349,6 @@ public class GridLayout extends ViewGroup {
         public int before;
         public int after;
         public int flexibility; // we're flexible iff all included specs are flexible
-        public float weight; // the min of the weights of the individual specs
-        public int shareOfDelta;
 
         private Bounds() {
             reset();
@@ -2360,7 +2358,6 @@ public class GridLayout extends ViewGroup {
             before = Integer.MIN_VALUE;
             after = Integer.MIN_VALUE;
             flexibility = CAN_STRETCH; // from the above, we're flexible when empty
-            weight = Float.MAX_VALUE; // default  is large => row/cols take all slack when empty
         }
 
         protected void include(int before, int after) {
@@ -2374,7 +2371,7 @@ public class GridLayout extends ViewGroup {
                     return MAX_SIZE;
                 }
             }
-            return before + after + shareOfDelta;
+            return before + after;
         }
 
         protected int getOffset(GridLayout gl, View c, Alignment a, int size, boolean horizontal) {
@@ -2383,7 +2380,6 @@ public class GridLayout extends ViewGroup {
 
         protected final void include(GridLayout gl, View c, Spec spec, Axis axis, int size) {
             this.flexibility &= spec.getFlexibility();
-            weight = Math.min(weight, spec.weight);
             boolean horizontal = axis.horizontal;
             Alignment alignment = gl.getAlignment(spec.alignment, horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
