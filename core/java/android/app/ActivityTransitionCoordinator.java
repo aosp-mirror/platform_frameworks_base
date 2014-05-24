@@ -15,14 +15,23 @@
  */
 package android.app;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.transition.TransitionSet;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageView;
 
@@ -181,6 +190,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      */
     public static final int MSG_CANCEL = 106;
 
+    /**
+     * When returning, this is the destination location for the shared element.
+     */
+    public static final int MSG_SHARED_ELEMENT_DESTINATION = 107;
+
     final private Window mWindow;
     final protected ArrayList<String> mAllSharedElementNames;
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
@@ -333,6 +347,210 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected abstract Transition getViewsTransition();
+
+    private static void setSharedElementState(View view, String name, Bundle transitionArgs,
+            int[] parentLoc) {
+        Bundle sharedElementBundle = transitionArgs.getBundle(name);
+        if (sharedElementBundle == null) {
+            return;
+        }
+
+        if (view instanceof ImageView) {
+            int scaleTypeInt = sharedElementBundle.getInt(KEY_SCALE_TYPE, -1);
+            if (scaleTypeInt >= 0) {
+                ImageView imageView = (ImageView) view;
+                ImageView.ScaleType scaleType = SCALE_TYPE_VALUES[scaleTypeInt];
+                imageView.setScaleType(scaleType);
+                if (scaleType == ImageView.ScaleType.MATRIX) {
+                    float[] matrixValues = sharedElementBundle.getFloatArray(KEY_IMAGE_MATRIX);
+                    Matrix matrix = new Matrix();
+                    matrix.setValues(matrixValues);
+                    imageView.setImageMatrix(matrix);
+                }
+            }
+        }
+
+        float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
+        view.setTranslationZ(z);
+
+        int x = sharedElementBundle.getInt(KEY_SCREEN_X);
+        int y = sharedElementBundle.getInt(KEY_SCREEN_Y);
+        int width = sharedElementBundle.getInt(KEY_WIDTH);
+        int height = sharedElementBundle.getInt(KEY_HEIGHT);
+
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
+        view.measure(widthSpec, heightSpec);
+
+        int left = x - parentLoc[0];
+        int top = y - parentLoc[1];
+        int right = left + width;
+        int bottom = top + height;
+        view.layout(left, top, right, bottom);
+    }
+
+    protected ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> setSharedElementState(
+            Bundle sharedElementState, final ArrayList<View> snapshots) {
+        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageState =
+                new ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>>();
+        if (sharedElementState != null) {
+            int[] tempLoc = new int[2];
+            for (int i = 0; i < mSharedElementNames.size(); i++) {
+                View sharedElement = mSharedElements.get(i);
+                String name = mSharedElementNames.get(i);
+                Pair<ImageView.ScaleType, Matrix> originalState = getOldImageState(sharedElement,
+                        name, sharedElementState);
+                if (originalState != null) {
+                    originalImageState.put((ImageView) sharedElement, originalState);
+                }
+                View parent = (View) sharedElement.getParent();
+                parent.getLocationOnScreen(tempLoc);
+                setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
+            }
+        }
+        mListener.setSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
+
+        getDecor().getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        mListener.setSharedElementEnd(mSharedElementNames, mSharedElements,
+                                snapshots);
+                        return true;
+                    }
+                }
+        );
+        return originalImageState;
+    }
+
+    private static Pair<ImageView.ScaleType, Matrix> getOldImageState(View view, String name,
+            Bundle transitionArgs) {
+        if (!(view instanceof ImageView)) {
+            return null;
+        }
+        Bundle bundle = transitionArgs.getBundle(name);
+        if (bundle == null) {
+            return null;
+        }
+        int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
+        if (scaleTypeInt < 0) {
+            return null;
+        }
+
+        ImageView imageView = (ImageView) view;
+        ImageView.ScaleType originalScaleType = imageView.getScaleType();
+
+        Matrix originalMatrix = null;
+        if (originalScaleType == ImageView.ScaleType.MATRIX) {
+            originalMatrix = new Matrix(imageView.getImageMatrix());
+        }
+
+        return Pair.create(originalScaleType, originalMatrix);
+    }
+
+    protected ArrayList<View> createSnapshots(Bundle state, Collection<String> names) {
+        int numSharedElements = names.size();
+        if (numSharedElements == 0) {
+            return null;
+        }
+        ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
+        Context context = getWindow().getContext();
+        int[] parentLoc = new int[2];
+        getDecor().getLocationOnScreen(parentLoc);
+        for (String name: names) {
+            Bundle sharedElementBundle = state.getBundle(name);
+            if (sharedElementBundle != null) {
+                Bitmap bitmap = sharedElementBundle.getParcelable(KEY_BITMAP);
+                View snapshot = new View(context);
+                Resources resources = getWindow().getContext().getResources();
+                if (bitmap != null) {
+                    snapshot.setBackground(new BitmapDrawable(resources, bitmap));
+                }
+                snapshot.setViewName(name);
+                setSharedElementState(snapshot, name, state, parentLoc);
+                snapshots.add(snapshot);
+            }
+        }
+        return snapshots;
+    }
+
+    protected static void setOriginalImageViewState(
+            ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalState) {
+        for (int i = 0; i < originalState.size(); i++) {
+            ImageView imageView = originalState.keyAt(i);
+            Pair<ImageView.ScaleType, Matrix> state = originalState.valueAt(i);
+            imageView.setScaleType(state.first);
+            imageView.setImageMatrix(state.second);
+        }
+    }
+
+    protected Bundle captureSharedElementState() {
+        Bundle bundle = new Bundle();
+        int[] tempLoc = new int[2];
+        for (int i = 0; i < mSharedElementNames.size(); i++) {
+            View sharedElement = mSharedElements.get(i);
+            String name = mSharedElementNames.get(i);
+            captureSharedElementState(sharedElement, name, bundle, tempLoc);
+        }
+        return bundle;
+    }
+
+    /**
+     * Captures placement information for Views with a shared element name for
+     * Activity Transitions.
+     *
+     * @param view           The View to capture the placement information for.
+     * @param name           The shared element name in the target Activity to apply the placement
+     *                       information for.
+     * @param transitionArgs Bundle to store shared element placement information.
+     * @param tempLoc        A temporary int[2] for capturing the current location of views.
+     */
+    private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
+            int[] tempLoc) {
+        Bundle sharedElementBundle = new Bundle();
+        view.getLocationOnScreen(tempLoc);
+        float scaleX = view.getScaleX();
+        sharedElementBundle.putInt(KEY_SCREEN_X, tempLoc[0]);
+        int width = Math.round(view.getWidth() * scaleX);
+        sharedElementBundle.putInt(KEY_WIDTH, width);
+
+        float scaleY = view.getScaleY();
+        sharedElementBundle.putInt(KEY_SCREEN_Y, tempLoc[1]);
+        int height = Math.round(view.getHeight() * scaleY);
+        sharedElementBundle.putInt(KEY_HEIGHT, height);
+
+        sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
+
+        if (width > 0 && height > 0) {
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+            sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);
+        }
+
+        if (view instanceof ImageView) {
+            ImageView imageView = (ImageView) view;
+            int scaleTypeInt = scaleTypeToInt(imageView.getScaleType());
+            sharedElementBundle.putInt(KEY_SCALE_TYPE, scaleTypeInt);
+            if (imageView.getScaleType() == ImageView.ScaleType.MATRIX) {
+                float[] matrix = new float[9];
+                imageView.getImageMatrix().getValues(matrix);
+                sharedElementBundle.putFloatArray(KEY_IMAGE_MATRIX, matrix);
+            }
+        }
+
+        transitionArgs.putBundle(name, sharedElementBundle);
+    }
+
+    private static int scaleTypeToInt(ImageView.ScaleType scaleType) {
+        for (int i = 0; i < SCALE_TYPE_VALUES.length; i++) {
+            if (scaleType == SCALE_TYPE_VALUES[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
         private Rect mEpicenter;
