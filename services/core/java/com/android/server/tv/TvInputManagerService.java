@@ -42,14 +42,11 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.TvContract;
 import android.tv.ITvInputClient;
-import android.tv.ITvInputHardware;
-import android.tv.ITvInputHardwareCallback;
 import android.tv.ITvInputManager;
 import android.tv.ITvInputService;
 import android.tv.ITvInputServiceCallback;
 import android.tv.ITvInputSession;
 import android.tv.ITvInputSessionCallback;
-import android.tv.TvInputHardwareInfo;
 import android.tv.TvInputInfo;
 import android.tv.TvInputService;
 import android.util.Slog;
@@ -74,7 +71,6 @@ public final class TvInputManagerService extends SystemService {
     private static final String TAG = "TvInputManagerService";
 
     private final Context mContext;
-    private final TvInputHardwareManager mTvInputHardwareManager;
 
     private final ContentResolver mContentResolver;
 
@@ -96,7 +92,6 @@ public final class TvInputManagerService extends SystemService {
         mContentResolver = context.getContentResolver();
         mLogHandler = new LogHandler(IoThread.get().getLooper());
 
-        mTvInputHardwareManager = new TvInputHardwareManager(context);
         registerBroadcastReceivers();
 
         synchronized (mLock) {
@@ -731,64 +726,6 @@ public final class TvInputManagerService extends SystemService {
                         Slog.e(TAG, "error in removeOverlayView", e);
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public List<TvInputHardwareInfo> getHardwareList() throws RemoteException {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.TV_INPUT_HARDWARE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return mTvInputHardwareManager.getHardwareList();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public ITvInputHardware acquireTvInputHardware(int deviceId,
-                ITvInputHardwareCallback callback, int userId) throws RemoteException {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.TV_INPUT_HARDWARE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "acquireTvInputHardware");
-            try {
-                return mTvInputHardwareManager.acquireHardware(
-                        deviceId, callback, callingUid, resolvedUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void releaseTvInputHardware(int deviceId, ITvInputHardware hardware, int userId)
-                throws RemoteException {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.TV_INPUT_HARDWARE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "releaseTvInputHardware");
-            try {
-                mTvInputHardwareManager.releaseHardware(
-                        deviceId, hardware, callingUid, resolvedUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
