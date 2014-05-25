@@ -53,7 +53,8 @@
         android:layout_marginBottom="100dp"
         android:layout_gravity="bottom|center_horizontal"
         android:textStyle="italic"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textColor="#ffffff"
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     <ImageView
         android:id="@+id/lock_icon"

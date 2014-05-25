@@ -39,13 +39,12 @@
             android:id="@+id/clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|top"
+            android:layout_gravity="center_horizontal"
             android:textColor="@color/clock_white"
             android:singleLine="true"
             style="@style/widget_big_thin"
             android:format12Hour="@string/keyguard_widget_12_hours_format"
             android:format24Hour="@string/keyguard_widget_24_hours_format"
-            android:baselineAligned="true"
             android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
 
         <include layout="@layout/keyguard_status_area" />
