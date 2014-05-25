@@ -196,6 +196,9 @@
     <dimen name="qs_dual_tile_height">109dp</dimen>
     <dimen name="qs_dual_tile_padding">12dp</dimen>
 
+    <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
+    <dimen name="qs_peek_height">8dp</dimen>
+
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
 

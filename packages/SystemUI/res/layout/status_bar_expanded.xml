@@ -59,7 +59,6 @@
             android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible"
             android:scrollbars="none"
             android:overScrollMode="never"
             android:fillViewport="true">
@@ -71,7 +70,9 @@
                     layout="@layout/qs_panel"
                     android:layout_marginTop="@dimen/status_bar_header_height_expanded"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/notification_side_padding"
+                    android:layout_marginRight="@dimen/notification_side_padding"/>
 
                 <!-- A view to reserve space for the collapsed stack -->
                 <View
@@ -79,7 +80,6 @@
                     android:layout_width="match_parent"/>
             </LinearLayout>
         </com.android.systemui.statusbar.phone.ObservableScrollView>
-
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"

@@ -50,6 +50,7 @@ public class NotificationPanelView extends PanelView implements
     PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
+    private View mQsPanel;
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private View mStackScrollerContainer;
@@ -68,6 +69,7 @@ public class NotificationPanelView extends PanelView implements
      */
     private boolean mIntercepting;
     private boolean mQsExpanded;
+    private boolean mKeyguardShowing;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
     private float mInitialTouchY;
@@ -77,6 +79,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsMinExpansionHeight;
     private int mQsMaxExpansionHeight;
     private int mMinStackHeight;
+    private int mQsPeekHeight;
     private float mNotificationTranslation;
     private int mStackScrollerIntrinsicPadding;
     private boolean mQsExpansionEnabled = true;
@@ -121,6 +124,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mStackScrollerContainer = findViewById(R.id.notification_container_parent);
         mQsContainer = findViewById(R.id.quick_settings_container);
+        mQsPanel = findViewById(R.id.quick_settings_panel);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
         mNotificationStackScroller = (NotificationStackScrollLayout)
@@ -139,22 +143,21 @@ public class NotificationPanelView extends PanelView implements
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.4f);
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
+        mQsPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_peek_height);
         mClockPositionAlgorithm.loadDimens(getResources());
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (!mQsExpanded) {
-            positionClockAndNotifications();
-            mNotificationStackScroller.setStackHeight(getExpandedHeight());
-        }
 
         // Calculate quick setting heights.
-        mQsMinExpansionHeight = mHeader.getCollapsedHeight();
+        mQsMinExpansionHeight = mHeader.getCollapsedHeight() + mQsPeekHeight;
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
-        if (mQsExpansionHeight == 0) {
-            mQsExpansionHeight = mQsMinExpansionHeight;
+        if (!mQsExpanded) {
+            setQsExpansion(mQsMinExpansionHeight);
+            positionClockAndNotifications();
+            mNotificationStackScroller.setStackHeight(getExpandedHeight());
         }
     }
 
@@ -165,7 +168,8 @@ public class NotificationPanelView extends PanelView implements
     private void positionClockAndNotifications() {
         boolean animateClock = mNotificationStackScroller.isAddOrRemoveAnimationPending();
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
-            mStackScrollerIntrinsicPadding = mHeader.getBottom() + mNotificationTopPadding;
+            mStackScrollerIntrinsicPadding = mHeader.getBottom() + mQsPeekHeight
+                    + mNotificationTopPadding;
             mTopPaddingAdjustment = 0;
         } else {
             mClockPositionAlgorithm.setup(
@@ -455,29 +459,38 @@ public class NotificationPanelView extends PanelView implements
         setQsExpansion(height);
     }
 
-    private void expandQs() {
-        mHeader.setExpanded(true);
-        mNotificationStackScroller.setEnabled(false);
-        mScrollView.setVisibility(View.VISIBLE);
-        mQsExpanded = true;
+    private void setQsExpanded(boolean expanded) {
+        boolean changed = mQsExpanded != expanded;
+        if (changed) {
+            mQsExpanded = expanded;
+            updateQsState();
+        }
     }
 
-    private void collapseQs() {
-        mHeader.setExpanded(false);
-        mNotificationStackScroller.setEnabled(true);
-        mScrollView.setVisibility(View.INVISIBLE);
-        mQsExpanded = false;
+    public void setKeyguardShowing(boolean keyguardShowing) {
+        mKeyguardShowing = keyguardShowing;
+        updateQsState();
+    }
+
+    private void updateQsState() {
+        mHeader.setExpanded(mQsExpanded);
+        mNotificationStackScroller.setEnabled(!mQsExpanded);
+        mQsPanel.setVisibility(mQsExpanded ? View.VISIBLE : View.INVISIBLE);
+        mQsContainer.setVisibility(mKeyguardShowing && !mQsExpanded
+                ? View.INVISIBLE
+                : View.VISIBLE);
+        mScrollView.setTouchEnabled(mQsExpanded);
     }
 
     private void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         if (height > mQsMinExpansionHeight && !mQsExpanded) {
-            expandQs();
+            setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
-            collapseQs();
+            setQsExpanded(false);
         }
         mQsExpansionHeight = height;
-        mHeader.setExpansion(height);
+        mHeader.setExpansion(height - mQsPeekHeight);
         setQsTranslation(height);
         setQsStackScrollerPadding(height);
         mStatusBar.userActivity();
