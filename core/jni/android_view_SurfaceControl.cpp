@@ -412,20 +412,12 @@ static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenOb
     return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
-static void nativeBlankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenObj, jint mode) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    ALOGD_IF_SLOW(100, "Excessive delay in blankDisplay() while turning screen off");
-    SurfaceComposerClient::blankDisplay(token);
-}
-
-static void nativeUnblankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return;
-
-    ALOGD_IF_SLOW(100, "Excessive delay in unblankDisplay() while turning screen on");
-    SurfaceComposerClient::unblankDisplay(token);
+    ALOGD_IF_SLOW(100, "Excessive delay in setPowerMode()");
+    SurfaceComposerClient::setDisplayPowerMode(token, mode);
 }
 
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -628,10 +620,6 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
-    {"nativeBlankDisplay", "(Landroid/os/IBinder;)V",
-            (void*)nativeBlankDisplay },
-    {"nativeUnblankDisplay", "(Landroid/os/IBinder;)V",
-            (void*)nativeUnblankDisplay },
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
@@ -640,6 +628,8 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeClearAnimationFrameStats },
     {"nativeGetAnimationFrameStats", "(Landroid/view/WindowAnimationFrameStats;)Z",
             (void*)nativeGetAnimationFrameStats },
+    {"nativeSetDisplayPowerMode", "(Landroid/os/IBinder;I)V",
+            (void*)nativeSetDisplayPowerMode },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
