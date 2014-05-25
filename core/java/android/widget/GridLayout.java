@@ -1322,7 +1322,7 @@ public class GridLayout extends ViewGroup {
                 // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                int size = !hasWeights() ?
+                int size = (spec.weight == 0) ?
                         getMeasurementIncludingMargin(c, horizontal) :
                         getOriginalMeasurements()[i] + getDeltas()[i];
                 groupBounds.getValue(i).include(GridLayout.this, c, spec, this, size);
