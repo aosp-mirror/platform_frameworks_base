@@ -370,6 +370,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
+    void setNextTaskId(int taskId) {
+        if (taskId > mCurTaskId) {
+            mCurTaskId = taskId;
+        }
+    }
+
     int getNextTaskId() {
         do {
             mCurTaskId++;
@@ -2248,6 +2254,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         return mLastStackId;
+    }
+
+    void createStackForRestoredTaskHistory(ArrayList<TaskRecord> tasks) {
+        int stackId = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
+        final ActivityStack stack = getStack(stackId);
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            stack.addTask(task, false, false);
+            final int taskId = task.taskId;
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                mWindowManager.addAppToken(0, r.appToken, taskId, stackId,
+                        r.info.screenOrientation, r.fullscreen,
+                        (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
+                        r.userId, r.info.configChanges);
+            }
+            mWindowManager.addTask(taskId, stackId, false);
+        }
+        resumeHomeActivity(null);
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {
