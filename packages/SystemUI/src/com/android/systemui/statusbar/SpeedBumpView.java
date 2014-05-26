@@ -103,7 +103,11 @@ public class SpeedBumpView extends ExpandableView implements View.OnClickListene
 
     @Override
     public int getIntrinsicHeight() {
-        return getActualHeight();
+        if (mCurrentAnimator != null) {
+            // expand animation is running
+            return getActualHeight();
+        }
+        return mIsExpanded ? getHeight() : mCollapsedHeight;
     }
 
     @Override
