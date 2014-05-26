@@ -56,6 +56,7 @@ public class SwipeHelper implements Gefingerpoken {
     static final float ALPHA_FADE_END = 0.5f; // fraction of thumbnail width
                                               // beyond which alpha->0
     private float mMinAlpha = 0f;
+    private float mMaxAlpha = 1f;
 
     private float mPagingTouchSlop;
     private Callback mCallback;
@@ -140,6 +141,10 @@ public class SwipeHelper implements Gefingerpoken {
         mMinAlpha = minAlpha;
     }
 
+    public void setMaxAlpha(float maxAlpha) {
+        mMaxAlpha = maxAlpha;
+    }
+
     private float getAlphaForOffset(View view) {
         float viewSize = getSize(view);
         final float fadeSize = ALPHA_FADE_END * viewSize;
@@ -150,7 +155,7 @@ public class SwipeHelper implements Gefingerpoken {
         } else if (pos < viewSize * (1.0f - ALPHA_FADE_START)) {
             result = 1.0f + (viewSize * ALPHA_FADE_START + pos) / fadeSize;
         }
-        return Math.max(mMinAlpha, result);
+        return Math.min(Math.max(mMinAlpha, result), mMaxAlpha);
     }
 
     private void updateAlphaFromOffset(View animView, boolean dismissable) {

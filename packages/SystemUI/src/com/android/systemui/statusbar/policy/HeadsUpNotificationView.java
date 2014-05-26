@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Outline;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import com.android.systemui.ExpandHelper;
@@ -35,14 +37,17 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 
-public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
+public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback,
+        ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = "HeadsUpNotificationView";
     private static final boolean DEBUG = false;
     private static final boolean SPEW = DEBUG;
 
     Rect mTmpRect = new Rect();
+    int[] mTmpTwoArray = new int[2];
 
     private final int mTouchSensitivityDelay;
+    private final float mMaxAlpha = 0.95f;
     private SwipeHelper mSwipeHelper;
     private EdgeSwipeHelper mEdgeSwipeHelper;
 
@@ -87,8 +92,9 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             }
             mContentHolder.setX(0);
             mContentHolder.setVisibility(View.VISIBLE);
-            mContentHolder.setAlpha(1f);
+            mContentHolder.setAlpha(mMaxAlpha);
             mContentHolder.addView(mHeadsUp.row);
+
             mSwipeHelper.snapChild(mContentHolder, 1f);
             mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
         }
@@ -97,32 +103,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     public boolean isClearable() {
         return mHeadsUp == null || mHeadsUp.notification.isClearable();
-    }
-
-    public void setMargin(int notificationPanelMarginPx) {
-        if (SPEW) Log.v(TAG, "setMargin() " + notificationPanelMarginPx);
-        if (mContentHolder != null &&
-                mContentHolder.getLayoutParams() instanceof FrameLayout.LayoutParams) {
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mContentHolder.getLayoutParams();
-            lp.setMarginStart(notificationPanelMarginPx);
-            mContentHolder.setLayoutParams(lp);
-        }
-    }
-
-    // LinearLayout methods
-
-    @Override
-    public void onDraw(android.graphics.Canvas c) {
-        super.onDraw(c);
-        if (DEBUG) {
-            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-            //        + getMeasuredHeight() + "px");
-            c.save();
-            c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
-                    android.graphics.Region.Op.DIFFERENCE);
-            c.drawColor(0xFFcc00cc);
-            c.restore();
-        }
     }
 
     // ViewGroup methods
@@ -134,6 +114,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         float pagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
         float touchSlop = viewConfiguration.getScaledTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        mSwipeHelper.setMaxAlpha(mMaxAlpha);
         mEdgeSwipeHelper = new EdgeSwipeHelper(touchSlop);
 
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
@@ -146,6 +127,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             // whoops, we're on already!
             setNotification(mHeadsUp);
         }
+
+        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
     @Override
@@ -161,6 +144,20 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     // View methods
+
+    @Override
+    public void onDraw(android.graphics.Canvas c) {
+        super.onDraw(c);
+        if (DEBUG) {
+            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
+            //        + getMeasuredHeight() + "px");
+            c.save();
+            c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
+                    android.graphics.Region.Op.DIFFERENCE);
+            c.drawColor(0xFFcc00cc);
+            c.restore();
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -181,6 +178,14 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mSwipeHelper.setDensityScale(densityScale);
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        Outline o = new Outline();
+        o.setRect(0, 0, mContentHolder.getWidth(), mContentHolder.getHeight());
+        mContentHolder.setOutline(o);
     }
 
     // ExpandHelper.Callback methods
@@ -233,7 +238,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public void onDragCancelled(View v) {
-        mContentHolder.setAlpha(1f); // sometimes this isn't quite reset
+        mContentHolder.setAlpha(mMaxAlpha); // sometimes this isn't quite reset
     }
 
     @Override
@@ -248,6 +253,16 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     @Override
     public View getChildContentView(View v) {
         return mContentHolder;
+    }
+
+    @Override
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
+        mContentHolder.getLocationOnScreen(mTmpTwoArray);
+
+        info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        info.touchableRegion.set(mTmpTwoArray[0], mTmpTwoArray[1],
+                mTmpTwoArray[0] + mContentHolder.getWidth(),
+                mTmpTwoArray[1] + mContentHolder.getHeight());
     }
 
     private class EdgeSwipeHelper implements Gefingerpoken {
