@@ -31,7 +31,6 @@
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button"
-        systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
         systemui:swipeDirection="start"/>
 
     <com.android.systemui.statusbar.phone.SwipeAffordanceView
@@ -43,7 +42,6 @@
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button"
-        systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
         systemui:swipeDirection="end"/>
 
     <com.android.systemui.statusbar.phone.KeyguardIndicationTextView

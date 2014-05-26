@@ -55,7 +55,7 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:scaleType="center"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_back"
                 />
             <View 
@@ -71,7 +71,7 @@
                 systemui:keyCode="3"
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_home"
                 />
             <View 
@@ -85,7 +85,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_recent"
                 />
             <FrameLayout
@@ -99,7 +99,7 @@
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu"
                     android:visibility="invisible"
-                    systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    android:background="@drawable/ripple_drawable"
                     systemui:keyCode="82" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
@@ -110,7 +110,7 @@
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_ime_switcher_default"
                     android:visibility="invisible"
-                    systemui:glowBackground="@drawable/ic_sysbar_highlight" />
+                    android:background="@drawable/ripple_drawable" />
             </FrameLayout>
 
         </LinearLayout>
@@ -219,7 +219,7 @@
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_ime_switcher_default"
                     android:visibility="invisible"
-                    systemui:glowBackground="@drawable/ic_sysbar_highlight" />
+                    android:background="@drawable/ripple_drawable" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/menu"
@@ -228,7 +228,7 @@
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu_land"
                     android:visibility="invisible"
-                    systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+                    android:background="@drawable/ripple_drawable"
                     systemui:keyCode="82" />
             </FrameLayout>
 
@@ -238,7 +238,7 @@
                 android:src="@drawable/ic_sysbar_recent_land"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_recent"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+                android:background="@drawable/ripple_drawable"
                 />
             <View 
                 android:layout_height="match_parent"
@@ -254,7 +254,7 @@
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+                android:background="@drawable/ripple_drawable"
                 />
             <View 
                 android:layout_height="match_parent"
@@ -270,7 +270,7 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+                android:background="@drawable/ripple_drawable"
                 />
             <View
                 android:layout_height="40dp"
