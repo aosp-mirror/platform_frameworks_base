@@ -30,6 +30,7 @@ public class ObservableScrollView extends ScrollView {
     private Listener mListener;
     private int mLastOverscrollAmount;
     private boolean mDispatchingTouchEvent;
+    private boolean mTouchEnabled = true;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -37,6 +38,10 @@ public class ObservableScrollView extends ScrollView {
 
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    public void setTouchEnabled(boolean touchEnabled) {
+        mTouchEnabled = touchEnabled;
     }
 
     public boolean isScrolledToBottom() {
@@ -59,6 +64,9 @@ public class ObservableScrollView extends ScrollView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!mTouchEnabled) {
+            return false;
+        }
         mDispatchingTouchEvent = true;
         boolean result = super.dispatchTouchEvent(ev);
         mDispatchingTouchEvent = false;

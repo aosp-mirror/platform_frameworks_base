@@ -19,13 +19,11 @@
     <item android:state_pressed="true">
         <shape>
             <solid android:color="@color/background_color_1_press" />
-            <corners android:radius="@*android:dimen/notification_quantum_rounded_rect_radius" />
         </shape>
     </item>
     <item>
         <shape>
             <solid android:color="@color/background_color_1" />
-            <corners android:radius="@*android:dimen/notification_quantum_rounded_rect_radius" />
         </shape>
     </item>
 </selector>

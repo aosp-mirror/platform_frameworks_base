@@ -38,6 +38,11 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener {
 
+    /**
+     * How much the header expansion gets rubberbanded while expanding the panel.
+     */
+    private static final float EXPANSION_RUBBERBAND_FACTOR = 0.35f;
+
     private boolean mExpanded;
     private boolean mKeyguardShowing;
 
@@ -128,6 +133,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateVisibilities();
             updateSystemIconsLayoutParams();
             updateBrightnessControllerState();
+            updateZTranslation();
             if (mQSPanel != null) {
                 mQSPanel.setExpanded(expanded);
             }
@@ -202,17 +208,24 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
+    private void updateZTranslation() {
+
+        // If we are on the Keyguard, we need to set our z position to zero, so we don't get
+        // shadows.
+        if (mKeyguardShowing && !mExpanded) {
+            setZ(0);
+        } else {
+            setTranslationZ(0);
+        }
+    }
+
     public void setExpansion(float height) {
+        height = (height - mCollapsedHeight) * EXPANSION_RUBBERBAND_FACTOR + mCollapsedHeight;
         if (height < mCollapsedHeight) {
             height = mCollapsedHeight;
         }
         if (height > mExpandedHeight) {
             height = mExpandedHeight;
-        }
-        if (mExpanded) {
-            mBackground.setTranslationY(-(mExpandedHeight - height));
-        } else {
-            mBackground.setTranslationY(0);
         }
         setClipping(height);
     }
@@ -247,14 +260,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setKeyguardShowing(boolean keyguardShowing) {
         mKeyguardShowing = keyguardShowing;
-        if (keyguardShowing) {
-            setZ(0);
-        } else {
-            setTranslationZ(0);
-        }
         updateHeights();
         updateWidth();
         updateVisibilities();
+        updateZTranslation();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
