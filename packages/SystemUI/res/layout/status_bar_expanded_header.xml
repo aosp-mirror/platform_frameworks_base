@@ -80,7 +80,7 @@
         android:layout_alignParentEnd="true"
         android:background="@null"
         android:scaleType="centerInside"
-        android:padding="6dp"
+        android:padding="8dp"
         />
 
     <ImageButton android:id="@+id/settings_button"
