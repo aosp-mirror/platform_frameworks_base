@@ -271,13 +271,87 @@ public class InputMethodSubtypeSwitchingController {
         }
     }
 
+    private static class DynamicRotationList {
+        private static final String TAG = DynamicRotationList.class.getSimpleName();
+        private final List<ImeSubtypeListItem> mImeSubtypeList;
+        private final int[] mUsageHistoryOfSubtypeListItemIndex;
+
+        public DynamicRotationList(final List<ImeSubtypeListItem> imeSubtypeListItems) {
+            mImeSubtypeList = imeSubtypeListItems;
+            mUsageHistoryOfSubtypeListItemIndex = new int[mImeSubtypeList.size()];
+            final int N = mImeSubtypeList.size();
+            for (int i = 0; i < N; i++) {
+                mUsageHistoryOfSubtypeListItemIndex[i] = i;
+            }
+        }
+
+        /**
+         * Returns the index of the specified object in
+         * {@link #mUsageHistoryOfSubtypeListItemIndex}.
+         * <p>We call the index of {@link #mUsageHistoryOfSubtypeListItemIndex} as "Usage Rank"
+         * so as not to be confused with the index in {@link #mImeSubtypeList}.
+         * @return -1 when the specified item doesn't belong to {@link #mImeSubtypeList} actually.
+         */
+        private int getUsageRank(final InputMethodInfo imi, InputMethodSubtype subtype) {
+            final int currentSubtypeId = calculateSubtypeId(imi, subtype);
+            final int N = mUsageHistoryOfSubtypeListItemIndex.length;
+            for (int usageRank = 0; usageRank < N; usageRank++) {
+                final int subtypeListItemIndex = mUsageHistoryOfSubtypeListItemIndex[usageRank];
+                final ImeSubtypeListItem subtypeListItem =
+                        mImeSubtypeList.get(subtypeListItemIndex);
+                if (subtypeListItem.mImi.equals(imi) &&
+                        subtypeListItem.mSubtypeId == currentSubtypeId) {
+                    return usageRank;
+                }
+            }
+            // Not found in the known IME/Subtype list.
+            return -1;
+        }
+
+        public void onUserAction(InputMethodInfo imi, InputMethodSubtype subtype) {
+            final int currentUsageRank = getUsageRank(imi, subtype);
+            // Do nothing if currentUsageRank == -1 (not found), or currentUsageRank == 0
+            if (currentUsageRank <= 0) {
+                return;
+            }
+            final int currentItemIndex = mUsageHistoryOfSubtypeListItemIndex[currentUsageRank];
+            System.arraycopy(mUsageHistoryOfSubtypeListItemIndex, 0,
+                    mUsageHistoryOfSubtypeListItemIndex, 1, currentUsageRank);
+            mUsageHistoryOfSubtypeListItemIndex[0] = currentItemIndex;
+        }
+
+        public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
+                InputMethodInfo imi, InputMethodSubtype subtype) {
+            int currentUsageRank = getUsageRank(imi, subtype);
+            if (currentUsageRank < 0) {
+                if (DEBUG) {
+                    Slog.d(TAG, "IME/subtype is not found: " + imi.getId() + ", " + subtype);
+                }
+                return null;
+            }
+            final int N = mUsageHistoryOfSubtypeListItemIndex.length;
+            for (int i = 1; i < N; i++) {
+                final int subtypeListItemRank = (currentUsageRank + i) % N;
+                final int subtypeListItemIndex =
+                        mUsageHistoryOfSubtypeListItemIndex[subtypeListItemRank];
+                final ImeSubtypeListItem subtypeListItem =
+                        mImeSubtypeList.get(subtypeListItemIndex);
+                if (onlyCurrentIme && !imi.equals(subtypeListItem.mImi)) {
+                    continue;
+                }
+                return subtypeListItem;
+            }
+            return null;
+        }
+    }
+
     @VisibleForTesting
     public static class ControllerImpl {
-        private final StaticRotationList mSwitchingAwareSubtypeList;
+        private final DynamicRotationList mSwitchingAwareSubtypeList;
         private final StaticRotationList mSwitchingUnawareSubtypeList;
 
         public ControllerImpl(final List<ImeSubtypeListItem> sortedItems) {
-            mSwitchingAwareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
+            mSwitchingAwareSubtypeList = new DynamicRotationList(filterImeSubtypeList(sortedItems,
                     true /* supportsSwitchingToNextInputMethod */));
             mSwitchingUnawareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
                     false /* supportsSwitchingToNextInputMethod */));
@@ -294,6 +368,15 @@ public class InputMethodSubtypeSwitchingController {
             } else {
                 return mSwitchingUnawareSubtypeList.getNextInputMethodLocked(onlyCurrentIme, imi,
                         subtype);
+            }
+        }
+
+        public void onUserActionLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
+            if (imi == null) {
+                return;
+            }
+            if (imi.supportsSwitchingToNextInputMethod()) {
+                mSwitchingAwareSubtypeList.onUserAction(imi, subtype);
             }
         }
 
@@ -327,9 +410,14 @@ public class InputMethodSubtypeSwitchingController {
         return new InputMethodSubtypeSwitchingController(settings, context);
     }
 
-    // TODO: write unit tests for this method and the logic that determines the next subtype
     public void onCommitTextLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
-        // TODO: Implement this.
+        if (mController == null) {
+            if (DEBUG) {
+                Log.e(TAG, "mController shouldn't be null.");
+            }
+            return;
+        }
+        mController.onUserActionLocked(imi, subtype);
     }
 
     public void resetCircularListLocked(Context context) {
