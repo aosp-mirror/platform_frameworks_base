@@ -123,6 +123,7 @@ public final class HdmiCecMessage implements Parcelable {
          * @param p HdmiCecMessage object to read the Rating from
          * @return a new HdmiCecMessage created from the data in the parcel
          */
+        @Override
         public HdmiCecMessage createFromParcel(Parcel p) {
             int source = p.readInt();
             int destination = p.readInt();
@@ -131,6 +132,7 @@ public final class HdmiCecMessage implements Parcelable {
             p.readByteArray(params);
             return new HdmiCecMessage(source, destination, opcode, params);
         }
+        @Override
         public HdmiCecMessage[] newArray(int size) {
             return new HdmiCecMessage[size];
         }
@@ -139,11 +141,40 @@ public final class HdmiCecMessage implements Parcelable {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        s.append(String.format("src: %d dst: %d op: %2X params: ", mSource, mDestination, mOpcode));
-        for (byte data : mParams) {
-            s.append(String.format("%02X ", data));
+        s.append(String.format("<%s> src: %d, dst: %d",
+                opcodeToString(mOpcode), mSource, mDestination));
+        if (mParams.length > 0) {
+            s.append(", params:");
+            for (byte data : mParams) {
+                s.append(String.format(" %02X", data));
+            }
         }
         return s.toString();
+    }
+
+    private static String opcodeToString(int opcode) {
+        switch (opcode) {
+            case HdmiCec.MESSAGE_FEATURE_ABORT:
+                return "Feature Abort";
+            case HdmiCec.MESSAGE_CEC_VERSION:
+                return "CEC Version";
+            case HdmiCec.MESSAGE_REQUEST_ARC_INITIATION:
+                return "Request ARC Initiation";
+            case HdmiCec.MESSAGE_REQUEST_ARC_TERMINATION:
+                return "Request ARC Termination";
+            case HdmiCec.MESSAGE_REPORT_ARC_INITIATED:
+                return "Report ARC Initiated";
+            case HdmiCec.MESSAGE_REPORT_ARC_TERMINATED:
+                return "Report ARC Terminated";
+            case HdmiCec.MESSAGE_TEXT_VIEW_ON:
+                return "Text View On";
+            case HdmiCec.MESSAGE_ACTIVE_SOURCE:
+                return "Active Source";
+            case HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS:
+                return "Give Device Power Status";
+            default:
+                return String.format("Opcode: %02X", opcode);
+        }
     }
 }
 
