@@ -155,7 +155,7 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-18dp</dimen>
+    <dimen name="bottom_text_spacing_digital">-6dp</dimen>
     <dimen name="label_font_size">14dp</dimen>
     <dimen name="widget_label_font_size">14sp</dimen>
     <dimen name="widget_big_font_size">68dp</dimen>

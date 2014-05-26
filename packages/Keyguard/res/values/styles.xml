@@ -59,8 +59,6 @@
 
     <!-- Built-in clock widget stuff -->
     <style name="widget_label">
-        <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
     <style name="big_thin">
