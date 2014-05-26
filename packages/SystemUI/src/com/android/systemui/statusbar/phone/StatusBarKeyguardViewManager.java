@@ -98,8 +98,7 @@ public class StatusBarKeyguardViewManager {
             mBouncer.show();
         } else {
             mPhoneStatusBar.showKeyguard();
-            mBouncer.hide();
-            mBouncer.prepare();
+            mBouncer.hide(false /* destroyView */);
         }
     }
 
@@ -124,7 +123,7 @@ public class StatusBarKeyguardViewManager {
         if (mShowing) {
             if (mOccluded) {
                 mPhoneStatusBar.hideKeyguard();
-                mBouncer.hide();
+                mBouncer.hide(false /* destroyView */);
             } else {
                 showBouncerOrKeyguard();
             }
@@ -184,7 +183,7 @@ public class StatusBarKeyguardViewManager {
         mShowing = false;
         mPhoneStatusBar.hideKeyguard();
         mStatusBarWindowManager.setKeyguardShowing(false);
-        mBouncer.hide();
+        mBouncer.hide(true /* destroyView */);
         mViewMediatorCallback.keyguardGone();
         updateStates();
     }
@@ -216,7 +215,7 @@ public class StatusBarKeyguardViewManager {
      */
     public boolean onBackPressed() {
         if (mBouncer.isShowing()) {
-            mBouncer.hide();
+            mBouncer.hide(false /* destroyView */);
             mPhoneStatusBar.showKeyguard();
             updateStates();
             return true;
