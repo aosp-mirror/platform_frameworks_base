@@ -16,15 +16,19 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Notification;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
-import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 /**
  * The list of currently displaying notifications.
+ *
+ * TODO: Rename to NotificationList.
  */
 public class NotificationData {
     public static final class Entry {
@@ -34,7 +38,6 @@ public class NotificationData {
         public ExpandableNotificationRow row; // the outer expanded view
         public View expanded; // the inflated RemoteViews
         public View expandedPublic; // for insecure lockscreens
-        public ImageView largeIcon;
         public View expandedBig;
         private boolean interruption;
         public Entry() {}
@@ -64,18 +67,23 @@ public class NotificationData {
     }
 
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
-        // sort first by score, then by when
+    private Ranking mRanking;
+    private final Comparator<Entry> mRankingComparator = new Comparator<Entry>() {
+        @Override
         public int compare(Entry a, Entry b) {
+            if (mRanking != null) {
+                return mRanking.getRank(a.key) - mRanking.getRank(b.key);
+            }
+
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
-            int d = na.getScore() - nb.getScore();
+            int d = nb.getScore() - na.getScore();
             if (a.interruption != b.interruption) {
-                return a.interruption ? 1 : -1;
+                return a.interruption ? -1 : 1;
             } else if (d != 0) {
                 return d;
             } else {
-                return (int) (na.getNotification().when - nb.getNotification().when);
+                return (int) (nb.getNotification().when - na.getNotification().when);
             }
         }
     };
@@ -97,24 +105,45 @@ public class NotificationData {
         return null;
     }
 
-    public int add(Entry entry) {
-        int i;
-        int N = mEntries.size();
-        for (i = 0; i < N; i++) {
-            if (mEntryCmp.compare(mEntries.get(i), entry) > 0) {
-                break;
-            }
-        }
-        mEntries.add(i, entry);
-        return i;
+    public void add(Entry entry, Ranking ranking) {
+        mEntries.add(entry);
+        updateRankingAndSort(ranking);
     }
 
-    public Entry remove(String key) {
+    public Entry remove(String key, Ranking ranking) {
         Entry e = findByKey(key);
-        if (e != null) {
-            mEntries.remove(e);
+        if (e == null) {
+            return null;
         }
+        mEntries.remove(e);
+        updateRankingAndSort(ranking);
         return e;
+    }
+
+    public void updateRanking(Ranking ranking) {
+        updateRankingAndSort(ranking);
+    }
+
+    public boolean isAmbient(String key) {
+        // TODO: Remove when switching to NotificationListener.
+        if (mRanking == null) {
+            for (Entry entry : mEntries) {
+                if (key.equals(entry.key)) {
+                    return entry.notification.getNotification().priority ==
+                            Notification.PRIORITY_MIN;
+                }
+            }
+        } else {
+            return mRanking.isAmbient(key);
+        }
+        return false;
+    }
+
+    private void updateRankingAndSort(Ranking ranking) {
+        if (ranking != null) {
+            mRanking = ranking;
+        }
+        Collections.sort(mEntries, mRankingComparator);
     }
 
     /**

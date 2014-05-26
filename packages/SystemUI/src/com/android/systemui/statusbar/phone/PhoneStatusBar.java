@@ -64,6 +64,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -86,7 +87,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -1029,13 +1029,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void addNotificationInternal(StatusBarNotification notification) {
+    public void addNotificationInternal(StatusBarNotification notification, Ranking ranking) {
         if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
         Entry shadeEntry = createNotificationViews(notification);
         if (shadeEntry == null) {
             return;
         }
         if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification)) {
+            // Forward the ranking so we can sort the new notification.
+            mNotificationData.updateRanking(ranking);
             return;
         }
         if (mUseHeadsUp && shouldInterrupt(notification)) {
@@ -1075,7 +1077,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 tick(notification, true);
             }
         }
-        addNotificationViews(shadeEntry);
+        addNotificationViews(shadeEntry, ranking);
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -1097,8 +1099,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void removeNotificationInternal(String key) {
-        StatusBarNotification old = removeNotificationViews(key);
+    public void removeNotificationInternal(String key, Ranking ranking) {
+        StatusBarNotification old = removeNotificationViews(key, ranking);
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
         if (old != null) {
@@ -1135,7 +1137,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             R.integer.config_show_search_delay);
     }
 
-    private void loadNotificationShade() {
+    private void updateNotificationShade() {
         if (mStackScroller == null) return;
 
         int N = mNotificationData.size();
@@ -1145,7 +1147,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean provisioned = isDeviceProvisioned();
         // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
-            Entry ent = mNotificationData.get(N-i-1);
+            Entry ent = mNotificationData.get(i);
             if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
 
             // TODO How do we want to badge notifcations from profiles.
@@ -1176,26 +1178,75 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
-                mStackScroller.addView(v, i);
+                mStackScroller.addView(v);
             }
         }
 
+        // So after all this work notifications still aren't sorted correctly.
+        // Let's do that now by advancing through toShow and mStackScroller in
+        // lock-step, making sure mStackScroller matches what we see in toShow.
+        int j = 0;
+        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
+            View child = mStackScroller.getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                // We don't care about non-notification views.
+                continue;
+            }
+
+            if (child == toShow.get(j)) {
+                // Everything is well, advance both lists.
+                j++;
+                continue;
+            }
+
+            // Oops, wrong notification at this position. Put the right one
+            // here and advance both lists.
+            mStackScroller.changeViewPosition(toShow.get(j), i);
+            j++;
+        }
+        updateRowStates();
+        updateSpeedbump();
         mNotificationPanel.setQsExpansionEnabled(provisioned && mUserSetup);
     }
 
+    private void updateSpeedbump() {
+        int speedbumpIndex = -1;
+        int currentIndex = 0;
+        for (int i = 0; i < mNotificationData.size(); i++) {
+            Entry entry = mNotificationData.get(i);
+            if (entry.row.getParent() == null) {
+                // This view isn't even added, so the stack scroller doesn't
+                // know about it. Ignore completely.
+                continue;
+            }
+            if (entry.row.getVisibility() != View.GONE &&
+                    mNotificationData.isAmbient(entry.key)) {
+                speedbumpIndex = currentIndex;
+                break;
+            }
+            currentIndex++;
+        }
+        mStackScroller.updateSpeedBumpIndex(speedbumpIndex);
+    }
+
     @Override
-    protected void updateNotificationIcons() {
+    protected void updateNotifications() {
+        // TODO: Move this into updateNotificationIcons()?
         if (mNotificationIcons == null) return;
 
-        loadNotificationShade();
+        updateNotificationShade();
+        updateNotificationIcons();
+    }
 
+    private void updateNotificationIcons() {
         final LinearLayout.LayoutParams params
             = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
         int N = mNotificationData.size();
 
         if (DEBUG) {
-            Log.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" + mNotificationIcons);
+            Log.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" +
+                    mNotificationIcons);
         }
 
         ArrayList<View> toShow = new ArrayList<View>();
@@ -1203,7 +1254,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean provisioned = isDeviceProvisioned();
         // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
-            Entry ent = mNotificationData.get(N-i-1);
+            Entry ent = mNotificationData.get(i);
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
             if (!notificationIsForCurrentProfiles(ent.notification)) continue;
@@ -2376,7 +2427,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void userSwitched(int newUserId) {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
-        updateNotificationIcons();
+        updateNotifications();
         resetUserSetupObserver();
     }
 
@@ -2777,10 +2828,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         updateStackScrollerState();
         updatePublicMode();
-        updateRowStates();
-        updateSpeedBump();
+        updateNotifications();
         checkBarModes();
-        updateNotificationIcons();
         updateCarrierLabelVisibility(false);
     }
 

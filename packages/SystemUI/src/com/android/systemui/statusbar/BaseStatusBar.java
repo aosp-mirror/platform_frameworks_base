@@ -48,6 +48,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -77,11 +78,12 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
@@ -194,7 +196,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0);
             if (provisioned != mDeviceProvisioned) {
                 mDeviceProvisioned = provisioned;
-                updateNotificationIcons();
+                updateNotifications();
             }
             final int mode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
@@ -209,7 +211,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             // so we just dump our cache ...
             mUsersAllowingPrivateNotifications.clear();
             // ... and refresh all the notifications
-            updateNotificationIcons();
+            updateNotifications();
         }
     };
 
@@ -280,11 +282,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void onListenerConnected() {
             if (DEBUG) Log.d(TAG, "onListenerConnected");
             final StatusBarNotification[] notifications = getActiveNotifications();
+            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
-                        addNotificationInternal(sbn);
+                        addNotificationInternal(sbn, currentRanking);
                     }
                 }
             });
@@ -293,13 +296,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         @Override
         public void onNotificationPosted(final StatusBarNotification sbn) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
+            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mNotificationData.findByKey(sbn.getKey()) != null) {
-                        updateNotificationInternal(sbn);
+                        updateNotificationInternal(sbn, currentRanking);
                     } else {
-                        addNotificationInternal(sbn);
+                        addNotificationInternal(sbn, currentRanking);
                     }
                 }
             });
@@ -308,10 +312,24 @@ public abstract class BaseStatusBar extends SystemUI implements
         @Override
         public void onNotificationRemoved(final StatusBarNotification sbn) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
+            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    removeNotificationInternal(sbn.getKey());
+                    removeNotificationInternal(sbn.getKey(), currentRanking);
+                }
+            });
+        }
+
+        @Override
+        public void onNotificationRankingUpdate() {
+            if (DEBUG) Log.d(TAG, "onRankingUpdate");
+            final Ranking currentRanking = getCurrentRanking();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mNotificationData.updateRanking(currentRanking);
+                    updateNotifications();
                 }
             });
         }
@@ -1113,19 +1131,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected StatusBarNotification removeNotificationViews(String key) {
-        NotificationData.Entry entry = mNotificationData.remove(key);
+    protected StatusBarNotification removeNotificationViews(String key, Ranking ranking) {
+        NotificationData.Entry entry = mNotificationData.remove(key, ranking);
         if (entry == null) {
             Log.w(TAG, "removeNotification for unknown key: " + key);
             return null;
         }
-        // Remove the expanded view.
-        ViewGroup rowParent = (ViewGroup)entry.row.getParent();
-        if (rowParent != null) rowParent.removeView(entry.row);
-        updateRowStates();
-        updateNotificationIcons();
-        updateSpeedBump();
-
+        updateNotifications();
         return entry.notification;
     }
 
@@ -1159,35 +1171,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry;
     }
 
-    protected void addNotificationViews(NotificationData.Entry entry) {
+    protected void addNotificationViews(Entry entry, Ranking ranking) {
         if (entry == null) {
             return;
         }
         // Add the expanded view and icon.
-        int pos = mNotificationData.add(entry);
-        if (DEBUG) {
-            Log.d(TAG, "addNotificationViews: added at " + pos);
-        }
-        updateRowStates();
-        updateNotificationIcons();
-        updateSpeedBump();
+        mNotificationData.add(entry, ranking);
+        updateNotifications();
     }
 
-    protected void updateSpeedBump() {
-        int n = mNotificationData.size();
-        int speedBumpIndex = -1;
-        for (int i = n-1; i >= 0; i--) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            if (entry.row.getVisibility() != View.GONE && speedBumpIndex == -1
-                    && entry.row.isBelowSpeedBump() ) {
-                speedBumpIndex = n - 1 - i;
-            }
-        }
-        mStackScroller.updateSpeedBumpIndex(speedBumpIndex);
-    }
-
-    private void addNotificationViews(StatusBarNotification notification) {
-        addNotificationViews(createNotificationViews(notification));
+    private void addNotificationViews(StatusBarNotification notification, Ranking ranking) {
+        addNotificationViews(createNotificationViews(notification), ranking);
     }
 
     /**
@@ -1201,17 +1195,17 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void updateRowStates() {
         int maxKeyguardNotifications = getMaxKeyguardNotifications();
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
-        int n = mNotificationData.size();
+        final int N = mNotificationData.size();
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        for (int i = n-1; i >= 0; i--) {
+        for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
             if (onKeyguard) {
                 entry.row.setExpansionDisabled(true);
             } else {
                 entry.row.setExpansionDisabled(false);
                 if (!entry.row.isUserLocked()) {
-                    boolean top = (i == n-1);
+                    boolean top = (i == 0);
                     entry.row.setSystemExpanded(top);
                 }
             }
@@ -1238,6 +1232,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
+        // Move overflow container to last position.
+        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
+                mStackScroller.getChildCount() - 1);
     }
 
     private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
@@ -1247,46 +1244,42 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void setZenMode(int mode) {
         if (!isDeviceProvisioned()) return;
         mZenMode = mode;
-        updateNotificationIcons();
+        updateNotifications();
     }
 
     protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
-    protected abstract void updateNotificationIcons();
+    protected abstract void updateNotifications();
     protected abstract void tick(StatusBarNotification n, boolean firstTime);
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract boolean shouldDisableNavbarGestures();
 
-    protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
-        return parent != null && parent.indexOfChild(entry.row) == 0;
-    }
-
-
     @Override
     public void addNotification(StatusBarNotification notification) {
         if (!USE_NOTIFICATION_LISTENER) {
-            addNotificationInternal(notification);
+            addNotificationInternal(notification, null);
         }
     }
 
-    public abstract void addNotificationInternal(StatusBarNotification notification);
+    public abstract void addNotificationInternal(StatusBarNotification notification,
+            Ranking ranking);
 
     @Override
     public void removeNotification(String key) {
         if (!USE_NOTIFICATION_LISTENER) {
-            removeNotificationInternal(key);
+            removeNotificationInternal(key, null);
         }
     }
 
-    protected abstract void removeNotificationInternal(String key);
+    protected abstract void removeNotificationInternal(String key, Ranking ranking);
 
     public void updateNotification(StatusBarNotification notification) {
         if (!USE_NOTIFICATION_LISTENER) {
-            updateNotificationInternal(notification);
+            updateNotificationInternal(notification, null);
         }
     }
 
-    public void updateNotificationInternal(StatusBarNotification notification) {
+    public void updateNotificationInternal(StatusBarNotification notification, Ranking ranking) {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(notification.getKey());
@@ -1358,18 +1351,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                         && oldPublicContentView.getPackage().equals(publicContentView.getPackage())
                         && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
 
-        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean orderUnchanged =
-                   notification.getNotification().when == oldNotification.getNotification().when
-                && notification.getScore() == oldNotification.getScore();
-        // score now encompasses/supersedes isOngoing()
 
         boolean updateTicker = notification.getNotification().tickerText != null
                 && !TextUtils.equals(notification.getNotification().tickerText,
                 oldEntry.notification.getNotification().tickerText);
-        boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
-        if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged && publicUnchanged
-                && (orderUnchanged || isTopAnyway)) {
+        if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged
+                && publicUnchanged) {
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + notification.getKey());
             oldEntry.notification = notification;
             try {
@@ -1397,22 +1384,20 @@ public abstract class BaseStatusBar extends SystemUI implements
                     handleNotificationError(notification, "Couldn't update icon: " + ic);
                     return;
                 }
-                updateRowStates();
-                updateSpeedBump();
+                mNotificationData.updateRanking(ranking);
+                updateNotifications();
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
                 Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
-                removeNotificationViews(notification.getKey());
-                addNotificationViews(notification);
+                removeNotificationViews(notification.getKey(), ranking);
+                addNotificationViews(notification, ranking);
             }
         } else {
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + notification.getKey());
             if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
-            removeNotificationViews(notification.getKey());
-            addNotificationViews(notification);  // will also replace the heads up
+            removeNotificationViews(notification.getKey(), ranking);
+            addNotificationViews(notification, ranking);  // will also replace the heads up
             final NotificationData.Entry newEntry = mNotificationData.findByKey(
                     notification.getKey());
             final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
@@ -1559,5 +1544,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             mWindowManager.removeViewImmediate(mSearchPanelView);
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
+        if (USE_NOTIFICATION_LISTENER) {
+            try {
+                mNotificationListener.unregisterAsSystemService();
+            } catch (RemoteException e) {
+                // Ignore.
+            }
+        }
     }
 }
