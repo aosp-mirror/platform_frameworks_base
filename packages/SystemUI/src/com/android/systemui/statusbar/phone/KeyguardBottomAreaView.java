@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
@@ -33,26 +32,23 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import com.android.systemui.R;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
  * text.
  */
-public class KeyguardBottomAreaView extends FrameLayout
-        implements SwipeAffordanceView.AffordanceListener,
+public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickListener,
         UnlockMethodCache.OnUnlockMethodChangedListener {
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
     private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
 
-    private SwipeAffordanceView mCameraButton;
-    private SwipeAffordanceView mPhoneButton;
+    private ImageView mCameraImageView;
+    private ImageView mPhoneImageView;
     private ImageView mLockIcon;
 
-    private PowerManager mPowerManager;
     private ActivityStarter mActivityStarter;
     private UnlockMethodCache mUnlockMethodCache;
 
@@ -76,11 +72,9 @@ public class KeyguardBottomAreaView extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mCameraButton = (SwipeAffordanceView) findViewById(R.id.camera_button);
-        mPhoneButton = (SwipeAffordanceView) findViewById(R.id.phone_button);
+        mCameraImageView = (ImageView) findViewById(R.id.camera_button);
+        mPhoneImageView = (ImageView) findViewById(R.id.phone_button);
         mLockIcon = (ImageView) findViewById(R.id.lock_icon);
-        mCameraButton.setAffordanceListener(this);
-        mPhoneButton.setAffordanceListener(this);
         watchForDevicePolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
@@ -88,7 +82,6 @@ public class KeyguardBottomAreaView extends FrameLayout
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
         updateTrust();
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -97,12 +90,12 @@ public class KeyguardBottomAreaView extends FrameLayout
 
     private void updateCameraVisibility() {
         boolean visible = !isCameraDisabledByDpm();
-        mCameraButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private void updatePhoneVisibility() {
         boolean visible = isPhoneVisible();
-        mPhoneButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mPhoneImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private boolean isPhoneVisible() {
@@ -162,33 +155,31 @@ public class KeyguardBottomAreaView extends FrameLayout
     }
 
     private void enableAccessibility(boolean touchExplorationEnabled) {
-        mCameraButton.enableAccessibility(touchExplorationEnabled);
-        mPhoneButton.enableAccessibility(touchExplorationEnabled);
+        mCameraImageView.setOnClickListener(touchExplorationEnabled ? this : null);
+        mCameraImageView.setClickable(touchExplorationEnabled);
+        mPhoneImageView.setOnClickListener(touchExplorationEnabled ? this : null);
+        mPhoneImageView.setClickable(touchExplorationEnabled);
     }
 
-    private void launchCamera() {
+    @Override
+    public void onClick(View v) {
+        if (v == mCameraImageView) {
+            launchCamera();
+        } else if (v == mPhoneImageView) {
+            launchPhone();
+        }
+    }
+
+    public void launchCamera() {
         mContext.startActivityAsUser(
                 new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE),
                 UserHandle.CURRENT);
     }
 
-    private void launchPhone() {
+    public void launchPhone() {
         mActivityStarter.startActivity(PHONE_INTENT);
     }
 
-    @Override
-    public void onUserActivity(long when) {
-        mPowerManager.userActivity(when, false);
-    }
-
-    @Override
-    public void onActionPerformed(SwipeAffordanceView view) {
-        if (view == mCameraButton) {
-            launchCamera();
-        } else if (view == mPhoneButton) {
-            launchPhone();
-        }
-    }
 
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
@@ -206,6 +197,18 @@ public class KeyguardBottomAreaView extends FrameLayout
                 ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
+    }
+
+    public ImageView getPhoneImageView() {
+        return mPhoneImageView;
+    }
+
+    public ImageView getCameraImageView() {
+        return mCameraImageView;
+    }
+
+    public ImageView getLockIcon() {
+        return mLockIcon;
     }
 
     @Override
