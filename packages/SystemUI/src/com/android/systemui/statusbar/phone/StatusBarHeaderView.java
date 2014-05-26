@@ -134,6 +134,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateSystemIconsLayoutParams();
             updateBrightnessControllerState();
             updateZTranslation();
+            updateClickTargets();
             if (mQSPanel != null) {
                 mQSPanel.setExpanded(expanded);
             }
@@ -206,6 +207,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else {
             mBrightnessController.unregisterCallbacks();
         }
+    }
+
+    private void updateClickTargets() {
+        mDateTime.setClickable(mExpanded);
+        mMultiUserSwitch.setClickable(mExpanded);
     }
 
     private void updateZTranslation() {
