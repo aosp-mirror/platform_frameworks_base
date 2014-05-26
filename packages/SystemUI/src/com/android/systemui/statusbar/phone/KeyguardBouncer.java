@@ -56,6 +56,9 @@ public class KeyguardBouncer {
 
     public void show() {
         ensureView();
+        if (mRoot.getVisibility() == View.VISIBLE) {
+            return;
+        }
 
         // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
         // Keyguard. If we need to authenticate, show the bouncer.
@@ -107,6 +110,10 @@ public class KeyguardBouncer {
 
     public boolean isShowing() {
         return mRoot != null && mRoot.getVisibility() == View.VISIBLE;
+    }
+
+    public void prepare() {
+        ensureView();
     }
 
     private void ensureView() {
