@@ -25,7 +25,7 @@
     android:paddingStart="@dimen/notification_side_padding"
     android:paddingEnd="@dimen/notification_side_padding"
     android:baselineAligned="false"
-    android:elevation="10dp"
+    android:elevation="4dp"
     >
 
     <View
