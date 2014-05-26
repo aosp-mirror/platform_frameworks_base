@@ -1102,8 +1102,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void updateNotification(StatusBarNotification notification) {
-        super.updateNotification(notification);
+    public void updateNotificationInternal(StatusBarNotification notification, Ranking ranking) {
+        super.updateNotificationInternal(notification, ranking);
         mIntercepted.update(notification);
     }
 
