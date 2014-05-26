@@ -221,7 +221,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d zaidi"</item>
   </plurals>
-    <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizokuwa za dharura sana hapo chini"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Gonga tena ili ufungue"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Telezesha kidole ili ufungue"</string>
 </resources>

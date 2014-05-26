@@ -223,8 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d lagi"</item>
   </plurals>
-    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
-    <skip />
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Pemberitahuan kurang penting di bawah"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ketik lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Leret ke atas untuk membuka kunci"</string>
 </resources>

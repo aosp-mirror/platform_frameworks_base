@@ -202,15 +202,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"I-cast ang Screen"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brightness"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
-    <!-- no translation found for quick_settings_inversion_label (8790919884718619648) -->
-    <skip />
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"I-invert ang mga kulay"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Mode ng pagtatama ng kulay"</string>
-    <!-- no translation found for quick_settings_more_settings (326112621462813682) -->
-    <skip />
-    <!-- no translation found for quick_settings_tethering_label (7153452060448575549) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_label (6046917934974004879) -->
-    <skip />
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Marami pang setting"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Nagte-tether"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"MGA KAMAKAILAN"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Impormasyon ng Application"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"maghanap"</string>
@@ -227,8 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"%d pa"</item>
   </plurals>
-    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
-    <skip />
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Nasa ibaba ang mga notification na hindi masyadong mahalaga"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"I-tap ulit upang buksan"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Mag-swipe pataas upang i-unlock"</string>
 </resources>

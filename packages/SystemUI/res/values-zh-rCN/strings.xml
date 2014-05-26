@@ -225,8 +225,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"还有%d条"</item>
   </plurals>
-    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
-    <skip />
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
 </resources>

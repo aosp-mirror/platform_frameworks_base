@@ -223,7 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"อีก %d"</item>
   </plurals>
-    <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยทางด้านล่าง"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"กวาดขึ้นเพื่อปลดล็อก"</string>
 </resources>
