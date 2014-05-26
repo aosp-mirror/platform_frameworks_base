@@ -39,7 +39,7 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
 
     @Override
     public void cleanUp() {
-        // TODO Auto-generated method stub
+        getSecurityContainer().onPause();
     }
 
     @Override

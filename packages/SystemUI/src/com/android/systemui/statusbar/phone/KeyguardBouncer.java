@@ -54,10 +54,6 @@ public class KeyguardBouncer {
         mWindowManager = windowManager;
     }
 
-    public void prepare() {
-        ensureView();
-    }
-
     public void show() {
         ensureView();
 
@@ -75,11 +71,15 @@ public class KeyguardBouncer {
         show();
     }
 
-    public void hide() {
+    public void hide(boolean destroyView) {
         if (mKeyguardView != null) {
             mKeyguardView.cleanUp();
         }
-        removeView();
+        if (destroyView) {
+            removeView();
+        } else if (mRoot != null) {
+            mRoot.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**
