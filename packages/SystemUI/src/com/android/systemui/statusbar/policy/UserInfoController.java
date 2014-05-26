@@ -166,7 +166,7 @@ public final class UserInfoController {
                 if (rawAvatar != null) {
                     avatar = new BitmapDrawable(mContext.getResources(), circularClip(rawAvatar));
                 } else {
-                    avatar = mContext.getResources().getDrawable(R.drawable.ic_qs_default_user);
+                    avatar = mContext.getResources().getDrawable(R.drawable.ic_account_circle);
                     mUseDefaultAvatar = true;
                 }
 
