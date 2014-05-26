@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import com.android.server.hdmi.HdmiCecController.AllocateLogicalAddressCallback;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 
 /**
  * Class that models a logical CEC device hosted in this system. Handles initialization,
@@ -30,6 +31,7 @@ abstract class HdmiCecLocalDevice {
     protected final int mDeviceType;
     protected int mAddress;
     protected int mPreferredAddress;
+    protected HdmiCecDeviceInfo mDeviceInfo;
 
     protected HdmiCecLocalDevice(HdmiCecController controller, int deviceType) {
         mController = controller;
@@ -57,9 +59,32 @@ abstract class HdmiCecLocalDevice {
             @Override
             public void onAllocated(int deviceType, int logicalAddress) {
                 mAddress = mPreferredAddress = logicalAddress;
+
+                // Create and set device info.
+                HdmiCecDeviceInfo deviceInfo = createDeviceInfo(mAddress, deviceType);
+                setDeviceInfo(deviceInfo);
+                mController.addDeviceInfo(deviceInfo);
+
                 mController.addLogicalAddress(logicalAddress);
             }
         });
+    }
+
+    private final HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
+        int vendorId = mController.getVendorId();
+        int physicalAddress = mController.getPhysicalAddress();
+        // TODO: get device name read from system configuration.
+        String displayName = HdmiCec.getDefaultDeviceName(logicalAddress);
+        return new HdmiCecDeviceInfo(logicalAddress,
+                physicalAddress, deviceType, vendorId, displayName);
+    }
+
+    HdmiCecDeviceInfo getDeviceInfo() {
+        return mDeviceInfo;
+    }
+
+    void setDeviceInfo(HdmiCecDeviceInfo info) {
+        mDeviceInfo = info;
     }
 
     // Returns true if the logical address is same as the argument.
