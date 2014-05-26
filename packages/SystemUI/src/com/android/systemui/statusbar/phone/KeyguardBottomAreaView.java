@@ -29,18 +29,11 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 
 /**
@@ -48,7 +41,8 @@ import com.android.systemui.R;
  * text.
  */
 public class KeyguardBottomAreaView extends FrameLayout
-        implements SwipeAffordanceView.AffordanceListener {
+        implements SwipeAffordanceView.AffordanceListener,
+        UnlockMethodCache.OnUnlockMethodChangedListener {
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
@@ -60,9 +54,7 @@ public class KeyguardBottomAreaView extends FrameLayout
 
     private PowerManager mPowerManager;
     private ActivityStarter mActivityStarter;
-
-    private LockPatternUtils mLockPatternUtils;
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private UnlockMethodCache mUnlockMethodCache;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -89,13 +81,12 @@ public class KeyguardBottomAreaView extends FrameLayout
         mLockIcon = (ImageView) findViewById(R.id.lock_icon);
         mCameraButton.setAffordanceListener(this);
         mPhoneButton.setAffordanceListener(this);
-        mLockPatternUtils = new LockPatternUtils(getContext());
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
-        KeyguardUpdateMonitor.getInstance(getContext()).registerCallback(mCallback);
         watchForDevicePolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
         updatePhoneVisibility();
+        mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
+        mUnlockMethodCache.addListener(this);
         updateTrust();
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
@@ -211,28 +202,14 @@ public class KeyguardBottomAreaView extends FrameLayout
         if (getVisibility() != VISIBLE) {
             return;
         }
-        int user = mLockPatternUtils.getCurrentUser();
-        boolean trust = !mLockPatternUtils.isSecure() ||
-                mKeyguardUpdateMonitor.getUserHasTrust(user);
-
-        int iconRes = trust ? R.drawable.ic_lock_open_24dp : R.drawable.ic_lock_24dp;
+        int iconRes = mUnlockMethodCache.isMethodInsecure()
+                ? R.drawable.ic_lock_open_24dp
+                : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
     }
 
-    final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
-        @Override
-        public void onScreenTurnedOn() {
-            updateTrust();
-        }
-
-        @Override
-        public void onUserSwitchComplete(int userId) {
-            updateTrust();
-        }
-
-        @Override
-        public void onTrustChanged(int userId) {
-            updateTrust();
-        }
-    };
+    @Override
+    public void onMethodSecureChanged(boolean methodSecure) {
+        updateTrust();
+    }
 }

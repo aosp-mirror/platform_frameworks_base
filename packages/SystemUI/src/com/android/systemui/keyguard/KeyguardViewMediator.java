@@ -62,6 +62,7 @@ import com.android.keyguard.analytics.KeyguardAnalytics;
 import com.android.keyguard.analytics.Session;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 
@@ -1316,9 +1317,10 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public StatusBarKeyguardViewManager registerStatusBar(PhoneStatusBar phoneStatusBar,
-            ViewGroup container, StatusBarWindowManager statusBarWindowManager) {
+            ViewGroup container, StatusBarWindowManager statusBarWindowManager,
+            ScrimController scrimController) {
         mStatusBarKeyguardViewManager.registerStatusBar(phoneStatusBar, container,
-                statusBarWindowManager);
+                statusBarWindowManager, scrimController);
         return mStatusBarKeyguardViewManager;
     }
 
