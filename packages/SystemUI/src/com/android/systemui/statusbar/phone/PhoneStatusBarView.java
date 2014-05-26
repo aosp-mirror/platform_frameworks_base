@@ -36,21 +36,16 @@ public class PhoneStatusBarView extends PanelBar {
     private static final boolean DEBUG_GESTURES = true;
 
     PhoneStatusBar mBar;
-    int mScrimColor;
-    int mScrimColorKeyguard;
 
-    PanelView mFadingPanel = null;
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel;
-    private boolean mShouldFade;
     private final PhoneStatusBarTransitions mBarTransitions;
+    private ScrimController mScrimController;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         Resources res = getContext().getResources();
-        mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
-        mScrimColorKeyguard = res.getColor(R.color.notification_panel_scrim_color_keyguard);
         mBarTransitions = new PhoneStatusBarTransitions(this);
     }
 
@@ -60,6 +55,10 @@ public class PhoneStatusBarView extends PanelBar {
 
     public void setBar(PhoneStatusBar bar) {
         mBar = bar;
+    }
+
+    public void setScrimController(ScrimController scrimController) {
+        mScrimController = scrimController;
     }
 
     @Override
@@ -110,27 +109,11 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void startOpeningPanel(PanelView panel) {
-        super.startOpeningPanel(panel);
-        // we only want to start fading if this is the "first" or "last" panel,
-        // which is kind of tricky to determine
-        mShouldFade = (mFadingPanel == null || mFadingPanel.isFullyExpanded());
-        if (DEBUG) {
-            Log.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
-        }
-        mFadingPanel = panel;
-    }
-
-    @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
         // give animations time to settle
         mBar.makeExpandedInvisibleSoon();
-        mFadingPanel = null;
         mLastFullyOpenedPanel = null;
-        if (mScrimColor != 0 && ActivityManager.isHighEndGfx() && mBar.mStatusBarWindow != null) {
-            mBar.mStatusBarWindow.setBackgroundColor(0);
-        }
     }
 
     @Override
@@ -139,9 +122,7 @@ public class PhoneStatusBarView extends PanelBar {
         if (openPanel != mLastFullyOpenedPanel) {
             openPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
-        mFadingPanel = openPanel;
         mLastFullyOpenedPanel = openPanel;
-        mShouldFade = true; // now you own the fade, mister
     }
 
     @Override
@@ -163,6 +144,7 @@ public class PhoneStatusBarView extends PanelBar {
     public void onTrackingStarted(PanelView panel) {
         super.onTrackingStarted(panel);
         mBar.onTrackingStarted();
+        mScrimController.onTrackingStarted();
     }
 
     @Override
@@ -184,27 +166,7 @@ public class PhoneStatusBarView extends PanelBar {
             Log.v(TAG, "panelExpansionChanged: f=" + frac);
         }
 
-        if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()
-                && mBar.mStatusBarWindow != null) {
-            if (mShouldFade) {
-                int scrimColor = (mBar.getBarState() == StatusBarState.KEYGUARD
-                        || mBar.getBarState() == StatusBarState.SHADE_LOCKED)
-                        ? mScrimColorKeyguard
-                        : mScrimColor;
-                frac = mPanelExpandedFractionSum; // don't judge me
-                // let's start this 20% of the way down the screen
-                frac = frac * 1.2f - 0.2f;
-                if (frac <= 0) {
-                    mBar.mStatusBarWindow.setBackgroundColor(0);
-                } else {
-                    // woo, special effects
-                    final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2f))));
-                    // attenuate background color alpha by k
-                    final int color = (int) ((scrimColor >>> 24) * k) << 24 | (scrimColor & 0xFFFFFF);
-                    mBar.mStatusBarWindow.setBackgroundColor(color);
-                }
-            }
-        }
+        mScrimController.setPanelExpansion(frac);
 
         // fade out the panel as it gets buried into the status bar to avoid overdrawing the
         // status bar on the last frame of a close animation

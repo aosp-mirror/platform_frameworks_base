@@ -26,6 +26,10 @@
     android:fitsSystemWindows="true"
     android:descendantFocusability="afterDescendants">
 
+    <View android:id="@+id/scrim_behind"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_height" />
@@ -39,5 +43,9 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
     </com.android.systemui.statusbar.phone.PanelHolder>
+
+    <View android:id="@+id/scrim_in_front"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

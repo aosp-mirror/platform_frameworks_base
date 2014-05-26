@@ -372,6 +372,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
+    private ScrimController mScrimController;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -638,8 +639,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_speed_bump, mStackScroller, false);
         mStackScroller.setSpeedBumpView(speedBump);
-
         mExpandedContents = mStackScroller;
+
+        mScrimController = new ScrimController(mStatusBarWindow.findViewById(R.id.scrim_behind),
+                mStatusBarWindow.findViewById(R.id.scrim_in_front));
+        mStatusBarView.setScrimController(mScrimController);
 
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
         mHeader.setActivityStarter(this);
@@ -775,7 +779,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void startKeyguard() {
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
-                mStatusBarWindow, mStatusBarWindowManager);
+                mStatusBarWindow, mStatusBarWindowManager, mScrimController);
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
     }
 
@@ -1444,6 +1448,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void startActivity(Intent intent) {
         startActivityDismissingKeyguard(intent, false);
+    }
+
+    public ScrimController getScrimController() {
+        return mScrimController;
     }
 
     /**
@@ -2771,10 +2779,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mHeader.setKeyguardShowing(true);
             mNotificationPanel.setKeyguardShowing(true);
+            mScrimController.setKeyguardShowing(true);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
             mHeader.setKeyguardShowing(false);
             mNotificationPanel.setKeyguardShowing(false);
+            mScrimController.setKeyguardShowing(false);
         }
 
         updateStackScrollerState();
