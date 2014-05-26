@@ -178,6 +178,16 @@ public final class HdmiControlService extends SystemService {
         });
     }
 
+    // See if we have an action of a given type in progress.
+    private <T extends FeatureAction> boolean hasAction(final Class<T> clazz) {
+        for (FeatureAction action : mActions) {
+            if (action.getClass().equals(clazz)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Remove the given {@link FeatureAction} object from the action queue.
      *
@@ -415,36 +425,95 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void oneTouchPlay(IHdmiControlCallback callback) {
+        public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
-            // TODO: Post a message for HdmiControlService#oneTouchPlay()
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.oneTouchPlay(callback);
+                }
+            });
         }
 
         @Override
-        public void queryDisplayStatus(IHdmiControlCallback callback) {
+        public void queryDisplayStatus(final IHdmiControlCallback callback) {
             enforceAccessPermission();
-            // TODO: Post a message for HdmiControlService#queryDisplayStatus()
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.queryDisplayStatus(callback);
+                }
+            });
         }
 
         @Override
-        public void addHotplugEventListener(IHdmiHotplugEventListener listener) {
+        public void addHotplugEventListener(final IHdmiHotplugEventListener listener) {
             enforceAccessPermission();
-            // TODO: Post a message for HdmiControlService#addHotplugEventListener()
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.addHotplugEventListener(listener);
+                }
+            });
         }
 
         @Override
-        public void removeHotplugEventListener(IHdmiHotplugEventListener listener) {
+        public void removeHotplugEventListener(final IHdmiHotplugEventListener listener) {
             enforceAccessPermission();
-            // TODO: Post a message for HdmiControlService#removeHotplugEventListener()
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.removeHotplugEventListener(listener);
+                }
+            });
         }
     }
 
     private void oneTouchPlay(IHdmiControlCallback callback) {
-        // TODO: Create a new action
+        if (hasAction(OneTouchPlayAction.class)) {
+            Slog.w(TAG, "oneTouchPlay already in progress");
+            invokeCallback(callback, HdmiCec.RESULT_ALREADY_IN_PROGRESS);
+            return;
+        }
+        HdmiCecLocalDevice source = mCecController.getLocalDevice(HdmiCec.DEVICE_PLAYBACK);
+        if (source == null) {
+            Slog.w(TAG, "Local playback device not available");
+            invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+            return;
+        }
+        // TODO: Consider the case of multiple TV sets. For now we always direct the command
+        //       to the primary one.
+        OneTouchPlayAction action = OneTouchPlayAction.create(this,
+                source.getDeviceInfo().getLogicalAddress(),
+                source.getDeviceInfo().getPhysicalAddress(), HdmiCec.ADDR_TV, callback);
+        if (action == null) {
+            Slog.w(TAG, "Cannot initiate oneTouchPlay");
+            invokeCallback(callback, HdmiCec.RESULT_EXCEPTION);
+            return;
+        }
+        addAndStartAction(action);
     }
 
     private void queryDisplayStatus(IHdmiControlCallback callback) {
-        // TODO: Create a new action
+        if (hasAction(DevicePowerStatusAction.class)) {
+            Slog.w(TAG, "queryDisplayStatus already in progress");
+            invokeCallback(callback, HdmiCec.RESULT_ALREADY_IN_PROGRESS);
+            return;
+        }
+        HdmiCecLocalDevice source = mCecController.getLocalDevice(HdmiCec.DEVICE_PLAYBACK);
+        if (source == null) {
+            Slog.w(TAG, "Local playback device not available");
+            invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+            return;
+        }
+        DevicePowerStatusAction action = DevicePowerStatusAction.create(this,
+                source.getDeviceInfo().getLogicalAddress(), HdmiCec.ADDR_TV, callback);
+        if (action == null) {
+            Slog.w(TAG, "Cannot initiate queryDisplayStatus");
+            invokeCallback(callback, HdmiCec.RESULT_EXCEPTION);
+            return;
+        }
+        addAndStartAction(action);
     }
 
     private void addHotplugEventListener(IHdmiHotplugEventListener listener) {
@@ -471,6 +540,14 @@ public final class HdmiControlService extends SystemService {
                 }
             }
             mHotplugEventListeners.remove(listener);
+        }
+    }
+
+    private void invokeCallback(IHdmiControlCallback callback, int result) {
+        try {
+            callback.onComplete(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Invoking callback failed:" + e);
         }
     }
 }
