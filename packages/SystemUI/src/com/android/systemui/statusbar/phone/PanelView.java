@@ -38,6 +38,7 @@ import java.io.PrintWriter;
 public class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
+    protected float mOverExpansion;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -403,6 +404,11 @@ public class PanelView extends FrameLayout {
     public void setExpandedHeightInternal(float h) {
         float fh = getMaxPanelHeight();
         mExpandedHeight = Math.min(fh, h);
+        float overExpansion = h - fh;
+        overExpansion = Math.max(0, overExpansion);
+        if (overExpansion != mOverExpansion) {
+            onOverExpansionChanged(overExpansion);
+        }
 
         if (DEBUG) {
             logf("setExpansion: height=%.1f fh=%.1f tracking=%s", h, fh, mTracking ? "T" : "f");
@@ -410,6 +416,10 @@ public class PanelView extends FrameLayout {
 
         onHeightUpdated(mExpandedHeight);
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
+    }
+
+    protected void onOverExpansionChanged(float overExpansion) {
+        mOverExpansion = overExpansion;
     }
 
     protected void onHeightUpdated(float expandedHeight) {
