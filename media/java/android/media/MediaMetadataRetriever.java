@@ -958,4 +958,16 @@ public class MediaMetadataRetriever
      */
     public static final int METADATA_KEY_COLOR_RANGE    = 37;
     // Add more here...
+
+    /**
+     * This key retrieves the sample rate, if available.
+     * @hide
+     */
+    public static final int METADATA_KEY_SAMPLERATE      = 38;
+
+    /**
+     * This key retrieves the bits per sample, if available.
+     * @hide
+     */
+    public static final int METADATA_KEY_BITS_PER_SAMPLE = 39;
 }
