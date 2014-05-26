@@ -21,9 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -32,7 +30,6 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
@@ -644,6 +641,23 @@ public class NotificationPanelView extends PanelView implements
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
     }
+
+    @Override
+    protected void onOverExpansionChanged(float overExpansion) {
+        float currentOverScroll = mNotificationStackScroller.getCurrentOverScrolledPixels(true);
+        mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + overExpansion
+                        - mOverExpansion, true /* onTop */, false /* animate */);
+        super.onOverExpansionChanged(overExpansion);
+    }
+
+    @Override
+    protected void onTrackingStopped() {
+        super.onTrackingStopped();
+        mOverExpansion = 0.0f;
+        mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */,
+                true /* animate */);
+    }
+
 
     @Override
     public void onHeightChanged(ExpandableView view) {
