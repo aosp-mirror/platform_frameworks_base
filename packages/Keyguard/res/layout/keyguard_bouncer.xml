@@ -18,12 +18,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <View android:id="@+id/bouncer_background"
-        android:background="#cc000000"
-        android:clickable="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <include
         style="@style/BouncerSecurityContainer"
         layout="@layout/keyguard_simple_host_view"

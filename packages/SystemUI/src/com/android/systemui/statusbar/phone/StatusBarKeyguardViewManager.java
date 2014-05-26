@@ -45,6 +45,7 @@ public class StatusBarKeyguardViewManager {
     private LockPatternUtils mLockPatternUtils;
     private ViewMediatorCallback mViewMediatorCallback;
     private PhoneStatusBar mPhoneStatusBar;
+    private ScrimController mScrimController;
 
     private ViewGroup mContainer;
     private StatusBarWindowManager mStatusBarWindowManager;
@@ -68,10 +69,12 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void registerStatusBar(PhoneStatusBar phoneStatusBar,
-            ViewGroup container, StatusBarWindowManager statusBarWindowManager) {
+            ViewGroup container, StatusBarWindowManager statusBarWindowManager,
+            ScrimController scrimController) {
         mPhoneStatusBar = phoneStatusBar;
         mContainer = container;
         mStatusBarWindowManager = statusBarWindowManager;
+        mScrimController = scrimController;
         mBouncer = new KeyguardBouncer(mContext, mViewMediatorCallback, mLockPatternUtils,
                 mStatusBarWindowManager, container);
     }
@@ -252,6 +255,7 @@ public class StatusBarKeyguardViewManager {
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             mStatusBarWindowManager.setBouncerShowing(bouncerShowing);
             mPhoneStatusBar.setBouncerShowing(bouncerShowing);
+            mScrimController.setBouncerShowing(bouncerShowing);
         }
 
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
