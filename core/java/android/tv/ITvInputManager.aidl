@@ -19,7 +19,10 @@ package android.tv;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.tv.ITvInputHardware;
+import android.tv.ITvInputHardwareCallback;
 import android.tv.ITvInputClient;
+import android.tv.TvInputHardwareInfo;
 import android.tv.TvInputInfo;
 import android.view.Surface;
 
@@ -46,4 +49,10 @@ interface ITvInputManager {
             int userId);
     void relayoutOverlayView(in IBinder sessionToken, in Rect frame, int userId);
     void removeOverlayView(in IBinder sessionToken, int userId);
+
+    // For TV input hardware binding
+    List<TvInputHardwareInfo> getHardwareList();
+    ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
+            int userId);
+    void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
 }

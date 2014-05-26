@@ -1014,6 +1014,13 @@
         android:description="@string/permdesc_sim_communication"
         android:protectionLevel="dangerous" />
 
+    <!-- Allows TvInputService to access underlying TV input hardware such as
+         built-in tuners and HDMI-in's.
+         @hide This should only be used by OEM's TvInputService's.
+    -->
+    <permission android:name="android.permission.TV_INPUT_HARDWARE"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with audio capture -->
     <!-- =========================================== -->
