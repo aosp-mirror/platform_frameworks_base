@@ -46,6 +46,7 @@ import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -438,6 +439,8 @@ public class CameraMetadataNative implements Parcelable {
             value = (T) getMaxNumOutputs(key);
         } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
             value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
+            value = (T) getTonemapCurve();
         } else {
             override = false;
         }
@@ -615,6 +618,17 @@ public class CameraMetadataNative implements Parcelable {
         }
     }
 
+    private <T> TonemapCurve getTonemapCurve() {
+        float[] red = getBase(CaptureRequest.TONEMAP_CURVE_RED);
+        float[] green = getBase(CaptureRequest.TONEMAP_CURVE_GREEN);
+        float[] blue = getBase(CaptureRequest.TONEMAP_CURVE_BLUE);
+        if (red == null || green == null || blue == null) {
+            return null;
+        }
+        TonemapCurve tc = new TonemapCurve(red, green, blue);
+        return tc;
+    }
+
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
         setBase(key.getNativeKey(), value);
     }
@@ -654,8 +668,9 @@ public class CameraMetadataNative implements Parcelable {
             return setAvailableFormats((int[]) value);
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
             return setFaceRectangles((Rect[]) value);
+        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
+            return setTonemapCurve((TonemapCurve) value);
         }
-
         // For other keys, set() falls back to setBase().
         return false;
     }
@@ -706,6 +721,24 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         setBase(CaptureResult.STATISTICS_FACE_RECTANGLES, newFaceRects);
+        return true;
+    }
+
+    private <T> boolean setTonemapCurve(TonemapCurve tc) {
+        if (tc == null) {
+            return false;
+        }
+
+        float[][] curve = new float[3][];
+        for (int i = TonemapCurve.CHANNEL_RED; i <= TonemapCurve.CHANNEL_BLUE; i++) {
+            int pointCount = tc.getPointCount(i);
+            curve[i] = new float[pointCount * TonemapCurve.POINT_SIZE];
+            tc.copyColorCurve(i, curve[i], 0);
+        }
+        setBase(CaptureRequest.TONEMAP_CURVE_RED, curve[0]);
+        setBase(CaptureRequest.TONEMAP_CURVE_GREEN, curve[1]);
+        setBase(CaptureRequest.TONEMAP_CURVE_BLUE, curve[2]);
+
         return true;
     }
 

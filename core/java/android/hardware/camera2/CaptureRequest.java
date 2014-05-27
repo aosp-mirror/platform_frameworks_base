@@ -1496,10 +1496,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Tonemapping / contrast / gamma curve for the blue
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
-     * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
+     * <p>See android.tonemap.curveRed for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @hide
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -1508,10 +1508,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Tonemapping / contrast / gamma curve for the green
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
-     * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
+     * <p>See android.tonemap.curveRed for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @hide
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
@@ -1521,7 +1521,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
      * <p>Each channel's curve is defined by an array of control points:</p>
-     * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} =
+     * <pre><code>android.tonemap.curveRed =
      * [ P0in, P0out, P1in, P1out, P2in, P2out, P3in, P3out, ..., PNin, PNout ]
      * 2 &lt;= N &lt;= {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</code></pre>
      * <p>These are sorted in order of increasing <code>Pin</code>; it is always
@@ -1537,15 +1537,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
      * <p>Linear mapping:</p>
-     * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} = [ 0, 0, 1.0, 1.0 ]
+     * <pre><code>android.tonemap.curveRed = [ 0, 0, 1.0, 1.0 ]
      * </code></pre>
      * <p><img alt="Linear mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
      * <p>Invert mapping:</p>
-     * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} = [ 0, 1.0, 1.0, 0 ]
+     * <pre><code>android.tonemap.curveRed = [ 0, 1.0, 1.0, 0 ]
      * </code></pre>
      * <p><img alt="Inverting mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
      * <p>Gamma 1/2.2 mapping, with 16 control points:</p>
-     * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} = [
+     * <pre><code>android.tonemap.curveRed = [
      * 0.0000, 0.0000, 0.0667, 0.2920, 0.1333, 0.4002, 0.2000, 0.4812,
      * 0.2667, 0.5484, 0.3333, 0.6069, 0.4000, 0.6594, 0.4667, 0.7072,
      * 0.5333, 0.7515, 0.6000, 0.7928, 0.6667, 0.8317, 0.7333, 0.8685,
@@ -1553,7 +1553,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </code></pre>
      * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
      * <p>Standard sRGB gamma mapping, per IEC 61966-2-1:1999, with 16 control points:</p>
-     * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} = [
+     * <pre><code>android.tonemap.curveRed = [
      * 0.0000, 0.0000, 0.0667, 0.2864, 0.1333, 0.4007, 0.2000, 0.4845,
      * 0.2667, 0.5532, 0.3333, 0.6125, 0.4000, 0.6652, 0.4667, 0.7130,
      * 0.5333, 0.7569, 0.6000, 0.7977, 0.6667, 0.8360, 0.7333, 0.8721,
@@ -1561,12 +1561,65 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </code></pre>
      * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
+     * @hide
      */
     public static final Key<float[]> TONEMAP_CURVE_RED =
             new Key<float[]>("android.tonemap.curveRed", float[].class);
+
+    /**
+     * <p>Tonemapping / contrast / gamma curve to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}
+     * is CONTRAST_CURVE.</p>
+     * <p>The tonemapCurve consist of three curves for each of red, green, and blue
+     * channels respectively. The following example uses the red channel as an
+     * example. The same logic applies to green and blue channel.
+     * Each channel's curve is defined by an array of control points:</p>
+     * <pre><code>curveRed =
+     * [ P0(in, out), P1(in, out), P2(in, out), P3(in, out), ..., PN(in, out) ]
+     * 2 &lt;= N &lt;= {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</code></pre>
+     * <p>These are sorted in order of increasing <code>Pin</code>; it is always
+     * guaranteed that input values 0.0 and 1.0 are included in the list to
+     * define a complete mapping. For input values between control points,
+     * the camera device must linearly interpolate between the control
+     * points.</p>
+     * <p>Each curve can have an independent number of points, and the number
+     * of points can be less than max (that is, the request doesn't have to
+     * always provide a curve with number of points equivalent to
+     * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>A few examples, and their corresponding graphical mappings; these
+     * only specify the red channel and the precision is limited to 4
+     * digits, for conciseness.</p>
+     * <p>Linear mapping:</p>
+     * <pre><code>curveRed = [ (0, 0), (1.0, 1.0) ]
+     * </code></pre>
+     * <p><img alt="Linear mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
+     * <p>Invert mapping:</p>
+     * <pre><code>curveRed = [ (0, 1.0), (1.0, 0) ]
+     * </code></pre>
+     * <p><img alt="Inverting mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
+     * <p>Gamma 1/2.2 mapping, with 16 control points:</p>
+     * <pre><code>curveRed = [
+     * (0.0000, 0.0000), (0.0667, 0.2920), (0.1333, 0.4002), (0.2000, 0.4812),
+     * (0.2667, 0.5484), (0.3333, 0.6069), (0.4000, 0.6594), (0.4667, 0.7072),
+     * (0.5333, 0.7515), (0.6000, 0.7928), (0.6667, 0.8317), (0.7333, 0.8685),
+     * (0.8000, 0.9035), (0.8667, 0.9370), (0.9333, 0.9691), (1.0000, 1.0000) ]
+     * </code></pre>
+     * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
+     * <p>Standard sRGB gamma mapping, per IEC 61966-2-1:1999, with 16 control points:</p>
+     * <pre><code>curveRed = [
+     * (0.0000, 0.0000), (0.0667, 0.2864), (0.1333, 0.4007), (0.2000, 0.4845),
+     * (0.2667, 0.5532), (0.3333, 0.6125), (0.4000, 0.6652), (0.4667, 0.7130),
+     * (0.5333, 0.7569), (0.6000, 0.7977), (0.6667, 0.8360), (0.7333, 0.8721),
+     * (0.8000, 0.9063), (0.8667, 0.9389), (0.9333, 0.9701), (1.0000, 1.0000) ]
+     * </code></pre>
+     * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
+     *
+     * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE =
+            new Key<android.hardware.camera2.params.TonemapCurve>("android.tonemap.curve", android.hardware.camera2.params.TonemapCurve.class);
 
     /**
      * <p>High-level global contrast/gamma/tonemapping control.</p>
@@ -1584,8 +1637,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This must be set to a valid mode in
      * {@link CameraCharacteristics#TONEMAP_AVAILABLE_TONE_MAP_MODES android.tonemap.availableToneMapModes}.</p>
      * <p>When using either FAST or HIGH_QUALITY, the camera device will
-     * emit its own tonemap curve in {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed},
-     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, and {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.
+     * emit its own tonemap curve in {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}.
      * These values are always available, and as close as possible to the
      * actually used nonlinear/nonglobal transforms.</p>
      * <p>If a request is sent with CONTRAST_CURVE with the camera device's
@@ -1593,9 +1645,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * roughly the same.</p>
      *
      * @see CameraCharacteristics#TONEMAP_AVAILABLE_TONE_MAP_MODES
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
-     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_CURVE
      * @see CaptureRequest#TONEMAP_MODE
      * @see #TONEMAP_MODE_CONTRAST_CURVE
      * @see #TONEMAP_MODE_FAST

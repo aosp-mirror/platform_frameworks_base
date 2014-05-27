@@ -12507,9 +12507,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_HOT_PIXEL_MAP_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_LENS_SHADING_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_CURVE_BLUE;
-    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_CURVE_GREEN;
-    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_CURVE_RED;
+    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_CURVE;
     field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_MODE;
   }
 
@@ -12596,9 +12594,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_MAP;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_SCENE_FLICKER;
-    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE_BLUE;
-    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE_GREEN;
-    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE_RED;
+    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE;
     field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_MODE;
   }
 

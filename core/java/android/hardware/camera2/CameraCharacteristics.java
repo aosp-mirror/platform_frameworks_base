@@ -1378,8 +1378,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * array</p>
      * <p>Needed for FOV calculation for old API</p>
      */
-    public static final Key<float[]> SENSOR_INFO_PHYSICAL_SIZE =
-            new Key<float[]>("android.sensor.info.physicalSize", float[].class);
+    public static final Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE =
+            new Key<android.util.SizeF>("android.sensor.info.physicalSize", android.util.SizeF.class);
 
     /**
      * <p>Dimensions of full pixel array, possibly
@@ -1686,19 +1686,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Maximum number of supported points in the
-     * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, or
-     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, or {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.</p>
+     * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}.</p>
      * <p>If the actual number of points provided by the application (in
-     * android.tonemap.curve*)  is less than max, the camera device will
+     * {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}*)  is less than max, the camera device will
      * resample the curve to its internal representation, using linear
      * interpolation.</p>
      * <p>The output curves in the result metadata may have a different number
      * of points than the input curves, and will represent the actual
      * hardware curves used as closely as possible when linearly interpolated.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
-     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_CURVE
      */
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
