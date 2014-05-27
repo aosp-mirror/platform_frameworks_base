@@ -221,10 +221,13 @@
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
 
     <!-- The min translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_min">3dp</dimen>
+    <dimen name="recents_task_view_z_min">5dp</dimen>
 
     <!-- The translation in the Z index for each task above the last task. -->
-    <dimen name="recents_task_view_z_increment">5dp</dimen>
+    <dimen name="recents_task_view_z_increment">10dp</dimen>
+
+    <!-- The amount of bottom inset in the shadow outline. -->
+    <dimen name="recents_task_view_shadow_outline_bottom_inset">5dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>

@@ -278,6 +278,7 @@ public class SwipeHelper {
                 if (FADE_OUT_DURING_SWIPE && canAnimViewBeDismissed) {
                     view.setAlpha(getAlphaForOffset(view));
                 }
+                mCallback.onSwipeChanged(mCurrView, view.getTranslationX());
             }
         });
         anim.addListener(new AnimatorListenerAdapter() {
@@ -313,6 +314,7 @@ public class SwipeHelper {
                 if (mCurrView != null) {
                     float delta = getPos(ev) - mInitialTouchPos;
                     setSwipeAmount(delta);
+                    mCallback.onSwipeChanged(mCurrView, delta);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -392,6 +394,8 @@ public class SwipeHelper {
         boolean canChildBeDismissed(View v);
 
         void onBeginDrag(View v);
+
+        void onSwipeChanged(View v, float delta);
 
         void onChildDismissed(View v);
 
