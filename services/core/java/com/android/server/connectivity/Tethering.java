@@ -489,8 +489,10 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private class StateReceiver extends BroadcastReceiver {
+        @Override
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
+            if (action == null) { return; }
             if (action.equals(UsbManager.ACTION_USB_STATE)) {
                 synchronized (Tethering.this.mPublicSync) {
                     boolean usbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
