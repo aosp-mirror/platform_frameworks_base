@@ -1238,8 +1238,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             requestCode = sourceRecord.requestCode;
             sourceRecord.resultTo = null;
             if (resultRecord != null) {
-                resultRecord.removeResultsLocked(
-                    sourceRecord, resultWho, requestCode);
+                resultRecord.removeResultsLocked(sourceRecord, resultWho, requestCode);
             }
             if (sourceRecord.launchedFromUid == callingUid) {
                 // The new activity is being launched from the same uid as the previous
@@ -1411,7 +1410,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return err;
     }
 
-    ActivityStack adjustStackFocus(ActivityRecord r) {
+    ActivityStack adjustStackFocus(ActivityRecord r, boolean newTask) {
         final TaskRecord task = r.task;
         if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
             if (task != null) {
@@ -1436,7 +1435,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return container.mStack;
             }
 
-            if (mFocusedStack != mHomeStack) {
+            if (mFocusedStack != mHomeStack && (!newTask ||
+                    mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                         "adjustStackFocus: Have a focused stack=" + mFocusedStack);
                 return mFocusedStack;
@@ -1833,7 +1833,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            targetStack = adjustStackFocus(r);
+            newTask = true;
+            targetStack = adjustStackFocus(r, newTask);
             targetStack.moveToFront();
             if (reuseTask == null) {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
@@ -1850,7 +1851,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             } else {
                 r.setTask(reuseTask, reuseTask, true);
             }
-            newTask = true;
             if (!movedHome) {
                 if ((launchFlags &
                         (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
@@ -1918,7 +1918,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = adjustStackFocus(r);
+            targetStack = adjustStackFocus(r, newTask);
             targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
@@ -2345,7 +2345,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!r.isApplicationActivity() && !stack.isHomeStack()) {
-                    if (DEBUG_TASKS) Slog.d(TAG, "Skipping stack: " + stack);
+                    if (DEBUG_TASKS) Slog.d(TAG, "Skipping stack: (home activity) " + stack);
+                    continue;
+                }
+                if (!stack.mActivityContainer.isEligibleForNewTasks()) {
+                    if (DEBUG_TASKS) Slog.d(TAG, "Skipping stack: (new task not allowed) " +
+                            stack);
                     continue;
                 }
                 final ActivityRecord ar = stack.findTaskLocked(r);
@@ -3307,6 +3312,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         void setDrawn() {
         }
 
+        // You can always start a new task on a regular ActivityStack.
+        boolean isEligibleForNewTasks() {
+            return true;
+        }
+
         @Override
         public String toString() {
             return mIdString + (mActivityDisplay == null ? "N" : "A");
@@ -3385,6 +3395,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mDrawn = true;
                 setSurfaceIfReady();
             }
+        }
+
+        // Never start a new task on an ActivityView if it isn't explicitly specified.
+        @Override
+        boolean isEligibleForNewTasks() {
+            return false;
         }
 
         private void setSurfaceIfReady() {
