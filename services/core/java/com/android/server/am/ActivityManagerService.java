@@ -7085,6 +7085,10 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
     private ActivityManager.RecentTaskInfo createRecentTaskInfoFromTaskRecord(TaskRecord tr) {
+        // Update the task description to reflect any changes in the task stack
+        tr.updateTaskDescription();
+
+        // Compose the recent task info
         ActivityManager.RecentTaskInfo rti
                 = new ActivityManager.RecentTaskInfo();
         rti.id = tr.mActivities.isEmpty() ? -1 : tr.taskId;
