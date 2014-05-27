@@ -214,8 +214,9 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 disabledSubtypeUnawareIme, null);
     }
 
+    // This test is disabled until DynamicRotationList is enabled.
     @SmallTest
-    public void testControllerImplWithUserAction() throws Exception {
+    public void DISABLED_testControllerImplWithUserAction() throws Exception {
         final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
         final ImeSubtypeListItem latinIme_en_US = enabledItems.get(0);
         final ImeSubtypeListItem latinIme_fr = enabledItems.get(1);
