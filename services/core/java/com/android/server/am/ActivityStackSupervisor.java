@@ -1489,7 +1489,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
-        mUserLeaving = (launchFlags&Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
+        mUserLeaving = (launchFlags & Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
         if (DEBUG_USER_LEAVING) Slog.v(TAG, "startActivity() => mUserLeaving=" + mUserLeaving);
 
         // If the caller has asked not to resume at this point, we make note
@@ -1499,7 +1499,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.delayedResume = true;
         }
 
-        ActivityRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
+        ActivityRecord notTop =
+                (launchFlags & Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
 
         // If the onlyIfNeeded flag is set, then we can do this if the activity
         // being launched is the same as the one making the call...  or, as
@@ -1522,9 +1523,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
                 intent.addFlags(
                         Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                launchFlags = intent.getFlags();
                 break;
             case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+                launchFlags = intent.getFlags();
                 break;
         }
         final boolean newDocument = intent.isDocument();
