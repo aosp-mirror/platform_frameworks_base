@@ -139,56 +139,64 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     }
 
     private String[] getExtraPeople(Bundle extras) {
-        String[] people = extras.getStringArray(Notification.EXTRA_PEOPLE);
-        if (people != null) {
-            return people;
+        Object people = extras.get(Notification.EXTRA_PEOPLE);
+        if (people instanceof String[]) {
+            return (String[]) people;
         }
 
-        ArrayList<String> stringArray = extras.getStringArrayList(Notification.EXTRA_PEOPLE);
-        if (stringArray != null) {
-            return (String[]) stringArray.toArray();
+        if (people instanceof ArrayList) {
+            ArrayList arrayList = (ArrayList) people;
+
+            if (arrayList.isEmpty()) {
+                return null;
+            }
+
+            if (arrayList.get(0) instanceof String) {
+                ArrayList<String> stringArray = (ArrayList<String>) arrayList;
+                return stringArray.toArray(new String[stringArray.size()]);
+            }
+
+            if (arrayList.get(0) instanceof CharSequence) {
+                ArrayList<CharSequence> charSeqList = (ArrayList<CharSequence>) arrayList;
+                final int N = charSeqList.size();
+                String[] array = new String[N];
+                for (int i = 0; i < N; i++) {
+                    array[i] = charSeqList.get(i).toString();
+                }
+                return array;
+            }
+
+            return null;
         }
 
-        String string = extras.getString(Notification.EXTRA_PEOPLE);
-        if (string != null) {
-            people = new String[1];
-            people[0] = string;
-            return people;
-        }
-        char[] charArray = extras.getCharArray(Notification.EXTRA_PEOPLE);
-        if (charArray != null) {
-            people = new String[1];
-            people[0] = new String(charArray);
-            return people;
+        if (people instanceof String) {
+            String[] array = new String[1];
+            array[0] = (String) people;
+            return array;
         }
 
-        CharSequence charSeq = extras.getCharSequence(Notification.EXTRA_PEOPLE);
-        if (charSeq != null) {
-            people = new String[1];
-            people[0] = charSeq.toString();
-            return people;
+        if (people instanceof char[]) {
+            String[] array = new String[1];
+            array[0] = new String((char[]) people);
+            return array;
         }
 
-        CharSequence[] charSeqArray = extras.getCharSequenceArray(Notification.EXTRA_PEOPLE);
-        if (charSeqArray != null) {
+        if (people instanceof CharSequence) {
+            String[] array = new String[1];
+            array[0] = ((CharSequence) people).toString();
+            return array;
+        }
+
+        if (people instanceof CharSequence[]) {
+            CharSequence[] charSeqArray = (CharSequence[]) people;
             final int N = charSeqArray.length;
-            people = new String[N];
+            String[] array = new String[N];
             for (int i = 0; i < N; i++) {
-                people[i] = charSeqArray[i].toString();
+                array[i] = charSeqArray[i].toString();
             }
-            return people;
+            return array;
         }
 
-        ArrayList<CharSequence> charSeqList =
-                extras.getCharSequenceArrayList(Notification.EXTRA_PEOPLE);
-        if (charSeqList != null) {
-            final int N = charSeqList.size();
-            people = new String[N];
-            for (int i = 0; i < N; i++) {
-                people[i] = charSeqList.get(i).toString();
-            }
-            return people;
-        }
         return null;
     }
 
