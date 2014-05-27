@@ -2939,6 +2939,26 @@ final class Settings {
         file.delete();
         file = getUserPackagesStateBackupFile(userId);
         file.delete();
+        removeCrossProfileIntentFiltersToUserLPr(userId);
+    }
+
+    void removeCrossProfileIntentFiltersToUserLPr(int targetUserId) {
+        for (int i = 0; i < mCrossProfileIntentResolvers.size(); i++) {
+            int sourceUserId = mCrossProfileIntentResolvers.keyAt(i);
+            CrossProfileIntentResolver cpir = mCrossProfileIntentResolvers.get(sourceUserId);
+            boolean needsWriting = false;
+            HashSet<CrossProfileIntentFilter> cpifs =
+                    new HashSet<CrossProfileIntentFilter>(cpir.filterSet());
+            for (CrossProfileIntentFilter cpif : cpifs) {
+                if (cpif.getTargetUserId() == targetUserId) {
+                    needsWriting = true;
+                    cpir.removeFilter(cpif);
+                }
+            }
+            if (needsWriting) {
+                writePackageRestrictionsLPr(sourceUserId);
+            }
+        }
     }
 
     // This should be called (at least) whenever an application is removed
