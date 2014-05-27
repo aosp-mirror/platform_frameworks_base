@@ -979,7 +979,6 @@ public final class Canvas_Delegate {
             final float startX, final float startY, final int flags, long paint,
             long typeface) {
 
-        // TODO: use typeface.
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
             @Override
@@ -1097,7 +1096,7 @@ public final class Canvas_Delegate {
     /**
      * Executes a {@link GcSnapshot.Drawable} with a given canvas and paint.
      * <p>Note that the drawable may actually be executed several times if there are
-     * layers involved (see {@link #saveLayer(RectF, int, int)}.
+     * layers involved (see {@link #saveLayer(RectF, Paint_Delegate, int)}.
      */
     private static void draw(long nCanvas, long nPaint, boolean compositeOnly, boolean forceSrcMode,
             GcSnapshot.Drawable drawable) {
@@ -1117,7 +1116,7 @@ public final class Canvas_Delegate {
      * Executes a {@link GcSnapshot.Drawable} with a given canvas. No paint object will be provided
      * to {@link GcSnapshot.Drawable#draw(Graphics2D, Paint_Delegate)}.
      * <p>Note that the drawable may actually be executed several times if there are
-     * layers involved (see {@link #saveLayer(RectF, int, int)}.
+     * layers involved (see {@link #saveLayer(RectF, Paint_Delegate, int)}.
      */
     private static void draw(long nCanvas, GcSnapshot.Drawable drawable) {
         // get the delegate from the native int.
@@ -1188,12 +1187,6 @@ public final class Canvas_Delegate {
 
     private boolean clipRect(float left, float top, float right, float bottom, int regionOp) {
         return mSnapshot.clipRect(left, top, right, bottom, regionOp);
-    }
-
-    private void setBitmap(Bitmap_Delegate bitmap) {
-        mBitmap = bitmap;
-        assert mSnapshot.size() == 1;
-        mSnapshot.setBitmap(mBitmap);
     }
 
     private static void drawBitmap(

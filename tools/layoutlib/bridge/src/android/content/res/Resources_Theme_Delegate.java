@@ -97,6 +97,13 @@ public class Resources_Theme_Delegate {
         return found;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static TypedArray resolveAttributes(Resources thisResources, Theme thisTheme,
+            int[] values, int[] attrs) {
+        // FIXME
+        return null;
+    }
+
     // ---- private helper methods ----
 
     private static boolean setupResources(Theme thisTheme) {
