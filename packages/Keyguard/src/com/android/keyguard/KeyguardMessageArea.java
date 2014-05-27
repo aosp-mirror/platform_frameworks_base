@@ -48,34 +48,18 @@ class KeyguardMessageArea extends TextView {
      */
     private static final long ANNOUNCEMENT_DELAY = 250;
 
-    static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
-    static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
-
     static final int SECURITY_MESSAGE_DURATION = 5000;
     protected static final int FADE_DURATION = 750;
 
     private static final String TAG = "KeyguardMessageArea";
 
-    // are we showing battery information?
-    boolean mShowingBatteryInfo = false;
-
     // is the bouncer up?
     boolean mShowingBouncer = false;
-
-    // last known plugged in state
-    boolean mCharging = false;
-
-    // last known battery level
-    int mBatteryLevel = 100;
 
     KeyguardUpdateMonitor mUpdateMonitor;
 
     // Timeout before we reset the message to show charging/owner info
     long mTimeout = SECURITY_MESSAGE_DURATION;
-
-    // Shadowed text values
-    protected boolean mBatteryCharged;
-    protected boolean mBatteryIsLow;
 
     private Handler mHandler;
 
@@ -146,16 +130,6 @@ class KeyguardMessageArea extends TextView {
     }
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
-        @Override
-        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
-            mShowingBatteryInfo = status.isPluggedIn() || status.isBatteryLow();
-            mCharging = status.status == BatteryManager.BATTERY_STATUS_CHARGING
-                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
-            mBatteryLevel = status.level;
-            mBatteryCharged = status.isCharged();
-            mBatteryIsLow = status.isBatteryLow();
-            update();
-        }
         public void onScreenTurnedOff(int why) {
             setSelected(false);
         };
@@ -212,7 +186,7 @@ class KeyguardMessageArea extends TextView {
      */
     void update() {
         MutableInt icon = new MutableInt(0);
-        CharSequence status = concat(getChargeInfo(icon), getOwnerInfo(), getCurrentMessage());
+        CharSequence status = concat(getOwnerInfo(), getCurrentMessage());
         setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
         setText(status);
     }
@@ -246,25 +220,6 @@ class KeyguardMessageArea extends TextView {
             info = mLockPatternUtils.getOwnerInfo(mLockPatternUtils.getCurrentUser());
         }
         return info;
-    }
-
-    private CharSequence getChargeInfo(MutableInt icon) {
-        CharSequence string = null;
-        if (mShowingBatteryInfo && !mShowingMessage) {
-            // Battery status
-            if (mCharging) {
-                // Charging, charged or waiting to charge.
-                string = getContext().getString(mBatteryCharged
-                        ? R.string.keyguard_charged
-                        : R.string.keyguard_plugged_in, mBatteryLevel);
-                icon.value = CHARGING_ICON;
-            } else if (mBatteryIsLow) {
-                // Battery is low
-                string = getContext().getString(R.string.keyguard_low_battery);
-                icon.value = BATTERY_LOW_ICON;
-            }
-        }
-        return string;
     }
 
     private void hideMessage(int duration, boolean thenUpdate) {
