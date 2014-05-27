@@ -155,6 +155,7 @@ public class TaskPersister {
             File taskFile = recentFiles[taskNdx];
             if (DEBUG) Slog.d(TAG, "restoreTasksLocked: taskFile=" + taskFile.getName());
             BufferedReader reader = null;
+            boolean deleteFile = false;
             try {
                 reader = new BufferedReader(new FileReader(taskFile));
                 final XmlPullParser in = Xml.newPullParser();
@@ -183,16 +184,18 @@ public class TaskPersister {
                     }
                     XmlUtils.skipCurrentTag(in);
                 }
-            } catch (IOException e) {
-                Slog.e(TAG, "Unable to parse " + taskFile + ". Error " + e);
-            } catch (XmlPullParserException e) {
-                Slog.e(TAG, "Unable to parse " + taskFile + ". Error " + e);
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Unable to parse " + taskFile + ". Error " + e);
+                deleteFile = true;
             } finally {
                 if (reader != null) {
                     try {
                         reader.close();
                     } catch (IOException e) {
                     }
+                }
+                if (!DEBUG && deleteFile) {
+                    taskFile.delete();
                 }
             }
         }
@@ -220,7 +223,7 @@ public class TaskPersister {
         return new ArrayList<TaskRecord>(Arrays.asList(tasksArray));
     }
 
-    private void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, File[] files) {
+    private static void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, File[] files) {
         for (int fileNdx = 0; fileNdx < files.length; ++fileNdx) {
             File file = files[fileNdx];
             String filename = file.getName();
@@ -285,8 +288,7 @@ public class TaskPersister {
                 synchronized(mService) {
                     final ArrayList<TaskRecord> tasks = mService.mRecentTasks;
                     persistentTaskIds.clear();
-                    int taskNdx;
-                    for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                    for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                         task = tasks.get(taskNdx);
                         if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task + " persistable=" +
                                 task.isPersistable + " needsPersisting=" + task.needsPersisting);
