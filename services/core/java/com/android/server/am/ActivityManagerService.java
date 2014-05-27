@@ -9574,11 +9574,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mRecentTasks = mTaskPersister.restoreTasksLocked();
-            if (!mRecentTasks.isEmpty()) {
-                mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
+            if (mRecentTasks == null) {
+                mRecentTasks = mTaskPersister.restoreTasksLocked();
+                if (!mRecentTasks.isEmpty()) {
+                    mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
+                }
+                mTaskPersister.startPersisting();
             }
-            mTaskPersister.startPersisting();
 
             // Check to see if there are any update receivers to run.
             if (!mDidUpdate) {
