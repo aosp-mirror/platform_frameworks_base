@@ -5246,6 +5246,7 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
     field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "defaultManagedProfileName";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "deviceAdminPackageName";
+    field public static final java.lang.String EXTRA_PROVISIONING_TOKEN = "android.app.extra.token";
     field public static int FLAG_MANAGED_CAN_ACCESS_PARENT;
     field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff

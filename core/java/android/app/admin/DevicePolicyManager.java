@@ -104,12 +104,30 @@ public class DevicePolicyManager {
         = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
 
     /**
+     * A broadcast intent with this action can be sent to ManagedProvisionning to specify that the
+     * user has already consented to the creation of the managed profile.
+     * The intent must contain the extras
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} and
+     * {@link #EXTRA_PROVISIONING_TOKEN}
+     * @hide
+     */
+    public static final String ACTION_PROVISIONING_USER_HAS_CONSENTED
+        = "android.app.action.USER_HAS_CONSENTED";
+
+    /**
      * A String extra holding the name of the package of the mobile device management application
      * that starts the managed provisioning flow. This package will be set as the profile owner.
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
         = "deviceAdminPackageName";
+
+    /**
+     * An int extra used to identify the consent of the user to create the managed profile.
+     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
+     */
+    public static final String EXTRA_PROVISIONING_TOKEN
+        = "android.app.extra.token";
 
     /**
      * A String extra holding the default name of the profile that is created during managed profile
