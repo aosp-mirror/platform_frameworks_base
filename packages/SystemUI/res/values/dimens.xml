@@ -199,6 +199,9 @@
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>
 
+    <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
+    <dimen name="zen_mode_condition_height">48dp</dimen>
+
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
 
@@ -291,4 +294,9 @@
     <dimen name="keyguard_clock_notifications_margin_min">22dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
 
+    <!-- Volume panel dialog y offset -->
+    <dimen name="volume_panel_top">16dp</dimen>
+
+    <!-- Volume panel dialog width -->
+    <dimen name="volume_panel_width">300dp</dimen>
 </resources>

@@ -69,8 +69,6 @@
   <java-symbol type="id" name="edittext_container" />
   <java-symbol type="id" name="enter_pin_section" />
   <java-symbol type="id" name="expand_activities_button" />
-  <java-symbol type="id" name="expand_button" />
-  <java-symbol type="id" name="expand_button_divider" />
   <java-symbol type="id" name="expires_on" />
   <java-symbol type="id" name="find_next" />
   <java-symbol type="id" name="find_prev" />
@@ -161,9 +159,7 @@
   <java-symbol type="id" name="share" />
   <java-symbol type="id" name="shortcut" />
   <java-symbol type="id" name="skip_button" />
-  <java-symbol type="id" name="slider_group" />
   <java-symbol type="id" name="split_action_bar" />
-  <java-symbol type="id" name="stream_icon" />
   <java-symbol type="id" name="submit_area" />
   <java-symbol type="id" name="switch_new" />
   <java-symbol type="id" name="switch_old" />
@@ -181,7 +177,6 @@
   <java-symbol type="id" name="topPanel" />
   <java-symbol type="id" name="up" />
   <java-symbol type="id" name="value" />
-  <java-symbol type="id" name="visible_panel" />
   <java-symbol type="id" name="websearch" />
   <java-symbol type="id" name="wifi_p2p_wps_pin" />
   <java-symbol type="id" name="year" />
@@ -343,7 +338,6 @@
   <java-symbol type="dimen" name="search_view_preferred_width" />
   <java-symbol type="dimen" name="textview_error_popup_default_width" />
   <java-symbol type="dimen" name="toast_y_offset" />
-  <java-symbol type="dimen" name="volume_panel_top" />
   <java-symbol type="dimen" name="action_bar_stacked_max_height" />
   <java-symbol type="dimen" name="action_bar_stacked_tab_max_width" />
   <java-symbol type="dimen" name="notification_text_size" />
@@ -1199,8 +1193,6 @@
   <java-symbol type="layout" name="time_picker_legacy" />
   <java-symbol type="layout" name="time_picker_dialog" />
   <java-symbol type="layout" name="transient_notification" />
-  <java-symbol type="layout" name="volume_adjust" />
-  <java-symbol type="layout" name="volume_adjust_item" />
   <java-symbol type="layout" name="voice_interaction_session" />
   <java-symbol type="layout" name="web_text_view_dropdown" />
   <java-symbol type="layout" name="webview_find" />

@@ -121,10 +121,12 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
+import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -196,8 +198,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     NetworkControllerImpl mNetworkController;
     RotationLockControllerImpl mRotationLockController;
     UserInfoController mUserInfoController;
-    ZenModeControllerImpl mZenModeController;
+    ZenModeController mZenModeController;
     CastControllerImpl mCastController;
+    VolumeComponent mVolumeComponent;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -690,7 +693,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mRotationLockController = new RotationLockControllerImpl(mContext);
         }
         mUserInfoController = new UserInfoController(mContext);
-        mZenModeController = new ZenModeControllerImpl(mContext, mHandler);
+        mVolumeComponent = getComponent(VolumeComponent.class);
+        mZenModeController = mVolumeComponent.getZenController();
         mCastController = new CastControllerImpl(mContext);
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
@@ -753,7 +757,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,
-                    mCastController);
+                    mCastController, mVolumeComponent);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
             }

@@ -135,5 +135,8 @@
     <!-- Defines the implementation of the velocity tracker to be used for the panel expansion. Can
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
+
+    <!-- Wait on the touch feedback this long before performing an action. -->
+    <integer name="feedback_start_delay">300</integer>
 </resources>
 

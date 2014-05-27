@@ -72,8 +72,7 @@ public class BrightnessDialog extends Dialog implements
         window.setGravity(Gravity.TOP);
         WindowManager.LayoutParams lp = window.getAttributes();
         // Offset from the top
-        lp.y = getContext().getResources().getDimensionPixelOffset(
-                com.android.internal.R.dimen.volume_panel_top);
+        lp.y = getContext().getResources().getDimensionPixelOffset(R.dimen.volume_panel_top);
         lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
