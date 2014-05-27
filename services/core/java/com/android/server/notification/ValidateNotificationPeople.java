@@ -36,6 +36,8 @@ import java.util.LinkedList;
 /**
  * This {@link NotificationSignalExtractor} attempts to validate
  * people references. Also elevates the priority of real people.
+ *
+ * {@hide}
  */
 public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private static final String TAG = "ValidateNotificationPeople";
@@ -138,7 +140,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         };
     }
 
-    private String[] getExtraPeople(Bundle extras) {
+    // VisibleForTesting
+    public static String[] getExtraPeople(Bundle extras) {
         Object people = extras.get(Notification.EXTRA_PEOPLE);
         if (people instanceof String[]) {
             return (String[]) people;
