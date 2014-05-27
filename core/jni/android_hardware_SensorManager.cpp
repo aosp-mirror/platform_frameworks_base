@@ -51,6 +51,8 @@ struct SensorOffsets
     jfieldID    fifoMaxEventCount;
     jfieldID    stringType;
     jfieldID    requiredPermission;
+    jfieldID    maxDelay;
+    jfieldID    isWakeUpSensor;
 } gSensorOffsets;
 
 
@@ -78,6 +80,8 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.stringType = _env->GetFieldID(sensorClass, "mStringType", "Ljava/lang/String;");
     sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
                                                         "Ljava/lang/String;");
+    sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
+    sensorOffsets.isWakeUpSensor = _env->GetFieldID(sensorClass, "mWakeUpSensor",  "Z");
 }
 
 static jint
@@ -112,6 +116,8 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
     env->SetObjectField(sensor, sensorOffsets.requiredPermission,
                         requiredPermission);
+    env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
+    env->SetBooleanField(sensor, sensorOffsets.isWakeUpSensor, list->isWakeUpSensor());
     next++;
     return size_t(next) < count ? next : 0;
 }
@@ -160,7 +166,8 @@ private:
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
-                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
+                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER ||
+                    buffer[i].type == SENSOR_TYPE_WAKE_UP_STEP_COUNTER) {
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
                     env->SetFloatArrayRegion(mScratch, 0, 1, &value);
