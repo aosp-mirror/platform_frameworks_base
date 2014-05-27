@@ -388,6 +388,12 @@
     <string name="accessibility_quick_settings_location">Location <xliff:g id="state" example="Off">%s</xliff:g>.</string>
     <!-- Content description of the alarm tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_alarm">Alarm set for <xliff:g id="time" example="Wed 3:30 PM">%s</xliff:g>.</string>
+    <!-- Content description of quick settings detail panel close button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_close">Close panel</string>
+    <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_more_time">More time</string>
+    <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_less_time">Less time</string>
 
     <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_3g_title">2G-3G data disabled</string>
@@ -512,6 +518,8 @@
     <string name="quick_settings_tethering_label">Tethering</string>
     <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hotspot_label">Hotspot</string>
+    <!-- QuickSettings: Notifications [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_notifications_label">Notifications</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">RECENTS</string>
@@ -563,4 +571,19 @@
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
     <string name="bugreport_tile_extended" translatable="false">%s\n%s (%s)</string>
+
+    <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_forever">Until you turn this off</string>
+
+    <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_minutes">
+        <item quantity="one">For one minute</item>
+        <item quantity="other">For %d minutes</item>
+    </plurals>
+
+    <!-- Zen mode condition: time duration in hours. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_hours">
+        <item quantity="one">For one hour</item>
+        <item quantity="other">For %d hours</item>
+    </plurals>
 </resources>

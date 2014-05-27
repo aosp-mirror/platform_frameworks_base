@@ -133,6 +133,32 @@
         <item name="android:fadingEdge">horizontal</item>
     </style>
 
+    <style name="TextAppearance.QS">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailHeader">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailItemPrimary">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailItemSecondary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#7fcac3</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -192,9 +218,9 @@
         <item name="android:colorControlActivated">@color/system_accent_color</item>
     </style>
 
-    <style name="QSBorderless" parent="@android:style/Widget.Quantum.Button.Borderless" />
+    <style name="BorderlessButton" parent="@android:style/Widget.Quantum.Button.Borderless" />
 
-    <style name="QSBorderless.Tiny">
+    <style name="BorderlessButton.Tiny">
         <item name="android:minHeight">12dip</item>
         <item name="android:minWidth">12dip</item>
     </style>

@@ -112,6 +112,9 @@ public class AudioService extends IAudioService.Stub {
     private static final boolean USE_SESSIONS = true;
     private static final boolean DEBUG_SESSIONS = true;
 
+    /** Allow volume changes to set ringer mode to silent? */
+    private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
+
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -1019,7 +1022,8 @@ public class AudioService extends IAudioService.Stub {
             int newRingerMode;
             if (index == 0) {
                 newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
-                                              : AudioManager.RINGER_MODE_SILENT;
+                        : VOLUME_SETS_RINGER_MODE_SILENT ? AudioManager.RINGER_MODE_SILENT
+                        : AudioManager.RINGER_MODE_NORMAL;
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
@@ -2552,7 +2556,9 @@ public class AudioService extends IAudioService.Stub {
                     }
                 } else {
                     // (oldIndex < step) is equivalent to (old UI index == 0)
-                    if ((oldIndex < step) && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                    if ((oldIndex < step)
+                            && VOLUME_SETS_RINGER_MODE_SILENT
+                            && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
@@ -2565,7 +2571,8 @@ public class AudioService extends IAudioService.Stub {
                 break;
             }
             if ((direction == AudioManager.ADJUST_LOWER)) {
-                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                if (VOLUME_SETS_RINGER_MODE_SILENT
+                        && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                     ringerMode = RINGER_MODE_SILENT;
                 }
             } else if (direction == AudioManager.ADJUST_RAISE) {

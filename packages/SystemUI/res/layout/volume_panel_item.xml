@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="16dip"
-        android:background="?attr/selectableItemBackground"
+        android:background="?android:attr/selectableItemBackground"
         android:contentDescription="@null" />
 
     <SeekBar
