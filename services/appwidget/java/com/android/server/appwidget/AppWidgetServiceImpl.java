@@ -843,6 +843,15 @@ class AppWidgetServiceImpl {
                 throw new IllegalArgumentException("Unknown component " + componentName);
             }
 
+            // Ensure that the service specified by the passed intent belongs to the same package
+            // as provides the passed widget id.
+            String widgetIdPackage = id.provider.info.provider.getPackageName();
+            String servicePackage = componentName.getPackageName();
+            if (!servicePackage.equals(widgetIdPackage)) {
+                throw new SecurityException("Specified intent doesn't belong to the same package"
+                        + " as the provided AppWidget id");
+            }
+
             // If there is already a connection made for this service intent, then disconnect from
             // that first. (This does not allow multiple connections to the same service under
             // the same key)
