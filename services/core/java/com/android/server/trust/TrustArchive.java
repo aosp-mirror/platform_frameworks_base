@@ -33,6 +33,8 @@ public class TrustArchive {
     private static final int TYPE_REVOKE_TRUST = 1;
     private static final int TYPE_TRUST_TIMEOUT = 2;
     private static final int TYPE_AGENT_DIED = 3;
+    private static final int TYPE_AGENT_CONNECTED = 4;
+    private static final int TYPE_AGENT_STOPPED = 5;
 
     private static final int HISTORY_LIMIT = 200;
 
@@ -77,6 +79,14 @@ public class TrustArchive {
 
     public void logAgentDied(int userId, ComponentName agent) {
         addEvent(new Event(TYPE_AGENT_DIED, userId, agent, null, 0, false));
+    }
+
+    public void logAgentConnected(int userId, ComponentName agent) {
+        addEvent(new Event(TYPE_AGENT_CONNECTED, userId, agent, null, 0, false));
+    }
+
+    public void logAgentStopped(int userId, ComponentName agent) {
+        addEvent(new Event(TYPE_AGENT_STOPPED, userId, agent, null, 0, false));
     }
 
     private void addEvent(Event e) {
@@ -152,6 +162,10 @@ public class TrustArchive {
                 return "TrustTimeout";
             case TYPE_AGENT_DIED:
                 return "AgentDied";
+            case TYPE_AGENT_CONNECTED:
+                return "AgentConnected";
+            case TYPE_AGENT_STOPPED:
+                return "AgentStopped";
             default:
                 return "Unknown(" + type + ")";
         }
