@@ -505,7 +505,7 @@ final class HdmiCecController {
             // Reply <Feature Abort> to initiator (source) for all requests.
             HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
                     sourceAddress, message.getSource(), message.getOpcode(),
-                    HdmiCecMessageBuilder.ABORT_REFUSED);
+                    HdmiConstants.ABORT_REFUSED);
             sendCommand(cecMessage, null);
         }
     }
