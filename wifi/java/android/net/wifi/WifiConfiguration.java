@@ -216,6 +216,18 @@ public class WifiConfiguration implements Parcelable {
      * <code>XX:XX:XX:XX:XX:XX</code> where each <code>X</code> is a hex digit.
      */
     public String BSSID;
+    /**
+     * Fully qualified domain name (FQDN), for Passpoint credential.
+     * e.g. {@code "mail.example.com"}.
+     * @hide
+     */
+    public String FQDN;
+    /**
+     * Network access identifier (NAI) realm, for Passpoint credential.
+     * e.g. {@code "myhost.example.com"}.
+     * @hide
+     */
+    public String naiRealm;
 
     /**
      * Pre-shared key for use with WPA-PSK.
@@ -484,6 +496,8 @@ public class WifiConfiguration implements Parcelable {
         networkId = INVALID_NETWORK_ID;
         SSID = null;
         BSSID = null;
+        FQDN = null;
+        naiRealm = null;
         priority = 0;
         hiddenSSID = false;
         disableReason = DISABLED_UNKNOWN_REASON;
@@ -565,7 +579,8 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append("- DSBLE: ").append(this.disableReason).append(" ");
         }
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
-                append(" BSSID: ").append(this.BSSID).append(" PRIO: ").append(this.priority).
+                append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN).
+                append(" REALM: ").append(this.naiRealm).append(" PRIO: ").append(this.priority).
                 append('\n');
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
@@ -870,6 +885,8 @@ public class WifiConfiguration implements Parcelable {
             disableReason = source.disableReason;
             SSID = source.SSID;
             BSSID = source.BSSID;
+            FQDN = source.FQDN;
+            naiRealm = source.naiRealm;
             preSharedKey = source.preSharedKey;
 
             wepKeys = new String[4];
@@ -932,6 +949,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(disableReason);
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeString(FQDN);
+        dest.writeString(naiRealm);
         dest.writeString(preSharedKey);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
@@ -976,6 +995,8 @@ public class WifiConfiguration implements Parcelable {
                 config.disableReason = in.readInt();
                 config.SSID = in.readString();
                 config.BSSID = in.readString();
+                config.FQDN = in.readString();
+                config.naiRealm = in.readString();
                 config.preSharedKey = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();

@@ -7037,7 +7037,6 @@ package android.content {
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
     field public static final java.lang.String WALLPAPER_SERVICE = "wallpaper";
     field public static final java.lang.String WIFI_P2P_SERVICE = "wifip2p";
-    field public static final java.lang.String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
     field public static final java.lang.String WIFI_SERVICE = "wifi";
     field public static final java.lang.String WINDOW_SERVICE = "window";
   }
@@ -17580,29 +17579,6 @@ package android.net.wifi.p2p.nsd {
   public class WifiP2pUpnpServiceRequest extends android.net.wifi.p2p.nsd.WifiP2pServiceRequest {
     method public static android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest newInstance();
     method public static android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest newInstance(java.lang.String);
-  }
-
-}
-
-package android.net.wifi.passpoint {
-
-  public class WifiPasspointCredential implements android.os.Parcelable {
-    ctor public WifiPasspointCredential(java.lang.String, java.lang.String, android.net.wifi.WifiEnterpriseConfig);
-    method public int describeContents();
-    method public android.net.wifi.WifiEnterpriseConfig getEnterpriseConfig();
-    method public java.lang.String getFqdn();
-    method public java.lang.String getRealm();
-    method public void setEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
-    method public void setFqdn(java.lang.String);
-    method public void setRealm(java.lang.String);
-    method public void writeToParcel(android.os.Parcel, int);
-  }
-
-  public class WifiPasspointManager {
-    method public boolean addCredential(android.net.wifi.passpoint.WifiPasspointCredential);
-    method public java.util.List<android.net.wifi.passpoint.WifiPasspointCredential> getSavedCredentials();
-    method public boolean removeCredential(android.net.wifi.passpoint.WifiPasspointCredential);
-    method public boolean updateCredential(android.net.wifi.passpoint.WifiPasspointCredential);
   }
 
 }

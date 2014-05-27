@@ -27,6 +27,7 @@ import java.util.Map;
 
 /**
  * A class representing a Wi-Fi Passpoint credential.
+ * @hide
  */
 public class WifiPasspointCredential implements Parcelable {
 
