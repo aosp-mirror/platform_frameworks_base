@@ -133,16 +133,6 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    // simplified click handler to be used when device is in accessibility mode
-    private final OnClickListener mAccessibilityClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v.getId() == R.id.search_light) {
-                KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
-            }
-        }
-    };
-
     private final OnClickListener mImeSwitcherClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -246,11 +236,6 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.ime_switcher);
     }
 
-    // for when home is disabled, but search isn't
-    public View getSearchLight() {
-        return mCurrentView.findViewById(R.id.search_light);
-    }
-
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
@@ -345,9 +330,6 @@ public class NavigationBarView extends LinearLayout {
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
 
-        final boolean showSearch = disableHome && !disableSearch;
-        setVisibleOrGone(getSearchLight(), showSearch);
-
         mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
 
@@ -402,38 +384,6 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
-
-        watchForAccessibilityChanges();
-    }
-
-    private void watchForAccessibilityChanges() {
-        final AccessibilityManager am =
-                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
-
-        // Set the initial state
-        enableAccessibility(am.isTouchExplorationEnabled());
-
-        // Watch for changes
-        am.addTouchExplorationStateChangeListener(new TouchExplorationStateChangeListener() {
-            @Override
-            public void onTouchExplorationStateChanged(boolean enabled) {
-                enableAccessibility(enabled);
-            }
-        });
-    }
-
-    private void enableAccessibility(boolean touchEnabled) {
-        Log.v(TAG, "touchEnabled:"  + touchEnabled);
-
-        // Add a touch handler or accessibility click listener for camera and search buttons
-        // for all view orientations.
-        final OnClickListener onClickListener = touchEnabled ? mAccessibilityClickListener : null;
-        for (int i = 0; i < mRotatedViews.length; i++) {
-            final View searchLight = mRotatedViews[i].findViewById(R.id.search_light);
-            if (searchLight != null) {
-                searchLight.setOnClickListener(onClickListener);
-            }
-        }
     }
 
     public boolean isVertical() {
@@ -571,7 +521,6 @@ public class NavigationBarView extends LinearLayout {
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "rcnt", getRecentsButton());
         dumpButton(pw, "menu", getMenuButton());
-        dumpButton(pw, "srch", getSearchLight());
 
         pw.println("    }");
     }
