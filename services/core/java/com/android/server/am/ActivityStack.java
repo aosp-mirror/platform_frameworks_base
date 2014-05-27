@@ -349,10 +349,8 @@ final class ActivityStack {
         mCurrentUser = mService.mCurrentUserId;
         // Get the activity screenshot thumbnail dimensions
         Resources res = mService.mContext.getResources();
-        mThumbnailWidth =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_width);
-        mThumbnailHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.recents_thumbnail_height);
+        mThumbnailWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+        mThumbnailHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
     }
 
     /**

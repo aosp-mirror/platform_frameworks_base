@@ -3010,8 +3010,8 @@ public final class ActivityThread {
                 int h;
                 if (w < 0) {
                     Resources res = r.activity.getResources();
-                    int wId = com.android.internal.R.dimen.recents_thumbnail_width;
-                    int hId = com.android.internal.R.dimen.recents_thumbnail_height;
+                    int wId = com.android.internal.R.dimen.thumbnail_width;
+                    int hId = com.android.internal.R.dimen.thumbnail_height;
                     mThumbnailWidth = w = res.getDimensionPixelSize(wId);
                     mThumbnailHeight = h = res.getDimensionPixelSize(hId);
                 } else {
