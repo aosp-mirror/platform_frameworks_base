@@ -23,6 +23,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SerialService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SystemServer.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_tv_TvInputHal.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbDeviceManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbHostManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_VibratorService.cpp \
