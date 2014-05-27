@@ -4141,6 +4141,7 @@ package android.app {
     method public android.app.Notification.WearableExtender setHintShowBackgroundOnly(boolean);
     method public android.app.Notification.WearableExtender setStartScrollBottom(boolean);
     field public static final int SIZE_DEFAULT = 0; // 0x0
+    field public static final int SIZE_FULL_SCREEN = 5; // 0x5
     field public static final int SIZE_LARGE = 4; // 0x4
     field public static final int SIZE_MEDIUM = 3; // 0x3
     field public static final int SIZE_SMALL = 2; // 0x2
