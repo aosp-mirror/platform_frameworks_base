@@ -1154,13 +1154,15 @@ final class ActivityRecord {
         }
 
         if (intent == null) {
-            Slog.e(TAG, "restoreActivity error intent=" + intent);
-            return null;
+            throw new XmlPullParserException("restoreActivity error intent=" + intent);
         }
 
         final ActivityManagerService service = stackSupervisor.mService;
         final ActivityInfo aInfo = stackSupervisor.resolveActivity(intent, resolvedType, 0, null,
                 null, userId);
+        if (aInfo == null) {
+            throw new XmlPullParserException("restoreActivity resolver error.");
+        }
         final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
                 launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
                 null, null, 0, componentSpecified, stackSupervisor, null, null);
