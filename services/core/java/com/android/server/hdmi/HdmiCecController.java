@@ -21,6 +21,7 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.MessageQueue;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -29,7 +30,6 @@ import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -99,7 +99,7 @@ final class HdmiCecController {
      */
     static HdmiCecController create(HdmiControlService service) {
         HdmiCecController controller = new HdmiCecController();
-        long nativePtr = nativeInit(controller);
+        long nativePtr = nativeInit(controller, service.getServiceLooper().getQueue());
         if (nativePtr == 0L) {
             controller = null;
             return null;
@@ -471,8 +471,8 @@ final class HdmiCecController {
 
     private void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (isAcceptableAddress(message.getDestination()) &&
-                mService.handleCecCommand(message)) {
+        if (isAcceptableAddress(message.getDestination())
+                && mService.handleCecCommand(message)) {
             return;
         }
 
@@ -517,17 +517,8 @@ final class HdmiCecController {
      * Called by native when incoming CEC message arrived.
      */
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
-        byte opcode = body[0];
-        byte params[] = Arrays.copyOfRange(body, 1, body.length);
-        final HdmiCecMessage cecMessage = new HdmiCecMessage(srcAddress, dstAddress, opcode, params);
-
-        // Delegate message to main handler so that it handles in main thread.
-        runOnServiceThread(new Runnable() {
-            @Override
-            public void run() {
-                onReceiveCommand(cecMessage);
-            }
-        });
+        assertRunOnServiceThread();
+        onReceiveCommand(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));
     }
 
     /**
@@ -539,7 +530,7 @@ final class HdmiCecController {
         mService.onHotplug(0, connected);
     }
 
-    private static native long nativeInit(HdmiCecController handler);
+    private static native long nativeInit(HdmiCecController handler, MessageQueue messageQueue);
     private static native int nativeSendCecCommand(long controllerPtr, int srcAddress,
             int dstAddress, byte[] body);
     private static native int nativeAddLogicalAddress(long controllerPtr, int logicalAddress);
