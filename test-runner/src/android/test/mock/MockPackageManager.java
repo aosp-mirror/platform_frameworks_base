@@ -707,17 +707,8 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void addCrossProfileIntentFilter(IntentFilter filter, boolean removable,
-            int sourceUserId, int targetUserId) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int sourceUserId,
-            int targetUserId) {
+    public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
+            int flags) {
         throw new UnsupportedOperationException();
     }
 
@@ -726,14 +717,6 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void clearForwardingIntentFilters(int sourceUserId) {
         throw new UnsupportedOperationException();
     }
 

@@ -3456,12 +3456,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 if ((flags & DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED) != 0) {
-                    pm.addCrossProfileIntentFilter(filter, true /*removable*/, callingUserId,
-                            UserHandle.USER_OWNER);
+                    pm.addCrossProfileIntentFilter(filter, callingUserId, UserHandle.USER_OWNER,
+                            PackageManager.SET_BY_PROFILE_OWNER);
                 }
                 if ((flags & DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT) != 0) {
-                    pm.addCrossProfileIntentFilter(filter, true /*removable*/, UserHandle.USER_OWNER,
-                            callingUserId);
+                    pm.addCrossProfileIntentFilter(filter, UserHandle.USER_OWNER, callingUserId,
+                            PackageManager.SET_BY_PROFILE_OWNER);
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen
@@ -3482,6 +3482,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 pm.clearCrossProfileIntentFilters(callingUserId);
+                // If we want to support multiple managed profiles, we will have to only remove
+                // those that have callingUserId as their target.
                 pm.clearCrossProfileIntentFilters(UserHandle.USER_OWNER);
             } catch (RemoteException re) {
                 // Shouldn't happen
