@@ -4780,6 +4780,18 @@
         <attr name="height" />
     </declare-styleable>
 
+    <!-- Defines the group used in Vector Drawables. -->
+    <declare-styleable name="VectorDrawableGroup">
+        <!-- The Name of this group -->
+        <attr name="name" />
+        <!-- The amount to rotate the group -->
+        <attr name="rotation" />
+        <!-- The X coordinate of the center of rotation of a group -->
+        <attr name="pivotX" />
+        <!-- The Y coordinate of the center of rotation of a group -->
+        <attr name="pivotY" />
+    </declare-styleable>
+
     <!-- Defines the path used in Vector Drawables. -->
     <declare-styleable name="VectorDrawablePath">
         <!-- The Name of this path -->
@@ -4788,12 +4800,6 @@
         <attr name="strokeWidth" format="float" />
         <!-- The opacity of a path stroke -->
         <attr name="strokeOpacity" format="float" />
-        <!-- The amount to rotate the path stroke -->
-        <attr name="rotation" />
-        <!-- The X coordinate of the center of rotation of a path -->
-        <attr name="pivotX" />
-        <!-- The Y coordinate of the center of rotation of a path -->
-        <attr name="pivotY" />
         <!-- The color to stroke the path if not defined implies no stroke-->
         <attr name="stroke" format="color" />
         <!-- The color to fill the path if not defined implies no fill-->

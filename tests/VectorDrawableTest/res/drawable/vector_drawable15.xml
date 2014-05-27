@@ -23,14 +23,14 @@
         android:viewportHeight="400"
         android:viewportWidth="500" />
 
-    <group>
+    <group
+        android:pivotX="250"
+        android:pivotY="200"
+        android:rotation="180">
         <path
             android:name="house"
             android:fill="#ff440000"
             android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
-            android:pivotX="250"
-            android:pivotY="200"
-            android:rotation="180"
             android:stroke="#FFFF0000"
             android:strokeWidth="10" />
     </group>

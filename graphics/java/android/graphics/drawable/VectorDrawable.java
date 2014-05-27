@@ -39,7 +39,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -289,6 +288,7 @@ public class VectorDrawable extends Drawable {
                     noViewportTag = false;
                 } else if (SHAPE_GROUP.equals(tagName)) {
                     currentGroup = new VGroup();
+                    currentGroup.inflate(res, attrs, theme);
                     pathRenderer.mGroupList.add(currentGroup);
                     noGroupTag = false;
                 }
@@ -325,8 +325,6 @@ public class VectorDrawable extends Drawable {
             throw new XmlPullParserException("no " + tag + " defined");
         }
 
-        // post parse cleanup
-        pathRenderer.parseFinish();
         return pathRenderer;
     }
 
@@ -373,7 +371,6 @@ public class VectorDrawable extends Drawable {
         private final Path mRenderPath = new Path();
         private final Matrix mMatrix = new Matrix();
 
-        private VPath[] mCurrentPaths;
         private Paint mStrokePaint;
         private Paint mFillPaint;
         private ColorFilter mColorFilter;
@@ -391,12 +388,6 @@ public class VectorDrawable extends Drawable {
 
         public VPathRenderer(VPathRenderer copy) {
             mGroupList.addAll(copy.mGroupList);
-            if (copy.mCurrentPaths != null) {
-                mCurrentPaths = new VPath[copy.mCurrentPaths.length];
-                for (int i = 0; i < mCurrentPaths.length; i++) {
-                    mCurrentPaths[i] = new VPath(copy.mCurrentPaths[i]);
-                }
-            }
 
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
@@ -422,7 +413,9 @@ public class VectorDrawable extends Drawable {
         public void applyTheme(Theme t) {
             final ArrayList<VGroup> groups = mGroupList;
             for (int i = groups.size() - 1; i >= 0; i--) {
-                final ArrayList<VPath> paths = groups.get(i).mVGList;
+                VGroup currentGroup = groups.get(i);
+                currentGroup.applyTheme(t);
+                final ArrayList<VPath> paths = currentGroup.mVGList;
                 for (int j = paths.size() - 1; j >= 0; j--) {
                     final VPath path = paths.get(j);
                     if (path.canApplyTheme()) {
@@ -446,104 +439,98 @@ public class VectorDrawable extends Drawable {
         }
 
         public void draw(Canvas canvas, int w, int h) {
-            if (mCurrentPaths == null) {
-                Log.e(LOGTAG,"mCurrentPaths == null");
+            if (mGroupList == null || mGroupList.size() == 0) {
+                Log.e(LOGTAG,"There is no group to draw");
                 return;
             }
 
-            for (int i = 0; i < mCurrentPaths.length; i++) {
-                if (mCurrentPaths[i] != null) {
-                    drawPath(mCurrentPaths[i], canvas, w, h);
+            for (int i = 0; i < mGroupList.size(); i++) {
+                VGroup currentGroup = mGroupList.get(i);
+                if (currentGroup != null) {
+                    drawPath(currentGroup, canvas, w, h);
                 }
             }
         }
 
-        private void drawPath(VPath vPath, Canvas canvas, int w, int h) {
+        private void drawPath(VGroup vGroup, Canvas canvas, int w, int h) {
             final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
-            vPath.toPath(mPath);
-            final Path path = mPath;
-
-            if (vPath.mTrimPathStart != 0.0f || vPath.mTrimPathEnd != 1.0f) {
-                float start = (vPath.mTrimPathStart + vPath.mTrimPathOffset) % 1.0f;
-                float end = (vPath.mTrimPathEnd + vPath.mTrimPathOffset) % 1.0f;
-
-                if (mPathMeasure == null) {
-                    mPathMeasure = new PathMeasure();
-                }
-                mPathMeasure.setPath(mPath, false);
-
-                float len = mPathMeasure.getLength();
-                start = start * len;
-                end = end * len;
-                path.reset();
-                if (start > end) {
-                    mPathMeasure.getSegment(start, len, path, true);
-                    mPathMeasure.getSegment(0f, end, path, true);
-                } else {
-                    mPathMeasure.getSegment(start, end, path, true);
-                }
-                path.rLineTo(0, 0); // fix bug in measure
-            }
-
-            mRenderPath.reset();
             mMatrix.reset();
 
-            mMatrix.postRotate(vPath.mRotate, vPath.mPivotX, vPath.mPivotY);
+            mMatrix.postRotate(vGroup.mRotate, vGroup.mPivotX, vGroup.mPivotY);
             mMatrix.postScale(scale, scale, mViewportWidth / 2f, mViewportHeight / 2f);
             mMatrix.postTranslate(w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
 
-            mRenderPath.addPath(path, mMatrix);
+            ArrayList<VPath> paths = vGroup.getPaths();
+            for (int i = 0; i < paths.size(); i++) {
+                VPath vPath = paths.get(i);
+                vPath.toPath(mPath);
+                final Path path = mPath;
 
-            if (vPath.mClip) {
-                canvas.clipPath(mRenderPath, Region.Op.REPLACE);
-            }
+                if (vPath.mTrimPathStart != 0.0f || vPath.mTrimPathEnd != 1.0f) {
+                    float start = (vPath.mTrimPathStart + vPath.mTrimPathOffset) % 1.0f;
+                    float end = (vPath.mTrimPathEnd + vPath.mTrimPathOffset) % 1.0f;
 
-            if (vPath.mFillColor != 0) {
-                if (mFillPaint == null) {
-                    mFillPaint = new Paint();
-                    mFillPaint.setColorFilter(mColorFilter);
-                    mFillPaint.setStyle(Paint.Style.FILL);
-                    mFillPaint.setAntiAlias(true);
+                    if (mPathMeasure == null) {
+                        mPathMeasure = new PathMeasure();
+                    }
+                    mPathMeasure.setPath(mPath, false);
+
+                    float len = mPathMeasure.getLength();
+                    start = start * len;
+                    end = end * len;
+                    path.reset();
+                    if (start > end) {
+                        mPathMeasure.getSegment(start, len, path, true);
+                        mPathMeasure.getSegment(0f, end, path, true);
+                    } else {
+                        mPathMeasure.getSegment(start, end, path, true);
+                    }
+                    path.rLineTo(0, 0); // fix bug in measure
                 }
 
-                mFillPaint.setColor(vPath.mFillColor);
-                canvas.drawPath(mRenderPath, mFillPaint);
-            }
+                mRenderPath.reset();
 
-            if (vPath.mStrokeColor != 0) {
-                if (mStrokePaint == null) {
-                    mStrokePaint = new Paint();
-                    mStrokePaint.setColorFilter(mColorFilter);
-                    mStrokePaint.setStyle(Paint.Style.STROKE);
-                    mStrokePaint.setAntiAlias(true);
+                mRenderPath.addPath(path, mMatrix);
+
+                if (vPath.mClip) {
+                    canvas.clipPath(mRenderPath, Region.Op.REPLACE);
                 }
 
-                final Paint strokePaint = mStrokePaint;
-                if (vPath.mStrokeLineJoin != null) {
-                    strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
+                if (vPath.mFillColor != 0) {
+                    if (mFillPaint == null) {
+                        mFillPaint = new Paint();
+                        mFillPaint.setColorFilter(mColorFilter);
+                        mFillPaint.setStyle(Paint.Style.FILL);
+                        mFillPaint.setAntiAlias(true);
+                    }
+
+                    mFillPaint.setColor(vPath.mFillColor);
+                    canvas.drawPath(mRenderPath, mFillPaint);
                 }
 
-                if (vPath.mStrokeLineCap != null) {
-                    strokePaint.setStrokeCap(vPath.mStrokeLineCap);
+                if (vPath.mStrokeColor != 0) {
+                    if (mStrokePaint == null) {
+                        mStrokePaint = new Paint();
+                        mStrokePaint.setColorFilter(mColorFilter);
+                        mStrokePaint.setStyle(Paint.Style.STROKE);
+                        mStrokePaint.setAntiAlias(true);
+                    }
+
+                    final Paint strokePaint = mStrokePaint;
+                    if (vPath.mStrokeLineJoin != null) {
+                        strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
+                    }
+
+                    if (vPath.mStrokeLineCap != null) {
+                        strokePaint.setStrokeCap(vPath.mStrokeLineCap);
+                    }
+
+                    strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
+                    strokePaint.setColor(vPath.mStrokeColor);
+                    strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
+                    canvas.drawPath(mRenderPath, strokePaint);
                 }
-
-                strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
-                strokePaint.setColor(vPath.mStrokeColor);
-                strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
-                canvas.drawPath(mRenderPath, strokePaint);
-            }
-        }
-
-        /**
-         * Build the "current" path based on the current group
-         * TODO: improve memory use & performance or move to C++
-         */
-        public void parseFinish() {
-            final Collection<VPath> paths = mGroupList.get(0).getPaths();
-            mCurrentPaths = paths.toArray(new VPath[paths.size()]);
-            for (int i = 0; i < mCurrentPaths.length; i++) {
-                mCurrentPaths[i] = new VPath(mCurrentPaths[i]);
             }
         }
 
@@ -587,17 +574,60 @@ public class VectorDrawable extends Drawable {
         private final HashMap<String, VPath> mVGPathMap = new HashMap<String, VPath>();
         private final ArrayList<VPath> mVGList = new ArrayList<VPath>();
 
+        private float mRotate = 0;
+        private float mPivotX = 0;
+        private float mPivotY = 0;
+
+        private int[] mThemeAttrs;
+
         public void add(VPath path) {
             String id = path.getID();
             mVGPathMap.put(id, path);
             mVGList.add(path);
          }
 
+        public void applyTheme(Theme t) {
+            if (mThemeAttrs == null) {
+                return;
+            }
+
+            final TypedArray a = t.resolveAttributes(
+                    mThemeAttrs, R.styleable.VectorDrawablePath);
+
+            mRotate = a.getFloat(R.styleable.VectorDrawableGroup_rotation, mRotate);
+            mPivotX = a.getFloat(R.styleable.VectorDrawableGroup_pivotX, mPivotX);
+            mPivotY = a.getFloat(R.styleable.VectorDrawableGroup_pivotY, mPivotY);
+            a.recycle();
+        }
+
+        public void inflate(Resources res, AttributeSet attrs, Theme theme) {
+            final TypedArray a = obtainAttributes(res, theme, attrs, R.styleable.VectorDrawableGroup);
+            final int[] themeAttrs = a.extractThemeAttrs();
+
+            mThemeAttrs = themeAttrs;
+            // NOTE: The set of attributes loaded here MUST match the
+            // set of attributes loaded in applyTheme.
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_rotation] == 0) {
+                mRotate = a.getFloat(R.styleable.VectorDrawableGroup_rotation, mRotate);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_pivotX] == 0) {
+                mPivotX = a.getFloat(R.styleable.VectorDrawableGroup_pivotX, mPivotX);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_pivotY] == 0) {
+                mPivotY = a.getFloat(R.styleable.VectorDrawableGroup_pivotY, mPivotY);
+            }
+
+            a.recycle();
+        }
+
         /**
          * Must return in order of adding
          * @return ordered list of paths
          */
-        public Collection<VPath> getPaths() {
+        public ArrayList<VPath> getPaths() {
             return mVGList;
         }
 
@@ -616,10 +646,6 @@ public class VectorDrawable extends Drawable {
         int mFillRule;
         float mFillOpacity = Float.NaN;
 
-        float mRotate = 0;
-        float mPivotX = 0;
-        float mPivotY = 0;
-
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
         float mTrimPathOffset = 0;
@@ -631,16 +657,9 @@ public class VectorDrawable extends Drawable {
 
         private VNode[] mNode = null;
         private String mId;
-        private int[] mCheckState = new int[MAX_STATES];
-        private boolean[] mCheckValue = new boolean[MAX_STATES];
-        private int mNumberOfStates = 0;
 
         public VPath() {
             // Empty constructor.
-        }
-
-        public VPath(VPath p) {
-            copyFrom(p);
         }
 
         public void toPath(Path path) {
@@ -705,18 +724,6 @@ public class VectorDrawable extends Drawable {
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_fillOpacity] == 0) {
                 mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, mFillOpacity);
-            }
-
-            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_rotation] == 0) {
-                mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, mRotate);
-            }
-
-            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pivotX] == 0) {
-                mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, mPivotX);
-            }
-
-            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pivotY] == 0) {
-                mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, mPivotY);
             }
 
             if (themeAttrs == null
@@ -797,10 +804,6 @@ public class VectorDrawable extends Drawable {
             mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, mFillColor);
             mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, mFillOpacity);
 
-            mRotate = a.getFloat(R.styleable.VectorDrawablePath_rotation, mRotate);
-            mPivotX = a.getFloat(R.styleable.VectorDrawablePath_pivotX, mPivotX);
-            mPivotY = a.getFloat(R.styleable.VectorDrawablePath_pivotY, mPivotY);
-
             mStrokeLineCap = getStrokeLineCap(a.getInt(
                     R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
             mStrokeLineJoin = getStrokeLineJoin(a.getInt(
@@ -819,6 +822,7 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_trimPathStart, mTrimPathStart);
 
             updateColorAlphas();
+            a.recycle();
         }
 
         private void updateColorAlphas() {
@@ -920,33 +924,6 @@ public class VectorDrawable extends Drawable {
                 addNode(list, value.charAt(start), new float[0]);
             }
             return list.toArray(new VectorDrawable.VNode[list.size()]);
-        }
-
-        public void copyFrom(VPath p1) {
-            mNode = new VNode[p1.mNode.length];
-            for (int i = 0; i < mNode.length; i++) {
-                mNode[i] = new VNode(p1.mNode[i]);
-            }
-            mId = p1.mId;
-            mStrokeColor = p1.mStrokeColor;
-            mFillColor = p1.mFillColor;
-            mStrokeWidth = p1.mStrokeWidth;
-            mRotate = p1.mRotate;
-            mPivotX = p1.mPivotX;
-            mPivotY = p1.mPivotY;
-            mTrimPathStart = p1.mTrimPathStart;
-            mTrimPathEnd = p1.mTrimPathEnd;
-            mTrimPathOffset = p1.mTrimPathOffset;
-            mStrokeLineCap = p1.mStrokeLineCap;
-            mStrokeLineJoin = p1.mStrokeLineJoin;
-            mStrokeMiterlimit = p1.mStrokeMiterlimit;
-            mNumberOfStates = p1.mNumberOfStates;
-            for (int i = 0; i < mNumberOfStates; i++) {
-                mCheckState[i] = p1.mCheckState[i];
-                mCheckValue[i] = p1.mCheckValue[i];
-            }
-
-            mFillRule = p1.mFillRule;
         }
     }
 

@@ -23,7 +23,10 @@
         android:viewportHeight="500"
         android:viewportWidth="800" />
 
-    <group>
+    <group
+        android:pivotX="90"
+        android:pivotY="100"
+        android:rotation="20">
         <path
             android:name="pie2"
             android:pathData="M200,350 l 50,-25
@@ -31,9 +34,6 @@
            a25,25 -30 0,1 100,-50 l 50,-25
            a25,37 -30 0,1 100,-50 l 50,-25
            a25,50 -30 0,1 100,-50 l 50,-25"
-            android:pivotX="90"
-            android:pivotY="100"
-            android:rotation="20"
             android:stroke="#FF00FF00"
             android:strokeWidth="10" />
     </group>

@@ -34,9 +34,6 @@
             android:name="half"
             android:fill="#FFFF0000"
             android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
-            android:pivotX="300"
-            android:pivotY="200"
-            android:rotation="0"
             android:stroke="#FF0000FF"
             android:strokeWidth="5" />
     </group>

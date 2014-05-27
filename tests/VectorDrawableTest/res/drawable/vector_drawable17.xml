@@ -26,10 +26,7 @@
                 android:name="house"
                 android:pathData="M200,300 Q400,50 600,300 T1000,300"
                 android:stroke="#FFFF0000"
-                android:strokeWidth="10"
-                android:rotation="360"
-                android:pivotX="600"
-                android:pivotY="300"/>
+                android:strokeWidth="10"/>
     </group>
 
 </vector>

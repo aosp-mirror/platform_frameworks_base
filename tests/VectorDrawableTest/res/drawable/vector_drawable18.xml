@@ -27,9 +27,6 @@
         <path
             android:name="house"
             android:pathData="M100,200 C100,100 250,100 250,200 S400,300 400,200"
-            android:pivotX="250"
-            android:pivotY="200"
-            android:rotation="360"
             android:stroke="#FFFFFF00"
             android:strokeWidth="10" />
     </group>
