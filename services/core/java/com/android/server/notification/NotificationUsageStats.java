@@ -46,7 +46,7 @@ import java.util.Map;
  * {@hide}
  */
 public class NotificationUsageStats {
-    private static final boolean ENABLE_SQLITE_LOG = true;
+    private static final boolean ENABLE_SQLITE_LOG = false;
 
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
