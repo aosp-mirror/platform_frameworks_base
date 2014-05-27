@@ -98,7 +98,8 @@
         android:gravity="center_vertical"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:singleLine="true" />
 
     <include
         layout="@layout/quick_settings_brightness_dialog"
