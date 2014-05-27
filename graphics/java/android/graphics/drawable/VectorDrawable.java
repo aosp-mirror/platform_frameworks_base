@@ -101,6 +101,7 @@ import java.util.HashMap;
  * <dd>Sets the Miter limit for a stroked path</dd></dt>
  * </dl>
  * </dd>
+ * @hide
  */
 public class VectorDrawable extends Drawable {
     private static final String LOGTAG = VectorDrawable.class.getSimpleName();
