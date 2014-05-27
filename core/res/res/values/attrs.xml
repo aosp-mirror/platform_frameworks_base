@@ -6694,4 +6694,17 @@
     <declare-styleable name="EdgeEffect">
         <attr name="colorPrimaryLight" />
     </declare-styleable>
+
+    <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes an
+         {@link android.media.tv.TvInputService}, which is referenced from its
+         {@link android.media.tv.TvInputService#SERVICE_META_DATA} meta-data entry.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvInputService">
+        <!-- Component name of an activity for setup of this service.
+             The setup includes scanning channels and registering EPG data. -->
+        <attr name="setupActivity" format="string" />
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
 </resources>

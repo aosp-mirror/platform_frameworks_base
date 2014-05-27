@@ -62,6 +62,14 @@ public abstract class TvInputService extends Service {
      */
     public static final String SERVICE_INTERFACE = "android.media.tv.TvInputService";
 
+    /**
+     * Name under which a TvInputService component publishes information about itself.
+     * This meta-data must reference an XML resource containing an
+     * <code>&lt;{@link android.R.styleable#TvInputService tv-input}&gt;</code>
+     * tag.
+     */
+    public static final String SERVICE_META_DATA = "android.media.tv.input";
+
     private String mId;
     private final Handler mHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =

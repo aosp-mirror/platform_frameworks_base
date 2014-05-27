@@ -708,7 +708,6 @@ package android {
     field public static final int l_resource_pad24 = 16843769; // 0x10103f9
     field public static final int l_resource_pad25 = 16843768; // 0x10103f8
     field public static final int l_resource_pad26 = 16843767; // 0x10103f7
-    field public static final int l_resource_pad27 = 16843766; // 0x10103f6
     field public static final int l_resource_pad3 = 16843790; // 0x101040e
     field public static final int l_resource_pad4 = 16843789; // 0x101040d
     field public static final int l_resource_pad5 = 16843788; // 0x101040c
@@ -1020,6 +1019,7 @@ package android {
     field public static final int selectedWeekBackgroundColor = 16843586; // 0x1010342
     field public static final int sessionService = 16843841; // 0x1010441
     field public static final int settingsActivity = 16843301; // 0x1010225
+    field public static final int setupActivity = 16843766; // 0x10103f6
     field public static final int shadowColor = 16843105; // 0x1010161
     field public static final int shadowDx = 16843106; // 0x1010162
     field public static final int shadowDy = 16843107; // 0x1010163
@@ -15934,10 +15934,13 @@ package android.media.tv {
     method public int describeContents();
     method public android.content.ComponentName getComponent();
     method public java.lang.String getId();
+    method public android.content.Intent getIntentForSettingsActivity();
+    method public android.content.Intent getIntentForSetupActivity();
     method public java.lang.String getPackageName();
     method public java.lang.String getServiceName();
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String EXTRA_SERVICE_NAME = "serviceName";
   }
 
   public final class TvInputManager {
@@ -15971,6 +15974,7 @@ package android.media.tv {
     method public abstract android.media.tv.TvInputService.TvInputSessionImpl onCreateSession();
     method public final void setAvailable(boolean);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
+    field public static final java.lang.String SERVICE_META_DATA = "android.media.tv.input";
   }
 
   public abstract class TvInputService.TvInputSessionImpl implements android.view.KeyEvent.Callback {
