@@ -128,8 +128,7 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
         int sampleSize, bool ditherImage) {
 
-    SkImageInfo bitmapInfo;
-    if (!bitmap->asImageInfo(&bitmapInfo)) {
+    if (kUnknown_SkColorType == bitmap->colorType()) {
         ALOGW("bitmap has unknown configuration so no memory has been allocated");
         return NULL;
     }
@@ -137,9 +136,9 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
     SkImageRef* pr;
     // only use ashmem for large images, since mmaps come at a price
     if (bitmap->getSize() >= 32 * 1024) {
-        pr = new SkImageRef_ashmem(bitmapInfo, stream, sampleSize);
+        pr = new SkImageRef_ashmem(bitmap->info(), stream, sampleSize);
     } else {
-        pr = new SkImageRef_GlobalPool(bitmapInfo, stream, sampleSize);
+        pr = new SkImageRef_GlobalPool(bitmap->info(), stream, sampleSize);
     }
     pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
