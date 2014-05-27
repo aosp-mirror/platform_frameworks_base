@@ -261,18 +261,23 @@ final class HdmiCecController {
     }
 
     /**
+     * Clear all device info.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    void clearDeviceInfoList() {
+        assertRunOnServiceThread();
+        mDeviceInfos.clear();
+    }
+
+    /**
      * Return a list of all {@link HdmiCecDeviceInfo}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
     List<HdmiCecDeviceInfo> getDeviceInfoList() {
         assertRunOnServiceThread();
-
-        List<HdmiCecDeviceInfo> deviceInfoList = new ArrayList<>(mDeviceInfos.size());
-        for (int i = 0; i < mDeviceInfos.size(); ++i) {
-            deviceInfoList.add(mDeviceInfos.valueAt(i));
-        }
-        return deviceInfoList;
+        return sparseArrayToList(mDeviceInfos);
     }
 
     /**
@@ -387,6 +392,24 @@ final class HdmiCecController {
         }
 
         runDevicePolling(pollingCandidates, retryCount, callback);
+    }
+
+    /**
+     * Return a list of all {@link HdmiCecLocalDevice}s.
+     *
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     */
+    List<HdmiCecLocalDevice> getLocalDeviceList() {
+        assertRunOnServiceThread();
+        return sparseArrayToList(mLocalDevices);
+    }
+
+    private static <T> List<T> sparseArrayToList(SparseArray<T> array) {
+        ArrayList<T> list = new ArrayList<>();
+        for (int i = 0; i < array.size(); ++i) {
+            list.add(array.valueAt(i));
+        }
+        return list;
     }
 
     private boolean isAllocatedLocalDeviceAddress(int address) {
