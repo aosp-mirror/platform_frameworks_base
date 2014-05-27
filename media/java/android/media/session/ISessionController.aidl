@@ -30,7 +30,7 @@ import android.view.KeyEvent;
  */
 interface ISessionController {
     void sendCommand(String command, in Bundle extras, in ResultReceiver cb);
-    void sendMediaButton(in KeyEvent mediaButton);
+    boolean sendMediaButton(in KeyEvent mediaButton);
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();

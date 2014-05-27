@@ -33,7 +33,7 @@ import java.util.ArrayList;
 public final class TransportPerformer {
     private static final String TAG = "TransportPerformer";
     private final Object mLock = new Object();
-    private final ArrayList<MessageHandler> mListeners = new ArrayList<MessageHandler>();
+    private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
 
     private ISession mBinder;
 
@@ -45,35 +45,35 @@ public final class TransportPerformer {
     }
 
     /**
-     * Add a listener to receive updates on.
+     * Add a callback to receive updates on.
      *
-     * @param listener The callback object
+     * @param callback The callback object
      */
-    public void addListener(Listener listener) {
-        addListener(listener, null);
+    public void addCallback(Callback callback) {
+        addCallback(callback, null);
     }
 
     /**
-     * Add a listener to receive updates on. The updates will be posted to the
+     * Add a callback to receive updates on. The updates will be posted to the
      * specified handler. If no handler is provided they will be posted to the
      * caller's thread.
      *
-     * @param listener The listener to receive updates on
+     * @param callback The callback to receive updates on
      * @param handler The handler to post the updates on
      */
-    public void addListener(Listener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null");
+    public void addCallback(Callback callback, Handler handler) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
         }
         synchronized (mLock) {
-            if (getHandlerForListenerLocked(listener) != null) {
-                Log.w(TAG, "Listener is already added, ignoring");
+            if (getHandlerForCallbackLocked(callback) != null) {
+                Log.w(TAG, "Callback is already added, ignoring");
             }
             if (handler == null) {
                 handler = new Handler();
             }
-            MessageHandler msgHandler = new MessageHandler(handler.getLooper(), listener);
-            mListeners.add(msgHandler);
+            MessageHandler msgHandler = new MessageHandler(handler.getLooper(), callback);
+            mCallbacks.add(msgHandler);
         }
     }
 
@@ -81,14 +81,14 @@ public final class TransportPerformer {
      * Stop receiving updates on the specified handler. If an update has already
      * been posted you may still receive it after this call returns.
      *
-     * @param listener The listener to stop receiving updates on
+     * @param callback The callback to stop receiving updates on
      */
-    public void removeListener(Listener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null");
+    public void removeCallback(Callback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
         }
         synchronized (mLock) {
-            removeListenerLocked(listener);
+            removeCallbackLocked(callback);
         }
     }
 
@@ -97,7 +97,7 @@ public final class TransportPerformer {
      *
      * @param state The current state of playback
      */
-    public final void setPlaybackState(PlaybackState state) {
+    public void setPlaybackState(PlaybackState state) {
         try {
             mBinder.setPlaybackState(state);
         } catch (RemoteException e) {
@@ -111,7 +111,7 @@ public final class TransportPerformer {
      *
      * @param metadata The new metadata
      */
-    public final void setMetadata(MediaMetadata metadata) {
+    public void setMetadata(MediaMetadata metadata) {
         try {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
@@ -122,80 +122,80 @@ public final class TransportPerformer {
     /**
      * @hide
      */
-    public final void onPlay() {
+    public void dispatchPlay() {
         post(MessageHandler.MESSAGE_PLAY);
     }
 
     /**
      * @hide
      */
-    public final void onPause() {
+    public void dispatchPause() {
         post(MessageHandler.MESSAGE_PAUSE);
     }
 
     /**
      * @hide
      */
-    public final void onStop() {
+    public void dispatchStop() {
         post(MessageHandler.MESSAGE_STOP);
     }
 
     /**
      * @hide
      */
-    public final void onNext() {
+    public void dispatchNext() {
         post(MessageHandler.MESSAGE_NEXT);
     }
 
     /**
      * @hide
      */
-    public final void onPrevious() {
+    public void dispatchPrevious() {
         post(MessageHandler.MESSAGE_PREVIOUS);
     }
 
     /**
      * @hide
      */
-    public final void onFastForward() {
+    public void dispatchFastForward() {
         post(MessageHandler.MESSAGE_FAST_FORWARD);
     }
 
     /**
      * @hide
      */
-    public final void onRewind() {
+    public void dispatchRewind() {
         post(MessageHandler.MESSAGE_REWIND);
     }
 
     /**
      * @hide
      */
-    public final void onSeekTo(long pos) {
+    public void dispatchSeekTo(long pos) {
         post(MessageHandler.MESSAGE_SEEK_TO, pos);
     }
 
     /**
      * @hide
      */
-    public final void onRate(Rating rating) {
+    public void dispatchRate(Rating rating) {
         post(MessageHandler.MESSAGE_RATE, rating);
     }
 
-    private MessageHandler getHandlerForListenerLocked(Listener listener) {
-        for (int i = mListeners.size() - 1; i >= 0; i--) {
-            MessageHandler handler = mListeners.get(i);
-            if (listener == handler.mListener) {
+    private MessageHandler getHandlerForCallbackLocked(Callback callback) {
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            MessageHandler handler = mCallbacks.get(i);
+            if (callback == handler.mCallback) {
                 return handler;
             }
         }
         return null;
     }
 
-    private boolean removeListenerLocked(Listener listener) {
-        for (int i = mListeners.size() - 1; i >= 0; i--) {
-            if (listener == mListeners.get(i).mListener) {
-                mListeners.remove(i);
+    private boolean removeCallbackLocked(Callback callback) {
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            if (callback == mCallbacks.get(i).mCallback) {
+                mCallbacks.remove(i);
                 return true;
             }
         }
@@ -204,8 +204,8 @@ public final class TransportPerformer {
 
     private void post(int what, Object obj) {
         synchronized (mLock) {
-            for (int i = mListeners.size() - 1; i >= 0; i--) {
-                mListeners.get(i).post(what, obj);
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                mCallbacks.get(i).post(what, obj);
             }
         }
     }
@@ -215,10 +215,10 @@ public final class TransportPerformer {
     }
 
     /**
-     * Extend Listener to handle transport controls. Listeners can be registered
-     * using {@link #addListener}.
+     * Extend to handle transport controls. Callbacks can be registered using
+     * {@link #addCallback}.
      */
-    public static abstract class Listener {
+    public static abstract class Callback {
 
         /**
          * Override to handle requests to begin playback.
@@ -235,13 +235,13 @@ public final class TransportPerformer {
         /**
          * Override to handle requests to skip to the next media item.
          */
-        public void onNext() {
+        public void onSkipToNext() {
         }
 
         /**
          * Override to handle requests to skip to the previous media item.
          */
-        public void onPrevious() {
+        public void onSkipToPrevious() {
         }
 
         /**
@@ -275,7 +275,7 @@ public final class TransportPerformer {
          *
          * @param rating
          */
-        public void onRate(Rating rating) {
+        public void onSetRating(Rating rating) {
         }
 
         /**
@@ -284,6 +284,7 @@ public final class TransportPerformer {
          * {@link #setPlaybackState}.
          *
          * @param focusChange The type of focus change, TBD.
+         * @hide
          */
         public void onRouteFocusChange(int focusChange) {
         }
@@ -300,11 +301,11 @@ public final class TransportPerformer {
         private static final int MESSAGE_SEEK_TO = 8;
         private static final int MESSAGE_RATE = 9;
 
-        private Listener mListener;
+        private TransportPerformer.Callback mCallback;
 
-        public MessageHandler(Looper looper, Listener cb) {
+        public MessageHandler(Looper looper, TransportPerformer.Callback cb) {
             super(looper);
-            mListener = cb;
+            mCallback = cb;
         }
 
         public void post(int what, Object obj) {
@@ -319,31 +320,31 @@ public final class TransportPerformer {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_PLAY:
-                    mListener.onPlay();
+                    mCallback.onPlay();
                     break;
                 case MESSAGE_PAUSE:
-                    mListener.onPause();
+                    mCallback.onPause();
                     break;
                 case MESSAGE_STOP:
-                    mListener.onStop();
+                    mCallback.onStop();
                     break;
                 case MESSAGE_NEXT:
-                    mListener.onNext();
+                    mCallback.onSkipToNext();
                     break;
                 case MESSAGE_PREVIOUS:
-                    mListener.onPrevious();
+                    mCallback.onSkipToPrevious();
                     break;
                 case MESSAGE_FAST_FORWARD:
-                    mListener.onFastForward();
+                    mCallback.onFastForward();
                     break;
                 case MESSAGE_REWIND:
-                    mListener.onRewind();
+                    mCallback.onRewind();
                     break;
                 case MESSAGE_SEEK_TO:
-                    mListener.onSeekTo((Long) msg.obj);
+                    mCallback.onSeekTo((Long) msg.obj);
                     break;
                 case MESSAGE_RATE:
-                    mListener.onRate((Rating) msg.obj);
+                    mCallback.onSetRating((Rating) msg.obj);
                     break;
             }
         }

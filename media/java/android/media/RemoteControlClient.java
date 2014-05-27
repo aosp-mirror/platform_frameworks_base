@@ -1317,7 +1317,7 @@ public class RemoteControlClient
     }
 
     // USE_SESSIONS
-    private TransportPerformer.Listener mTransportListener = new TransportPerformer.Listener() {
+    private TransportPerformer.Callback mTransportListener = new TransportPerformer.Callback() {
 
         @Override
         public void onSeekTo(long pos) {
@@ -1325,7 +1325,7 @@ public class RemoteControlClient
         }
 
         @Override
-        public void onRate(Rating rating) {
+        public void onSetRating(Rating rating) {
             if ((mTransportControlFlags & FLAG_KEY_MEDIA_RATING) != 0) {
                 if (mEventHandler != null) {
                     mEventHandler.sendMessage(mEventHandler.obtainMessage(

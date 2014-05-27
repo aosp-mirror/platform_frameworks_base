@@ -106,6 +106,7 @@ public final class MediaSessionManager {
      * @param notificationListener The enabled notification listener component.
      *            May be null.
      * @return A list of controllers for ongoing sessions
+     * @hide
      */
     public List<MediaController> getActiveSessions(ComponentName notificationListener) {
         return getActiveSessionsForUser(notificationListener, UserHandle.myUserId());

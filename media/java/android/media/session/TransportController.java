@@ -144,7 +144,7 @@ public final class TransportController {
     /**
      * Skip to the next item.
      */
-    public void next() {
+    public void skipToNext() {
         try {
             mBinder.next();
         } catch (RemoteException e) {
@@ -167,7 +167,7 @@ public final class TransportController {
     /**
      * Skip to the previous item.
      */
-    public void previous() {
+    public void skipToPrevious() {
         try {
             mBinder.previous();
         } catch (RemoteException e) {
@@ -182,7 +182,7 @@ public final class TransportController {
      *
      * @param rating The rating to set for the current content
      */
-    public void rate(Rating rating) {
+    public void setRating(Rating rating) {
         try {
             mBinder.rate(rating);
         } catch (RemoteException e) {

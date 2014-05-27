@@ -20,7 +20,12 @@ import android.media.session.ISessionController;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class MediaSessionToken implements Parcelable {
+/**
+ * Represents an ongoing session. This may be passed to apps by the session
+ * owner to allow them to create a {@link MediaController} to communicate with
+ * the session.
+ */
+public final class MediaSessionToken implements Parcelable {
     private ISessionController mBinder;
 
     /**

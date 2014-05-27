@@ -49,12 +49,8 @@ import java.util.List;
  * <p>
  * A MediaSession is created by calling
  * {@link MediaSessionManager#createSession(String)}. Once a session is created
- * apps that have the MEDIA_CONTENT_CONTROL permission can interact with the
- * session through
- * {@link MediaSessionManager#getActiveSessions(android.content.ComponentName)}.
- * The owner of the session may also use {@link #getSessionToken()} to allow
- * apps without this permission to create a {@link MediaController} to interact
- * with this session.
+ * the owner of the session may use {@link #getSessionToken()} to allow apps to
+ * create a {@link MediaController} to interact with this session.
  * <p>
  * To receive commands, media keys, and other events a Callback must be set with
  * {@link #addCallback(Callback)}.
@@ -166,7 +162,9 @@ public final class MediaSession {
     }
 
     /**
-     * Set the callback to receive updates on.
+     * Add a callback to receive updates on for the MediaSession. This includes
+     * media button and volume events. The caller's thread will be used to post
+     * events.
      *
      * @param callback The callback object
      */
@@ -246,7 +244,7 @@ public final class MediaSession {
 
     /**
      * Set the stream this session is playing on. This will affect the system's
-     * volume handling for this session. If {@link #useRemotePlayback} was
+     * volume handling for this session. If {@link #setPlaybackToRemote} was
      * previously called it will stop receiving volume commands and the system
      * will begin sending volume changes to the appropriate stream.
      * <p>
@@ -254,21 +252,21 @@ public final class MediaSession {
      *
      * @param stream The {@link AudioManager} stream this session is playing on.
      */
-    public void useLocalPlayback(int stream) {
+    public void setPlaybackToLocal(int stream) {
         // TODO
     }
 
     /**
      * Configure this session to use remote volume handling. This must be called
      * to receive volume button events, otherwise the system will adjust the
-     * current stream volume for this session. If {@link #useLocalPlayback} was
-     * previously called that stream will stop receiving volume changes for this
-     * session.
+     * current stream volume for this session. If {@link #setPlaybackToLocal}
+     * was previously called that stream will stop receiving volume changes for
+     * this session.
      *
      * @param volumeProvider The provider that will handle volume changes. May
      *            not be null.
      */
-    public void useRemotePlayback(RemoteVolumeProvider volumeProvider) {
+    public void setPlaybackToRemote(RemoteVolumeProvider volumeProvider) {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
@@ -312,7 +310,7 @@ public final class MediaSession {
      * @param event The name of the event to send
      * @param extras Any extras included with the event
      */
-    public void sendEvent(String event, Bundle extras) {
+    public void sendSessionEvent(String event, Bundle extras) {
         if (TextUtils.isEmpty(event)) {
             throw new IllegalArgumentException("event cannot be null or empty");
         }
@@ -525,7 +523,7 @@ public final class MediaSession {
          * @param mediaButtonIntent an intent containing the KeyEvent as an
          *            extra
          */
-        public void onMediaButton(Intent mediaButtonIntent) {
+        public void onMediaButtonEvent(Intent mediaButtonIntent) {
         }
 
         /**
@@ -536,7 +534,7 @@ public final class MediaSession {
          * @param command
          * @param extras optional
          */
-        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
+        public void onControlCommand(String command, Bundle extras, ResultReceiver cb) {
         }
 
         /**
@@ -645,7 +643,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onPlay();
+                    tp.dispatchPlay();
                 }
             }
         }
@@ -656,7 +654,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onPause();
+                    tp.dispatchPause();
                 }
             }
         }
@@ -667,7 +665,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onStop();
+                    tp.dispatchStop();
                 }
             }
         }
@@ -678,7 +676,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onNext();
+                    tp.dispatchNext();
                 }
             }
         }
@@ -689,7 +687,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onPrevious();
+                    tp.dispatchPrevious();
                 }
             }
         }
@@ -700,7 +698,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onFastForward();
+                    tp.dispatchFastForward();
                 }
             }
         }
@@ -711,7 +709,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onRewind();
+                    tp.dispatchRewind();
                 }
             }
         }
@@ -722,7 +720,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onSeekTo(pos);
+                    tp.dispatchSeekTo(pos);
                 }
             }
         }
@@ -733,7 +731,7 @@ public final class MediaSession {
             if (session != null) {
                 TransportPerformer tp = session.getTransportPerformer();
                 if (tp != null) {
-                    tp.onRate(rating);
+                    tp.dispatchRate(rating);
                 }
             }
         }
@@ -776,11 +774,11 @@ public final class MediaSession {
                 }
                 switch (msg.what) {
                     case MSG_MEDIA_BUTTON:
-                        mCallback.onMediaButton((Intent) msg.obj);
+                        mCallback.onMediaButtonEvent((Intent) msg.obj);
                         break;
                     case MSG_COMMAND:
                         Command cmd = (Command) msg.obj;
-                        mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
+                        mCallback.onControlCommand(cmd.command, cmd.extras, cmd.stub);
                         break;
                     case MSG_ROUTE_CHANGE:
                         mCallback.onRequestRouteChange((RouteInfo) msg.obj);

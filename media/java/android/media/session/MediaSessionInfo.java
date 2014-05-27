@@ -20,6 +20,8 @@ import android.os.Parcelable;
 
 /**
  * Information about a media session, including the owner's package name.
+ *
+ * @hide
  */
 public final class MediaSessionInfo implements Parcelable {
     private final String mId;

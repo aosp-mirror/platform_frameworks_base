@@ -103,24 +103,25 @@ public final class MediaController {
     }
 
     /**
-     * Send the specified media button to the session. Only media keys can be
-     * sent using this method.
+     * Send the specified media button event to the session. Only media keys can
+     * be sent by this method, other keys will be ignored.
      *
-     * @param keycode The media button keycode, such as
-     *            {@link KeyEvent#KEYCODE_MEDIA_PLAY}.
+     * @param keyEvent The media button event to dispatch.
+     * @return true if the event was sent to the session, false otherwise.
      */
-    public void sendMediaButton(int keycode) {
-        if (!KeyEvent.isMediaKey(keycode)) {
-            throw new IllegalArgumentException("May only send media buttons through "
-                    + "sendMediaButton");
+    public boolean dispatchMediaButtonEvent(KeyEvent keyEvent) {
+        if (keyEvent == null) {
+            throw new IllegalArgumentException("KeyEvent may not be null");
         }
-        // TODO do something better than key down/up events
-        KeyEvent event = new KeyEvent(KeyEvent.ACTION_UP, keycode);
+        if (!KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
+            return false;
+        }
         try {
-            mSessionBinder.sendMediaButton(event);
+            return mSessionBinder.sendMediaButton(keyEvent);
         } catch (RemoteException e) {
             Log.d(TAG, "Dead object in sendMediaButton", e);
         }
+        return false;
     }
 
     /**
@@ -171,7 +172,7 @@ public final class MediaController {
      * @param params Any parameters to include with the command
      * @param cb The callback to receive the result on
      */
-    public void sendCommand(String command, Bundle params, ResultReceiver cb) {
+    public void sendControlCommand(String command, Bundle params, ResultReceiver cb) {
         if (TextUtils.isEmpty(command)) {
             throw new IllegalArgumentException("command cannot be null or empty");
         }
@@ -282,7 +283,7 @@ public final class MediaController {
          *
          * @param event
          */
-        public void onEvent(String event, Bundle extras) {
+        public void onSessionEvent(String event, Bundle extras) {
         }
 
         /**
@@ -354,7 +355,7 @@ public final class MediaController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_EVENT:
-                    mCallback.onEvent((String) msg.obj, msg.getData());
+                    mCallback.onSessionEvent((String) msg.obj, msg.getData());
                     break;
                 case MSG_ROUTE:
                     mCallback.onRouteChanged((RouteInfo) msg.obj);
