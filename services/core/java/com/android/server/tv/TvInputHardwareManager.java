@@ -17,6 +17,11 @@
 package com.android.server.tv;
 
 import android.content.Context;
+import android.media.AudioDevicePort;
+import android.media.AudioManager;
+import android.media.AudioPatch;
+import android.media.AudioPort;
+import android.media.AudioPortConfig;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.TvInputHardwareInfo;
@@ -48,11 +53,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final List<TvInputHardwareInfo> mInfoList = new ArrayList<TvInputHardwareInfo>();
     private final Context mContext;
     private final Set<Integer> mActiveHdmiSources = new HashSet<Integer>();
+    private final AudioManager mAudioManager;
 
     private final Object mLock = new Object();
 
     public TvInputHardwareManager(Context context) {
         mContext = context;
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         // TODO(hdmi): mHdmiManager = mContext.getSystemService(...);
         // TODO(hdmi): mHdmiClient = mHdmiManager.getTvClient();
         mHal.init();
@@ -258,12 +265,48 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private boolean mReleased = false;
         private final Object mImplLock = new Object();
 
+        private final AudioDevicePort mAudioSource;
+        private final AudioDevicePort mAudioSink;
+        private AudioPatch mAudioPatch = null;
+
         public TvInputHardwareImpl(TvInputHardwareInfo info) {
             mInfo = info;
+            AudioDevicePort audioSource = null;
+            AudioDevicePort audioSink = null;
+            if (mInfo.getAudioType() != AudioManager.DEVICE_NONE) {
+                ArrayList<AudioPort> devicePorts = new ArrayList<AudioPort>();
+                if (mAudioManager.listAudioDevicePorts(devicePorts) == AudioManager.SUCCESS) {
+                    // Find source
+                    for (AudioPort port : devicePorts) {
+                        AudioDevicePort devicePort = (AudioDevicePort) port;
+                        if (devicePort.type() == mInfo.getAudioType() &&
+                                devicePort.address().equals(mInfo.getAudioAddress())) {
+                            audioSource = devicePort;
+                            break;
+                        }
+                    }
+                    // Find sink
+                    // TODO: App may want to specify sink device?
+                    int sinkDevices = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
+                    for (AudioPort port : devicePorts) {
+                        AudioDevicePort devicePort = (AudioDevicePort) port;
+                        if (devicePort.type() == sinkDevices) {
+                            audioSink = devicePort;
+                            break;
+                        }
+                    }
+                }
+            }
+            mAudioSource = audioSource;
+            mAudioSink = audioSink;
         }
 
         public void release() {
             synchronized (mImplLock) {
+                if (mAudioPatch != null) {
+                    mAudioManager.releaseAudioPatch(mAudioPatch);
+                    mAudioPatch = null;
+                }
                 mReleased = true;
             }
         }
@@ -288,6 +331,22 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         }
                     }
                 }
+                if (mAudioSource != null && mAudioSink != null) {
+                    if (surface != null) {
+                        AudioPortConfig sourceConfig = mAudioSource.activeConfig();
+                        AudioPortConfig sinkConfig = mAudioSink.activeConfig();
+                        AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
+                        // TODO: build config if activeConfig() == null
+                        mAudioManager.createAudioPatch(
+                                audioPatchArray,
+                                new AudioPortConfig[] { sourceConfig },
+                                new AudioPortConfig[] { sinkConfig });
+                        mAudioPatch = audioPatchArray[0];
+                    } else {
+                        mAudioManager.releaseAudioPatch(mAudioPatch);
+                        mAudioPatch = null;
+                    }
+                }
                 return mHal.setSurface(mInfo.getDeviceId(), surface, config) == TvInputHal.SUCCESS;
             }
         }
@@ -299,7 +358,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     throw new IllegalStateException("Device already released.");
                 }
             }
-            // TODO
+            // TODO: Use AudioGain?
         }
 
         @Override

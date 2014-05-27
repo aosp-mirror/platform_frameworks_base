@@ -225,6 +225,7 @@ public class AudioSystem
     // audio device definitions: must be kept in sync with values in system/core/audio.h
     //
 
+    public static final int DEVICE_NONE = 0x0;
     // reserved bits
     public static final int DEVICE_BIT_IN = 0x80000000;
     public static final int DEVICE_BIT_DEFAULT = 0x40000000;
