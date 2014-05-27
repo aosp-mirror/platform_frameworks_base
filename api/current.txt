@@ -5154,10 +5154,10 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
-    method public void addForwardingIntentFilter(android.content.ComponentName, android.content.IntentFilter, int);
+    method public void addCrossProfileIntentFilter(android.content.ComponentName, android.content.IntentFilter, int);
     method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
     method public void addUserRestriction(android.content.ComponentName, java.lang.String);
-    method public void clearForwardingIntentFilters(android.content.ComponentName);
+    method public void clearCrossProfileIntentFilters(android.content.ComponentName);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
     method public android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
@@ -5232,8 +5232,8 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
     field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "defaultManagedProfileName";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "deviceAdminPackageName";
-    field public static int FLAG_TO_MANAGED_PROFILE;
-    field public static int FLAG_TO_PRIMARY_USER;
+    field public static int FLAG_MANAGED_CAN_ACCESS_PARENT;
+    field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
     field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
     field public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 2; // 0x2

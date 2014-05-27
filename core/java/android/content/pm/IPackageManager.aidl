@@ -112,7 +112,7 @@ interface IPackageManager {
 
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
-    boolean canForwardTo(in Intent intent, String resolvedType, int userIdFrom, int userIdDest);
+    boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
     List<ResolveInfo> queryIntentActivities(in Intent intent, 
             String resolvedType, int flags, int userId);
@@ -248,10 +248,10 @@ interface IPackageManager {
 
     void clearPackagePersistentPreferredActivities(String packageName, int userId);
 
-    void addForwardingIntentFilter(in IntentFilter filter, boolean removable, int userIdOrig,
-            int userIdDest);
+    void addCrossProfileIntentFilter(in IntentFilter filter, boolean removable, int sourceUserId,
+            int targetUserId);
 
-    void clearForwardingIntentFilters(int userIdOrig);
+    void clearCrossProfileIntentFilters(int sourceUserId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them

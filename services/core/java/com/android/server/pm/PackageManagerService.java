@@ -3374,25 +3374,26 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Returns if intent can be forwarded from the userId from to dest
      */
     @Override
-    public boolean canForwardTo(Intent intent, String resolvedType, int userIdFrom, int userIdDest) {
+    public boolean canForwardTo(Intent intent, String resolvedType, int sourceUserId,
+            int targetUserId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        List<ForwardingIntentFilter> matches =
-                getMatchingForwardingIntentFilters(intent, resolvedType, userIdFrom);
+        List<CrossProfileIntentFilter> matches =
+                getMatchingCrossProfileIntentFilters(intent, resolvedType, sourceUserId);
         if (matches != null) {
             int size = matches.size();
             for (int i = 0; i < size; i++) {
-                if (matches.get(i).getUserIdDest() == userIdDest) return true;
+                if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
         return false;
     }
 
-    private List<ForwardingIntentFilter> getMatchingForwardingIntentFilters(Intent intent,
+    private List<CrossProfileIntentFilter> getMatchingCrossProfileIntentFilters(Intent intent,
             String resolvedType, int userId) {
-        ForwardingIntentResolver fir = mSettings.mForwardingIntentResolvers.get(userId);
-        if (fir != null) {
-            return fir.queryIntent(intent, resolvedType, false, userId);
+        CrossProfileIntentResolver cpir = mSettings.mCrossProfileIntentResolvers.get(userId);
+        if (cpir != null) {
+            return cpir.queryIntent(intent, resolvedType, false, userId);
         }
         return null;
     }
@@ -3428,31 +3429,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                 List<ResolveInfo> result =
                         mActivities.queryIntent(intent, resolvedType, flags, userId);
                 // Checking if we can forward the intent to another user
-                List<ForwardingIntentFilter> fifs =
-                        getMatchingForwardingIntentFilters(intent, resolvedType, userId);
-                if (fifs != null) {
-                    ForwardingIntentFilter forwardingIntentFilterWithResult = null;
+                List<CrossProfileIntentFilter> cpifs =
+                        getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
+                if (cpifs != null) {
+                    CrossProfileIntentFilter crossProfileIntentFilterWithResult = null;
                     HashSet<Integer> alreadyTriedUserIds = new HashSet<Integer>();
-                    for (ForwardingIntentFilter fif : fifs) {
-                        int userIdDest = fif.getUserIdDest();
-                        // Two {@link ForwardingIntentFilter}s can have the same userIdDest and
+                    for (CrossProfileIntentFilter cpif : cpifs) {
+                        int targetUserId = cpif.getTargetUserId();
+                        // Two {@link CrossProfileIntentFilter}s can have the same targetUserId and
                         // match the same an intent. For performance reasons, it is better not to
                         // run queryIntent twice for the same userId
-                        if (!alreadyTriedUserIds.contains(userIdDest)) {
+                        if (!alreadyTriedUserIds.contains(targetUserId)) {
                             List<ResolveInfo> resultUser = mActivities.queryIntent(intent,
-                                    resolvedType, flags, userIdDest);
+                                    resolvedType, flags, targetUserId);
                             if (resultUser != null) {
-                                forwardingIntentFilterWithResult = fif;
+                                crossProfileIntentFilterWithResult = cpif;
                                 // As soon as there is a match in another user, we add the
                                 // intentForwarderActivity to the list of ResolveInfo.
                                 break;
                             }
-                            alreadyTriedUserIds.add(userIdDest);
+                            alreadyTriedUserIds.add(targetUserId);
                         }
                     }
-                    if (forwardingIntentFilterWithResult != null) {
+                    if (crossProfileIntentFilterWithResult != null) {
                         ResolveInfo forwardingResolveInfo = createForwardingResolveInfo(
-                                forwardingIntentFilterWithResult, userId);
+                                crossProfileIntentFilterWithResult, userId);
                         result.add(forwardingResolveInfo);
                     }
                 }
@@ -3467,10 +3468,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private ResolveInfo createForwardingResolveInfo(ForwardingIntentFilter fif, int userIdFrom) {
+    private ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter cpif,
+            int sourceUserId) {
         String className;
-        int userIdDest = fif.getUserIdDest();
-        if (userIdDest == UserHandle.USER_OWNER) {
+        int targetUserId = cpif.getTargetUserId();
+        if (targetUserId == UserHandle.USER_OWNER) {
             className = FORWARD_INTENT_TO_USER_OWNER;
         } else {
             className = FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -3478,14 +3480,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         ComponentName forwardingActivityComponentName = new ComponentName(
                 mAndroidApplication.packageName, className);
         ActivityInfo forwardingActivityInfo = getActivityInfo(forwardingActivityComponentName, 0,
-                userIdFrom);
+                sourceUserId);
         ResolveInfo forwardingResolveInfo = new ResolveInfo();
         forwardingResolveInfo.activityInfo = forwardingActivityInfo;
         forwardingResolveInfo.priority = 0;
         forwardingResolveInfo.preferredOrder = 0;
         forwardingResolveInfo.match = 0;
         forwardingResolveInfo.isDefault = true;
-        forwardingResolveInfo.filter = fif;
+        forwardingResolveInfo.filter = cpif;
         return forwardingResolveInfo;
     }
 
@@ -11475,33 +11477,34 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int userIdOrig,
-            int userIdDest) {
+    public void addCrossProfileIntentFilter(IntentFilter filter, boolean removable,
+            int sourceUserId, int targetUserId) {
         mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         if (filter.countActions() == 0) {
-            Slog.w(TAG, "Cannot set a forwarding intent filter with no filter actions");
+            Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
             return;
         }
         synchronized (mPackages) {
-            mSettings.editForwardingIntentResolverLPw(userIdOrig).addFilter(
-                    new ForwardingIntentFilter(filter, removable, userIdDest));
-            mSettings.writePackageRestrictionsLPr(userIdOrig);
+            mSettings.editCrossProfileIntentResolverLPw(sourceUserId).addFilter(
+                    new CrossProfileIntentFilter(filter, removable, targetUserId));
+            mSettings.writePackageRestrictionsLPr(sourceUserId);
         }
     }
 
     @Override
-    public void clearForwardingIntentFilters(int userIdOrig) {
+    public void clearCrossProfileIntentFilters(int sourceUserId) {
         mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         synchronized (mPackages) {
-            ForwardingIntentResolver fir = mSettings.editForwardingIntentResolverLPw(userIdOrig);
-            HashSet<ForwardingIntentFilter> set =
-                    new HashSet<ForwardingIntentFilter>(fir.filterSet());
-            for (ForwardingIntentFilter fif : set) {
-                if (fif.isRemovable()) fir.removeFilter(fif);
+            CrossProfileIntentResolver cpir =
+                    mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
+            HashSet<CrossProfileIntentFilter> set =
+                    new HashSet<CrossProfileIntentFilter>(cpir.filterSet());
+            for (CrossProfileIntentFilter cpif : set) {
+                if (cpif.isRemovable()) cpir.removeFilter(cpif);
             }
-            mSettings.writePackageRestrictionsLPr(userIdOrig);
+            mSettings.writePackageRestrictionsLPr(sourceUserId);
         }
     }
 
