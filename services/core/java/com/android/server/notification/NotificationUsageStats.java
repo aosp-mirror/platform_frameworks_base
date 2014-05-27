@@ -46,12 +46,14 @@ import java.util.Map;
  * {@hide}
  */
 public class NotificationUsageStats {
+    private static final boolean ENABLE_SQLITE_LOG = true;
+
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
     private final SQLiteLog mSQLiteLog;
 
     public NotificationUsageStats(Context context) {
-        mSQLiteLog = new SQLiteLog(context);
+        mSQLiteLog = ENABLE_SQLITE_LOG ? new SQLiteLog(context) : null;
     }
 
     /**
@@ -63,7 +65,9 @@ public class NotificationUsageStats {
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numPostedByApp++;
         }
-        mSQLiteLog.logPosted(notification);
+        if (ENABLE_SQLITE_LOG) {
+            mSQLiteLog.logPosted(notification);
+        }
     }
 
     /**
@@ -85,7 +89,9 @@ public class NotificationUsageStats {
             stats.numRemovedByApp++;
             stats.collect(notification.stats);
         }
-        mSQLiteLog.logRemoved(notification);
+        if (ENABLE_SQLITE_LOG) {
+            mSQLiteLog.logRemoved(notification);
+        }
     }
 
     /**
@@ -97,7 +103,9 @@ public class NotificationUsageStats {
             stats.numDismissedByUser++;
             stats.collect(notification.stats);
         }
-        mSQLiteLog.logDismissed(notification);
+        if (ENABLE_SQLITE_LOG) {
+            mSQLiteLog.logDismissed(notification);
+        }
     }
 
     /**
@@ -108,7 +116,9 @@ public class NotificationUsageStats {
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numClickedByUser++;
         }
-        mSQLiteLog.logClicked(notification);
+        if (ENABLE_SQLITE_LOG) {
+            mSQLiteLog.logClicked(notification);
+        }
     }
 
     /**
@@ -164,7 +174,9 @@ public class NotificationUsageStats {
         for (AggregatedStats as : mStats.values()) {
             as.dump(pw, indent);
         }
-        mSQLiteLog.dump(pw, indent);
+        if (ENABLE_SQLITE_LOG) {
+            mSQLiteLog.dump(pw, indent);
+        }
     }
 
     /**
