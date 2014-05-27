@@ -52,6 +52,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private boolean mBouncerShowing;
     private boolean mAnimateChange;
     private boolean mUpdatePending;
+    private boolean mExpanding;
 
     private final Interpolator mInterpolator = new DecelerateInterpolator();
 
@@ -67,7 +68,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     public void onTrackingStarted() {
+        mExpanding = true;
         mDarkenWhileDragging = !mUnlockMethodCache.isMethodInsecure();
+    }
+
+    public void onExpandingFinished() {
+        mExpanding = false;
     }
 
     public void setPanelExpansion(float fraction) {
@@ -77,7 +83,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
 
     public void setBouncerShowing(boolean showing) {
         mBouncerShowing = showing;
-        mAnimateChange = true;
+        mAnimateChange = !mExpanding;
         scheduleUpdate();
     }
 
@@ -98,14 +104,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void updateScrimKeyguard() {
-        if (mBouncerShowing) {
-            setScrimInFrontColor(SCRIM_IN_FRONT_ALPHA);
-            setScrimBehindColor(0f);
-        } else if (mDarkenWhileDragging) {
+        if (mExpanding && mDarkenWhileDragging) {
             float behindFraction = Math.max(0, Math.min(mFraction, 1));
             float fraction = 1 - behindFraction;
             setScrimInFrontColor(fraction * SCRIM_IN_FRONT_ALPHA);
             setScrimBehindColor(behindFraction * SCRIM_BEHIND_ALPHA_KEYGUARD);
+        } else if (mBouncerShowing) {
+            setScrimInFrontColor(SCRIM_IN_FRONT_ALPHA);
+            setScrimBehindColor(0f);
         } else {
             setScrimInFrontColor(0f);
             setScrimBehindColor(SCRIM_BEHIND_ALPHA_KEYGUARD);

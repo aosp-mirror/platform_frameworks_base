@@ -67,6 +67,7 @@ public class PanelView extends FrameLayout {
     private float mInitialTouchX;
 
     protected void onExpandingFinished() {
+        mBar.onExpandingFinished();
     }
 
     protected void onExpandingStarted() {
@@ -184,9 +185,9 @@ public class PanelView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 mTracking = false;
                 mTrackingPointer = -1;
-                onTrackingStopped();
                 trackMovement(event);
-                flingWithCurrentVelocity();
+                boolean expand = flingWithCurrentVelocity();
+                onTrackingStopped(expand);
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -196,8 +197,8 @@ public class PanelView extends FrameLayout {
         return true;
     }
 
-    protected void onTrackingStopped() {
-        mBar.onTrackingStopped(PanelView.this);
+    protected void onTrackingStopped(boolean expand) {
+        mBar.onTrackingStopped(PanelView.this, expand);
     }
 
     protected void onTrackingStarted() {
@@ -303,7 +304,10 @@ public class PanelView extends FrameLayout {
         mMaxPanelHeight = -1;
     }
 
-    private void flingWithCurrentVelocity() {
+    /**
+     * @return whether the panel will be expanded after the animation
+     */
+    private boolean flingWithCurrentVelocity() {
         float vel = getCurrentVelocity();
         boolean expand;
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -312,11 +316,16 @@ public class PanelView extends FrameLayout {
             expand = vel > 0;
         }
         fling(vel, expand);
+        return expand;
     }
 
     protected void fling(float vel, boolean expand) {
         cancelPeek();
         float target = expand ? getMaxPanelHeight() : 0.0f;
+        if (target == mExpandedHeight) {
+            onExpandingFinished();
+            return;
+        }
         ValueAnimator animator = ValueAnimator.ofFloat(mExpandedHeight, target);
         if (expand) {
             mFlingAnimationUtils.apply(animator, mExpandedHeight, target, vel, getHeight());

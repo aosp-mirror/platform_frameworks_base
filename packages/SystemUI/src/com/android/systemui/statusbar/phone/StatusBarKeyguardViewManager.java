@@ -102,6 +102,7 @@ public class StatusBarKeyguardViewManager {
         } else {
             mPhoneStatusBar.showKeyguard();
             mBouncer.hide(false /* destroyView */);
+            mBouncer.prepare();
         }
     }
 

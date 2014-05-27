@@ -222,7 +222,11 @@ public class PanelBar extends FrameLayout {
         }
     }
 
-    public void onTrackingStopped(PanelView panel) {
+    public void onTrackingStopped(PanelView panel, boolean expand) {
         mTracking = false;
+    }
+
+    public void onExpandingFinished() {
+
     }
 }
