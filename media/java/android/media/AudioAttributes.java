@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * @hide
  * A class to encapsulate a collection of attributes describing information about an audio
  * player or recorder.
  */
