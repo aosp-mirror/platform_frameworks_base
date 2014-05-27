@@ -1,0 +1,361 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.hdmi;
+
+import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiCecMessage;
+import android.util.Slog;
+
+import com.android.internal.util.Preconditions;
+import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Feature action that handles device discovery sequences.
+ * Device discovery is launched when TV device is woken from "Standby" state
+ * or enabled "Control for Hdmi" from disabled state.
+ *
+ * <p>Device discovery goes through the following steps.
+ * <ol>
+ *   <li>Poll all non-local devices by sending &lt;Polling Message&gt;
+ *   <li>Gather "Physical address" and "device type" of all acknowledged devices
+ *   <li>Gather "OSD (display) name" of all acknowledge devices
+ *   <li>Gather "Vendor id" of all acknowledge devices
+ * </ol>
+ */
+final class DeviceDiscoveryAction extends FeatureAction {
+    private static final String TAG = "DeviceDiscoveryAction";
+
+    // State in which the action is waiting for device polling.
+    private static final int STATE_WAITING_FOR_DEVICE_POLLING = 1;
+    // State in which the action is waiting for gathering physical address of non-local devices.
+    private static final int STATE_WAITING_FOR_PHYSICAL_ADDRESS = 2;
+    // State in which the action is waiting for gathering osd name of non-local devices.
+    private static final int STATE_WAITING_FOR_OSD_NAME = 3;
+    // State in which the action is waiting for gathering vendor id of non-local devices.
+    private static final int STATE_WAITING_FOR_VENDOR_ID = 4;
+
+    private static final int DEVICE_POLLING_RETRY = 1;
+
+    // TODO: Move this to common place
+    private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
+    /**
+     * Interface used to report result of device discovery.
+     */
+    interface DeviceDiscoveryCallback {
+        /**
+         * Called when device discovery is done.
+         *
+         * @param deviceInfos a list of all non-local devices. It can be empty list.
+         */
+        void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos);
+    }
+
+    // An internal container used to keep track of device information during
+    // this action.
+    private static final class DeviceInfo {
+        private final int mLogicalAddress;
+
+        private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+        private int mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
+        private String mDisplayName = "";
+        private int mDeviceType = HdmiCec.DEVICE_INACTIVE;
+
+        private DeviceInfo(int logicalAddress) {
+            mLogicalAddress = logicalAddress;
+        }
+
+        private HdmiCecDeviceInfo toHdmiCecDeviceInfo() {
+            return new HdmiCecDeviceInfo(mLogicalAddress, mPhysicalAddress, mDeviceType, mVendorId,
+                    mDisplayName);
+        }
+    }
+
+    private final ArrayList<DeviceInfo> mDevices = new ArrayList<>();
+    private final DeviceDiscoveryCallback mCallback;
+    private int mProcessedDeviceCount = 0;
+
+    /**
+     * @Constructor
+     *
+     * @param service
+     * @param sourceAddress
+     */
+    DeviceDiscoveryAction(HdmiControlService service, int sourceAddress,
+            DeviceDiscoveryCallback callback) {
+        super(service, sourceAddress);
+        mCallback = Preconditions.checkNotNull(callback);
+    }
+
+    @Override
+    boolean start() {
+        mDevices.clear();
+        mState = STATE_WAITING_FOR_DEVICE_POLLING;
+
+        mService.pollDevices(new DevicePollingCallback() {
+            @Override
+            public void onPollingFinished(List<Integer> ackedAddress) {
+                if (ackedAddress.isEmpty()) {
+                    Slog.i(TAG, "No device is detected.");
+                    finish();
+                    return;
+                }
+
+                Slog.i(TAG, "Device detected: " + ackedAddress);
+                allocateDevices(ackedAddress);
+                startPhysicalAddressStage();
+            }
+        }, DEVICE_POLLING_RETRY);
+        return true;
+    }
+
+    private void allocateDevices(List<Integer> addresses) {
+        for (Integer i : addresses) {
+            DeviceInfo info = new DeviceInfo(i);
+            mDevices.add(info);
+        }
+    }
+
+    private void startPhysicalAddressStage() {
+        mProcessedDeviceCount = 0;
+        mState = STATE_WAITING_FOR_PHYSICAL_ADDRESS;
+
+        checkAndProceedStage();
+    }
+
+    private boolean verifyValidLogicalAddress(int address) {
+        return address >= HdmiCec.ADDR_TV && address < HdmiCec.ADDR_UNREGISTERED;
+    }
+
+    private void queryPhysicalAddress(int address) {
+        if (!verifyValidLogicalAddress(address)) {
+            checkAndProceedStage();
+            return;
+        }
+
+        mActionTimer.clearTimerMessage();
+        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(mSourceAddress, address));
+        addTimer(mState, TIMEOUT_MS);
+    }
+
+    private void startOsdNameStage() {
+        mProcessedDeviceCount = 0;
+        mState = STATE_WAITING_FOR_OSD_NAME;
+
+        checkAndProceedStage();
+    }
+
+    private void queryOsdName(int address) {
+        if (!verifyValidLogicalAddress(address)) {
+            checkAndProceedStage();
+            return;
+        }
+
+        mActionTimer.clearTimerMessage();
+        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress, address));
+        addTimer(mState, TIMEOUT_MS);
+    }
+
+    private void startVendorIdStage() {
+        mProcessedDeviceCount = 0;
+        mState = STATE_WAITING_FOR_VENDOR_ID;
+
+        checkAndProceedStage();
+    }
+
+    private void queryVendorId(int address) {
+        if (!verifyValidLogicalAddress(address)) {
+            checkAndProceedStage();
+            return;
+        }
+
+        mActionTimer.clearTimerMessage();
+        sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress, address));
+        addTimer(mState, TIMEOUT_MS);
+    }
+
+    @Override
+    boolean processCommand(HdmiCecMessage cmd) {
+        switch (mState) {
+            case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
+                if (cmd.getOpcode() == HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS) {
+                    handleReportPhysicalAddress(cmd);
+                    return true;
+                }
+                return false;
+            case STATE_WAITING_FOR_OSD_NAME:
+                if (cmd.getOpcode() == HdmiCec.MESSAGE_SET_OSD_NAME) {
+                    handleSetOsdName(cmd);
+                    return true;
+                }
+                return false;
+            case STATE_WAITING_FOR_VENDOR_ID:
+                if (cmd.getOpcode() == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
+                    handleVendorId(cmd);
+                    return true;
+                }
+                return false;
+            case STATE_WAITING_FOR_DEVICE_POLLING:
+                // Fall through.
+            default:
+                return false;
+        }
+    }
+
+    private void handleReportPhysicalAddress(HdmiCecMessage cmd) {
+        Preconditions.checkState(mProcessedDeviceCount < mDevices.size());
+
+        DeviceInfo current = mDevices.get(mProcessedDeviceCount);
+        if (current.mLogicalAddress != cmd.getSource()) {
+            Slog.w(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
+                    cmd.getSource());
+            return;
+        }
+
+        byte params[] = cmd.getParams();
+        if (params.length == 3) {
+            current.mPhysicalAddress = ((params[0] & 0xFF) << 8) | (params[1] & 0xFF);
+            current.mDeviceType = params[2] & 0xFF;
+
+            increaseProcessedDeviceCount();
+            checkAndProceedStage();
+        } else {
+            // Physical address is a critical element in device info.
+            // If failed, remove device from device list and proceed to the next device.
+            removeDevice(mProcessedDeviceCount);
+            checkAndProceedStage();
+        }
+    }
+
+    private void handleSetOsdName(HdmiCecMessage cmd) {
+        Preconditions.checkState(mProcessedDeviceCount < mDevices.size());
+
+        DeviceInfo current = mDevices.get(mProcessedDeviceCount);
+        if (current.mLogicalAddress != cmd.getSource()) {
+            Slog.w(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
+                    cmd.getSource());
+            return;
+        }
+
+        String displayName = null;
+        try {
+            displayName = new String(cmd.getParams(), "US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            Slog.w(TAG, "Failed to decode display name: " + cmd.toString());
+            // If failed to get display name, use the default name of device.
+            displayName = HdmiCec.getDefaultDeviceName(current.mLogicalAddress);
+        }
+        current.mDisplayName = displayName;
+        increaseProcessedDeviceCount();
+        checkAndProceedStage();
+    }
+
+    private void handleVendorId(HdmiCecMessage cmd) {
+        Preconditions.checkState(mProcessedDeviceCount < mDevices.size());
+
+        DeviceInfo current = mDevices.get(mProcessedDeviceCount);
+        if (current.mLogicalAddress != cmd.getSource()) {
+            Slog.w(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
+                    cmd.getSource());
+            return;
+        }
+
+        byte[] params = cmd.getParams();
+        if (params.length == 3) {
+            int vendorId = ((params[0] & 0xFF) << 16)
+                    | ((params[1] & 0xFF) << 8)
+                    | (params[2] & 0xFF);
+            current.mVendorId = vendorId;
+        } else {
+            Slog.w(TAG, "Invalid vendor id: " + cmd.toString());
+        }
+        increaseProcessedDeviceCount();
+        checkAndProceedStage();
+    }
+
+    private void increaseProcessedDeviceCount() {
+        mProcessedDeviceCount++;
+    }
+
+    private void removeDevice(int index) {
+        mDevices.remove(index);
+    }
+
+    private void wrapUpAndFinish() {
+        ArrayList<HdmiCecDeviceInfo> result = new ArrayList<>();
+        for (DeviceInfo info : mDevices) {
+            HdmiCecDeviceInfo cecDeviceInfo = info.toHdmiCecDeviceInfo();
+            result.add(cecDeviceInfo);
+        }
+        mCallback.onDeviceDiscoveryDone(result);
+        finish();
+    }
+
+    private void checkAndProceedStage() {
+        if (mDevices.isEmpty()) {
+            wrapUpAndFinish();
+            return;
+        }
+
+        // If finished current stage, move on to next stage.
+        if (mProcessedDeviceCount == mDevices.size()) {
+            mProcessedDeviceCount = 0;
+            switch (mState) {
+                case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
+                    startOsdNameStage();
+                    return;
+                case STATE_WAITING_FOR_OSD_NAME:
+                    startVendorIdStage();
+                    return;
+                case STATE_WAITING_FOR_VENDOR_ID:
+                    wrapUpAndFinish();
+                    return;
+                default:
+                    return;
+            }
+        } else {
+            int address = mDevices.get(mProcessedDeviceCount).mLogicalAddress;
+            switch (mState) {
+                case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
+                    queryPhysicalAddress(address);
+                    return;
+                case STATE_WAITING_FOR_OSD_NAME:
+                    queryOsdName(address);
+                    return;
+                case STATE_WAITING_FOR_VENDOR_ID:
+                    queryVendorId(address);
+                default:
+                    return;
+            }
+        }
+    }
+
+    @Override
+    void handleTimerEvent(int state) {
+        if (mState == STATE_NONE || mState != state) {
+            return;
+        }
+
+        removeDevice(mProcessedDeviceCount);
+        checkAndProceedStage();
+    }
+}
