@@ -664,8 +664,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected void onTrackingStopped() {
-        super.onTrackingStopped();
+    protected void onTrackingStopped(boolean expand) {
+        super.onTrackingStopped(expand);
         mOverExpansion = 0.0f;
         mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */,
                 true /* animate */);

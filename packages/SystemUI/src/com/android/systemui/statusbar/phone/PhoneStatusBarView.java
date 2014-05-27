@@ -148,9 +148,15 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onTrackingStopped(PanelView panel) {
-        super.onTrackingStopped(panel);
-        mBar.onTrackingStopped();
+    public void onTrackingStopped(PanelView panel, boolean expand) {
+        super.onTrackingStopped(panel, expand);
+        mBar.onTrackingStopped(expand);
+    }
+
+    @Override
+    public void onExpandingFinished() {
+        super.onExpandingFinished();
+        mScrimController.onExpandingFinished();
     }
 
     @Override

@@ -212,6 +212,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private StatusBarWindowManager mStatusBarWindowManager;
+    private UnlockMethodCache mUnlockMethodCache;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -532,6 +533,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
                     mHeadsUpObserver);
         }
+        mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         startKeyguard();
     }
 
@@ -2895,9 +2897,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    public void onTrackingStopped() {
+    public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+        }
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+            if (!expand && !mUnlockMethodCache.isMethodInsecure()) {
+                showBouncer();
+            }
         }
     }
 
