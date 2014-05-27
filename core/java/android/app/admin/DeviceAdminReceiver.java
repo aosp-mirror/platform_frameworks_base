@@ -172,6 +172,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p>The broadcast is limited to the DeviceAdminReceiver component specified in the message
      * that started the provisioning. It is also limited to the managed profile.
      *
+     * <p> The intent may contain the extra
+     * {@link DevicePolicyManager#EXTRA_PROVISIONING_EMAIL_ADDRESS}.
+     *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
      */

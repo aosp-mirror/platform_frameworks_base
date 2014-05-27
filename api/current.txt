@@ -5234,6 +5234,7 @@ package android.app.admin {
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
+    field public static final java.lang.String ACTION_SEND_PROVISIONING_VALUES = "android.app.action.ACTION_SEND_PROVISIONING_VALUES";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
@@ -5244,6 +5245,7 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
     field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "defaultManagedProfileName";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "deviceAdminPackageName";
+    field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.ManagedProfileEmailAddress";
     field public static final java.lang.String EXTRA_PROVISIONING_TOKEN = "android.app.extra.token";
     field public static int FLAG_MANAGED_CAN_ACCESS_PARENT;
     field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
