@@ -1,5 +1,4 @@
-<!--
- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,38 +15,34 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-        android:height="64dp"
-        android:width="64dp" />
+            android:width="64dp"
+            android:height="64dp"/>
 
     <viewport
-        android:viewportHeight="700"
-        android:viewportWidth="700" />
+            android:viewportWidth="700"
+            android:viewportHeight="700"/>
 
-    <path
-        android:name="path2451"
-        android:pathData="M 569.374 461.472L 569.374 160.658L 160.658 160.658L 160.658 461.472L 569.374 461.472z"
-        android:stroke="#FF000000"
-        android:strokeWidth="30.65500000000000" />
-    <path
-        android:name="path2453"
-        android:pathData="M 365.015 311.066"
-        android:stroke="#FF000000"
-        android:strokeWidth="30.655000000000001" />
-    <path
-        android:name="path2455"
-        android:fill="#FFFFFFFF"
-        android:pathData="M 164.46 164.49L 340.78 343.158C 353.849 356.328 377.63 356.172 390.423 343.278L 566.622 165.928"
-        android:stroke="#FF000000"
-        android:strokeWidth="30.655000000000001" />
-    <path
-        android:name="path2457"
-        android:pathData="M 170.515 451.566L 305.61 313.46"
-        android:stroke="#000000"
-        android:strokeWidth="30.655000000000001" />
-    <path
-        android:name="path2459"
-        android:pathData="M 557.968 449.974L 426.515 315.375"
-        android:stroke="#000000"
-        android:strokeWidth="30.655000000000001" />
-
+    <group>
+        <path android:pathData="M 569.374 461.472L 569.374 160.658L 160.658 160.658L 160.658 461.472L 569.374 461.472z"
+              android:name="path2451"
+              android:stroke="#FF000000"
+              android:strokeWidth="30.65500000000000"/>
+        <path android:pathData="M 365.015 311.066"
+              android:name="path2453"
+              android:stroke="#FF000000"
+              android:strokeWidth="30.655000000000001"/>
+        <path android:pathData="M 164.46 164.49L 340.78 343.158C 353.849 356.328 377.63 356.172 390.423 343.278L 566.622 165.928"
+              android:name="path2455"
+              android:stroke="#FF000000"
+              android:fill="#FFFFFFFF"
+              android:strokeWidth="30.655000000000001"/>
+        <path android:pathData="M 170.515 451.566L 305.61 313.46"
+              android:name="path2457"
+              android:stroke="#000000"
+              android:strokeWidth="30.655000000000001"/>
+        <path android:pathData="M 557.968 449.974L 426.515 315.375"
+              android:name="path2459"
+              android:stroke="#000000"
+              android:strokeWidth="30.655000000000001"/>
+    </group>
 </vector>

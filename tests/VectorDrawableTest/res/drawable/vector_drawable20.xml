@@ -23,14 +23,16 @@
         android:viewportHeight="480"
         android:viewportWidth="480" />
 
-    <path
-        android:name="edit"
-        android:fill="#FF00FFFF"
-        android:pathData="M406.667,180c0,0 -100 -100 -113.334 -113.333
+    <group>
+        <path
+            android:name="edit"
+            android:fill="#FF00FFFF"
+            android:pathData="M406.667,180c0,0 -100 -100 -113.334 -113.333
     c-13.333 -13.334 -33.333,0 -33.333,0l-160,160c0,0 -40,153.333 -40,173.333c0,13.333,13.333,13.333,13.333,13.333l173.334 -40
     c0,0,146.666 -146.666,160 -160C420,200,406.667,180,406.667,180z M226.399,356.823L131.95,378.62l-38.516 -38.522
     c7.848 -34.675,20.152 -82.52,23.538 -95.593l3.027,2.162l106.667,106.666L226.399,356.823z"
-        android:stroke="#FF000000"
-        android:strokeWidth="10" />
+            android:stroke="#FF000000"
+            android:strokeWidth="10" />
+    </group>
 
 </vector>

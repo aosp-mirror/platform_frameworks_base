@@ -21,24 +21,26 @@
         android:width="64dp" />
 
     <viewport
-        android:viewportHeight="200"
-        android:viewportWidth="200" />
+        android:viewportWidth="200"
+        android:viewportHeight="200"/>
 
-    <path
-        android:name="bar3"
-        android:fill="#FFFFFFFF"
-        android:pathData="M49.001,60c-5.466,0 -9.899,4.478 -9.899,10s4.434,10,9.899,10c5.468,0,9.899 -4.478,9.899 -10S54.469,60,49.001,60z" />
-    <path
-        android:name="bar2"
-        android:fill="#FFFFFFFF"
-        android:pathData="M28.001,48.787l7,7.07c7.731 -7.811,20.269 -7.81,28.001,0l6.999 -7.07C58.403,37.071,39.599,37.071,28.001,48.787z" />
-    <path
-        android:name="bar1"
-        android:fill="#FF555555"
-        android:pathData="M14.001,34.645   L21,41.716c15.464 -15.621,40.536 -15.621,56,0l7.001 -7.071C64.672,15.119,33.33,15.119,14.001,34.645z" />
-    <path
-        android:name="bar0"
-        android:fill="#FF555555"
-        android:pathData="M0,20.502l6.999,7.071   c23.196 -23.431,60.806 -23.431,84.002,0L98,20.503C70.938 -6.834,27.063 -6.834,0,20.502z" />
+    <group>
+        <path
+            android:name="bar3"
+            android:fill="#FFFFFFFF"
+            android:pathData="M49.001,60c-5.466,0 -9.899,4.478 -9.899,10s4.434,10,9.899,10c5.468,0,9.899 -4.478,9.899 -10S54.469,60,49.001,60z" />
+        <path
+            android:name="bar2"
+            android:fill="#FFFFFFFF"
+            android:pathData="M28.001,48.787l7,7.07c7.731 -7.811,20.269 -7.81,28.001,0l6.999 -7.07C58.403,37.071,39.599,37.071,28.001,48.787z" />
+        <path
+            android:name="bar1"
+            android:fill="#FF555555"
+            android:pathData="M14.001,34.645   L21,41.716c15.464 -15.621,40.536 -15.621,56,0l7.001 -7.071C64.672,15.119,33.33,15.119,14.001,34.645z" />
+        <path
+            android:name="bar0"
+            android:fill="#FF555555"
+            android:pathData="M0,20.502l6.999,7.071   c23.196 -23.431,60.806 -23.431,84.002,0L98,20.503C70.938 -6.834,27.063 -6.834,0,20.502z" />
+    </group>
 
 </vector>

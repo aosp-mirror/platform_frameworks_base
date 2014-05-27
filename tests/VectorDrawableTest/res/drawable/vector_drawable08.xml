@@ -1,5 +1,4 @@
-<!--
- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,18 +15,20 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-        android:height="64dp"
-        android:width="64dp" />
+            android:width="64dp"
+            android:height="64dp"/>
 
-    <viewport
-        android:viewportHeight="600"
-        android:viewportWidth="600" />
 
-    <path
-        android:name="pie1"
-        android:fill="#ffffcc00"
-        android:pathData="M535.441,412.339A280.868,280.868 0 1,1 536.186,161.733L284.493,286.29Z"
-        android:stroke="#FF00FF00"
-        android:strokeWidth="1" />
+    <viewport android:viewportWidth="600"
+          android:viewportHeight="600"/>
+
+    <group>
+        <path
+                android:name="pie1"
+                android:pathData="M535.441,412.339A280.868,280.868 0 1,1 536.186,161.733L284.493,286.29Z"
+                android:fill="#ffffcc00"
+                android:stroke="#FF00FF00"
+                android:strokeWidth="1"/>
+    </group>
 
 </vector>
