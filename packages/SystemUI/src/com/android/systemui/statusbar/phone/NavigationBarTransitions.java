@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 
 public final class NavigationBarTransitions extends BarTransitions {
 
-    private static final float KEYGUARD_QUIESCENT_ALPHA = 0.5f;
     private static final int CONTENT_FADE_DURATION = 200;
 
     private final NavigationBarView mView;
@@ -81,8 +80,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
 
-        setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
-
         applyBackButtonQuiescentAlpha(mode, animate);
 
         // apply to lights out
@@ -96,7 +93,6 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     public void applyBackButtonQuiescentAlpha(int mode, boolean animate) {
         float backAlpha = 0;
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getSearchLight());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getHomeButton());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getRecentsButton());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getMenuButton());
@@ -116,7 +112,6 @@ public final class NavigationBarTransitions extends BarTransitions {
     public void setContentVisible(boolean visible) {
         final float alpha = visible ? 1 : 0;
         fadeContent(mView.getBackButton(), alpha);
-        fadeContent(mView.getSearchLight(), alpha);
     }
 
     private void fadeContent(View v, float alpha) {
