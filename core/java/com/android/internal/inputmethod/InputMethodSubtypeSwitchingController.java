@@ -347,11 +347,12 @@ public class InputMethodSubtypeSwitchingController {
 
     @VisibleForTesting
     public static class ControllerImpl {
-        private final DynamicRotationList mSwitchingAwareSubtypeList;
+        // TODO: Switch to DynamicRotationList for smarter rotation.
+        private final StaticRotationList mSwitchingAwareSubtypeList;
         private final StaticRotationList mSwitchingUnawareSubtypeList;
 
         public ControllerImpl(final List<ImeSubtypeListItem> sortedItems) {
-            mSwitchingAwareSubtypeList = new DynamicRotationList(filterImeSubtypeList(sortedItems,
+            mSwitchingAwareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
                     true /* supportsSwitchingToNextInputMethod */));
             mSwitchingUnawareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
                     false /* supportsSwitchingToNextInputMethod */));
@@ -375,9 +376,10 @@ public class InputMethodSubtypeSwitchingController {
             if (imi == null) {
                 return;
             }
-            if (imi.supportsSwitchingToNextInputMethod()) {
-                mSwitchingAwareSubtypeList.onUserAction(imi, subtype);
-            }
+            // TODO: Enable the following code when DynamicRotationList is enabled.
+            // if (imi.supportsSwitchingToNextInputMethod()) {
+            //     mSwitchingAwareSubtypeList.onUserAction(imi, subtype);
+            // }
         }
 
         private static List<ImeSubtypeListItem> filterImeSubtypeList(
