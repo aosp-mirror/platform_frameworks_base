@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -2965,5 +2966,152 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.w(TAG, "Error disabling safe media volume", e);
         }
+    }
+
+    /**
+     * Return codes for listAudioPorts(), createAudioPatch() ...
+     */
+
+    /** @hide
+     */
+    public static final int SUCCESS = AudioSystem.SUCCESS;
+    /** @hide
+     */
+    public static final int ERROR = AudioSystem.ERROR;
+    /** @hide
+     */
+    public static final int ERROR_BAD_VALUE = AudioSystem.BAD_VALUE;
+    /** @hide
+     */
+    public static final int ERROR_INVALID_OPERATION = AudioSystem.INVALID_OPERATION;
+    /** @hide
+     */
+    public static final int ERROR_PERMISSION_DENIED = AudioSystem.PERMISSION_DENIED;
+    /** @hide
+     */
+    public static final int ERROR_NO_INIT = AudioSystem.NO_INIT;
+    /** @hide
+     */
+    public static final int ERROR_DEAD_OBJECT = AudioSystem.DEAD_OBJECT;
+
+    /**
+     * Returns a list of descriptors for all audio ports managed by the audio framework.
+     * Audio ports are nodes in the audio framework or audio hardware that can be configured
+     * or connected and disconnected with createAudioPatch() or releaseAudioPatch().
+     * See AudioPort for a list of attributes of each audio port.
+     * @param ports An AudioPort ArrayList where the list will be returned.
+     * @hide
+     */
+    public int listAudioPorts(ArrayList<AudioPort> ports) {
+        return ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * Specialized version of listAudioPorts() listing only audio devices (AudioDevicePort)
+     * @see listAudioPorts(ArrayList<AudioPort>)
+     * @hide
+     */
+    public int listAudioDevicePorts(ArrayList<AudioPort> devices) {
+        return ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * Create a connection between two or more devices. The framework will reject the request if
+     * device types are not compatible or the implementation does not support the requested
+     * configuration.
+     * NOTE: current implementation is limited to one source and one sink per patch.
+     * @param patch AudioPatch array where the newly created patch will be returned.
+     *              As input, if patch[0] is not null, the specified patch will be replaced by the
+     *              new patch created. This avoids calling releaseAudioPatch() when modifying a
+     *              patch and allows the implementation to optimize transitions.
+     * @param sources List of source audio ports. All must be AudioPort.ROLE_SOURCE.
+     * @param sinks   List of sink audio ports. All must be AudioPort.ROLE_SINK.
+     *
+     * @return - {@link #SUCCESS} if connection is successful.
+     *         - {@link #ERROR_BAD_VALUE} if incompatible device types are passed.
+     *         - {@link #ERROR_INVALID_OPERATION} if the requested connection is not supported.
+     *         - {@link #ERROR_PERMISSION_DENIED} if the client does not have permission to create
+     *         a patch.
+     *         - {@link #ERROR_DEAD_OBJECT} if the server process is dead
+     *         - {@link #ERROR} if patch cannot be connected for any other reason.
+     *
+     *         patch[0] contains the newly created patch
+     * @hide
+     */
+    public int createAudioPatch(AudioPatch[] patch,
+                                 AudioPortConfig[] sources,
+                                 AudioPortConfig[] sinks) {
+        return ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * Releases an existing audio patch connection.
+     * @param patch The audio patch to disconnect.
+     * @return - {@link #SUCCESS} if disconnection is successful.
+     *         - {@link #ERROR_BAD_VALUE} if the specified patch does not exist.
+     *         - {@link #ERROR_PERMISSION_DENIED} if the client does not have permission to release
+     *         a patch.
+     *         - {@link #ERROR_DEAD_OBJECT} if the server process is dead
+     *         - {@link #ERROR} if patch cannot be released for any other reason.
+     * @hide
+     */
+    public int releaseAudioPatch(AudioPatch patch) {
+        return  ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * List all existing connections between audio ports.
+     * @param patches An AudioPatch array where the list will be returned.
+     * @hide
+     */
+    public int listAudioPatches(ArrayList<AudioPatch> patches) {
+        return ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * Set the gain on the specified AudioPort. The AudioGainConfig config is build by
+     * AudioGain.buildConfig()
+     * @hide
+     */
+    public int setAudioPortGain(AudioPort port, AudioGainConfig gain) {
+        return ERROR_INVALID_OPERATION;
+    }
+
+    /**
+     * Listener registered by client to be notified upon new audio port connections,
+     * disconnections or attributes update.
+     * @hide
+     */
+    public interface OnAudioPortUpdateListener {
+        /**
+         * Callback method called upon audio port list update.
+         * @param portList the updated list of audio ports
+         */
+        public void OnAudioPortListUpdate(AudioPort[] portList);
+
+        /**
+         * Callback method called upon audio patch list update.
+         * @param patchList the updated list of audio patches
+         */
+        public void OnAudioPatchListUpdate(AudioPatch[] patchList);
+
+        /**
+         * Callback method called when the mediaserver dies
+         */
+        public void OnServiceDied();
+    }
+
+    /**
+     * Register an audio port update listener.
+     * @hide
+     */
+    public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
+    }
+
+    /**
+     * Unregister an audio port update listener.
+     * @hide
+     */
+    public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
     }
 }
