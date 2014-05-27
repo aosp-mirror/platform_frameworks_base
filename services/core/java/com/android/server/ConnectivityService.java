@@ -343,12 +343,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_INET_CONDITION_HOLD_END = 5;
 
     /**
-     * used internally to set enable/disable cellular data
-     * arg1 = ENBALED or DISABLED
-     */
-    private static final int EVENT_SET_MOBILE_DATA = 7;
-
-    /**
      * used internally to clear a wakelock when transitioning
      * from one net to another
      */
@@ -1822,20 +1816,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return true;
     }
 
-    /**
-     * @see ConnectivityManager#getMobileDataEnabled()
-     */
-    public boolean getMobileDataEnabled() {
-        // TODO: This detail should probably be in DataConnectionTracker's
-        //       which is where we store the value and maybe make this
-        //       asynchronous.
-        enforceAccessPermission();
-        boolean retVal = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.MOBILE_DATA, 1) == 1;
-        if (VDBG) log("getMobileDataEnabled returning " + retVal);
-        return retVal;
-    }
-
     public void setDataDependency(int networkType, boolean met) {
         enforceConnectivityInternalPermission();
 
@@ -1907,22 +1887,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
     };
-
-    /**
-     * @see ConnectivityManager#setMobileDataEnabled(boolean)
-     */
-    public void setMobileDataEnabled(boolean enabled) {
-        enforceChangePermission();
-        if (DBG) log("setMobileDataEnabled(" + enabled + ")");
-
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_MOBILE_DATA,
-                (enabled ? ENABLED : DISABLED), 0));
-    }
-
-    private void handleSetMobileData(boolean enabled) {
-    // TODO - handle this - probably generalize passing in a transport type and send to the
-    // factories?
-    }
 
     @Override
     public void setPolicyDataEnable(int networkType, boolean enabled) {
@@ -3313,11 +3277,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     int netType = msg.arg1;
                     int sequence = msg.arg2;
                     handleInetConditionHoldEnd(netType, sequence);
-                    break;
-                }
-                case EVENT_SET_MOBILE_DATA: {
-                    boolean enabled = (msg.arg1 == ENABLED);
-                    handleSetMobileData(enabled);
                     break;
                 }
                 case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
