@@ -28205,12 +28205,8 @@ package android.telephony {
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
     method public boolean hasIccCard();
-    method public boolean iccCloseLogicalChannel(int);
-    method public int iccOpenLogicalChannel(java.lang.String);
-    method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
-    method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
