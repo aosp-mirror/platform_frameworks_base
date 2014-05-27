@@ -63,6 +63,11 @@ public class TrustAgentWrapper {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_GRANT_TRUST:
+                    if (!isConnected()) {
+                        Log.w(TAG, "Agent is not connected, cannot grant trust: "
+                                + mName.flattenToShortString());
+                        return;
+                    }
                     mTrusted = true;
                     mMessage = (CharSequence) msg.obj;
                     boolean initiatedByUser = msg.arg1 != 0;
@@ -119,6 +124,7 @@ public class TrustAgentWrapper {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "TrustAgent started : " + name.flattenToString());
             mTrustAgentService = ITrustAgentService.Stub.asInterface(service);
+            mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
             setCallback(mCallback);
         }
 
@@ -179,7 +185,10 @@ public class TrustAgentWrapper {
 
     public void unbind() {
         if (DEBUG) Log.v(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
+        mTrustManagerService.mArchive.logAgentStopped(mUserId, mName);
         mContext.unbindService(mConnection);
+        mTrustAgentService = null;
+        mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
     }
 
     public boolean isConnected() {
