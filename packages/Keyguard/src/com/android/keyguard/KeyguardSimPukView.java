@@ -186,6 +186,9 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
         mPasswordEntry.requestFocus();
 
         mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
+        if (mEcaView instanceof EmergencyCarrierArea) {
+            ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
+        }
     }
 
     @Override
