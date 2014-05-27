@@ -223,8 +223,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"Încă %d"</item>
   </plurals>
-    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
-    <skip />
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificările mai puțin urgente mai jos"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Atingeți din nou pentru a deschide"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Glisați în sus pentru a debloca"</string>
 </resources>

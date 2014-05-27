@@ -204,15 +204,11 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Transmitir tela"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brilho"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
-    <!-- no translation found for quick_settings_inversion_label (8790919884718619648) -->
-    <skip />
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverter cores"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Modo de correção de cor"</string>
-    <!-- no translation found for quick_settings_more_settings (326112621462813682) -->
-    <skip />
-    <!-- no translation found for quick_settings_tethering_label (7153452060448575549) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_label (6046917934974004879) -->
-    <skip />
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Mais configurações"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Ponto de acesso"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"RECENTES"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informações do aplicativo"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
@@ -229,8 +225,7 @@
   <plurals name="keyguard_more_overflow_text">
     <item quantity="other" msgid="9180696159506883684">"Mais %d"</item>
   </plurals>
-    <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
-    <skip />
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toque novamente para abrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Deslize para cima para desbloquear"</string>
 </resources>
