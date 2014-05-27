@@ -65,6 +65,7 @@ public class KeyguardBouncer {
         if (!mKeyguardView.dismiss()) {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
+            mKeyguardView.startAppearAnimation();
         }
     }
 

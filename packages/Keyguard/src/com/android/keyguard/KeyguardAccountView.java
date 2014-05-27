@@ -328,5 +328,10 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     @Override
     public void hideBouncer(int duration) {
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // TODO.
+    }
 }
 

@@ -339,6 +339,11 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     protected void verifyPasswordAndUnlock() {
         mStateMachine.next();
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // noop.
+    }
 }
 
 
