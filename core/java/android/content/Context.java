@@ -2363,6 +2363,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.net.wifi.passpoint.WifiPasspointManager
+     * @hide
      */
     public static final String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
 

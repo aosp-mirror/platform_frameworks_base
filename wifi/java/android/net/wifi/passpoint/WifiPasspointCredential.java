@@ -25,6 +25,10 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * A class representing a Wi-Fi Passpoint credential.
+ * @hide
+ */
 public class WifiPasspointCredential implements Parcelable {
 
     private final static String TAG = "PasspointCredential";
