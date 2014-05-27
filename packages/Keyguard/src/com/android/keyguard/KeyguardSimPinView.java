@@ -270,5 +270,10 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
             mCheckSimPinThread.start();
         }
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // noop.
+    }
 }
 

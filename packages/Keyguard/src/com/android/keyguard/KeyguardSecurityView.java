@@ -84,4 +84,9 @@ public interface KeyguardSecurityView {
      * @param duration millisends for the transisiton animation.
      */
     void hideBouncer(int duration);
+
+    /**
+     * Starts the animation which should run when the security view appears.
+     */
+    void startAppearAnimation();
 }

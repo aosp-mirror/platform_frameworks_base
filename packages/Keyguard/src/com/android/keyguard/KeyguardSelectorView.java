@@ -244,4 +244,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         KeyguardSecurityViewHelper.
                 hideBouncer(mSecurityMessageDisplay, mFadeView, mBouncerFrame, duration);
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // noop.
+    }
 }

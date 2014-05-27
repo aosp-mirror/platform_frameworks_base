@@ -198,4 +198,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     public int getWrongPasswordStringId() {
         return R.string.kg_wrong_password;
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // TODO: Fancy animation.
+        setAlpha(0);
+        animate().alpha(1).withLayer().setDuration(200);
+    }
 }
