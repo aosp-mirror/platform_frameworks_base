@@ -12086,6 +12086,7 @@ package android.hardware {
     field public static final int SENSOR_STATUS_ACCURACY_HIGH = 3; // 0x3
     field public static final int SENSOR_STATUS_ACCURACY_LOW = 1; // 0x1
     field public static final int SENSOR_STATUS_ACCURACY_MEDIUM = 2; // 0x2
+    field public static final int SENSOR_STATUS_NO_CONTACT = -1; // 0xffffffff
     field public static final int SENSOR_STATUS_UNRELIABLE = 0; // 0x0
     field public static final deprecated int SENSOR_TEMPERATURE = 4; // 0x4
     field public static final deprecated int SENSOR_TRICORDER = 64; // 0x40

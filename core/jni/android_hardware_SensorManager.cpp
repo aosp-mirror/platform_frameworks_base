@@ -175,11 +175,26 @@ private:
                                         gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
                                         buffer[i].meta_data.sensor);
                 } else {
+                    int8_t status;
+                    switch (buffer[i].type) {
+                    case SENSOR_TYPE_ORIENTATION:
+                    case SENSOR_TYPE_MAGNETIC_FIELD:
+                    case SENSOR_TYPE_ACCELEROMETER:
+                    case SENSOR_TYPE_GYROSCOPE:
+                        status = buffer[i].vector.status;
+                        break;
+                    case SENSOR_TYPE_HEART_RATE:
+                        status = buffer[i].heart_rate.status;
+                        break;
+                    default:
+                        status = SENSOR_STATUS_ACCURACY_HIGH;
+                        break;
+                    }
                     env->CallVoidMethod(mReceiverObject,
                                         gBaseEventQueueClassInfo.dispatchSensorEvent,
                                         buffer[i].sensor,
                                         mScratch,
-                                        buffer[i].vector.status,
+                                        status,
                                         buffer[i].timestamp);
                 }
                 if (env->ExceptionCheck()) {
