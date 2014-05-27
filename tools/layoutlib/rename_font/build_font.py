@@ -52,13 +52,17 @@ def main(argv):
   os.chdir(cwd)
   input_fonts = list()
   for src_dir in src_dirs:
-    for filename in os.listdir(src_dir):
-      if os.path.isdir(os.path.join(src_dir, filename)):
-        continue
-      if not os.path.splitext(filename)[1].lower() == '.ttf':
-        shutil.copy(os.path.join(src_dir, filename), dest_dir)
-        continue
-      input_fonts.append(os.path.join(src_dir, filename))
+    for dirname, dirnames, filenames in os.walk(src_dir):
+      for filename in filenames:
+          input_path = os.path.join(dirname, filename)
+          extension = os.path.splitext(filename)[1].lower()
+          if (extension == '.ttf'):
+            input_fonts.append(input_path)
+          elif (extension == '.xml'):
+            shutil.copy(input_path, dest_dir)
+      if '.git' in dirnames:
+          # don't go into any .git directories.
+          dirnames.remove('.git')
   # Create as many threads as the number of CPUs
   pool = Pool(processes=None)
   pool.map(convert_font, input_fonts)
