@@ -37,20 +37,22 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
  * @hide
  */
 public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callback {
+    private static final String TAG = "SeekBarVolumizer";
 
     public interface Callback {
         void onSampleStarting(SeekBarVolumizer sbv);
     }
 
-    private Context mContext;
-    private Handler mHandler;
+    private final Context mContext;
+    private final Handler mHandler;
     private final Callback mCallback;
+    private final Uri mDefaultUri;
+    private final AudioManager mAudioManager;
+    private final int mStreamType;
+    private final int mMaxStreamVolume;
 
-    private AudioManager mAudioManager;
-    private int mStreamType;
     private int mOriginalStreamVolume;
     private Ringtone mRingtone;
-
     private int mLastProgress = -1;
     private SeekBar mSeekBar;
     private int mVolumeBeforeMute = -1;
@@ -58,9 +60,10 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     private static final int MSG_SET_STREAM_VOLUME = 0;
     private static final int MSG_START_SAMPLE = 1;
     private static final int MSG_STOP_SAMPLE = 2;
+    private static final int MSG_INIT_SAMPLE = 3;
     private static final int CHECK_RINGTONE_PLAYBACK_DELAY_MS = 1000;
 
-    private ContentObserver mVolumeObserver = new ContentObserver(mHandler) {
+    private ContentObserver mVolumeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -71,27 +74,17 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
     };
 
-    public SeekBarVolumizer(Context context, SeekBar seekBar, int streamType, Uri defaultUri,
+    public SeekBarVolumizer(Context context, int streamType, Uri defaultUri,
             Callback callback) {
         mContext = context;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mStreamType = streamType;
-        mSeekBar = seekBar;
-
-        HandlerThread thread = new HandlerThread(VolumePreference.TAG + ".CallbackHandler");
+        mMaxStreamVolume = mAudioManager.getStreamMaxVolume(mStreamType);
+        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
         thread.start();
         mHandler = new Handler(thread.getLooper(), this);
         mCallback = callback;
-
-        initSeekBar(seekBar, defaultUri);
-    }
-
-    private void initSeekBar(SeekBar seekBar, Uri defaultUri) {
-        seekBar.setMax(mAudioManager.getStreamMaxVolume(mStreamType));
         mOriginalStreamVolume = mAudioManager.getStreamVolume(mStreamType);
-        seekBar.setProgress(mOriginalStreamVolume);
-        seekBar.setOnSeekBarChangeListener(this);
-
         mContext.getContentResolver().registerContentObserver(
                 System.getUriFor(System.VOLUME_SETTINGS[mStreamType]),
                 false, mVolumeObserver);
@@ -105,12 +98,16 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 defaultUri = Settings.System.DEFAULT_ALARM_ALERT_URI;
             }
         }
+        mDefaultUri = defaultUri;
+        mHandler.sendEmptyMessage(MSG_INIT_SAMPLE);
+    }
 
-        mRingtone = RingtoneManager.getRingtone(mContext, defaultUri);
-
-        if (mRingtone != null) {
-            mRingtone.setStreamType(mStreamType);
-        }
+    public void setSeekBar(SeekBar seekBar) {
+        mSeekBar = seekBar;
+        mSeekBar.setOnSeekBarChangeListener(null);
+        mSeekBar.setMax(mMaxStreamVolume);
+        mSeekBar.setProgress(mLastProgress > -1 ? mLastProgress : mOriginalStreamVolume);
+        mSeekBar.setOnSeekBarChangeListener(this);
     }
 
     @Override
@@ -125,10 +122,20 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             case MSG_STOP_SAMPLE:
                 onStopSample();
                 break;
+            case MSG_INIT_SAMPLE:
+                onInitSample();
+                break;
             default:
-                Log.e(VolumePreference.TAG, "invalid SeekBarVolumizer message: "+msg.what);
+                Log.e(TAG, "invalid SeekBarVolumizer message: "+msg.what);
         }
         return true;
+    }
+
+    private void onInitSample() {
+        mRingtone = RingtoneManager.getRingtone(mContext, mDefaultUri);
+        if (mRingtone != null) {
+            mRingtone.setStreamType(mStreamType);
+        }
     }
 
     private void postStartSample() {
