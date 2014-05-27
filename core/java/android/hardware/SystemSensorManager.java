@@ -395,25 +395,12 @@ public class SystemSensorManager extends SensorManager {
             t.timestamp = timestamp;
             t.accuracy = inAccuracy;
             t.sensor = sensor;
-            switch (t.sensor.getType()) {
-                // Only report accuracy for sensors that support it.
-                case Sensor.TYPE_MAGNETIC_FIELD:
-                case Sensor.TYPE_ORIENTATION:
-                    // call onAccuracyChanged() only if the value changes
-                    final int accuracy = mSensorAccuracies.get(handle);
-                    if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
-                        mSensorAccuracies.put(handle, t.accuracy);
-                        mListener.onAccuracyChanged(t.sensor, t.accuracy);
-                    }
-                    break;
-                default:
-                    // For other sensors, just report the accuracy once
-                    if (mFirstEvent.get(handle) == false) {
-                        mFirstEvent.put(handle, true);
-                        mListener.onAccuracyChanged(
-                                t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
-                    }
-                    break;
+
+            // call onAccuracyChanged() only if the value changes
+            final int accuracy = mSensorAccuracies.get(handle);
+            if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+                mSensorAccuracies.put(handle, t.accuracy);
+                mListener.onAccuracyChanged(t.sensor, t.accuracy);
             }
             mListener.onSensorChanged(t);
         }
