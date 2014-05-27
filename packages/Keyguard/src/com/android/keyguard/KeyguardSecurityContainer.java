@@ -81,6 +81,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         getSecurityView(mCurrentSecuritySelection).onPause();
     }
 
+    public void startAppearAnimation() {
+        getSecurityView(mCurrentSecuritySelection).startAppearAnimation();
+    }
+
     void updateSecurityViews(boolean isBouncing) {
         int children = mSecurityViewFlipper.getChildCount();
         for (int i = 0; i < children; i++) {

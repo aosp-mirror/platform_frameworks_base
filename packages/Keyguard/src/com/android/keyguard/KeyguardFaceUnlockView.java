@@ -349,4 +349,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                 hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
     }
 
+    @Override
+    public void startAppearAnimation() {
+        // TODO.
+    }
 }

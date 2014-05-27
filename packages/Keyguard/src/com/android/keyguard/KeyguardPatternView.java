@@ -400,4 +400,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         KeyguardSecurityViewHelper.
                 hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
     }
+
+    @Override
+    public void startAppearAnimation() {
+        // TODO: Fancy animation.
+        setAlpha(0);
+        animate().alpha(1).withLayer().setDuration(200);
+    }
 }
