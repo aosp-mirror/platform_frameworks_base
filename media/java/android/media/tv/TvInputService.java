@@ -560,8 +560,11 @@ public abstract class TvInputService extends Service {
          */
         int dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
             if (DEBUG) Log.d(TAG, "dispatchInputEvent(" + event + ")");
+            boolean isNavigationKey = false;
             if (event instanceof KeyEvent) {
-                if (((KeyEvent) event).dispatch(this, mDispatcherState, this)) {
+                KeyEvent keyEvent = (KeyEvent) event;
+                isNavigationKey = isNavigationKey(keyEvent.getKeyCode());
+                if (keyEvent.dispatch(this, mDispatcherState, this)) {
                     return TvInputManager.Session.DISPATCH_HANDLED;
                 }
             } else if (event instanceof MotionEvent) {
@@ -587,13 +590,43 @@ public abstract class TvInputService extends Service {
             if (!mOverlayView.hasWindowFocus()) {
                 mOverlayView.getViewRootImpl().windowFocusChanged(true, true);
             }
-            mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
-            return TvInputManager.Session.DISPATCH_IN_PROGRESS;
+            if (isNavigationKey && mOverlayView.hasFocusable()) {
+                // If mOverlayView has focusable views, navigation key events should be always
+                // handled. If not, it can make the application UI navigation messed up.
+                // For example, in the case that the left-most view is focused, a left key event
+                // will not be handled in ViewRootImpl. Then, the left key event will be handled in
+                // the application during the UI navigation of the TV input.
+                mOverlayView.getViewRootImpl().dispatchInputEvent(event);
+                return TvInputManager.Session.DISPATCH_HANDLED;
+            } else {
+                mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
+                return TvInputManager.Session.DISPATCH_IN_PROGRESS;
+            }
         }
 
         private void setSessionCallback(ITvInputSessionCallback callback) {
             mSessionCallback = callback;
         }
+    }
+
+    /** @hide */
+    public static boolean isNavigationKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_PAGE_UP:
+            case KeyEvent.KEYCODE_PAGE_DOWN:
+            case KeyEvent.KEYCODE_MOVE_HOME:
+            case KeyEvent.KEYCODE_MOVE_END:
+            case KeyEvent.KEYCODE_TAB:
+            case KeyEvent.KEYCODE_SPACE:
+            case KeyEvent.KEYCODE_ENTER:
+                return true;
+        }
+        return false;
     }
 
     private final class ServiceHandler extends Handler {
