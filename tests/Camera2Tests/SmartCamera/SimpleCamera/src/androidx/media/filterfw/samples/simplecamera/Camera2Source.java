@@ -26,6 +26,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.os.Handler;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -86,7 +87,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
         @Override
         public void onCaptureCompleted(CameraDevice camera, CaptureRequest request,
-                CaptureResult result) {
+                TotalCaptureResult result) {
             // TODO Auto-generated method stub
             Log.v(TAG, "in onCaptureComplete");
 

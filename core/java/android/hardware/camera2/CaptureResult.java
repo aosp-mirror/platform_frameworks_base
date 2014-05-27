@@ -24,9 +24,9 @@ import android.util.Rational;
 import java.util.List;
 
 /**
- * <p>The results of a single image capture from the image sensor.</p>
+ * <p>The subset of the results of a single image capture from the image sensor.</p>
  *
- * <p>Contains the final configuration for the capture hardware (sensor, lens,
+ * <p>Contains a subset of the final configuration for the capture hardware (sensor, lens,
  * flash), the processing pipeline, the control algorithms, and the output
  * buffers.</p>
  *
@@ -36,10 +36,15 @@ import java.util.List;
  * capture. The result also includes additional metadata about the state of the
  * camera device during the capture.</p>
  *
- * <p>{@link CameraCharacteristics} objects are immutable.</p>
+ * <p>Not all properties returned by {@link CameraCharacteristics#getAvailableCaptureResultKeys()}
+ * are necessarily available. Some results are {@link CaptureResult partial} and will
+ * not have every key set. Only {@link TotalCaptureResult total} results are guaranteed to have
+ * every key available that was enabled by the request.</p>
+ *
+ * <p>{@link CaptureResult} objects are immutable.</p>
  *
  */
-public final class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
+public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     private static final String TAG = "CaptureResult";
     private static final boolean VERBOSE = false;
@@ -249,18 +254,19 @@ public final class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * Get the request associated with this result.
      *
-     * <p>Whenever a request is successfully captured, with
-     * {@link CameraDevice.CaptureListener#onCaptureCompleted},
-     * the {@code result}'s {@code getRequest()} will return that {@code request}.
+     * <p>Whenever a request has been fully or partially captured, with
+     * {@link CameraDevice.CaptureListener#onCaptureCompleted} or
+     * {@link CameraDevice.CaptureListener#onCaptureProgressed}, the {@code result}'s
+     * {@code getRequest()} will return that {@code request}.
      * </p>
      *
-     * <p>In particular,
+     * <p>For example,
      * <code><pre>cameraDevice.capture(someRequest, new CaptureListener() {
      *     {@literal @}Override
      *     void onCaptureCompleted(CaptureRequest myRequest, CaptureResult myResult) {
      *         assert(myResult.getRequest.equals(myRequest) == true);
      *     }
-     * };
+     * }, null);
      * </code></pre>
      * </p>
      *
@@ -297,6 +303,7 @@ public final class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @return int The ID for the sequence of requests that this capture result is a part of
      *
      * @see CameraDevice.CaptureListener#onCaptureSequenceCompleted
+     * @see CameraDevice.CaptureListener#onCaptureSequenceAborted
      */
     public int getSequenceId() {
         return mSequenceId;
