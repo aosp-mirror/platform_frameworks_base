@@ -39,6 +39,5 @@
     <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Hebreu"</string>
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Lituà"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Espanyol (llatí)"</string>
-    <!-- no translation found for keyboard_layout_latvian (4405417142306250595) -->
-    <skip />
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"Letó"</string>
 </resources>
