@@ -144,8 +144,7 @@ public class ScanResult implements Parcelable {
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
-            if (source.passpoint != null)
-                passpoint = new WifiPasspointInfo(source.passpoint);
+            passpoint = source.passpoint;
         }
     }
 
@@ -179,8 +178,7 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
-        if (passpoint != null)
-            sb.append(", passpoint: [").append(passpoint.toString()).append("]");
+        sb.append(", passpoint: ").append(passpoint != null ? "yes" : "no");
 
         return sb.toString();
     }

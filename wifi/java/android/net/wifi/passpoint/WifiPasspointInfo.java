@@ -88,67 +88,173 @@ public class WifiPasspointInfo implements Parcelable {
                     CONNECTION_CAPABILITY |
                     OSU_PROVIDER;
 
-    /** TODO doc */
-    public String bssid;
 
-    /** TODO doc */
-    public String venueName;
+    public static class WanMetrics {
+        public static final int STATUS_RESERVED = 0;
+        public static final int STATUS_UP = 1;
+        public static final int STATUS_DOWN = 2;
+        public static final int STATUS_TEST = 3;
 
-    /** TODO doc */
-    public String networkAuthType;
+        public int wanInfo;
+        public long downlinkSpeed;
+        public long uplinkSpeed;
+        public int downlinkLoad;
+        public int uplinkLoad;
+        public int lmd;
 
-    /** TODO doc */
-    public String roamingConsortium;
+        public int getLinkStatus() {
+            return wanInfo & 0x3;
+        }
 
-    /** TODO doc */
-    public String ipAddrTypeAvaibility;
+        public boolean getSymmetricLink() {
+            return (wanInfo & (1 << 2)) != 0;
+        }
 
-    /** TODO doc */
-    public String naiRealm;
+        public boolean getAtCapacity() {
+            return (wanInfo & (1 << 3)) != 0;
+        }
 
-    /** TODO doc */
-    public String cellularNetwork;
-
-    /** TODO doc */
-    public String domainName;
-
-    /** TODO doc */
-    public String operatorFriendlyName;
-
-    /** TODO doc */
-    public String wanMetrics;
-
-    /** TODO doc */
-    public String connectionCapability;
-
-    /** TODO doc */
-    public List<WifiPasspointOsuProvider> osuProviderList;
-
-    /** default constructor @hide */
-    public WifiPasspointInfo() {
-        //        osuProviderList = new ArrayList<OsuProvider>();
-    }
-
-    /** copy constructor @hide */
-    public WifiPasspointInfo(WifiPasspointInfo source) {
-        // TODO
-        bssid = source.bssid;
-        venueName = source.venueName;
-        networkAuthType = source.networkAuthType;
-        roamingConsortium = source.roamingConsortium;
-        ipAddrTypeAvaibility = source.ipAddrTypeAvaibility;
-        naiRealm = source.naiRealm;
-        cellularNetwork = source.cellularNetwork;
-        domainName = source.domainName;
-        operatorFriendlyName = source.operatorFriendlyName;
-        wanMetrics = source.wanMetrics;
-        connectionCapability = source.connectionCapability;
-        if (source.osuProviderList != null) {
-            osuProviderList = new ArrayList<WifiPasspointOsuProvider>();
-            for (WifiPasspointOsuProvider osu : source.osuProviderList)
-                osuProviderList.add(new WifiPasspointOsuProvider(osu));
+        @Override
+        public String toString() {
+            return wanInfo + "," + downlinkSpeed + "," + uplinkSpeed + "," +
+                    downlinkLoad + "," + uplinkLoad + "," + lmd;
         }
     }
+
+    public static class IpProtoPort {
+        public static final int STATUS_CLOSED = 0;
+        public static final int STATUS_OPEN = 1;
+        public static final int STATUS_UNKNOWN = 2;
+
+        public int proto;
+        public int port;
+        public int status;
+
+        @Override
+        public String toString() {
+            return proto + "," + port + "," + status;
+        }
+    }
+
+    public static class NetworkAuthType {
+        public static final int TYPE_TERMS_AND_CONDITION = 0;
+        public static final int TYPE_ONLINE_ENROLLMENT = 1;
+        public static final int TYPE_HTTP_REDIRECTION = 2;
+        public static final int TYPE_DNS_REDIRECTION = 3;
+
+        public int type;
+        public String redirectUrl;
+
+        @Override
+        public String toString() {
+            return type + "," + redirectUrl;
+        }
+    }
+
+    public static class IpAddressType {
+        public static final int IPV6_NOT_AVAILABLE = 0;
+        public static final int IPV6_AVAILABLE = 1;
+        public static final int IPV6_UNKNOWN = 2;
+
+        public static final int IPV4_NOT_AVAILABLE = 0;
+        public static final int IPV4_PUBLIC = 1;
+        public static final int IPV4_PORT_RESTRICTED = 2;
+        public static final int IPV4_SINGLE_NAT = 3;
+        public static final int IPV4_DOUBLE_NAT = 4;
+        public static final int IPV4_PORT_RESTRICTED_SINGLE_NAT = 5;
+        public static final int IPV4_PORT_RESTRICTED_DOUBLE_NAT = 6;
+        public static final int IPV4_PORT_UNKNOWN = 7;
+
+        private static final int NULL_VALUE = -1;
+
+        public int availability;
+
+        public int getIpv6Availability() {
+            return availability & 0x3;
+        }
+
+        public int getIpv4Availability() {
+            return (availability & 0xFF) >> 2;
+        }
+
+        @Override
+        public String toString() {
+            return getIpv6Availability() + "," + getIpv4Availability();
+        }
+    }
+
+    public static class NaiRealm {
+        public static final int ENCODING_RFC4282 = 0;
+        public static final int ENCODING_UTF8 = 1;
+
+        public int encoding;
+        public String realm;
+
+        @Override
+        public String toString() {
+            return encoding + "," + realm;
+        }
+    }
+
+    public static class CellularNetwork {
+        public byte[] rawData;
+
+        public int getMnc() {
+            // TODO
+            return 0;
+        }
+
+        public int getMcc() {
+            // TODO
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            if (rawData == null) return null;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < rawData.length; i++)
+                sb.append(String.format("%02X",  rawData[i]));
+            return sb.toString();
+        }
+
+    }
+
+    /** BSSID */
+    public String bssid;
+
+    /** venue name */
+    public String venueName;
+
+    /** list of network authentication types */
+    public List<NetworkAuthType> networkAuthType;
+
+    /** list of roaming consortium OIs */
+    public List<String> roamingConsortium;
+
+    /** IP address availability */
+    public IpAddressType ipAddrTypeAvailability;
+
+    /** NAI realm */
+    public List<NaiRealm> naiRealm;
+
+    /** 3GPP cellular network */
+    public CellularNetwork cellularNetwork;
+
+    /** fully qualified domain name (FQDN) */
+    public List<String> domainName;
+
+    /** HS 2.0 operator friendly name */
+    public String operatorFriendlyName;
+
+    /** HS 2.0 wan metrics */
+    public WanMetrics wanMetrics;
+
+    /** HS 2.0 list of IP proto port */
+    public List<IpProtoPort> connectionCapability;
+
+    /** HS 2.0 list of OSU providers */
+    public List<WifiPasspointOsuProvider> osuProviderList;
 
     /**
      * Convert mask to ANQP subtypes, for supplicant command use.
@@ -193,46 +299,149 @@ public class WifiPasspointInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+
         sb.append("BSSID: ").append(bssid);
+
         if (venueName != null)
-            sb.append(" venueName: ").append(venueName);
-        if (networkAuthType != null)
-            sb.append(" networkAuthType: ").append(networkAuthType);
-        if (roamingConsortium != null)
-            sb.append(" roamingConsortium: ").append(roamingConsortium);
-        if (ipAddrTypeAvaibility != null)
-            sb.append(" ipAddrTypeAvaibility: ").append(ipAddrTypeAvaibility);
-        if (naiRealm != null)
-            sb.append(" naiRealm: ").append(naiRealm);
+            sb.append(" venueName: ").append(venueName.replace("\n", "\\n"));
+
+        if (networkAuthType != null) {
+            sb.append(" networkAuthType: ");
+            for (NetworkAuthType auth : networkAuthType)
+                sb.append("(").append(auth.toString()).append(")");
+        }
+
+        if (roamingConsortium != null) {
+            sb.append(" roamingConsortium: ");
+            for (String oi : roamingConsortium)
+                sb.append("(").append(oi).append(")");
+        }
+
+        if (ipAddrTypeAvailability != null) {
+            sb.append(" ipAddrTypeAvaibility: ").append("(")
+              .append(ipAddrTypeAvailability.toString()).append(")");
+        }
+
+        if (naiRealm != null) {
+            sb.append(" naiRealm: ");
+            for (NaiRealm realm : naiRealm)
+                sb.append("(").append(realm.toString()).append(")");
+        }
+
         if (cellularNetwork != null)
-            sb.append(" cellularNetwork: ").append(cellularNetwork);
-        if (domainName != null)
-            sb.append(" domainName: ").append(domainName);
+            sb.append(" cellularNetwork: ").append("(")
+              .append(cellularNetwork.toString()).append(")");
+
+        if (domainName != null) {
+            sb.append(" domainName: ");
+            for (String fqdn : domainName)
+                sb.append("(").append(fqdn).append(")");
+        }
+
         if (operatorFriendlyName != null)
-            sb.append(" operatorFriendlyName: ").append(operatorFriendlyName);
+            sb.append(" operatorFriendlyName: ").append("(")
+              .append(operatorFriendlyName).append(")");
+
         if (wanMetrics != null)
-            sb.append(" wanMetrics: ").append(wanMetrics);
-        if (connectionCapability != null)
-            sb.append(" connectionCapability: ").append(connectionCapability);
-        if (osuProviderList != null)
-            sb.append(" osuProviderList: (size=" + osuProviderList.size() + ")");
+            sb.append(" wanMetrics: ").append("(")
+              .append(wanMetrics.toString()).append(")");
+
+        if (connectionCapability != null) {
+            sb.append(" connectionCapability: ");
+            for (IpProtoPort ip : connectionCapability)
+                sb.append("(").append(ip.toString()).append(")");
+        }
+
+        if (osuProviderList != null) {
+            sb.append(" osuProviderList: ");
+            for (WifiPasspointOsuProvider osu : osuProviderList)
+                sb.append("(").append(osu.toString()).append(")");
+        }
+
         return sb.toString();
     }
 
     /** Implement the Parcelable interface {@hide} */
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeValue(bssid);
-        out.writeValue(venueName);
-        out.writeValue(networkAuthType);
-        out.writeValue(roamingConsortium);
-        out.writeValue(ipAddrTypeAvaibility);
-        out.writeValue(naiRealm);
-        out.writeValue(cellularNetwork);
-        out.writeValue(domainName);
-        out.writeValue(operatorFriendlyName);
-        out.writeValue(wanMetrics);
-        out.writeValue(connectionCapability);
+        out.writeString(bssid);
+        out.writeString(venueName);
+
+        if (networkAuthType == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(networkAuthType.size());
+            for (NetworkAuthType auth : networkAuthType) {
+                out.writeInt(auth.type);
+                out.writeString(auth.redirectUrl);
+            }
+        }
+
+        if (roamingConsortium == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(roamingConsortium.size());
+            for (String oi : roamingConsortium)
+                out.writeString(oi);
+        }
+
+        if (ipAddrTypeAvailability == null) {
+            out.writeInt(IpAddressType.NULL_VALUE);
+        } else {
+            out.writeInt(ipAddrTypeAvailability.availability);
+        }
+
+        if (naiRealm == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(naiRealm.size());
+            for (NaiRealm realm : naiRealm) {
+                out.writeInt(realm.encoding);
+                out.writeString(realm.realm);
+            }
+        }
+
+        if (cellularNetwork == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(cellularNetwork.rawData.length);
+            out.writeByteArray(cellularNetwork.rawData);
+        }
+
+
+        if (domainName == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(domainName.size());
+            for (String fqdn : domainName)
+                out.writeString(fqdn);
+        }
+
+        out.writeString(operatorFriendlyName);
+
+        if (wanMetrics == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(1);
+            out.writeInt(wanMetrics.wanInfo);
+            out.writeLong(wanMetrics.downlinkSpeed);
+            out.writeLong(wanMetrics.uplinkSpeed);
+            out.writeInt(wanMetrics.downlinkLoad);
+            out.writeInt(wanMetrics.uplinkLoad);
+            out.writeInt(wanMetrics.lmd);
+        }
+
+        if (connectionCapability == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(connectionCapability.size());
+            for (IpProtoPort ip : connectionCapability) {
+                out.writeInt(ip.proto);
+                out.writeInt(ip.port);
+                out.writeInt(ip.status);
+            }
+        }
+
         if (osuProviderList == null) {
             out.writeInt(0);
         } else {
@@ -254,18 +463,86 @@ public class WifiPasspointInfo implements Parcelable {
                 @Override
                 public WifiPasspointInfo createFromParcel(Parcel in) {
                     WifiPasspointInfo p = new WifiPasspointInfo();
-                    p.bssid = (String) in.readValue(String.class.getClassLoader());
-                    p.venueName = (String) in.readValue(String.class.getClassLoader());
-                    p.networkAuthType = (String) in.readValue(String.class.getClassLoader());
-                    p.roamingConsortium = (String) in.readValue(String.class.getClassLoader());
-                    p.ipAddrTypeAvaibility = (String) in.readValue(String.class.getClassLoader());
-                    p.naiRealm = (String) in.readValue(String.class.getClassLoader());
-                    p.cellularNetwork = (String) in.readValue(String.class.getClassLoader());
-                    p.domainName = (String) in.readValue(String.class.getClassLoader());
-                    p.operatorFriendlyName = (String) in.readValue(String.class.getClassLoader());
-                    p.wanMetrics = (String) in.readValue(String.class.getClassLoader());
-                    p.connectionCapability = (String) in.readValue(String.class.getClassLoader());
-                    int n = in.readInt();
+                    int n;
+
+                    p.bssid = in.readString();
+                    p.venueName = in.readString();
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.networkAuthType = new ArrayList<NetworkAuthType>();
+                        for (int i = 0; i < n; i++) {
+                            NetworkAuthType auth = new NetworkAuthType();
+                            auth.type = in.readInt();
+                            auth.redirectUrl = in.readString();
+                            p.networkAuthType.add(auth);
+                        }
+                    }
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.roamingConsortium = new ArrayList<String>();
+                        for (int i = 0; i < n; i++)
+                            p.roamingConsortium.add(in.readString());
+                    }
+
+                    n = in.readInt();
+                    if (n != IpAddressType.NULL_VALUE) {
+                        p.ipAddrTypeAvailability = new IpAddressType();
+                        p.ipAddrTypeAvailability.availability = n;
+                    }
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.naiRealm = new ArrayList<NaiRealm>();
+                        for (int i = 0; i < n; i++) {
+                            NaiRealm realm = new NaiRealm();
+                            realm.encoding = in.readInt();
+                            realm.realm = in.readString();
+                            p.naiRealm.add(realm);
+                        }
+                    }
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.cellularNetwork = new CellularNetwork();
+                        p.cellularNetwork.rawData = new byte[n];
+                        in.readByteArray(p.cellularNetwork.rawData);
+                    }
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.domainName = new ArrayList<String>();
+                        for (int i = 0; i < n; i++)
+                            p.domainName.add(in.readString());
+                    }
+
+                    p.operatorFriendlyName = in.readString();
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.wanMetrics = new WanMetrics();
+                        p.wanMetrics.wanInfo = in.readInt();
+                        p.wanMetrics.downlinkSpeed = in.readLong();
+                        p.wanMetrics.uplinkSpeed = in.readLong();
+                        p.wanMetrics.downlinkLoad = in.readInt();
+                        p.wanMetrics.uplinkLoad = in.readInt();
+                        p.wanMetrics.lmd = in.readInt();
+                    }
+
+                    n = in.readInt();
+                    if (n > 0) {
+                        p.connectionCapability = new ArrayList<IpProtoPort>();
+                        for (int i = 0; i < n; i++) {
+                            IpProtoPort ip = new IpProtoPort();
+                            ip.proto = in.readInt();
+                            ip.port = in.readInt();
+                            ip.status = in.readInt();
+                            p.connectionCapability.add(ip);
+                        }
+                    }
+
+                    n = in.readInt();
                     if (n > 0) {
                         p.osuProviderList = new ArrayList<WifiPasspointOsuProvider>();
                         for (int i = 0; i < n; i++) {
@@ -274,6 +551,7 @@ public class WifiPasspointInfo implements Parcelable {
                             p.osuProviderList.add(osu);
                         }
                     }
+
                     return p;
                 }
 
