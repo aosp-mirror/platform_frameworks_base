@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 public class InterceptedNotifications {
     private static final String TAG = "InterceptedNotifications";
     private static final String EXTRA_INTERCEPT = "android.intercept";
-    private static final String SYNTHETIC_KEY = "InterceptedNotifications.SYNTHETIC_KEY";
 
     private final Context mContext;
     private final PhoneStatusBar mBar;
@@ -71,7 +70,7 @@ public class InterceptedNotifications {
     }
 
     public boolean isSyntheticEntry(Entry ent) {
-        return ent.key.equals(SYNTHETIC_KEY);
+        return ent.key.equals(mSynKey);
     }
 
     public void update(StatusBarNotification notification) {
