@@ -10711,8 +10711,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link Drawable#getOutline(Outline)}. Manually setting the Outline with this method allows
      * this behavior to be overridden.
      * <p>
-     * If the outline is empty or is null, shadows will be cast from the
-     * bounds of the View.
+     * If the outline is {@link Outline#isEmpty()} or is <code>null</code>,
+     * shadows will not be cast.
      * <p>
      * Only outlines that return true from {@link Outline#canClip()} may be used for clipping.
      *
