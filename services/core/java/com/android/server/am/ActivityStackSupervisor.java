@@ -207,6 +207,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Set when we have taken too long waiting to go to sleep. */
     boolean mSleepTimeout = false;
 
+    private final boolean mLeanbackOnlyDevice = isLeanbackOnlyDevice();
+
     /**
      * We don't want to allow the device to go to sleep while in the process
      * of launching an activity.  This is primarily to allow alarm intent
@@ -1387,7 +1389,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ActivityStack adjustStackFocus(ActivityRecord r, boolean newTask) {
         final TaskRecord task = r.task;
-        if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
+
+        // On leanback only devices we should keep all activities in the same stack.
+        if (!mLeanbackOnlyDevice &&
+                (r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
             if (task != null) {
                 final ActivityStack taskStack = task.stack;
                 if (taskStack.isOnHomeDisplay()) {
@@ -3439,5 +3444,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         public String toString() {
             return "VirtualActivityDisplay={" + mDisplayId + "}";
         }
+    }
+
+    private boolean isLeanbackOnlyDevice() {
+        boolean onLeanbackOnly = false;
+        try {
+            onLeanbackOnly = AppGlobals.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_LEANBACK_ONLY);
+        } catch (RemoteException e) {
+            // noop
+        }
+
+        return onLeanbackOnly;
     }
 }
