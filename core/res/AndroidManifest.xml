@@ -2610,6 +2610,13 @@
                 android:label="@string/permlab_trust_listener"
                 android:description="@string/permdesc_trust_listener" />
 
+    <!-- Allows an application to provide a trust agent.
+         @hide For security reasons, this is a platform-only permission. -->
+    <permission android:name="android.permission.PROVIDE_TRUST_AGENT"
+                android:protectionLevel="signatureOrSystem"
+                android:label="@string/permlab_provide_trust_agent"
+                android:description="@string/permdesc_provide_trust_agent" />
+
     <!-- Must be required by an {@link
          android.service.trust.TrustAgentService},
          to ensure that only the system can bind to it. -->

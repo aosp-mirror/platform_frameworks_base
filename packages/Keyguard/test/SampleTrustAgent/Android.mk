@@ -20,9 +20,8 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := SampleTrustAgent
 
-# Remove these to verify permission checks are working correctly
-#LOCAL_CERTIFICATE := platform
-#LOCAL_PRIVILEGED_MODULE := true
+# Remove this to verify permission checks are working correctly
+LOCAL_CERTIFICATE := platform
 
 LOCAL_MODULE_TAGS := tests
 
