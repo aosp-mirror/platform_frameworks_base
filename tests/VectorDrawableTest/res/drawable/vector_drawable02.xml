@@ -15,21 +15,22 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <size
-            android:width="64dp"
-            android:height="64dp"/>
+        android:width="64dp"
+        android:height="64dp"/>
 
     <viewport android:viewportWidth="320"
           android:viewportHeight="320"/>
-
-    <path
+    <group
+        android:rotation="180"
+        android:pivotX="70"
+        android:pivotY="120">
+        <path
             android:name="house"
             android:pathData="M 130,225 L 130,115 L 130,115 L 70,15 L 10,115 L 10,115 L 10,225 z"
             android:fill="#ff440000"
             android:stroke="#FF00FF00"
             android:strokeWidth="10"
-            android:rotation="180"
-            android:pivotX="70"
-            android:pivotY="120"
             android:trimPathStart=".1"
             android:trimPathEnd=".9"/>
+    </group>
 </vector>

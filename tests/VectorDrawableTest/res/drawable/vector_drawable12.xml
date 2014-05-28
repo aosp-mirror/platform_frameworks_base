@@ -35,10 +35,7 @@
         <path
             android:name="v"
             android:fill="#FF00FF00"
-            android:pathData="M300,70 l 0,-70 70,70 -70,70z"
-            android:pivotX="300"
-            android:pivotY="300"
-            android:rotation="0" />
+            android:pathData="M300,70 l 0,-70 70,70 -70,70z"/>
     </group>
 
 </vector>
