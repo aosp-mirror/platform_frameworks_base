@@ -2174,7 +2174,6 @@ public class PackageParser {
         }
 
         final int innerDepth = parser.getDepth();
-
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
@@ -2548,13 +2547,13 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivity_singleUser,
                     false)) {
                 a.info.flags |= ActivityInfo.FLAG_SINGLE_USER;
-                if (a.info.exported) {
+                if (a.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
                     Slog.w(TAG, "Activity exported request ignored due to singleUser: "
                             + a.className + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     a.info.exported = false;
+                    setExported = true;
                 }
-                setExported = true;
             }
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_primaryUserOnly,
@@ -2907,7 +2906,7 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestProvider_singleUser,
                 false)) {
             p.info.flags |= ProviderInfo.FLAG_SINGLE_USER;
-            if (p.info.exported) {
+            if (p.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
                 Slog.w(TAG, "Provider exported request ignored due to singleUser: "
                         + p.className + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
@@ -3181,13 +3180,13 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestService_singleUser,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
-            if (s.info.exported) {
+            if (s.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
                 Slog.w(TAG, "Service exported request ignored due to singleUser: "
                         + s.className + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
                 s.info.exported = false;
+                setExported = true;
             }
-            setExported = true;
         }
 
         sa.recycle();

@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -858,7 +859,10 @@ public final class BroadcastQueue {
             r.state = BroadcastRecord.APP_RECEIVE;
             String targetProcess = info.activityInfo.processName;
             r.curComponent = component;
-            if (r.callingUid != Process.SYSTEM_UID && isSingleton) {
+            final int receiverUid = info.activityInfo.applicationInfo.uid;
+            // If it's a singleton, it needs to be the same app or a special app
+            if (r.callingUid != Process.SYSTEM_UID && isSingleton
+                    && mService.isValidSingletonCall(r.callingUid, receiverUid)) {
                 info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
             }
             r.curReceiver = info.activityInfo;

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -2189,7 +2190,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBatteryStatsService.publish(mContext);
         mUsageStatsService.publish(mContext);
         mAppOpsService.publish(mContext);
-
+        Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
     }
 
@@ -7737,7 +7738,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * in {@link ContentProvider}.
      */
     private final String checkContentProviderPermissionLocked(
-            ProviderInfo cpi, ProcessRecord r, int userId) {
+            ProviderInfo cpi, ProcessRecord r, int userId, boolean checkUser) {
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
         final int callingUid = (r != null) ? r.uid : Binder.getCallingUid();
         final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
@@ -7754,8 +7755,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        userId = handleIncomingUser(callingPid, callingUid, userId,
-                false, true, "checkContentProviderPermissionLocked", null);
+        if (checkUser) {
+            userId = handleIncomingUser(callingPid, callingUid, userId,
+                    false, true, "checkContentProviderPermissionLocked " + cpi.authority, null);
+        }
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
                 cpi.applicationInfo.uid, cpi.exported)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -7890,13 +7893,34 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
+            boolean checkCrossUser = true;
+
             // First check if this content provider has been published...
             cpr = mProviderMap.getProviderByName(name, userId);
+            // If that didn't work, check if it exists for user 0 and then
+            // verify that it's a singleton provider before using it.
+            if (cpr == null && userId != UserHandle.USER_OWNER) {
+                cpr = mProviderMap.getProviderByName(name, UserHandle.USER_OWNER);
+                if (cpr != null) {
+                    cpi = cpr.info;
+                    if (isSingleton(cpi.processName, cpi.applicationInfo,
+                            cpi.name, cpi.flags)
+                            && isValidSingletonCall(r.uid, cpi.applicationInfo.uid)) {
+                        userId = UserHandle.USER_OWNER;
+                        checkCrossUser = false;
+                    } else {
+                        cpr = null;
+                        cpi = null;
+                    }
+                }
+            }
+
             boolean providerRunning = cpr != null;
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
-                if ((msg=checkContentProviderPermissionLocked(cpi, r, userId)) != null) {
+                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
+                        != null) {
                     throw new SecurityException(msg);
                 }
 
@@ -7976,15 +8000,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (cpi == null) {
                     return null;
                 }
+                // If the provider is a singleton AND
+                // (it's a call within the same user || the provider is a
+                // privileged app)
+                // Then allow connecting to the singleton provider
                 singleton = isSingleton(cpi.processName, cpi.applicationInfo,
-                        cpi.name, cpi.flags); 
+                        cpi.name, cpi.flags)
+                        && isValidSingletonCall(r.uid, cpi.applicationInfo.uid);
                 if (singleton) {
-                    userId = 0;
+                    userId = UserHandle.USER_OWNER;
                 }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
 
                 String msg;
-                if ((msg=checkContentProviderPermissionLocked(cpi, r, userId)) != null) {
+                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
+                        != null) {
                     throw new SecurityException(msg);
                 }
 
@@ -10563,8 +10593,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // assume our apps are happy - lazy create the list
         List<ActivityManager.ProcessErrorStateInfo> errList = null;
 
-        final boolean allUsers = ActivityManager.checkUidPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+        final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
                 Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
         int userId = UserHandle.getUserId(Binder.getCallingUid());
 
@@ -10653,8 +10682,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("getRunningAppProcesses");
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
-        final boolean allUsers = ActivityManager.checkUidPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+        final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
                 Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
         int userId = UserHandle.getUserId(Binder.getCallingUid());
         synchronized (this) {
@@ -13094,8 +13122,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if ((requireFull || checkComponentPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         callingPid, callingUid, -1, true) != PackageManager.PERMISSION_GRANTED)
-                        && checkComponentPermission(
-                                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        && checkComponentPermission(INTERACT_ACROSS_USERS_FULL,
                                 callingPid, callingUid, -1, true)
                                 != PackageManager.PERMISSION_GRANTED) {
                     if (userId == UserHandle.USER_CURRENT_OR_SELF) {
@@ -13115,7 +13142,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         builder.append(" but is calling from user ");
                         builder.append(UserHandle.getUserId(callingUid));
                         builder.append("; this requires ");
-                        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                        builder.append(INTERACT_ACROSS_USERS_FULL);
                         if (!requireFull) {
                             builder.append(" or ");
                             builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
@@ -13145,8 +13172,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean isSingleton(String componentProcessName, ApplicationInfo aInfo,
             String className, int flags) {
         boolean result = false;
+        // For apps that don't have pre-defined UIDs, check for permission
         if (UserHandle.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
-            if ((flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
+            if ((flags & ServiceInfo.FLAG_SINGLE_USER) != 0) {
                 if (ActivityManager.checkUidPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         aInfo.uid) != PackageManager.PERMISSION_GRANTED) {
@@ -13157,18 +13185,35 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
                 }
+                // Permission passed
                 result = true;
             }
-        } else if (componentProcessName == aInfo.packageName) {
-            result = (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
         } else if ("system".equals(componentProcessName)) {
             result = true;
+        } else {
+            // App with pre-defined UID, check if it's a persistent app
+            result = (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
         }
         if (DEBUG_MU) {
             Slog.v(TAG, "isSingleton(" + componentProcessName + ", " + aInfo
                     + ", " + className + ", 0x" + Integer.toHexString(flags) + ") = " + result);
         }
         return result;
+    }
+
+    /**
+     * Checks to see if the caller is in the same app as the singleton
+     * component, or the component is in a special app. It allows special apps
+     * to export singleton components but prevents exporting singleton
+     * components for regular apps.
+     */
+    boolean isValidSingletonCall(int callingUid, int componentUid) {
+        int componentAppId = UserHandle.getAppId(componentUid);
+        return UserHandle.isSameApp(callingUid, componentUid)
+                || componentAppId == Process.SYSTEM_UID
+                || componentAppId == Process.PHONE_UID
+                || ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL, componentUid)
+                        == PackageManager.PERMISSION_GRANTED;
     }
 
     public int bindService(IApplicationThread caller, IBinder token,
@@ -13717,8 +13762,8 @@ public final class ActivityManagerService extends ActivityManagerNative
          */
         int callingAppId = UserHandle.getAppId(callingUid);
         if (callingAppId == Process.SYSTEM_UID || callingAppId == Process.PHONE_UID
-            || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID ||
-            callingUid == 0) {
+                || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID
+                || callingUid == 0) {
             // Always okay.
         } else if (callerApp == null || !callerApp.persistent) {
             try {
@@ -16528,12 +16573,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private boolean startUser(final int userId, boolean foreground) {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                    + " requires " + INTERACT_ACROSS_USERS_FULL;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -16899,12 +16944,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public int stopUser(final int userId, final IStopUserCallback callback) {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                    + " requires " + INTERACT_ACROSS_USERS_FULL;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -17042,7 +17087,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public UserInfo getCurrentUser() {
         if ((checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) && (
-                checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED)) {
             String msg = "Permission Denial: getCurrentUser() from pid="
                     + Binder.getCallingPid()
@@ -17128,12 +17173,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void registerUserSwitchObserver(IUserSwitchObserver observer) {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: registerUserSwitchObserver() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                    + " requires " + INTERACT_ACROSS_USERS_FULL;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
