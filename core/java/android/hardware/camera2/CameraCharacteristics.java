@@ -810,7 +810,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL devices:</p>
      * <ul>
      * <li>MANUAL_SENSOR</li>
-     * <li>ZSL</li>
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
      * devices, but the app. should query this field to be sure.</p>
@@ -819,7 +818,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_GCAM
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_ZSL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
      */
@@ -1725,15 +1724,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>A FULL device has the most support possible and will enable the
      * widest range of use cases such as:</p>
      * <ul>
-     * <li>30 FPS at maximum resolution (== sensor resolution)</li>
-     * <li>Per frame control</li>
-     * <li>Manual sensor control</li>
-     * <li>Zero Shutter Lag (ZSL)</li>
+     * <li>30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.</li>
+     * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
+     * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
+     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_POST_PROCESSING)</li>
      * </ul>
      * <p>A LIMITED device may have some or none of the above characteristics.
      * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      */

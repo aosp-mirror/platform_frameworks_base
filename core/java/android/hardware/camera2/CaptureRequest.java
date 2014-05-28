@@ -1109,6 +1109,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * but the captured JPEG will still be a valid image.</p>
      * <p>When a jpeg image capture is issued, the thumbnail size selected should have
      * the same aspect ratio as the jpeg image.</p>
+     * <p>If the thumbnail image aspect ratio differs from the JPEG primary image aspect
+     * ratio, the camera device creates the thumbnail by cropping it from the primary image.
+     * For example, if the primary image has 4:3 aspect ratio, the thumbnail image has
+     * 16:9 aspect ratio, the primary image will be cropped vertically (letterbox) to
+     * generate the thumbnail image. The thumbnail image will always have a smaller Field
+     * Of View (FOV) than the primary image when aspect ratios differ.</p>
      */
     public static final Key<android.util.Size> JPEG_THUMBNAIL_SIZE =
             new Key<android.util.Size>("android.jpeg.thumbnailSize", android.util.Size.class);
