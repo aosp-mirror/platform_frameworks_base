@@ -282,6 +282,18 @@ void RenderProxy::destroyLayer(DeferredLayerUpdater* layer) {
     post(task);
 }
 
+CREATE_BRIDGE2(flushCaches, CanvasContext* context, Caches::FlushMode flushMode) {
+    args->context->flushCaches(args->flushMode);
+    return NULL;
+}
+
+void RenderProxy::flushCaches(Caches::FlushMode flushMode) {
+    SETUP_TASK(flushCaches);
+    args->context = mContext;
+    args->flushMode = flushMode;
+    post(task);
+}
+
 CREATE_BRIDGE0(fence) {
     // Intentionally empty
     return NULL;

@@ -556,6 +556,13 @@ bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap)
     return LayerRenderer::copyLayer(layer->backingLayer(), bitmap);
 }
 
+void CanvasContext::flushCaches(Caches::FlushMode flushMode) {
+    if (mGlobalContext->hasContext()) {
+        requireGlContext();
+        Caches::getInstance().flush(flushMode);
+    }
+}
+
 void CanvasContext::runWithGlContext(RenderTask* task) {
     requireGlContext();
     task->run();
