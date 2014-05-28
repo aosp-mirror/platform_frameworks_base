@@ -91,7 +91,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
-    private static final boolean USE_NOTIFICATION_LISTENER = false;
+    private static final boolean USE_NOTIFICATION_LISTENER = true;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
