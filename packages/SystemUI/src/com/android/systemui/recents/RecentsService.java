@@ -83,19 +83,28 @@ class SystemUIMessageHandler extends Handler {
                 stack.addTask(new Task());
                 tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
                         systemInsets.top - systemInsets.bottom, 0, 0);
-                tsv.boundScroll();
+                tsv.setStackScrollToInitialState();
                 transform = tsv.getStackTransform(0, tsv.getStackScroll());
                 transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_SINGLE_TASK_STACK_RECT,
                         new Rect(transform.rect));
 
-                // Also calculate the target task rect when there are multiple tasks.
+                // Also calculate the target task rect when there are two tasks.
                 stack.addTask(new Task());
                 tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
                         systemInsets.top - systemInsets.bottom, 0, 0);
-                tsv.setStackScrollRaw(Integer.MAX_VALUE);
-                tsv.boundScroll();
+                tsv.setStackScrollToInitialState();
                 transform = tsv.getStackTransform(1, tsv.getStackScroll());
+                transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
+                replyData.putParcelable(AlternateRecentsComponent.KEY_TWO_TASK_STACK_RECT,
+                        new Rect(transform.rect));
+
+                // Also calculate the target task rect when there are two tasks.
+                stack.addTask(new Task());
+                tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
+                        systemInsets.top - systemInsets.bottom, 0, 0);
+                tsv.setStackScrollToInitialState();
+                transform = tsv.getStackTransform(2, tsv.getStackScroll());
                 transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_MULTIPLE_TASK_STACK_RECT,
                         new Rect(transform.rect));

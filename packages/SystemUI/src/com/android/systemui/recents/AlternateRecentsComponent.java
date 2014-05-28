@@ -62,12 +62,15 @@ public class AlternateRecentsComponent {
                 Bundle replyData = msg.getData().getParcelable(KEY_CONFIGURATION_DATA);
                 mSingleCountFirstTaskRect = replyData.getParcelable(KEY_SINGLE_TASK_STACK_RECT);
                 mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
+                mTwoCountFirstTaskRect = replyData.getParcelable(KEY_TWO_TASK_STACK_RECT);
+                mTwoCountFirstTaskRect.offset(0, (int) statusBarHeight);
                 mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
                 mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
                 if (Console.Enabled) {
                     Console.log(Constants.Log.App.RecentsComponent,
                             "[RecentsComponent|RecentsMessageHandler|handleMessage]",
                             "singleTaskRect: " + mSingleCountFirstTaskRect +
+                            " twoTaskRect: " + mTwoCountFirstTaskRect +
                             " multipleTaskRect: " + mMultipleCountFirstTaskRect);
                 }
 
@@ -130,6 +133,7 @@ public class AlternateRecentsComponent {
     final public static String KEY_WINDOW_RECT = "recents.windowRect";
     final public static String KEY_SYSTEM_INSETS = "recents.systemInsets";
     final public static String KEY_SINGLE_TASK_STACK_RECT = "recents.singleCountTaskRect";
+    final public static String KEY_TWO_TASK_STACK_RECT = "recents.twoCountTaskRect";
     final public static String KEY_MULTIPLE_TASK_STACK_RECT = "recents.multipleCountTaskRect";
 
 
@@ -155,6 +159,7 @@ public class AlternateRecentsComponent {
     boolean mTriggeredFromAltTab;
 
     Rect mSingleCountFirstTaskRect = new Rect();
+    Rect mTwoCountFirstTaskRect = new Rect();
     Rect mMultipleCountFirstTaskRect = new Rect();
     long mLastToggleTime;
 
@@ -261,8 +266,10 @@ public class AlternateRecentsComponent {
     /** Returns whether we have valid task rects to animate to. */
     boolean hasValidTaskRects() {
         return mSingleCountFirstTaskRect != null && mSingleCountFirstTaskRect.width() > 0 &&
-                mSingleCountFirstTaskRect.height() > 0 && mMultipleCountFirstTaskRect != null &&
-                mMultipleCountFirstTaskRect.width() > 0 && mMultipleCountFirstTaskRect.height() > 0;
+                mSingleCountFirstTaskRect.height() > 0 && mTwoCountFirstTaskRect != null &&
+                mTwoCountFirstTaskRect.width() > 0 && mTwoCountFirstTaskRect.height() > 0 &&
+                mMultipleCountFirstTaskRect != null && mMultipleCountFirstTaskRect.width() > 0 &&
+                mMultipleCountFirstTaskRect.height() > 0;
     }
 
     /** Updates each of the task animation rects. */
@@ -303,8 +310,8 @@ public class AlternateRecentsComponent {
         return null;
     }
 
-    /** Returns whether there is are multiple recents tasks */
-    boolean hasMultipleRecentsTask(List<ActivityManager.RecentTaskInfo> tasks) {
+    /** Returns the proper rect to use for the animation, given the number of tasks. */
+    Rect getAnimationTaskRect(List<ActivityManager.RecentTaskInfo> tasks) {
         // NOTE: Currently there's no method to get the number of non-home tasks, so we have to
         // compute this ourselves
         SystemServicesProxy ssp = mSystemServicesProxy;
@@ -318,7 +325,13 @@ public class AlternateRecentsComponent {
                 continue;
             }
         }
-        return (tasks.size() > 1);
+        if (tasks.size() <= 1) {
+            return mSingleCountFirstTaskRect;
+        } else if (tasks.size() <= 2) {
+            return mTwoCountFirstTaskRect;
+        } else {
+            return mMultipleCountFirstTaskRect;
+        }
     }
 
     /** Converts from the device rotation to the degree */
@@ -472,9 +485,8 @@ public class AlternateRecentsComponent {
         // which can differ depending on the number of items in the list.
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> recentTasks =
-                ssp.getRecentTasks(2, UserHandle.CURRENT.getIdentifier());
-        Rect taskRect = hasMultipleRecentsTask(recentTasks) ? mMultipleCountFirstTaskRect :
-                mSingleCountFirstTaskRect;
+                ssp.getRecentTasks(3, UserHandle.CURRENT.getIdentifier());
+        Rect taskRect = getAnimationTaskRect(recentTasks);
         boolean useThumbnailTransition = !isTopTaskHome &&
                 hasValidTaskRects();
 
