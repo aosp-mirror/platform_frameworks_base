@@ -65,7 +65,7 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
-        mSwipeHelper.setMinAlpha(minAlpha);
+        mSwipeHelper.setMinSwipeProgress(minAlpha);
     }
 
     private int scrollPositionOfMostRecent() {
@@ -227,6 +227,11 @@ public class RecentsVerticalScrollView extends ScrollView
 
     @Override
     public void onChildSnappedBack(View animView) {
+    }
+
+    @Override
+    public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
+        return false;
     }
 
     public View getChildAtPosition(MotionEvent ev) {
