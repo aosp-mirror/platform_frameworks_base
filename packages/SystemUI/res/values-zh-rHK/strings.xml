@@ -158,6 +158,9 @@
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"藍牙：<xliff:g id="STATE">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"定位服務<xliff:g id="STATE">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"鬧鐘已設定為：<xliff:g id="TIME">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"關閉面板"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"更多時間"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"更少時間"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"已停用 2G-3G 數據"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"已停用 4G 數據"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"已停用流動數據"</string>
@@ -209,6 +212,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"更多設定"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網路共用"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"近期"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
@@ -228,4 +232,13 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕按即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"手動關閉這項設定前一律啟用"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1 分鐘"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d 分鐘"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1 小時"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d 小時"</item>
+  </plurals>
 </resources>

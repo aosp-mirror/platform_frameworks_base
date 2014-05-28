@@ -156,6 +156,9 @@
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Helyadatok: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Ébresztés időpontja: <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Panel bezárása"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Több idő"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Kevesebb idő"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G adatforgalom letiltva"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G adatforgalom letiltva"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobil adatforgalom letiltva"</string>
@@ -207,6 +210,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"További beállítások"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Megosztás"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Értesítések"</string>
     <string name="recents_empty_message" msgid="2269156590813544104">"LEGUTÓBBIAK"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Az alkalmazás adatai"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"keresés"</string>
@@ -226,4 +230,13 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson rá ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Egy percen át"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d percen át"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Egy órán át"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d órán át"</item>
+  </plurals>
 </resources>
