@@ -62,20 +62,6 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
         return nativeCreate1(x, y, new int[] { color0, color1 }, null /*positions*/);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate1(long native_shader, float cx, float cy,
-            int[] colors, float[] positions) {
-        // nothing to be done here.
-        return 0;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate2(long native_shader, float cx, float cy,
-            int color0, int color1) {
-        // nothing to be done here.
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 
     /**
