@@ -90,7 +90,7 @@ public final class HdmiPlaybackClient {
     public void queryDisplayStatus(DisplayStatusCallback callback) {
         // TODO: PendingResult.
         try {
-            mService.oneTouchPlay(getCallbackWrapper(callback));
+            mService.queryDisplayStatus(getCallbackWrapper(callback));
         } catch (RemoteException e) {
             Log.e(TAG, "queryDisplayStatus threw exception ", e);
         }
