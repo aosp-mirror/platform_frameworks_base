@@ -94,11 +94,26 @@ public class Network implements Parcelable {
             mNetId = netId;
         }
 
+        private void connectToHost(Socket socket, String host, int port) throws IOException {
+            // Lookup addresses only on this Network.
+            InetAddress[] hostAddresses = getAllByName(host);
+            // Try all but last address ignoring exceptions.
+            for (int i = 0; i < hostAddresses.length - 1; i++) {
+                try {
+                    socket.connect(new InetSocketAddress(hostAddresses[i], port));
+                    return;
+                } catch (IOException e) {
+                }
+            }
+            // Try last address.  Do throw exceptions.
+            socket.connect(new InetSocketAddress(hostAddresses[hostAddresses.length - 1], port));
+        }
+
         @Override
         public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
             Socket socket = createSocket();
             socket.bind(new InetSocketAddress(localHost, localPort));
-            socket.connect(new InetSocketAddress(host, port));
+            connectToHost(socket, host, port);
             return socket;
         }
 
@@ -121,7 +136,7 @@ public class Network implements Parcelable {
         @Override
         public Socket createSocket(String host, int port) throws IOException {
             Socket socket = createSocket();
-            socket.connect(new InetSocketAddress(host, port));
+            connectToHost(socket, host, port);
             return socket;
         }
 
