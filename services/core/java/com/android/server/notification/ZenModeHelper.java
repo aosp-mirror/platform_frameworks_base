@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -123,15 +122,19 @@ public class ZenModeHelper {
         mCallbacks.add(callback);
     }
 
-    public boolean shouldIntercept(String pkg, Notification n) {
+    public boolean shouldIntercept(NotificationRecord record, boolean previouslySeen) {
         if (mZenMode != Global.ZEN_MODE_OFF) {
-            if (isAlarm(pkg, n)) {
+            if (previouslySeen && !record.isIntercepted()) {
+                // notifications never transition from not intercepted to intercepted
                 return false;
             }
-            if (isCall(pkg, n)) {
+            if (isAlarm(record)) {
+                return false;
+            }
+            if (isCall(record)) {
                 return !mConfig.allowCalls;
             }
-            if (isMessage(pkg, n)) {
+            if (isMessage(record)) {
                 return !mConfig.allowMessages;
             }
             return true;
@@ -176,7 +179,8 @@ public class ZenModeHelper {
     }
 
     public boolean allowDisable(int what, IBinder token, String pkg) {
-        if (isCall(pkg, null)) {
+        // TODO(cwren): delete this API before the next release. Bug:15344099
+        if (CALL_PACKAGES.contains(pkg)) {
             return mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
         }
         return true;
@@ -229,16 +233,16 @@ public class ZenModeHelper {
         }
     }
 
-    private boolean isAlarm(String pkg, Notification n) {
-        return ALARM_PACKAGES.contains(pkg);
+    private boolean isAlarm(NotificationRecord record) {
+        return ALARM_PACKAGES.contains(record.sbn.getPackageName());
     }
 
-    private boolean isCall(String pkg, Notification n) {
-        return CALL_PACKAGES.contains(pkg);
+    private boolean isCall(NotificationRecord record) {
+        return CALL_PACKAGES.contains(record.sbn.getPackageName());
     }
 
-    private boolean isMessage(String pkg, Notification n) {
-        return MESSAGE_PACKAGES.contains(pkg);
+    private boolean isMessage(NotificationRecord record) {
+        return MESSAGE_PACKAGES.contains(record.sbn.getPackageName());
     }
 
     private void updateAlarms() {

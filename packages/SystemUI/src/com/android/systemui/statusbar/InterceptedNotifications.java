@@ -20,8 +20,10 @@ import android.app.Notification;
 import android.content.Context;
 import android.os.Process;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -30,12 +32,13 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 public class InterceptedNotifications {
     private static final String TAG = "InterceptedNotifications";
-    private static final String EXTRA_INTERCEPT = "android.intercept";
+    private static final String SYNTHETIC_KEY = "InterceptedNotifications.SYNTHETIC_KEY";
 
     private final Context mContext;
     private final PhoneStatusBar mBar;
     private final ArrayMap<String, StatusBarNotification> mIntercepted
             = new ArrayMap<String, StatusBarNotification>();
+    private final ArraySet<String> mReleased = new ArraySet<String>();
 
     private String mSynKey;
 
@@ -48,25 +51,45 @@ public class InterceptedNotifications {
         final int n = mIntercepted.size();
         for (int i = 0; i < n; i++) {
             final StatusBarNotification sbn = mIntercepted.valueAt(i);
-            sbn.getNotification().extras.putBoolean(EXTRA_INTERCEPT, false);
+            mReleased.add(sbn.getKey());
             mBar.addNotificationInternal(sbn, null);
         }
         mIntercepted.clear();
         updateSyntheticNotification();
     }
 
-    public boolean tryIntercept(StatusBarNotification notification) {
-        if (!notification.getNotification().extras.getBoolean(EXTRA_INTERCEPT)) return false;
+    public boolean tryIntercept(StatusBarNotification notification, Ranking ranking) {
+        if (ranking == null) return false;
         if (shouldDisplayIntercepted()) return false;
+        if (mReleased.contains(notification.getKey())) return false;
+        if (!ranking.isInterceptedByDoNotDisturb(notification.getKey())) return false;
         mIntercepted.put(notification.getKey(), notification);
         updateSyntheticNotification();
         return true;
+    }
+
+    public void retryIntercepts(Ranking ranking) {
+        if (ranking == null) return;
+
+        boolean changed = false;
+        final int N = mIntercepted.size();
+        for (int i = 0; i < N; i++) {
+            final StatusBarNotification sbn = mIntercepted.valueAt(i);
+            if (!tryIntercept(sbn, ranking)) {
+                changed = true;
+                mBar.addNotificationInternal(sbn, ranking);
+            }
+        }
+        if (changed) {
+            updateSyntheticNotification();
+        }
     }
 
     public void remove(String key) {
         if (mIntercepted.remove(key) != null) {
             updateSyntheticNotification();
         }
+        mReleased.remove(key);
     }
 
     public boolean isSyntheticEntry(Entry ent) {

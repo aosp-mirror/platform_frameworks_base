@@ -20,8 +20,6 @@ import android.app.Notification;
 import android.content.Context;
 import android.util.Slog;
 
-import com.android.server.notification.NotificationManagerService.NotificationRecord;
-
 /**
  * This {@link com.android.server.notification.NotificationSignalExtractor} noticies noisy
  * notifications and marks them to get a temporary ranking bump.

@@ -21,11 +21,10 @@ import java.util.Comparator;
  * Sorts notificaitons into attention-relelvant order.
  */
 public class NotificationComparator
-        implements Comparator<NotificationManagerService.NotificationRecord> {
+        implements Comparator<NotificationRecord> {
 
     @Override
-    public int compare(NotificationManagerService.NotificationRecord lhs,
-            NotificationManagerService.NotificationRecord rhs) {
+    public int compare(NotificationRecord lhs, NotificationRecord rhs) {
         if (lhs.isRecentlyIntrusive() != rhs.isRecentlyIntrusive()) {
             return lhs.isRecentlyIntrusive() ? -1 : 1;
         }

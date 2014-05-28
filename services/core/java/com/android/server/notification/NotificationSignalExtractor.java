@@ -18,11 +18,9 @@ package com.android.server.notification;
 
 import android.content.Context;
 
-import com.android.server.notification.NotificationManagerService.NotificationRecord;
-
 /**
  * Extracts signals that will be useful to the {@link NotificationComparator} and caches them
- *  on the {@link NotificationManagerService.NotificationRecord} object. These annotations will
+ *  on the {@link NotificationRecord} object. These annotations will
  *  not be passed on to {@link android.service.notification.NotificationListenerService}s.
  */
 public interface NotificationSignalExtractor {
