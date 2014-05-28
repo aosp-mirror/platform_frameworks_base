@@ -66,6 +66,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1925,9 +1926,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
     }
 
-    static ITelephony getTelephonyService() {
-        return ITelephony.Stub.asInterface(
-                ServiceManager.checkService(Context.TELEPHONY_SERVICE));
+    TelephonyManager getTelephonyService() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     static IAudioService getAudioService() {
@@ -2010,14 +2010,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If an incoming call is ringing, HOME is totally disabled.
                 // (The user is already on the InCallScreen at this point,
                 // and his ONLY options are to answer or reject the call.)
-                try {
-                    ITelephony telephonyService = getTelephonyService();
-                    if (telephonyService != null && telephonyService.isRinging()) {
-                        Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
-                        return -1;
-                    }
-                } catch (RemoteException ex) {
-                    Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
+                TelephonyManager telephonyManager = getTelephonyService();
+                if (telephonyManager != null && telephonyManager.isRinging()) {
+                    Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                    return -1;
                 }
 
                 // Delay handling home if a double-tap is possible.
@@ -3967,37 +3963,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 if (down) {
-                    ITelephony telephonyService = getTelephonyService();
-                    if (telephonyService != null) {
-                        try {
-                            if (telephonyService.isRinging()) {
-                                // If an incoming call is ringing, either VOLUME key means
-                                // "silence ringer".  We handle these keys here, rather than
-                                // in the InCallScreen, to make sure we'll respond to them
-                                // even if the InCallScreen hasn't come to the foreground yet.
-                                // Look for the DOWN event here, to agree with the "fallback"
-                                // behavior in the InCallScreen.
-                                Log.i(TAG, "interceptKeyBeforeQueueing:"
-                                      + " VOLUME key-down while ringing: Silence ringer!");
+                    TelephonyManager telephonyManager = getTelephonyService();
+                    if (telephonyManager != null) {
+                        if (telephonyManager.isRinging()) {
+                            // If an incoming call is ringing, either VOLUME key means
+                            // "silence ringer".  We handle these keys here, rather than
+                            // in the InCallScreen, to make sure we'll respond to them
+                            // even if the InCallScreen hasn't come to the foreground yet.
+                            // Look for the DOWN event here, to agree with the "fallback"
+                            // behavior in the InCallScreen.
+                            Log.i(TAG, "interceptKeyBeforeQueueing:"
+                                  + " VOLUME key-down while ringing: Silence ringer!");
 
-                                // Silence the ringer.  (It's safe to call this
-                                // even if the ringer has already been silenced.)
-                                telephonyService.silenceRinger();
+                            // Silence the ringer.  (It's safe to call this
+                            // even if the ringer has already been silenced.)
+                            telephonyManager.silenceRinger();
 
-                                // And *don't* pass this key thru to the current activity
-                                // (which is probably the InCallScreen.)
-                                result &= ~ACTION_PASS_TO_USER;
-                                break;
-                            }
-                            if (telephonyService.isOffhook()
-                                    && (result & ACTION_PASS_TO_USER) == 0) {
-                                // If we are in call but we decided not to pass the key to
-                                // the application, handle the volume change here.
-                                handleVolumeKey(AudioManager.STREAM_VOICE_CALL, keyCode);
-                                break;
-                            }
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "ITelephony threw RemoteException", ex);
+                            // And *don't* pass this key thru to the current activity
+                            // (which is probably the InCallScreen.)
+                            result &= ~ACTION_PASS_TO_USER;
+                            break;
+                        }
+                        if (telephonyManager.isOffhook()
+                                && (result & ACTION_PASS_TO_USER) == 0) {
+                            // If we are in call but we decided not to pass the key to
+                            // the application, handle the volume change here.
+                            handleVolumeKey(AudioManager.STREAM_VOICE_CALL, keyCode);
+                            break;
                         }
                     }
 
@@ -4014,14 +4006,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_ENDCALL: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    ITelephony telephonyService = getTelephonyService();
+                    TelephonyManager telephonyManager = getTelephonyService();
                     boolean hungUp = false;
-                    if (telephonyService != null) {
-                        try {
-                            hungUp = telephonyService.endCall();
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "ITelephony threw RemoteException", ex);
-                        }
+                    if (telephonyManager != null) {
+                        hungUp = telephonyManager.endCall();
                     }
                     interceptPowerKeyDown(!interactive || hungUp);
                 } else {
@@ -4057,23 +4045,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         interceptScreenshotChord();
                     }
 
-                    ITelephony telephonyService = getTelephonyService();
+                    TelephonyManager telephonyManager = getTelephonyService();
                     boolean hungUp = false;
-                    if (telephonyService != null) {
-                        try {
-                            if (telephonyService.isRinging()) {
-                                // Pressing Power while there's a ringing incoming
-                                // call should silence the ringer.
-                                telephonyService.silenceRinger();
-                            } else if ((mIncallPowerBehavior
-                                    & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                                    && telephonyService.isOffhook() && interactive) {
-                                // Otherwise, if "Power button ends call" is enabled,
-                                // the Power button will hang up any current active call.
-                                hungUp = telephonyService.endCall();
-                            }
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "ITelephony threw RemoteException", ex);
+                    if (telephonyManager != null) {
+                        if (telephonyManager.isRinging()) {
+                            // Pressing Power while there's a ringing incoming
+                            // call should silence the ringer.
+                            telephonyManager.silenceRinger();
+                        } else if ((mIncallPowerBehavior
+                                & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
+                                && telephonyManager.isOffhook() && interactive) {
+                            // Otherwise, if "Power button ends call" is enabled,
+                            // the Power button will hang up any current active call.
+                            hungUp = telephonyManager.endCall();
                         }
                     }
                     interceptPowerKeyDown(!interactive || hungUp
@@ -4106,16 +4090,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 if (down) {
-                    ITelephony telephonyService = getTelephonyService();
-                    if (telephonyService != null) {
-                        try {
-                            if (!telephonyService.isIdle()) {
-                                // Suppress PLAY/PAUSE toggle when phone is ringing or in-call
-                                // to avoid music playback.
-                                break;
-                            }
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "ITelephony threw RemoteException", ex);
+                    TelephonyManager telephonyManager = getTelephonyService();
+                    if (telephonyManager != null) {
+                        if (!telephonyManager.isIdle()) {
+                            // Suppress PLAY/PAUSE toggle when phone is ringing or in-call
+                            // to avoid music playback.
+                            break;
                         }
                     }
                 }
@@ -4145,20 +4125,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_CALL: {
                 if (down) {
-                    ITelephony telephonyService = getTelephonyService();
-                    if (telephonyService != null) {
-                        try {
-                            if (telephonyService.isRinging()) {
-                                Log.i(TAG, "interceptKeyBeforeQueueing:"
-                                      + " CALL key-down while ringing: Answer the call!");
-                                telephonyService.answerRingingCall();
+                    TelephonyManager telephonyManager = getTelephonyService();
+                    if (telephonyManager != null) {
+                        if (telephonyManager.isRinging()) {
+                            Log.i(TAG, "interceptKeyBeforeQueueing:"
+                                  + " CALL key-down while ringing: Answer the call!");
+                            telephonyManager.answerRingingCall();
 
-                                // And *don't* pass this key thru to the current activity
-                                // (which is presumably the InCallScreen.)
-                                result &= ~ACTION_PASS_TO_USER;
-                            }
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "ITelephony threw RemoteException", ex);
+                            // And *don't* pass this key thru to the current activity
+                            // (which is presumably the InCallScreen.)
+                            result &= ~ACTION_PASS_TO_USER;
                         }
                     }
                 }
