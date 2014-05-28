@@ -279,9 +279,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>TODO: This should be @hide</p>
      * <ul>
      * <li>Manual tonemap control<ul>
-     * <li>{@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}</li>
-     * <li>{@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}</li>
-     * <li>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}</li>
+     * <li>{@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}</li>
      * <li>{@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</li>
      * <li>{@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</li>
      * </ul>
@@ -292,8 +290,8 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * </li>
      * <li>Lens shading map information<ul>
-     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}</li>
-     * <li>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}</li>
+     * <li>android.statistics.lensShadingMap</li>
+     * <li>android.lens.info.shadingMapSize</li>
      * </ul>
      * </li>
      * </ul>
@@ -304,11 +302,7 @@ public abstract class CameraMetadata<TKey> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
-     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_CURVE
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -1548,17 +1542,14 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Use the tone mapping curve specified in
-     * the android.tonemap.curve* entries.</p>
+     * the {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}* entries.</p>
      * <p>All color enhancement and tonemapping must be disabled, except
      * for applying the tonemapping curve specified by
-     * {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}, or
-     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}.</p>
+     * {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}.</p>
      * <p>Must not slow down frame rate relative to raw
      * sensor output.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
-     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_CURVE
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_CONTRAST_CURVE = 0;

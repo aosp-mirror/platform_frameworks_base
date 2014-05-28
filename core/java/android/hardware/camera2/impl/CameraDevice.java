@@ -20,6 +20,8 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -73,6 +75,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final SparseArray<Surface> mConfiguredOutputs = new SparseArray<Surface>();
 
     private final String mCameraId;
+    private final CameraCharacteristics mCharacteristics;
 
     /**
      * A list tracking request and its expected last frame.
@@ -151,13 +154,15 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         }
     };
 
-    public CameraDevice(String cameraId, StateListener listener, Handler handler) {
+    public CameraDevice(String cameraId, StateListener listener, Handler handler,
+                        CameraCharacteristics characteristics) {
         if (cameraId == null || listener == null || handler == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
         mDeviceListener = listener;
         mDeviceHandler = handler;
+        mCharacteristics = characteristics;
 
         final int MAX_TAG_LEN = 23;
         String tag = String.format("CameraDevice-JV-%s", mCameraId);
@@ -851,11 +856,18 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         @Override
         public void onResultReceived(CameraMetadataNative result,
                 CaptureResultExtras resultExtras) throws RemoteException {
+
             int requestId = resultExtras.getRequestId();
             if (DEBUG) {
                 Log.v(TAG, "Received result frame " + resultExtras.getFrameNumber() + " for id "
                         + requestId);
             }
+
+
+            // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
+            result.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
+                    getCharacteristics().get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
+
             final CaptureListenerHolder holder;
             synchronized (mLock) {
                 holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
@@ -964,5 +976,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         synchronized(mLock) {
             return (mRemoteDevice == null);
         }
+    }
+
+    private CameraCharacteristics getCharacteristics() {
+        return mCharacteristics;
     }
 }

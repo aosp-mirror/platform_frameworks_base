@@ -43,13 +43,19 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.LensShadingMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
+import android.util.Pair;
+import android.util.Size;
 
 import com.android.internal.util.Preconditions;
 
@@ -57,6 +63,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -209,6 +216,37 @@ public class CameraMetadataNative implements Parcelable {
     // this should be in sync with HAL_PIXEL_FORMAT_BLOB defined in graphics.h
     public static final int NATIVE_JPEG_FORMAT = 0x21;
 
+    private static final String CELLID_PROCESS = "CELLID";
+    private static final String GPS_PROCESS = "GPS";
+
+    private static String translateLocationProviderToProcess(final String provider) {
+        if (provider == null) {
+            return null;
+        }
+        switch(provider) {
+            case LocationManager.GPS_PROVIDER:
+                return GPS_PROCESS;
+            case LocationManager.NETWORK_PROVIDER:
+                return CELLID_PROCESS;
+            default:
+                return null;
+        }
+    }
+
+    private static String translateProcessToLocationProvider(final String process) {
+        if (process == null) {
+            return null;
+        }
+        switch(process) {
+            case GPS_PROCESS:
+                return LocationManager.GPS_PROVIDER;
+            case CELLID_PROCESS:
+                return LocationManager.NETWORK_PROVIDER;
+            default:
+                return null;
+        }
+    }
+
     public CameraMetadataNative() {
         super();
         mMetadataPtr = nativeAllocate();
@@ -297,9 +335,9 @@ public class CameraMetadataNative implements Parcelable {
     public <T> T get(Key<T> key) {
         Preconditions.checkNotNull(key, "key must not be null");
 
-        T value = getOverride(key);
-        if (value != null) {
-            return value;
+        Pair<T, Boolean> override = getOverride(key);
+        if (override.second) {
+            return override.first;
         }
 
         return getBase(key);
@@ -409,23 +447,44 @@ public class CameraMetadataNative implements Parcelable {
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
         return marshaler.unmarshal(buffer);
     }
-
     // Need overwrite some metadata that has different definitions between native
     // and managed sides.
     @SuppressWarnings("unchecked")
-    private <T> T getOverride(Key<T> key) {
+    private <T> Pair<T, Boolean> getOverride(Key<T> key) {
+        T value = null;
+        boolean override = true;
+
         if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            return (T) getAvailableFormats();
+            value = (T) getAvailableFormats();
         } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
-            return (T) getFaces();
+            value = (T) getFaces();
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            return (T) getFaceRectangles();
+            value = (T) getFaceRectangles();
         } else if (key.equals(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)) {
-            return (T) getStreamConfigurationMap();
+            value = (T) getStreamConfigurationMap();
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
+            value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
+            value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
+            value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
+            value = (T) getTonemapCurve();
+        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
+            value = (T) getGpsLocation();
+        } else if (key.equals(CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP)) {
+            value = (T) getLensShadingMap();
+        } else {
+            override = false;
         }
 
-        // For other keys, get() falls back to getBase()
-        return null;
+        return Pair.create(value, override);
     }
 
     private int[] getAvailableFormats() {
@@ -541,6 +600,62 @@ public class CameraMetadataNative implements Parcelable {
         return fixedFaceRectangles;
     }
 
+    private LensShadingMap getLensShadingMap() {
+        float[] lsmArray = getBase(CaptureResult.STATISTICS_LENS_SHADING_MAP);
+        if (lsmArray == null) {
+            Log.w(TAG, "getLensShadingMap - Lens shading map was null.");
+            return null;
+        }
+        Size s = get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE);
+        LensShadingMap map = new LensShadingMap(lsmArray, s.getHeight(), s.getWidth());
+        return map;
+    }
+
+    private Location getGpsLocation() {
+        String processingMethod = get(CaptureResult.JPEG_GPS_PROCESSING_METHOD);
+        Location l = new Location(translateProcessToLocationProvider(processingMethod));
+
+        double[] coords = get(CaptureResult.JPEG_GPS_COORDINATES);
+        Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP);
+
+        if (timeStamp != null) {
+            l.setTime(timeStamp);
+        } else {
+            Log.w(TAG, "getGpsLocation - No timestamp for GPS location.");
+        }
+
+        if (coords != null) {
+            l.setLatitude(coords[0]);
+            l.setLongitude(coords[1]);
+            l.setAltitude(coords[2]);
+        } else {
+            Log.w(TAG, "getGpsLocation - No coordinates for GPS location");
+        }
+
+        return l;
+    }
+
+    private boolean setGpsLocation(Location l) {
+        if (l == null) {
+            return false;
+        }
+
+        double[] coords = { l.getLatitude(), l.getLongitude(), l.getAltitude() };
+        String processMethod = translateLocationProviderToProcess(l.getProvider());
+        long timestamp = l.getTime();
+
+        set(CaptureRequest.JPEG_GPS_TIMESTAMP, timestamp);
+        set(CaptureRequest.JPEG_GPS_COORDINATES, coords);
+
+        if (processMethod == null) {
+            Log.w(TAG, "setGpsLocation - No process method, Location is not from a GPS or NETWORK" +
+                    "provider");
+        } else {
+            setBase(CaptureRequest.JPEG_GPS_PROCESSING_METHOD, processMethod);
+        }
+        return true;
+    }
+
     private StreamConfigurationMap getStreamConfigurationMap() {
         StreamConfiguration[] configurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
@@ -550,6 +665,63 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS);
 
         return new StreamConfigurationMap(configurations, minFrameDurations, stallDurations);
+    }
+
+    private <T> Integer getMaxRegions(Key<T> key) {
+        final int AE = 0;
+        final int AWB = 1;
+        final int AF = 2;
+
+        // The order of the elements is: (AE, AWB, AF)
+        int[] maxRegions = getBase(CameraCharacteristics.CONTROL_MAX_REGIONS);
+
+        if (maxRegions == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
+            return maxRegions[AE];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
+            return maxRegions[AWB];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
+            return maxRegions[AF];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
+    }
+
+    private <T> Integer getMaxNumOutputs(Key<T> key) {
+        final int RAW = 0;
+        final int PROC = 1;
+        final int PROC_STALLING = 2;
+
+        // The order of the elements is: (raw, proc+nonstalling, proc+stalling)
+        int[] maxNumOutputs = getBase(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS);
+
+        if (maxNumOutputs == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
+            return maxNumOutputs[RAW];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
+            return maxNumOutputs[PROC];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
+            return maxNumOutputs[PROC_STALLING];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
+    }
+
+    private <T> TonemapCurve getTonemapCurve() {
+        float[] red = getBase(CaptureRequest.TONEMAP_CURVE_RED);
+        float[] green = getBase(CaptureRequest.TONEMAP_CURVE_GREEN);
+        float[] blue = getBase(CaptureRequest.TONEMAP_CURVE_BLUE);
+        if (red == null || green == null || blue == null) {
+            return null;
+        }
+        TonemapCurve tc = new TonemapCurve(red, green, blue);
+        return tc;
     }
 
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
@@ -591,8 +763,11 @@ public class CameraMetadataNative implements Parcelable {
             return setAvailableFormats((int[]) value);
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
             return setFaceRectangles((Rect[]) value);
+        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
+            return setTonemapCurve((TonemapCurve) value);
+        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
+            return setGpsLocation((Location) value);
         }
-
         // For other keys, set() falls back to setBase().
         return false;
     }
@@ -643,6 +818,24 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         setBase(CaptureResult.STATISTICS_FACE_RECTANGLES, newFaceRects);
+        return true;
+    }
+
+    private <T> boolean setTonemapCurve(TonemapCurve tc) {
+        if (tc == null) {
+            return false;
+        }
+
+        float[][] curve = new float[3][];
+        for (int i = TonemapCurve.CHANNEL_RED; i <= TonemapCurve.CHANNEL_BLUE; i++) {
+            int pointCount = tc.getPointCount(i);
+            curve[i] = new float[pointCount * TonemapCurve.POINT_SIZE];
+            tc.copyColorCurve(i, curve[i], 0);
+        }
+        setBase(CaptureRequest.TONEMAP_CURVE_RED, curve[0]);
+        setBase(CaptureRequest.TONEMAP_CURVE_GREEN, curve[1]);
+        setBase(CaptureRequest.TONEMAP_CURVE_BLUE, curve[2]);
+
         return true;
     }
 
