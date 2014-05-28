@@ -46,7 +46,7 @@ public final class HdmiCecMessage implements Parcelable {
     public HdmiCecMessage(int source, int destination, int opcode, byte[] params) {
         mSource = source;
         mDestination = destination;
-        mOpcode = opcode;
+        mOpcode = opcode & 0xFF;
         mParams = Arrays.copyOf(params, params.length);
     }
 
