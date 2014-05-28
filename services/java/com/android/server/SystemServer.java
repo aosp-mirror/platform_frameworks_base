@@ -1146,7 +1146,7 @@ public class SystemServer {
          * running as root and we need to be the system user to set
          * the property. http://b/11463182
          */
-        SystemProperties.set("persist.sys.dalvik.vm.lib.1",
+        SystemProperties.set("persist.sys.dalvik.vm.lib.2",
                              VMRuntime.getRuntime().vmLibrary());
 
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
