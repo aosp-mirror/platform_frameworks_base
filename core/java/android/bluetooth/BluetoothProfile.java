@@ -104,6 +104,12 @@ public interface BluetoothProfile {
     public static final int MAP = 9;
 
     /**
+     * A2DP Sink Profile
+     * @hide
+     */
+    public static final int A2DP_SINK = 10;
+
+    /**
      * Default priority for devices that we try to auto-connect to and
      * and allow incoming connections for the profile
      * @hide
