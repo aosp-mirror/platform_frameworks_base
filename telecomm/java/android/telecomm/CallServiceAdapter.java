@@ -156,5 +156,17 @@ public final class CallServiceAdapter {
         }
     }
 
+    /**
+     * Asks Telecomm to start or stop a ringback tone for a call.
+     *
+     * @param callId The unique ID of the call whose ringback is being changed.
+     * @param ringback Whether Telecomm should start playing a ringback tone.
+     */
+    public void setRequestingRingback(String callId, boolean ringback) {
+        try {
+            mAdapter.setRequestingRingback(callId, ringback);
+        } catch (RemoteException e) {
+        }
+    }
 
 }

@@ -33,6 +33,7 @@ public abstract class Connection {
         void onHandleChanged(Connection c, Uri newHandle);
         void onSignalChanged(Connection c, Bundle details);
         void onDisconnected(Connection c, int cause, String message);
+        void onRequestingRingback(Connection c, boolean ringback);
         void onDestroyed(Connection c);
     }
 
@@ -60,6 +61,10 @@ public abstract class Connection {
         /** {@inheritDoc} */
         @Override
         public void onDestroyed(Connection c) {}
+
+        /** {@inheritDoc} */
+        @Override
+        public void onRequestingRingback(Connection c, boolean ringback) {}
     }
 
     public final class State {
@@ -77,6 +82,7 @@ public abstract class Connection {
     private int mState = State.NEW;
     private CallAudioState mCallAudioState;
     private Uri mHandle;
+    private boolean mRequestingRingback = false;
 
     /**
      * Create a new Connection.
@@ -268,6 +274,14 @@ public abstract class Connection {
     }
 
     /**
+     * @return Whether this connection is requesting that the system play a ringback tone
+     * on its behalf.
+     */
+    public boolean isRequestingRingback() {
+        return mRequestingRingback;
+    }
+
+    /**
      * Sets the value of the {@link #getHandle()} property and notifies listeners.
      *
      * @param handle The new handle.
@@ -286,6 +300,7 @@ public abstract class Connection {
      * communicate).
      */
     protected void setActive() {
+        setRequestingRingback(false);
         setState(State.ACTIVE);
     }
 
@@ -329,6 +344,21 @@ public abstract class Connection {
     }
 
     /**
+     * Requests that the framework play a ringback tone. This is to be invoked by implementations
+     * that do not play a ringback tone themselves in the call's audio stream.
+     *
+     * @param ringback Whether the ringback tone is to be played.
+     */
+    protected void setRequestingRingback(boolean ringback) {
+        if (mRequestingRingback != ringback) {
+            mRequestingRingback = ringback;
+            for (Listener l : mListeners) {
+                l.onRequestingRingback(this, ringback);
+            }
+        }
+    }
+
+    /**
      * Notifies this Connection and listeners that the {@link #getCallAudioState()} property
      * has a new value.
      *
@@ -336,7 +366,7 @@ public abstract class Connection {
      */
     protected void onSetAudioState(CallAudioState state) {
         // TODO: Enforce super called
-        this.mCallAudioState = state;
+        mCallAudioState = state;
         for (Listener l : mListeners) {
             l.onAudioStateChanged(this, state);
         }
@@ -352,6 +382,21 @@ public abstract class Connection {
         // TODO: Enforce super called
         for (Listener l : mListeners) {
             l.onSignalChanged(this, details);
+        }
+    }
+
+    /**
+     * Notifies this Connection of an internal state change. This method is called before the
+     * state is actually changed. Overriding implementations must call
+     * {@code super.onSetState(state)}.
+     *
+     * @param state The new state, a {@link Connection.State} member.
+     */
+    protected void onSetState(int state) {
+        // TODO: Enforce super called
+        this.mState = state;
+        for (Listener l : mListeners) {
+            l.onStateChanged(this, state);
         }
     }
 
@@ -401,9 +446,6 @@ public abstract class Connection {
 
     private void setState(int state) {
         Log.d(this, "setState: %s", stateToString(state));
-        this.mState = state;
-        for (Listener l : mListeners) {
-            l.onStateChanged(this, state);
-        }
+        onSetState(state);
     }
 }

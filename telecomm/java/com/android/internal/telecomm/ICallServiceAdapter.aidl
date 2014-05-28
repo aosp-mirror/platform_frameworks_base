@@ -43,4 +43,6 @@ oneway interface ICallServiceAdapter {
     void setDisconnected(String callId, int disconnectCause, String disconnectMessage);
 
     void setOnHold(String callId);
+
+    void setRequestingRingback(String callId, boolean ringing);
 }
