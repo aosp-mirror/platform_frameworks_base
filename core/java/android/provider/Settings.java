@@ -4461,6 +4461,12 @@ public final class Settings {
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
         /**
+         * Whether the device should wake when the wake gesture sensor detects motion.
+         * @hide
+         */
+        public static final String WAKE_GESTURE_ENABLED = "wake_gesture_enabled";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
