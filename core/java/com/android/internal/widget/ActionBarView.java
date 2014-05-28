@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.animation.LayoutTransition;
 import android.app.ActionBar;
-import android.app.ActionBar.OnNavigationListener;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -63,7 +62,7 @@ import com.android.internal.view.menu.SubMenuBuilder;
 /**
  * @hide
  */
-public class ActionBarView extends AbsActionBarView {
+public class ActionBarView extends AbsActionBarView implements DecorToolbar {
     private static final String TAG = "ActionBarView";
 
     /**
@@ -117,8 +116,7 @@ public class ActionBarView extends AbsActionBarView {
 
     private boolean mUserTitle;
     private boolean mIncludeTabs;
-    private boolean mIsCollapsable;
-    private boolean mIsCollapsed;
+    private boolean mIsCollapsible;
     private boolean mWasHomeEnabled; // Was it enabled before action view expansion?
 
     private MenuBuilder mOptionsMenu;
@@ -129,7 +127,7 @@ public class ActionBarView extends AbsActionBarView {
     private ActionMenuItem mLogoNavItem;
 
     private SpinnerAdapter mSpinnerAdapter;
-    private OnNavigationListener mCallback;
+    private AdapterView.OnItemSelectedListener mNavItemSelectedListener;
 
     private Runnable mTabSelector;
 
@@ -137,18 +135,6 @@ public class ActionBarView extends AbsActionBarView {
     View mExpandedActionView;
 
     Window.Callback mWindowCallback;
-
-    private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
-            new AdapterView.OnItemSelectedListener() {
-        public void onItemSelected(AdapterView parent, View view, int position, long id) {
-            if (mCallback != null) {
-                mCallback.onNavigationItemSelected(position, id);
-            }
-        }
-        public void onNothingSelected(AdapterView parent) {
-            // Do nothing
-        }
-    };
 
     private final OnClickListener mExpandedActionViewUpListener = new OnClickListener() {
         @Override
@@ -178,8 +164,6 @@ public class ActionBarView extends AbsActionBarView {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar,
                 com.android.internal.R.attr.actionBarStyle, 0);
 
-        ApplicationInfo appInfo = context.getApplicationInfo();
-        PackageManager pm = context.getPackageManager();
         mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode,
                 ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
@@ -260,7 +244,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         if (mHomeDescriptionRes != 0) {
-            setHomeActionContentDescription(mHomeDescriptionRes);
+            setNavigationContentDescription(mHomeDescriptionRes);
         }
 
         if (mTabScrollView != null && mIncludeTabs) {
@@ -313,7 +297,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     @Override
-    public void setSplitActionBar(boolean splitActionBar) {
+    public void setSplitToolbar(boolean splitActionBar) {
         if (mSplitActionBar != splitActionBar) {
             if (mMenuView != null) {
                 final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
@@ -349,16 +333,24 @@ public class ActionBarView extends AbsActionBarView {
                     mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
                 }
             }
-            super.setSplitActionBar(splitActionBar);
+            super.setSplitToolbar(splitActionBar);
         }
     }
 
-    public boolean isSplitActionBar() {
+    public boolean isSplit() {
         return mSplitActionBar;
+    }
+
+    public boolean canSplit() {
+        return true;
     }
 
     public boolean hasEmbeddedTabs() {
         return mIncludeTabs;
+    }
+
+    public void setEmbeddedTabView(View view) {
+        setEmbeddedTabView((ScrollingTabContainerView) view);
     }
 
     public void setEmbeddedTabView(ScrollingTabContainerView tabs) {
@@ -374,10 +366,6 @@ public class ActionBarView extends AbsActionBarView {
             lp.height = LayoutParams.MATCH_PARENT;
             tabs.setAllowCollapse(true);
         }
-    }
-
-    public void setCallback(OnNavigationListener callback) {
-        mCallback = callback;
     }
 
     public void setMenuPrepared() {
@@ -473,7 +461,7 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
-    public void setCustomNavigationView(View view) {
+    public void setCustomView(View view) {
         final boolean showCustom = (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0;
         if (showCustom) {
             ActionBarTransition.beginDelayedTransition(this);
@@ -765,15 +753,16 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
-    public void setDropdownAdapter(SpinnerAdapter adapter) {
+    public void setDropdownParams(SpinnerAdapter adapter, AdapterView.OnItemSelectedListener l) {
         mSpinnerAdapter = adapter;
+        mNavItemSelectedListener = l;
         if (mSpinner != null) {
             mSpinner.setAdapter(adapter);
         }
     }
 
-    public SpinnerAdapter getDropdownAdapter() {
-        return mSpinnerAdapter;
+    public int getDropdownItemCount() {
+        return mSpinnerAdapter != null ? mSpinnerAdapter.getCount() : 0;
     }
 
     public void setDropdownSelectedPosition(int position) {
@@ -784,7 +773,7 @@ public class ActionBarView extends AbsActionBarView {
         return mSpinner.getSelectedItemPosition();
     }
 
-    public View getCustomNavigationView() {
+    public View getCustomView() {
         return mCustomNavView;
     }
 
@@ -794,6 +783,11 @@ public class ActionBarView extends AbsActionBarView {
 
     public int getDisplayOptions() {
         return mDisplayOptions;
+    }
+
+    @Override
+    public ViewGroup getViewGroup() {
+        return this;
     }
 
     @Override
@@ -860,12 +854,8 @@ public class ActionBarView extends AbsActionBarView {
         mContextView = view;
     }
 
-    public void setCollapsable(boolean collapsable) {
-        mIsCollapsable = collapsable;
-    }
-
-    public boolean isCollapsed() {
-        return mIsCollapsed;
+    public void setCollapsible(boolean collapsible) {
+        mIsCollapsible = collapsible;
     }
 
     /**
@@ -893,7 +883,7 @@ public class ActionBarView extends AbsActionBarView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int childCount = getChildCount();
-        if (mIsCollapsable) {
+        if (mIsCollapsible) {
             int visibleChildren = 0;
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
@@ -915,11 +905,9 @@ public class ActionBarView extends AbsActionBarView {
             if (visibleChildren == 0) {
                 // No size for an empty action bar when collapsable.
                 setMeasuredDimension(0, 0);
-                mIsCollapsed = true;
                 return;
             }
         }
-        mIsCollapsed = false;
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         if (widthMode != MeasureSpec.EXACTLY) {
@@ -1323,20 +1311,20 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
-    public void setHomeAsUpIndicator(Drawable indicator) {
+    public void setNavigationIcon(Drawable indicator) {
         mHomeLayout.setUpIndicator(indicator);
     }
 
-    public void setHomeAsUpIndicator(int resId) {
+    public void setNavigationIcon(int resId) {
         mHomeLayout.setUpIndicator(resId);
     }
 
-    public void setHomeActionContentDescription(CharSequence description) {
+    public void setNavigationContentDescription(CharSequence description) {
         mHomeDescription = description;
         updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
-    public void setHomeActionContentDescription(int resId) {
+    public void setNavigationContentDescription(int resId) {
         mHomeDescriptionRes = resId;
         mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
         updateHomeAccessibility(mUpGoerFive.isEnabled());

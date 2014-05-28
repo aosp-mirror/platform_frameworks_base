@@ -39,6 +39,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.widget.OverScroller;
+import android.widget.Toolbar;
 import com.android.internal.view.menu.MenuPresenter;
 
 /**
@@ -59,7 +60,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     private ActionBarContainer mActionBarTop;
 
     // Some interior UI elements.
-    private ActionBarView mActionBarView;
+    private DecorToolbar mDecorToolbar;
 
     // Content overlay drawable - generally the action bar's shadow
     private Drawable mWindowContentOverlay;
@@ -401,7 +402,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
             topInset = mActionBarTop.getMeasuredHeight();
         }
 
-        if (mActionBarView.isSplitActionBar()) {
+        if (mDecorToolbar.isSplit()) {
             // If action bar is split, adjust bottom insets for it.
             if (mActionBarBottom != null) {
                 if (stable) {
@@ -563,9 +564,20 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
             mContent = findViewById(com.android.internal.R.id.content);
             mActionBarTop = (ActionBarContainer) findViewById(
                     com.android.internal.R.id.action_bar_container);
-            mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
+            mDecorToolbar = getDecorToolbar(findViewById(com.android.internal.R.id.action_bar));
             mActionBarBottom = (ActionBarContainer) findViewById(
                     com.android.internal.R.id.split_action_bar);
+        }
+    }
+
+    private DecorToolbar getDecorToolbar(View view) {
+        if (view instanceof DecorToolbar) {
+            return (DecorToolbar) view;
+        } else if (view instanceof Toolbar) {
+            return ((Toolbar) view).getWrapper();
+        } else {
+            throw new IllegalStateException("Can't make a decor toolbar out of " +
+                    view.getClass().getSimpleName());
         }
     }
 
@@ -648,9 +660,9 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
             final int action = event.getAction();
 
             // Collapse any expanded action views.
-            if (mActionBarView != null && mActionBarView.hasExpandedActionView()) {
+            if (mDecorToolbar != null && mDecorToolbar.hasExpandedActionView()) {
                 if (action == KeyEvent.ACTION_UP) {
-                    mActionBarView.collapseActionView();
+                    mDecorToolbar.collapseActionView();
                 }
                 return true;
             }
@@ -662,19 +674,19 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     @Override
     public void setWindowCallback(Window.Callback cb) {
         pullChildren();
-        mActionBarView.setWindowCallback(cb);
+        mDecorToolbar.setWindowCallback(cb);
     }
 
     @Override
     public void setWindowTitle(CharSequence title) {
         pullChildren();
-        mActionBarView.setWindowTitle(title);
+        mDecorToolbar.setWindowTitle(title);
     }
 
     @Override
     public CharSequence getTitle() {
         pullChildren();
-        return mActionBarView.getTitle();
+        return mDecorToolbar.getTitle();
     }
 
     @Override
@@ -682,10 +694,10 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         pullChildren();
         switch (windowFeature) {
             case Window.FEATURE_PROGRESS:
-                mActionBarView.initProgress();
+                mDecorToolbar.initProgress();
                 break;
             case Window.FEATURE_INDETERMINATE_PROGRESS:
-                mActionBarView.initIndeterminateProgress();
+                mDecorToolbar.initIndeterminateProgress();
                 break;
             case Window.FEATURE_ACTION_BAR_OVERLAY:
                 setOverlayMode(true);
@@ -704,15 +716,15 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         }
         if (splitActionBar) {
             pullChildren();
-            if (mActionBarBottom != null) {
-                mActionBarView.setSplitView(mActionBarBottom);
-                mActionBarView.setSplitActionBar(splitActionBar);
-                mActionBarView.setSplitWhenNarrow(splitWhenNarrow);
+            if (mActionBarBottom != null && mDecorToolbar.canSplit()) {
+                mDecorToolbar.setSplitView(mActionBarBottom);
+                mDecorToolbar.setSplitToolbar(splitActionBar);
+                mDecorToolbar.setSplitWhenNarrow(splitWhenNarrow);
 
                 final ActionBarContextView cab = (ActionBarContextView) findViewById(
                         com.android.internal.R.id.action_context_bar);
                 cab.setSplitView(mActionBarBottom);
-                cab.setSplitActionBar(splitActionBar);
+                cab.setSplitToolbar(splitActionBar);
                 cab.setSplitWhenNarrow(splitWhenNarrow);
             } else if (splitActionBar) {
                 Log.e(TAG, "Requested split action bar with " +
@@ -724,91 +736,91 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     @Override
     public boolean hasIcon() {
         pullChildren();
-        return mActionBarView.hasIcon();
+        return mDecorToolbar.hasIcon();
     }
 
     @Override
     public boolean hasLogo() {
         pullChildren();
-        return mActionBarView.hasLogo();
+        return mDecorToolbar.hasLogo();
     }
 
     @Override
     public void setIcon(int resId) {
         pullChildren();
-        mActionBarView.setIcon(resId);
+        mDecorToolbar.setIcon(resId);
     }
 
     @Override
     public void setIcon(Drawable d) {
         pullChildren();
-        mActionBarView.setIcon(d);
+        mDecorToolbar.setIcon(d);
     }
 
     @Override
     public void setLogo(int resId) {
         pullChildren();
-        mActionBarView.setLogo(resId);
+        mDecorToolbar.setLogo(resId);
     }
 
     @Override
     public boolean canShowOverflowMenu() {
         pullChildren();
-        return mActionBarView.isOverflowReserved() && mActionBarView.getVisibility() == VISIBLE;
+        return mDecorToolbar.canShowOverflowMenu();
     }
 
     @Override
     public boolean isOverflowMenuShowing() {
         pullChildren();
-        return mActionBarView.isOverflowMenuShowing();
+        return mDecorToolbar.isOverflowMenuShowing();
     }
 
     @Override
     public boolean isOverflowMenuShowPending() {
         pullChildren();
-        return mActionBarView.isOverflowMenuShowPending();
+        return mDecorToolbar.isOverflowMenuShowPending();
     }
 
     @Override
     public boolean showOverflowMenu() {
         pullChildren();
-        return mActionBarView.showOverflowMenu();
+        return mDecorToolbar.showOverflowMenu();
     }
 
     @Override
     public boolean hideOverflowMenu() {
         pullChildren();
-        return mActionBarView.hideOverflowMenu();
+        return mDecorToolbar.hideOverflowMenu();
     }
 
     @Override
     public void setMenuPrepared() {
         pullChildren();
-        mActionBarView.setMenuPrepared();
+        mDecorToolbar.setMenuPrepared();
     }
 
     @Override
     public void setMenu(Menu menu, MenuPresenter.Callback cb) {
         pullChildren();
-        mActionBarView.setMenu(menu, cb);
+        mDecorToolbar.setMenu(menu, cb);
     }
 
     @Override
     public void saveToolbarHierarchyState(SparseArray<Parcelable> toolbarStates) {
         pullChildren();
-        mActionBarView.saveHierarchyState(toolbarStates);
+        mDecorToolbar.saveHierarchyState(toolbarStates);
     }
 
     @Override
     public void restoreToolbarHierarchyState(SparseArray<Parcelable> toolbarStates) {
         pullChildren();
-        mActionBarView.restoreHierarchyState(toolbarStates);
+        mDecorToolbar.restoreHierarchyState(toolbarStates);
     }
 
     @Override
     public void dismissPopups() {
         pullChildren();
-        mActionBarView.dismissPopupMenus();
+        mDecorToolbar.dismissPopupMenus();
     }
 
     public static class LayoutParams extends MarginLayoutParams {

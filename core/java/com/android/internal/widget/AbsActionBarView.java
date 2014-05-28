@@ -34,7 +34,7 @@ import android.view.animation.DecelerateInterpolator;
 public abstract class AbsActionBarView extends ViewGroup {
     protected ActionMenuView mMenuView;
     protected ActionMenuPresenter mActionMenuPresenter;
-    protected ActionBarContainer mSplitView;
+    protected ViewGroup mSplitView;
     protected boolean mSplitActionBar;
     protected boolean mSplitWhenNarrow;
     protected int mContentHeight;
@@ -74,7 +74,7 @@ public abstract class AbsActionBarView extends ViewGroup {
         setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
         a.recycle();
         if (mSplitWhenNarrow) {
-            setSplitActionBar(getContext().getResources().getBoolean(
+            setSplitToolbar(getContext().getResources().getBoolean(
                     com.android.internal.R.bool.split_action_bar_is_narrow));
         }
         if (mActionMenuPresenter != null) {
@@ -86,7 +86,7 @@ public abstract class AbsActionBarView extends ViewGroup {
      * Sets whether the bar should be split right now, no questions asked.
      * @param split true if the bar should split
      */
-    public void setSplitActionBar(boolean split) {
+    public void setSplitToolbar(boolean split) {
         mSplitActionBar = split;
     }
 
@@ -107,7 +107,7 @@ public abstract class AbsActionBarView extends ViewGroup {
         return mContentHeight;
     }
 
-    public void setSplitView(ActionBarContainer splitView) {
+    public void setSplitView(ViewGroup splitView) {
         mSplitView = splitView;
     }
 
@@ -212,6 +212,10 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     public boolean isOverflowReserved() {
         return mActionMenuPresenter != null && mActionMenuPresenter.isOverflowReserved();
+    }
+
+    public boolean canShowOverflowMenu() {
+        return isOverflowReserved() && getVisibility() == VISIBLE;
     }
 
     public void dismissPopupMenus() {

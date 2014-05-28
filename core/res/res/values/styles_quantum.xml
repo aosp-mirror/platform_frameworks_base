@@ -773,7 +773,7 @@ please see styles_device_defaults.xml.
         <item name="background">@null</item>
         <item name="backgroundStacked">@null</item>
         <item name="backgroundSplit">@null</item>
-        <item name="displayOptions">useLogo|showHome|showTitle</item>
+        <item name="displayOptions">showTitle</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="titleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Quantum.Widget.ActionBar.Subtitle</item>
@@ -783,6 +783,7 @@ please see styles_device_defaults.xml.
         <item name="itemPadding">8dip</item>
         <item name="homeLayout">@layout/action_bar_home_quantum</item>
         <item name="gravity">center_vertical</item>
+        <item name="contentInsetStart">56dp</item>
     </style>
 
     <style name="Widget.Quantum.ActionBar.Solid">

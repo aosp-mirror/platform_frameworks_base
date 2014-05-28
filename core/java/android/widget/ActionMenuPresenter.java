@@ -544,6 +544,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     public void setMenuView(ActionMenuView menuView) {
         mMenuView = menuView;
+        menuView.initialize(mMenu);
     }
 
     private static class SavedState implements Parcelable {

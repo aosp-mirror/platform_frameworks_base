@@ -493,6 +493,9 @@
              {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
         <attr name="windowAllowExitTransitionOverlap" format="boolean"/>
 
+        <!-- Internal layout used internally for window decor -->
+        <attr name="windowActionBarFullscreenDecorLayout" format="reference" />
+
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -685,6 +688,7 @@
         <!-- Default ActivityChooserView style. -->
         <attr name="activityChooserViewStyle" format="reference" />
 
+        <!-- Default Toolbar style. -->
         <attr name="toolbarStyle" format="reference" />
 
         <!-- Fast scroller styles -->
@@ -1713,6 +1717,7 @@
         <attr name="windowSwipeToDismiss" />
         <attr name="windowContentTransitions" />
         <attr name="windowContentTransitionManager" />
+        <attr name="windowActionBarFullscreenDecorLayout" />
 
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
@@ -6418,11 +6423,17 @@
         <attr name="indeterminateProgressStyle" format="reference" />
         <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
         <attr name="progressBarPadding" format="dimension" />
+        <!-- Up navigation glyph -->
+        <attr name="homeAsUpIndicator" />
         <!-- Specifies padding that should be applied to the left and right sides of
              system-provided items in the bar. -->
         <attr name="itemPadding" format="dimension" />
         <!-- Set true to hide the action bar on a vertical nested scroll of content. -->
         <attr name="hideOnContentScroll" format="boolean" />
+        <attr name="contentInsetStart" format="dimension" />
+        <attr name="contentInsetEnd" format="dimension" />
+        <attr name="contentInsetLeft" format="dimension" />
+        <attr name="contentInsetRight" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
@@ -6673,10 +6684,19 @@
         <attr name="titleMarginEnd" format="dimension" />
         <attr name="titleMarginTop" format="dimension" />
         <attr name="titleMarginBottom" format="dimension" />
-        <attr name="contentInsetStart" format="dimension" />
-        <attr name="contentInsetEnd" format="dimension" />
-        <attr name="contentInsetLeft" format="dimension" />
-        <attr name="contentInsetRight" format="dimension" />
+        <attr name="contentInsetStart" />
+        <attr name="contentInsetEnd" />
+        <attr name="contentInsetLeft" />
+        <attr name="contentInsetRight" />
+        <attr name="maxButtonHeight" format="dimension" />
+        <attr name="navigationButtonStyle" format="reference" />
+        <attr name="buttonGravity">
+            <!-- Push object to the top of its container, not changing its size. -->
+            <flag name="top" value="0x30" />
+            <!-- Push object to the bottom of its container, not changing its size. -->
+            <flag name="bottom" value="0x50" />
+        </attr>
+        <attr name="collapseIcon" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar_LayoutParams">
