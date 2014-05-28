@@ -27,6 +27,7 @@ public class AnimationFilter {
     boolean animateZ;
     boolean animateScale;
     boolean animateHeight;
+    boolean animateTopInset;
     boolean animateDimmed;
     boolean hasDelays;
 
@@ -60,6 +61,11 @@ public class AnimationFilter {
         return this;
     }
 
+    public AnimationFilter animateTopInset() {
+        animateTopInset = true;
+        return this;
+    }
+
     public AnimationFilter animateDimmed() {
         animateDimmed = true;
         return this;
@@ -84,6 +90,7 @@ public class AnimationFilter {
         animateZ |= filter.animateZ;
         animateScale |= filter.animateScale;
         animateHeight |= filter.animateHeight;
+        animateTopInset |= filter.animateTopInset;
         animateDimmed |= filter.animateDimmed;
         hasDelays |= filter.hasDelays;
     }
@@ -94,6 +101,7 @@ public class AnimationFilter {
         animateZ = false;
         animateScale = false;
         animateHeight = false;
+        animateTopInset = false;
         animateDimmed = false;
         hasDelays = false;
     }

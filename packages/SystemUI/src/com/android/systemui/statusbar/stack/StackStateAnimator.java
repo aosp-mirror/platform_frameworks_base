@@ -133,10 +133,11 @@ public class StackStateAnimator {
         boolean scaleChanging = child.getScaleX() != viewState.scale;
         boolean alphaChanging = alpha != child.getAlpha();
         boolean heightChanging = viewState.height != child.getActualHeight();
+        boolean topInsetChanging = viewState.clipTopAmount != child.getClipTopAmount();
         boolean wasAdded = mNewAddChildren.contains(child);
         boolean hasDelays = mAnimationFilter.hasDelays;
         boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || scaleChanging ||
-                alphaChanging || heightChanging;
+                alphaChanging || heightChanging || topInsetChanging;
         long delay = 0;
         if (hasDelays && isDelayRelevant || wasAdded) {
             delay = calculateChildAnimationDelay(viewState, finalState);
@@ -165,6 +166,11 @@ public class StackStateAnimator {
         // start height animation
         if (heightChanging) {
             startHeightAnimation(child, viewState, delay);
+        }
+
+        // start top inset animation
+        if (topInsetChanging) {
+            startInsetAnimation(child, viewState, delay);
         }
 
         // start dimmed animation
@@ -278,6 +284,64 @@ public class StackStateAnimator {
         child.setTag(TAG_ANIMATOR_HEIGHT, animator);
         child.setTag(TAG_START_HEIGHT, child.getActualHeight());
         child.setTag(TAG_END_HEIGHT, newEndValue);
+    }
+
+    private void startInsetAnimation(final ExpandableView child,
+            StackScrollState.ViewState viewState, long delay) {
+        Integer previousStartValue = getChildTag(child, TAG_START_TOP_INSET);
+        Integer previousEndValue = getChildTag(child, TAG_END_TOP_INSET);
+        int newEndValue = viewState.clipTopAmount;
+        if (previousEndValue != null && previousEndValue == newEndValue) {
+            return;
+        }
+        ValueAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TOP_INSET);
+        if (!mAnimationFilter.animateTopInset) {
+            // just a local update was performed
+            if (previousAnimator != null) {
+                // we need to increase all animation keyframes of the previous animator by the
+                // relative change to the end value
+                PropertyValuesHolder[] values = previousAnimator.getValues();
+                int relativeDiff = newEndValue - previousEndValue;
+                int newStartValue = previousStartValue + relativeDiff;
+                values[0].setIntValues(newStartValue, newEndValue);
+                child.setTag(TAG_START_TOP_INSET, newStartValue);
+                child.setTag(TAG_END_TOP_INSET, newEndValue);
+                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+                return;
+            } else {
+                // no new animation needed, let's just apply the value
+                child.setClipTopAmount(newEndValue);
+                return;
+            }
+        }
+
+        ValueAnimator animator = ValueAnimator.ofInt(child.getClipTopAmount(), newEndValue);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                child.setClipTopAmount((int) animation.getAnimatedValue());
+            }
+        });
+        animator.setInterpolator(mFastOutSlowInInterpolator);
+        long newDuration = cancelAnimatorAndGetNewDuration(previousAnimator);
+        animator.setDuration(newDuration);
+        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+            animator.setStartDelay(delay);
+        }
+        animator.addListener(getGlobalAnimationFinishedListener());
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_TOP_INSET, null);
+                child.setTag(TAG_START_TOP_INSET, null);
+                child.setTag(TAG_END_TOP_INSET, null);
+            }
+        });
+        startAnimator(animator);
+        child.setTag(TAG_ANIMATOR_TOP_INSET, animator);
+        child.setTag(TAG_START_TOP_INSET, child.getClipTopAmount());
+        child.setTag(TAG_END_TOP_INSET, newEndValue);
     }
 
     private void startAlphaAnimation(final ExpandableView child,
