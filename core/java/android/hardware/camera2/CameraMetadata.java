@@ -236,9 +236,17 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device can be manually controlled (3A algorithms such
-     * as auto exposure, and auto focus can be
-     * bypassed), this includes but is not limited to:</p>
+     * as auto exposure, and auto focus can be bypassed).
+     * The camera device supports basic manual control of the sensor image
+     * acquisition related stages. This means the following controls are
+     * guaranteed to be supported:</p>
      * <ul>
+     * <li>Manual frame duration control<ul>
+     * <li>{@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
+     * <li>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}</li>
+     * </ul>
+     * </li>
      * <li>Manual exposure control<ul>
      * <li>{@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</li>
      * <li>{@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
@@ -265,10 +273,15 @@ public abstract class CameraMetadata<TKey> {
      * <p>If any of the above 3A algorithms are enabled, then the camera
      * device will accurately report the values applied by 3A in the
      * result.</p>
+     * <p>A given camera device may also support additional manual sensor controls,
+     * but this capability only covers the above list of controls.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
      * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -276,7 +289,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2;
 
     /**
-     * <p>TODO: This should be @hide</p>
+     * <p>The camera device post-processing stages can be manually controlled.
+     * The camera device supports basic manual control of the image post-processing
+     * stages. This means the following controls are guaranteed to be supported:</p>
      * <ul>
      * <li>Manual tonemap control<ul>
      * <li>{@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}</li>
@@ -299,6 +314,8 @@ public abstract class CameraMetadata<TKey> {
      * will accurately report the values applied by AWB in the result.</p>
      * <p>The camera device will also support everything in MANUAL_SENSOR
      * except manual lens control and manual flash control.</p>
+     * <p>A given camera device may also support additional post-processing
+     * controls, but this capability only covers the above list of controls.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
@@ -307,7 +324,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#TONEMAP_MODE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_GCAM = 3;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 3;
 
     /**
      * <p>The camera device supports the Zero Shutter Lag use case.</p>
