@@ -714,6 +714,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null ? mAppToken.appToken : null;
     }
 
+    @Override
+    public boolean isVoiceInteraction() {
+        return mAppToken != null ? mAppToken.voiceInteraction : false;
+    }
+
     boolean setInsetsChanged() {
         mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);

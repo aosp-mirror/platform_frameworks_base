@@ -274,6 +274,11 @@ public interface WindowManagerPolicy {
         public IApplicationToken getAppToken();
 
         /**
+         * Return true if this window is participating in voice interaction.
+         */
+        public boolean isVoiceInteraction();
+
+        /**
          * Return true if, at any point, the application token associated with 
          * this window has actually displayed any windows.  This is most useful 
          * with the "starting up" window to determine if any windows were 

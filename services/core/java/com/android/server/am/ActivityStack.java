@@ -1860,7 +1860,7 @@ final class ActivityStack {
                         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                                r.userId, r.info.configChanges);
+                                r.userId, r.info.configChanges, task.voiceSession != null);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -1921,7 +1921,7 @@ final class ActivityStack {
             mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
-                    r.info.configChanges);
+                    r.info.configChanges, task.voiceSession != null);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -1966,7 +1966,7 @@ final class ActivityStack {
             mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                     r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
-                    r.info.configChanges);
+                    r.info.configChanges, task.voiceSession != null);
             ActivityOptions.abort(options);
             options = null;
         }

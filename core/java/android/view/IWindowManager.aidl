@@ -79,7 +79,7 @@ interface IWindowManager
     void removeWindowToken(IBinder token);
     void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges);
+            int configChanges, boolean voiceInteraction);
     void setAppGroupId(IBinder token, int groupId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);

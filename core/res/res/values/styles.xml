@@ -171,8 +171,8 @@ please see styles_device_defaults.xml.
 
     <!-- Window animations that are applied to voice interaction overlay windows. -->
     <style name="Animation.VoiceInteractionSession">
-        <item name="windowEnterAnimation">@anim/input_method_enter</item>
-        <item name="windowExitAnimation">@anim/input_method_exit</item>
+        <item name="windowEnterAnimation">@anim/voice_layer_enter</item>
+        <item name="windowExitAnimation">@anim/voice_layer_exit</item>
     </style>
 
     <!-- Special optional fancy IM animations. @hide -->

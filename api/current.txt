@@ -26386,7 +26386,7 @@ package android.service.voice {
     field public static final int TOUCHABLE_INSETS_CONTENT = 1; // 0x1
     field public static final int TOUCHABLE_INSETS_FRAME = 0; // 0x0
     field public static final int TOUCHABLE_INSETS_REGION = 3; // 0x3
-    field public int contentTopInsets;
+    field public final android.graphics.Rect contentInsets;
     field public int touchableInsets;
     field public final android.graphics.Region touchableRegion;
   }

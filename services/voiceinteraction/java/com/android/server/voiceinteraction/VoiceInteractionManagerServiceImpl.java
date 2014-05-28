@@ -113,7 +113,7 @@ class VoiceInteractionManagerServiceImpl {
             if (mBound) {
                 try {
                     mIWindowManager.addWindowToken(mToken,
-                            WindowManager.LayoutParams.TYPE_INPUT_METHOD);
+                            WindowManager.LayoutParams.TYPE_VOICE_INTERACTION);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed adding window token", e);
                 }
