@@ -27,10 +27,13 @@ import android.os.Parcelable;
  * using the {@link Task.Builder}.
  */
 public class Task implements Parcelable {
-
     public interface NetworkType {
-        public final int ANY = 0;
-        public final int UNMETERED = 1;
+        /** Default. */
+        public final int NONE = 0;
+        /** This task requires network connectivity. */
+        public final int ANY = 1;
+        /** This task requires network connectivity that is unmetered. */
+        public final int UNMETERED = 2;
     }
 
     /**
@@ -48,6 +51,8 @@ public class Task implements Parcelable {
     private final ComponentName service;
     private final boolean requireCharging;
     private final boolean requireDeviceIdle;
+    private final boolean hasEarlyConstraint;
+    private final boolean hasLateConstraint;
     private final int networkCapabilities;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
@@ -59,7 +64,7 @@ public class Task implements Parcelable {
     /**
      * Unique task id associated with this class. This is assigned to your task by the scheduler.
      */
-    public int getTaskId() {
+    public int getId() {
         return taskId;
     }
 
@@ -146,6 +151,24 @@ public class Task implements Parcelable {
         return backoffPolicy;
     }
 
+    /**
+     * User can specify an early constraint of 0L, which is valid, so we keep track of whether the
+     * function was called at all.
+     * @hide
+     */
+    public boolean hasEarlyConstraint() {
+        return hasEarlyConstraint;
+    }
+
+    /**
+     * User can specify a late constraint of 0L, which is valid, so we keep track of whether the
+     * function was called at all.
+     * @hide
+     */
+    public boolean hasLateConstraint() {
+        return hasLateConstraint;
+    }
+
     private Task(Parcel in) {
         taskId = in.readInt();
         extras = in.readBundle();
@@ -159,6 +182,8 @@ public class Task implements Parcelable {
         intervalMillis = in.readLong();
         initialBackoffMillis = in.readLong();
         backoffPolicy = in.readInt();
+        hasEarlyConstraint = in.readInt() == 1;
+        hasLateConstraint = in.readInt() == 1;
     }
 
     private Task(Task.Builder b) {
@@ -174,6 +199,8 @@ public class Task implements Parcelable {
         intervalMillis = b.mIntervalMillis;
         initialBackoffMillis = b.mInitialBackoffMillis;
         backoffPolicy = b.mBackoffPolicy;
+        hasEarlyConstraint = b.mHasEarlyConstraint;
+        hasLateConstraint = b.mHasLateConstraint;
     }
 
     @Override
@@ -195,6 +222,8 @@ public class Task implements Parcelable {
         out.writeLong(intervalMillis);
         out.writeLong(initialBackoffMillis);
         out.writeInt(backoffPolicy);
+        out.writeInt(hasEarlyConstraint ? 1 : 0);
+        out.writeInt(hasLateConstraint ? 1 : 0);
     }
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
@@ -212,7 +241,7 @@ public class Task implements Parcelable {
     /**
      * Builder class for constructing {@link Task} objects.
      */
-    public final class Builder {
+    public static final class Builder {
         private int mTaskId;
         private Bundle mExtras;
         private ComponentName mTaskService;
@@ -225,6 +254,8 @@ public class Task implements Parcelable {
         private long mMaxExecutionDelayMillis;
         // Periodic parameters.
         private boolean mIsPeriodic;
+        private boolean mHasEarlyConstraint;
+        private boolean mHasLateConstraint;
         private long mIntervalMillis;
         // Back-off parameters.
         private long mInitialBackoffMillis = 5000L;
@@ -307,6 +338,7 @@ public class Task implements Parcelable {
         public Builder setPeriodic(long intervalMillis) {
             mIsPeriodic = true;
             mIntervalMillis = intervalMillis;
+            mHasEarlyConstraint = mHasLateConstraint = true;
             return this;
         }
 
@@ -320,6 +352,7 @@ public class Task implements Parcelable {
          */
         public Builder setMinimumLatency(long minLatencyMillis) {
             mMinLatencyMillis = minLatencyMillis;
+            mHasEarlyConstraint = true;
             return this;
         }
 
@@ -332,6 +365,7 @@ public class Task implements Parcelable {
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
             mMaxExecutionDelayMillis = maxExecutionDelayMillis;
+            mHasLateConstraint = true;
             return this;
         }
 
@@ -360,31 +394,18 @@ public class Task implements Parcelable {
          * @return The task object to hand to the TaskManager. This object is immutable.
          */
         public Task build() {
-            // Check that extras bundle only contains primitive types.
-            try {
-                for (String key : extras.keySet()) {
-                    Object value = extras.get(key);
-                    if (value == null) continue;
-                    if (value instanceof Long) continue;
-                    if (value instanceof Integer) continue;
-                    if (value instanceof Boolean) continue;
-                    if (value instanceof Float) continue;
-                    if (value instanceof Double) continue;
-                    if (value instanceof String) continue;
-                    throw new IllegalArgumentException("Unexpected value type: "
-                            + value.getClass().getName());
-                }
-            } catch (IllegalArgumentException e) {
-                throw e;
-            } catch (RuntimeException exc) {
-                throw new IllegalArgumentException("error unparcelling Bundle", exc);
+            if (mExtras == null) {
+                mExtras = Bundle.EMPTY;
+            }
+            if (mTaskId < 0) {
+                throw new IllegalArgumentException("Task id must be greater than 0.");
             }
             // Check that a deadline was not set on a periodic task.
-            if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
+            if (mIsPeriodic && mHasLateConstraint) {
                 throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
                         "periodic task.");
             }
-            if (mIsPeriodic && (mMinLatencyMillis != 0L)) {
+            if (mIsPeriodic && mHasEarlyConstraint) {
                 throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
                         "periodic task");
             }

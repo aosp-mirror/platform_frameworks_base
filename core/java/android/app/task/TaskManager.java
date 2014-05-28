@@ -34,14 +34,13 @@ public abstract class TaskManager {
      * if the run-time for your task is too short, or perhaps the system can't resolve the
      * requisite {@link TaskService} in your package.
      */
-    public static final int RESULT_INVALID_PARAMETERS = -1;
-
+    public static final int RESULT_FAILURE = 0;
     /**
      * Returned from {@link #schedule(Task)} if this application has made too many requests for
      * work over too short a time.
      */
     // TODO: Determine if this is necessary.
-    public static final int RESULT_OVER_QUOTA = -2;
+    public static final int RESULT_SUCCESS = 1;
 
     /**
      * @param task The task you wish scheduled. See
