@@ -25,6 +25,7 @@ import android.os.MessageQueue;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.util.Predicate;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 
 import libcore.util.EmptyArray;
@@ -77,6 +78,22 @@ final class HdmiCecController {
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
     private static final int RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION = 3;
+
+    // Predicate for whether the given logical address is remote device's one or not.
+    private final Predicate<Integer> mRemoteDeviceAddressPredicate = new Predicate<Integer>() {
+        @Override
+        public boolean apply(Integer address) {
+            return !isAllocatedLocalDeviceAddress(address);
+        }
+    };
+
+    // Predicate whether the given logical address is system audio's one or not
+    private final Predicate<Integer> mSystemAudioAddressPredicate = new Predicate<Integer>() {
+        @Override
+        public boolean apply(Integer address) {
+            return HdmiCec.getTypeFromAddress(address) == HdmiCec.ADDR_AUDIO_SYSTEM;
+        }
+    };
 
     // Handler instance to process synchronous I/O (mainly send) message.
     private Handler mIoHandler;
@@ -258,10 +275,23 @@ final class HdmiCecController {
      * Return a list of all {@link HdmiCecDeviceInfo}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     *
+     * @param includeLocalDevice whether to add local device or not
      */
-    List<HdmiCecDeviceInfo> getDeviceInfoList() {
+    List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includeLocalDevice) {
         assertRunOnServiceThread();
-        return sparseArrayToList(mDeviceInfos);
+        if (includeLocalDevice) {
+            return sparseArrayToList(mDeviceInfos);
+        } else {
+            ArrayList<HdmiCecDeviceInfo> infoList = new ArrayList<>();
+            for (int i = 0; i < mDeviceInfos.size(); ++i) {
+                HdmiCecDeviceInfo info = mDeviceInfos.valueAt(i);
+                if (mRemoteDeviceAddressPredicate.apply(info.getLogicalAddress())) {
+                    infoList.add(info);
+                }
+            }
+            return infoList;
+        }
     }
 
     /**
@@ -363,18 +393,14 @@ final class HdmiCecController {
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      *
      * @param callback an interface used to get a list of all remote devices' address
+     * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
      */
-    void pollDevices(DevicePollingCallback callback, int retryCount) {
+    void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
         assertRunOnServiceThread();
-        // Extract polling candidates. No need to poll against local devices.
-        ArrayList<Integer> pollingCandidates = new ArrayList<>();
-        for (int i = HdmiCec.ADDR_SPECIFIC_USE; i >= HdmiCec.ADDR_TV; --i) {
-            if (!isAllocatedLocalDeviceAddress(i)) {
-                pollingCandidates.add(i);
-            }
-        }
 
+        // Extract polling candidates. No need to poll against local devices.
+        List<Integer> pollingCandidates = pickPollCandidates(pickStrategy);
         runDevicePolling(pollingCandidates, retryCount, callback);
     }
 
@@ -386,6 +412,41 @@ final class HdmiCecController {
     List<HdmiCecLocalDevice> getLocalDeviceList() {
         assertRunOnServiceThread();
         return sparseArrayToList(mLocalDevices);
+    }
+
+    private List<Integer> pickPollCandidates(int pickStrategy) {
+        int strategy = pickStrategy & HdmiControlService.POLL_STRATEGY_MASK;
+        Predicate<Integer> pickPredicate = null;
+        switch (strategy) {
+            case HdmiControlService.POLL_STRATEGY_SYSTEM_AUDIO:
+                pickPredicate = mSystemAudioAddressPredicate;
+                break;
+            case HdmiControlService.POLL_STRATEGY_REMOTES_DEVICES:
+            default:  // The default is POLL_STRATEGY_REMOTES_DEVICES.
+                pickPredicate = mRemoteDeviceAddressPredicate;
+                break;
+        }
+
+        int iterationStrategy = pickStrategy & HdmiControlService.POLL_ITERATION_STRATEGY_MASK;
+        ArrayList<Integer> pollingCandidates = new ArrayList<>();
+        switch (iterationStrategy) {
+            case HdmiControlService.POLL_ITERATION_IN_ORDER:
+                for (int i = HdmiCec.ADDR_TV; i <= HdmiCec.ADDR_SPECIFIC_USE; ++i) {
+                    if (pickPredicate.apply(i)) {
+                        pollingCandidates.add(i);
+                    }
+                }
+                break;
+            case HdmiControlService.POLL_ITERATION_REVERSE_ORDER:
+            default:  // The default is reverse order.
+                for (int i = HdmiCec.ADDR_SPECIFIC_USE; i >= HdmiCec.ADDR_TV; --i) {
+                    if (pickPredicate.apply(i)) {
+                        pollingCandidates.add(i);
+                    }
+                }
+                break;
+        }
+        return pollingCandidates;
     }
 
     private static <T> List<T> sparseArrayToList(SparseArray<T> array) {

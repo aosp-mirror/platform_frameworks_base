@@ -124,7 +124,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
                 allocateDevices(ackedAddress);
                 startPhysicalAddressStage();
             }
-        }, DEVICE_POLLING_RETRY);
+        }, HdmiControlService.POLL_STRATEGY_REMOTES_DEVICES, DEVICE_POLLING_RETRY);
         return true;
     }
 

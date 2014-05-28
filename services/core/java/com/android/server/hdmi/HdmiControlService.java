@@ -58,6 +58,14 @@ public final class HdmiControlService extends SystemService {
     static final int SEND_RESULT_NAK = -1;
     static final int SEND_RESULT_FAILURE = -2;
 
+    static final int POLL_STRATEGY_MASK = 0x3;  // first and second bit.
+    static final int POLL_STRATEGY_REMOTES_DEVICES = 0x1;
+    static final int POLL_STRATEGY_SYSTEM_AUDIO = 0x2;
+
+    static final int POLL_ITERATION_STRATEGY_MASK = 0x30000;  // first and second bit.
+    static final int POLL_ITERATION_IN_ORDER = 0x10000;
+    static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
+
     /**
      * Interface to report send result.
      */
@@ -115,10 +123,12 @@ public final class HdmiControlService extends SystemService {
     @Nullable
     private HdmiMhlController mMhlController;
 
+    @GuardedBy("mLock")
     // Whether ARC is "enabled" or not.
     // TODO: it may need to hold lock if it's accessed from others.
     private boolean mArcStatusEnabled = false;
 
+    @GuardedBy("mLock")
     // Whether SystemAudioMode is "On" or not.
     private boolean mSystemAudioMode;
 
@@ -227,6 +237,16 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
+     * Returns a list of {@link HdmiCecDeviceInfo}.
+     *
+     * @param includeLocalDevice whether to include local devices
+     */
+    List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includeLocalDevice) {
+        assertRunOnServiceThread();
+        return mCecController.getDeviceInfoList(includeLocalDevice);
+    }
+
+    /**
      * Add and start a new {@link FeatureAction} to the action queue.
      *
      * @param action {@link FeatureAction} to add and start
@@ -240,6 +260,18 @@ public final class HdmiControlService extends SystemService {
                 action.start();
             }
         });
+    }
+
+    void setSystemAudioMode(boolean on) {
+        synchronized (mLock) {
+            mSystemAudioMode = on;
+        }
+    }
+
+    boolean getSystemAudioMode() {
+        synchronized (mLock) {
+            return mSystemAudioMode;
+        }
     }
 
     // See if we have an action of a given type in progress.
@@ -301,13 +333,15 @@ public final class HdmiControlService extends SystemService {
      * @return {@code true} if ARC was in "Enabled" status
      */
     boolean setArcStatus(boolean enabled) {
-        boolean oldStatus = mArcStatusEnabled;
-        // 1. Enable/disable ARC circuit.
-        // TODO: call set_audio_return_channel of hal interface.
+        synchronized (mLock) {
+            boolean oldStatus = mArcStatusEnabled;
+            // 1. Enable/disable ARC circuit.
+            // TODO: call set_audio_return_channel of hal interface.
 
-        // 2. Update arc status;
-        mArcStatusEnabled = enabled;
-        return oldStatus;
+            // 2. Update arc status;
+            mArcStatusEnabled = enabled;
+            return oldStatus;
+        }
     }
 
     /**
@@ -387,10 +421,24 @@ public final class HdmiControlService extends SystemService {
      * devices.
      *
      * @param callback an interface used to get a list of all remote devices' address
+     * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
+     * @throw IllegalArgumentException if {@code pickStrategy} is invalid value
      */
-    void pollDevices(DevicePollingCallback callback, int retryCount) {
-        mCecController.pollDevices(callback, retryCount);
+    void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
+        mCecController.pollDevices(callback, checkPollStrategy(pickStrategy), retryCount);
+    }
+
+    private int checkPollStrategy(int pickStrategy) {
+        int strategy = pickStrategy & POLL_STRATEGY_MASK;
+        if (strategy == 0) {
+            throw new IllegalArgumentException("Invalid poll strategy:" + pickStrategy);
+        }
+        int iterationStrategy = pickStrategy & POLL_ITERATION_STRATEGY_MASK;
+        if (iterationStrategy == 0) {
+            throw new IllegalArgumentException("Invalid iteration strategy:" + pickStrategy);
+        }
+        return strategy | iterationStrategy;
     }
 
 
@@ -400,7 +448,7 @@ public final class HdmiControlService extends SystemService {
      *
      * @param sourceAddress a logical address of tv
      */
-    void launchDeviceDiscovery(int sourceAddress) {
+    void launchDeviceDiscovery(final int sourceAddress) {
         // At first, clear all existing device infos.
         mCecController.clearDeviceInfoList();
 
@@ -418,8 +466,8 @@ public final class HdmiControlService extends SystemService {
                             mCecController.addDeviceInfo(device.getDeviceInfo());
                         }
 
-                        // TODO: start hot-plug detection sequence here.
-                        // addAndStartAction(new HotplugDetectionAction());
+                        addAndStartAction(new HotplugDetectionAction(HdmiControlService.this,
+                                sourceAddress));
                     }
                 });
         addAndStartAction(action);
@@ -438,7 +486,7 @@ public final class HdmiControlService extends SystemService {
             return;
         }
 
-        // Ignore if [Device Discovery Action] is on going ignore message.
+        // Ignore if [Device Discovery Action] is going on.
         if (hasAction(DeviceDiscoveryAction.class)) {
             Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
                     + "because Device Discovery Action is on-going:" + message);
@@ -585,7 +633,6 @@ public final class HdmiControlService extends SystemService {
         mCecController.addDeviceInfo(info);
     }
 
-
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -728,21 +775,6 @@ public final class HdmiControlService extends SystemService {
 
     HdmiCecDeviceInfo getAvrDeviceInfo() {
         return mCecController.getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
-    }
-
-    void setSystemAudioMode(boolean newMode) {
-        assertRunOnServiceThread();
-        if (newMode != mSystemAudioMode) {
-            // TODO: Need to set the preference for SystemAudioMode.
-            // TODO: Need to handle the notification of changing the mode and
-            // to identify the notification should be handled in the service or TvSettings.
-            mSystemAudioMode = newMode;
-        }
-    }
-
-    boolean getSystemAudioMode() {
-        assertRunOnServiceThread();
-        return mSystemAudioMode;
     }
 
     void setAudioStatus(boolean mute, int volume) {
