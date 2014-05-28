@@ -778,7 +778,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     // libart tolerates libdvm flags, but not vice versa, so only pass some options if libart.
-    property_get("persist.sys.dalvik.vm.lib.1", dalvikVmLibBuf, "libdvm.so");
+    property_get("persist.sys.dalvik.vm.lib.2", dalvikVmLibBuf, "libart.so");
     bool libart = (strncmp(dalvikVmLibBuf, "libart", 6) == 0);
 
     if (libart) {
