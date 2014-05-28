@@ -1006,14 +1006,6 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to communicate with a SIM card using logical
-         channels. -->
-    <permission android:name="android.permission.SIM_COMMUNICATION"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:label="@string/permlab_sim_communication"
-        android:description="@string/permdesc_sim_communication"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows TvInputService to access underlying TV input hardware such as
          built-in tuners and HDMI-in's.
          @hide This should only be used by OEM's TvInputService's.
