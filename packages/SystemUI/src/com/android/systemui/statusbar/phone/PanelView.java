@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public class PanelView extends FrameLayout {
+public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
     protected float mOverExpansion;
@@ -130,21 +130,24 @@ public class PanelView extends FrameLayout {
         final float y = event.getY(pointerIndex);
         final float x = event.getX(pointerIndex);
 
+        boolean waitForTouchSlop = hasConflictingGestures();
+
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mTracking = true;
 
                 mInitialTouchY = y;
                 mInitialTouchX = x;
+                mInitialOffsetOnTouch = mExpandedHeight;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
                 trackMovement(event);
-                if (mHeightAnimator != null) {
-                    mHeightAnimator.cancel(); // end any outstanding animations
+                if (!waitForTouchSlop || mHeightAnimator != null) {
+                    if (mHeightAnimator != null) {
+                        mHeightAnimator.cancel(); // end any outstanding animations
+                    }
+                    onTrackingStarted();
                 }
-                onTrackingStarted();
-                mInitialOffsetOnTouch = mExpandedHeight;
                 if (mExpandedHeight == 0) {
                     mJustPeeked = true;
                     runPeekAnimation();
@@ -166,15 +169,27 @@ public class PanelView extends FrameLayout {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                final float h = y - mInitialTouchY + mInitialOffsetOnTouch;
-                if (h > mPeekHeight) {
+                float h = y - mInitialTouchY;
+                if (waitForTouchSlop && !mTracking && Math.abs(h) > mTouchSlop
+                        && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
+                    mInitialOffsetOnTouch = mExpandedHeight;
+                    mInitialTouchX = x;
+                    mInitialTouchY = y;
+                    if (mHeightAnimator != null) {
+                        mHeightAnimator.cancel(); // end any outstanding animations
+                    }
+                    onTrackingStarted();
+                    h = 0;
+                }
+                final float newHeight = h + mInitialOffsetOnTouch;
+                if (newHeight > mPeekHeight) {
                     if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
                         mPeekAnimator.cancel();
                     }
                     mJustPeeked = false;
                 }
-                if (!mJustPeeked) {
-                    setExpandedHeightInternal(h);
+                if (!mJustPeeked && (!waitForTouchSlop || mTracking)) {
+                    setExpandedHeightInternal(newHeight);
                     mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
                 }
 
@@ -183,7 +198,6 @@ public class PanelView extends FrameLayout {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mTracking = false;
                 mTrackingPointer = -1;
                 trackMovement(event);
                 boolean expand = flingWithCurrentVelocity();
@@ -194,14 +208,18 @@ public class PanelView extends FrameLayout {
                 }
                 break;
         }
-        return true;
+        return !waitForTouchSlop || mTracking;
     }
 
+    protected abstract boolean hasConflictingGestures();
+
     protected void onTrackingStopped(boolean expand) {
+        mTracking = false;
         mBar.onTrackingStopped(PanelView.this, expand);
     }
 
     protected void onTrackingStarted() {
+        mTracking = true;
         mBar.onTrackingStarted(PanelView.this);
         onExpandingStarted();
     }

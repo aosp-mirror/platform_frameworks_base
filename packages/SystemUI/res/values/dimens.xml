@@ -294,6 +294,9 @@
     <dimen name="keyguard_clock_notifications_margin_min">22dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
 
+    <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
+    <dimen name="keyguard_min_swipe_amount">75dp</dimen>
+
     <!-- Volume panel dialog y offset -->
     <dimen name="volume_panel_top">16dp</dimen>
 

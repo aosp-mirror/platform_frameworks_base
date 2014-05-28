@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -40,10 +41,13 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
+import java.util.ArrayList;
+
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
-        View.OnClickListener {
+        View.OnClickListener, KeyguardPageSwipeHelper.Callback {
 
+    private KeyguardPageSwipeHelper mPageSwiper;
     PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
@@ -58,7 +62,7 @@ public class NotificationPanelView extends PanelView implements
 
     private int mTrackingPointer;
     private VelocityTracker mVelocityTracker;
-    private boolean mTracking;
+    private boolean mQsTracking;
 
     /**
      * Whether we are currently handling a motion gesture in #onInterceptTouchEvent, but haven't
@@ -92,6 +96,11 @@ public class NotificationPanelView extends PanelView implements
             new KeyguardClockPositionAlgorithm();
     private KeyguardClockPositionAlgorithm.Result mClockPositionResult =
             new KeyguardClockPositionAlgorithm.Result();
+    private boolean mIsSwipedHorizontally;
+    private boolean mIsExpanding;
+    private KeyguardBottomAreaView mKeyguardBottomArea;
+    private boolean mBlockTouches;
+    private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -129,6 +138,10 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOnHeightChangedListener(this);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
+        mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+        mSwipeTranslationViews.add(mNotificationStackScroller);
+        mSwipeTranslationViews.add(mKeyguardStatusView);
+        mPageSwiper = new KeyguardPageSwipeHelper(this, getContext());
     }
 
     @Override
@@ -247,6 +260,12 @@ public class NotificationPanelView extends PanelView implements
         mQsExpansionEnabled = qsExpansionEnabled;
     }
 
+    public void resetViews() {
+        mBlockTouches = false;
+        mPageSwiper.reset();
+        closeQs();
+    }
+
     public void closeQs() {
         cancelAnimation();
         setQsExpansion(mQsMinExpansionHeight);
@@ -263,9 +282,7 @@ public class NotificationPanelView extends PanelView implements
     public void fling(float vel, boolean always) {
         GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
         if (gr != null) {
-            gr.tag(
-                "fling " + ((vel > 0) ? "open" : "closed"),
-                "notifications,v=" + vel);
+            gr.tag("fling " + ((vel > 0) ? "open" : "closed"), "notifications,v=" + vel);
         }
         super.fling(vel, always);
     }
@@ -283,6 +300,9 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mBlockTouches) {
+            return false;
+        }
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
@@ -298,7 +318,7 @@ public class NotificationPanelView extends PanelView implements
                 mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
-                if (shouldIntercept(mInitialTouchX, mInitialTouchY, 0)) {
+                if (shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 break;
@@ -316,7 +336,7 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
-                if (mTracking) {
+                if (mQsTracking) {
 
                     // Already tracking because onOverscrolled was called. We need to update here
                     // so we don't stop for a frame until the next touch event gets handled in
@@ -327,12 +347,12 @@ public class NotificationPanelView extends PanelView implements
                     return true;
                 }
                 if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)
-                        && shouldIntercept(mInitialTouchX, mInitialTouchY, h)) {
+                        && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     onQsExpansionStarted();
                     mInitialHeightOnTouch = mQsExpansionHeight;
                     mInitialTouchY = y;
                     mInitialTouchX = x;
-                    mTracking = true;
+                    mQsTracking = true;
                     mIntercepting = false;
                     return true;
                 }
@@ -341,9 +361,9 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
-                if (mTracking) {
-                    flingWithCurrentVelocity();
-                    mTracking = false;
+                if (mQsTracking) {
+                    flingQsWithCurrentVelocity();
+                    mQsTracking = false;
                 }
                 mIntercepting = false;
                 break;
@@ -362,7 +382,7 @@ public class NotificationPanelView extends PanelView implements
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
 
-    private void flingWithCurrentVelocity() {
+    private void flingQsWithCurrentVelocity() {
         float vel = getCurrentVelocity();
 
         // TODO: Better logic whether we should expand or not.
@@ -371,65 +391,83 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mBlockTouches) {
+            return false;
+        }
         // TODO: Handle doublefinger swipe to notifications again. Look at history for a reference
         // implementation.
-        if (mTracking) {
-            int pointerIndex = event.findPointerIndex(mTrackingPointer);
-            if (pointerIndex < 0) {
-                pointerIndex = 0;
-                mTrackingPointer = event.getPointerId(pointerIndex);
+        if (!mIsExpanding && !mQsExpanded && mStatusBar.getBarState() != StatusBarState.SHADE) {
+            mPageSwiper.onTouchEvent(event);
+            if (mPageSwiper.isSwipingInProgress()) {
+                return true;
             }
-            final float y = event.getY(pointerIndex);
-            final float x = event.getX(pointerIndex);
-
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    mTracking = true;
-                    mInitialTouchY = y;
-                    mInitialTouchX = x;
-                    onQsExpansionStarted();
-                    mInitialHeightOnTouch = mQsExpansionHeight;
-                    initVelocityTracker();
-                    trackMovement(event);
-                    break;
-
-                case MotionEvent.ACTION_POINTER_UP:
-                    final int upPointer = event.getPointerId(event.getActionIndex());
-                    if (mTrackingPointer == upPointer) {
-                        // gesture is ongoing, find a new pointer to track
-                        final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
-                        final float newY = event.getY(newIndex);
-                        final float newX = event.getX(newIndex);
-                        mTrackingPointer = event.getPointerId(newIndex);
-                        mInitialHeightOnTouch = mQsExpansionHeight;
-                        mInitialTouchY = newY;
-                        mInitialTouchX = newX;
-                    }
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    final float h = y - mInitialTouchY;
-                    setQsExpansion(h + mInitialHeightOnTouch);
-                    trackMovement(event);
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    mTracking = false;
-                    mTrackingPointer = -1;
-                    trackMovement(event);
-                    flingWithCurrentVelocity();
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
-                    break;
-            }
-            return true;
+        }
+        if (mQsTracking || mQsExpanded) {
+            return onQsTouch(event);
         }
 
-        // Consume touch events when QS are expanded.
-        return mQsExpanded || super.onTouchEvent(event);
+        super.onTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    protected boolean hasConflictingGestures() {
+        return mStatusBar.getBarState() != StatusBarState.SHADE;
+    }
+
+    private boolean onQsTouch(MotionEvent event) {
+        int pointerIndex = event.findPointerIndex(mTrackingPointer);
+        if (pointerIndex < 0) {
+            pointerIndex = 0;
+            mTrackingPointer = event.getPointerId(pointerIndex);
+        }
+        final float y = event.getY(pointerIndex);
+        final float x = event.getX(pointerIndex);
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                mQsTracking = true;
+                mInitialTouchY = y;
+                mInitialTouchX = x;
+                onQsExpansionStarted();
+                mInitialHeightOnTouch = mQsExpansionHeight;
+                initVelocityTracker();
+                trackMovement(event);
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                final int upPointer = event.getPointerId(event.getActionIndex());
+                if (mTrackingPointer == upPointer) {
+                    // gesture is ongoing, find a new pointer to track
+                    final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
+                    final float newY = event.getY(newIndex);
+                    final float newX = event.getX(newIndex);
+                    mTrackingPointer = event.getPointerId(newIndex);
+                    mInitialHeightOnTouch = mQsExpansionHeight;
+                    mInitialTouchY = newY;
+                    mInitialTouchX = newX;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                final float h = y - mInitialTouchY;
+                setQsExpansion(h + mInitialHeightOnTouch);
+                trackMovement(event);
+                break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mQsTracking = false;
+                mTrackingPointer = -1;
+                trackMovement(event);
+                flingQsWithCurrentVelocity();
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+        }
+        return true;
     }
 
     @Override
@@ -439,7 +477,7 @@ public class NotificationPanelView extends PanelView implements
             mInitialHeightOnTouch = mQsExpansionHeight;
             mInitialTouchY = mLastTouchY;
             mInitialTouchX = mLastTouchX;
-            mTracking = true;
+            mQsTracking = true;
         }
     }
 
@@ -569,7 +607,7 @@ public class NotificationPanelView extends PanelView implements
     /**
      * @return Whether we should intercept a gesture to open Quick Settings.
      */
-    private boolean shouldIntercept(float x, float y, float yDiff) {
+    private boolean shouldQuickSettingsIntercept(float x, float y, float yDiff) {
         if (!mQsExpansionEnabled) {
             return false;
         }
@@ -647,12 +685,14 @@ public class NotificationPanelView extends PanelView implements
     protected void onExpandingStarted() {
         super.onExpandingStarted();
         mNotificationStackScroller.onExpansionStarted();
+        mIsExpanding = true;
     }
 
     @Override
     protected void onExpandingFinished() {
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
+        mIsExpanding = false;
     }
 
     @Override
@@ -686,6 +726,12 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mPageSwiper.onConfigurationChanged();
+    }
+
+    @Override
     public void onClick(View v) {
         if (v == mHeader.getBackgroundView()) {
             onQsExpansionStarted();
@@ -695,5 +741,41 @@ public class NotificationPanelView extends PanelView implements
                 flingSettings(0 /* vel */, true /* expand */);
             }
         }
+    }
+
+    @Override
+    public void onAnimationToSideStarted(boolean rightPage) {
+        if (rightPage) {
+            mKeyguardBottomArea.launchCamera();
+        } else {
+            mKeyguardBottomArea.launchPhone();
+        }
+        mBlockTouches = true;
+    }
+
+
+    @Override
+    public float getPageWidth() {
+        return getWidth();
+    }
+
+    @Override
+    public ArrayList<View> getTranslationViews() {
+        return mSwipeTranslationViews;
+    }
+
+    @Override
+    public View getLeftIcon() {
+        return mKeyguardBottomArea.getPhoneImageView();
+    }
+
+    @Override
+    public View getCenterIcon() {
+        return mKeyguardBottomArea.getLockIcon();
+    }
+
+    @Override
+    public View getRightIcon() {
+        return mKeyguardBottomArea.getCameraImageView();
     }
 }

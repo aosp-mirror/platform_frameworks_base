@@ -2774,7 +2774,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
             mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
-            mNotificationPanel.closeQs();
+            mNotificationPanel.resetViews();
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardIndicationTextView.setVisibility(View.GONE);

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
@@ -45,6 +46,8 @@ public class FlingAnimationUtils {
     private float mMinVelocityPxPerSecond;
     private float mMaxLengthSeconds;
     private float mHighVelocityPxPerSecond;
+
+    private AnimatorProperties mAnimatorProperties = new AnimatorProperties();
 
     public FlingAnimationUtils(Context ctx, float maxLengthSeconds) {
         mMaxLengthSeconds = maxLengthSeconds;
@@ -80,18 +83,59 @@ public class FlingAnimationUtils {
      * @param currValue the current value
      * @param endValue the end value of the animator
      * @param velocity the current velocity of the motion
+     */
+    public void apply(ViewPropertyAnimator animator, float currValue, float endValue,
+            float velocity) {
+        apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion.
+     *
+     * @param animator the animator to apply
+     * @param currValue the current value
+     * @param endValue the end value of the animator
+     * @param velocity the current velocity of the motion
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
     public void apply(ValueAnimator animator, float currValue, float endValue, float velocity,
             float maxDistance) {
+        AnimatorProperties properties = getProperties(currValue, endValue, velocity,
+                maxDistance);
+        animator.setDuration(properties.duration);
+        animator.setInterpolator(properties.interpolator);
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion.
+     *
+     * @param animator the animator to apply
+     * @param currValue the current value
+     * @param endValue the end value of the animator
+     * @param velocity the current velocity of the motion
+     * @param maxDistance the maximum distance for this interaction; the maximum animation length
+     *                    gets multiplied by the ratio between the actual distance and this value
+     */
+    public void apply(ViewPropertyAnimator animator, float currValue, float endValue,
+            float velocity, float maxDistance) {
+        AnimatorProperties properties = getProperties(currValue, endValue, velocity,
+                maxDistance);
+        animator.setDuration(properties.duration);
+        animator.setInterpolator(properties.interpolator);
+    }
+
+    private AnimatorProperties getProperties(float currValue,
+            float endValue, float velocity, float maxDistance) {
         float maxLengthSeconds = (float) (mMaxLengthSeconds
                 * Math.sqrt(Math.abs(endValue - currValue) / maxDistance));
         float diff = Math.abs(endValue - currValue);
         float velAbs = Math.abs(velocity);
         float durationSeconds = LINEAR_OUT_SLOW_IN_START_GRADIENT * diff / velAbs;
         if (durationSeconds <= maxLengthSeconds) {
-            animator.setInterpolator(mLinearOutSlowIn);
+            mAnimatorProperties.interpolator = mLinearOutSlowIn;
         } else if (velAbs >= mMinVelocityPxPerSecond) {
 
             // Cross fade between fast-out-slow-in and linear interpolator with current velocity.
@@ -100,14 +144,15 @@ public class FlingAnimationUtils {
                     = new VelocityInterpolator(durationSeconds, velAbs, diff);
             InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
                     velocityInterpolator, mLinearOutSlowIn, mLinearOutSlowIn);
-            animator.setInterpolator(superInterpolator);
+            mAnimatorProperties.interpolator = superInterpolator;
         } else {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            animator.setInterpolator(mFastOutSlowIn);
+            mAnimatorProperties.interpolator = mFastOutSlowIn;
         }
-        animator.setDuration((long) (durationSeconds * 1000));
+        mAnimatorProperties.duration = (long) (durationSeconds * 1000);
+        return mAnimatorProperties;
     }
 
     /**
@@ -124,6 +169,34 @@ public class FlingAnimationUtils {
      */
     public void applyDismissing(ValueAnimator animator, float currValue, float endValue,
             float velocity, float maxDistance) {
+        AnimatorProperties properties = getDismissingProperties(currValue, endValue, velocity,
+                maxDistance);
+        animator.setDuration(properties.duration);
+        animator.setInterpolator(properties.interpolator);
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion for the case when the animation is making something
+     * disappear.
+     *
+     * @param animator the animator to apply
+     * @param currValue the current value
+     * @param endValue the end value of the animator
+     * @param velocity the current velocity of the motion
+     * @param maxDistance the maximum distance for this interaction; the maximum animation length
+     *                    gets multiplied by the ratio between the actual distance and this value
+     */
+    public void applyDismissing(ViewPropertyAnimator animator, float currValue, float endValue,
+            float velocity, float maxDistance) {
+        AnimatorProperties properties = getDismissingProperties(currValue, endValue, velocity,
+                maxDistance);
+        animator.setDuration(properties.duration);
+        animator.setInterpolator(properties.interpolator);
+    }
+
+    private AnimatorProperties getDismissingProperties(float currValue, float endValue,
+            float velocity, float maxDistance) {
         float maxLengthSeconds = (float) (mMaxLengthSeconds
                 * Math.pow(Math.abs(endValue - currValue) / maxDistance, 0.5f));
         float diff = Math.abs(endValue - currValue);
@@ -135,7 +208,7 @@ public class FlingAnimationUtils {
         Interpolator mLinearOutFasterIn = new PathInterpolator(0, 0, 1, y2);
         float durationSeconds = startGradient * diff / velAbs;
         if (durationSeconds <= maxLengthSeconds) {
-            animator.setInterpolator(mLinearOutFasterIn);
+            mAnimatorProperties.interpolator = mLinearOutFasterIn;
         } else if (velAbs >= mMinVelocityPxPerSecond) {
 
             // Cross fade between linear-out-faster-in and linear interpolator with current
@@ -145,14 +218,15 @@ public class FlingAnimationUtils {
                     = new VelocityInterpolator(durationSeconds, velAbs, diff);
             InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
                     velocityInterpolator, mLinearOutFasterIn, mLinearOutSlowIn);
-            animator.setInterpolator(superInterpolator);
+            mAnimatorProperties.interpolator = superInterpolator;
         } else {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            animator.setInterpolator(mFastOutLinearIn);
+            mAnimatorProperties.interpolator = mFastOutLinearIn;
         }
-        animator.setDuration((long) (durationSeconds * 1000));
+        mAnimatorProperties.duration = (long) (durationSeconds * 1000);
+        return mAnimatorProperties;
     }
 
     /**
@@ -221,4 +295,10 @@ public class FlingAnimationUtils {
             return time * mVelocity / mDiff;
         }
     }
+
+    private static class AnimatorProperties {
+        Interpolator interpolator;
+        long duration;
+    }
+
 }
