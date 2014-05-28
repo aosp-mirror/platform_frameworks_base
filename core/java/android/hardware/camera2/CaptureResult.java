@@ -537,8 +537,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
-     * bottom-right pixel in the active pixel array. The weight
-     * should be nonnegative.</p>
+     * bottom-right pixel in the active pixel array.</p>
+     * <p>The weight must range from 0 to 1000, and represents a weight
+     * for every pixel in the area. This means that a large metering area
+     * with the same weight as a smaller area will have more effect in
+     * the metering result. Metering areas can partially overlap and the
+     * camera device will add the weights in the overlap region.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the camera device. If the metering region is
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
@@ -807,8 +811,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
-     * bottom-right pixel in the active pixel array. The weight
-     * should be nonnegative.</p>
+     * bottom-right pixel in the active pixel array.</p>
+     * <p>The weight must range from 0 to 1000, and represents a weight
+     * for every pixel in the area. This means that a large metering area
+     * with the same weight as a smaller area will have more effect in
+     * the metering result. Metering areas can partially overlap and the
+     * camera device will add the weights in the overlap region.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the camera device. If the metering region is
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
@@ -1287,8 +1295,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
-     * bottom-right pixel in the active pixel array. The weight
-     * should be nonnegative.</p>
+     * bottom-right pixel in the active pixel array.</p>
+     * <p>The weight must range from 0 to 1000, and represents a weight
+     * for every pixel in the area. This means that a large metering area
+     * with the same weight as a smaller area will have more effect in
+     * the metering result. Metering areas can partially overlap and the
+     * camera device will add the weights in the overlap region.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the camera device. If the metering region is
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
