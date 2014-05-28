@@ -61,6 +61,13 @@ static struct {
     jfieldID secure;
 } gPhysicalDisplayInfoClassInfo;
 
+static struct {
+    jfieldID bottom;
+    jfieldID left;
+    jfieldID right;
+    jfieldID top;
+} gRectClassInfo;
+
 // Implements SkMallocPixelRef::ReleaseProc, to delete the screenshot on unref.
 void DeleteScreenshot(void* addr, void* context) {
     SkASSERT(addr == ((ScreenshotClient*) context)->getPixels());
@@ -104,25 +111,32 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
     ctrl->decStrong((void *)nativeCreate);
 }
 
-static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject displayTokenObj,
-        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers,
-        bool useIdentityTransform) {
+static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
+        jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
         return NULL;
     }
 
+    int left = env->GetIntField(sourceCropObj, gRectClassInfo.left);
+    int top = env->GetIntField(sourceCropObj, gRectClassInfo.top);
+    int right = env->GetIntField(sourceCropObj, gRectClassInfo.right);
+    int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
+    Rect sourceCrop(left, top, right, bottom);
+
     ScreenshotClient* screenshot = new ScreenshotClient();
     status_t res;
     if (width > 0 && height > 0) {
         if (allLayers) {
-            res = screenshot->update(displayToken, width, height, useIdentityTransform);
-        } else {
-            res = screenshot->update(displayToken, width, height, minLayer, maxLayer,
+            res = screenshot->update(displayToken, sourceCrop, width, height,
                     useIdentityTransform);
+        } else {
+            res = screenshot->update(displayToken, sourceCrop, width, height,
+                    minLayer, maxLayer, useIdentityTransform);
         }
     } else {
-        res = screenshot->update(displayToken, useIdentityTransform);
+        res = screenshot->update(displayToken, sourceCrop, useIdentityTransform);
     }
     if (res != NO_ERROR) {
         delete screenshot;
@@ -174,20 +188,25 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
             GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
-static void nativeScreenshot(JNIEnv* env, jclass clazz,
-        jobject displayTokenObj, jobject surfaceObj,
-        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers,
-        bool useIdentityTransform) {
+static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
+        jobject surfaceObj, jobject sourceCropObj, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken != NULL) {
         sp<Surface> consumer = android_view_Surface_getSurface(env, surfaceObj);
         if (consumer != NULL) {
+            int left = env->GetIntField(sourceCropObj, gRectClassInfo.left);
+            int top = env->GetIntField(sourceCropObj, gRectClassInfo.top);
+            int right = env->GetIntField(sourceCropObj, gRectClassInfo.right);
+            int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
+            Rect sourceCrop(left, top, right, bottom);
+
             if (allLayers) {
                 minLayer = 0;
                 maxLayer = -1;
             }
-            ScreenshotClient::capture(
-                    displayToken, consumer->getIGraphicBufferProducer(),
+            ScreenshotClient::capture(displayToken,
+                    consumer->getIGraphicBufferProducer(), sourceCrop,
                     width, height, uint32_t(minLayer), uint32_t(maxLayer),
                     useIdentityTransform);
         }
@@ -563,9 +582,9 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    {"nativeScreenshot", "(Landroid/os/IBinder;IIIIZZ)Landroid/graphics/Bitmap;",
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZ)Landroid/graphics/Bitmap;",
             (void*)nativeScreenshotBitmap },
-    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;IIIIZZ)V",
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;Landroid/graphics/Rect;IIIIZZ)V",
             (void*)nativeScreenshot },
     {"nativeOpenTransaction", "()V",
             (void*)nativeOpenTransaction },
@@ -639,6 +658,12 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gPhysicalDisplayInfoClassInfo.xDpi = env->GetFieldID(clazz, "xDpi", "F");
     gPhysicalDisplayInfoClassInfo.yDpi = env->GetFieldID(clazz, "yDpi", "F");
     gPhysicalDisplayInfoClassInfo.secure = env->GetFieldID(clazz, "secure", "Z");
+
+    jclass rectClazz = env->FindClass("android/graphics/Rect");
+    gRectClassInfo.bottom = env->GetFieldID(rectClazz, "bottom", "I");
+    gRectClassInfo.left = env->GetFieldID(rectClazz, "left", "I");
+    gRectClassInfo.right = env->GetFieldID(rectClazz, "right", "I");
+    gRectClassInfo.top = env->GetFieldID(rectClazz, "top", "I");
 
     jclass frameStatsClazz = env->FindClass("android/view/FrameStats");
     jfieldID undefined_time_nano_field =  env->GetStaticFieldID(frameStatsClazz, "UNDEFINED_TIME_NANO", "J");

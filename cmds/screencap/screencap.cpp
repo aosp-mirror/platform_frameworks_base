@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 
     ScreenshotClient screenshot;
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
-    if (display != NULL && screenshot.update(display, false) == NO_ERROR) {
+    if (display != NULL && screenshot.update(display, Rect(), false) == NO_ERROR) {
         base = screenshot.getPixels();
         w = screenshot.getWidth();
         h = screenshot.getHeight();
