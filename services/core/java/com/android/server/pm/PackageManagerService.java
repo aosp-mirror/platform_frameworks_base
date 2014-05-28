@@ -11775,8 +11775,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
                 if (removed.size() > 0) {
-                    for (int j=0; j<removed.size(); j++) {
-                        PreferredActivity pa = removed.get(i);
+                    for (int r=0; r<removed.size(); r++) {
+                        PreferredActivity pa = removed.get(r);
                         Slog.w(TAG, "Removing dangling preferred activity: "
                                 + pa.mPref.mComponent);
                         pir.removeFilter(pa);
