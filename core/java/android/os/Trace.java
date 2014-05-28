@@ -70,6 +70,8 @@ public final class Trace {
     public static final long TRACE_TAG_DALVIK = 1L << 14;
     /** @hide */
     public static final long TRACE_TAG_RS = 1L << 15;
+    /** @hide */
+    public static final long TRACE_TAG_BIONIC = 1L << 16;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
