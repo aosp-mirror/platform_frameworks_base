@@ -156,6 +156,12 @@
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Блютүүт <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Байршил <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Сэрүүлгийг <xliff:g id="TIME">%s</xliff:g>-д тохируулсан."</string>
+    <!-- no translation found for accessibility_quick_settings_close (2571790856136835943) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_more_time (5778794273488176726) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_less_time (101026945195230084) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G дата идэвхгүй болов"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G дата идэвхгүй байна"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобайл дата идэвхгүй болов"</string>
@@ -207,6 +213,8 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Өөр тохиргоо"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
+    <!-- no translation found for quick_settings_notifications_label (4818156442169154523) -->
+    <skip />
     <string name="recents_empty_message" msgid="2269156590813544104">"СҮҮЛИЙН"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Аппликешны мэдээлэл"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"хайх"</string>
@@ -226,4 +234,10 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нээхийн тулд дахин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Түгжээг тайлах бол шудрана уу"</string>
+    <!-- no translation found for zen_mode_forever (7420011936770086993) -->
+    <skip />
+    <!-- no translation found for zen_mode_duration_minutes:one (9040808414992812341) -->
+    <!-- no translation found for zen_mode_duration_minutes:other (6924190729213550991) -->
+    <!-- no translation found for zen_mode_duration_hours:one (3480040795582254384) -->
+    <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
 </resources>

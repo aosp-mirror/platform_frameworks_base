@@ -282,6 +282,12 @@
     <skip />
     <!-- no translation found for accessibility_quick_settings_alarm (3959908972897295660) -->
     <skip />
+    <!-- no translation found for accessibility_quick_settings_close (2571790856136835943) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_more_time (5778794273488176726) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_less_time (101026945195230084) -->
+    <skip />
     <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
     <skip />
     <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
@@ -384,6 +390,8 @@
     <skip />
     <!-- no translation found for quick_settings_hotspot_label (6046917934974004879) -->
     <skip />
+    <!-- no translation found for quick_settings_notifications_label (4818156442169154523) -->
+    <skip />
     <!-- no translation found for recents_empty_message (2269156590813544104) -->
     <skip />
     <!-- no translation found for recents_app_info_button_label (2890317189376000030) -->
@@ -411,4 +419,10 @@
     <skip />
     <!-- no translation found for keyguard_unlock (8043466894212841998) -->
     <skip />
+    <!-- no translation found for zen_mode_forever (7420011936770086993) -->
+    <skip />
+    <!-- no translation found for zen_mode_duration_minutes:one (9040808414992812341) -->
+    <!-- no translation found for zen_mode_duration_minutes:other (6924190729213550991) -->
+    <!-- no translation found for zen_mode_duration_hours:one (3480040795582254384) -->
+    <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
 </resources>
