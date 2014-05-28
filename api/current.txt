@@ -10174,8 +10174,8 @@ package android.graphics {
     method public boolean clipRect(float, float, float, float, android.graphics.Region.Op);
     method public boolean clipRect(float, float, float, float);
     method public boolean clipRect(int, int, int, int);
-    method public boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
-    method public boolean clipRegion(android.graphics.Region);
+    method public deprecated boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
+    method public deprecated boolean clipRegion(android.graphics.Region);
     method public void concat(android.graphics.Matrix);
     method public void drawARGB(int, int, int, int);
     method public void drawArc(android.graphics.RectF, float, float, boolean, android.graphics.Paint);
