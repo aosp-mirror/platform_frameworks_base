@@ -1599,6 +1599,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateHeight()
+                        .animateTopInset()
                         .animateY()
                         .animateZ()
                         .hasDelays(),
@@ -1607,6 +1608,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateHeight()
+                        .animateTopInset()
                         .animateY()
                         .animateZ()
                         .hasDelays(),
@@ -1615,6 +1617,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateHeight()
+                        .animateTopInset()
                         .animateY()
                         .animateZ()
                         .hasDelays(),
@@ -1623,6 +1626,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateHeight()
+                        .animateTopInset()
                         .animateY()
                         .animateDimmed()
                         .animateScale()
@@ -1651,6 +1655,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateHeight()
+                        .animateTopInset()
                         .animateY()
                         .animateZ()
         };

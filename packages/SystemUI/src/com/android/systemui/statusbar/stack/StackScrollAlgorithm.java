@@ -49,6 +49,7 @@ public class StackScrollAlgorithm {
     private int mBottomStackPeekSize;
     private int mZDistanceBetweenElements;
     private int mZBasicHeight;
+    private int mRoundedRectCornerRadius;
 
     private StackIndentationFunctor mTopStackIndentationFunctor;
     private StackIndentationFunctor mBottomStackIndentationFunctor;
@@ -111,6 +112,8 @@ public class StackScrollAlgorithm {
         mZBasicHeight = (MAX_ITEMS_IN_BOTTOM_STACK + 1) * mZDistanceBetweenElements;
         mBottomStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
+        mRoundedRectCornerRadius = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
     }
 
 
@@ -146,6 +149,67 @@ public class StackScrollAlgorithm {
 
         handleDraggedViews(ambientState, resultState, algorithmState);
         updateDimmedActivated(ambientState, resultState, algorithmState);
+        updateClipping(resultState, algorithmState);
+    }
+
+    private void updateClipping(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState) {
+        float previousNotificationEnd = 0;
+        float previousNotificationStart = 0;
+        boolean previousNotificationIsSwiped = false;
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            ExpandableView child = algorithmState.visibleChildren.get(i);
+            StackScrollState.ViewState state = resultState.getViewStateForView(child);
+            float newYTranslation = state.yTranslation;
+            int newHeight = state.height;
+            // apply clipping and shadow
+            float newNotificationEnd = newYTranslation + newHeight;
+
+            // In the unlocked shade we have to clip a little bit higher because of the rounded
+            // corners of the notifications.
+            float clippingCorrection = state.dimmed ? 0 : mRoundedRectCornerRadius;
+
+            // When the previous notification is swiped, we don't clip the content to the
+            // bottom of it.
+            float clipHeight = previousNotificationIsSwiped
+                    ? newHeight
+                    : newNotificationEnd - (previousNotificationEnd - clippingCorrection);
+
+            updateChildClippingAndBackground(state, newHeight, clipHeight,
+                    (int) (newHeight - (previousNotificationStart - newYTranslation)));
+
+            if (!child.isTransparent()) {
+                // Only update the previous values if we are not transparent,
+                // otherwise we would clip to a transparent view.
+                previousNotificationStart = newYTranslation + child.getClipTopAmount();
+                previousNotificationEnd = newNotificationEnd;
+                previousNotificationIsSwiped = child.getTranslationX() != 0;
+            }
+        }
+    }
+
+    /**
+     * Updates the shadow outline and the clipping for a view.
+     *
+     * @param state the viewState to update
+     * @param realHeight the currently applied height of the view
+     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
+     * @param backgroundHeight the desired background height. The shadows of the view will be
+     *                         based on this height and the content will be clipped from the top
+     */
+    private void updateChildClippingAndBackground(StackScrollState.ViewState state, int realHeight,
+            float clipHeight, int backgroundHeight) {
+        if (realHeight > clipHeight) {
+            state.topOverLap = (int) (realHeight - clipHeight);
+        } else {
+            state.topOverLap = 0;
+        }
+        if (realHeight > backgroundHeight) {
+            state.clipTopAmount = (realHeight - backgroundHeight);
+        } else {
+            state.clipTopAmount = 0;
+        }
     }
 
     /**

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.stack;
 
-import android.graphics.Outline;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
@@ -37,15 +36,12 @@ public class StackScrollState {
     private static final String CHILD_NOT_FOUND_TAG = "StackScrollStateNoSuchChild";
 
     private final ViewGroup mHostView;
-    private final int mRoundedRectCornerRadius;
     private Map<ExpandableView, ViewState> mStateMap;
     private final Rect mClipRect = new Rect();
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
         mStateMap = new HashMap<ExpandableView, ViewState>();
-        mRoundedRectCornerRadius = mHostView.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
     }
 
     public ViewGroup getHostView() {
@@ -83,9 +79,6 @@ public class StackScrollState {
      */
     public void apply() {
         int numChildren = mHostView.getChildCount();
-        float previousNotificationEnd = 0;
-        float previousNotificationStart = 0;
-        boolean previousNotificationIsSwiped = false;
         for (int i = 0; i < numChildren; i++) {
             ExpandableView child = (ExpandableView) mHostView.getChildAt(i);
             ViewState state = mStateMap.get(child);
@@ -155,37 +148,39 @@ public class StackScrollState {
                 // apply dimming
                 child.setDimmed(state.dimmed, false /* animate */);
 
-                // apply clipping and shadow
-                float newNotificationEnd = newYTranslation + newHeight;
+                float oldClipTopAmount = child.getClipTopAmount();
+                if (oldClipTopAmount != state.clipTopAmount) {
+                    child.setClipTopAmount(state.clipTopAmount);
+                }
 
-                // In the unlocked shade we have to clip a little bit higher because of the rounded
-                // corners of the notifications.
-                float clippingCorrection = state.dimmed ? 0 : mRoundedRectCornerRadius;
-
-                // When the previous notification is swiped, we don't clip the content to the
-                // bottom of it.
-                float clipHeight = previousNotificationIsSwiped
-                        ? newHeight
-                        : newNotificationEnd - (previousNotificationEnd - clippingCorrection);
-
-                updateChildClippingAndBackground(child, newHeight,
-                        clipHeight,
-                        (int) (newHeight - (previousNotificationStart - newYTranslation)));
-
-                if (!child.isTransparent()) {
-                    // Only update the previous values if we are not transparent,
-                    // otherwise we would clip to a transparent view.
-                    previousNotificationStart = newYTranslation + child.getClipTopAmount();
-                    previousNotificationEnd = newNotificationEnd;
-                    previousNotificationIsSwiped = child.getTranslationX() != 0;
+                if (state.topOverLap != 0) {
+                    updateChildClip(child, newHeight, state.topOverLap);
+                } else {
+                    child.setClipBounds(null);
                 }
 
                 if(child instanceof SpeedBumpView) {
-                    performSpeedBumpAnimation(i, (SpeedBumpView) child, newNotificationEnd,
+                    float speedBumpEnd = newYTranslation + newHeight;
+                    performSpeedBumpAnimation(i, (SpeedBumpView) child, speedBumpEnd,
                             newYTranslation);
                 }
             }
         }
+    }
+
+    /**
+     * Updates the clipping of a view
+     *
+     * @param child the view to update
+     * @param height the currently applied height of the view
+     * @param clipInset how much should this view be clipped from the top
+     */
+    private void updateChildClip(View child, int height, int clipInset) {
+        mClipRect.set(0,
+                clipInset,
+                child.getWidth(),
+                height);
+        child.setClipBounds(mClipRect);
     }
 
     private void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, float speedBumpEnd,
@@ -216,45 +211,6 @@ public class StackScrollState {
         return null;
     }
 
-    /**
-     * Updates the shadow outline and the clipping for a view.
-     *
-     * @param child the view to update
-     * @param realHeight the currently applied height of the view
-     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
-     * @param backgroundHeight the desired background height. The shadows of the view will be
-     *                         based on this height and the content will be clipped from the top
-     */
-    private void updateChildClippingAndBackground(ExpandableView child, int realHeight,
-            float clipHeight, int backgroundHeight) {
-        if (realHeight > clipHeight) {
-            updateChildClip(child, realHeight, clipHeight);
-        } else {
-            child.setClipBounds(null);
-        }
-        if (realHeight > backgroundHeight) {
-            child.setClipTopAmount(realHeight - backgroundHeight);
-        } else {
-            child.setClipTopAmount(0);
-        }
-    }
-
-    /**
-     * Updates the clipping of a view
-     *
-     * @param child the view to update
-     * @param height the currently applied height of the view
-     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
-     */
-    private void updateChildClip(View child, int height, float clipHeight) {
-        int clipInset = (int) (height - clipHeight);
-        mClipRect.set(0,
-                clipInset,
-                child.getWidth(),
-                height);
-        child.setClipBounds(mClipRect);
-    }
-
     public static class ViewState {
 
         // These are flags such that we can create masks for filtering.
@@ -274,6 +230,18 @@ public class StackScrollState {
         boolean gone;
         float scale;
         boolean dimmed;
+
+        /**
+         * The amount which the view should be clipped from the top. This is calculated to
+         * perceive consistent shadows.
+         */
+        int clipTopAmount;
+
+        /**
+         * How much does the child overlap with the previous view on the top? Can be used for
+         * a clipping optimization
+         */
+        int topOverLap;
 
         /**
          * The index of the view, only accounting for views not equal to GONE
