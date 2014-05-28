@@ -294,7 +294,7 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recevoir des messages texte (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet à l\'application de recevoir et de traiter les messages WAP. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"récupérer les applications en cours d\'exécution"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible de d\'obtenir des informations sur les applications utilisées sur l\'appareil."</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible d\'obtenir des informations sur les applications utilisées sur l\'appareil."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagir entre les utilisateurs"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet à l\'application d\'effectuer des actions entre les différents utilisateurs de l\'appareil. Les applications malveillantes peuvent utiliser cette autorisation pour passer outre la protection entre les utilisateurs."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"autorisation totale d\'interagir entre les utilisateurs"</string>

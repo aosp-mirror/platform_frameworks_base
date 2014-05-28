@@ -187,7 +187,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"การตั้งค่า"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"ระบบ Android"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"ระบบแอนดรอยด์"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ส่วนตัว"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ที่ทำงาน"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"บริการที่ต้องเสียค่าใช้จ่าย"</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้โทรศัพท์ทำงานช้าลง"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"ลบแอปพลิเคชัน"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันลบแพ็กเกจ Android แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ลบแอปพลิเคชันที่สำคัญ"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันลบแพ็กเกจแอนดรอยด์แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ลบแอปพลิเคชันที่สำคัญ"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"ลบข้อมูลของแอปพลิเคชันอื่น"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"อนุญาตให้แอปพลิเคชันล้างข้อมูลผู้ใช้"</string>
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ลบแคชของแอปพลิเคชันอื่น"</string>
@@ -432,7 +432,7 @@
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"อนุญาตให้แอปพลิเคชันเรียกดูรหัส ข้อมูล และขนาดแคชของตน"</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"ติดตั้งแอปพลิเคชันโดยตรง"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"อนุญาตให้แอปพลิเคชันติดตั้งแพ็กเกจ Android ใหม่หรือที่อัปเดต แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการเพิ่มแอปพลิเคชันใหม่ๆ ด้วยสิทธิ์ที่สูงนี้ได้ตามต้องการ"</string>
+    <string name="permdesc_installPackages" msgid="5628530972548071284">"อนุญาตให้แอปพลิเคชันติดตั้งแพ็กเกจแอนดรอยด์ใหม่หรือที่อัปเดต แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการเพิ่มแอปพลิเคชันใหม่ๆ ด้วยสิทธิ์ที่สูงนี้ได้ตามต้องการ"</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"ลบข้อมูลแคชของแอปพลิเคชันทั้งหมด"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของแท็บเล็ต โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของโทรศัพท์ โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
@@ -1190,7 +1190,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"เปิดใช้งานอีกครั้งในการตั้งค่าระบบ &gt; แอปพลิเคชัน &gt; ดาวน์โหลด"</string>
     <string name="smv_application" msgid="3307209192155442829">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g>) ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="smv_process" msgid="5120397012047462446">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"กำลังอัปเกรด Android..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"กำลังอัปเกรดแอนดรอยด์..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"กำลังเพิ่มประสิทธิภาพแอปพลิเคชัน <xliff:g id="NUMBER_0">%1$d</xliff:g> จาก <xliff:g id="NUMBER_1">%2$d</xliff:g> รายการ"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"เสร็จสิ้นการบูต"</string>
