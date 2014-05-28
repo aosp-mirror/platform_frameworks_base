@@ -499,14 +499,14 @@ final class HdmiCecController {
             return;
         }
 
-        // TODO: Use device's source address for broadcast message.
-        int sourceAddress = message.getDestination() != HdmiCec.ADDR_BROADCAST ?
-                message.getDestination() : 0;
-        // Reply <Feature Abort> to initiator (source) for all requests.
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand
-                (sourceAddress, message.getSource(), message.getOpcode(),
-                        HdmiCecMessageBuilder.ABORT_REFUSED);
-        sendCommand(cecMessage, null);
+        if (message.getDestination() != HdmiCec.ADDR_BROADCAST) {
+            int sourceAddress = message.getDestination();
+            // Reply <Feature Abort> to initiator (source) for all requests.
+            HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                    sourceAddress, message.getSource(), message.getOpcode(),
+                    HdmiCecMessageBuilder.ABORT_REFUSED);
+            sendCommand(cecMessage, null);
+        }
     }
 
     void sendCommand(HdmiCecMessage cecMessage) {
