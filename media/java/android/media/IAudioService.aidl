@@ -78,6 +78,8 @@ interface IAudioService {
 
     int getLastAudibleMasterVolume();
 
+    void setMicrophoneMute(boolean on, String callingPackage);
+
     void setRingerMode(int ringerMode);
 
     int getRingerMode();

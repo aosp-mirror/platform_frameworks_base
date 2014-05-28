@@ -189,7 +189,9 @@ public class AppOpsManager {
     /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
     public static final int OP_GET_USAGE_STATS = 43;
     /** @hide */
-    public static final int _NUM_OP = 44;
+    public static final int OP_MUTE_MICROPHONE = 44;
+    /** @hide */
+    public static final int _NUM_OP = 45;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -257,6 +259,7 @@ public class AppOpsManager {
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
             OP_GET_USAGE_STATS,
+            OP_MUTE_MICROPHONE
     };
 
     /**
@@ -308,6 +311,7 @@ public class AppOpsManager {
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
             null,
+            null,
     };
 
     /**
@@ -358,7 +362,8 @@ public class AppOpsManager {
             "WAKE_LOCK",
             "MONITOR_LOCATION",
             "MONITOR_HIGH_POWER_LOCATION",
-            "GET_USAGE_STATS"
+            "GET_USAGE_STATS",
+            "OP_MUTE_MICROPHONE",
     };
 
     /**
@@ -410,6 +415,7 @@ public class AppOpsManager {
             null, // no permission for generic location monitoring
             null, // no permission for high power location monitoring
             android.Manifest.permission.PACKAGE_USAGE_STATS,
+            null, // no permission for muting/unmuting microphone
     };
 
     /**
@@ -462,6 +468,7 @@ public class AppOpsManager {
             null, //MONITOR_LOCATION
             null, //MONITOR_HIGH_POWER_LOCATION
             null, //GET_USAGE_STATS
+            UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
     };
 
     /**
@@ -512,6 +519,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_GET_USAGE_STATS
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -538,6 +546,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,

@@ -1437,6 +1437,16 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    /** @see AudioManager#setMicrophoneMute(boolean) */
+    public void setMicrophoneMute(boolean on, String callingPackage) {
+        if (mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
+
+        AudioSystem.muteMicrophone(on);
+    }
+
     /** @see AudioManager#getRingerMode() */
     public int getRingerMode() {
         synchronized(mSettingsLock) {
