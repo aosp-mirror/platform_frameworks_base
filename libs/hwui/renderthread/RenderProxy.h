@@ -29,6 +29,7 @@
 #include <utils/StrongPointer.h>
 #include <utils/Vector.h>
 
+#include "../Caches.h"
 #include "DrawFrameTask.h"
 
 namespace android {
@@ -80,6 +81,8 @@ public:
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     ANDROID_API void destroyLayer(DeferredLayerUpdater* layer);
+
+    ANDROID_API void flushCaches(Caches::FlushMode flushMode);
 
     ANDROID_API void fence();
     ANDROID_API void notifyFramePending();
