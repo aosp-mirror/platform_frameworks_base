@@ -17,11 +17,11 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ScrollView;
+
 import java.text.DecimalFormat;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -48,7 +48,9 @@ public class VectorDrawablePerformance extends Activity {
             R.drawable.vector_drawable18,
             R.drawable.vector_drawable19,
             R.drawable.vector_drawable20,
-            R.drawable.vector_drawable21
+            R.drawable.vector_drawable21,
+            R.drawable.vector_drawable22,
+            R.drawable.vector_drawable23
     };
 
     @Override
