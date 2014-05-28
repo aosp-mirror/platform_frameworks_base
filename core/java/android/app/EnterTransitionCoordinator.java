@@ -55,16 +55,14 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mHasStopped;
     private Handler mHandler;
     private boolean mIsCanceled;
-    private boolean mIsReturning;
     private ObjectAnimator mBackgroundAnimator;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames,
             ArrayList<String> acceptedNames, ArrayList<String> mappedNames) {
         super(activity.getWindow(), sharedElementNames, acceptedNames, mappedNames,
-                getListener(activity, acceptedNames));
+                getListener(activity, acceptedNames), acceptedNames != null);
         mActivity = activity;
-        mIsReturning = acceptedNames != null;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();

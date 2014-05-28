@@ -58,16 +58,14 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private Handler mHandler;
 
-    private boolean mIsReturning;
-
     private ObjectAnimator mBackgroundAnimator;
 
     private boolean mIsHidden;
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
-        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning));
-        mIsReturning = isReturning;
+        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning),
+                isReturning);
         mIsBackgroundReady = !isReturning;
         mActivity = activity;
     }
