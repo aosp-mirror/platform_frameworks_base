@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     >
-    <com.android.systemui.statusbar.phone.SwipeAffordanceView
+    <com.android.systemui.statusbar.AlphaImageView
         android:id="@+id/camera_button"
         android:layout_height="64dp"
         android:layout_width="64dp"
@@ -30,10 +30,9 @@
         android:tint="#ffffffff"
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
-        android:contentDescription="@string/accessibility_camera_button"
-        systemui:swipeDirection="start"/>
+        android:contentDescription="@string/accessibility_camera_button" />
 
-    <com.android.systemui.statusbar.phone.SwipeAffordanceView
+    <com.android.systemui.statusbar.AlphaImageView
         android:id="@+id/phone_button"
         android:layout_height="64dp"
         android:layout_width="64dp"
@@ -41,8 +40,7 @@
         android:tint="#ffffffff"
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
-        android:contentDescription="@string/accessibility_phone_button"
-        systemui:swipeDirection="end"/>
+        android:contentDescription="@string/accessibility_phone_button" />
 
     <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
         android:id="@+id/keyguard_indication_text"
@@ -54,15 +52,13 @@
         android:textColor="#ffffff"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
-    <ImageView
+    <com.android.systemui.statusbar.AlphaImageView
         android:id="@+id/lock_icon"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
-        android:alpha="0.7"
-        android:layerType="hardware"
-        android:tint="#ffffffff"/>
+        android:tint="#ffffffff" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

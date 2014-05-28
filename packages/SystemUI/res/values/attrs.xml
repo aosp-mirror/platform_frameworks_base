@@ -43,12 +43,6 @@
     <declare-styleable name="BatteryMeterView">
         <attr name="frameColor" format="color" />
     </declare-styleable>
-    <declare-styleable name="SwipeAffordanceView">
-        <attr name="swipeDirection" format="enum">
-            <enum name="start" value="0" />
-            <enum name="end" value="1" />
-        </attr>
-    </declare-styleable>
     <declare-styleable name="Clock">
         <attr name="amPmStyle" format="enum">
             <enum name="normal" value="0" />
