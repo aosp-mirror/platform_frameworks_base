@@ -565,8 +565,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
-    public static final Key<int[]> CONTROL_AE_TARGET_FPS_RANGE =
-            new Key<int[]>("android.control.aeTargetFpsRange", int[].class);
+    public static final Key<android.util.Range<Integer>> CONTROL_AE_TARGET_FPS_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.aeTargetFpsRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Whether the camera device will trigger a precapture
@@ -1783,8 +1783,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>If variable focus not supported, can still report
      * fixed depth of field range</p>
      */
-    public static final Key<float[]> LENS_FOCUS_RANGE =
-            new Key<float[]>("android.lens.focusRange", float[].class);
+    public static final Key<android.util.Range<Float>> LENS_FOCUS_RANGE =
+            new Key<android.util.Range<Float>>("android.lens.focusRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
     /**
      * <p>Sets whether the camera device uses optical image stabilization (OIS)

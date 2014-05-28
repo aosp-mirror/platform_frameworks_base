@@ -719,8 +719,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
-    public static final Key<int[]> CONTROL_AE_TARGET_FPS_RANGE =
-            new Key<int[]>("android.control.aeTargetFpsRange", int[].class);
+    public static final Key<android.util.Range<Integer>> CONTROL_AE_TARGET_FPS_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.aeTargetFpsRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Whether the camera device will trigger a precapture

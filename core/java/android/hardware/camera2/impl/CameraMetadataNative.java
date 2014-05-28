@@ -50,6 +50,7 @@ import android.hardware.camera2.utils.TypeReference;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
 
@@ -297,9 +298,9 @@ public class CameraMetadataNative implements Parcelable {
     public <T> T get(Key<T> key) {
         Preconditions.checkNotNull(key, "key must not be null");
 
-        T value = getOverride(key);
-        if (value != null) {
-            return value;
+        Pair<T, Boolean> override = getOverride(key);
+        if (override.second) {
+            return override.first;
         }
 
         return getBase(key);
@@ -413,19 +414,35 @@ public class CameraMetadataNative implements Parcelable {
     // Need overwrite some metadata that has different definitions between native
     // and managed sides.
     @SuppressWarnings("unchecked")
-    private <T> T getOverride(Key<T> key) {
+    private <T> Pair<T, Boolean> getOverride(Key<T> key) {
+        T value = null;
+        boolean override = true;
+
         if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            return (T) getAvailableFormats();
+            value = (T) getAvailableFormats();
         } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
-            return (T) getFaces();
+            value = (T) getFaces();
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            return (T) getFaceRectangles();
+            value = (T) getFaceRectangles();
         } else if (key.equals(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)) {
-            return (T) getStreamConfigurationMap();
+            value = (T) getStreamConfigurationMap();
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
+            value = (T) getMaxRegions(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
+            value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
+            value = (T) getMaxNumOutputs(key);
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
+            value = (T) getMaxNumOutputs(key);
+        } else {
+            override = false;
         }
 
-        // For other keys, get() falls back to getBase()
-        return null;
+        return Pair.create(value, override);
     }
 
     private int[] getAvailableFormats() {
@@ -550,6 +567,52 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS);
 
         return new StreamConfigurationMap(configurations, minFrameDurations, stallDurations);
+    }
+
+    private <T> Integer getMaxRegions(Key<T> key) {
+        final int AE = 0;
+        final int AWB = 1;
+        final int AF = 2;
+
+        // The order of the elements is: (AE, AWB, AF)
+        int[] maxRegions = getBase(CameraCharacteristics.CONTROL_MAX_REGIONS);
+
+        if (maxRegions == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
+            return maxRegions[AE];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
+            return maxRegions[AWB];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
+            return maxRegions[AF];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
+    }
+
+    private <T> Integer getMaxNumOutputs(Key<T> key) {
+        final int RAW = 0;
+        final int PROC = 1;
+        final int PROC_STALLING = 2;
+
+        // The order of the elements is: (raw, proc+nonstalling, proc+stalling)
+        int[] maxNumOutputs = getBase(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS);
+
+        if (maxNumOutputs == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
+            return maxNumOutputs[RAW];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
+            return maxNumOutputs[PROC];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
+            return maxNumOutputs[PROC_STALLING];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
     }
 
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {

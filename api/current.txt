@@ -12149,7 +12149,9 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AVAILABLE_SCENE_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AWB_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AF;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AWB;
     field public static final android.hardware.camera2.CameraCharacteristics.Key EDGE_AVAILABLE_EDGE_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key FLASH_INFO_AVAILABLE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
@@ -12167,7 +12169,9 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_AVAILABLE_CAPABILITIES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_INPUT_STREAMS;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC_STALLING;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_RAW;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_PARTIAL_RESULT_COUNT;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_PIPELINE_MAX_DEPTH;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;

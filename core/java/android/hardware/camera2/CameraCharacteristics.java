@@ -322,8 +322,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>List of frame rate ranges supported by the
      * AE algorithm/hardware</p>
      */
-    public static final Key<int[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
-            new Key<int[]>("android.control.aeAvailableTargetFpsRanges", int[].class);
+    public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
+            new Key<android.util.Range<Integer>[]>("android.control.aeAvailableTargetFpsRanges", new TypeReference<android.util.Range<Integer>[]>() {{ }});
 
     /**
      * <p>Maximum and minimum exposure compensation
@@ -332,8 +332,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      */
-    public static final Key<int[]> CONTROL_AE_COMPENSATION_RANGE =
-            new Key<int[]>("android.control.aeCompensationRange", int[].class);
+    public static final Key<android.util.Range<Integer>> CONTROL_AE_COMPENSATION_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.aeCompensationRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Smallest step by which exposure compensation
@@ -427,9 +427,43 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_REGIONS
      * @see CaptureRequest#CONTROL_AF_REGIONS
      * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @hide
      */
     public static final Key<int[]> CONTROL_MAX_REGIONS =
             new Key<int[]>("android.control.maxRegions", int[].class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-exposure (AE);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AE =
+            new Key<Integer>("android.control.maxRegionsAe", int.class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-white balance (AWB);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AWB =
+            new Key<Integer>("android.control.maxRegionsAwb", int.class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-focus (AF);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AF =
+            new Key<Integer>("android.control.maxRegionsAf", int.class);
 
     /**
      * <p>The set of edge enhancement modes supported by this camera device.</p>
@@ -621,7 +655,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * number is 3, and max JPEG stream number is 2, then this tuple should be <code>(1, 3, 2)</code>.</p>
      * <p>This lists the upper bound of the number of output streams supported by
      * the camera device. Using more streams simultaneously may require more hardware and
-     * CPU resources that will consume more power. The image format for a output stream can
+     * CPU resources that will consume more power. The image format for an output stream can
      * be any supported format provided by android.scaler.availableStreamConfigurations.
      * The formats defined in android.scaler.availableStreamConfigurations can be catergorized
      * into the 3 stream types as below:</p>
@@ -632,9 +666,77 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
+     * @hide
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any <code>RAW</code> formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams from the raw sensor.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any <code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>In particular, a <code>RAW</code> format is typically one of:</p>
+     * <ul>
+     * <li>ImageFormat#RAW_SENSOR</li>
+     * <li>Opaque <code>RAW</code></li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_RAW =
+            new Key<Integer>("android.request.maxNumOutputRaw", int.class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any processed (but not-stalling) formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams for any processed (but not-stalling) formats.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>Processed (but not-stalling) is defined as any non-RAW format without a stall duration.
+     * Typically:</p>
+     * <ul>
+     * <li>ImageFormat#YUV_420_888</li>
+     * <li>ImageFormat#NV21</li>
+     * <li>ImageFormat#YV12</li>
+     * <li>Implementation-defined formats, i.e. StreamConfiguration#isOutputSupportedFor(Class)</li>
+     * </ul>
+     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+     * a processed format -- it will return 0 for a non-stalling stream.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC =
+            new Key<Integer>("android.request.maxNumOutputProc", int.class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any processed (and stalling) formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams for any processed (but not-stalling) formats.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>A processed and stalling format is defined as any non-RAW format with a stallDurations &gt; 0.
+     * Typically only the <code>JPEG</code> format (ImageFormat#JPEG)</p>
+     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+     * a processed format -- it will return a non-0 value for a stalling stream.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING =
+            new Key<Integer>("android.request.maxNumOutputProcStalling", int.class);
 
     /**
      * <p>The maximum numbers of any type of input streams

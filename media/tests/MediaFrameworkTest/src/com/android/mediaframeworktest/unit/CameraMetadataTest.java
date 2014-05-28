@@ -1166,6 +1166,48 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         }
     }
 
+    private <T> void assertKeyValueEquals(T expected, CameraCharacteristics.Key<T> key) {
+        assertKeyValueEquals(expected, key.getNativeKey());
+    }
+
+    private <T> void assertKeyValueEquals(T expected, Key<T> key) {
+        T actual = mMetadata.get(key);
+
+        assertEquals("Expected value for key " + key + " to match", expected, actual);
+    }
+
+    @SmallTest
+    public void testOverrideMaxRegions() {
+        // All keys are null before doing any writes.
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AE);
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AWB);
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+
+        mMetadata.set(CameraCharacteristics.CONTROL_MAX_REGIONS,
+                new int[] { /*AE*/1, /*AWB*/2, /*AF*/3 });
+
+        // All keys are the expected value after doing a write
+        assertKeyValueEquals(1, CameraCharacteristics.CONTROL_MAX_REGIONS_AE);
+        assertKeyValueEquals(2, CameraCharacteristics.CONTROL_MAX_REGIONS_AWB);
+        assertKeyValueEquals(3, CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+    }
+
+    @SmallTest
+    public void testOverrideMaxNumOutputStreams() {
+        // All keys are null before doing any writes.
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW);
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC);
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING);
+
+        mMetadata.set(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS,
+                new int[] { /*AE*/1, /*AWB*/2, /*AF*/3 });
+
+        // All keys are the expected value after doing a write
+        assertKeyValueEquals(1, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW);
+        assertKeyValueEquals(2, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC);
+        assertKeyValueEquals(3, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING);
+    }
+
     @SmallTest
     public void testCaptureResult() {
         mMetadata.set(CaptureRequest.CONTROL_AE_MODE,
