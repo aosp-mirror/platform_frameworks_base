@@ -253,9 +253,10 @@ public class ViewPropertyAnimator {
     ViewPropertyAnimator(View view) {
         mView = view;
         view.ensureTransformationInfo();
-        if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
-            mRTBackend = new ViewPropertyAnimatorRT(view);
-        }
+        // TODO: Disabled because of b/15287046
+        //if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+        //    mRTBackend = new ViewPropertyAnimatorRT(view);
+        //}
     }
 
     /**
