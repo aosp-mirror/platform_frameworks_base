@@ -3246,7 +3246,7 @@ public class Notification implements Parcelable
          * this notification. This action will no longer display separately from the
          * notification's content.
          *
-         * <p>For notifications with multiple pages, child pages can also have content action's
+         * <p>For notifications with multiple pages, child pages can also have content actions
          * set, although the list of available actions comes from the main notification and not
          * from the child page's notification.
          *
@@ -3261,16 +3261,18 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Get the action index from this notification's actions to be clickable with the
-         * content of this notification. This action will no longer display separately
+         * Get the index of the notification action, if any, that was specified as being clickable
+         * with the content of this notification. This action will no longer display separately
          * from the notification's content.
          *
-         * <p>For notifications with multiple pages, child pages can also have content action's
+         * <p>For notifications with multiple pages, child pages can also have content actions
          * set, although the list of available actions comes from the main notification and not
          * from the child page's notification.
          *
          * <p>If wearable specific actions were added to the main notification, this index will
          * apply to that list, otherwise it will apply to the regular actions list.
+         *
+         * @return the action index or {@link #UNSET_ACTION_INDEX} if no action was selected.
          */
         public int getContentAction() {
             return mContentActionIndex;
