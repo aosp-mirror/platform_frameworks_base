@@ -85,7 +85,7 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
                 // noop
             }
         });
-        vp.postVolumeChanged(AudioManager.STREAM_NOTIFICATION, AudioManager.FLAG_SHOW_UI);
+        vp.postVolumeChanged(AudioManager.STREAM_RING, AudioManager.FLAG_SHOW_UI);
         return v;
     }
 
