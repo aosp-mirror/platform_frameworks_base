@@ -14,15 +14,15 @@
  * limitations under the License
  */
 
-package android.content;
+package android.app.task;
 
-import android.app.task.TaskService;
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Container of data passed to the {@link android.content.TaskManager} fully encapsulating the
+ * Container of data passed to the {@link android.app.task.TaskManager} fully encapsulating the
  * parameters required to schedule work against the calling application. These are constructed
  * using the {@link Task.Builder}.
  */
@@ -92,7 +92,7 @@ public class Task implements Parcelable {
     }
 
     /**
-     * See {@link android.content.Task.NetworkType} for a description of this value.
+     * See {@link android.app.task.Task.NetworkType} for a description of this value.
      */
     public int getNetworkCapabilities() {
         return networkCapabilities;
@@ -139,7 +139,7 @@ public class Task implements Parcelable {
     }
 
     /**
-     * See {@link android.content.Task.BackoffPolicy} for an explanation of the values this field
+     * See {@link android.app.task.Task.BackoffPolicy} for an explanation of the values this field
      * can take. This defaults to exponential.
      */
     public int getBackoffPolicy() {
@@ -255,7 +255,7 @@ public class Task implements Parcelable {
 
         /**
          * Set some description of the kind of network capabilities you would like to have. This
-         * will be a parameter defined in {@link android.content.Task.NetworkType}.
+         * will be a parameter defined in {@link android.app.task.Task.NetworkType}.
          * Not calling this function means the network is not necessary.
          * Bear in mind that calling this function defines network as a strict requirement for your
          * task if the network requested is not available your task will never run. See
@@ -314,7 +314,7 @@ public class Task implements Parcelable {
          * Specify that this task should be delayed by the provided amount of time.
          * Because it doesn't make sense setting this property on a periodic task, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
-         * {@link android.content.Task.Builder#build()} is called.
+         * {@link android.app.task.Task.Builder#build()} is called.
          * @param minLatencyMillis Milliseconds before which this task will not be considered for
          *                         execution.
          */
@@ -328,7 +328,7 @@ public class Task implements Parcelable {
          * deadline even if other requirements are not met. Because it doesn't make sense setting
          * this property on a periodic task, doing so will throw an
          * {@link java.lang.IllegalArgumentException} when
-         * {@link android.content.Task.Builder#build()} is called.
+         * {@link android.app.task.Task.Builder#build()} is called.
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
             mMaxExecutionDelayMillis = maxExecutionDelayMillis;

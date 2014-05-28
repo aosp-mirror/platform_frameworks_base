@@ -16,12 +16,22 @@
 
 package com.android.server.task;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.task.ITaskManager;
+import android.app.task.Task;
 import android.content.Context;
-import android.content.Task;
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.task.controllers.TaskStatus;
@@ -39,13 +49,6 @@ public class TaskManagerService extends com.android.server.SystemService
     /** Master list of tasks. */
     private final TaskStore mTasks;
 
-    /** Check the pending queue and start any tasks. */
-    static final int MSG_RUN_PENDING = 0;
-    /** Initiate the stop task flow. */
-    static final int MSG_STOP_TASK = 1;
-    /** */
-    static final int MSG_CHECK_TASKS = 2;
-
     /**
      * Track Services that have currently active or pending tasks. The index is provided by
      * {@link TaskStatus#getServiceToken()}
@@ -54,6 +57,14 @@ public class TaskManagerService extends com.android.server.SystemService
             new SparseArray<TaskServiceContext>();
 
     private final TaskHandler mHandler;
+    private final TaskManagerStub mTaskManagerStub;
+
+    /** Check the pending queue and start any tasks. */
+    static final int MSG_RUN_PENDING = 0;
+    /** Initiate the stop task flow. */
+    static final int MSG_STOP_TASK = 1;
+    /** */
+    static final int MSG_CHECK_TASKS = 2;
 
     private class TaskHandler extends Handler {
 
@@ -94,21 +105,6 @@ public class TaskManagerService extends com.android.server.SystemService
     }
 
     /**
-     * Entry point from client to schedule the provided task.
-     * This will add the task to the
-     * @param task Task object containing execution parameters
-     * @param userId The id of the user this task is for.
-     * @param uId The package identifier of the application this task is for.
-     * @param canPersistTask Whether or not the client has the appropriate permissions for persisting
-     *                    of this task.
-     * @return Result of this operation. See <code>TaskManager#RESULT_*</code> return codes.
-     */
-    public int schedule(Task task, int userId, int uId, boolean canPersistTask) {
-        TaskStatus taskStatus = mTasks.addNewTaskForUser(task, userId, uId, canPersistTask);
-        return 0;
-    }
-
-    /**
      * Initializes the system service.
      * <p>
      * Subclasses must define a single argument constructor that accepts the context
@@ -121,11 +117,42 @@ public class TaskManagerService extends com.android.server.SystemService
         super(context);
         mTasks = new TaskStore(context);
         mHandler = new TaskHandler(context.getMainLooper());
+        mTaskManagerStub = new TaskManagerStub();
     }
 
     @Override
     public void onStart() {
+        publishBinderService(Context.TASK_SERVICE, mTaskManagerStub);
+    }
 
+    /**
+     * Entry point from client to schedule the provided task.
+     * This will add the task to the
+     * @param task Task object containing execution parameters
+     * @param userId The id of the user this task is for.
+     * @param uId The package identifier of the application this task is for.
+     * @param canPersistTask Whether or not the client has the appropriate permissions for
+     *     persisting of this task.
+     * @return Result of this operation. See <code>TaskManager#RESULT_*</code> return codes.
+     */
+    public int schedule(Task task, int userId, int uId, boolean canPersistTask) {
+        TaskStatus taskStatus = mTasks.addNewTaskForUser(task, userId, uId, canPersistTask);
+        return 0;
+    }
+
+    public List<Task> getPendingTasks(int uid) {
+        ArrayList<Task> outList = new ArrayList<Task>(3);
+        synchronized (mTasks) {
+            final SparseArray<TaskStatus> tasks = mTasks.getTasks();
+            final int N = tasks.size();
+            for (int i = 0; i < N; i++) {
+                TaskStatus ts = tasks.get(i);
+                if (ts.getUid() == uid) {
+                    outList.add(ts.getTask());
+                }
+            }
+        }
+        return outList;
     }
 
     // StateChangedListener implementations.
@@ -162,7 +189,7 @@ public class TaskManagerService extends com.android.server.SystemService
     public void onTaskCompleted(int serviceToken, int taskId, boolean needsReschedule) {
         final TaskServiceContext serviceContext = mActiveServices.get(serviceToken);
         if (serviceContext == null) {
-            Log.e(TAG, "Task completed for invalid service context; " + serviceToken);
+            Slog.e(TAG, "Task completed for invalid service context; " + serviceToken);
             return;
         }
 
@@ -202,5 +229,99 @@ public class TaskManagerService extends com.android.server.SystemService
      */
     private void postCheckTasksMessage() {
         mHandler.obtainMessage(MSG_CHECK_TASKS).sendToTarget();
+    }
+
+    /**
+     * Binder stub trampoline implementation
+     */
+    final class TaskManagerStub extends ITaskManager.Stub {
+        /** Cache determination of whether a given app can persist tasks
+         * key is uid of the calling app; value is undetermined/true/false
+         */
+        private final SparseArray<Boolean> mPersistCache = new SparseArray<Boolean>();
+
+        // Determine whether the caller is allowed to persist tasks, with a small cache
+        // because the lookup is expensive enough that we'd like to avoid repeating it.
+        // This must be called from within the calling app's binder identity!
+        private boolean canCallerPersistTasks() {
+            final boolean canPersist;
+            final int callingUid = Binder.getCallingUid();
+            synchronized (mPersistCache) {
+                Boolean cached = mPersistCache.get(callingUid);
+                if (cached) {
+                    canPersist = cached.booleanValue();
+                } else {
+                    // Persisting tasks is tantamount to running at boot, so we permit
+                    // it when the app has declared that it uses the RECEIVE_BOOT_COMPLETED
+                    // permission
+                    int result = getContext().checkCallingPermission(
+                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED);
+                    canPersist = (result == PackageManager.PERMISSION_GRANTED);
+                    mPersistCache.put(callingUid, canPersist);
+                }
+            }
+            return canPersist;
+        }
+
+        // ITaskManager implementation
+        @Override
+        public int schedule(Task task) throws RemoteException {
+            final boolean canPersist = canCallerPersistTasks();
+            final int uid = Binder.getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return TaskManagerService.this.schedule(task, userId, uid, canPersist);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public List<Task> getAllPendingTasks() throws RemoteException {
+            return null;
+        }
+
+        @Override
+        public void cancelAll() throws RemoteException {
+        }
+
+        @Override
+        public void cancel(int taskId) throws RemoteException {
+        }
+
+        /**
+         * "dumpsys" infrastructure
+         */
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
+            long identityToken = Binder.clearCallingIdentity();
+            try {
+                TaskManagerService.this.dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+        }
+    };
+
+    void dumpInternal(PrintWriter pw) {
+        synchronized (mTasks) {
+            pw.print("Registered tasks:");
+            if (mTasks.size() > 0) {
+                SparseArray<TaskStatus> tasks = mTasks.getTasks();
+                for (int i = 0; i < tasks.size(); i++) {
+                    TaskStatus ts = tasks.get(i);
+                    pw.println();
+                    ts.dump(pw, "  ");
+                }
+            } else {
+                pw.println();
+                pw.println("No tasks scheduled.");
+            }
+        }
+        pw.println();
     }
 }

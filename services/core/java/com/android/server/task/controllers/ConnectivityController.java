@@ -70,13 +70,10 @@ public class ConnectivityController extends StateController {
     }
 
     /**
-     * @param userId Id of the user for whom we are updating the connectivity state.
+     *
      */
-    private void updateTrackedTasks(int userId) {
+    private void updateTrackedTasks() {
         for (TaskStatus ts : mTrackedTasks) {
-            if (ts.userId != userId) {
-                continue;
-            }
             boolean prevIsConnected = ts.connectivityConstraintSatisfied.getAndSet(mConnectivity);
             boolean prevIsMetered = ts.meteredConstraintSatisfied.getAndSet(mMetered);
             if (prevIsConnected != mConnectivity || prevIsMetered != mMetered) {
@@ -107,14 +104,13 @@ public class ConnectivityController extends StateController {
                 final NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
                 // This broadcast gets sent a lot, only update if the active network has changed.
                 if (activeNetwork.getType() == networkType) {
-                    final int userid = context.getUserId();
                     mMetered = false;
                     mConnectivity =
                             !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
                     if (mConnectivity) {  // No point making the call if we know there's no conn.
                         mMetered = connManager.isActiveNetworkMetered();
                     }
-                    updateTrackedTasks(userid);
+                    updateTrackedTasks();
                 }
             } else {
                 Log.w(TAG, "Unrecognised action in intent: " + action);
