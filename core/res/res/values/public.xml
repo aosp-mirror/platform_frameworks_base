@@ -2180,6 +2180,8 @@
   <public type="attr" name="paddingMode" />
   <public type="attr" name="layout_rowWeight" />
   <public type="attr" name="layout_columnWeight" />
+  <public type="attr" name="translateX" />
+  <public type="attr" name="translateY" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

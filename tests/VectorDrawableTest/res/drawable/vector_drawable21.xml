@@ -34,12 +34,12 @@
             android:fill="#FF000000"/>
     </group>
     <group
-        android:pivotX="100"
-        android:pivotY="100"
+        android:pivotX="0"
+        android:pivotY="0"
         android:rotation="90"
         android:scaleX="0.75"
         android:scaleY="0.5"
-        android:translateX="0.0"
+        android:translateX="100.0"
         android:translateY="100.0">
         <path
             android:name="twoLines"
