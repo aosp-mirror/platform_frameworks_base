@@ -13,8 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="1" >
+<vector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <size
         android:height="48dp"

@@ -58,7 +58,23 @@ import java.util.HashMap;
  * The size is defined using the attributes <code>android:viewportHeight</code>
  * <code>android:viewportWidth</code></dd>
  * <dt><code>&lt;group></code></dt>
- * <dd>Defines a group of paths or subgroups, plus transformation information.</dd>
+ * <dd>Defines a group of paths or subgroups, plus transformation information.
+ * The transformations are defined in the same coordinates as the viewport.
+ * And the transformations are applied in the order of scale, rotate then translate. </dd>
+ * <dt><code>android:rotation</code>
+ * <dd>The degrees of rotation of the group.</dd></dt>
+ * <dt><code>android:pivotX</code>
+ * <dd>The X coordinate of the pivot for the scale and rotation of the group</dd></dt>
+ * <dt><code>android:pivotY</code>
+ * <dd>The Y coordinate of the pivot for the scale and rotation of the group</dd></dt>
+ * <dt><code>android:scaleX</code>
+ * <dd>The amount of scale on the X Coordinate</dd></dt>
+ * <dt><code>android:scaleY</code>
+ * <dd>The amount of scale on the Y coordinate</dd></dt>
+ * <dt><code>android:translateX</code>
+ * <dd>The amount of translation on the X coordinate</dd></dt>
+ * <dt><code>android:translateY</code>
+ * <dd>The amount of translation on the Y coordinate</dd></dt>
  * <dt><code>&lt;path></code></dt>
  * <dd>Defines paths to be drawn.
  * <dl>
@@ -76,12 +92,6 @@ import java.util.HashMap;
  * <dd>The width a path stroke</dd></dt>
  * <dt><code>android:strokeOpacity</code>
  * <dd>The opacity of a path stroke</dd></dt>
- * <dt><code>android:rotation</code>
- * <dd>The amount to rotation the path stroke.</dd></dt>
- * <dt><code>android:pivotX</code>
- * <dd>The X coordinate of the center of rotation of a path</dd></dt>
- * <dt><code>android:pivotY</code>
- * <dd>The Y coordinate of the center of rotation of a path</dd></dt>
  * <dt><code>android:fillOpacity</code>
  * <dd>The opacity to fill the path with</dd></dt>
  * <dt><code>android:trimPathStart</code>
@@ -457,7 +467,13 @@ public class VectorDrawable extends Drawable {
 
             mMatrix.reset();
 
-            mMatrix.postRotate(vGroup.mRotate, vGroup.mPivotX, vGroup.mPivotY);
+            // The order we apply is the same as the
+            // RenderNode.cpp::applyViewPropertyTransforms().
+            mMatrix.postTranslate(-vGroup.mPivotX, -vGroup.mPivotY);
+            mMatrix.postScale(vGroup.mScaleX, vGroup.mScaleY);
+            mMatrix.postRotate(vGroup.mRotate, 0, 0);
+            mMatrix.postTranslate(vGroup.mTranslateX + vGroup.mPivotX, vGroup.mTranslateY + vGroup.mPivotY);
+
             mMatrix.postScale(scale, scale, mViewportWidth / 2f, mViewportHeight / 2f);
             mMatrix.postTranslate(w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
 
@@ -577,6 +593,10 @@ public class VectorDrawable extends Drawable {
         private float mRotate = 0;
         private float mPivotX = 0;
         private float mPivotY = 0;
+        private float mScaleX = 1;
+        private float mScaleY = 1;
+        private float mTranslateX = 0;
+        private float mTranslateY = 0;
 
         private int[] mThemeAttrs;
 
@@ -597,6 +617,10 @@ public class VectorDrawable extends Drawable {
             mRotate = a.getFloat(R.styleable.VectorDrawableGroup_rotation, mRotate);
             mPivotX = a.getFloat(R.styleable.VectorDrawableGroup_pivotX, mPivotX);
             mPivotY = a.getFloat(R.styleable.VectorDrawableGroup_pivotY, mPivotY);
+            mScaleX = a.getFloat(R.styleable.VectorDrawableGroup_scaleX, mScaleX);
+            mScaleY = a.getFloat(R.styleable.VectorDrawableGroup_scaleY, mScaleY);
+            mTranslateX = a.getFloat(R.styleable.VectorDrawableGroup_translateX, mTranslateX);
+            mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
             a.recycle();
         }
 
@@ -618,6 +642,22 @@ public class VectorDrawable extends Drawable {
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_pivotY] == 0) {
                 mPivotY = a.getFloat(R.styleable.VectorDrawableGroup_pivotY, mPivotY);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_scaleX] == 0) {
+                mScaleX = a.getFloat(R.styleable.VectorDrawableGroup_scaleX, mScaleX);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_scaleY] == 0) {
+                mScaleY = a.getFloat(R.styleable.VectorDrawableGroup_scaleY, mScaleY);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_translateX] == 0) {
+                mTranslateX = a.getFloat(R.styleable.VectorDrawableGroup_translateX, mTranslateX);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_translateY] == 0) {
+                mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
             }
 
             a.recycle();

@@ -4790,6 +4790,14 @@
         <attr name="pivotX" />
         <!-- The Y coordinate of the center of rotation of a group -->
         <attr name="pivotY" />
+        <!-- The amount to translate the group on X coordinate -->
+        <attr name="translateX" format="float"/>
+        <!-- The amount to translate the group on Y coordinate -->
+        <attr name="translateY" format="float"/>
+        <!-- The amount to scale the group on X coordinate -->
+        <attr name="scaleX" />
+        <!-- The amount to scale the group on X coordinate -->
+        <attr name="scaleY" />
     </declare-styleable>
 
     <!-- Defines the path used in Vector Drawables. -->

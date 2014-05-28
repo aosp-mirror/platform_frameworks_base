@@ -1243,6 +1243,8 @@ package android {
     field public static final int transition = 16843743; // 0x10103df
     field public static final int transitionGroup = 16843803; // 0x101041b
     field public static final int transitionOrdering = 16843744; // 0x10103e0
+    field public static final int translateX = 16843869; // 0x101045d
+    field public static final int translateY = 16843870; // 0x101045e
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
     field public static final int translationZ = 16843796; // 0x1010414
