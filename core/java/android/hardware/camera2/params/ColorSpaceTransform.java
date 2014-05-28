@@ -139,8 +139,8 @@ public final class ColorSpaceTransform {
             throw new IllegalArgumentException("row out of range");
         }
 
-        int numerator = mElements[row * ROWS * RATIONAL_SIZE + column + OFFSET_NUMERATOR];
-        int denominator = mElements[row * ROWS * RATIONAL_SIZE + column + OFFSET_DENOMINATOR];
+        int numerator = mElements[(row * COLUMNS + column) * RATIONAL_SIZE + OFFSET_NUMERATOR];
+        int denominator = mElements[(row * COLUMNS + column) * RATIONAL_SIZE + OFFSET_DENOMINATOR];
 
         return new Rational(numerator, denominator);
     }
