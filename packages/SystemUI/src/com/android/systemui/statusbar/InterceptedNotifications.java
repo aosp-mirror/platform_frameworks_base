@@ -50,7 +50,7 @@ public class InterceptedNotifications {
         for (int i = 0; i < n; i++) {
             final StatusBarNotification sbn = mIntercepted.valueAt(i);
             sbn.getNotification().extras.putBoolean(EXTRA_INTERCEPT, false);
-            mBar.addNotificationInternal(sbn);
+            mBar.addNotificationInternal(sbn, null);
         }
         mIntercepted.clear();
         updateSyntheticNotification();
@@ -88,7 +88,7 @@ public class InterceptedNotifications {
     private void updateSyntheticNotification() {
         if (mIntercepted.isEmpty()) {
             if (mSynKey != null) {
-                mBar.removeNotificationInternal(mSynKey);
+                mBar.removeNotificationInternal(mSynKey, null);
                 mSynKey = null;
             }
             return;
@@ -107,9 +107,9 @@ public class InterceptedNotifications {
                 mBar.getCurrentUserHandle());
         if (mSynKey == null) {
             mSynKey = sbn.getKey();
-            mBar.addNotificationInternal(sbn);
+            mBar.addNotificationInternal(sbn, null);
         } else {
-           mBar.updateNotificationInternal(sbn);
+           mBar.updateNotificationInternal(sbn, null);
         }
         final NotificationData.Entry entry = mBar.mNotificationData.findByKey(mSynKey);
         entry.row.setOnClickListener(mSynClickListener);
