@@ -77,11 +77,13 @@ public class ZenModeHelper {
     // temporary, until we update apps to provide metadata
     private static final Set<String> CALL_PACKAGES = new HashSet<String>(Arrays.asList(
             "com.google.android.dialer",
-            "com.android.phone"
+            "com.android.phone",
+            "com.android.example.notificationshowcase"
             ));
     private static final Set<String> MESSAGE_PACKAGES = new HashSet<String>(Arrays.asList(
             "com.google.android.talk",
-            "com.android.mms"
+            "com.android.mms",
+            "com.android.example.notificationshowcase"
             ));
     private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
             "com.google.android.deskclock"
@@ -130,6 +132,10 @@ public class ZenModeHelper {
             }
             if (isAlarm(record)) {
                 return false;
+            }
+            // audience has veto power over all following rules
+            if (!audienceMatches(record)) {
+                return true;
             }
             if (isCall(record)) {
                 return !mConfig.allowCalls;
@@ -243,6 +249,20 @@ public class ZenModeHelper {
 
     private boolean isMessage(NotificationRecord record) {
         return MESSAGE_PACKAGES.contains(record.sbn.getPackageName());
+    }
+
+    private boolean audienceMatches(NotificationRecord record) {
+        switch (mConfig.allowFrom) {
+            case ZenModeConfig.SOURCE_ANYONE:
+                return true;
+            case ZenModeConfig.SOURCE_CONTACT:
+                return record.getContactAffinity() >= ValidateNotificationPeople.VALID_CONTACT;
+            case ZenModeConfig.SOURCE_STAR:
+                return record.getContactAffinity() >= ValidateNotificationPeople.STARRED_CONTACT;
+            default:
+                Slog.w(TAG, "Encountered unknown source: " + mConfig.allowFrom);
+                return true;
+        }
     }
 
     private void updateAlarms() {
