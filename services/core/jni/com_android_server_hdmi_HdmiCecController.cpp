@@ -240,13 +240,6 @@ void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
         LOG_FATAL_IF(! var, "Unable to find method " methodName);
 
-// TODO: replace above code with following once
-// replace old HdmiCecService with HdmiControlService
-#undef HDMI_CEC_HARDWARE_MODULE_ID
-#define HDMI_CEC_HARDWARE_MODULE_ID "hdmi_cec_module"
-#undef HDMI_CEC_HARDWARE_INTERFACE
-#define HDMI_CEC_HARDWARE_INTERFACE "hdmi_cec_module_hw_if"
-
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj,
         jobject messageQueueObj) {
     int err;
