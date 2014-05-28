@@ -16,15 +16,18 @@
 
 package android.content.pm;
 
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -36,6 +39,12 @@ import java.util.List;
  * managed profiles. This is mainly for use by launchers. Apps can be queried for each user profile.
  * Since the PackageManager will not deliver package broadcasts for other profiles, you can register
  * for package changes here.
+ * <p>
+ * To watch for managed profiles being added or removed, register for the following broadcasts:
+ * {@link Intent#ACTION_MANAGED_PROFILE_ADDED} and {@link Intent#ACTION_MANAGED_PROFILE_REMOVED}.
+ * <p>
+ * You can retrieve the list of profiles associated with this user with
+ * {@link UserManager#getUserProfiles()}.
  */
 public class LauncherApps {
 
@@ -44,12 +53,13 @@ public class LauncherApps {
 
     private Context mContext;
     private ILauncherApps mService;
+    private PackageManager mPm;
 
     private List<OnAppsChangedListener> mListeners
             = new ArrayList<OnAppsChangedListener>();
 
     /**
-     * Callbacks for changes to this and related managed profiles.
+     * Callbacks for package changes to this and related managed profiles.
      */
     public interface OnAppsChangedListener {
         /**
@@ -57,6 +67,7 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that was removed.
+         * @hide remove before ship
          */
         void onPackageRemoved(UserHandle user, String packageName);
 
@@ -65,6 +76,7 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that was added.
+         * @hide remove before ship
          */
         void onPackageAdded(UserHandle user, String packageName);
 
@@ -73,6 +85,7 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that has changed.
+         * @hide remove before ship
          */
         void onPackageChanged(UserHandle user, String packageName);
 
@@ -86,6 +99,7 @@ public class LauncherApps {
          *            available.
          * @param replacing Indicates whether these packages are replacing
          *            existing ones.
+         * @hide remove before ship
          */
         void onPackagesAvailable(UserHandle user, String[] packageNames, boolean replacing);
 
@@ -99,14 +113,66 @@ public class LauncherApps {
          *            unavailable.
          * @param replacing Indicates whether the packages are about to be
          *            replaced with new versions.
+         * @hide remove before ship
          */
         void onPackagesUnavailable(UserHandle user, String[] packageNames, boolean replacing);
+
+        /**
+         * Indicates that a package was removed from the specified profile.
+         *
+         * @param packageName The name of the package that was removed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        void onPackageRemoved(String packageName, UserHandle user);
+
+        /**
+         * Indicates that a package was added to the specified profile.
+         *
+         * @param packageName The name of the package that was added.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        void onPackageAdded(String packageName, UserHandle user);
+
+        /**
+         * Indicates that a package was modified in the specified profile.
+         *
+         * @param packageName The name of the package that has changed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        void onPackageChanged(String packageName, UserHandle user);
+
+        /**
+         * Indicates that one or more packages have become available. For
+         * example, this can happen when a removable storage card has
+         * reappeared.
+         *
+         * @param packageNames The names of the packages that have become
+         *            available.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether these packages are replacing
+         *            existing ones.
+         */
+        void onPackagesAvailable(String [] packageNames, UserHandle user, boolean replacing);
+
+        /**
+         * Indicates that one or more packages have become unavailable. For
+         * example, this can happen when a removable storage card has been
+         * removed.
+         *
+         * @param packageNames The names of the packages that have become
+         *            unavailable.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether the packages are about to be
+         *            replaced with new versions.
+         */
+        void onPackagesUnavailable(String[] packageNames, UserHandle user, boolean replacing);
     }
 
     /** @hide */
     public LauncherApps(Context context, ILauncherApps service) {
         mContext = context;
         mService = service;
+        mPm = context.getPackageManager();
     }
 
     /**
@@ -131,7 +197,15 @@ public class LauncherApps {
         final int count = activities.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo ri = activities.get(i);
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user);
+            long firstInstallTime = 0;
+            try {
+                firstInstallTime = mPm.getPackageInfo(ri.activityInfo.packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
+            } catch (NameNotFoundException nnfe) {
+                // Sorry, can't find package
+            }
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user,
+                    firstInstallTime);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -157,7 +231,15 @@ public class LauncherApps {
         try {
             ResolveInfo ri = mService.resolveActivity(intent, user);
             if (ri != null) {
-                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ri, user);
+                long firstInstallTime = 0;
+                try {
+                    firstInstallTime = mPm.getPackageInfo(ri.activityInfo.packageName,
+                            PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
+                } catch (NameNotFoundException nnfe) {
+                    // Sorry, can't find package
+                }
+                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ri, user,
+                        firstInstallTime);
                 return info;
             }
         } catch (RemoteException re) {
@@ -173,9 +255,23 @@ public class LauncherApps {
      * @param sourceBounds The Rect containing the source bounds of the clicked icon
      * @param opts Options to pass to startActivity
      * @param user The UserHandle of the profile
+     * @hide remove before ship
      */
     public void startActivityForProfile(ComponentName component, Rect sourceBounds,
             Bundle opts, UserHandle user) {
+        startActivityForProfile(component, user, sourceBounds, opts);
+    }
+
+    /**
+     * Starts an activity in the specified profile.
+     *
+     * @param component The ComponentName of the activity to launch
+     * @param user The UserHandle of the profile
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon
+     * @param opts Options to pass to startActivity
+     */
+    public void startActivityForProfile(ComponentName component, UserHandle user, Rect sourceBounds,
+            Bundle opts) {
         if (DEBUG) {
             Log.i(TAG, "StartActivityForProfile " + component + " " + user.getIdentifier());
         }
@@ -224,13 +320,15 @@ public class LauncherApps {
      *
      * @param listener The listener to add.
      */
-    public synchronized void addOnAppsChangedListener(OnAppsChangedListener listener) {
-        if (listener != null && !mListeners.contains(listener)) {
-            mListeners.add(listener);
-            if (mListeners.size() == 1) {
-                try {
-                    mService.addOnAppsChangedListener(mAppsChangedListener);
-                } catch (RemoteException re) {
+    public void addOnAppsChangedListener(OnAppsChangedListener listener) {
+        synchronized (this) {
+            if (listener != null && !mListeners.contains(listener)) {
+                mListeners.add(listener);
+                if (mListeners.size() == 1) {
+                    try {
+                        mService.addOnAppsChangedListener(mAppsChangedListener);
+                    } catch (RemoteException re) {
+                    }
                 }
             }
         }
@@ -242,12 +340,14 @@ public class LauncherApps {
      * @param listener The listener to remove.
      * @see #addOnAppsChangedListener(OnAppsChangedListener)
      */
-    public synchronized void removeOnAppsChangedListener(OnAppsChangedListener listener) {
-        mListeners.remove(listener);
-        if (mListeners.size() == 0) {
-            try {
-                mService.removeOnAppsChangedListener(mAppsChangedListener);
-            } catch (RemoteException re) {
+    public void removeOnAppsChangedListener(OnAppsChangedListener listener) {
+        synchronized (this) {
+            mListeners.remove(listener);
+            if (mListeners.size() == 0) {
+                try {
+                    mService.removeOnAppsChangedListener(mAppsChangedListener);
+                } catch (RemoteException re) {
+                }
             }
         }
     }
@@ -261,7 +361,8 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageRemoved(user, packageName);
+                    listener.onPackageRemoved(user, packageName); // TODO: Remove before ship
+                    listener.onPackageRemoved(packageName, user);
                 }
             }
         }
@@ -273,7 +374,8 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageChanged(user, packageName);
+                    listener.onPackageChanged(user, packageName); // TODO: Remove before ship
+                    listener.onPackageChanged(packageName, user);
                 }
             }
         }
@@ -285,7 +387,8 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageAdded(user, packageName);
+                    listener.onPackageAdded(user, packageName); // TODO: Remove before ship
+                    listener.onPackageAdded(packageName, user);
                 }
             }
         }
@@ -298,7 +401,8 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackagesAvailable(user, packageNames, replacing);
+                    listener.onPackagesAvailable(user, packageNames, replacing); // TODO: Remove
+                    listener.onPackagesAvailable(packageNames, user, replacing);
                 }
             }
         }
@@ -311,7 +415,8 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackagesUnavailable(user, packageNames, replacing);
+                    listener.onPackagesUnavailable(user, packageNames, replacing); // TODO: Remove
+                    listener.onPackagesUnavailable(packageNames, user, replacing);
                 }
             }
         }
