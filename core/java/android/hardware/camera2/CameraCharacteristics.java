@@ -296,8 +296,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * valid anti-banding modes that the application may request
      * for this camera device; they must include AUTO.</p>
      */
-    public static final Key<byte[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
-            new Key<byte[]>("android.control.aeAvailableAntibandingModes", byte[].class);
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
+            new Key<int[]>("android.control.aeAvailableAntibandingModes", int[].class);
 
     /**
      * <p>The set of auto-exposure modes that are supported by this
@@ -315,8 +315,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      */
-    public static final Key<byte[]> CONTROL_AE_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.aeAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_MODES =
+            new Key<int[]>("android.control.aeAvailableModes", int[].class);
 
     /**
      * <p>List of frame rate ranges supported by the
@@ -355,8 +355,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AF_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
-    public static final Key<byte[]> CONTROL_AF_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.afAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AF_AVAILABLE_MODES =
+            new Key<int[]>("android.control.afAvailableModes", int[].class);
 
     /**
      * <p>List containing the subset of color effects
@@ -374,8 +374,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_EFFECTS =
-            new Key<byte[]>("android.control.availableEffects", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_EFFECTS =
+            new Key<int[]>("android.control.availableEffects", int[].class);
 
     /**
      * <p>List containing a subset of scene modes
@@ -388,15 +388,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_SCENE_MODES =
-            new Key<byte[]>("android.control.availableSceneModes", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_SCENE_MODES =
+            new Key<int[]>("android.control.availableSceneModes", int[].class);
 
     /**
      * <p>List of video stabilization modes that can
      * be supported</p>
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
-            new Key<byte[]>("android.control.availableVideoStabilizationModes", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
+            new Key<int[]>("android.control.availableVideoStabilizationModes", int[].class);
 
     /**
      * <p>The set of auto-white-balance modes ({@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode})
@@ -414,8 +414,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
-    public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AWB_AVAILABLE_MODES =
+            new Key<int[]>("android.control.awbAvailableModes", int[].class);
 
     /**
      * <p>List of the maximum number of regions that can be used for metering in
@@ -472,8 +472,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#EDGE_MODE
      */
-    public static final Key<byte[]> EDGE_AVAILABLE_EDGE_MODES =
-            new Key<byte[]>("android.edge.availableEdgeModes", byte[].class);
+    public static final Key<int[]> EDGE_AVAILABLE_EDGE_MODES =
+            new Key<int[]>("android.edge.availableEdgeModes", int[].class);
 
     /**
      * <p>Whether this camera device has a
@@ -492,8 +492,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
-    public static final Key<byte[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
-            new Key<byte[]>("android.hotPixel.availableHotPixelModes", byte[].class);
+    public static final Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
+            new Key<int[]>("android.hotPixel.availableHotPixelModes", int[].class);
 
     /**
      * <p>Supported resolutions for the JPEG thumbnail</p>
@@ -560,8 +560,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
-    public static final Key<byte[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
-            new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
+    public static final Key<int[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
+            new Key<int[]>("android.lens.info.availableOpticalStabilization", int[].class);
 
     /**
      * <p>Optional. Hyperfocal distance for this lens.</p>
@@ -625,8 +625,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
-    public static final Key<byte[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
-            new Key<byte[]>("android.noiseReduction.availableNoiseReductionModes", byte[].class);
+    public static final Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
+            new Key<int[]>("android.noiseReduction.availableNoiseReductionModes", int[].class);
 
     /**
      * <p>If set to 1, the HAL will always split result
@@ -1485,8 +1485,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM1 =
-            new Key<Rational[]>("android.sensor.calibrationTransform1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A per-device calibration transform matrix that maps from the
@@ -1506,8 +1506,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM2 =
-            new Key<Rational[]>("android.sensor.calibrationTransform2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms color values from CIE XYZ color space to
@@ -1528,8 +1528,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM1 =
-            new Key<Rational[]>("android.sensor.colorTransform1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms color values from CIE XYZ color space to
@@ -1552,8 +1552,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM2 =
-            new Key<Rational[]>("android.sensor.colorTransform2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms white balanced camera colors from the reference
@@ -1572,8 +1572,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX1 =
-            new Key<Rational[]>("android.sensor.forwardMatrix1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms white balanced camera colors from the reference
@@ -1594,8 +1594,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX2 =
-            new Key<Rational[]>("android.sensor.forwardMatrix2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A fixed black level offset for each of the color filter arrangement
@@ -1662,8 +1662,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.statistics.faceIds and
      * android.statistics.faceLandmarks outputs.</p>
      */
-    public static final Key<byte[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
-            new Key<byte[]>("android.statistics.info.availableFaceDetectModes", byte[].class);
+    public static final Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
+            new Key<int[]>("android.statistics.info.availableFaceDetectModes", int[].class);
 
     /**
      * <p>Maximum number of simultaneously detectable
@@ -1711,8 +1711,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#TONEMAP_MODE
      */
-    public static final Key<byte[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
-            new Key<byte[]>("android.tonemap.availableToneMapModes", byte[].class);
+    public static final Key<int[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
+            new Key<int[]>("android.tonemap.availableToneMapModes", int[].class);
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>

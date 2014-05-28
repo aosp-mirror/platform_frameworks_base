@@ -383,30 +383,24 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
-    public static final Key<Rational[]> COLOR_CORRECTION_TRANSFORM =
-            new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> COLOR_CORRECTION_TRANSFORM =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.colorCorrection.transform", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>Gains applying to Bayer raw color channels for
      * white-balance.</p>
-     * <p>The 4-channel white-balance gains are defined in
-     * the order of <code>[R G_even G_odd B]</code>, where <code>G_even</code> is the gain
-     * for green pixels on even rows of the output, and <code>G_odd</code>
-     * is the gain for green pixels on the odd rows. if a HAL
-     * does not support a separate gain for even/odd green channels,
-     * it should use the <code>G_even</code> value, and write <code>G_odd</code> equal to
-     * <code>G_even</code> in the output result metadata.</p>
-     * <p>This array is either set by the camera device when the request
-     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
-     * directly by the application in the request when the
-     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>The output should be the gains actually applied by the camera device to
-     * the current frame.</p>
+     * <p>These per-channel gains are either set by the camera device
+     * when the request {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not
+     * TRANSFORM_MATRIX, or directly by the application in the
+     * request when the {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is
+     * TRANSFORM_MATRIX.</p>
+     * <p>The gains in the result metadata are the gains actually
+     * applied by the camera device to the current frame.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
-    public static final Key<float[]> COLOR_CORRECTION_GAINS =
-            new Key<float[]>("android.colorCorrection.gains", float[].class);
+    public static final Key<android.hardware.camera2.params.RggbChannelVector> COLOR_CORRECTION_GAINS =
+            new Key<android.hardware.camera2.params.RggbChannelVector>("android.colorCorrection.gains", android.hardware.camera2.params.RggbChannelVector.class);
 
     /**
      * <p>The desired setting for the camera device's auto-exposure
