@@ -2103,6 +2103,10 @@ public class AudioService extends IAudioService.Stub {
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
+
+            if ((mode == AudioSystem.MODE_IN_CALL) && isInCommunication()) {
+                 AudioSystem.setParameters("in_call=true");
+            }
             newModeOwnerPid = setModeInt(mode, cb, Binder.getCallingPid());
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
