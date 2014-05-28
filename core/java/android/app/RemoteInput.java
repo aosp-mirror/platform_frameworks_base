@@ -64,18 +64,24 @@ public final class RemoteInput implements Parcelable {
     /** Extra added to a clip data intent object to hold the results bundle. */
     public static final String EXTRA_RESULTS_DATA = "android.remoteinput.resultsData";
 
+    // Flags bitwise-ored to mFlags
+    private static final int FLAG_ALLOW_FREE_FORM_INPUT = 0x1;
+
+    // Default value for flags integer
+    private static final int DEFAULT_FLAGS = FLAG_ALLOW_FREE_FORM_INPUT;
+
     private final String mResultKey;
     private final CharSequence mLabel;
     private final CharSequence[] mChoices;
-    private final boolean mAllowFreeFormInput;
+    private final int mFlags;
     private final Bundle mExtras;
 
     private RemoteInput(String resultKey, CharSequence label, CharSequence[] choices,
-            boolean allowFreeFormInput, Bundle extras) {
+            int flags, Bundle extras) {
         this.mResultKey = resultKey;
         this.mLabel = label;
         this.mChoices = choices;
-        this.mAllowFreeFormInput = allowFreeFormInput;
+        this.mFlags = flags;
         this.mExtras = extras;
     }
 
@@ -108,7 +114,7 @@ public final class RemoteInput implements Parcelable {
      * if you set this to false and {@link #getChoices} returns {@code null} or empty.
      */
     public boolean getAllowFreeFormInput() {
-        return mAllowFreeFormInput;
+        return (mFlags & FLAG_ALLOW_FREE_FORM_INPUT) != 0;
     }
 
     /**
@@ -125,7 +131,7 @@ public final class RemoteInput implements Parcelable {
         private final String mResultKey;
         private CharSequence mLabel;
         private CharSequence[] mChoices;
-        private boolean mAllowFreeFormInput = true;
+        private int mFlags = DEFAULT_FLAGS;
         private Bundle mExtras = new Bundle();
 
         /**
@@ -178,7 +184,7 @@ public final class RemoteInput implements Parcelable {
          * @return this object for method chaining
          */
         public Builder setAllowFreeFormInput(boolean allowFreeFormInput) {
-            mAllowFreeFormInput = allowFreeFormInput;
+            setFlag(mFlags, allowFreeFormInput);
             return this;
         }
 
@@ -205,12 +211,20 @@ public final class RemoteInput implements Parcelable {
             return mExtras;
         }
 
+        private void setFlag(int mask, boolean value) {
+            if (value) {
+                mFlags |= mask;
+            } else {
+                mFlags &= ~mask;
+            }
+        }
+
         /**
          * Combine all of the options that have been set and return a new {@link RemoteInput}
          * object.
          */
         public RemoteInput build() {
-            return new RemoteInput(mResultKey, mLabel, mChoices, mAllowFreeFormInput, mExtras);
+            return new RemoteInput(mResultKey, mLabel, mChoices, mFlags, mExtras);
         }
     }
 
@@ -218,7 +232,7 @@ public final class RemoteInput implements Parcelable {
         mResultKey = in.readString();
         mLabel = in.readCharSequence();
         mChoices = in.readCharSequenceArray();
-        mAllowFreeFormInput = in.readInt() != 0;
+        mFlags = in.readInt();
         mExtras = in.readBundle();
     }
 
@@ -279,7 +293,7 @@ public final class RemoteInput implements Parcelable {
         out.writeString(mResultKey);
         out.writeCharSequence(mLabel);
         out.writeCharSequenceArray(mChoices);
-        out.writeInt(mAllowFreeFormInput ? 1 : 0);
+        out.writeInt(mFlags);
         out.writeBundle(mExtras);
     }
 
