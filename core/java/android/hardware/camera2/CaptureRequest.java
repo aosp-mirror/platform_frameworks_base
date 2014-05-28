@@ -1052,8 +1052,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.hotPixel.mode", int.class);
 
     /**
+     * <p>A location object to use when generating image GPS metadata.</p>
+     */
+    public static final Key<android.location.Location> JPEG_GPS_LOCATION =
+            new Key<android.location.Location>("android.jpeg.gpsLocation", android.location.Location.class);
+
+    /**
      * <p>GPS coordinates to include in output JPEG
      * EXIF</p>
+     * @hide
      */
     public static final Key<double[]> JPEG_GPS_COORDINATES =
             new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
@@ -1061,6 +1068,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>32 characters describing GPS algorithm to
      * include in EXIF</p>
+     * @hide
      */
     public static final Key<String> JPEG_GPS_PROCESSING_METHOD =
             new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
@@ -1068,6 +1076,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Time GPS fix was made to include in
      * EXIF</p>
+     * @hide
      */
     public static final Key<Long> JPEG_GPS_TIMESTAMP =
             new Key<Long>("android.jpeg.gpsTimestamp", long.class);
@@ -1416,8 +1425,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>When set to OFF mode, no lens shading correction will be applied by the
      * camera device, and an identity lens shading map data will be provided
      * if <code>{@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON</code>. For example, for lens
-     * shading map with size specified as <code>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize} = [ 4, 3 ]</code>,
-     * the output {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} for this case will be an identity map
+     * shading map with size specified as <code>android.lens.info.shadingMapSize = [ 4, 3 ]</code>,
+     * the output android.statistics.lensShadingMap for this case will be an identity map
      * shown below:</p>
      * <pre><code>[ 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
      * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
@@ -1429,8 +1438,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>When set to other modes, lens shading correction will be applied by the
      * camera device. Applications can request lens shading map data by setting
      * {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} to ON, and then the camera device will provide
-     * lens shading map data in {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}, with size specified
-     * by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}; the returned shading map data will be the one
+     * lens shading map data in android.statistics.lensShadingMap, with size specified
+     * by android.lens.info.shadingMapSize; the returned shading map data will be the one
      * applied by the camera device for this capture request.</p>
      * <p>The shading map data may depend on the AE and AWB statistics, therefore the reliability
      * of the map data may be affected by the AE and AWB algorithms. When AE and AWB are in
@@ -1440,8 +1449,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
-     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see #SHADING_MODE_OFF
      * @see #SHADING_MODE_FAST
@@ -1482,10 +1489,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Whether the camera device will output the lens
      * shading map in output result metadata.</p>
      * <p>When set to ON,
-     * {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} must be provided in
+     * android.statistics.lensShadingMap must be provided in
      * the output result metadata.</p>
-     *
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */

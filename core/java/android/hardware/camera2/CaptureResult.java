@@ -1640,8 +1640,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.hotPixel.mode", int.class);
 
     /**
+     * <p>A location object to use when generating image GPS metadata.</p>
+     */
+    public static final Key<android.location.Location> JPEG_GPS_LOCATION =
+            new Key<android.location.Location>("android.jpeg.gpsLocation", android.location.Location.class);
+
+    /**
      * <p>GPS coordinates to include in output JPEG
      * EXIF</p>
+     * @hide
      */
     public static final Key<double[]> JPEG_GPS_COORDINATES =
             new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
@@ -1649,6 +1656,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>32 characters describing GPS algorithm to
      * include in EXIF</p>
+     * @hide
      */
     public static final Key<String> JPEG_GPS_PROCESSING_METHOD =
             new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
@@ -1656,6 +1664,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Time GPS fix was made to include in
      * EXIF</p>
+     * @hide
      */
     public static final Key<Long> JPEG_GPS_TIMESTAMP =
             new Key<Long>("android.jpeg.gpsTimestamp", long.class);
@@ -2145,8 +2154,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>When set to OFF mode, no lens shading correction will be applied by the
      * camera device, and an identity lens shading map data will be provided
      * if <code>{@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON</code>. For example, for lens
-     * shading map with size specified as <code>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize} = [ 4, 3 ]</code>,
-     * the output {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} for this case will be an identity map
+     * shading map with size specified as <code>android.lens.info.shadingMapSize = [ 4, 3 ]</code>,
+     * the output android.statistics.lensShadingMap for this case will be an identity map
      * shown below:</p>
      * <pre><code>[ 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
      * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
@@ -2158,8 +2167,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>When set to other modes, lens shading correction will be applied by the
      * camera device. Applications can request lens shading map data by setting
      * {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} to ON, and then the camera device will provide
-     * lens shading map data in {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}, with size specified
-     * by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}; the returned shading map data will be the one
+     * lens shading map data in android.statistics.lensShadingMap, with size specified
+     * by android.lens.info.shadingMapSize; the returned shading map data will be the one
      * applied by the camera device for this capture request.</p>
      * <p>The shading map data may depend on the AE and AWB statistics, therefore the reliability
      * of the map data may be affected by the AE and AWB algorithms. When AE and AWB are in
@@ -2169,8 +2178,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
-     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see #SHADING_MODE_OFF
      * @see #SHADING_MODE_FAST
@@ -2260,13 +2267,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * The map is assumed to be bilinearly interpolated between the sample points.</p>
      * <p>The channel order is [R, Geven, Godd, B], where Geven is the green
      * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
-     * The shading map is stored in a fully interleaved format, and its size
-     * is provided in the camera static metadata by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}.</p>
+     * The shading map is stored in a fully interleaved format.</p>
      * <p>The shading map should have on the order of 30-40 rows and columns,
      * and must be smaller than 64x64.</p>
      * <p>As an example, given a very small map defined as:</p>
-     * <pre><code>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize} = [ 4, 3 ]
-     * {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} =
+     * <pre><code>width,height = [ 4, 3 ]
+     * values =
      * [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
      * 1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
      * 1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
@@ -2285,8 +2291,54 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
-     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     */
+    public static final Key<android.hardware.camera2.params.LensShadingMap> STATISTICS_LENS_SHADING_CORRECTION_MAP =
+            new Key<android.hardware.camera2.params.LensShadingMap>("android.statistics.lensShadingCorrectionMap", android.hardware.camera2.params.LensShadingMap.class);
+
+    /**
+     * <p>The shading map is a low-resolution floating-point map
+     * that lists the coefficients used to correct for vignetting, for each
+     * Bayer color channel.</p>
+     * <p>The least shaded section of the image should have a gain factor
+     * of 1; all other sections should have gains above 1.</p>
+     * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
+     * must take into account the colorCorrection settings.</p>
+     * <p>The shading map is for the entire active pixel array, and is not
+     * affected by the crop region specified in the request. Each shading map
+     * entry is the value of the shading compensation map over a specific
+     * pixel on the sensor.  Specifically, with a (N x M) resolution shading
+     * map, and an active pixel array size (W x H), shading map entry
+     * (x,y) ϵ (0 ... N-1, 0 ... M-1) is the value of the shading map at
+     * pixel ( ((W-1)/(N-1)) * x, ((H-1)/(M-1)) * y) for the four color channels.
+     * The map is assumed to be bilinearly interpolated between the sample points.</p>
+     * <p>The channel order is [R, Geven, Godd, B], where Geven is the green
+     * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
+     * The shading map is stored in a fully interleaved format, and its size
+     * is provided in the camera static metadata by android.lens.info.shadingMapSize.</p>
+     * <p>The shading map should have on the order of 30-40 rows and columns,
+     * and must be smaller than 64x64.</p>
+     * <p>As an example, given a very small map defined as:</p>
+     * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
+     * android.statistics.lensShadingMap =
+     * [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
+     * 1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
+     * 1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.2, 1.3, 1.25, 1.2,
+     * 1.3, 1.2, 1.2, 1.3,   1.2, 1.15, 1.1, 1.2,
+     * 1.2, 1.1, 1.0, 1.2,  1.3, 1.15, 1.2, 1.3 ]
+     * </code></pre>
+     * <p>The low-resolution scaling map images for each channel are
+     * (displayed using nearest-neighbor interpolation):</p>
+     * <p><img alt="Red lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/red_shading.png" />
+     * <img alt="Green (even rows) lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/green_e_shading.png" />
+     * <img alt="Green (odd rows) lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/green_o_shading.png" />
+     * <img alt="Blue lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/blue_shading.png" /></p>
+     * <p>As a visualization only, inverting the full-color map to recover an
+     * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
+     * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @hide
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
             new Key<float[]>("android.statistics.lensShadingMap", float[].class);
@@ -2393,10 +2445,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Whether the camera device will output the lens
      * shading map in output result metadata.</p>
      * <p>When set to ON,
-     * {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} must be provided in
+     * android.statistics.lensShadingMap must be provided in
      * the output result metadata.</p>
-     *
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */

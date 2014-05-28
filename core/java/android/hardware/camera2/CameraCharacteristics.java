@@ -587,6 +587,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Dimensions of lens shading map.</p>
      * <p>The map should be on the order of 30-40 rows and columns, and
      * must be smaller than 64x64.</p>
+     * @hide
      */
     public static final Key<android.util.Size> LENS_INFO_SHADING_MAP_SIZE =
             new Key<android.util.Size>("android.lens.info.shadingMapSize", android.util.Size.class);
@@ -852,7 +853,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * value.</p>
      * <p>The following keys may return <code>null</code> unless they are enabled:</p>
      * <ul>
-     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} (non-null iff {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON)</li>
+     * <li>android.statistics.lensShadingMap (non-null iff {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON)</li>
      * </ul>
      * <p>(Those sometimes-null keys should nevertheless be listed here
      * if they are available.)</p>
@@ -863,7 +864,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>TODO: This should be used by #getAvailableCaptureResultKeys.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @hide
      */
@@ -1331,8 +1331,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Range of valid sensitivities</p>
      */
-    public static final Key<int[]> SENSOR_INFO_SENSITIVITY_RANGE =
-            new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
+    public static final Key<android.util.Range<Integer>> SENSOR_INFO_SENSITIVITY_RANGE =
+            new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Arrangement of color filters on sensor;
@@ -1353,8 +1353,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
-    public static final Key<long[]> SENSOR_INFO_EXPOSURE_TIME_RANGE =
-            new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
+    public static final Key<android.util.Range<Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE =
+            new Key<android.util.Range<Long>>("android.sensor.info.exposureTimeRange", new TypeReference<android.util.Range<Long>>() {{ }});
 
     /**
      * <p>Maximum possible frame duration (minimum frame

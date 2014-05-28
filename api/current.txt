@@ -12165,7 +12165,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_FOCUS_DISTANCE_CALIBRATION;
     field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_HYPERFOCAL_DISTANCE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_SHADING_MAP_SIZE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_AVAILABLE_CAPABILITIES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_INPUT_STREAMS;
@@ -12484,9 +12483,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureRequest.Key EDGE_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key FLASH_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key HOT_PIXEL_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_GPS_COORDINATES;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_GPS_PROCESSING_METHOD;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_GPS_TIMESTAMP;
+    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_GPS_LOCATION;
     field public static final android.hardware.camera2.CaptureRequest.Key JPEG_ORIENTATION;
     field public static final android.hardware.camera2.CaptureRequest.Key JPEG_QUALITY;
     field public static final android.hardware.camera2.CaptureRequest.Key JPEG_THUMBNAIL_QUALITY;
@@ -12560,9 +12557,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key FLASH_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key FLASH_STATE;
     field public static final android.hardware.camera2.CaptureResult.Key HOT_PIXEL_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_GPS_COORDINATES;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_GPS_PROCESSING_METHOD;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_GPS_TIMESTAMP;
+    field public static final android.hardware.camera2.CaptureResult.Key JPEG_GPS_LOCATION;
     field public static final android.hardware.camera2.CaptureResult.Key JPEG_ORIENTATION;
     field public static final android.hardware.camera2.CaptureResult.Key JPEG_QUALITY;
     field public static final android.hardware.camera2.CaptureResult.Key JPEG_THUMBNAIL_QUALITY;
@@ -12591,7 +12586,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_HOT_PIXEL_MAP;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_HOT_PIXEL_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_MAP;
+    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_CORRECTION_MAP;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_SCENE_FLICKER;
     field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE;

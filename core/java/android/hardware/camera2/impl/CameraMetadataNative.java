@@ -43,15 +43,19 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.LensShadingMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 
 import com.android.internal.util.Preconditions;
 
@@ -59,6 +63,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -210,6 +215,37 @@ public class CameraMetadataNative implements Parcelable {
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
     // this should be in sync with HAL_PIXEL_FORMAT_BLOB defined in graphics.h
     public static final int NATIVE_JPEG_FORMAT = 0x21;
+
+    private static final String CELLID_PROCESS = "CELLID";
+    private static final String GPS_PROCESS = "GPS";
+
+    private static String translateLocationProviderToProcess(final String provider) {
+        if (provider == null) {
+            return null;
+        }
+        switch(provider) {
+            case LocationManager.GPS_PROVIDER:
+                return GPS_PROCESS;
+            case LocationManager.NETWORK_PROVIDER:
+                return CELLID_PROCESS;
+            default:
+                return null;
+        }
+    }
+
+    private static String translateProcessToLocationProvider(final String process) {
+        if (process == null) {
+            return null;
+        }
+        switch(process) {
+            case GPS_PROCESS:
+                return LocationManager.GPS_PROVIDER;
+            case CELLID_PROCESS:
+                return LocationManager.NETWORK_PROVIDER;
+            default:
+                return null;
+        }
+    }
 
     public CameraMetadataNative() {
         super();
@@ -411,7 +447,6 @@ public class CameraMetadataNative implements Parcelable {
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
         return marshaler.unmarshal(buffer);
     }
-
     // Need overwrite some metadata that has different definitions between native
     // and managed sides.
     @SuppressWarnings("unchecked")
@@ -441,6 +476,10 @@ public class CameraMetadataNative implements Parcelable {
             value = (T) getMaxNumOutputs(key);
         } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
             value = (T) getTonemapCurve();
+        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
+            value = (T) getGpsLocation();
+        } else if (key.equals(CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP)) {
+            value = (T) getLensShadingMap();
         } else {
             override = false;
         }
@@ -561,6 +600,62 @@ public class CameraMetadataNative implements Parcelable {
         return fixedFaceRectangles;
     }
 
+    private LensShadingMap getLensShadingMap() {
+        float[] lsmArray = getBase(CaptureResult.STATISTICS_LENS_SHADING_MAP);
+        if (lsmArray == null) {
+            Log.w(TAG, "getLensShadingMap - Lens shading map was null.");
+            return null;
+        }
+        Size s = get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE);
+        LensShadingMap map = new LensShadingMap(lsmArray, s.getHeight(), s.getWidth());
+        return map;
+    }
+
+    private Location getGpsLocation() {
+        String processingMethod = get(CaptureResult.JPEG_GPS_PROCESSING_METHOD);
+        Location l = new Location(translateProcessToLocationProvider(processingMethod));
+
+        double[] coords = get(CaptureResult.JPEG_GPS_COORDINATES);
+        Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP);
+
+        if (timeStamp != null) {
+            l.setTime(timeStamp);
+        } else {
+            Log.w(TAG, "getGpsLocation - No timestamp for GPS location.");
+        }
+
+        if (coords != null) {
+            l.setLatitude(coords[0]);
+            l.setLongitude(coords[1]);
+            l.setAltitude(coords[2]);
+        } else {
+            Log.w(TAG, "getGpsLocation - No coordinates for GPS location");
+        }
+
+        return l;
+    }
+
+    private boolean setGpsLocation(Location l) {
+        if (l == null) {
+            return false;
+        }
+
+        double[] coords = { l.getLatitude(), l.getLongitude(), l.getAltitude() };
+        String processMethod = translateLocationProviderToProcess(l.getProvider());
+        long timestamp = l.getTime();
+
+        set(CaptureRequest.JPEG_GPS_TIMESTAMP, timestamp);
+        set(CaptureRequest.JPEG_GPS_COORDINATES, coords);
+
+        if (processMethod == null) {
+            Log.w(TAG, "setGpsLocation - No process method, Location is not from a GPS or NETWORK" +
+                    "provider");
+        } else {
+            setBase(CaptureRequest.JPEG_GPS_PROCESSING_METHOD, processMethod);
+        }
+        return true;
+    }
+
     private StreamConfigurationMap getStreamConfigurationMap() {
         StreamConfiguration[] configurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
@@ -670,6 +765,8 @@ public class CameraMetadataNative implements Parcelable {
             return setFaceRectangles((Rect[]) value);
         } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
             return setTonemapCurve((TonemapCurve) value);
+        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
+            return setGpsLocation((Location) value);
         }
         // For other keys, set() falls back to setBase().
         return false;

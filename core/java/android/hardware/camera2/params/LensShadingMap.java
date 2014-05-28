@@ -28,7 +28,7 @@ import java.util.Arrays;
 /**
  * Immutable class for describing a {@code 4 x N x M} lens shading map of floats.
  *
- * @see CameraCharacteristics#LENS_SHADING_MAP
+ * @see CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP
  */
 public final class LensShadingMap {
 
@@ -62,12 +62,12 @@ public final class LensShadingMap {
     public LensShadingMap(final float[] elements, final int rows, final int columns) {
 
         mRows = checkArgumentPositive(rows, "rows must be positive");
-        mColumns = checkArgumentPositive(rows, "columns must be positive");
+        mColumns = checkArgumentPositive(columns, "columns must be positive");
         mElements = checkNotNull(elements, "elements must not be null");
 
         if (elements.length != getGainFactorCount()) {
             throw new IllegalArgumentException("elements must be " + getGainFactorCount() +
-                    " length");
+                    " length, received " + elements.length);
         }
 
         // Every element must be finite and >= 1.0f
@@ -242,4 +242,4 @@ public final class LensShadingMap {
     private final int mRows;
     private final int mColumns;
     private final float[] mElements;
-};
+}

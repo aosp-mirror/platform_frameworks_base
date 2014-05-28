@@ -220,6 +220,7 @@ public final class CameraManager {
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
             CameraDevice.StateListener listener, Handler handler)
             throws CameraAccessException {
+        CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
         try {
 
@@ -231,7 +232,8 @@ public final class CameraManager {
                         new android.hardware.camera2.impl.CameraDevice(
                                 cameraId,
                                 listener,
-                                handler);
+                                handler,
+                                characteristics);
 
                 BinderHolder holder = new BinderHolder();
 
