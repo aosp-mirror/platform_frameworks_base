@@ -1152,8 +1152,6 @@ public final class ContactsContract {
      * address book index, which is usually the first letter of the sort key.
      * When this parameter is supplied, the row counts are returned in the
      * cursor extras bundle.
-     *
-     * @hide
      */
     public final static class ContactCounts {
 
@@ -1163,7 +1161,24 @@ public final class ContactsContract {
          * first letter of the sort key. This parameter does not affect the main
          * content of the cursor.
          *
-         * @hide
+         * <p>
+         * <pre>
+         * Example:
+         * Uri uri = Contacts.CONTENT_URI.buildUpon()
+         *          .appendQueryParameter(ContactCounts.ADDRESS_BOOK_INDEX_EXTRAS, "true")
+         *          .build();
+         * Cursor cursor = getContentResolver().query(uri,
+         *          new String[] {Contacts.DISPLAY_NAME},
+         *          null, null, null);
+         * Bundle bundle = cursor.getExtras();
+         * if (bundle.containsKey(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
+         *         bundle.containsKey(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
+         *     String sections[] =
+         *             bundle.getStringArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
+         *     int counts[] = bundle.getIntArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
+         * }
+         * </pre>
+         * </p>
          */
         public static final String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
 
@@ -1171,8 +1186,6 @@ public final class ContactsContract {
          * The array of address book index titles, which are returned in the
          * same order as the data in the cursor.
          * <p>TYPE: String[]</p>
-         *
-         * @hide
          */
         public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
 
@@ -1180,8 +1193,6 @@ public final class ContactsContract {
          * The array of group counts for the corresponding group.  Contains the same number
          * of elements as the EXTRA_ADDRESS_BOOK_INDEX_TITLES array.
          * <p>TYPE: int[]</p>
-         *
-         * @hide
          */
         public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
     }
