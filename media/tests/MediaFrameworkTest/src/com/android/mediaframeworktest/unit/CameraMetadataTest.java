@@ -41,6 +41,7 @@ import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
@@ -49,6 +50,7 @@ import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1015,6 +1017,26 @@ public class CameraMetadataTest extends junit.framework.TestCase {
             assertNull(resultSimpleFaces[i].getMouthPosition());
         }
 
+        /**
+         * Read/Write TonemapCurve
+         */
+        float[] red = new float[] {0.0f, 0.0f, 1.0f, 1.0f};
+        float[] green = new float[] {0.0f, 1.0f, 1.0f, 0.0f};
+        float[] blue = new float[] {
+                0.0000f, 0.0000f, 0.0667f, 0.2920f, 0.1333f, 0.4002f, 0.2000f, 0.4812f,
+                0.2667f, 0.5484f, 0.3333f, 0.6069f, 0.4000f, 0.6594f, 0.4667f, 0.7072f,
+                0.5333f, 0.7515f, 0.6000f, 0.7928f, 0.6667f, 0.8317f, 0.7333f, 0.8685f,
+                0.8000f, 0.9035f, 0.8667f, 0.9370f, 0.9333f, 0.9691f, 1.0000f, 1.0000f};
+        TonemapCurve tcIn = new TonemapCurve(red, green, blue);
+        mMetadata.set(CaptureResult.TONEMAP_CURVE, tcIn);
+        float[] redOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_RED);
+        float[] greenOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_GREEN);
+        float[] blueOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_BLUE);
+        assertTrue("Input and output tonemap curve should match", Arrays.equals(red, redOut));
+        assertTrue("Input and output tonemap curve should match", Arrays.equals(green, greenOut));
+        assertTrue("Input and output tonemap curve should match", Arrays.equals(blue, blueOut));
+        TonemapCurve tcOut = mMetadata.get(CaptureResult.TONEMAP_CURVE);
+        assertTrue("Input and output tonemap curve should match", tcIn.equals(tcOut));
     }
 
     /**
@@ -1164,6 +1186,48 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                     Duration.Stall,
                     expectedAvailableStallDurations[i+3]);
         }
+    }
+
+    private <T> void assertKeyValueEquals(T expected, CameraCharacteristics.Key<T> key) {
+        assertKeyValueEquals(expected, key.getNativeKey());
+    }
+
+    private <T> void assertKeyValueEquals(T expected, Key<T> key) {
+        T actual = mMetadata.get(key);
+
+        assertEquals("Expected value for key " + key + " to match", expected, actual);
+    }
+
+    @SmallTest
+    public void testOverrideMaxRegions() {
+        // All keys are null before doing any writes.
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AE);
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AWB);
+        assertKeyValueEquals(null, CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+
+        mMetadata.set(CameraCharacteristics.CONTROL_MAX_REGIONS,
+                new int[] { /*AE*/1, /*AWB*/2, /*AF*/3 });
+
+        // All keys are the expected value after doing a write
+        assertKeyValueEquals(1, CameraCharacteristics.CONTROL_MAX_REGIONS_AE);
+        assertKeyValueEquals(2, CameraCharacteristics.CONTROL_MAX_REGIONS_AWB);
+        assertKeyValueEquals(3, CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+    }
+
+    @SmallTest
+    public void testOverrideMaxNumOutputStreams() {
+        // All keys are null before doing any writes.
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW);
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC);
+        assertKeyValueEquals(null, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING);
+
+        mMetadata.set(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS,
+                new int[] { /*AE*/1, /*AWB*/2, /*AF*/3 });
+
+        // All keys are the expected value after doing a write
+        assertKeyValueEquals(1, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW);
+        assertKeyValueEquals(2, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC);
+        assertKeyValueEquals(3, CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING);
     }
 
     @SmallTest

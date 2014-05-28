@@ -296,8 +296,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * valid anti-banding modes that the application may request
      * for this camera device; they must include AUTO.</p>
      */
-    public static final Key<byte[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
-            new Key<byte[]>("android.control.aeAvailableAntibandingModes", byte[].class);
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
+            new Key<int[]>("android.control.aeAvailableAntibandingModes", int[].class);
 
     /**
      * <p>The set of auto-exposure modes that are supported by this
@@ -315,15 +315,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      */
-    public static final Key<byte[]> CONTROL_AE_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.aeAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_MODES =
+            new Key<int[]>("android.control.aeAvailableModes", int[].class);
 
     /**
      * <p>List of frame rate ranges supported by the
      * AE algorithm/hardware</p>
      */
-    public static final Key<int[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
-            new Key<int[]>("android.control.aeAvailableTargetFpsRanges", int[].class);
+    public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
+            new Key<android.util.Range<Integer>[]>("android.control.aeAvailableTargetFpsRanges", new TypeReference<android.util.Range<Integer>[]>() {{ }});
 
     /**
      * <p>Maximum and minimum exposure compensation
@@ -332,8 +332,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      */
-    public static final Key<int[]> CONTROL_AE_COMPENSATION_RANGE =
-            new Key<int[]>("android.control.aeCompensationRange", int[].class);
+    public static final Key<android.util.Range<Integer>> CONTROL_AE_COMPENSATION_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.aeCompensationRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Smallest step by which exposure compensation
@@ -355,8 +355,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AF_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
-    public static final Key<byte[]> CONTROL_AF_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.afAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AF_AVAILABLE_MODES =
+            new Key<int[]>("android.control.afAvailableModes", int[].class);
 
     /**
      * <p>List containing the subset of color effects
@@ -374,8 +374,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_EFFECTS =
-            new Key<byte[]>("android.control.availableEffects", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_EFFECTS =
+            new Key<int[]>("android.control.availableEffects", int[].class);
 
     /**
      * <p>List containing a subset of scene modes
@@ -388,15 +388,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_SCENE_MODES =
-            new Key<byte[]>("android.control.availableSceneModes", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_SCENE_MODES =
+            new Key<int[]>("android.control.availableSceneModes", int[].class);
 
     /**
      * <p>List of video stabilization modes that can
      * be supported</p>
      */
-    public static final Key<byte[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
-            new Key<byte[]>("android.control.availableVideoStabilizationModes", byte[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
+            new Key<int[]>("android.control.availableVideoStabilizationModes", int[].class);
 
     /**
      * <p>The set of auto-white-balance modes ({@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode})
@@ -414,8 +414,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
-    public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
-            new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
+    public static final Key<int[]> CONTROL_AWB_AVAILABLE_MODES =
+            new Key<int[]>("android.control.awbAvailableModes", int[].class);
 
     /**
      * <p>List of the maximum number of regions that can be used for metering in
@@ -427,9 +427,43 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_REGIONS
      * @see CaptureRequest#CONTROL_AF_REGIONS
      * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @hide
      */
     public static final Key<int[]> CONTROL_MAX_REGIONS =
             new Key<int[]>("android.control.maxRegions", int[].class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-exposure (AE);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AE =
+            new Key<Integer>("android.control.maxRegionsAe", int.class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-white balance (AWB);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AWB =
+            new Key<Integer>("android.control.maxRegionsAwb", int.class);
+
+    /**
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-focus (AF);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS_AF =
+            new Key<Integer>("android.control.maxRegionsAf", int.class);
 
     /**
      * <p>The set of edge enhancement modes supported by this camera device.</p>
@@ -438,8 +472,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#EDGE_MODE
      */
-    public static final Key<byte[]> EDGE_AVAILABLE_EDGE_MODES =
-            new Key<byte[]>("android.edge.availableEdgeModes", byte[].class);
+    public static final Key<int[]> EDGE_AVAILABLE_EDGE_MODES =
+            new Key<int[]>("android.edge.availableEdgeModes", int[].class);
 
     /**
      * <p>Whether this camera device has a
@@ -458,8 +492,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
-    public static final Key<byte[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
-            new Key<byte[]>("android.hotPixel.availableHotPixelModes", byte[].class);
+    public static final Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
+            new Key<int[]>("android.hotPixel.availableHotPixelModes", int[].class);
 
     /**
      * <p>Supported resolutions for the JPEG thumbnail</p>
@@ -526,8 +560,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
-    public static final Key<byte[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
-            new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
+    public static final Key<int[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
+            new Key<int[]>("android.lens.info.availableOpticalStabilization", int[].class);
 
     /**
      * <p>Optional. Hyperfocal distance for this lens.</p>
@@ -553,6 +587,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Dimensions of lens shading map.</p>
      * <p>The map should be on the order of 30-40 rows and columns, and
      * must be smaller than 64x64.</p>
+     * @hide
      */
     public static final Key<android.util.Size> LENS_INFO_SHADING_MAP_SIZE =
             new Key<android.util.Size>("android.lens.info.shadingMapSize", android.util.Size.class);
@@ -591,8 +626,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
-    public static final Key<byte[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
-            new Key<byte[]>("android.noiseReduction.availableNoiseReductionModes", byte[].class);
+    public static final Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
+            new Key<int[]>("android.noiseReduction.availableNoiseReductionModes", int[].class);
 
     /**
      * <p>If set to 1, the HAL will always split result
@@ -621,7 +656,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * number is 3, and max JPEG stream number is 2, then this tuple should be <code>(1, 3, 2)</code>.</p>
      * <p>This lists the upper bound of the number of output streams supported by
      * the camera device. Using more streams simultaneously may require more hardware and
-     * CPU resources that will consume more power. The image format for a output stream can
+     * CPU resources that will consume more power. The image format for an output stream can
      * be any supported format provided by android.scaler.availableStreamConfigurations.
      * The formats defined in android.scaler.availableStreamConfigurations can be catergorized
      * into the 3 stream types as below:</p>
@@ -632,9 +667,77 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
+     * @hide
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any <code>RAW</code> formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams from the raw sensor.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any <code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>In particular, a <code>RAW</code> format is typically one of:</p>
+     * <ul>
+     * <li>ImageFormat#RAW_SENSOR</li>
+     * <li>Opaque <code>RAW</code></li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_RAW =
+            new Key<Integer>("android.request.maxNumOutputRaw", int.class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any processed (but not-stalling) formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams for any processed (but not-stalling) formats.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>Processed (but not-stalling) is defined as any non-RAW format without a stall duration.
+     * Typically:</p>
+     * <ul>
+     * <li>ImageFormat#YUV_420_888</li>
+     * <li>ImageFormat#NV21</li>
+     * <li>ImageFormat#YV12</li>
+     * <li>Implementation-defined formats, i.e. StreamConfiguration#isOutputSupportedFor(Class)</li>
+     * </ul>
+     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+     * a processed format -- it will return 0 for a non-stalling stream.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC =
+            new Key<Integer>("android.request.maxNumOutputProc", int.class);
+
+    /**
+     * <p>The maximum numbers of different types of output streams
+     * that can be configured and used simultaneously by a camera device
+     * for any processed (and stalling) formats.</p>
+     * <p>This value contains the max number of output simultaneous
+     * streams for any processed (but not-stalling) formats.</p>
+     * <p>This lists the upper bound of the number of output streams supported by
+     * the camera device. Using more streams simultaneously may require more hardware and
+     * CPU resources that will consume more power. The image format for this kind of an output stream can
+     * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
+     * <p>A processed and stalling format is defined as any non-RAW format with a stallDurations &gt; 0.
+     * Typically only the <code>JPEG</code> format (ImageFormat#JPEG)</p>
+     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+     * a processed format -- it will return a non-0 value for a stalling stream.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     */
+    public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING =
+            new Key<Integer>("android.request.maxNumOutputProcStalling", int.class);
 
     /**
      * <p>The maximum numbers of any type of input streams
@@ -750,7 +853,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * value.</p>
      * <p>The following keys may return <code>null</code> unless they are enabled:</p>
      * <ul>
-     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} (non-null iff {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON)</li>
+     * <li>android.statistics.lensShadingMap (non-null iff {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON)</li>
      * </ul>
      * <p>(Those sometimes-null keys should nevertheless be listed here
      * if they are available.)</p>
@@ -761,7 +864,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>TODO: This should be used by #getAvailableCaptureResultKeys.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @hide
      */
@@ -1229,8 +1331,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Range of valid sensitivities</p>
      */
-    public static final Key<int[]> SENSOR_INFO_SENSITIVITY_RANGE =
-            new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
+    public static final Key<android.util.Range<Integer>> SENSOR_INFO_SENSITIVITY_RANGE =
+            new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
      * <p>Arrangement of color filters on sensor;
@@ -1251,8 +1353,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
-    public static final Key<long[]> SENSOR_INFO_EXPOSURE_TIME_RANGE =
-            new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
+    public static final Key<android.util.Range<Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE =
+            new Key<android.util.Range<Long>>("android.sensor.info.exposureTimeRange", new TypeReference<android.util.Range<Long>>() {{ }});
 
     /**
      * <p>Maximum possible frame duration (minimum frame
@@ -1276,8 +1378,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * array</p>
      * <p>Needed for FOV calculation for old API</p>
      */
-    public static final Key<float[]> SENSOR_INFO_PHYSICAL_SIZE =
-            new Key<float[]>("android.sensor.info.physicalSize", float[].class);
+    public static final Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE =
+            new Key<android.util.SizeF>("android.sensor.info.physicalSize", android.util.SizeF.class);
 
     /**
      * <p>Dimensions of full pixel array, possibly
@@ -1383,8 +1485,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM1 =
-            new Key<Rational[]>("android.sensor.calibrationTransform1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A per-device calibration transform matrix that maps from the
@@ -1404,8 +1506,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM2 =
-            new Key<Rational[]>("android.sensor.calibrationTransform2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms color values from CIE XYZ color space to
@@ -1426,8 +1528,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM1 =
-            new Key<Rational[]>("android.sensor.colorTransform1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms color values from CIE XYZ color space to
@@ -1450,8 +1552,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM2 =
-            new Key<Rational[]>("android.sensor.colorTransform2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms white balanced camera colors from the reference
@@ -1470,8 +1572,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
-    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX1 =
-            new Key<Rational[]>("android.sensor.forwardMatrix1", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX1 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A matrix that transforms white balanced camera colors from the reference
@@ -1492,8 +1594,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
-    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX2 =
-            new Key<Rational[]>("android.sensor.forwardMatrix2", Rational[].class);
+    public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX2 =
+            new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
     /**
      * <p>A fixed black level offset for each of the color filter arrangement
@@ -1560,8 +1662,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.statistics.faceIds and
      * android.statistics.faceLandmarks outputs.</p>
      */
-    public static final Key<byte[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
-            new Key<byte[]>("android.statistics.info.availableFaceDetectModes", byte[].class);
+    public static final Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
+            new Key<int[]>("android.statistics.info.availableFaceDetectModes", int[].class);
 
     /**
      * <p>Maximum number of simultaneously detectable
@@ -1584,19 +1686,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Maximum number of supported points in the
-     * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, or
-     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, or {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.</p>
+     * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}.</p>
      * <p>If the actual number of points provided by the application (in
-     * android.tonemap.curve*)  is less than max, the camera device will
+     * {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}*)  is less than max, the camera device will
      * resample the curve to its internal representation, using linear
      * interpolation.</p>
      * <p>The output curves in the result metadata may have a different number
      * of points than the input curves, and will represent the actual
      * hardware curves used as closely as possible when linearly interpolated.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
-     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_CURVE
      */
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
@@ -1609,8 +1708,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#TONEMAP_MODE
      */
-    public static final Key<byte[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
-            new Key<byte[]>("android.tonemap.availableToneMapModes", byte[].class);
+    public static final Key<int[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
+            new Key<int[]>("android.tonemap.availableToneMapModes", int[].class);
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>

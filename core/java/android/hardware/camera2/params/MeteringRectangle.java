@@ -57,7 +57,7 @@ public final class MeteringRectangle {
      * @param height height >= 0
      * @param meteringWeight weight >= 0
      *
-     * @throws IllegalArgumentException if any of the parameters were non-negative
+     * @throws IllegalArgumentException if any of the parameters were negative
      */
     public MeteringRectangle(int x, int y, int width, int height, int meteringWeight) {
         mX = checkArgumentNonnegative(x, "x must be nonnegative");
@@ -74,7 +74,7 @@ public final class MeteringRectangle {
      * @param dimensions a non-{@code null} {@link android.util.Size Size} with width, height >= 0
      * @param meteringWeight weight >= 0
      *
-     * @throws IllegalArgumentException if any of the parameters were non-negative
+     * @throws IllegalArgumentException if any of the parameters were negative
      * @throws NullPointerException if any of the arguments were null
      */
     public MeteringRectangle(Point xy, Size dimensions, int meteringWeight) {
@@ -94,7 +94,7 @@ public final class MeteringRectangle {
      * @param rect a non-{@code null} rectangle with all x,y,w,h dimensions >= 0
      * @param meteringWeight weight >= 0
      *
-     * @throws IllegalArgumentException if any of the parameters were non-negative
+     * @throws IllegalArgumentException if any of the parameters were negative
      * @throws NullPointerException if any of the arguments were null
      */
     public MeteringRectangle(Rect rect, int meteringWeight) {
@@ -210,7 +210,7 @@ public final class MeteringRectangle {
                 && mY == other.mY
                 && mWidth == other.mWidth
                 && mHeight == other.mHeight
-                && mWidth == other.mWidth);
+                && mWeight == other.mWeight);
     }
 
     /**
