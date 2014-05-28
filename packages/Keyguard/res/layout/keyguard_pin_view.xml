@@ -41,28 +41,16 @@
        android:layout_weight="1"
        android:layoutDirection="ltr"
        >
-       <LinearLayout
+       <RelativeLayout
+          android:id="@+id/row0"
           android:layout_width="match_parent"
           android:layout_height="0dp"
-          android:orientation="horizontal"
           android:layout_weight="1"
           >
-          <TextView android:id="@+id/pinEntry"
-               android:editable="true"
-               android:layout_width="0dip"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:gravity="center"
-               android:layout_marginStart="@dimen/keyguard_lockscreen_pin_margin_left"
-               android:singleLine="true"
-               android:cursorVisible="false"
-               android:background="@null"
-               android:textAppearance="@style/TextAppearance.NumPadKey"
-               android:imeOptions="flagForceAscii|actionDone"
-               />
-           <ImageButton android:id="@+id/delete_button"
+          <ImageButton android:id="@+id/delete_button"
                android:layout_width="wrap_content"
                android:layout_height="match_parent"
+               android:layout_alignParentEnd="true"
                android:gravity="center_vertical"
                android:src="@drawable/ic_input_delete"
                android:clickable="true"
@@ -73,13 +61,30 @@
                android:background="?android:attr/selectableItemBackground"
                android:contentDescription="@string/keyboardview_keycode_delete"
                />
-       </LinearLayout>
-       <View
-           android:layout_width="wrap_content"
-           android:layout_height="1dp"
-           android:background="#55FFFFFF"
-           />
+           <TextView android:id="@+id/pinEntry"
+               android:editable="true"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:layout_toStartOf="@+id/delete_button"
+               android:layout_alignParentStart="true"
+               android:gravity="center"
+               android:layout_marginStart="@dimen/keyguard_lockscreen_pin_margin_left"
+               android:singleLine="true"
+               android:cursorVisible="false"
+               android:background="@null"
+               android:textAppearance="@style/TextAppearance.NumPadKey"
+               android:imeOptions="flagForceAscii|actionDone"
+               />
+            <View
+               android:id="@+id/divider"
+               android:layout_width="match_parent"
+               android:layout_height="1dp"
+               android:layout_alignParentBottom="true"
+               android:background="#55FFFFFF"
+               />
+       </RelativeLayout>
        <LinearLayout
+           android:id="@+id/row1"
            android:layout_width="match_parent"
            android:layout_height="0dp"
            android:layout_weight="1"
@@ -114,6 +119,7 @@
                />
        </LinearLayout>
        <LinearLayout
+           android:id="@+id/row2"
            android:layout_width="match_parent"
            android:layout_height="0dp"
            android:layout_weight="1"
@@ -148,6 +154,7 @@
                />
        </LinearLayout>
        <LinearLayout
+           android:id="@+id/row3"
            android:layout_width="match_parent"
            android:layout_height="0dp"
            android:orientation="horizontal"
@@ -182,6 +189,7 @@
                />
        </LinearLayout>
        <LinearLayout
+           android:id="@+id/row4"
            android:layout_width="match_parent"
            android:layout_height="0dp"
            android:layout_weight="1"

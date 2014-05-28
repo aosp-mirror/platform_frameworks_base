@@ -22,6 +22,7 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView.OnEditorActionListener;
 
 /**
@@ -30,12 +31,21 @@ import android.widget.TextView.OnEditorActionListener;
 public class KeyguardPINView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
+    private final AppearAnimationUtils mAppearAnimationUtils;
+    private ViewGroup mKeyguardBouncerFrame;
+    private ViewGroup mRow0;
+    private ViewGroup mRow1;
+    private ViewGroup mRow2;
+    private ViewGroup mRow3;
+    private View mDivider;
+
     public KeyguardPINView(Context context) {
         this(context, null);
     }
 
     public KeyguardPINView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mAppearAnimationUtils = new AppearAnimationUtils(context);
     }
 
     protected void resetState() {
@@ -56,6 +66,12 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        mKeyguardBouncerFrame = (ViewGroup) findViewById(R.id.keyguard_bouncer_frame);
+        mRow0 = (ViewGroup) findViewById(R.id.row0);
+        mRow1 = (ViewGroup) findViewById(R.id.row1);
+        mRow2 = (ViewGroup) findViewById(R.id.row2);
+        mRow3 = (ViewGroup) findViewById(R.id.row3);
+        mDivider = findViewById(R.id.divider);
         final View ok = findViewById(R.id.key_enter);
         if (ok != null) {
             ok.setOnClickListener(new View.OnClickListener() {
@@ -117,8 +133,45 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
 
     @Override
     public void startAppearAnimation() {
-        // TODO: Fancy animation.
-        setAlpha(0);
-        animate().alpha(1).withLayer().setDuration(200);
+        enableClipping(false);
+        setTranslationY(mAppearAnimationUtils.getStartTranslation());
+        animate()
+                .setDuration(500)
+                .setInterpolator(mAppearAnimationUtils.getInterpolator())
+                .translationY(0);
+        mAppearAnimationUtils.startAppearAnimation(new View[][] {
+                new View[] {
+                        mRow0, null, null
+                },
+                new View[] {
+                        findViewById(R.id.key1), findViewById(R.id.key2), findViewById(R.id.key3)
+                },
+                new View[] {
+                        findViewById(R.id.key4), findViewById(R.id.key5), findViewById(R.id.key6)
+                },
+                new View[] {
+                        findViewById(R.id.key7), findViewById(R.id.key8), findViewById(R.id.key9)
+                },
+                new View[] {
+                        null, findViewById(R.id.key0), findViewById(R.id.key_enter)
+                },
+                new View[] {
+                        null, mEcaView, null
+                }},
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        enableClipping(true);
+                    }
+                });
+    }
+
+    private void enableClipping(boolean enable) {
+        mKeyguardBouncerFrame.setClipToPadding(enable);
+        mKeyguardBouncerFrame.setClipChildren(enable);
+        mRow1.setClipToPadding(enable);
+        mRow2.setClipToPadding(enable);
+        mRow3.setClipToPadding(enable);
+        setClipChildren(enable);
     }
 }
