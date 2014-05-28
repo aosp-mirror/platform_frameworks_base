@@ -83,7 +83,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ActionMode, defStyleAttr, defStyleRes);
-        setBackgroundDrawable(a.getDrawable(
+        setBackground(a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_background));
         mTitleStyleRes = a.getResourceId(
                 com.android.internal.R.styleable.ActionMode_titleTextStyle, 0);
@@ -109,7 +109,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     }
 
     @Override
-    public void setSplitActionBar(boolean split) {
+    public void setSplitToolbar(boolean split) {
         if (mSplitActionBar != split) {
             if (mActionMenuPresenter != null) {
                 // Mode is already active; move everything over and adjust the menu itself.
@@ -137,7 +137,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                     mSplitView.addView(mMenuView, layoutParams);
                 }
             }
-            super.setSplitActionBar(split);
+            super.setSplitToolbar(split);
         }
     }
 

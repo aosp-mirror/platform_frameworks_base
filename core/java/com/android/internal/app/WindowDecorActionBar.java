@@ -18,7 +18,10 @@ package com.android.internal.app;
 
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
+import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.AdapterView;
+import android.widget.Toolbar;
 import com.android.internal.R;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.MenuBuilder;
@@ -28,6 +31,7 @@ import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
+import com.android.internal.widget.DecorToolbar;
 import com.android.internal.widget.ScrollingTabContainerView;
 
 import android.animation.Animator;
@@ -55,6 +59,7 @@ import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.SpinnerAdapter;
+import com.android.internal.widget.ToolbarWidgetWrapper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -77,7 +82,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
     private ActionBarOverlayLayout mOverlayLayout;
     private ActionBarContainer mContainerView;
-    private ActionBarView mActionView;
+    private DecorToolbar mDecorToolbar;
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
     private View mContentView;
@@ -187,7 +192,7 @@ public class WindowDecorActionBar extends ActionBar implements
         if (mOverlayLayout != null) {
             mOverlayLayout.setActionBarVisibilityCallback(this);
         }
-        mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
+        mDecorToolbar = getDecorToolbar(decor.findViewById(com.android.internal.R.id.action_bar));
         mContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
         mContainerView = (ActionBarContainer) decor.findViewById(
@@ -195,18 +200,17 @@ public class WindowDecorActionBar extends ActionBar implements
         mSplitView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.split_action_bar);
 
-        if (mActionView == null || mContextView == null || mContainerView == null) {
+        if (mDecorToolbar == null || mContextView == null || mContainerView == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with a compatible window decor layout");
         }
 
-        mContext = mActionView.getContext();
-        mActionView.setContextView(mContextView);
-        mContextDisplayMode = mActionView.isSplitActionBar() ?
+        mContext = mDecorToolbar.getContext();
+        mContextDisplayMode = mDecorToolbar.isSplit() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
         // This was initially read from the action bar style
-        final int current = mActionView.getDisplayOptions();
+        final int current = mDecorToolbar.getDisplayOptions();
         final boolean homeAsUp = (current & DISPLAY_HOME_AS_UP) != 0;
         if (homeAsUp) {
             mDisplayHomeAsUpSet = true;
@@ -225,6 +229,17 @@ public class WindowDecorActionBar extends ActionBar implements
         a.recycle();
     }
 
+    private DecorToolbar getDecorToolbar(View view) {
+        if (view instanceof DecorToolbar) {
+            return (DecorToolbar) view;
+        } else if (view instanceof Toolbar) {
+            return ((Toolbar) view).getWrapper();
+        } else {
+            throw new IllegalStateException("Can't make a decor toolbar out of " +
+                    view.getClass().getSimpleName());
+        }
+    }
+
     public void onConfigurationChanged(Configuration newConfig) {
         setHasEmbeddedTabs(ActionBarPolicy.get(mContext).hasEmbeddedTabs());
     }
@@ -233,11 +248,11 @@ public class WindowDecorActionBar extends ActionBar implements
         mHasEmbeddedTabs = hasEmbeddedTabs;
         // Switch tab layout configuration if needed
         if (!mHasEmbeddedTabs) {
-            mActionView.setEmbeddedTabView(null);
+            mDecorToolbar.setEmbeddedTabView(null);
             mContainerView.setTabContainer(mTabScrollView);
         } else {
             mContainerView.setTabContainer(null);
-            mActionView.setEmbeddedTabView(mTabScrollView);
+            mDecorToolbar.setEmbeddedTabView(mTabScrollView);
         }
         final boolean isInTabMode = getNavigationMode() == NAVIGATION_MODE_TABS;
         if (mTabScrollView != null) {
@@ -250,7 +265,7 @@ public class WindowDecorActionBar extends ActionBar implements
                 mTabScrollView.setVisibility(View.GONE);
             }
         }
-        mActionView.setCollapsable(!mHasEmbeddedTabs && isInTabMode);
+        mDecorToolbar.setCollapsible(!mHasEmbeddedTabs && isInTabMode);
         mOverlayLayout.setHasNonEmbeddedTabs(!mHasEmbeddedTabs && isInTabMode);
     }
 
@@ -263,7 +278,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
         if (mHasEmbeddedTabs) {
             tabScroller.setVisibility(View.VISIBLE);
-            mActionView.setEmbeddedTabView(tabScroller);
+            mDecorToolbar.setEmbeddedTabView(tabScroller);
         } else {
             if (getNavigationMode() == NAVIGATION_MODE_TABS) {
                 tabScroller.setVisibility(View.VISIBLE);
@@ -326,7 +341,8 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public void setCustomView(int resId) {
-        setCustomView(LayoutInflater.from(getThemedContext()).inflate(resId, mActionView, false));
+        setCustomView(LayoutInflater.from(getThemedContext()).inflate(resId,
+                (ViewGroup) mDecorToolbar, false));
     }
 
     @Override
@@ -356,7 +372,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public void setHomeButtonEnabled(boolean enable) {
-        mActionView.setHomeButtonEnabled(enable);
+        mDecorToolbar.setHomeButtonEnabled(enable);
     }
 
     @Override
@@ -370,12 +386,12 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public void setSelectedNavigationItem(int position) {
-        switch (mActionView.getNavigationMode()) {
+        switch (mDecorToolbar.getNavigationMode()) {
         case NAVIGATION_MODE_TABS:
             selectTab(mTabs.get(position));
             break;
         case NAVIGATION_MODE_LIST:
-            mActionView.setDropdownSelectedPosition(position);
+            mDecorToolbar.setDropdownSelectedPosition(position);
             break;
         default:
             throw new IllegalStateException(
@@ -399,26 +415,26 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public void setTitle(CharSequence title) {
-        mActionView.setTitle(title);
+        mDecorToolbar.setTitle(title);
     }
 
     public void setSubtitle(CharSequence subtitle) {
-        mActionView.setSubtitle(subtitle);
+        mDecorToolbar.setSubtitle(subtitle);
     }
 
     public void setDisplayOptions(int options) {
         if ((options & DISPLAY_HOME_AS_UP) != 0) {
             mDisplayHomeAsUpSet = true;
         }
-        mActionView.setDisplayOptions(options);
+        mDecorToolbar.setDisplayOptions(options);
     }
 
     public void setDisplayOptions(int options, int mask) {
-        final int current = mActionView.getDisplayOptions(); 
+        final int current = mDecorToolbar.getDisplayOptions();
         if ((mask & DISPLAY_HOME_AS_UP) != 0) {
             mDisplayHomeAsUpSet = true;
         }
-        mActionView.setDisplayOptions((options & mask) | (current & ~mask));
+        mDecorToolbar.setDisplayOptions((options & mask) | (current & ~mask));
     }
 
     public void setBackgroundDrawable(Drawable d) {
@@ -436,23 +452,23 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public View getCustomView() {
-        return mActionView.getCustomNavigationView();
+        return mDecorToolbar.getCustomView();
     }
 
     public CharSequence getTitle() {
-        return mActionView.getTitle();
+        return mDecorToolbar.getTitle();
     }
 
     public CharSequence getSubtitle() {
-        return mActionView.getSubtitle();
+        return mDecorToolbar.getSubtitle();
     }
 
     public int getNavigationMode() {
-        return mActionView.getNavigationMode();
+        return mDecorToolbar.getNavigationMode();
     }
 
     public int getDisplayOptions() {
-        return mActionView.getDisplayOptions();
+        return mDecorToolbar.getDisplayOptions();
     }
 
     public ActionMode startActionMode(ActionMode.Callback callback) {
@@ -572,7 +588,7 @@ public class WindowDecorActionBar extends ActionBar implements
             return;
         }
 
-        final FragmentTransaction trans = mActionView.isInEditMode() ? null :
+        final FragmentTransaction trans = ((View) mDecorToolbar).isInEditMode() ? null :
                 mActivity.getFragmentManager().beginTransaction().disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
@@ -828,11 +844,16 @@ public class WindowDecorActionBar extends ActionBar implements
             hideForActionMode();
         }
 
-        mActionView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
+        mDecorToolbar.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
-        if (mTabScrollView != null && !mActionView.hasEmbeddedTabs() && mActionView.isCollapsed()) {
+        if (mTabScrollView != null && !mDecorToolbar.hasEmbeddedTabs() &&
+                isCollapsed((View) mDecorToolbar)) {
             mTabScrollView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         }
+    }
+
+    private boolean isCollapsed(View view) {
+        return view == null || view.getVisibility() == View.GONE || view.getMeasuredHeight() == 0;
     }
 
     public Context getThemedContext() {
@@ -854,27 +875,27 @@ public class WindowDecorActionBar extends ActionBar implements
     
     @Override
     public boolean isTitleTruncated() {
-        return mActionView != null && mActionView.isTitleTruncated();
+        return mDecorToolbar != null && mDecorToolbar.isTitleTruncated();
     }
 
     @Override
     public void setHomeAsUpIndicator(Drawable indicator) {
-        mActionView.setHomeAsUpIndicator(indicator);
+        mDecorToolbar.setNavigationIcon(indicator);
     }
 
     @Override
     public void setHomeAsUpIndicator(int resId) {
-        mActionView.setHomeAsUpIndicator(resId);
+        mDecorToolbar.setNavigationIcon(resId);
     }
 
     @Override
     public void setHomeActionContentDescription(CharSequence description) {
-        mActionView.setHomeActionContentDescription(description);
+        mDecorToolbar.setNavigationContentDescription(description);
     }
 
     @Override
     public void setHomeActionContentDescription(int resId) {
-        mActionView.setHomeActionContentDescription(resId);
+        mDecorToolbar.setNavigationContentDescription(resId);
     }
 
     @Override
@@ -938,7 +959,8 @@ public class WindowDecorActionBar extends ActionBar implements
 
             // Clear out the context mode views after the animation finishes
             mContextView.closeMode();
-            mActionView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            ((View) mDecorToolbar).sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             mOverlayLayout.setHideOnContentScrollEnabled(mHideOnContentScroll);
 
             mActionMode = null;
@@ -1178,28 +1200,27 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public void setCustomView(View view) {
-        mActionView.setCustomNavigationView(view);
+        mDecorToolbar.setCustomView(view);
     }
 
     @Override
     public void setCustomView(View view, LayoutParams layoutParams) {
         view.setLayoutParams(layoutParams);
-        mActionView.setCustomNavigationView(view);
+        mDecorToolbar.setCustomView(view);
     }
 
     @Override
     public void setListNavigationCallbacks(SpinnerAdapter adapter, OnNavigationListener callback) {
-        mActionView.setDropdownAdapter(adapter);
-        mActionView.setCallback(callback);
+        mDecorToolbar.setDropdownParams(adapter, new NavItemSelectedListener(callback));
     }
 
     @Override
     public int getSelectedNavigationIndex() {
-        switch (mActionView.getNavigationMode()) {
+        switch (mDecorToolbar.getNavigationMode()) {
             case NAVIGATION_MODE_TABS:
                 return mSelectedTab != null ? mSelectedTab.getPosition() : -1;
             case NAVIGATION_MODE_LIST:
-                return mActionView.getDropdownSelectedPosition();
+                return mDecorToolbar.getDropdownSelectedPosition();
             default:
                 return -1;
         }
@@ -1207,12 +1228,11 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public int getNavigationItemCount() {
-        switch (mActionView.getNavigationMode()) {
+        switch (mDecorToolbar.getNavigationMode()) {
             case NAVIGATION_MODE_TABS:
                 return mTabs.size();
             case NAVIGATION_MODE_LIST:
-                SpinnerAdapter adapter = mActionView.getDropdownAdapter();
-                return adapter != null ? adapter.getCount() : 0;
+                return mDecorToolbar.getDropdownItemCount();
             default:
                 return 0;
         }
@@ -1225,7 +1245,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public void setNavigationMode(int mode) {
-        final int oldMode = mActionView.getNavigationMode();
+        final int oldMode = mDecorToolbar.getNavigationMode();
         switch (oldMode) {
             case NAVIGATION_MODE_TABS:
                 mSavedTabPosition = getSelectedNavigationIndex();
@@ -1238,7 +1258,7 @@ public class WindowDecorActionBar extends ActionBar implements
                 mOverlayLayout.requestFitSystemWindows();
             }
         }
-        mActionView.setNavigationMode(mode);
+        mDecorToolbar.setNavigationMode(mode);
         switch (mode) {
             case NAVIGATION_MODE_TABS:
                 ensureTabsExist();
@@ -1249,7 +1269,7 @@ public class WindowDecorActionBar extends ActionBar implements
                 }
                 break;
         }
-        mActionView.setCollapsable(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
+        mDecorToolbar.setCollapsible(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
         mOverlayLayout.setHasNonEmbeddedTabs(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
     }
 
@@ -1261,35 +1281,55 @@ public class WindowDecorActionBar extends ActionBar implements
 
     @Override
     public void setIcon(int resId) {
-        mActionView.setIcon(resId);
+        mDecorToolbar.setIcon(resId);
     }
 
     @Override
     public void setIcon(Drawable icon) {
-        mActionView.setIcon(icon);
+        mDecorToolbar.setIcon(icon);
     }
 
     public boolean hasIcon() {
-        return mActionView.hasIcon();
+        return mDecorToolbar.hasIcon();
     }
 
     @Override
     public void setLogo(int resId) {
-        mActionView.setLogo(resId);
+        mDecorToolbar.setLogo(resId);
     }
 
     @Override
     public void setLogo(Drawable logo) {
-        mActionView.setLogo(logo);
+        mDecorToolbar.setLogo(logo);
     }
 
     public boolean hasLogo() {
-        return mActionView.hasLogo();
+        return mDecorToolbar.hasLogo();
     }
 
     public void setDefaultDisplayHomeAsUpEnabled(boolean enable) {
         if (!mDisplayHomeAsUpSet) {
             setDisplayHomeAsUpEnabled(enable);
+        }
+    }
+
+    static class NavItemSelectedListener implements AdapterView.OnItemSelectedListener {
+        private final OnNavigationListener mListener;
+
+        public NavItemSelectedListener(OnNavigationListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (mListener != null) {
+                mListener.onNavigationItemSelected(position, id);
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Do nothing
         }
     }
 }

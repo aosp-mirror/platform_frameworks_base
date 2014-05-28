@@ -162,6 +162,7 @@ please see themes_device_defaults.xml.
         <item name="windowActionBar">true</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowDrawsSystemBarBackgrounds">true</item>
+        <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
         <item name="navigationBarColor">?attr/colorPrimaryDark</item>
 
@@ -505,6 +506,7 @@ please see themes_device_defaults.xml.
         <item name="windowActionBar">true</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowDrawsSystemBarBackgrounds">true</item>
+        <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
         <item name="navigationBarColor">?attr/colorPrimaryDark</item>
 

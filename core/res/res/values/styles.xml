@@ -1197,6 +1197,16 @@ please see styles_device_defaults.xml.
         <item name="android:subtitleTextAppearance">@android:style/TextAppearance.Widget.Toolbar.Subtitle</item>
         <item name="android:minHeight">?android:attr/actionBarSize</item>
         <item name="android:titleMargins">4dp</item>
+        <item name="android:maxButtonHeight">56dp</item>
+        <item name="android:buttonGravity">top</item>
+        <item name="android:navigationButtonStyle">@android:style/Widget.Toolbar.Button.Navigation</item>
+        <item name="android:collapseIcon">?android:attr/homeAsUpIndicator</item>
+    </style>
+
+    <style name="Widget.Toolbar.Button.Navigation" parent="@android:style/Widget">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:minWidth">56dp</item>
+        <item name="android:scaleType">center</item>
     </style>
 
     <style name="TextAppearance.Widget.ActionBar.Title"
@@ -2394,7 +2404,6 @@ please see styles_device_defaults.xml.
         <item name="android:background">@android:drawable/ab_transparent_light_holo</item>
         <item name="android:backgroundStacked">@android:drawable/ab_stacked_transparent_light_holo</item>
         <item name="android:backgroundSplit">@android:drawable/ab_bottom_transparent_light_holo</item>
-        <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
         <item name="android:progressBarStyle">@android:style/Widget.Holo.Light.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.Light.ProgressBar</item>
     </style>
