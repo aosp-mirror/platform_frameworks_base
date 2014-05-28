@@ -69,7 +69,7 @@ public abstract class TvInputService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mId = TvInputInfo.generateInputIdForComponenetName(
+        mId = TvInputInfo.generateInputIdForComponentName(
                 new ComponentName(getPackageName(), getClass().getName()));
     }
 

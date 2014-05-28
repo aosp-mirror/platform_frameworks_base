@@ -39,7 +39,7 @@ public final class TvInputInfo implements Parcelable {
     public TvInputInfo(ResolveInfo service) {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        mId = generateInputIdForComponenetName(new ComponentName(si.packageName, si.name));
+        mId = generateInputIdForComponentName(new ComponentName(si.packageName, si.name));
     }
 
     /**
@@ -134,7 +134,7 @@ public final class TvInputInfo implements Parcelable {
      * @return the generated input id for the given {@code name}.
      * @hide
      */
-    public static final String generateInputIdForComponenetName(ComponentName name) {
+    public static final String generateInputIdForComponentName(ComponentName name) {
         return name.flattenToShortString();
     }
 
