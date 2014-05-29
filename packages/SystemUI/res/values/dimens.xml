@@ -212,7 +212,7 @@
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
     <!-- The size of the application icon in the recents task view. -->
-    <dimen name="recents_task_view_application_icon_size">60dp</dimen>
+    <dimen name="recents_task_view_application_icon_size">32dp</dimen>
 
     <!-- The size of the activity icon in the recents task view. -->
     <dimen name="recents_task_view_activity_icon_size">60dp</dimen>

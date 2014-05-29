@@ -25,36 +25,37 @@
     <com.android.systemui.recents.views.TaskBarView
         android:id="@+id/task_view_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_gravity="top|center_horizontal"
         android:background="@color/recents_task_bar_default_background_color">
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/recents_task_view_application_icon_size"
             android:layout_height="@dimen/recents_task_view_application_icon_size"
-            android:layout_gravity="center_vertical|start"
-            android:padding="8dp" />
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical|start" />
         <TextView
             android:id="@+id/activity_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|left"
-            android:layout_marginStart="@dimen/recents_task_view_application_icon_size"
-            android:layout_marginEnd="@dimen/recents_task_view_application_icon_size"
-            android:textSize="22sp"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="64dp"
+            android:layout_marginEnd="64dp"
+            android:textSize="16sp"
             android:textColor="#ffffffff"
             android:text="@string/recents_empty_message"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="sans-serif-medium"
             android:singleLine="true"
             android:maxLines="2"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal" />
         <ImageView
             android:id="@+id/dismiss_task"
-            android:layout_width="@dimen/recents_task_view_application_icon_size"
-            android:layout_height="@dimen/recents_task_view_application_icon_size"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
             android:layout_gravity="center_vertical|end"
-            android:padding="23dp"
+            android:padding="18dp"
             android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
 </com.android.systemui.recents.views.TaskView>

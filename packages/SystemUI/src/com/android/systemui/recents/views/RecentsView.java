@@ -158,6 +158,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
+    /** Requests all task stacks to start their enter-recents animation */
+    public void startOnEnterAnimation() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                TaskStackView stackView = (TaskStackView) child;
+                stackView.startOnEnterAnimation();
+            }
+        }
+    }
+
     /** Adds the search bar */
     public void setSearchBar(View searchBar) {
         // Create the search bar (and hide it if we have no recent tasks)

@@ -115,7 +115,7 @@ public class AppTransition implements Dump {
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
 
     private static final int DEFAULT_APP_TRANSITION_DURATION = 250;
-    private static final int THUMBNAIL_APP_TRANSITION_DURATION = 225;
+    private static final int THUMBNAIL_APP_TRANSITION_DURATION = 275;
 
     private final Context mContext;
     private final Handler mH;

@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -49,7 +50,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A proxy implementation for the recents component */
-public class AlternateRecentsComponent {
+public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
     /** A handler for messages from the recents implementation */
     class RecentsMessageHandler extends Handler {
@@ -123,6 +124,7 @@ public class AlternateRecentsComponent {
     final public static int MSG_SHOW_RECENTS = 4;
     final public static int MSG_HIDE_RECENTS = 5;
     final public static int MSG_TOGGLE_RECENTS = 6;
+    final public static int MSG_START_ENTER_ANIMATION = 7;
 
     final public static String EXTRA_ANIMATING_WITH_THUMBNAIL = "recents.animatingWithThumbnail";
     final public static String EXTRA_FROM_ALT_TAB = "recents.triggeredFromAltTab";
@@ -392,7 +394,7 @@ public class AlternateRecentsComponent {
         }
 
         return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView, thumbnail,
-                taskRect.left, taskRect.top, null);
+                taskRect.left, taskRect.top, this);
     }
 
     /** Returns whether the recents is currently running */
@@ -515,6 +517,20 @@ public class AlternateRecentsComponent {
                     UserHandle.USER_CURRENT));
         } else {
             mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        }
+    }
+
+
+    /**** OnAnimationStartedListener Implementation ****/
+
+    @Override
+    public void onAnimationStarted() {
+        // Notify recents to start the enter animation
+        try {
+            Message msg = Message.obtain(null, MSG_START_ENTER_ANIMATION, 0, 0);
+            mService.send(msg);
+        } catch (RemoteException re) {
+            re.printStackTrace();
         }
     }
 }
