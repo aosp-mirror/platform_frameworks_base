@@ -38,6 +38,7 @@ import android.content.pm.VerificationParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IUserManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -54,7 +55,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -801,6 +801,7 @@ public final class Pm {
         byte[] tag = null;
         String originatingUriString = null;
         String referrer = null;
+        String abi = null;
 
         while ((opt=nextOption()) != null) {
             if (opt.equals("-l")) {
@@ -871,8 +872,30 @@ public final class Pm {
                     System.err.println("Error: must supply argument for --referrer");
                     return;
                 }
+            } else if (opt.equals("--abi")) {
+                abi = nextOptionData();
+                if (abi == null) {
+                    System.err.println("Error: must supply argument for --abi");
+                    return;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+
+        if (abi != null) {
+            final String[] supportedAbis = Build.SUPPORTED_ABIS;
+            boolean matched = false;
+            for (String supportedAbi : supportedAbis) {
+                if (supportedAbi.equals(abi)) {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) {
+                System.err.println("Error: abi " + abi + " not supported on this device.");
                 return;
             }
         }
@@ -954,8 +977,9 @@ public final class Pm {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackageWithVerificationAndEncryption(apkURI, obs, installFlags,
-                    installerPackageName, verificationParams, encryptionParams);
+            mPm.installPackageWithVerificationEncryptionAndAbiOverride(apkURI, obs,
+                    installFlags, installerPackageName, verificationParams,
+                    encryptionParams, abi);
 
             synchronized (obs) {
                 while (!obs.finished) {
