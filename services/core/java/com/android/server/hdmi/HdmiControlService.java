@@ -140,8 +140,7 @@ public final class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
 
-        // TODO: Publish the BinderService
-        // publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
+        publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
     }
 
     /**

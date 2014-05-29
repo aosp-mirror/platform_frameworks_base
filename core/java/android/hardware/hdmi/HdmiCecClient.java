@@ -69,44 +69,28 @@ public final class HdmiCecClient {
      * Send &lt;Active Source&gt; message.
      */
     public void sendActiveSource() {
-        try {
-            mService.sendActiveSource(mBinder);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendActiveSource threw exception ", e);
-        }
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
     }
 
     /**
      * Send &lt;Inactive Source&gt; message.
      */
     public void sendInactiveSource() {
-        try {
-            mService.sendInactiveSource(mBinder);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendInactiveSource threw exception ", e);
-        }
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
     }
 
     /**
      * Send &lt;Text View On&gt; message.
      */
     public void sendTextViewOn() {
-        try {
-            mService.sendTextViewOn(mBinder);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendTextViewOn threw exception ", e);
-        }
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
     }
 
     /**
      * Send &lt;Image View On&gt; message.
      */
     public void sendImageViewOn() {
-        try {
-            mService.sendImageViewOn(mBinder);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendImageViewOn threw exception ", e);
-        }
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
     }
 
     /**
@@ -116,11 +100,7 @@ public final class HdmiCecClient {
      *        {@link HdmiCec#ADDR_TV}.
      */
     public void sendGiveDevicePowerStatus(int address) {
-        try {
-            mService.sendGiveDevicePowerStatus(mBinder, address);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendGiveDevicePowerStatus threw exception ", e);
-        }
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
     }
 
     /**
@@ -133,11 +113,7 @@ public final class HdmiCecClient {
      * @return true if TV is on; otherwise false.
      */
     public boolean isTvOn() {
-        try {
-            return mService.isTvOn(mBinder);
-        } catch (RemoteException e) {
-            Log.e(TAG, "isTvOn threw exception ", e);
-        }
-        return false;
+        Log.w(TAG, "In transition to HdmiControlManager. Will not work.");
+        return true;
     }
 }
