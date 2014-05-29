@@ -705,7 +705,6 @@ package android {
     field public static final int l_resource_pad23 = 16843770; // 0x10103fa
     field public static final int l_resource_pad24 = 16843769; // 0x10103f9
     field public static final int l_resource_pad25 = 16843768; // 0x10103f8
-    field public static final int l_resource_pad26 = 16843767; // 0x10103f7
     field public static final int l_resource_pad3 = 16843790; // 0x101040e
     field public static final int l_resource_pad4 = 16843789; // 0x101040d
     field public static final int l_resource_pad5 = 16843788; // 0x101040c
@@ -1247,6 +1246,7 @@ package android {
     field public static final int trimPathEnd = 16843813; // 0x1010425
     field public static final int trimPathOffset = 16843814; // 0x1010426
     field public static final int trimPathStart = 16843812; // 0x1010424
+    field public static final int tvInputType = 16843767; // 0x10103f7
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
@@ -15928,9 +15928,14 @@ package android.media.tv {
     method public android.content.Intent getIntentForSettingsActivity();
     method public android.content.Intent getIntentForSetupActivity();
     method public android.content.pm.ServiceInfo getServiceInfo();
+    method public int getType();
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String EXTRA_SERVICE_NAME = "serviceName";
+    field public static final int TYPE_HDMI = 1; // 0x1
+    field public static final int TYPE_PASSTHROUGH = 3; // 0x3
+    field public static final int TYPE_TUNER = 2; // 0x2
+    field public static final int TYPE_VIRTUAL = 0; // 0x0
   }
 
   public final class TvInputManager {

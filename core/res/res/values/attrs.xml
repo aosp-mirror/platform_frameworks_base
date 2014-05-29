@@ -6722,5 +6722,19 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
+        <!-- Type of this service. -->
+        <attr name="tvInputType">
+            <!-- Should be in sync with constant values defined in
+                 {@link android.media.tv.TvInputInfo}. -->
+
+            <!-- Virtual input (default) -->
+            <enum name="virtual" value="0" />
+            <!-- HDMI -->
+            <enum name="hdmi" value="1" />
+            <!-- Built-in tuner -->
+            <enum name="tuner" value="2" />
+            <!-- Pass-through -->
+            <enum name="passthrough" value="3" />
+        </attr>
     </declare-styleable>
 </resources>
