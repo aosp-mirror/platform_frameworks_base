@@ -79,13 +79,6 @@ public class BitmapShader_Delegate extends Shader_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate(long native_shader, long native_bitmap,
-            int shaderTileModeX, int shaderTileModeY) {
-        // pass, not needed.
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 
     private BitmapShader_Delegate(java.awt.image.BufferedImage image,

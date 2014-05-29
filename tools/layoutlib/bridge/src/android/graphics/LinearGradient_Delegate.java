@@ -71,22 +71,6 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
                 tileMode);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate1(LinearGradient thisGradient,
-            long native_shader, float x0, float y0, float x1, float y1,
-            int colors[], float positions[], int tileMode) {
-        // nothing to be done here.
-        return 0;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate2(LinearGradient thisGradient,
-            long native_shader, float x0, float y0, float x1, float y1,
-            int color0, int color1, int tileMode) {
-        // nothing to be done here.
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 
     /**

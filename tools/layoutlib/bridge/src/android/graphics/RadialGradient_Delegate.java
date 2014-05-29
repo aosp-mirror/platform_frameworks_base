@@ -68,20 +68,6 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                 tileMode);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate1(long native_shader, float x, float y, float radius,
-            int colors[], float positions[], int tileMode) {
-        // nothing to be done here.
-        return 0;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate2(long native_shader, float x, float y, float radius,
-            int color0, int color1, int tileMode) {
-        // nothing to be done here.
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 
     /**
