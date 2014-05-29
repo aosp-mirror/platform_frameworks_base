@@ -112,7 +112,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
         // Update the outline
         Outline o = new Outline();
-        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), radius);
+        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight() -
+                config.taskViewShadowOutlineBottomInsetPx, radius);
         setOutline(o);
     }
 

@@ -1556,6 +1556,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     }
 
     @Override
+    public void onSwipeChanged(View v, float delta) {
+        // Do nothing
+    }
+
+    @Override
     public void onChildDismissed(View v) {
         TaskView tv = (TaskView) v;
         mSv.onTaskDismissed(tv);

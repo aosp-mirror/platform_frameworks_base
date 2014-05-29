@@ -36,7 +36,7 @@ public class Constants {
             // Enables the search bar layout
             public static final boolean EnableSearchLayout = true;
             // Enables the dynamic shadows behind each task
-            public static final boolean EnableShadows = false;
+            public static final boolean EnableShadows = true;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // For debugging, this enables us to create mock recents tasks

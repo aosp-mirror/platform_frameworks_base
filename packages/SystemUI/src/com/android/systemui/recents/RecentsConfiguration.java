@@ -61,6 +61,7 @@ public class RecentsConfiguration {
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
     public int taskViewTranslationZIncrementPx;
+    public int taskViewShadowOutlineBottomInsetPx;
     public int taskViewRoundedCornerRadiusPx;
     public int searchBarSpaceHeightPx;
 
@@ -132,6 +133,8 @@ public class RecentsConfiguration {
         taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         taskViewTranslationZIncrementPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
+        taskViewShadowOutlineBottomInsetPx =
+                res.getDimensionPixelSize(R.dimen.recents_task_view_shadow_outline_bottom_inset);
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
 
         taskBarViewDefaultBackgroundColor =
