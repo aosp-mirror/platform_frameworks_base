@@ -67,7 +67,7 @@
     <!-- The recents task bar light text color to be drawn on top of dark backgrounds. -->
     <color name="recents_task_bar_light_text_color">#ffeeeeee</color>
     <!-- The recents task bar dark text color to be drawn on top of light backgrounds. -->
-    <color name="recents_task_bar_dark_text_color">#ff222222</color>
+    <color name="recents_task_bar_dark_text_color">#ff333333</color>
     <!-- The recents task bar light dismiss icon color to be drawn on top of dark backgrounds. -->
     <color name="recents_task_bar_light_dismiss_color">#ffeeeeee</color>
     <!-- The recents task bar dark dismiss icon color to be drawn on top of light backgrounds. -->

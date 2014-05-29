@@ -98,6 +98,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     // If there are no filtered stacks, dismiss recents and launch the first task
                     dismissRecentsIfVisible();
                 }
+            } else if (action.equals(RecentsService.ACTION_START_ENTER_ANIMATION)) {
+                // Try and start the enter animation
+                mRecentsView.startOnEnterAnimation();
             }
         }
     };
@@ -345,6 +348,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         IntentFilter filter = new IntentFilter();
         filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
         filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsService.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register the broadcast receiver to handle messages when the screen is turned off

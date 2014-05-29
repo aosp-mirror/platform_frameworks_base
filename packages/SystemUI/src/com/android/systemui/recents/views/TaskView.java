@@ -221,13 +221,20 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         fromTransform.alpha = 0f;
     }
 
+    /** Prepares this task view for the enter-recents animations.  This is called earlier in the
+     * first layout because the actual animation into recents may take a long time. */
+    public void prepareAnimateOnEnterRecents() {
+        mBarView.setVisibility(View.INVISIBLE);
+    }
+
     /** Animates this task view as it enters recents */
     public void animateOnEnterRecents() {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mBarView.setAlpha(0f);
+        mBarView.setVisibility(View.VISIBLE);
+        mBarView.setTranslationY(-mBarView.getMeasuredHeight());
         mBarView.animate()
-                .alpha(1f)
-                .setStartDelay(300)
+                .translationY(0)
+                .setStartDelay(200)
                 .setInterpolator(config.defaultBezierInterpolator)
                 .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
@@ -238,7 +245,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public void animateOnLeavingRecents(final Runnable r) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         mBarView.animate()
-            .alpha(0f)
+            .translationY(-mBarView.getMeasuredHeight())
             .setStartDelay(0)
             .setInterpolator(config.defaultBezierInterpolator)
             .setDuration(config.taskBarExitAnimDuration)
