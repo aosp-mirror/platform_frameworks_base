@@ -12,7 +12,7 @@ table tr td {border:0}
 <p>The following links provide the Adobe&reg; Illustrator&reg; (.ai) file for the
 two Google Play badges.</p>
 
-<hr>
+
 <img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png" alt="Get It On Google Play">
 
 <div style="clear:left">&nbsp;</div>
@@ -137,7 +137,7 @@ two Google Play badges.</p>
 
 
 
-<hr>
+
 <img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="Android App On Google Play">
 
 <div style="clear:left">&nbsp;</div>

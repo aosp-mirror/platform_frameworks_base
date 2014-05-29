@@ -44,12 +44,12 @@ Xnonavpage=true
   verification by email, you can sign in to your Google Play Developer Console.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="allapps">
+<div class="headerLine">
+  <h2 id="allapps">
     All Applications
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -61,12 +61,12 @@ Xnonavpage=true
   <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
 </div>
 
-<div class="headerLine clearfloat" style="margin-top:-6px">
-  <h1 id="account-details">
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
     Your Account Details
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -112,12 +112,12 @@ Xnonavpage=true
   Google Play licensing.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="merchant-account">
+<div class="headerLine">
+  <h2 id="merchant-account">
     Linking Your Merchant Account
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -127,12 +127,12 @@ Xnonavpage=true
   from sales.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="multiple-user-accounts">
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
     Multiple User Accounts
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -157,12 +157,12 @@ Xnonavpage=true
   up multiple accounts</a> now.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="store-listing-details">
+<div class="headerLine">
+  <h2 id="store-listing-details">
     Store Listing Details
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -181,12 +181,12 @@ Xnonavpage=true
   <img src="{@docRoot}images/gp-dc-details.png" class="frame">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="upload-instantly-publish">
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
     Upload and Instantly Publish
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -212,12 +212,12 @@ Xnonavpage=true
   time.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="alpha-beta">
+<div class="headerLine">
+  <h2 id="alpha-beta">
     Alpha and Beta Testing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -270,12 +270,12 @@ Xnonavpage=true
   Checklist</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="staged-rollouts">
+<div class="headerLine">
+  <h2 id="staged-rollouts">
     Staged Rollouts
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -303,12 +303,12 @@ Xnonavpage=true
   updates.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="multiple-apk">
+<div class="headerLine">
+  <h2 id="multiple-apk">
     Multiple APK Support
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -335,12 +335,12 @@ Xnonavpage=true
   of the normal app installation.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="selling-pricing-your-products">
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
     Selling and Pricing Your Products
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure-right">
@@ -407,12 +407,12 @@ Xnonavpage=true
   Expand into New Markets</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="in-app-products">
+<div class="headerLine">
+  <h2 id="in-app-products">
     In-app Products
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -448,12 +448,12 @@ Xnonavpage=true
   monetization models
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="distribution-controls">
+<div class="headerLine">
+  <h2 id="distribution-controls">
     Distribution Controls
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -518,12 +518,12 @@ Xnonavpage=true
   exclude specific devices if needed.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="reviews-reports">
+<div class="headerLine">
+  <h2 id="reviews-reports">
     User Reviews and Crash Reports
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure-right" style="width:500px;">
@@ -548,12 +548,12 @@ Xnonavpage=true
   devices.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="app-stats">
+<div class="headerLine">
+  <h2 id="app-stats">
     App Statistics
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="width:500px">
@@ -587,9 +587,12 @@ Xnonavpage=true
   on data inside a dimension by adding specific points to the timeline.
 </p>
 
+<p style="clear:both">
+</p>
+
 <div class="dynamic-grid">
-<div class="headerLine clearfloat">
-<h1 id="related-resources">Related Resources</h1><hr/>
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"

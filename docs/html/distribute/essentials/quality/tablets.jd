@@ -52,7 +52,7 @@ Xnonavpage=true
   help you address each recommendation included.
 </p>
 
-<div class="headerLine"><h1 id="core-app-quality">1. Test for Basic Tablet App Quality</h1><hr></div>
+<div class="headerLine"><h2 id="core-app-quality">1. Test for Basic Tablet App Quality</h2></div>
 
 <p>The first step in delivering a great tablet app experience is making sure
 that it meets the <em>core app quality criteria</em> for all of the devices
@@ -78,8 +78,8 @@ Before publishing, also ensure that your app passes the basic technical checks a
   Tips page</a>.</p>
 
 
-<div class="headerLine clearfloat">
-<h1 id="optimize-layouts">2. Optimize Layouts for Larger Screens</h1><hr></div>
+<div class="headerLine">
+<h2 id="optimize-layouts">2. Optimize Layouts for Larger Screens</h2></div>
 
 <p>
   Android makes it easy to develop an app that runs well on a wide range of
@@ -167,7 +167,7 @@ multi-pane UI for tablets (see next section).</li>
   data-maxResults="6"></div>
 
 
-<div class="headerLine clearfloat"><h1 id="use-extra-space">3. Take Advantage of Extra Screen Area</h1><hr></div>
+<div class="headerLine"><h2 id="use-extra-space">3. Take Advantage of Extra Screen Area</h2></div>
 
 <div style="width:340px;float:right;margin:1.5em;margin-bottom:0;margin-top:0;">
 <img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png"
@@ -227,7 +227,7 @@ different layouts in the appropriate screen size buckets (such as
   data-cardSizes="6x3,6x3,6x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat"><h1 id="use-tablet-icons">4. Use Assets Designed for Tablet Screens</h1><hr></div>
+<div class="headerLine"><h2 id="use-tablet-icons">4. Use Assets Designed for Tablet Screens</h2></div>
 
 <div><img src="{@docRoot}design/media/devices_displays_density@2x.png"></div>
 
@@ -316,8 +316,8 @@ it will request the {@code xxhdpi} version of the launcher icon.</li>
   data-cardSizes="9x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat"><h1 id="adjust-font-sizes">5.
-Adjust Font Sizes and Touch Targets</h1><hr></div>
+<div class="headerLine"><h2 id="adjust-font-sizes">5.
+Adjust Font Sizes and Touch Targets</h2></div>
 
 <p>To make sure your app is easy to use on tablets, take some time to adjust the
 font sizes and touch targets in your tablet UI, for all of the screen
@@ -353,7 +353,7 @@ or just centering the icon within the transparent button.</li>
   data-cardSizes="9x3,9x3,6x3,6x3,6x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat"><h1 id="adjust-widgets">6. Adjust Sizes of Home Screen Widgets</h1><hr></div>
+<div class="headerLine"><h2 id="adjust-widgets">6. Adjust Sizes of Home Screen Widgets</h2></div>
 
 <p>If your app includes a home screen widget, here are a few points to consider
 to ensure a great user experience on tablet screens: </p>
@@ -380,7 +380,7 @@ possible.</li>
   data-maxResults="6"></div>
 
 
-<div class="headerLine clearfloat"><h1 id="offer-full-feature-set">7. Full Feature Set for Tablet Users</h1><hr></div>
+<div class="headerLine"><h2 id="offer-full-feature-set">7. Full Feature Set for Tablet Users</h2></div>
 
 <div class="centered-full-image" style="width:600px;margin:1.5em"><img src="{@docRoot}images/gp-tablets-full-feature-set.png" alt="Tablet feature sets"></div>
 
@@ -415,7 +415,7 @@ some recommendations:</p>
   </li>
 </ul>
 
-<div class="headerLine clearfloat"><h1 id="android-versions">8. Target Android Versions Properly</h1><hr></div>
+<div class="headerLine"><h2 id="android-versions">8. Target Android Versions Properly</h2></div>
 
 <p>
   To ensure the broadest possible distribution to tablets, make sure that your
@@ -466,7 +466,7 @@ some recommendations:</p>
   data-cardSizes="6x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat"><h1 id="hardware-requirements">9. Declare Hardware Feature Dependencies Properly</h1><hr></div>
+<div class="headerLine"><h2 id="hardware-requirements">9. Declare Hardware Feature Dependencies Properly</h2></div>
 
 <p>
   Handsets and tablets typically offer slightly different hardware support for
@@ -536,7 +536,7 @@ permissions, make sure to explicitly declare a corresponding
   data-cardSizes="9x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat"><h1 id="support-screens">10. Declare Support for Tablet Screens</h1><hr></div>
+<div class="headerLine"><h2 id="support-screens">10. Declare Support for Tablet Screens</h2></div>
 
 <p>To ensure that you can distribute your app to a broad range of tablets, your app should
 declare support for tablet screen sizes in its manifest file, as follows:</p>
@@ -569,7 +569,7 @@ element in your app.</p>
   data-maxResults="6"></div>
 
 
-<div class="headerLine clearfloat"><h1 id="google-play">11. Showcase Your Tablet UI in Google Play</h1><hr></div>
+<div class="headerLine"><h2 id="google-play">11. Showcase Your Tablet UI in Google Play</h2></div>
 
 <p>
   After you've done the work to create an rich, optimized UI for your tablet
@@ -697,12 +697,12 @@ element in your app.</p>
   data-cardSizes="9x3,9x3,9x3,9x3"
   data-maxResults="6"></div>
 
-<div class="headerLine clearfloat">
-  <h1 id="google-play-best-practices">
+<div class="headerLine">
+  <h2 id="google-play-best-practices">
     12. Follow Best Practices for Publishing in Google Play
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -807,12 +807,12 @@ appropriate.</p>
   data-maxResults="6"></div>
 
 
-<div class="headerLine clearfloat">
-  <h1 id="test-environment">
+<div class="headerLine">
+  <h2 id="test-environment">
     Setting Up a Test Environment for Tablets
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -858,7 +858,7 @@ listed platform versions, screen configurations, and hardware feature configurat
 </tr>
 </table>
 
-<div class="headerLine clearfloat"><h1 id="related-resources">Related Resources</h1><hr></div>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines"

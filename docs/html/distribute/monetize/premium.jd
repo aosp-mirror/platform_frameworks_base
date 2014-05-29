@@ -35,11 +35,13 @@ page.tags="monetizing", "paid"
   <a href="{@docRoot}distribute/monetize/ads.html">advertising</a> models.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1>
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2>
   Related Resources
-  </h1>
-  <hr>
+  </h2>
+
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"

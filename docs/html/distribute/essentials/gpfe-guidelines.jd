@@ -50,12 +50,12 @@ Xnonavpage=true
   Distribution Agreement</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="basic-reqts">
+<div class="headerLine">
+  <h2 id="basic-reqts">
     Basic Requirements
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -108,11 +108,11 @@ Xnonavpage=true
 </ul>
 
 <div class="headerLine">
-  <h1 id="monetizing-ads">
+  <h2 id="monetizing-ads">
     Monetizing and Ads
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -195,11 +195,11 @@ Xnonavpage=true
 </ul>
 
 <div class="headerLine">
-  <h1 id="e-value">
+  <h2 id="e-value">
     Educational Value
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -299,11 +299,11 @@ Xnonavpage=true
 </p>
 
 <div class="headerLine">
-  <h1 id="quality">
+  <h2 id="quality">
     App Quality
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -410,11 +410,11 @@ Xnonavpage=true
 </ul>
 
 <div class="headerLine">
-  <h1 id="test-environment">
+  <h2 id="test-environment">
     Test Environment
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -487,7 +487,7 @@ Xnonavpage=true
 </ul>
 
 <div class="headerLine">
-<h1>Related Resources</h1><hr>
+<h2>Related Resources</h2>
 </div>
 
 <div class="dynamic-grid">

@@ -61,7 +61,9 @@ page.tags="in-app", "iap", "monetizing", "free", "trials"
   </p>
 </div>
 
-<div class="headerLine clearfloat"><h1 id="related-resources">Related Resources</h1><hr></div>
+<p style="clear:both">
+</p>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/monetize/subscriptions"

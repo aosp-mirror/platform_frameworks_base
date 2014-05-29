@@ -63,12 +63,12 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   Guidelines</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="ux">
+<div class="headerLine">
+  <h2 id="ux">
   Visual Design and User Interaction
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -244,12 +244,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="fn">
+<div class="headerLine">
+  <h2 id="fn">
   Functionality
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -518,12 +518,12 @@ data-maxresults="6">
 data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="ps">
+<div class="headerLine">
+  <h2 id="ps">
   Performance and Stability
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -679,12 +679,12 @@ data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
 data-cardsizes="6x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="listing">
+<div class="headerLine">
+  <h2 id="listing">
   Google Play
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -828,12 +828,12 @@ data-cardsizes="6x3" data-maxresults="6">
 data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="test-environment">
+<div class="headerLine">
+  <h2 id="test-environment">
   Setting Up a Test Environment
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -863,12 +863,12 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
   increase the number or complexity of tests and quality criteria.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="tests">
+<div class="headerLine">
+  <h2 id="tests">
   Test Procedures
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>

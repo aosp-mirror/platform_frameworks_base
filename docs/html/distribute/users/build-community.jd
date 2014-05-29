@@ -43,11 +43,11 @@ page.tags="users, growth, community"
 </p>
 
 <div class="headerLine">
-  <h1 id="starting-your-community">
+  <h2 id="starting-your-community">
   Starting Your Community
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -116,11 +116,11 @@ page.tags="users, growth, community"
 </p>
 
 <div class="headerLine">
-  <h1 id="tools-to-build-your-community">
+  <h2 id="tools-to-build-your-community">
   Tools to Build Your Community
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -158,11 +158,11 @@ page.tags="users, growth, community"
 </p>
 
 <div class="headerLine">
-  <h1 id="managing-your-community">
+  <h2 id="managing-your-community">
   Managing Your Community
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -189,11 +189,11 @@ page.tags="users, growth, community"
   versions or new apps to make them feel special.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="related-resources">
+<div class="headerLine">
+  <h2 id="related-resources">
   Related Resources
-  </h1>
-  <hr>
+  </h2>
+
 </div>
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/users/buildcommunity"
