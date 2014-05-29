@@ -53,11 +53,11 @@ page.image=/distribute/images/gp-optimize-card.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="listen-to-your-users">
+  <h2 id="listen-to-your-users">
     Listen to Your Users
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -147,11 +147,11 @@ page.image=/distribute/images/gp-optimize-card.jpg
 </p>
 
 <div class="headerLine" id="measuring-analyzing-responding">
-  <h1>
+  <h2>
     Measuring, Analyzing, and Responding to User Behavior
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -260,11 +260,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="improve-stability">
+  <h2 id="improve-stability">
     Improve Stability and Eliminate Bugs
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -298,11 +298,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="improve-ui">
+  <h2 id="improve-ui">
     Improve UI Responsiveness
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -352,11 +352,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="improve-usability">
+  <h2 id="improve-usability">
     Improve Usability
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="sidebox-wrapper" style="float:right;">
@@ -403,11 +403,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="professional-appearance">
+  <h2 id="professional-appearance">
     Professional Appearance and Aesthetics
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -439,11 +439,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="deliver-features">
+  <h2 id="deliver-features">
     Deliver the Right Set of Features
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -464,11 +464,11 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-  <h1 id="integrate">
+  <h2 id="integrate">
     Integrate with the System and Third-Party apps
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -502,7 +502,7 @@ who can help automate, measure, and optimize your mobile marketing.
 </p>
 
 <div class="headerLine">
-<h1 id="related-resources">Related Resources</h1><hr>
+<h2 id="related-resources">Related Resources</h2>
 </div>
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/optimizing, tag:addia"

@@ -77,11 +77,11 @@ page.tags="users, growth, global"
 </p>
 
 <div class="headerLine">
-  <h1 id="localize-your-product">
+  <h2 id="localize-your-product">
     Localize Your Product
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="sidebox-wrapper" style="float:right;">
@@ -124,20 +124,16 @@ page.tags="users, growth, global"
   high-quality professional translations at competitive prices.
 </p>
 
-<div style="float:left; width:48%; padding:8px;">
-  <img src="{@docRoot}images/gp-listing-3.jpg">
-</div>
+<img src="{@docRoot}images/gp-listing-3.jpg" style="padding:8px 0">
 
-<div style="width:48%; padding:8px; float:left">
-  <img src="{@docRoot}images/gp-expand-2.jpg">
-</div>
+<img src="{@docRoot}images/gp-expand-2.jpg" style="padding:8px 0">
 
-<div class="headerLine clearfloat">
-  <h1 id="testing-and-support">
+<div class="headerLine">
+  <h2 id="testing-and-support">
     Testing and Support
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -162,11 +158,11 @@ page.tags="users, growth, global"
 </p>
 
 <div class="headerLine">
-  <h1 id="localize-your-google-play-listing">
+  <h2 id="localize-your-google-play-listing">
     Localize Your Google Play Store Listing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="sidebox-wrapper" style="float:right;">
@@ -295,11 +291,11 @@ page.tags="users, growth, global"
 </p>
 
 <div class="headerLine">
-  <h1 id="marketing">
+  <h2 id="marketing">
     Marketing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -316,7 +312,7 @@ page.tags="users, growth, global"
   for each language you support.
 </p>
 
-<div class="headerLine clearfloat"><h1 id="related-resources">Related Resources</h1><hr></div>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/getusers/expandnewmarkets"

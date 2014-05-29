@@ -32,12 +32,12 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
   "border:1px solid #ddd;padding:0px;width:100%;">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="register">
+<div class="headerLine">
+  <h2 id="register">
     Register for a Publisher Account
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -49,11 +49,11 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
 </p>
 
 <div class="headerLine">
-  <h1 id="prepare">
+  <h2 id="prepare">
     Prepare Your Apps
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure-right">
@@ -138,11 +138,11 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
 </p>
 
 <div class="headerLine">
-  <h1 id="publish">
+  <h2 id="publish">
     Publish Your Apps
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -298,7 +298,7 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
   </li>
 </ul>
 <div class="headerLine">
-<h1 id="related-resources">Related Resources</h1><hr>
+<h2 id="related-resources">Related Resources</h2>
 </div>
 
 <div class="dynamic-grid">

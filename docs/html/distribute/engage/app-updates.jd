@@ -36,12 +36,12 @@ page.image=/images/gp-your-user-0.jpg
 "18x6," data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="related-resources">
+<div class="headerLine">
+  <h2 id="related-resources">
     Related Resources
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
