@@ -5606,16 +5606,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean isNewDefault = false;
         if (DBG) log("handleConnectionValidated for "+newNetwork.name());
         // check if any NetworkRequest wants this NetworkAgent
-        // first check if it satisfies the NetworkCapabilities
         ArrayList<NetworkAgentInfo> affectedNetworks = new ArrayList<NetworkAgentInfo>();
         if (VDBG) log(" new Network has: " + newNetwork.networkCapabilities);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
+            if (newNetwork == currentNetwork) {
+                if (VDBG) log("Network " + newNetwork.name() + " was already satisfying" +
+                              " request " + nri.request.requestId + ". No change.");
+                keep = true;
+                continue;
+            }
+
+            // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
             if (nri.request.networkCapabilities.satisfiedByNetworkCapabilities(
                     newNetwork.networkCapabilities)) {
                 // next check if it's better than any current network we're using for
                 // this request
-                NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
                 if (VDBG) {
                     log("currentScore = " +
                             (currentNetwork != null ? currentNetwork.currentScore : 0) +
@@ -5744,12 +5751,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         if (state == NetworkInfo.State.CONNECTED) {
-            // TODO - check if we want it (optimization)
             try {
+                // This is likely caused by the fact that this network already
+                // exists. An example is when a network goes from CONNECTED to
+                // CONNECTING and back (like wifi on DHCP renew).
+                // TODO: keep track of which networks we've created, or ask netd
+                // to tell us whether we've already created this network or not.
                 mNetd.createNetwork(networkAgent.network.netId);
             } catch (Exception e) {
-                loge("Error creating Network " + networkAgent.network.netId);
+                loge("Error creating network " + networkAgent.network.netId + ": "
+                        + e.getMessage());
+                return;
             }
+
             updateLinkProperties(networkAgent, null);
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
