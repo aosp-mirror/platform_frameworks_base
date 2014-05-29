@@ -20507,6 +20507,37 @@ package android.os {
     ctor public BadParcelableException(java.lang.Exception);
   }
 
+  public class BaseBundle {
+    method public void clear();
+    method public boolean containsKey(java.lang.String);
+    method public java.lang.Object get(java.lang.String);
+    method public double getDouble(java.lang.String);
+    method public double getDouble(java.lang.String, double);
+    method public double[] getDoubleArray(java.lang.String);
+    method public int getInt(java.lang.String);
+    method public int getInt(java.lang.String, int);
+    method public int[] getIntArray(java.lang.String);
+    method public long getLong(java.lang.String);
+    method public long getLong(java.lang.String, long);
+    method public long[] getLongArray(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public java.lang.String getString(java.lang.String, java.lang.String);
+    method public java.lang.String[] getStringArray(java.lang.String);
+    method public boolean isEmpty();
+    method public java.util.Set<java.lang.String> keySet();
+    method public void putAll(android.os.PersistableBundle);
+    method public void putDouble(java.lang.String, double);
+    method public void putDoubleArray(java.lang.String, double[]);
+    method public void putInt(java.lang.String, int);
+    method public void putIntArray(java.lang.String, int[]);
+    method public void putLong(java.lang.String, long);
+    method public void putLongArray(java.lang.String, long[]);
+    method public void putString(java.lang.String, java.lang.String);
+    method public void putStringArray(java.lang.String, java.lang.String[]);
+    method public void remove(java.lang.String);
+    method public int size();
+  }
+
   public class BatteryManager {
     ctor public BatteryManager();
     method public android.os.BatteryProperty getProperty(int) throws android.os.RemoteException;
@@ -20635,17 +20666,14 @@ package android.os {
     field public static final int L = 10000; // 0x2710
   }
 
-  public final class Bundle extends android.os.CommonBundle {
+  public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
     ctor public Bundle();
     ctor public Bundle(java.lang.ClassLoader);
     ctor public Bundle(int);
     ctor public Bundle(android.os.Bundle);
     ctor public Bundle(android.os.PersistableBundle);
-    method public void clear();
     method public java.lang.Object clone();
-    method public boolean containsKey(java.lang.String);
     method public int describeContents();
-    method public java.lang.Object get(java.lang.String);
     method public android.os.IBinder getBinder(java.lang.String);
     method public boolean getBoolean(java.lang.String);
     method public boolean getBoolean(java.lang.String, boolean);
@@ -20662,37 +20690,21 @@ package android.os {
     method public java.lang.CharSequence[] getCharSequenceArray(java.lang.String);
     method public java.util.ArrayList<java.lang.CharSequence> getCharSequenceArrayList(java.lang.String);
     method public java.lang.ClassLoader getClassLoader();
-    method public double getDouble(java.lang.String);
-    method public double getDouble(java.lang.String, double);
-    method public double[] getDoubleArray(java.lang.String);
     method public float getFloat(java.lang.String);
     method public float getFloat(java.lang.String, float);
     method public float[] getFloatArray(java.lang.String);
-    method public int getInt(java.lang.String);
-    method public int getInt(java.lang.String, int);
-    method public int[] getIntArray(java.lang.String);
     method public java.util.ArrayList<java.lang.Integer> getIntegerArrayList(java.lang.String);
-    method public long getLong(java.lang.String);
-    method public long getLong(java.lang.String, long);
-    method public long[] getLongArray(java.lang.String);
     method public T getParcelable(java.lang.String);
     method public android.os.Parcelable[] getParcelableArray(java.lang.String);
     method public java.util.ArrayList<T> getParcelableArrayList(java.lang.String);
-    method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
     method public java.io.Serializable getSerializable(java.lang.String);
     method public short getShort(java.lang.String);
     method public short getShort(java.lang.String, short);
     method public short[] getShortArray(java.lang.String);
     method public android.util.SparseArray<T> getSparseParcelableArray(java.lang.String);
-    method public java.lang.String getString(java.lang.String);
-    method public java.lang.String getString(java.lang.String, java.lang.String);
-    method public java.lang.String[] getStringArray(java.lang.String);
     method public java.util.ArrayList<java.lang.String> getStringArrayList(java.lang.String);
     method public boolean hasFileDescriptors();
-    method public boolean isEmpty();
-    method public java.util.Set<java.lang.String> keySet();
     method public void putAll(android.os.Bundle);
-    method public void putAll(android.os.PersistableBundle);
     method public void putBinder(java.lang.String, android.os.IBinder);
     method public void putBoolean(java.lang.String, boolean);
     method public void putBooleanArray(java.lang.String, boolean[]);
@@ -20704,30 +20716,19 @@ package android.os {
     method public void putCharSequence(java.lang.String, java.lang.CharSequence);
     method public void putCharSequenceArray(java.lang.String, java.lang.CharSequence[]);
     method public void putCharSequenceArrayList(java.lang.String, java.util.ArrayList<java.lang.CharSequence>);
-    method public void putDouble(java.lang.String, double);
-    method public void putDoubleArray(java.lang.String, double[]);
     method public void putFloat(java.lang.String, float);
     method public void putFloatArray(java.lang.String, float[]);
-    method public void putInt(java.lang.String, int);
-    method public void putIntArray(java.lang.String, int[]);
     method public void putIntegerArrayList(java.lang.String, java.util.ArrayList<java.lang.Integer>);
-    method public void putLong(java.lang.String, long);
-    method public void putLongArray(java.lang.String, long[]);
     method public void putParcelable(java.lang.String, android.os.Parcelable);
     method public void putParcelableArray(java.lang.String, android.os.Parcelable[]);
     method public void putParcelableArrayList(java.lang.String, java.util.ArrayList<? extends android.os.Parcelable>);
-    method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);
     method public void putSerializable(java.lang.String, java.io.Serializable);
     method public void putShort(java.lang.String, short);
     method public void putShortArray(java.lang.String, short[]);
     method public void putSparseParcelableArray(java.lang.String, android.util.SparseArray<? extends android.os.Parcelable>);
-    method public void putString(java.lang.String, java.lang.String);
-    method public void putStringArray(java.lang.String, java.lang.String[]);
     method public void putStringArrayList(java.lang.String, java.util.ArrayList<java.lang.String>);
     method public void readFromParcel(android.os.Parcel);
-    method public void remove(java.lang.String);
     method public void setClassLoader(java.lang.ClassLoader);
-    method public int size();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final android.os.Bundle EMPTY;
@@ -20743,9 +20744,6 @@ package android.os {
 
   public static abstract interface CancellationSignal.OnCancelListener {
     method public abstract void onCancel();
-  }
-
-   abstract class CommonBundle implements java.lang.Cloneable android.os.Parcelable {
   }
 
   public class ConditionVariable {
@@ -21327,46 +21325,14 @@ package android.os {
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
   }
 
-  public final class PersistableBundle extends android.os.CommonBundle {
+  public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
     ctor public PersistableBundle();
-    ctor public PersistableBundle(java.lang.ClassLoader);
     ctor public PersistableBundle(int);
     ctor public PersistableBundle(android.os.PersistableBundle);
-    method public void clear();
     method public java.lang.Object clone();
-    method public boolean containsKey(java.lang.String);
     method public int describeContents();
-    method public java.lang.Object get(java.lang.String);
-    method public java.lang.ClassLoader getClassLoader();
-    method public double getDouble(java.lang.String);
-    method public double getDouble(java.lang.String, double);
-    method public double[] getDoubleArray(java.lang.String);
-    method public int getInt(java.lang.String);
-    method public int getInt(java.lang.String, int);
-    method public int[] getIntArray(java.lang.String);
-    method public long getLong(java.lang.String);
-    method public long getLong(java.lang.String, long);
-    method public long[] getLongArray(java.lang.String);
     method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
-    method public java.lang.String getString(java.lang.String);
-    method public java.lang.String getString(java.lang.String, java.lang.String);
-    method public java.lang.String[] getStringArray(java.lang.String);
-    method public boolean isEmpty();
-    method public java.util.Set<java.lang.String> keySet();
-    method public void putAll(android.os.PersistableBundle);
-    method public void putDouble(java.lang.String, double);
-    method public void putDoubleArray(java.lang.String, double[]);
-    method public void putInt(java.lang.String, int);
-    method public void putIntArray(java.lang.String, int[]);
-    method public void putLong(java.lang.String, long);
-    method public void putLongArray(java.lang.String, long[]);
     method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);
-    method public void putString(java.lang.String, java.lang.String);
-    method public void putStringArray(java.lang.String, java.lang.String[]);
-    method public void readFromParcel(android.os.Parcel);
-    method public void remove(java.lang.String);
-    method public void setClassLoader(java.lang.ClassLoader);
-    method public int size();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final android.os.PersistableBundle EMPTY;
