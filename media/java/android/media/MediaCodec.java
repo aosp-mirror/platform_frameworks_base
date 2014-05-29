@@ -749,6 +749,8 @@ final public class MediaCodec {
      * <p>Call this method with a null listener to stop receiving event notifications.
      *
      * @param cb The listener that will run.
+     *
+     * @hide
      */
     public void setNotificationCallback(NotificationCallback cb) {
         mNotificationCallback = cb;
@@ -758,6 +760,8 @@ final public class MediaCodec {
      * MediaCodec listener interface.  Used to notify the user of MediaCodec
      * when there are available input and/or output buffers, a change in
      * configuration or when a codec error happened.
+     *
+     * @hide
      */
     public static abstract class NotificationCallback {
         /**
@@ -771,6 +775,7 @@ final public class MediaCodec {
          * repeatedly with a zero timeout until {@link #INFO_TRY_AGAIN_LATER} is returned.
          *
          * @param codec the MediaCodec instance that has an actionable event.
+         *
          */
         public abstract void onCodecNotify(MediaCodec codec);
     }
