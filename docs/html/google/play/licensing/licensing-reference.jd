@@ -151,7 +151,8 @@ returned by the Google Play server in a license response.</p>
 <tr>
 <td>{@code LICENSED}</td>
 <td>The application is licensed to the user. The user has purchased the
-application or the application only exists as a draft.</td>
+application, or is authorized to download and install the alpha or beta version
+of the application.</td>
 <td>Yes</td>
 <td><code>VT</code>,&nbsp;<code>GT</code>, <code>GR</code></td>
 <td><em>Allow access according to {@code Policy} constraints.</em></td>
@@ -233,16 +234,14 @@ implementation.</p>
 href="{@docRoot}google/play/licensing/setting-up.html#test-env">
 Setting Up The Testing Environment</a>, the response code can be manually
 overridden for the application developer and any registered test users via the
-Google Play Developer Console.
-<br/><br/>
-Additionally, as noted above, applications that are in draft mode (in other
-words, applications that have been uploaded but have <em>never</em> been
-published) will return {@code LICENSED} for all users, even if not listed as a test
-user. Since the application has never been offered for download, it is assumed
-that any users running it must have obtained it from an authorized channel for
-testing purposes.</p>
+Google Play Developer Console.</p>
 
-
+<p class="note"><strong>Note:</strong> Previously you could test an app by
+uploading an unpublished "draft" version. This functionality is no longer
+supported; instead, you must publish it to the alpha or beta distribution
+channel. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.
 
 
 <h2 id="extras">Server Response Extras</h2>
@@ -430,8 +429,8 @@ public boolean allowAccess() {
         }
     } else if (mLastResponse == LicenseResponse.RETRY &amp;&amp;
                 ts &lt; mLastResponseTime + MILLIS_PER_MINUTE) {
-        // Only allow access if we are within the retry period or we haven't used up our
-        // max retries.
+        // Only allow access if we are within the retry period
+        // or we haven't used up our max retries.
         return (ts &lt;= mRetryUntil || mRetryCount &lt;= mMaxRetries);
     }
     return false;
