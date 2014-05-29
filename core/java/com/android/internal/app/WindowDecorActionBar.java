@@ -342,7 +342,7 @@ public class WindowDecorActionBar extends ActionBar implements
     @Override
     public void setCustomView(int resId) {
         setCustomView(LayoutInflater.from(getThemedContext()).inflate(resId,
-                (ViewGroup) mDecorToolbar, false));
+                mDecorToolbar.getViewGroup(), false));
     }
 
     @Override
