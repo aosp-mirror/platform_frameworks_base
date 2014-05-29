@@ -164,7 +164,9 @@ public class NotificationPanelView extends PanelView implements
         // Calculate quick setting heights.
         mQsMinExpansionHeight = mHeader.getCollapsedHeight() + mQsPeekHeight;
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
-        if (!mQsExpanded) {
+        if (mQsExpanded) {
+            setQsStackScrollerPadding(mQsMaxExpansionHeight);
+        } else {
             setQsExpansion(mQsMinExpansionHeight);
             positionClockAndNotifications();
             mNotificationStackScroller.setStackHeight(getExpandedHeight());

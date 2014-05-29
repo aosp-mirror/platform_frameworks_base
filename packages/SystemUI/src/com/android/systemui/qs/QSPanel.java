@@ -191,13 +191,21 @@ public class QSPanel extends ViewGroup {
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
         }
-        final int actualHeight = rows == 0 ? 0 : getRowTop(rows);
-        mDetail.measure(exactly(width), exactly(actualHeight));
-        setMeasuredDimension(width, actualHeight);
+        int h = rows == 0 ? 0 : getRowTop(rows);
+        mDetail.measure(exactly(width), unspecified());
+        if (mDetail.getVisibility() == VISIBLE && mDetail.getChildCount() > 0) {
+            final int dmh = mDetail.getMeasuredHeight();
+            if (dmh > 0) h = dmh;
+        }
+        setMeasuredDimension(width, h);
     }
 
     private static int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
+    }
+
+    private static int unspecified() {
+        return MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
     }
 
     @Override

@@ -21,7 +21,9 @@
     android:layout_height="wrap_content"
     android:background="@color/system_primary_color"
     android:orientation="vertical"
-    android:padding="@dimen/qs_panel_padding" >
+    android:paddingTop="@dimen/qs_panel_padding"
+    android:paddingLeft="@dimen/qs_panel_padding"
+    android:paddingRight="@dimen/qs_panel_padding" >
 
     <TextView
         android:id="@android:id/title"
