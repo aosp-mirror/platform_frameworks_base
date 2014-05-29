@@ -31,9 +31,6 @@ import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityManagerService.TAG;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -321,27 +318,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void moveHomeStackTaskToTop(int homeStackTaskType) {
-        if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps();
-            return;
-        }
+    void moveHomeToTop() {
         moveHomeStack(true);
-        mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);
+        mHomeStack.moveHomeTaskToTop();
     }
 
-    boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev) {
-        if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps();
-            return false;
-        }
-        moveHomeStackTaskToTop(homeStackTaskType);
+    boolean resumeHomeActivity(ActivityRecord prev) {
+        moveHomeToTop();
         if (prev != null) {
-            prev.task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            prev.task.mOnTopOfHome = false;
         }
-
         ActivityRecord r = mHomeStack.topRunningActivityLocked(null);
-        if (r != null && (r.isHomeActivity() || r.isRecentsActivity())) {
+        if (r != null && r.isHomeActivity()) {
             mService.setFocusedActivityLocked(r);
             return resumeTopActivitiesLocked(mHomeStack, prev, null);
         }
@@ -695,7 +683,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
-        moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE);
+        moveHomeToTop();
         startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null, 0,
                 null, false, null, null);
     }
@@ -1627,7 +1615,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                                 // Caller wants to appear on home activity.
-                                intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+                                intentActivity.task.mOnTopOfHome = true;
                             }
                             options = null;
                         }
@@ -1811,11 +1799,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         newTaskInfo != null ? newTaskInfo : r.info,
                         newTaskIntent != null ? newTaskIntent : intent,
                         voiceSession, voiceInteractor, true), null, true);
-                if (sourceRecord == null) {
-                    // Launched from a service or notification or task that is finishing.
-                    r.task.setTaskToReturnTo(isFrontStack(mHomeStack) ?
-                            mHomeStack.topTask().taskType : RECENTS_ACTIVITY_TYPE);
-                }
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
@@ -1828,7 +1811,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
                     // Caller wants to appear on home activity, so before starting
                     // their own activity we will bring home to the front.
-                    r.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+                    r.task.mOnTopOfHome = r.task.stack.isOnHomeDisplay();
                 }
             }
         } else if (sourceRecord != null) {
@@ -2179,7 +2162,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
             // Caller wants the home activity moved with it.  To accomplish this,
             // we'll just indicate that this task returns to the home task.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            task.mOnTopOfHome = true;
         }
         task.stack.moveTaskToFrontLocked(task, null, options);
         if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack="
@@ -2290,7 +2273,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             mWindowManager.addTask(taskId, stackId, false);
         }
-        resumeHomeStackTask(HOME_ACTIVITY_TYPE, null);
+        resumeHomeActivity(null);
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {
@@ -2547,7 +2530,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         } else {
             // Stack was moved to another display while user was swapped out.
-            resumeHomeStackTask(HOME_ACTIVITY_TYPE, null);
+            resumeHomeActivity(null);
         }
         return homeInFront;
     }

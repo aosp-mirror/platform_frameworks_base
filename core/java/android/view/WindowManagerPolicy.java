@@ -1144,12 +1144,6 @@ public interface WindowManagerPolicy {
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
 
     /**
-     * Show the recents task list app.
-     * @hide
-     */
-    public void showRecentApps();
-
-    /**
      * @return The current height of the input method window.
      */
     public int getInputMethodWindowVisibleHeightLw();
