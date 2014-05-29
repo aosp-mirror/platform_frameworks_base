@@ -1035,8 +1035,8 @@ public class VolumePanel extends Handler {
                 if (isShowing()) {
                     if (mDialog != null) {
                         mDialog.dismiss();
+                        mActiveStreamType = -1;
                     }
-                    mActiveStreamType = -1;
                 }
                 synchronized (sConfirmSafeVolumeLock) {
                     if (sConfirmSafeVolumeDialog != null) {
