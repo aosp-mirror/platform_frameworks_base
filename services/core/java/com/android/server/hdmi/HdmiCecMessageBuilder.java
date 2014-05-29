@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 /**
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
@@ -37,6 +38,20 @@ public class HdmiCecMessageBuilder {
     private static final int OSD_NAME_MAX_LENGTH = 13;
 
     private HdmiCecMessageBuilder() {}
+
+    /**
+     * Build {@link HdmiCecMessage} from raw data.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param body body of message. It includes opcode.
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage of(int src, int dest, byte[] body) {
+        byte opcode = body[0];
+        byte params[] = Arrays.copyOfRange(body, 1, body.length);
+        return new HdmiCecMessage(src, dest, opcode, params);
+    }
 
     /**
      * Build &lt;Feature Abort&gt; command. &lt;Feature Abort&gt; consists of

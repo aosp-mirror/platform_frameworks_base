@@ -21,12 +21,15 @@
 #include "JNIHelp.h"
 #include "ScopedPrimitiveArray.h"
 
-#include <string>
+#include <cstring>
 
+#include <android_os_MessageQueue.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <hardware/hdmi_cec.h>
 #include <sys/param.h>
+#include <utils/Looper.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -37,7 +40,8 @@ static struct {
 
 class HdmiCecController {
 public:
-    HdmiCecController(hdmi_cec_device_t* device, jobject callbacksObj);
+    HdmiCecController(hdmi_cec_device_t* device, jobject callbacksObj,
+            const sp<Looper>& looper);
 
     void init();
 
@@ -54,49 +58,135 @@ public:
     // Get vendor id used for vendor command.
     uint32_t getVendorId();
 
-private:
-    // Propagate the message up to Java layer.
-    void propagateCecCommand(const cec_message_t& message);
-    void propagateHotplugEvent(const hotplug_event_t& event);
+    jobject getCallbacksObj() const {
+        return mCallbacksObj;
+    }
 
+private:
     static void onReceived(const hdmi_event_t* event, void* arg);
-    static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     hdmi_cec_device_t* mDevice;
     jobject mCallbacksObj;
+    sp<Looper> mLooper;
 };
 
-HdmiCecController::HdmiCecController(hdmi_cec_device_t* device, jobject callbacksObj) :
+// RefBase wrapper for hdmi_event_t. As hdmi_event_t coming from HAL
+// may keep its own lifetime, we need to copy it in order to delegate
+// it to service thread.
+class CecEventWrapper : public LightRefBase<CecEventWrapper> {
+public:
+    CecEventWrapper(const hdmi_event_t& event) {
+        // Copy message.
+        switch (event.type) {
+        case HDMI_EVENT_CEC_MESSAGE:
+            mEvent.cec.initiator = event.cec.initiator;
+            mEvent.cec.destination = event.cec.destination;
+            mEvent.cec.length = event.cec.length;
+            std::memcpy(mEvent.cec.body, event.cec.body, event.cec.length);
+            break;
+        case HDMI_EVENT_HOT_PLUG:
+            mEvent.hotplug.connected = event.hotplug.connected;
+            mEvent.hotplug.port = event.hotplug.port;
+            break;
+        case HDMI_EVENT_TX_STATUS:
+            mEvent.tx_status.status = event.tx_status.status;
+            mEvent.tx_status.opcode = event.tx_status.opcode;
+            break;
+        default:
+            // TODO: add more type whenever new type is introduced.
+            break;
+        }
+    }
+
+    const cec_message_t& cec() const {
+        return mEvent.cec;
+    }
+
+    const hotplug_event_t& hotplug() const {
+        return mEvent.hotplug;
+    }
+
+    virtual ~CecEventWrapper() {}
+
+private:
+    hdmi_event_t mEvent;
+};
+
+// Handler class to delegate incoming message to service thread.
+class HdmiCecEventHandler : public MessageHandler {
+public:
+    HdmiCecEventHandler(HdmiCecController* controller, const sp<CecEventWrapper>& event)
+        : mController(controller),
+          mEventWrapper(event) {
+    }
+
+    virtual ~HdmiCecEventHandler() {}
+
+    void handleMessage(const Message& message) {
+        switch (message.what) {
+        case HDMI_EVENT_CEC_MESSAGE:
+            propagateCecCommand(mEventWrapper->cec());
+            break;
+        case HDMI_EVENT_HOT_PLUG:
+            propagateHotplugEvent(mEventWrapper->hotplug());
+            break;
+        case HDMI_EVENT_TX_STATUS:
+            // TODO: propagate this to controller.
+        default:
+            // TODO: add more type whenever new type is introduced.
+            break;
+        }
+    }
+
+private:
+    // Propagate the message up to Java layer.
+    void propagateCecCommand(const cec_message_t& message) {
+        jint srcAddr = message.initiator;
+        jint dstAddr = message.destination;
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+        jbyteArray body = env->NewByteArray(message.length);
+        const jbyte* bodyPtr = reinterpret_cast<const jbyte *>(message.body);
+        env->SetByteArrayRegion(body, 0, message.length, bodyPtr);
+
+        env->CallVoidMethod(mController->getCallbacksObj(),
+                gHdmiCecControllerClassInfo.handleIncomingCecCommand, srcAddr,
+                dstAddr, body);
+        env->DeleteLocalRef(body);
+
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    }
+
+    void propagateHotplugEvent(const hotplug_event_t& event) {
+        // Note that this method should be called in service thread.
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+        env->CallVoidMethod(mController->getCallbacksObj(),
+                gHdmiCecControllerClassInfo.handleHotplug, event.connected);
+
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    }
+
+    // static
+    static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+        if (env->ExceptionCheck()) {
+            ALOGE("An exception was thrown by callback '%s'.", methodName);
+            LOGE_EX(env);
+            env->ExceptionClear();
+        }
+    }
+
+    HdmiCecController* mController;
+    sp<CecEventWrapper> mEventWrapper;
+};
+
+HdmiCecController::HdmiCecController(hdmi_cec_device_t* device,
+        jobject callbacksObj, const sp<Looper>& looper) :
     mDevice(device),
-    mCallbacksObj(callbacksObj) {
+    mCallbacksObj(callbacksObj),
+    mLooper(looper) {
 }
 
 void HdmiCecController::init() {
     mDevice->register_event_callback(mDevice, HdmiCecController::onReceived, this);
-}
-
-void HdmiCecController::propagateCecCommand(const cec_message_t& message) {
-    jint srcAddr = message.initiator;
-    jint dstAddr = message.destination;
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jbyteArray body = env->NewByteArray(message.length);
-    const jbyte* bodyPtr = reinterpret_cast<const jbyte *>(message.body);
-    env->SetByteArrayRegion(body, 0, message.length, bodyPtr);
-
-    env->CallVoidMethod(mCallbacksObj,
-            gHdmiCecControllerClassInfo.handleIncomingCecCommand,
-            srcAddr, dstAddr, body);
-    env->DeleteLocalRef(body);
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-void HdmiCecController::propagateHotplugEvent(const hotplug_event_t& event) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(mCallbacksObj,
-            gHdmiCecControllerClassInfo.handleHotplug, event.connected);
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 int HdmiCecController::sendMessage(const cec_message_t& message) {
@@ -132,15 +222,6 @@ uint32_t HdmiCecController::getVendorId() {
     return vendorId;
 }
 
-// static
-void HdmiCecController::checkAndClearExceptionFromCallback(JNIEnv* env,
-        const char* methodName) {
-    if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-}
 
 // static
 void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
@@ -149,17 +230,9 @@ void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
         return;
     }
 
-    switch (event->type) {
-    case HDMI_EVENT_CEC_MESSAGE:
-        controller->propagateCecCommand(event->cec);
-        break;
-    case HDMI_EVENT_HOT_PLUG:
-        controller->propagateHotplugEvent(event->hotplug);
-        break;
-    default:
-        ALOGE("Unsupported event type: %d", event->type);
-        break;
-    }
+    sp<CecEventWrapper> spEvent(new CecEventWrapper(*event));
+    sp<HdmiCecEventHandler> handler(new HdmiCecEventHandler(controller, spEvent));
+    controller->mLooper->sendMessage(handler, event->type);
 }
 
 //------------------------------------------------------------------------------
@@ -167,31 +240,38 @@ void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
         LOG_FATAL_IF(! var, "Unable to find method " methodName);
 
-static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj) {
+// TODO: replace above code with following once
+// replace old HdmiCecService with HdmiControlService
+#undef HDMI_CEC_HARDWARE_MODULE_ID
+#define HDMI_CEC_HARDWARE_MODULE_ID "hdmi_cec_module"
+#undef HDMI_CEC_HARDWARE_INTERFACE
+#define HDMI_CEC_HARDWARE_INTERFACE "hdmi_cec_module_hw_if"
+
+static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj,
+        jobject messageQueueObj) {
     int err;
-    // If use same hardware module id between HdmiCecService and
-    // HdmiControlSservice it may conflict and cause abnormal state of HAL.
-    // TODO: use HDMI_CEC_HARDWARE_MODULE_ID of hdmi_cec.h for module id
-    //       once migration to HdmiControlService is done.
     hw_module_t* module;
-    err = hw_get_module("hdmi_cec_module",
+    err = hw_get_module(HDMI_CEC_HARDWARE_MODULE_ID,
             const_cast<const hw_module_t **>(&module));
     if (err != 0) {
         ALOGE("Error acquiring hardware module: %d", err);
         return 0;
     }
+
     hw_device_t* device;
-    // TODO: use HDMI_CEC_HARDWARE_INTERFACE of hdmi_cec.h for interface name
-    //       once migration to HdmiControlService is done.
-    err = module->methods->open(module, "hdmi_cec_module_hw_if", &device);
+    err = module->methods->open(module, HDMI_CEC_HARDWARE_INTERFACE, &device);
     if (err != 0) {
         ALOGE("Error opening hardware module: %d", err);
         return 0;
     }
 
+    sp<MessageQueue> messageQueue =
+            android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
+
     HdmiCecController* controller = new HdmiCecController(
             reinterpret_cast<hdmi_cec_device*>(device),
-            env->NewGlobalRef(callbacksObj));
+            env->NewGlobalRef(callbacksObj),
+            messageQueue->getLooper());
     controller->init();
 
     GET_METHOD_ID(gHdmiCecControllerClassInfo.handleIncomingCecCommand, clazz,
@@ -255,8 +335,9 @@ static jint nativeGetVendorId(JNIEnv* env, jclass clazz, jlong controllerPtr) {
 
 static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "(Lcom/android/server/hdmi/HdmiCecController;)J",
-            (void *) nativeInit },
+    { "nativeInit",
+      "(Lcom/android/server/hdmi/HdmiCecController;Landroid/os/MessageQueue;)J",
+      (void *) nativeInit },
     { "nativeSendCecCommand", "(JII[B)I", (void *) nativeSendCecCommand },
     { "nativeAddLogicalAddress", "(JI)I", (void *) nativeAddLogicalAddress },
     { "nativeClearLogicalAddress", "(J)V", (void *) nativeClearLogicalAddress },
@@ -268,7 +349,8 @@ static JNINativeMethod sMethods[] = {
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecController"
 
 int register_android_server_hdmi_HdmiCecController(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, CLASS_PATH, sMethods, NELEM(sMethods));
+    int res = jniRegisterNativeMethods(env, CLASS_PATH, sMethods,
+            NELEM(sMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
     return 0;
 }
