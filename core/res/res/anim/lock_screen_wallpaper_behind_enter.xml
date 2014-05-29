@@ -23,6 +23,6 @@
         android:fromAlpha="0.0" android:toAlpha="1.0"
         android:fillEnabled="true" android:fillBefore="true"
         android:interpolator="@interpolator/decelerate_quad"
-        android:startOffset="@android:integer/config_shortAnimTime"
+        android:startOffset="@android:integer/config_mediumAnimTime"
         android:duration="@android:integer/config_shortAnimTime"/>
 </set>

@@ -190,6 +190,14 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    public void startKeyguardExitAnimation(long fadeoutDuration) {
+        try {
+            mService.startKeyguardExitAnimation(fadeoutDuration);
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
     public void showAssistant() {
         // Not used by PhoneWindowManager
     }

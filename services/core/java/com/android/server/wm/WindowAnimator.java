@@ -36,6 +36,7 @@ import android.util.TimeUtils;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
 import com.android.server.wm.WindowManagerService.LayoutFields;
@@ -49,6 +50,9 @@ import java.util.ArrayList;
  */
 public class WindowAnimator {
     private static final String TAG = "WindowAnimator";
+
+    /** How long to give statusbar to clear the private keyguard flag when animating out */
+    private static final long KEYGUARD_ANIM_TIMEOUT_MS = 1000;
 
     final WindowManagerService mService;
     final Context mContext;
@@ -81,6 +85,8 @@ public class WindowAnimator {
             new SparseArray<DisplayContentsAnimator>(2);
 
     boolean mInitialized = false;
+
+    boolean mKeyguardGoingAway;
 
     // forceHiding states.
     static final int KEYGUARD_NOT_SHOWN     = 0;
@@ -213,6 +219,29 @@ public class WindowAnimator {
         final WindowList windows = mService.getWindowListLocked(displayId);
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
+
+        if (mKeyguardGoingAway) {
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                WindowState win = windows.get(i);
+                if (!mPolicy.isKeyguardHostWindow(win.mAttrs)) {
+                    continue;
+                }
+                final WindowStateAnimator winAnimator = win.mWinAnimator;
+                if (mPolicy.doesForceHide(win.mAttrs)) {
+                    if (!winAnimator.mAnimating) {
+                        // Create a new animation to delay until keyguard is gone on its own.
+                        winAnimator.mAnimation = new AlphaAnimation(1.0f, 1.0f);
+                        winAnimator.mAnimation.setDuration(KEYGUARD_ANIM_TIMEOUT_MS);
+                        winAnimator.mAnimationIsEntrance = false;
+                    }
+                } else {
+                    mKeyguardGoingAway = false;
+                    winAnimator.clearAnimation();
+                }
+                break;
+            }
+        }
+
         mForceHiding = KEYGUARD_NOT_SHOWN;
 
         for (int i = windows.size() - 1; i >= 0; i--) {
@@ -239,7 +268,7 @@ public class WindowAnimator {
                     }
                 }
 
-                if (mPolicy.doesForceHide(win, win.mAttrs)) {
+                if (mPolicy.doesForceHide(win.mAttrs)) {
                     if (!wasAnimating && nowAnimating) {
                         if (WindowManagerService.DEBUG_ANIM ||
                                 WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
@@ -252,6 +281,11 @@ public class WindowAnimator {
                                     getPendingLayoutChanges(displayId));
                         }
                         mService.mFocusMayChange = true;
+                    } else if (mKeyguardGoingAway && !nowAnimating) {
+                        // Timeout!!
+                        Slog.e(TAG, "Timeout waiting for animation to startup");
+                        mPolicy.startKeyguardExitAnimation(0);
+                        mKeyguardGoingAway = false;
                     }
                     if (win.isReadyForDisplay()) {
                         if (nowAnimating) {
@@ -265,7 +299,7 @@ public class WindowAnimator {
                         }
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "Force hide " + mForceHiding
+                            "Force hide " + forceHidingToString()
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
                             + " destroying=" + win.mDestroying
@@ -349,12 +383,18 @@ public class WindowAnimator {
         // If we have windows that are being show due to them no longer
         // being force-hidden, apply the appropriate animation to them.
         if (unForceHiding != null) {
+            boolean startKeyguardExit = true;
             for (int i=unForceHiding.size()-1; i>=0; i--) {
                 Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
                 if (a != null) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     winAnimator.setAnimation(a);
                     winAnimator.mAnimationIsEntrance = true;
+                    if (startKeyguardExit) {
+                        // Do one time only.
+                        mPolicy.startKeyguardExitAnimation(a.getStartOffset());
+                        startKeyguardExit = false;
+                    }
                 }
             }
         }

@@ -56,4 +56,10 @@ interface IKeyguardService {
     oneway void dispatch(in MotionEvent event);
     oneway void launchCamera();
     oneway void onBootCompleted();
+
+    /**
+     * Notifies that the activity behind has now been drawn and it's safe to remove the wallpaper
+     * and keyguard flag.
+     */
+    oneway void startKeyguardExitAnimation(long fadeoutDuration);
 }

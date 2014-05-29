@@ -202,6 +202,12 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onBootCompleted();
         }
+
+        @Override
+        public void startKeyguardExitAnimation(long fadeoutDuration) {
+            checkPermission();
+            mKeyguardViewMediator.startKeyguardExitAnimation(fadeoutDuration);
+        }
     };
 }
 

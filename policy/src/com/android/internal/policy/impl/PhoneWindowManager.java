@@ -1576,8 +1576,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
+    public boolean doesForceHide(WindowManager.LayoutParams attrs) {
         return (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+    }
+
+    @Override
+    public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
+        return attrs.type == TYPE_STATUS_BAR;
     }
 
     @Override
@@ -4567,6 +4572,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean isKeyguardDrawnLw() {
         synchronized (mLock) {
             return mKeyguardDrawn;
+        }
+    }
+
+    @Override
+    public void startKeyguardExitAnimation(final long fadeoutDuration) {
+        if (mKeyguardDelegate != null) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyguardDelegate.startKeyguardExitAnimation(fadeoutDuration);
+                }
+            });
         }
     }
 
