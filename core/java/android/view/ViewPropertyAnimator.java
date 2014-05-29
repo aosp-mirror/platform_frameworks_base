@@ -1143,7 +1143,8 @@ public class ViewPropertyAnimator {
                 // Shouldn't happen, but just to play it safe
                 return;
             }
-            boolean useRenderNodeProperties = mView.mRenderNode != null;
+
+            boolean hardwareAccelerated = mView.isHardwareAccelerated();
 
             // alpha requires slightly different treatment than the other (transform) properties.
             // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
@@ -1151,13 +1152,13 @@ public class ViewPropertyAnimator {
             // We track what kinds of properties are set, and how alpha is handled when it is
             // set, and perform the invalidation steps appropriately.
             boolean alphaHandled = false;
-            if (!useRenderNodeProperties) {
+            if (!hardwareAccelerated) {
                 mView.invalidateParentCaches();
             }
             float fraction = animation.getAnimatedFraction();
             int propertyMask = propertyBundle.mPropertyMask;
             if ((propertyMask & TRANSFORM_MASK) != 0) {
-                mView.invalidateViewProperty(false, false);
+                mView.invalidateViewProperty(hardwareAccelerated, false);
             }
             ArrayList<NameValuesHolder> valueList = propertyBundle.mNameValuesHolder;
             if (valueList != null) {
@@ -1173,7 +1174,7 @@ public class ViewPropertyAnimator {
                 }
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
-                if (!useRenderNodeProperties) {
+                if (!hardwareAccelerated) {
                     mView.mPrivateFlags |= View.PFLAG_DRAWN; // force another invalidation
                 }
             }
