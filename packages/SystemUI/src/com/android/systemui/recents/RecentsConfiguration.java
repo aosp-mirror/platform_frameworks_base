@@ -46,7 +46,9 @@ public class RecentsConfiguration {
 
     public float animationPxMovementPerSecond;
 
-    public Interpolator defaultBezierInterpolator;
+    public Interpolator fastOutSlowInInterpolator;
+    public Interpolator fastOutLinearInInterpolator;
+    public Interpolator linearOutSlowInInterpolator;
 
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
@@ -141,8 +143,12 @@ public class RecentsConfiguration {
         taskBarViewDarkTextColor =
                 res.getColor(R.color.recents_task_bar_dark_text_color);
 
-        defaultBezierInterpolator = AnimationUtils.loadInterpolator(context,
+        fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                         com.android.internal.R.interpolator.fast_out_slow_in);
+        fastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_linear_in);
+        linearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
 
         // Check if the developer options are enabled
         ContentResolver cr = context.getContentResolver();
@@ -165,6 +171,13 @@ public class RecentsConfiguration {
         SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         settings.edit().putInt(Constants.Values.App.Key_SearchAppWidgetId,
                 appWidgetId).apply();
+    }
+
+    /** Called when the configuration has changed, and we want to reset any configuration specific
+     * members. */
+    public void updateOnConfigurationChange() {
+        launchedFromAltTab = false;
+        launchedWithThumbnailAnimation = false;
     }
 
     /** Returns whether the search bar app widget exists */
