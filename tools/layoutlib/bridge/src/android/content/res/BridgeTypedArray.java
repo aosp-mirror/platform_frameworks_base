@@ -826,6 +826,11 @@ public final class BridgeTypedArray extends TypedArray {
         return null;
     }
 
+    @Override
+    public int[] extractThemeAttrs() {
+        return null;
+    }
+
     /**
      * Retrieve the raw TypedValue for the attribute at <var>index</var>.
      *
@@ -912,4 +917,9 @@ public final class BridgeTypedArray extends TypedArray {
     public String toString() {
         return Arrays.toString(mResourceData);
     }
- }
+
+    static TypedArray obtain(Resources res, int len) {
+        return res instanceof BridgeResources ?
+                new BridgeTypedArray(((BridgeResources) res), null, len, true) : null;
+    }
+}
