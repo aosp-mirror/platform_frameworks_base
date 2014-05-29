@@ -10858,6 +10858,40 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
+    @Override
+    public boolean setBlockUninstallForUser(String packageName, boolean blockUninstall,
+            int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.DELETE_PACKAGES, null);
+        synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                Log.i(TAG, "Package doesn't exist in set block uninstall " + packageName);
+                return false;
+            }
+            if (!ps.getInstalled(userId)) {
+                // Can't block uninstall for an app that is not installed or enabled.
+                Log.i(TAG, "Package not installed in set block uninstall " + packageName);
+                return false;
+            }
+            ps.setBlockUninstall(blockUninstall, userId);
+            mSettings.writePackageRestrictionsLPr(userId);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean getBlockUninstallForUser(String packageName, int userId) {
+        synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                Log.i(TAG, "Package doesn't exist in get block uninstall " + packageName);
+                return false;
+            }
+            return ps.getBlockUninstall(userId);
+        }
+    }
+
     /*
      * This method handles package deletion in general
      */
@@ -10894,7 +10928,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         true,  //stopped
                         true,  //notLaunched
                         false, //blocked
-                        null, null, null);
+                        null, null, null,
+                        false // blockUninstall
+                        );
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {
                         // Other user still have this package installed, so all

@@ -153,6 +153,7 @@ final class Settings {
     private static final String ATTR_STOPPED = "stopped";
     private static final String ATTR_BLOCKED = "blocked";
     private static final String ATTR_INSTALLED = "inst";
+    private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
 
     private final File mSettingsFilename;
     private final File mBackupSettingsFilename;
@@ -594,7 +595,9 @@ final class Settings {
                                     true, // stopped,
                                     true, // notLaunched
                                     false, // blocked
-                                    null, null, null);
+                                    null, null, null,
+                                    false // blockUninstall
+                                    );
                             writePackageRestrictionsLPr(user.id);
                         }
                     }
@@ -1162,7 +1165,9 @@ final class Settings {
                                 false,  // stopped
                                 false,  // notLaunched
                                 false,  // blocked
-                                null, null, null);
+                                null, null, null,
+                                false // blockUninstall
+                                );
                     }
                     return;
                 }
@@ -1221,6 +1226,10 @@ final class Settings {
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
+                    final String blockUninstallStr = parser.getAttributeValue(null,
+                            ATTR_BLOCK_UNINSTALL);
+                    final boolean blockUninstall = blockUninstallStr == null
+                            ? false : Boolean.parseBoolean(blockUninstallStr);
 
                     HashSet<String> enabledComponents = null;
                     HashSet<String> disabledComponents = null;
@@ -1242,7 +1251,7 @@ final class Settings {
                     }
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched, blocked,
-                            enabledCaller, enabledComponents, disabledComponents);
+                            enabledCaller, enabledComponents, disabledComponents, blockUninstall);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1414,7 +1423,8 @@ final class Settings {
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
-                                && ustate.disabledComponents.size() > 0)) {
+                                && ustate.disabledComponents.size() > 0)
+                        || ustate.blockUninstall) {
                     serializer.startTag(null, TAG_PACKAGE);
                     serializer.attribute(null, ATTR_NAME, pkg.name);
                     if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
@@ -1430,6 +1440,9 @@ final class Settings {
                     }
                     if (ustate.blocked) {
                         serializer.attribute(null, ATTR_BLOCKED, "true");
+                    }
+                    if (ustate.blockUninstall) {
+                        serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
                     }
                     if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                         serializer.attribute(null, ATTR_ENABLED,

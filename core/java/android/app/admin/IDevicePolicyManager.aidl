@@ -154,4 +154,7 @@ interface IDevicePolicyManager {
     boolean isMasterVolumeMuted(in ComponentName admin);
 
     void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userId);
+
+    void setBlockUninstall(in ComponentName admin, in String packageName, boolean blockUninstall);
+    boolean getBlockUninstall(in ComponentName admin, in String packageName);
 }

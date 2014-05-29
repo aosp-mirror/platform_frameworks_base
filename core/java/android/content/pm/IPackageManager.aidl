@@ -463,4 +463,7 @@ interface IPackageManager {
     boolean getApplicationBlockedSettingAsUser(String packageName, int userId);
 
     IPackageInstaller getPackageInstaller();
+
+    boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
+    boolean getBlockUninstallForUser(String packageName, int userId);
 }

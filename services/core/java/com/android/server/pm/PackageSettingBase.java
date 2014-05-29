@@ -275,10 +275,18 @@ class PackageSettingBase extends GrantedPermissions {
         modifyUserState(userId).blocked = blocked;
     }
 
+    boolean getBlockUninstall(int userId) {
+        return readUserState(userId).blockUninstall;
+    }
+
+    void setBlockUninstall(boolean blockUninstall, int userId) {
+        modifyUserState(userId).blockUninstall = blockUninstall;
+    }
+
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean blocked,
             String lastDisableAppCaller, HashSet<String> enabledComponents,
-            HashSet<String> disabledComponents) {
+            HashSet<String> disabledComponents, boolean blockUninstall) {
         PackageUserState state = modifyUserState(userId);
         state.enabled = enabled;
         state.installed = installed;
@@ -288,6 +296,7 @@ class PackageSettingBase extends GrantedPermissions {
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;
+        state.blockUninstall = blockUninstall;
     }
 
     HashSet<String> getEnabledComponents(int userId) {

@@ -5259,6 +5259,7 @@ package android.app.admin {
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
+    method public boolean getBlockUninstall(android.content.ComponentName, java.lang.String);
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
@@ -5297,6 +5298,7 @@ package android.app.admin {
     method public boolean setApplicationBlocked(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public int setApplicationsBlocked(android.content.ComponentName, android.content.Intent, boolean);
+    method public void setBlockUninstall(android.content.ComponentName, java.lang.String, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);

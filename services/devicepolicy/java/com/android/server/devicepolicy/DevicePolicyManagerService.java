@@ -3751,6 +3751,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public void setBlockUninstall(ComponentName who, String packageName, boolean blockUninstall) {
+        final int userId = UserHandle.getCallingUserId();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                pm.setBlockUninstallForUser(packageName, blockUninstall, userId);
+            } catch (RemoteException re) {
+                // Shouldn't happen.
+                Slog.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
+    public boolean getBlockUninstall(ComponentName who, String packageName) {
+        final int userId = UserHandle.getCallingUserId();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                return pm.getBlockUninstallForUser(packageName, userId);
+            } catch (RemoteException re) {
+                // Shouldn't happen.
+                Slog.e(LOG_TAG, "Failed to getBlockUninstallForUser", re);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+        return false;
+    }
+
     /**
      * Sets which packages may enter lock task mode.
      *

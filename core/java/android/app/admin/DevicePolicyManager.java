@@ -2685,4 +2685,41 @@ public class DevicePolicyManager {
         }
         return false;
     }
+
+    /**
+     * Called by profile or device owners to change whether a user can uninstall
+     * a package.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName package to change.
+     * @param blockUninstall true if the user shouldn't be able to uninstall the package.
+     */
+    public void setBlockUninstall(ComponentName admin, String packageName, boolean blockUninstall) {
+        if (mService != null) {
+            try {
+                mService.setBlockUninstall(admin, packageName, blockUninstall);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to call block uninstall on device policy service");
+            }
+        }
+    }
+
+    /**
+     * Called by profile or device owners to check whether a user has been blocked from
+     * uninstalling a package.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName package to check.
+     * @return true if the user shouldn't be able to uninstall the package.
+     */
+    public boolean getBlockUninstall(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.getBlockUninstall(admin, packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to call block uninstall on device policy service");
+            }
+        }
+        return false;
+    }
 }

@@ -841,6 +841,15 @@ public abstract class PackageManager {
     public static final int DELETE_FAILED_USER_RESTRICTED = -3;
 
     /**
+     * Deletion failed return code: this is returned from the PackageInstaller
+     * activity if it failed to delete a package because the a profile
+     * or device owner has marked the package as uninstallable.
+     *
+     * @hide
+     */
+    public static final int DELETE_FAILED_OWNER_BLOCKED= -4;
+
+    /**
      * Return code that is passed to the {@link IPackageMoveObserver} by
      * {@link #movePackage(android.net.Uri, IPackageMoveObserver)} when the
      * package has been successfully moved by the system.
