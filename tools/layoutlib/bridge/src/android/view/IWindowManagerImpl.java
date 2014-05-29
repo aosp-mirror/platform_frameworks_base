@@ -439,6 +439,10 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void keyguardGoingAway() throws RemoteException {
+    }
+
+    @Override
     public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
