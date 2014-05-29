@@ -74,7 +74,7 @@ public final class TvContract {
      *
      * @hide
      */
-    public static final String PARAM_BROWSABLE_ONLY = "browable_only";
+    public static final String PARAM_BROWSABLE_ONLY = "browsable_only";
 
     /**
      * Builds a URI that points to a specific channel.
