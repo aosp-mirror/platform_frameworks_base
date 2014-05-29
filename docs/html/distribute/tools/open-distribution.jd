@@ -26,11 +26,11 @@ page.image=/distribute/images/alt-distribution.jpg
 </p>
 
 <div class="headerLine">
-  <h1>
+  <h2>
   Distributing Through an App Marketplace
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -55,11 +55,11 @@ page.image=/distribute/images/alt-distribution.jpg
 </p>
 
 <div class="headerLine">
-  <h1>
+  <h2>
   Distributing Your Apps by Email
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="width:300px;">
@@ -95,11 +95,11 @@ page.image=/distribute/images/alt-distribution.jpg
 </p>
 
 <div class="headerLine">
-  <h1>
+  <h2>
   Distributing Through a Website
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -119,12 +119,12 @@ page.image=/distribute/images/alt-distribution.jpg
   sources</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1>
+<div class="headerLine">
+  <h2>
   User Opt-In for Apps from Unknown Sources
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="width:325px;">

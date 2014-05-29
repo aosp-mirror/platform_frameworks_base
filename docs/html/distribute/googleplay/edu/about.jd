@@ -106,8 +106,10 @@ Xnonavpage=true
   </div>
 </div>
 
-<div class="headerLine clearfloat">
-<h1>Related Resources</h1><hr>
+<p style="clear:both">
+</p>
+<div class="headerLine">
+<h2>Related Resources</h2>
 </div>
 
 <div class="dynamic-grid">

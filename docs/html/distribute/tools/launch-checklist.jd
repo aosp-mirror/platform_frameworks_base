@@ -62,11 +62,11 @@ src="{@docRoot}distribute/images/launch-checklist.jpg"></div>
 </p>
 
 <div class="headerLine">
-  <h1 id="understand-publishing">
+  <h2 id="understand-publishing">
     1. Understand the Publishing Process
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -95,12 +95,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="understand-policies">
+<div class="headerLine">
+  <h2 id="understand-policies">
     2. Understand Google Play Policies and Agreements
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -119,12 +119,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="6x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="test-quality">
+<div class="headerLine">
+  <h2 id="test-quality">
     3. Test for Quality
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -163,12 +163,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="determine-rating">
+<div class="headerLine">
+  <h2 id="determine-rating">
     4. Determine your App’s Content Rating
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -221,12 +221,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="determine-country">
+<div class="headerLine">
+  <h2 id="determine-country">
     5. Determine Country Distribution
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -289,12 +289,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="confirm-size">
+<div class="headerLine">
+  <h2 id="confirm-size">
     6. Confirm the App's Overall Size
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -344,12 +344,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="confirm-platform">
+<div class="headerLine">
+  <h2 id="confirm-platform">
     7. Confirm the App's Platform and Screen Compatibility Ranges
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -396,12 +396,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="decide-price">
+<div class="headerLine">
+  <h2 id="decide-price">
     8. Decide Whether your App will be Free or Priced
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -459,12 +459,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="consider-billing">
+<div class="headerLine">
+  <h2 id="consider-billing">
     9. Consider using In-app Billing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -495,12 +495,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="set-prices">
+<div class="headerLine">
+  <h2 id="set-prices">
     10. Set Prices for your Products
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -526,12 +526,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="start-localization">
+<div class="headerLine">
+  <h2 id="start-localization">
     11. Start Localization
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -609,12 +609,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="prepare-graphics">
+<div class="headerLine">
+  <h2 id="prepare-graphics">
     12. Prepare Promotional Graphics, Screenshots, and Videos
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -668,12 +668,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="build-upload">
+<div class="headerLine">
+  <h2 id="build-upload">
     13. Build and Upload the Release-ready APK
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -709,12 +709,12 @@ data-maxresults="6">
   data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
   data-maxResults="6"></div>-->
 
-<div class="headerLine clearfloat">
-  <h1 id="plan-beta">
+<div class="headerLine">
+  <h2 id="plan-beta">
     14. Plan a Beta Release
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="sidebox-wrapper" style="float:right;">
@@ -765,11 +765,11 @@ See how you can facilitate testing with Google Play.</td>
 </table> -->
 
 <div class="headerLine">
-  <h1 id="complete-details">
+  <h2 id="complete-details">
     15. Complete the Apps’ Store Listing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -825,12 +825,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="use-badges">
+<div class="headerLine">
+  <h2 id="use-badges">
     16. Use Google Play Badges and Links in your Promotional Campaigns
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -862,12 +862,12 @@ data-maxresults="6">
 "-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="final-checks">
+<div class="headerLine">
+  <h2 id="final-checks">
     17. Final Checks and Publishing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -969,12 +969,12 @@ data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="support-users">
+<div class="headerLine">
+  <h2 id="support-users">
     18. Support Users after Launch
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>

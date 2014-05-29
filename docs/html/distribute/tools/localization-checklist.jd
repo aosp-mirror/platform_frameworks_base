@@ -41,11 +41,11 @@ page.image=/distribute/images/localization-checklist.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="identify-languages">
+  <h2 id="identify-languages">
     1. Identify target languages and locales
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -93,12 +93,12 @@ page.image=/distribute/images/localization-checklist.jpg
 data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="design">
+<div class="headerLine">
+  <h2 id="design">
     2. Design for localization
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -233,12 +233,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
 data-cardsizes="9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="manage-strings">
+<div class="headerLine">
+  <h2 id="manage-strings">
     3. Manage strings for localization
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -408,12 +408,12 @@ data-cardsizes="9x3" data-maxresults="6">
 data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="translate-strings">
+<div class="headerLine">
+  <h2 id="translate-strings">
     4. Translate UI strings and other resources
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -579,12 +579,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="test">
+<div class="headerLine">
+  <h2 id="test">
     5. Test your localized app
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -699,12 +699,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   data-maxResults="6"></div> -->
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="prepare-launch">
+<div class="headerLine">
+  <h2 id="prepare-launch">
     6. Prepare for international launch
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -897,12 +897,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
 data-maxresults="6">
 </div>
 
-<div class="headerLine clearfloat">
-  <h1 id="support-users">
+<div class="headerLine">
+  <h2 id="support-users">
     7. Support international users after launch
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
