@@ -28,11 +28,17 @@ void MinikinUtils::SetLayoutProperties(Layout* layout, SkPaint* paint, int flags
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
     char css[256];
-    sprintf(css, "font-size: %d; font-weight: %d; font-style: %s; -minikin-bidi: %d",
+    int off = snprintf(css, sizeof(css),
+        "font-size: %d; font-weight: %d; font-style: %s; -minikin-bidi: %d;",
         (int)paint->getTextSize(),
         style.getWeight() * 100,
         style.getItalic() ? "italic" : "normal",
         flags);
+    SkString langString = paint->getPaintOptionsAndroid().getLanguage().getTag();
+    off += snprintf(css + off, sizeof(css) - off, " lang: %s;", langString.c_str());
+    SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
+    const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
+    off += snprintf(css + off, sizeof(css) - off, " -minikin-variant: %s;", varstr);
     layout->setProperties(css);
 }
 
