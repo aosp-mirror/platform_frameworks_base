@@ -6381,7 +6381,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Like checkGrantUriPermissionLocked, but takes an Intent.
      */
     NeededUriGrants checkGrantUriPermissionFromIntentLocked(int callingUid,
-            String targetPkg, Intent intent, int mode, NeededUriGrants needed) {
+            String targetPkg, Intent intent, int mode, NeededUriGrants needed, int targetUserId) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                 "Checking URI perm to data=" + (intent != null ? intent.getData() : null)
                 + " clip=" + (intent != null ? intent.getClipData() : null)
@@ -6400,11 +6400,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (data == null && clip == null) {
             return null;
         }
-
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        int targetUid;
+        if (needed != null) {
+            targetUid = needed.targetUid;
+        } else {
+            try {
+                targetUid = pm.getPackageUid(targetPkg, targetUserId);
+            } catch (RemoteException ex) {
+                return null;
+            }
+            if (targetUid < 0) {
+                if (DEBUG_URI_PERMISSION) {
+                    Slog.v(TAG, "Can't grant URI permission no uid for: " + targetPkg
+                            + " on user " + targetUserId);
+                }
+                return null;
+            }
+        }
         if (data != null) {
             GrantUri grantUri = GrantUri.resolve(UserHandle.getUserId(callingUid), data);
-            int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, mode,
-                    needed != null ? needed.targetUid : -1);
+            targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, mode,
+                    targetUid);
             if (targetUid > 0) {
                 if (needed == null) {
                     needed = new NeededUriGrants(targetPkg, targetUid, mode);
@@ -6416,10 +6433,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<clip.getItemCount(); i++) {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null) {
-                    int targetUid = -1;
                     GrantUri grantUri = GrantUri.resolve(UserHandle.getUserId(callingUid), uri);
                     targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, mode,
-                            needed != null ? needed.targetUid : -1);
+                            targetUid);
                     if (targetUid > 0) {
                         if (needed == null) {
                             needed = new NeededUriGrants(targetPkg, targetUid, mode);
@@ -6430,7 +6446,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Intent clipIntent = clip.getItemAt(i).getIntent();
                     if (clipIntent != null) {
                         NeededUriGrants newNeeded = checkGrantUriPermissionFromIntentLocked(
-                                callingUid, targetPkg, clipIntent, mode, needed);
+                                callingUid, targetPkg, clipIntent, mode, needed, targetUserId);
                         if (newNeeded != null) {
                             needed = newNeeded;
                         }
@@ -6457,9 +6473,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void grantUriPermissionFromIntentLocked(int callingUid,
-            String targetPkg, Intent intent, UriPermissionOwner owner) {
+            String targetPkg, Intent intent, UriPermissionOwner owner, int targetUserId) {
         NeededUriGrants needed = checkGrantUriPermissionFromIntentLocked(callingUid, targetPkg,
-                intent, intent != null ? intent.getFlags() : 0, null);
+                intent, intent != null ? intent.getFlags() : 0, null, targetUserId);
         if (needed == null) {
             return;
         }
