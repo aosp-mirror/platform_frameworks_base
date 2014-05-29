@@ -631,6 +631,7 @@ public class MediaPlayer implements SubtitleController.Listener
     private static final int INVOKE_ID_SELECT_TRACK = 4;
     private static final int INVOKE_ID_DESELECT_TRACK = 5;
     private static final int INVOKE_ID_SET_VIDEO_SCALE_MODE = 6;
+    private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -1634,7 +1635,6 @@ public class MediaPlayer implements SubtitleController.Listener
         public static final int MEDIA_TRACK_TYPE_VIDEO = 1;
         public static final int MEDIA_TRACK_TYPE_AUDIO = 2;
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
-        /** @hide */
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
 
         final int mTrackType;
@@ -2059,6 +2059,7 @@ public class MediaPlayer implements SubtitleController.Listener
             throws IllegalArgumentException, IllegalStateException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
             throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mimeType);
+
         }
 
         Parcel request = Parcel.obtain();
@@ -2071,6 +2072,49 @@ public class MediaPlayer implements SubtitleController.Listener
             request.writeLong(length);
             request.writeString(mimeType);
             invoke(request, reply);
+        } finally {
+            request.recycle();
+            reply.recycle();
+        }
+    }
+
+    /**
+     * Returns the index of the audio, video, or subtitle track currently selected for playback,
+     * The return value is an index into the array returned by {@link #getTrackInfo()}, and can
+     * be used in calls to {@link #selectTrack(int)} or {@link #deselectTrack(int)}.
+     *
+     * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
+     * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
+     * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
+     * @return index of the audio, video, or subtitle track currently selected for playback;
+     * a negative integer is returned when there is no selected track for {@code trackType} or
+     * when {@code trackType} is not one of audio, video, or subtitle.
+     * @throws IllegalStateException if called after {@link #release()}
+     *
+     * @see {@link #getTrackInfo()}
+     * @see {@link #selectTrack(int)}
+     * @see {@link #deselectTrack(int)}
+     */
+    public int getSelectedTrack(int trackType) throws IllegalStateException {
+        if (trackType == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE && mSubtitleController != null) {
+            SubtitleTrack subtitleTrack = mSubtitleController.getSelectedTrack();
+            if (subtitleTrack != null) {
+                int index = mOutOfBandSubtitleTracks.indexOf(subtitleTrack);
+                if (index >= 0) {
+                    return mInbandSubtitleTracks.length + index;
+                }
+            }
+        }
+
+        Parcel request = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            request.writeInterfaceToken(IMEDIA_PLAYER);
+            request.writeInt(INVOKE_ID_GET_SELECTED_TRACK);
+            request.writeInt(trackType);
+            invoke(request, reply);
+            int selectedTrack = reply.readInt();
+            return selectedTrack;
         } finally {
             request.recycle();
             reply.recycle();

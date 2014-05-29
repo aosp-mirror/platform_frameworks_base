@@ -14668,6 +14668,7 @@ package android.media {
     method public int getAudioSessionId();
     method public int getCurrentPosition();
     method public int getDuration();
+    method public int getSelectedTrack(int) throws java.lang.IllegalStateException;
     method public android.media.MediaPlayer.TrackInfo[] getTrackInfo() throws java.lang.IllegalStateException;
     method public int getVideoHeight();
     method public int getVideoWidth();
@@ -14767,6 +14768,7 @@ package android.media {
     method public int getTrackType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int MEDIA_TRACK_TYPE_AUDIO = 2; // 0x2
+    field public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4; // 0x4
     field public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3; // 0x3
     field public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0; // 0x0
     field public static final int MEDIA_TRACK_TYPE_VIDEO = 1; // 0x1
