@@ -22,6 +22,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
@@ -982,13 +983,13 @@ public class ConnectivityManager {
             public void onAvailable(NetworkRequest request, Network network) {
                 currentNetwork = network;
                 Log.d(TAG, "startUsingNetworkFeature got Network:" + network);
-                network.bindProcessForHostResolution();
+                setProcessDefaultNetworkForHostResolution(network);
             }
             @Override
             public void onLost(NetworkRequest request, Network network) {
                 if (network.equals(currentNetwork)) {
                     currentNetwork = null;
-                    network.unbindProcessForHostResolution();
+                    setProcessDefaultNetworkForHostResolution(null);
                 }
                 Log.d(TAG, "startUsingNetworkFeature lost Network:" + network);
             }
@@ -1072,7 +1073,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      *
      * @deprecated Deprecated in favor of the {@link #requestNetwork},
-     *             {@link Network#bindProcess} and {@link Network#socketFactory} api.
+     *             {@link #setProcessDefaultNetwork} and {@link Network#getSocketFactory} api.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
@@ -1096,7 +1097,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
-     *             {@link Network#bindProcess} api.
+     *             {@link #setProcessDefaultNetwork} api.
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         byte[] address = hostAddress.getAddress();
@@ -2347,5 +2348,65 @@ public class ConnectivityManager {
         try {
             mService.releaseNetworkRequest(networkRequest);
         } catch (RemoteException e) {}
+    }
+
+    /**
+     * Binds the current process to {@code network}.  All Sockets created in the future
+     * (and not explicitly bound via a bound SocketFactory from
+     * {@link Network#getSocketFactory() Network.getSocketFactory()}) will be bound to
+     * {@code network}.  All host name resolutions will be limited to {@code network} as well.
+     * Note that if {@code network} ever disconnects, all Sockets created in this way will cease to
+     * work and all host name resolutions will fail.  This is by design so an application doesn't
+     * accidentally use Sockets it thinks are still bound to a particular {@link Network}.
+     * To clear binding pass {@code null} for {@code network}.  Using individually bound
+     * Sockets created by Network.getSocketFactory().createSocket() and
+     * performing network-specific host name resolutions via
+     * {@link Network#getAllByName Network.getAllByName} is preferred to calling
+     * {@code setProcessDefaultNetwork}.
+     *
+     * @param network The {@link Network} to bind the current process to, or {@code null} to clear
+     *                the current binding.
+     * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
+     */
+    public static boolean setProcessDefaultNetwork(Network network) {
+        if (network == null) {
+            NetworkUtils.unbindProcessToNetwork();
+        } else {
+            NetworkUtils.bindProcessToNetwork(network.netId);
+        }
+        // TODO fix return value
+        return true;
+    }
+
+    /**
+     * Returns the {@link Network} currently bound to this process via
+     * {@link #setProcessDefaultNetwork}, or {@code null} if no {@link Network} is explicitly bound.
+     *
+     * @return {@code Network} to which this process is bound, or {@code null}.
+     */
+    public static Network getProcessDefaultNetwork() {
+        int netId = NetworkUtils.getNetworkBoundToProcess();
+        if (netId == 0) return null;
+        return new Network(netId);
+    }
+
+    /**
+     * Binds host resolutions performed by this process to {@code network}.
+     * {@link #setProcessDefaultNetwork} takes precedence over this setting.
+     *
+     * @param network The {@link Network} to bind host resolutions from the current process to, or
+     *                {@code null} to clear the current binding.
+     * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
+     * @hide
+     * @deprecated This is strictly for legacy usage to support {@link #startUsingNetworkFeature}.
+     */
+    public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
+        if (network == null) {
+            NetworkUtils.unbindProcessToNetworkForHostResolution();
+        } else {
+            NetworkUtils.bindProcessToNetworkForHostResolution(network.netId);
+        }
+        // TODO hook up the return value.
+        return true;
     }
 }
