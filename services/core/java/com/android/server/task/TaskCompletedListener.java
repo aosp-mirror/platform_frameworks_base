@@ -16,6 +16,8 @@
 
 package com.android.server.task;
 
+import com.android.server.task.controllers.TaskStatus;
+
 /**
  * Used for communication between {@link com.android.server.task.TaskServiceContext} and the
  * {@link com.android.server.task.TaskManagerService}.
@@ -26,13 +28,5 @@ public interface TaskCompletedListener {
      * Callback for when a task is completed.
      * @param needsReschedule Whether the implementing class should reschedule this task.
      */
-    public void onTaskCompleted(int serviceToken, int taskId, boolean needsReschedule);
-
-    /**
-     * Callback for when the implementing class needs to clean up the
-     * {@link com.android.server.task.TaskServiceContext}. The scheduler can get this callback
-     * several times if the TaskServiceContext got into a bad state (for e.g. the client crashed
-     * and it needs to clean up).
-     */
-    public void onAllTasksCompleted(int serviceToken);
+    public void onTaskCompleted(TaskStatus taskStatus, boolean needsReschedule);
 }

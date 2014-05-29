@@ -27,9 +27,8 @@ public interface StateChangedListener {
     /**
      * Called by the controller to notify the TaskManager that it should check on the state of a
      * task.
-     * @param taskStatus The state of the task which has changed.
      */
-    public void onTaskStateChanged(TaskStatus taskStatus);
+    public void onControllerStateChanged();
 
     /**
      * Called by the controller to notify the TaskManager that regardless of the state of the task,
