@@ -23,14 +23,17 @@ import android.hardware.hdmi.HdmiCec;
  */
 final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
-    HdmiCecLocalDeviceTv(HdmiCecController controller) {
-        super(controller, HdmiCec.DEVICE_TV);
+    HdmiCecLocalDeviceTv(HdmiCecController controller, AddressAllocationCallback callback) {
+        super(controller, HdmiCec.DEVICE_TV, callback);
     }
 
     @Override
     void init() {
         allocateAddress(mDeviceType);
+    }
 
+    @Override
+    protected void onAddressAllocated(int logicalAddress) {
         // TODO: vendor-specific initialization here.
 
         mController.sendCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(

@@ -121,10 +121,11 @@ final class HdmiCecController {
      *
      * @param deviceTypes array of device types
      */
-    void initializeLocalDevices(int[] deviceTypes) {
+    void initializeLocalDevices(int[] deviceTypes,
+            HdmiCecLocalDevice.AddressAllocationCallback callback) {
         assertRunOnServiceThread();
         for (int type : deviceTypes) {
-            HdmiCecLocalDevice device = HdmiCecLocalDevice.create(this, type);
+            HdmiCecLocalDevice device = HdmiCecLocalDevice.create(this, type, callback);
             if (device == null) {
                 continue;
             }

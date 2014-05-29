@@ -29,29 +29,53 @@ abstract class HdmiCecLocalDevice {
 
     protected final HdmiCecController mController;
     protected final int mDeviceType;
+    protected final AddressAllocationCallback mAllocationCallback;
     protected int mAddress;
     protected int mPreferredAddress;
     protected HdmiCecDeviceInfo mDeviceInfo;
 
-    protected HdmiCecLocalDevice(HdmiCecController controller, int deviceType) {
+    /**
+     * Callback interface to notify newly allocated logical address of the given
+     * local device.
+     */
+    interface AddressAllocationCallback {
+        /**
+         * Called when a logical address of the given device is allocated.
+         *
+         * @param deviceType original device type
+         * @param logicalAddress newly allocated logical address
+         */
+        void onAddressAllocated(int deviceType, int logicalAddress);
+    }
+
+    protected HdmiCecLocalDevice(HdmiCecController controller, int deviceType,
+            AddressAllocationCallback callback) {
         mController = controller;
         mDeviceType = deviceType;
+        mAllocationCallback = callback;
         mAddress = HdmiCec.ADDR_UNREGISTERED;
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
-    static HdmiCecLocalDevice create(HdmiCecController controller, int deviceType) {
+    static HdmiCecLocalDevice create(HdmiCecController controller, int deviceType,
+            AddressAllocationCallback callback) {
         switch (deviceType) {
         case HdmiCec.DEVICE_TV:
-            return new HdmiCecLocalDeviceTv(controller);
+            return new HdmiCecLocalDeviceTv(controller, callback);
         case HdmiCec.DEVICE_PLAYBACK:
-            return new HdmiCecLocalDevicePlayback(controller);
+            return new HdmiCecLocalDevicePlayback(controller, callback);
         default:
             return null;
         }
     }
 
     abstract void init();
+
+    /**
+     * Called when a logical address of the local device is allocated.
+     * Note that internal variables are updated before it's called.
+     */
+    protected abstract void onAddressAllocated(int logicalAddress);
 
     protected void allocateAddress(int type) {
         mController.allocateLogicalAddress(type, mPreferredAddress,
@@ -66,6 +90,10 @@ abstract class HdmiCecLocalDevice {
                 mController.addDeviceInfo(deviceInfo);
 
                 mController.addLogicalAddress(logicalAddress);
+                onAddressAllocated(logicalAddress);
+                if (mAllocationCallback != null) {
+                    mAllocationCallback.onAddressAllocated(deviceType, logicalAddress);
+                }
             }
         });
     }
