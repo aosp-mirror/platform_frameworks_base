@@ -23,6 +23,7 @@
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
+#include "../DrawProfiler.h"
 #include "../RenderNode.h"
 #include "RenderTask.h"
 #include "RenderThread.h"
@@ -77,6 +78,8 @@ public:
 
     void notifyFramePending();
 
+    DrawProfiler& profiler() { return mProfiler; }
+
 private:
     friend class RegisterFrameCallbackTask;
 
@@ -100,6 +103,8 @@ private:
     bool mHaveNewSurface;
 
     const sp<RenderNode> mRootRenderNode;
+
+    DrawProfiler mProfiler;
 };
 
 } /* namespace renderthread */

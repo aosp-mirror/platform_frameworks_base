@@ -48,6 +48,12 @@ static void android_view_RenderNode_output(JNIEnv* env,
     renderNode->output();
 }
 
+static jint android_view_RenderNode_getDebugSize(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->getDebugSize();
+}
+
 static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz, jstring name) {
     RenderNode* renderNode = new RenderNode();
     renderNode->incStrong(0);
@@ -505,6 +511,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyRenderNode",   "(J)V",   (void*) android_view_RenderNode_destroyRenderNode },
     { "nSetDisplayListData",   "(JJ)V", (void*) android_view_RenderNode_setDisplayListData },
     { "nOutput",               "(J)V",  (void*) android_view_RenderNode_output },
+    { "nGetDebugSize",         "(J)I",  (void*) android_view_RenderNode_getDebugSize },
 
     { "nSetCaching",           "(JZ)V",  (void*) android_view_RenderNode_setCaching },
     { "nSetStaticMatrix",      "(JJ)V",  (void*) android_view_RenderNode_setStaticMatrix },

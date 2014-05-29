@@ -60,7 +60,8 @@ public:
     void removeLayer(DeferredLayerUpdater* layer);
 
     void setDirty(int left, int top, int right, int bottom);
-    int drawFrame(nsecs_t frameTimeNanos);
+    void setDensity(float density) { mDensity = density; }
+    int drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos);
 
     virtual void run();
 
@@ -80,6 +81,8 @@ private:
      *********************************************/
     Rect mDirty;
     nsecs_t mFrameTimeNanos;
+    nsecs_t mRecordDurationNanos;
+    float mDensity;
 
     int mSyncResult;
 

@@ -238,10 +238,11 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong frameTimeNanos, jint dirtyLeft, jint dirtyTop,
-        jint dirtyRight, jint dirtyBottom) {
+        jlong proxyPtr, jlong frameTimeNanos, jlong recordDuration, jfloat density,
+        jint dirtyLeft, jint dirtyTop, jint dirtyRight, jint dirtyBottom) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    return proxy->syncAndDrawFrame(frameTimeNanos, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density,
+            dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
 }
 
 static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
@@ -311,6 +312,13 @@ static void android_view_ThreadedRenderer_notifyFramePending(JNIEnv* env, jobjec
     proxy->notifyFramePending();
 }
 
+static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jobject javaFileDescriptor) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
+    proxy->dumpProfileInfo(fd);
+}
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -332,7 +340,7 @@ static JNINativeMethod gMethods[] = {
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JIIFFFF)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
-    { "nSyncAndDrawFrame", "(JJIIII)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
+    { "nSyncAndDrawFrame", "(JJJFIIII)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
@@ -343,6 +351,7 @@ static JNINativeMethod gMethods[] = {
     { "nFlushCaches", "(JI)V", (void*) android_view_ThreadedRenderer_flushCaches },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
+    { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
 #endif
 };
 

@@ -22,12 +22,14 @@ import android.graphics.SurfaceTexture;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -60,11 +62,16 @@ public class ThreadedRenderer extends HardwareRenderer {
     // Needs a ViewRoot invalidate
     private static final int SYNC_INVALIDATE_REQUIRED = 0x1;
 
+    private static final String[] VISUALIZERS = {
+        PROFILE_PROPERTY_VISUALIZE_BARS,
+    };
+
     private int mWidth, mHeight;
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
     private Choreographer mChoreographer;
+    private boolean mProfilingEnabled;
 
     ThreadedRenderer(boolean translucent) {
         AtlasInitializer.sInstance.init();
@@ -77,6 +84,8 @@ public class ThreadedRenderer extends HardwareRenderer {
         // Setup timing
         mChoreographer = Choreographer.getInstance();
         nSetFrameInterval(mNativeProxy, mChoreographer.getFrameIntervalNanos());
+
+        loadSystemProperties();
     }
 
     @Override
@@ -166,19 +175,33 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void dumpGfxInfo(PrintWriter pw) {
-        // TODO Auto-generated method stub
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd) {
+        pw.flush();
+        nDumpProfileInfo(mNativeProxy, fd);
     }
 
-    @Override
-    long getFrameCount() {
-        // TODO Auto-generated method stub
-        return 0;
+    private static int search(String[] values, String value) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(value)) return i;
+        }
+        return -1;
+    }
+
+    private static boolean checkIfProfilingRequested() {
+        String profiling = SystemProperties.get(HardwareRenderer.PROFILE_PROPERTY);
+        int graphType = search(VISUALIZERS, profiling);
+        return (graphType >= 0) || Boolean.parseBoolean(profiling);
     }
 
     @Override
     boolean loadSystemProperties() {
-        return nLoadSystemProperties(mNativeProxy);
+        boolean changed = nLoadSystemProperties(mNativeProxy);
+        boolean wantProfiling = checkIfProfilingRequested();
+        if (wantProfiling != mProfilingEnabled) {
+            mProfilingEnabled = wantProfiling;
+            changed = true;
+        }
+        return changed;
     }
 
     private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
@@ -210,7 +233,16 @@ public class ThreadedRenderer extends HardwareRenderer {
         long frameTimeNanos = mChoreographer.getFrameTimeNanos();
         attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
 
+        long recordDuration = 0;
+        if (mProfilingEnabled) {
+            recordDuration = System.nanoTime();
+        }
+
         updateRootDisplayList(view, callbacks);
+
+        if (mProfilingEnabled) {
+            recordDuration = System.nanoTime() - recordDuration;
+        }
 
         attachInfo.mIgnoreDirtyState = false;
 
@@ -218,6 +250,7 @@ public class ThreadedRenderer extends HardwareRenderer {
             dirty = NULL_RECT;
         }
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
+                recordDuration, view.getResources().getDisplayMetrics().density,
                 dirty.left, dirty.top, dirty.right, dirty.bottom);
         if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
             attachInfo.mViewRootImpl.invalidate();
@@ -354,7 +387,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetup(long nativeProxy, int width, int height,
             float lightX, float lightY, float lightZ, float lightRadius);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native int nSyncAndDrawFrame(long nativeProxy, long frameTimeNanos,
+    private static native int nSyncAndDrawFrame(long nativeProxy,
+            long frameTimeNanos, long recordDuration, float density,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);
@@ -370,4 +404,6 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nFence(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
+
+    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd);
 }

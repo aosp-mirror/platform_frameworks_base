@@ -17,13 +17,13 @@
 package android.view;
 
 import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.DisplayMetrics;
 import android.view.Surface.OutOfResourcesException;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -61,11 +61,9 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "true", to enable profiling
      * "visual_bars", to enable profiling and visualize the results on screen
-     * "visual_lines", to enable profiling and visualize the results on screen
      * "false", to disable profiling
      *
      * @see #PROFILE_PROPERTY_VISUALIZE_BARS
-     * @see #PROFILE_PROPERTY_VISUALIZE_LINES
      *
      * @hide
      */
@@ -78,14 +76,6 @@ public abstract class HardwareRenderer {
      * @hide
      */
     public static final String PROFILE_PROPERTY_VISUALIZE_BARS = "visual_bars";
-
-    /**
-     * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
-     * value, profiling data will be visualized on screen as a line chart.
-     *
-     * @hide
-     */
-    public static final String PROFILE_PROPERTY_VISUALIZE_LINES = "visual_lines";
 
     /**
      * System property used to specify the number of frames to be used
@@ -298,16 +288,8 @@ public abstract class HardwareRenderer {
 
     /**
      * Outputs extra debugging information in the specified file descriptor.
-     * @param pw
      */
-    abstract void dumpGfxInfo(PrintWriter pw);
-
-    /**
-     * Outputs the total number of frames rendered (used for fps calculations)
-     *
-     * @return the number of frames rendered
-     */
-    abstract long getFrameCount();
+    abstract void dumpGfxInfo(PrintWriter pw, FileDescriptor fd);
 
     /**
      * Loads system properties used by the renderer. This method is invoked
@@ -582,99 +564,5 @@ public abstract class HardwareRenderer {
      * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
      */
     public void notifyFramePending() {
-    }
-
-    /**
-     * Describes a series of frames that should be drawn on screen as a graph.
-     * Each frame is composed of 1 or more elements.
-     */
-    abstract class GraphDataProvider {
-        /**
-         * Draws the graph as bars. Frame elements are stacked on top of
-         * each other.
-         */
-        public static final int GRAPH_TYPE_BARS = 0;
-        /**
-         * Draws the graph as lines. The number of series drawn corresponds
-         * to the number of elements.
-         */
-        public static final int GRAPH_TYPE_LINES = 1;
-
-        /**
-         * Returns the type of graph to render.
-         *
-         * @return {@link #GRAPH_TYPE_BARS} or {@link #GRAPH_TYPE_LINES}
-         */
-        abstract int getGraphType();
-
-        /**
-         * This method is invoked before the graph is drawn. This method
-         * can be used to compute sizes, etc.
-         *
-         * @param metrics The display metrics
-         */
-        abstract void prepare(DisplayMetrics metrics);
-
-        /**
-         * @return The size in pixels of a vertical unit.
-         */
-        abstract int getVerticalUnitSize();
-
-        /**
-         * @return The size in pixels of a horizontal unit.
-         */
-        abstract int getHorizontalUnitSize();
-
-        /**
-         * @return The size in pixels of the margin between horizontal units.
-         */
-        abstract int getHorizontaUnitMargin();
-
-        /**
-         * An optional threshold value.
-         *
-         * @return A value >= 0 to draw the threshold, a negative value
-         *         to ignore it.
-         */
-        abstract float getThreshold();
-
-        /**
-         * The data to draw in the graph. The number of elements in the
-         * array must be at least {@link #getFrameCount()} * {@link #getElementCount()}.
-         * If a value is negative the following values will be ignored.
-         */
-        abstract float[] getData();
-
-        /**
-         * Returns the number of frames to render in the graph.
-         */
-        abstract int getFrameCount();
-
-        /**
-         * Returns the number of elements in each frame. This directly affects
-         * the number of series drawn in the graph.
-         */
-        abstract int getElementCount();
-
-        /**
-         * Returns the current frame, if any. If the returned value is negative
-         * the current frame is ignored.
-         */
-        abstract int getCurrentFrame();
-
-        /**
-         * Prepares the paint to draw the specified element (or series.)
-         */
-        abstract void setupGraphPaint(Paint paint, int elementIndex);
-
-        /**
-         * Prepares the paint to draw the threshold.
-         */
-        abstract void setupThresholdPaint(Paint paint);
-
-        /**
-         * Prepares the paint to draw the current frame indicator.
-         */
-        abstract void setupCurrentFramePaint(Paint paint);
     }
 }
