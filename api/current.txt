@@ -23513,6 +23513,13 @@ package android.provider {
     field public static final java.lang.String URL = "data1";
   }
 
+  public static final class ContactsContract.ContactCounts {
+    ctor public ContactsContract.ContactCounts();
+    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+  }
+
   protected static abstract interface ContactsContract.ContactNameColumns {
     field public static final java.lang.String DISPLAY_NAME_ALTERNATIVE = "display_name_alt";
     field public static final java.lang.String DISPLAY_NAME_PRIMARY = "display_name";
