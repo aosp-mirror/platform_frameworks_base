@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.location.Location;
@@ -31,6 +32,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.TimeZone;
 
 /**
@@ -68,17 +70,19 @@ public final class DngCreator implements AutoCloseable {
      * </p>
      * <p>
      * DNG metadata tags will be generated from the corresponding parameters in the
-     * {@link android.hardware.camera2.CaptureResult} object.  This removes or overrides
-     * all previous tags set.
+     * {@link android.hardware.camera2.CaptureResult} object.
      * </p>
-     *
+     * <p>
+     * For best quality DNG files, it is strongly recommended that lens shading map output is
+     * enabled if supported. See {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE}.
+     * </p>
      * @param characteristics an object containing the static
      *          {@link android.hardware.camera2.CameraCharacteristics}.
      * @param metadata a metadata object to generate tags from.
      */
     public DngCreator(CameraCharacteristics characteristics, CaptureResult metadata) {
         if (characteristics == null || metadata == null) {
-            throw new NullPointerException("Null argument to DngCreator constructor");
+            throw new IllegalArgumentException("Null argument to DngCreator constructor");
         }
 
         // Find current time
@@ -121,10 +125,8 @@ public final class DngCreator implements AutoCloseable {
      *                      <li>{@link android.media.ExifInterface#ORIENTATION_ROTATE_270}</li>
      *                    </ul>
      * @return this {@link #DngCreator} object.
-     * @hide
      */
     public DngCreator setOrientation(int orientation) {
-
         if (orientation < ExifInterface.ORIENTATION_UNDEFINED ||
                 orientation > ExifInterface.ORIENTATION_ROTATE_270) {
             throw new IllegalArgumentException("Orientation " + orientation +
@@ -139,31 +141,31 @@ public final class DngCreator implements AutoCloseable {
      *
      * <p>
      * Pixel data will be converted to a Baseline TIFF RGB image, with 8 bits per color channel.
-     * The alpha channel will be discarded.
-     * </p>
-     *
-     * <p>
-     * The given bitmap should not be altered while this object is in use.
+     * The alpha channel will be discarded.  Thumbnail images with a dimension larger than
+     * {@link #MAX_THUMBNAIL_DIMENSION} will be rejected.
      * </p>
      *
      * @param pixels a {@link android.graphics.Bitmap} of pixel data.
      * @return this {@link #DngCreator} object.
-     * @hide
+     * @throws java.lang.IllegalArgumentException if the given thumbnail image has a dimension
+     *      larger than {@link #MAX_THUMBNAIL_DIMENSION}.
      */
     public DngCreator setThumbnail(Bitmap pixels) {
         if (pixels == null) {
-            throw new NullPointerException("Null argument to setThumbnail");
+            throw new IllegalArgumentException("Null argument to setThumbnail");
         }
 
-        Bitmap.Config config = pixels.getConfig();
+        int width = pixels.getWidth();
+        int height = pixels.getHeight();
 
-        if (config != Bitmap.Config.ARGB_8888) {
-            pixels = pixels.copy(Bitmap.Config.ARGB_8888, false);
-            if (pixels == null) {
-                throw new IllegalArgumentException("Unsupported Bitmap format " + config);
-            }
-            nativeSetThumbnailBitmap(pixels);
+        if (width > MAX_THUMBNAIL_DIMENSION || height > MAX_THUMBNAIL_DIMENSION) {
+            throw new IllegalArgumentException("Thumbnail dimensions width,height (" + width +
+                    "," + height + ") too large, dimensions must be smaller than " +
+                    MAX_THUMBNAIL_DIMENSION);
         }
+
+        ByteBuffer rgbBuffer = convertToRGB(pixels);
+        nativeSetThumbnail(rgbBuffer, width, height);
 
         return this;
     }
@@ -173,36 +175,40 @@ public final class DngCreator implements AutoCloseable {
      *
      * <p>
      * Pixel data is interpreted as a {@link android.graphics.ImageFormat#YUV_420_888} image.
-     * </p>
-     *
-     * <p>
-     * The given image should not be altered while this object is in use.
+     * Thumbnail images with a dimension larger than {@link #MAX_THUMBNAIL_DIMENSION} will be
+     * rejected.
      * </p>
      *
      * @param pixels an {@link android.media.Image} object with the format
      *               {@link android.graphics.ImageFormat#YUV_420_888}.
      * @return this {@link #DngCreator} object.
-     * @hide
+     * @throws java.lang.IllegalArgumentException if the given thumbnail image has a dimension
+     *      larger than {@link #MAX_THUMBNAIL_DIMENSION}.
      */
     public DngCreator setThumbnail(Image pixels) {
         if (pixels == null) {
-            throw new NullPointerException("Null argument to setThumbnail");
+            throw new IllegalArgumentException("Null argument to setThumbnail");
         }
 
         int format = pixels.getFormat();
         if (format != ImageFormat.YUV_420_888) {
-            throw new IllegalArgumentException("Unsupported image format " + format);
+            throw new IllegalArgumentException("Unsupported Image format " + format);
         }
 
-        Image.Plane[] planes = pixels.getPlanes();
-        nativeSetThumbnailImage(pixels.getWidth(), pixels.getHeight(), planes[0].getBuffer(),
-                planes[0].getRowStride(), planes[0].getPixelStride(), planes[1].getBuffer(),
-                planes[1].getRowStride(), planes[1].getPixelStride(), planes[1].getBuffer(),
-                planes[1].getRowStride(), planes[1].getPixelStride());
+        int width = pixels.getWidth();
+        int height = pixels.getHeight();
+
+        if (width > MAX_THUMBNAIL_DIMENSION || height > MAX_THUMBNAIL_DIMENSION) {
+            throw new IllegalArgumentException("Thumbnail dimensions width,height (" + width +
+                    "," + height + ") too large, dimensions must be smaller than " +
+                    MAX_THUMBNAIL_DIMENSION);
+        }
+
+        ByteBuffer rgbBuffer = convertToRGB(pixels);
+        nativeSetThumbnail(rgbBuffer, width, height);
 
         return this;
     }
-
 
     /**
      * Set image location metadata.
@@ -219,10 +225,26 @@ public final class DngCreator implements AutoCloseable {
      *
      * @throws java.lang.IllegalArgumentException if the given location object doesn't
      *          contain enough information to set location metadata.
-     * @hide
      */
     public DngCreator setLocation(Location location) {
-        /*TODO*/
+        if (location == null) {
+            throw new IllegalArgumentException("Null location passed to setLocation");
+        }
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        long time = location.getTime();
+
+        int[] latTag = toExifLatLong(latitude);
+        int[] longTag = toExifLatLong(longitude);
+        String latRef = latitude >= 0 ? GPS_LAT_REF_NORTH : GPS_LAT_REF_SOUTH;
+        String longRef = longitude >= 0 ? GPS_LONG_REF_EAST : GPS_LONG_REF_WEST;
+
+        String dateTag = sExifGPSDateStamp.format(time);
+        mGPSTimeStampCalendar.setTimeInMillis(time);
+        int[] timeTag = new int[] { mGPSTimeStampCalendar.get(Calendar.HOUR_OF_DAY), 1,
+                mGPSTimeStampCalendar.get(Calendar.MINUTE), 1,
+                mGPSTimeStampCalendar.get(Calendar.SECOND), 1 };
+        nativeSetGpsTags(latTag, latRef, longTag, longRef, dateTag, timeTag);
         return this;
     }
 
@@ -235,10 +257,12 @@ public final class DngCreator implements AutoCloseable {
      *
      * @param description the user description string.
      * @return this {@link #DngCreator} object.
-     * @hide
      */
     public DngCreator setDescription(String description) {
-        /*TODO*/
+        if (description == null) {
+            throw new IllegalArgumentException("Null description passed to setDescription.");
+        }
+        nativeSetDescription(description);
         return this;
     }
 
@@ -268,14 +292,26 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      * @throws java.lang.IllegalArgumentException if the size passed in does not match the
-     * @hide
      */
     public void writeInputStream(OutputStream dngOutput, Size size, InputStream pixels, long offset)
             throws IOException {
-        if (dngOutput == null || pixels == null) {
-            throw new NullPointerException("Null argument to writeImage");
+        if (dngOutput == null) {
+            throw new IllegalArgumentException("Null dngOutput passed to writeInputStream");
+        } else if (size == null) {
+            throw new IllegalArgumentException("Null size passed to writeInputStream");
+        } else if (pixels == null) {
+            throw new IllegalArgumentException("Null pixels passed to writeInputStream");
+        } else if (offset < 0) {
+            throw new IllegalArgumentException("Negative offset passed to writeInputStream");
         }
-        nativeWriteInputStream(dngOutput, pixels, offset);
+
+        int width = size.getWidth();
+        int height = size.getHeight();
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Size with invalid width, height: (" + width + "," +
+                    height + ") passed to writeInputStream");
+        }
+        nativeWriteInputStream(dngOutput, pixels, width, height, offset);
     }
 
     /**
@@ -294,6 +330,11 @@ public final class DngCreator implements AutoCloseable {
      * {@link java.lang.IllegalStateException} will be thrown.
      * </p>
      *
+     * <p>
+     * Any mark or limit set on this {@link ByteBuffer} is ignored, and will be cleared by this
+     * method.
+     * </p>
+     *
      * @param dngOutput an {@link java.io.OutputStream} to write the DNG file to.
      * @param size the {@link Size} of the image to write, in pixels.
      * @param pixels an {@link java.nio.ByteBuffer} of pixel data to write.
@@ -303,14 +344,24 @@ public final class DngCreator implements AutoCloseable {
      * @throws IOException if an error was encountered in the input or output stream.
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
-     * @hide
      */
     public void writeByteBuffer(OutputStream dngOutput, Size size, ByteBuffer pixels, long offset)
             throws IOException {
-        if (dngOutput == null || pixels == null) {
-            throw new NullPointerException("Null argument to writeImage");
+        if (dngOutput == null) {
+            throw new IllegalArgumentException("Null dngOutput passed to writeByteBuffer");
+        } else if (size == null) {
+            throw new IllegalArgumentException("Null size passed to writeByteBuffer");
+        } else if (pixels == null) {
+            throw new IllegalArgumentException("Null pixels passed to writeByteBuffer");
+        } else if (offset < 0) {
+            throw new IllegalArgumentException("Negative offset passed to writeByteBuffer");
         }
-        nativeWriteByteBuffer(dngOutput, pixels, offset);
+
+        int width = size.getWidth();
+        int height = size.getHeight();
+
+        writeByteBuffer(width, height, pixels, dngOutput, DEFAULT_PIXEL_STRIDE,
+                width * DEFAULT_PIXEL_STRIDE, offset);
     }
 
     /**
@@ -331,8 +382,10 @@ public final class DngCreator implements AutoCloseable {
      *          set to write a well-formatted DNG file.
      */
     public void writeImage(OutputStream dngOutput, Image pixels) throws IOException {
-        if (dngOutput == null || pixels == null) {
-            throw new NullPointerException("Null argument to writeImage");
+        if (dngOutput == null) {
+            throw new IllegalArgumentException("Null dngOutput to writeImage");
+        } else if (pixels == null) {
+            throw new IllegalArgumentException("Null pixels to writeImage");
         }
 
         int format = pixels.getFormat();
@@ -341,14 +394,24 @@ public final class DngCreator implements AutoCloseable {
         }
 
         Image.Plane[] planes = pixels.getPlanes();
-        nativeWriteImage(dngOutput, pixels.getWidth(), pixels.getHeight(), planes[0].getBuffer(),
-                planes[0].getRowStride(), planes[0].getPixelStride());
+        if (planes == null || planes.length <= 0) {
+            throw new IllegalArgumentException("Image with no planes passed to writeImage");
+        }
+
+        ByteBuffer buf = planes[0].getBuffer();
+        writeByteBuffer(pixels.getWidth(), pixels.getHeight(), buf, dngOutput,
+                planes[0].getPixelStride(), planes[0].getRowStride(), 0);
     }
 
     @Override
     public void close() {
         nativeDestroy();
     }
+
+    /**
+     * Max width or height dimension for thumbnails.
+     */
+    public static final int MAX_THUMBNAIL_DIMENSION = 256; // max pixel dimension for TIFF/EP
 
     @Override
     protected void finalize() throws Throwable {
@@ -359,13 +422,181 @@ public final class DngCreator implements AutoCloseable {
         }
     }
 
+    private static final String GPS_LAT_REF_NORTH = "N";
+    private static final String GPS_LAT_REF_SOUTH = "S";
+    private static final String GPS_LONG_REF_EAST = "E";
+    private static final String GPS_LONG_REF_WEST = "W";
+
+    private static final String GPS_DATE_FORMAT_STR = "yyyy:MM:dd";
     private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd kk:mm:ss";
+    private static final DateFormat sExifGPSDateStamp = new SimpleDateFormat(GPS_DATE_FORMAT_STR);
     private static final DateFormat sDateTimeStampFormat =
             new SimpleDateFormat(TIFF_DATETIME_FORMAT);
+    private final Calendar mGPSTimeStampCalendar = Calendar
+            .getInstance(TimeZone.getTimeZone("UTC"));
 
     static {
         sDateTimeStampFormat.setTimeZone(TimeZone.getDefault());
+        sExifGPSDateStamp.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    private static final int DEFAULT_PIXEL_STRIDE = 2; // bytes per sample
+    private static final int BYTES_PER_RGB_PIX = 3; // byts per pixel
+
+    /**
+     * Offset, rowStride, and pixelStride are given in bytes.  Height and width are given in pixels.
+     */
+    private void writeByteBuffer(int width, int height, ByteBuffer pixels, OutputStream dngOutput,
+                                 int pixelStride, int rowStride, long offset)  throws IOException {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Image with invalid width, height: (" + width + "," +
+                    height + ") passed to write");
+        }
+        long capacity = pixels.capacity();
+        long totalSize = rowStride * height + offset;
+        if (capacity < totalSize) {
+            throw new IllegalArgumentException("Image size " + capacity +
+                    " is too small (must be larger than " + totalSize + ")");
+        }
+        int minRowStride = pixelStride * width;
+        if (minRowStride > rowStride) {
+            throw new IllegalArgumentException("Invalid image pixel stride, row byte width " +
+                    minRowStride + " is too large, expecting " + rowStride);
+        }
+        pixels.clear(); // Reset mark and limit
+        nativeWriteImage(dngOutput, width, height, pixels, rowStride, pixelStride, offset,
+                pixels.isDirect());
+        pixels.clear();
+    }
+
+    /**
+     * Convert a single YUV pixel to RGB.
+     */
+    private static void yuvToRgb(byte[] yuvData, int outOffset, /*out*/byte[] rgbOut) {
+        final int COLOR_MAX = 255;
+
+        float y = yuvData[0] & 0xFF;  // Y channel
+        float cb = yuvData[1] & 0xFF; // U channel
+        float cr = yuvData[2] & 0xFF; // V channel
+
+        // convert YUV -> RGB (from JFIF's "Conversion to and from RGB" section)
+        float r = y + 1.402f * (cr - 128);
+        float g = y - 0.34414f * (cb - 128) - 0.71414f * (cr - 128);
+        float b = y + 1.772f * (cb - 128);
+
+        // clamp to [0,255]
+        rgbOut[outOffset] = (byte) Math.max(0, Math.min(COLOR_MAX, r));
+        rgbOut[outOffset + 1] = (byte) Math.max(0, Math.min(COLOR_MAX, g));
+        rgbOut[outOffset + 2] = (byte) Math.max(0, Math.min(COLOR_MAX, b));
+    }
+
+    /**
+     * Convert a single {@link Color} pixel to RGB.
+     */
+    private static void colorToRgb(int color, int outOffset, /*out*/byte[] rgbOut) {
+        rgbOut[outOffset] = (byte) Color.red(color);
+        rgbOut[outOffset + 1] = (byte) Color.green(color);
+        rgbOut[outOffset + 2] = (byte) Color.blue(color);
+        // Discards Alpha
+    }
+
+    /**
+     * Generate a direct RGB {@link ByteBuffer} from a YUV420_888 {@link Image}.
+     */
+    private static ByteBuffer convertToRGB(Image yuvImage) {
+        // TODO: Optimize this with renderscript intrinsic.
+        int width = yuvImage.getWidth();
+        int height = yuvImage.getHeight();
+        ByteBuffer buf = ByteBuffer.allocateDirect(BYTES_PER_RGB_PIX * width * height);
+
+        Image.Plane yPlane = yuvImage.getPlanes()[0];
+        Image.Plane uPlane = yuvImage.getPlanes()[1];
+        Image.Plane vPlane = yuvImage.getPlanes()[2];
+
+        ByteBuffer yBuf = yPlane.getBuffer();
+        ByteBuffer uBuf = uPlane.getBuffer();
+        ByteBuffer vBuf = vPlane.getBuffer();
+
+        yBuf.rewind();
+        uBuf.rewind();
+        vBuf.rewind();
+
+        int yRowStride = yPlane.getRowStride();
+        int vRowStride = vPlane.getRowStride();
+        int uRowStride = uPlane.getRowStride();
+
+        int yPixStride = yPlane.getPixelStride();
+        int vPixStride = vPlane.getPixelStride();
+        int uPixStride = uPlane.getPixelStride();
+
+        byte[] yuvPixel = { 0, 0, 0 };
+        byte[] yFullRow = new byte[yPixStride * width];
+        byte[] uFullRow = new byte[uPixStride * width / 2];
+        byte[] vFullRow = new byte[vPixStride * width / 2];
+        byte[] finalRow = new byte[BYTES_PER_RGB_PIX * width];
+        for (int i = 0; i < height; i++) {
+            int halfH = i / 2;
+            yBuf.position(yRowStride * i);
+            yBuf.get(yFullRow);
+            uBuf.position(uRowStride * halfH);
+            uBuf.get(uFullRow);
+            vBuf.position(vRowStride * halfH);
+            vBuf.get(vFullRow);
+            for (int j = 0; j < width; j++) {
+                int halfW = j / 2;
+                yuvPixel[0] = yFullRow[yPixStride * j];
+                yuvPixel[1] = uFullRow[uPixStride * halfW];
+                yuvPixel[2] = vFullRow[vPixStride * halfW];
+                yuvToRgb(yuvPixel, j * BYTES_PER_RGB_PIX, /*out*/finalRow);
+            }
+            buf.put(finalRow);
+        }
+
+        yBuf.rewind();
+        uBuf.rewind();
+        vBuf.rewind();
+        buf.rewind();
+        return buf;
+    }
+
+    /**
+     * Generate a direct RGB {@link ByteBuffer} from a {@link Bitmap}.
+     */
+    private static ByteBuffer convertToRGB(Bitmap argbBitmap) {
+        // TODO: Optimize this.
+        int width = argbBitmap.getWidth();
+        int height = argbBitmap.getHeight();
+        ByteBuffer buf = ByteBuffer.allocateDirect(BYTES_PER_RGB_PIX * width * height);
+
+        int[] pixelRow = new int[width];
+        byte[] finalRow = new byte[BYTES_PER_RGB_PIX * width];
+        for (int i = 0; i < height; i++) {
+            argbBitmap.getPixels(pixelRow, /*offset*/0, /*stride*/width, /*x*/0, /*y*/i,
+                    /*width*/width, /*height*/1);
+            for (int j = 0; j < width; j++) {
+                colorToRgb(pixelRow[j], j * BYTES_PER_RGB_PIX, /*out*/finalRow);
+            }
+            buf.put(finalRow);
+        }
+
+        buf.rewind();
+        return buf;
+    }
+
+    /**
+     * Convert coordinate to EXIF GPS tag format.
+     */
+    private static int[] toExifLatLong(double value) {
+        // convert to the format dd/1 mm/1 ssss/100
+        value = Math.abs(value);
+        int degrees = (int) value;
+        value = (value - degrees) * 60;
+        int minutes = (int) value;
+        value = (value - minutes) * 6000;
+        int seconds = (int) value;
+        return new int[] { degrees, 1, minutes, 1, seconds, 100 };
+    }
+
     /**
      * This field is used by native code, do not access or modify.
      */
@@ -381,24 +612,22 @@ public final class DngCreator implements AutoCloseable {
 
     private synchronized native void nativeSetOrientation(int orientation);
 
-    private synchronized native void nativeSetThumbnailBitmap(Bitmap bitmap);
+    private synchronized native void nativeSetDescription(String description);
 
-    private synchronized native void nativeSetThumbnailImage(int width, int height,
-                                                             ByteBuffer yBuffer, int yRowStride,
-                                                             int yPixStride, ByteBuffer uBuffer,
-                                                             int uRowStride, int uPixStride,
-                                                             ByteBuffer vBuffer, int vRowStride,
-                                                             int vPixStride);
+    private synchronized native void nativeSetGpsTags(int[] latTag, String latRef, int[] longTag,
+                                                      String longRef, String dateTag,
+                                                      int[] timeTag);
+
+    private synchronized native void nativeSetThumbnail(ByteBuffer buffer, int width, int height);
 
     private synchronized native void nativeWriteImage(OutputStream out, int width, int height,
                                                       ByteBuffer rawBuffer, int rowStride,
-                                                      int pixStride) throws IOException;
-
-    private synchronized native void nativeWriteByteBuffer(OutputStream out, ByteBuffer rawBuffer,
-                                                           long offset) throws IOException;
+                                                      int pixStride, long offset, boolean isDirect)
+                                                      throws IOException;
 
     private synchronized native void nativeWriteInputStream(OutputStream out, InputStream rawStream,
-                                                            long offset) throws IOException;
+                                                            int width, int height, long offset)
+                                                            throws IOException;
 
     static {
         nativeClassInit();
