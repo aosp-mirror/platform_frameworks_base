@@ -33,6 +33,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -409,6 +410,38 @@ public final class HdmiControlService extends SystemService {
                 mHotplugEventListeners.remove(mListener);
             }
         }
+    }
+
+    void addCecDevice(HdmiCecDeviceInfo info) {
+        mCecController.addDeviceInfo(info);
+    }
+
+    // Launch device discovery sequence.
+    // It starts with clearing the existing device info list.
+    // Note that it assumes that logical address of all local devices is already allocated.
+    void launchDeviceDiscovery() {
+        // At first, clear all existing device infos.
+        mCecController.clearDeviceInfoList();
+
+        // TODO: check whether TV is one of local devices.
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, HdmiCec.ADDR_TV,
+                new DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
+                        for (HdmiCecDeviceInfo info : deviceInfos) {
+                            mCecController.addDeviceInfo(info);
+                        }
+
+                        // Add device info of all local devices.
+                        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+                            mCecController.addDeviceInfo(device.getDeviceInfo());
+                        }
+
+                        // TODO: start hot-plug detection sequence here.
+                        // addAndStartAction(new HotplugDetectionAction());
+                    }
+                });
+        addAndStartAction(action);
     }
 
     private void enforceAccessPermission() {
