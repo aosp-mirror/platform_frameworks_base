@@ -30,9 +30,22 @@ public class FontFamily {
     public long mNativePtr;
 
     public FontFamily() {
-        mNativePtr = nCreateFamily();
+        mNativePtr = nCreateFamily(null, 0);
         if (mNativePtr == 0) {
-            throw new RuntimeException();
+            throw new IllegalStateException("error creating native FontFamily");
+        }
+    }
+
+    public FontFamily(String lang, String variant) {
+        int varEnum = 0;
+        if ("compact".equals(variant)) {
+            varEnum = 1;
+        } else if ("elegant".equals(variant)) {
+            varEnum = 2;
+        }
+        mNativePtr = nCreateFamily(lang, varEnum);
+        if (mNativePtr == 0) {
+            throw new IllegalStateException("error creating native FontFamily");
         }
     }
 
@@ -49,7 +62,7 @@ public class FontFamily {
         return nAddFont(mNativePtr, path.getAbsolutePath());
     }
 
-    static native long nCreateFamily();
+    static native long nCreateFamily(String lang, int variant);
     static native void nUnrefFamily(long nativePtr);
     static native boolean nAddFont(long nativeFamily, String path);
 }

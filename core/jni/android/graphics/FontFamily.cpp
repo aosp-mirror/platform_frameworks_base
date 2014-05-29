@@ -31,9 +31,14 @@
 
 namespace android {
 
-static jlong FontFamily_create(JNIEnv* env, jobject clazz) {
+static jlong FontFamily_create(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
 #ifdef USE_MINIKIN
-    return (jlong)new FontFamily();
+    FontLanguage fontLanguage;
+    if (lang != NULL) {
+        ScopedUtfChars str(env, lang);
+        fontLanguage = FontLanguage(str.c_str(), str.size());
+    }
+    return (jlong)new FontFamily(fontLanguage, variant);
 #else
     return 0;
 #endif
@@ -67,7 +72,7 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gFontFamilyMethods[] = {
-    { "nCreateFamily",            "()J", (void*)FontFamily_create },
+    { "nCreateFamily",            "(Ljava/lang/String;I)J", (void*)FontFamily_create },
     { "nUnrefFamily",             "(J)V", (void*)FontFamily_unref },
     { "nAddFont",                 "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },
 };

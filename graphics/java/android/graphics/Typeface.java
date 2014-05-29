@@ -245,7 +245,7 @@ public class Typeface {
 
     private static FontFamily makeFamilyFromParsed(FontListParser.Family family) {
         // TODO: expand to handle attributes like lang and variant
-        FontFamily fontFamily = new FontFamily();
+        FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (String fontFile : family.fontFiles) {
             fontFamily.addFont(new File(fontFile));
         }

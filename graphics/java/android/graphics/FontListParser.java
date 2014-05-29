@@ -34,14 +34,18 @@ import java.util.List;
 public class FontListParser {
 
     public static class Family {
-        public Family(List<String> names, List<String> fontFiles) {
+        public Family(List<String> names, List<String> fontFiles, String lang, String variant) {
             this.names = names;
             this.fontFiles = fontFiles;
+            this.lang = lang;
+            this.variant = variant;
         }
 
         public List<String> names;
         // todo: need attributes for font files
         public List<String> fontFiles;
+        public String lang;
+        public String variant;
     }
 
     /* Parse fallback list (no names) */
@@ -75,6 +79,8 @@ public class FontListParser {
             throws XmlPullParserException, IOException {
         List<String> names = null;
         List<String> fontFiles = new ArrayList<String>();
+        String lang = null;
+        String variant = null;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
@@ -82,6 +88,12 @@ public class FontListParser {
                 while (parser.next() != XmlPullParser.END_TAG) {
                     if (parser.getEventType() != XmlPullParser.START_TAG) continue;
                     if (parser.getName().equals("file")) {
+                        if (lang == null) {
+                            lang = parser.getAttributeValue(null, "lang");
+                        }
+                        if (variant == null) {
+                            variant = parser.getAttributeValue(null, "variant");
+                        }
                         String filename = parser.nextText();
                         String fullFilename = "/system/fonts/" + filename;
                         fontFiles.add(fullFilename);
@@ -98,7 +110,7 @@ public class FontListParser {
                 }
             }
         }
-        return new Family(names, fontFiles);
+        return new Family(names, fontFiles, lang, variant);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
