@@ -172,7 +172,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Set the alphas
-        transform.dismissAlpha = Math.max(-1f, Math.min(0f, t)) + 1f;
+        transform.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
 
         // Update the rect and visibility
         transform.rect.set(mTaskRect);
@@ -299,6 +299,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Sets the current stack scroll without synchronizing the stack view with the model */
     public void setStackScrollRaw(int value) {
         mStackScroll = value;
+    }
+    /** Sets the current stack scroll to the initial state when you first enter recents */
+    public void setStackScrollToInitialState() {
+        if (mStack.getTaskCount() > 2) {
+            int initialScroll = mMaxScroll - mTaskRect.height() / 2;
+            setStackScroll(initialScroll);
+        } else {
+            setStackScroll(mMaxScroll);
+        }
     }
 
     /**
@@ -700,7 +709,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately
         if (mAwaitingFirstLayout) {
-            setStackScroll(mMaxScroll);
+            setStackScrollToInitialState();
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
         }
