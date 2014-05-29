@@ -1556,6 +1556,12 @@
       happen in the background but does not prevent other audio capture (e.g. Camcorder).</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_modifyAudioRouting">Audio Routing</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_modifyAudioRouting">Allows the app to directly control audio routing and
+      override audio policy decisions.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_captureVideoOutput">capture video output</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_captureVideoOutput">Allows the app to capture and redirect video output.</string>
