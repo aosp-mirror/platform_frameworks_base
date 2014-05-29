@@ -608,8 +608,15 @@ public interface WindowManagerPolicy {
      * Return whether the given window should forcibly hide everything
      * behind it.  Typically returns true for the keyguard.
      */
-    public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs);
-    
+    public boolean doesForceHide(WindowManager.LayoutParams attrs);
+
+
+    /**
+     * Return whether the given window can become one that passes doesForceHide() test.
+     * Typically returns true for the StatusBar.
+     */
+    public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
+
     /**
      * Determine if a window that is behind one that is force hiding
      * (as determined by {@link #doesForceHide}) should actually be hidden.
@@ -618,7 +625,7 @@ public interface WindowManagerPolicy {
      * will conflict with what you set.
      */
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs);
-    
+
     /**
      * Called when the system would like to show a UI to indicate that an
      * application is starting.  You can use this to add a
@@ -1189,4 +1196,9 @@ public interface WindowManagerPolicy {
      * @return True if the window is a top level one.
      */
     public boolean isTopLevelWindow(int windowType);
+
+    /**
+     * Notifies the keyguard to start fading out.
+     */
+    public void startKeyguardExitAnimation(long fadeoutDuration);
 }
