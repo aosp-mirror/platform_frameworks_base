@@ -54,7 +54,7 @@ public final class Typeface_Delegate {
 
     // ---- delegate data ----
 
-    private final long[] mFontFamilies;  // the reference to FontFamily_Delegate.
+    private final FontFamily_Delegate[] mFontFamilies;  // the reference to FontFamily_Delegate.
     private int mStyle;
 
     private static long sDefaultTypeface;
@@ -71,8 +71,7 @@ public final class Typeface_Delegate {
 
     public List<Font> getFonts(boolean compact) {
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
-        for (long fontFamily : mFontFamilies) {
-            FontFamily_Delegate ffd = FontFamily_Delegate.getDelegate(fontFamily);
+        for (FontFamily_Delegate ffd : mFontFamilies) {
             if (ffd != null) {
                 Font font = ffd.getFont(mStyle, compact);
                 if (font != null) {
@@ -122,7 +121,11 @@ public final class Typeface_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static synchronized long nativeCreateFromArray(long[] familyArray) {
-        Typeface_Delegate delegate = new Typeface_Delegate(familyArray, Typeface.NORMAL);
+        FontFamily_Delegate[] fontFamilies = new FontFamily_Delegate[familyArray.length];
+        for (int i = 0; i < familyArray.length; i++) {
+            fontFamilies[i] = FontFamily_Delegate.getDelegate(familyArray[i]);
+        }
+        Typeface_Delegate delegate = new Typeface_Delegate(fontFamilies, Typeface.NORMAL);
         return sManager.addNewDelegate(delegate);
     }
 
@@ -153,9 +156,8 @@ public final class Typeface_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    private Typeface_Delegate(long[] fontFamilies, int style) {
+    private Typeface_Delegate(FontFamily_Delegate[] fontFamilies, int style) {
         mFontFamilies = fontFamilies;
         mStyle = style;
     }
-
 }

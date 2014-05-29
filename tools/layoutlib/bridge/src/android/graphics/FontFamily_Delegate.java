@@ -146,6 +146,8 @@ public class FontFamily_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nUnrefFamily(long nativePtr) {
+        // Removing the java reference for the object doesn't mean that it's freed for garbage
+        // collection. Typeface_Delegate may still hold a reference for it.
         sManager.removeJavaReferenceFor(nativePtr);
     }
 
