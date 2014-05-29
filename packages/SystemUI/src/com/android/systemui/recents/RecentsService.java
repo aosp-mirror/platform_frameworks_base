@@ -55,7 +55,8 @@ class SystemUIMessageHandler extends Handler {
 
         if (msg.what == AlternateRecentsComponent.MSG_UPDATE_FOR_CONFIGURATION) {
             RecentsTaskLoader.initialize(context);
-            RecentsConfiguration.reinitialize(context);
+            RecentsConfiguration config = RecentsConfiguration.reinitialize(context);
+            config.updateOnConfigurationChange();
 
             try {
                 Bundle data = msg.getData();
@@ -73,7 +74,6 @@ class SystemUIMessageHandler extends Handler {
 
                 // Get the task stack and search bar bounds
                 Rect taskStackBounds = new Rect();
-                RecentsConfiguration config = RecentsConfiguration.getInstance();
                 config.getTaskStackBounds(windowRect.width(), windowRect.height(), taskStackBounds);
 
                 // Calculate the target task rect for when there is one task.

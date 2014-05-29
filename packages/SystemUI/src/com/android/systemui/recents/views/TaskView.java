@@ -21,7 +21,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
-import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -167,7 +166,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
                     .setDuration(duration)
-                    .setInterpolator(config.defaultBezierInterpolator)
+                    .setInterpolator(config.fastOutSlowInInterpolator)
                     .withLayer()
                     .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
@@ -235,7 +234,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.animate()
                 .translationY(0)
                 .setStartDelay(200)
-                .setInterpolator(config.defaultBezierInterpolator)
+                .setInterpolator(config.fastOutSlowInInterpolator)
                 .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
                 .start();
@@ -247,7 +246,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.animate()
             .translationY(-mBarView.getMeasuredHeight())
             .setStartDelay(0)
-            .setInterpolator(config.defaultBezierInterpolator)
+            .setInterpolator(config.fastOutLinearInInterpolator)
             .setDuration(config.taskBarExitAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {
@@ -268,7 +267,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         animate().translationX(config.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
             .setStartDelay(0)
-            .setInterpolator(config.defaultBezierInterpolator)
+            .setInterpolator(config.fastOutSlowInInterpolator)
             .setDuration(config.taskViewRemoveAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {

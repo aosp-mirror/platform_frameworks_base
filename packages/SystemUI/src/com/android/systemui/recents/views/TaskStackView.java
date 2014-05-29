@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -345,7 +344,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mScrollAnimator = ObjectAnimator.ofInt(this, "stackScroll", curScroll, newScroll);
         mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
                 curScroll, 250));
-        mScrollAnimator.setInterpolator(RecentsConfiguration.getInstance().defaultBezierInterpolator);
+        mScrollAnimator.setInterpolator(RecentsConfiguration.getInstance().fastOutSlowInInterpolator);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

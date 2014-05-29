@@ -115,7 +115,7 @@
     <!-- The min animation duration for animating the task bar in. -->
     <integer name="recents_animate_task_bar_enter_duration">300</integer>
     <!-- The min animation duration for animating the task bar out. -->
-    <integer name="recents_animate_task_bar_exit_duration">175</integer>
+    <integer name="recents_animate_task_bar_exit_duration">150</integer>
     <!-- The animation duration for animating in the info pane. -->
     <integer name="recents_animate_task_view_info_pane_duration">150</integer>
     <!-- The animation duration for animating the removal of a task view. -->
