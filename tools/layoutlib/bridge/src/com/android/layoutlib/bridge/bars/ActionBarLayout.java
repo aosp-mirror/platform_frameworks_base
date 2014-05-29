@@ -171,7 +171,7 @@ public class ActionBarLayout extends LinearLayout {
             // Set action bar to be split, if needed.
             ActionBarContainer splitView = (ActionBarContainer) findViewById(R.id.split_action_bar);
             mActionBarView.setSplitView(splitView);
-            mActionBarView.setSplitActionBar(mSplit);
+            mActionBarView.setSplitToolbar(mSplit);
 
             inflateMenus();
 
