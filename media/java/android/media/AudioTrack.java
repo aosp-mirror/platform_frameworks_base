@@ -816,6 +816,8 @@ public class AudioTrack
     *         with the estimated time when that frame was presented or is committed to
     *         be presented.
     *         In the case that no timestamp is available, any supplied instance is left unaltered.
+    *         A timestamp may be temporarily unavailable while the audio clock is stabilizing,
+    *         or during and immediately after a route change.
     */
     // Add this text when the "on new timestamp" API is added:
     //   Use if you need to get the most recent timestamp outside of the event callback handler.
