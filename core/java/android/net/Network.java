@@ -16,10 +16,13 @@
 
 package android.net;
 
+import android.net.NetworkUtils;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import javax.net.SocketFactory;
@@ -37,6 +40,8 @@ public class Network implements Parcelable {
      * @hide
      */
     public final int netId;
+
+    private NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
 
     /**
      * @hide
@@ -79,6 +84,59 @@ public class Network implements Parcelable {
     }
 
     /**
+     * A {@code SocketFactory} that produces {@code Socket}'s bound to this network.
+     */
+    private class NetworkBoundSocketFactory extends SocketFactory {
+        private final int mNetId;
+
+        public NetworkBoundSocketFactory(int netId) {
+            super();
+            mNetId = netId;
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+            Socket socket = createSocket();
+            socket.bind(new InetSocketAddress(localHost, localPort));
+            socket.connect(new InetSocketAddress(host, port));
+            return socket;
+        }
+
+        @Override
+        public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
+                int localPort) throws IOException {
+            Socket socket = createSocket();
+            socket.bind(new InetSocketAddress(localAddress, localPort));
+            socket.connect(new InetSocketAddress(address, port));
+            return socket;
+        }
+
+        @Override
+        public Socket createSocket(InetAddress host, int port) throws IOException {
+            Socket socket = createSocket();
+            socket.connect(new InetSocketAddress(host, port));
+            return socket;
+        }
+
+        @Override
+        public Socket createSocket(String host, int port) throws IOException {
+            Socket socket = createSocket();
+            socket.connect(new InetSocketAddress(host, port));
+            return socket;
+        }
+
+        @Override
+        public Socket createSocket() throws IOException {
+            Socket socket = new Socket();
+            // Query a property of the underlying socket to ensure the underlying
+            // socket exists so a file descriptor is available to bind to a network.
+            socket.getReuseAddress();
+            NetworkUtils.bindSocketToNetwork(socket.getFileDescriptor$().getInt$(), mNetId);
+            return socket;
+        }
+    }
+
+    /**
      * Returns a {@link SocketFactory} bound to this network.  Any {@link Socket} created by
      * this factory will have its traffic sent over this {@code Network}.  Note that if this
      * {@code Network} ever disconnects, this factory and any {@link Socket} it produced in the
@@ -88,7 +146,10 @@ public class Network implements Parcelable {
      *         {@code Network}.
      */
     public SocketFactory socketFactory() {
-        return null;
+        if (mNetworkBoundSocketFactory == null) {
+            mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(netId);
+        }
+        return mNetworkBoundSocketFactory;
     }
 
     /**
@@ -99,6 +160,29 @@ public class Network implements Parcelable {
      * doesn't accidentally use sockets it thinks are still bound to a particular {@code Network}.
      */
     public void bindProcess() {
+        NetworkUtils.bindProcessToNetwork(netId);
+    }
+
+    /**
+     * Binds host resolutions performed by this process to this network.  {@link #bindProcess}
+     * takes precedence over this setting.
+     *
+     * @hide
+     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
+     */
+    public void bindProcessForHostResolution() {
+        NetworkUtils.bindProcessToNetworkForHostResolution(netId);
+    }
+
+    /**
+     * Clears any process specific {@link Network} binding for host resolution.  This does
+     * not clear bindings enacted via {@link #bindProcess}.
+     *
+     * @hide
+     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
+     */
+    public void unbindProcessForHostResolution() {
+        NetworkUtils.unbindProcessToNetworkForHostResolution();
     }
 
     /**
@@ -107,7 +191,7 @@ public class Network implements Parcelable {
      * @return {@code Network} to which this process is bound.
      */
     public static Network getProcessBoundNetwork() {
-        return null;
+        return new Network(NetworkUtils.getNetworkBoundToProcess());
     }
 
     /**
@@ -115,6 +199,7 @@ public class Network implements Parcelable {
      * {@link Network#bindProcess}.
      */
     public static void unbindProcess() {
+        NetworkUtils.unbindProcessToNetwork();
     }
 
     // implement the Parcelable interface

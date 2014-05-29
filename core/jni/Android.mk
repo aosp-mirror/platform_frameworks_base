@@ -173,8 +173,10 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
+	$(TOP)/bionic/libc/dns/include \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
+	$(TOP)/system/netd/include \
 	external/pdfium/core/include/fpdfapi \
 	external/pdfium/core/include/fpdfdoc \
 	external/pdfium/fpdfsdk/include \
@@ -233,6 +235,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libaudioutils \
 	libpdfium \
 	libimg_utils \
+	libnetd_client \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
