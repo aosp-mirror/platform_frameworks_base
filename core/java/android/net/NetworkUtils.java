@@ -111,7 +111,7 @@ public class NetworkUtils {
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
-     * {@link Network#socketFactory}) will be bound to this network.  Note that if this
+     * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
      * {@code Network} ever disconnects all sockets created in this way will cease to work.  This
      * is by design so an application doesn't accidentally use sockets it thinks are still bound to
      * a particular {@code Network}.

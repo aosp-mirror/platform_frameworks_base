@@ -32,7 +32,8 @@ import javax.net.SocketFactory;
  * {@link ConnectivityManager.NetworkCallbackListener} in response to
  * {@link ConnectivityManager#requestNetwork} or {@link ConnectivityManager#listenForNetwork}.
  * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
- * through a targeted {@link SocketFactory} or process-wide via {@link #bindProcess}.
+ * through a targeted {@link SocketFactory} or process-wide via
+ * {@link ConnectivityManager#setProcessDefaultNetwork}.
  */
 public class Network implements Parcelable {
 
@@ -160,61 +161,11 @@ public class Network implements Parcelable {
      * @return a {@link SocketFactory} which produces {@link Socket} instances bound to this
      *         {@code Network}.
      */
-    public SocketFactory socketFactory() {
+    public SocketFactory getSocketFactory() {
         if (mNetworkBoundSocketFactory == null) {
             mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(netId);
         }
         return mNetworkBoundSocketFactory;
-    }
-
-    /**
-     * Binds the current process to this network.  All sockets created in the future (and not
-     * explicitly bound via a bound {@link SocketFactory} (see {@link Network#socketFactory})
-     * will be bound to this network.  Note that if this {@code Network} ever disconnects
-     * all sockets created in this way will cease to work.  This is by design so an application
-     * doesn't accidentally use sockets it thinks are still bound to a particular {@code Network}.
-     */
-    public void bindProcess() {
-        NetworkUtils.bindProcessToNetwork(netId);
-    }
-
-    /**
-     * Binds host resolutions performed by this process to this network.  {@link #bindProcess}
-     * takes precedence over this setting.
-     *
-     * @hide
-     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
-     */
-    public void bindProcessForHostResolution() {
-        NetworkUtils.bindProcessToNetworkForHostResolution(netId);
-    }
-
-    /**
-     * Clears any process specific {@link Network} binding for host resolution.  This does
-     * not clear bindings enacted via {@link #bindProcess}.
-     *
-     * @hide
-     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
-     */
-    public void unbindProcessForHostResolution() {
-        NetworkUtils.unbindProcessToNetworkForHostResolution();
-    }
-
-    /**
-     * A static utility method to return any {@code Network} currently bound by this process.
-     *
-     * @return {@code Network} to which this process is bound.
-     */
-    public static Network getProcessBoundNetwork() {
-        return new Network(NetworkUtils.getNetworkBoundToProcess());
-    }
-
-    /**
-     * Clear any process specific {@code Network} binding.  This reverts a call to
-     * {@link Network#bindProcess}.
-     */
-    public static void unbindProcess() {
-        NetworkUtils.unbindProcessToNetwork();
     }
 
     // implement the Parcelable interface
