@@ -540,4 +540,6 @@ public abstract class PanelView extends FrameLayout {
                 mHeightAnimator, ((mHeightAnimator !=null && mHeightAnimator.isStarted())?" (started)":"")
         ));
     }
+
+    public abstract void resetViews();
 }

@@ -260,6 +260,7 @@ public class NotificationPanelView extends PanelView implements
         mQsExpansionEnabled = qsExpansionEnabled;
     }
 
+    @Override
     public void resetViews() {
         mBlockTouches = false;
         mPageSwiper.reset();
