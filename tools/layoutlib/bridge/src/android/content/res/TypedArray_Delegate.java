@@ -30,7 +30,6 @@ public class TypedArray_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static TypedArray obtain(Resources res, int len) {
-        // FIXME
-        return null;
+        return BridgeTypedArray.obtain(res, len);
     }
 }
