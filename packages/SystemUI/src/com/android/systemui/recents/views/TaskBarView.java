@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -81,7 +80,7 @@ class TaskBarView extends FrameLayout {
                     .alpha(toTransform.dismissAlpha)
                     .setStartDelay(0)
                     .setDuration(duration)
-                    .setInterpolator(config.defaultBezierInterpolator)
+                    .setInterpolator(config.fastOutSlowInInterpolator)
                     .withLayer()
                     .start();
         } else {
