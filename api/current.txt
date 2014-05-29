@@ -15723,28 +15723,49 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
-    method public android.media.session.TransportController getTransportController();
+    method public android.media.MediaMetadata getMetadata();
+    method public android.media.session.PlaybackState getPlaybackState();
+    method public int getRatingType();
+    method public android.media.session.MediaController.TransportControls getTransportControls();
     method public void removeCallback(android.media.session.MediaController.Callback);
     method public void sendControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
   }
 
   public static abstract class MediaController.Callback {
     ctor public MediaController.Callback();
+    method public void onMetadataChanged(android.media.MediaMetadata);
+    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
+  }
+
+  public final class MediaController.TransportControls {
+    method public void fastForward();
+    method public void pause();
+    method public void play();
+    method public void rewind();
+    method public void seekTo(long);
+    method public void setRating(android.media.Rating);
+    method public void skipToNext();
+    method public void skipToPrevious();
+    method public void stop();
   }
 
   public final class MediaSession {
     method public void addCallback(android.media.session.MediaSession.Callback);
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
+    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
+    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
     method public android.media.session.MediaSessionToken getSessionToken();
-    method public android.media.session.TransportPerformer getTransportPerformer();
     method public boolean isActive();
     method public void release();
     method public void removeCallback(android.media.session.MediaSession.Callback);
+    method public void removeTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void sendSessionEvent(java.lang.String, android.os.Bundle);
     method public void setActive(boolean);
     method public void setFlags(int);
     method public void setLaunchPendingIntent(android.app.PendingIntent);
+    method public void setMetadata(android.media.MediaMetadata);
+    method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(int);
     method public void setPlaybackToRemote(android.media.session.RemoteVolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
@@ -15755,6 +15776,19 @@ package android.media.session {
     ctor public MediaSession.Callback();
     method public void onControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void onMediaButtonEvent(android.content.Intent);
+  }
+
+  public static abstract class MediaSession.TransportControlsCallback {
+    ctor public MediaSession.TransportControlsCallback();
+    method public void onFastForward();
+    method public void onPause();
+    method public void onPlay();
+    method public void onRewind();
+    method public void onSeekTo(long);
+    method public void onSetRating(android.media.Rating);
+    method public void onSkipToNext();
+    method public void onSkipToPrevious();
+    method public void onStop();
   }
 
   public final class MediaSessionManager {
@@ -15808,60 +15842,15 @@ package android.media.session {
 
   public abstract class RemoteVolumeProvider {
     ctor public RemoteVolumeProvider(int, int);
-    method public final int getFlags();
     method public final int getMaxVolume();
+    method public final int getVolumeControl();
     method public final void notifyVolumeChanged();
     method public void onAdjustVolumeBy(int);
     method public abstract int onGetCurrentVolume();
     method public void onSetVolumeTo(int);
-    field public static final int VOLUME_CONTROL_ABSOLUTE = 4; // 0x4
-    field public static final int VOLUME_CONTROL_FIXED = 1; // 0x1
-    field public static final int VOLUME_CONTROL_RELATIVE = 2; // 0x2
-  }
-
-  public final class TransportController {
-    method public void addStateListener(android.media.session.TransportController.TransportStateListener);
-    method public void addStateListener(android.media.session.TransportController.TransportStateListener, android.os.Handler);
-    method public void fastForward();
-    method public android.media.MediaMetadata getMetadata();
-    method public android.media.session.PlaybackState getPlaybackState();
-    method public int getRatingType();
-    method public void pause();
-    method public void play();
-    method public void removeStateListener(android.media.session.TransportController.TransportStateListener);
-    method public void rewind();
-    method public void seekTo(long);
-    method public void setRating(android.media.Rating);
-    method public void skipToNext();
-    method public void skipToPrevious();
-    method public void stop();
-  }
-
-  public static abstract class TransportController.TransportStateListener {
-    ctor public TransportController.TransportStateListener();
-    method public void onMetadataChanged(android.media.MediaMetadata);
-    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
-  }
-
-  public final class TransportPerformer {
-    method public void addCallback(android.media.session.TransportPerformer.Callback);
-    method public void addCallback(android.media.session.TransportPerformer.Callback, android.os.Handler);
-    method public void removeCallback(android.media.session.TransportPerformer.Callback);
-    method public void setMetadata(android.media.MediaMetadata);
-    method public void setPlaybackState(android.media.session.PlaybackState);
-  }
-
-  public static abstract class TransportPerformer.Callback {
-    ctor public TransportPerformer.Callback();
-    method public void onFastForward();
-    method public void onPause();
-    method public void onPlay();
-    method public void onRewind();
-    method public void onSeekTo(long);
-    method public void onSetRating(android.media.Rating);
-    method public void onSkipToNext();
-    method public void onSkipToPrevious();
-    method public void onStop();
+    field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
+    field public static final int VOLUME_CONTROL_FIXED = 0; // 0x0
+    field public static final int VOLUME_CONTROL_RELATIVE = 1; // 0x1
   }
 
 }

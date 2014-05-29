@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package android.media.session;
 
 /**
@@ -12,23 +27,23 @@ public abstract class RemoteVolumeProvider {
      * The volume is fixed and can not be modified. Requests to change volume
      * should be ignored.
      */
-    public static final int VOLUME_CONTROL_FIXED = 1 << 0;
+    public static final int VOLUME_CONTROL_FIXED = 0;
 
     /**
      * The volume control uses relative adjustment via
      * {@link #onAdjustVolumeBy(int)}. Attempts to set the volume to a specific
      * value should be ignored.
      */
-    public static final int VOLUME_CONTROL_RELATIVE = 1 << 1;
+    public static final int VOLUME_CONTROL_RELATIVE = 1;
 
     /**
      * The volume control uses an absolute value. It may be adjusted using
      * {@link #onAdjustVolumeBy(int)} or set directly using
      * {@link #onSetVolumeTo(int)}.
      */
-    public static final int VOLUME_CONTROL_ABSOLUTE = 1 << 2;
+    public static final int VOLUME_CONTROL_ABSOLUTE = 2;
 
-    private final int mFlags;
+    private final int mControlType;
     private final int mMaxVolume;
 
     /**
@@ -40,7 +55,7 @@ public abstract class RemoteVolumeProvider {
      * @param maxVolume The maximum allowed volume.
      */
     public RemoteVolumeProvider(int volumeControl, int maxVolume) {
-        mFlags = volumeControl;
+        mControlType = volumeControl;
         mMaxVolume = maxVolume;
     }
 
@@ -52,12 +67,12 @@ public abstract class RemoteVolumeProvider {
     public abstract int onGetCurrentVolume();
 
     /**
-     * Get the flags that were set for this volume provider.
+     * Get the volume control type that this volume provider uses.
      *
-     * @return The flags for this volume provider
+     * @return The volume control type for this volume provider
      */
-    public final int getFlags() {
-        return mFlags;
+    public final int getVolumeControl() {
+        return mControlType;
     }
 
     /**

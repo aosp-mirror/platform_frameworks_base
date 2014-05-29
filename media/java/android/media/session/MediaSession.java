@@ -16,10 +16,12 @@
 
 package android.media.session;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionController;
 import android.media.session.ISession;
@@ -52,8 +54,10 @@ import java.util.List;
  * the owner of the session may use {@link #getSessionToken()} to allow apps to
  * create a {@link MediaController} to interact with this session.
  * <p>
- * To receive commands, media keys, and other events a Callback must be set with
- * {@link #addCallback(Callback)}.
+ * To receive commands, media keys, and other events a {@link Callback} must be
+ * set with {@link #addCallback(Callback)}. To receive transport control
+ * commands a {@link TransportControlsCallback} must be set with
+ * {@link #addTransportControlsCallback}.
  * <p>
  * When an app is finished performing playback it must call {@link #release()}
  * to clean up the session and notify any controllers.
@@ -70,9 +74,10 @@ public final class MediaSession {
     public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1 << 0;
 
     /**
-     * Set this flag on the session to indicate that it handles commands through
-     * the {@link TransportPerformer}. The performer can be retrieved by calling
-     * {@link #getTransportPerformer()}.
+     * Set this flag on the session to indicate that it handles transport
+     * control commands through a {@link TransportControlsCallback}. The
+     * callback can be retrieved by calling
+     * {@link #addTransportControlsCallback}.
      */
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
@@ -119,12 +124,6 @@ public final class MediaSession {
      */
     public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
 
-    private static final int MSG_MEDIA_BUTTON = 1;
-    private static final int MSG_COMMAND = 2;
-    private static final int MSG_ROUTE_CHANGE = 3;
-    private static final int MSG_ROUTE_CONNECTED = 4;
-    private static final int MSG_ROUTE_DISCONNECTED = 5;
-
     private static final String KEY_COMMAND = "command";
     private static final String KEY_EXTRAS = "extras";
     private static final String KEY_CALLBACK = "callback";
@@ -135,12 +134,14 @@ public final class MediaSession {
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
-    private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
+    private final ArrayList<CallbackMessageHandler> mCallbacks
+            = new ArrayList<CallbackMessageHandler>();
+    private final ArrayList<TransportMessageHandler> mTransportCallbacks
+            = new ArrayList<TransportMessageHandler>();
     // TODO route interfaces
     private final ArrayMap<String, RouteInterface.EventListener> mInterfaceListeners
             = new ArrayMap<String, RouteInterface.EventListener>();
 
-    private TransportPerformer mPerformer;
     private Route mRoute;
 
     private boolean mActive = false;;
@@ -158,7 +159,6 @@ public final class MediaSession {
             throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
         }
         mSessionToken = new MediaSessionToken(controllerBinder);
-        mPerformer = new TransportPerformer(mBinder);
     }
 
     /**
@@ -191,7 +191,8 @@ public final class MediaSession {
             if (handler == null) {
                 handler = new Handler();
             }
-            MessageHandler msgHandler = new MessageHandler(handler.getLooper(), callback);
+            CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
+                    callback);
             mCallbacks.add(msgHandler);
         }
     }
@@ -205,18 +206,6 @@ public final class MediaSession {
         synchronized (mLock) {
             removeCallbackLocked(callback);
         }
-    }
-
-    /**
-     * Retrieves the {@link TransportPerformer} for this session. To receive
-     * commands through the performer you must also set the
-     * {@link #FLAG_HANDLES_TRANSPORT_CONTROLS} flag using
-     * {@link #setFlags(int)}.
-     *
-     * @return The performer associated with this session.
-     */
-    public TransportPerformer getTransportPerformer() {
-        return mPerformer;
     }
 
     /**
@@ -430,12 +419,160 @@ public final class MediaSession {
         return true;
     }
 
-    private MessageHandler getHandlerForCallbackLocked(Callback cb) {
+    /**
+     * Add a callback to receive transport controls on, such as play, rewind, or
+     * fast forward.
+     *
+     * @param callback The callback object
+     */
+    public void addTransportControlsCallback(@NonNull TransportControlsCallback callback) {
+        addTransportControlsCallback(callback, null);
+    }
+
+    /**
+     * Add a callback to receive transport controls on, such as play, rewind, or
+     * fast forward. The updates will be posted to the specified handler. If no
+     * handler is provided they will be posted to the caller's thread.
+     *
+     * @param callback The callback to receive updates on
+     * @param handler The handler to post the updates on
+     */
+    public void addTransportControlsCallback(@NonNull TransportControlsCallback callback,
+            @Nullable Handler handler) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        synchronized (mLock) {
+            if (getTransportControlsHandlerForCallbackLocked(callback) != null) {
+                Log.w(TAG, "Callback is already added, ignoring");
+                return;
+            }
+            if (handler == null) {
+                handler = new Handler();
+            }
+            TransportMessageHandler msgHandler = new TransportMessageHandler(handler.getLooper(),
+                    callback);
+            mTransportCallbacks.add(msgHandler);
+        }
+    }
+
+    /**
+     * Stop receiving transport controls on the specified callback. If an update
+     * has already been posted you may still receive it after this call returns.
+     *
+     * @param callback The callback to stop receiving updates on
+     */
+    public void removeTransportControlsCallback(@NonNull TransportControlsCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        synchronized (mLock) {
+            removeTransportControlsCallbackLocked(callback);
+        }
+    }
+
+    /**
+     * Update the current playback state.
+     *
+     * @param state The current state of playback
+     */
+    public void setPlaybackState(PlaybackState state) {
+        try {
+            mBinder.setPlaybackState(state);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Dead object in setPlaybackState.", e);
+        }
+    }
+
+    /**
+     * Update the current metadata. New metadata can be created using
+     * {@link android.media.MediaMetadata.Builder}.
+     *
+     * @param metadata The new metadata
+     */
+    public void setMetadata(MediaMetadata metadata) {
+        try {
+            mBinder.setMetadata(metadata);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Dead object in setPlaybackState.", e);
+        }
+    }
+
+    private void dispatchPlay() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY);
+    }
+
+    private void dispatchPause() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_PAUSE);
+    }
+
+    private void dispatchStop() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_STOP);
+    }
+
+    private void dispatchNext() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_NEXT);
+    }
+
+    private void dispatchPrevious() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_PREVIOUS);
+    }
+
+    private void dispatchFastForward() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_FAST_FORWARD);
+    }
+
+    private void dispatchRewind() {
+        postToTransportCallbacks(TransportMessageHandler.MSG_REWIND);
+    }
+
+    private void dispatchSeekTo(long pos) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_SEEK_TO, pos);
+    }
+
+    private void dispatchRate(Rating rating) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_RATE, rating);
+    }
+
+    private TransportMessageHandler getTransportControlsHandlerForCallbackLocked(
+            TransportControlsCallback callback) {
+        for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
+            TransportMessageHandler handler = mTransportCallbacks.get(i);
+            if (callback == handler.mCallback) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    private boolean removeTransportControlsCallbackLocked(TransportControlsCallback callback) {
+        for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
+            if (callback == mTransportCallbacks.get(i).mCallback) {
+                mTransportCallbacks.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void postToTransportCallbacks(int what, Object obj) {
+        synchronized (mLock) {
+            for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
+                mTransportCallbacks.get(i).post(what, obj);
+            }
+        }
+    }
+
+    private void postToTransportCallbacks(int what) {
+        postToTransportCallbacks(what, null);
+    }
+
+    private CallbackMessageHandler getHandlerForCallbackLocked(Callback cb) {
         if (cb == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            MessageHandler handler = mCallbacks.get(i);
+            CallbackMessageHandler handler = mCallbacks.get(i);
             if (cb == handler.mCallback) {
                 return handler;
             }
@@ -448,7 +585,7 @@ public final class MediaSession {
             throw new IllegalArgumentException("Callback cannot be null");
         }
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            MessageHandler handler = mCallbacks.get(i);
+            CallbackMessageHandler handler = mCallbacks.get(i);
             if (cb == handler.mCallback) {
                 mCallbacks.remove(i);
                 return true;
@@ -461,7 +598,7 @@ public final class MediaSession {
         Command cmd = new Command(command, extras, resultCb);
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_COMMAND, cmd);
+                mCallbacks.get(i).post(CallbackMessageHandler.MSG_COMMAND, cmd);
             }
         }
     }
@@ -469,7 +606,7 @@ public final class MediaSession {
     private void postMediaButton(Intent mediaButtonIntent) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_MEDIA_BUTTON, mediaButtonIntent);
+                mCallbacks.get(i).post(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
             }
         }
     }
@@ -477,7 +614,7 @@ public final class MediaSession {
     private void postRequestRouteChange(RouteInfo route) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_ROUTE_CHANGE, route);
+                mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_CHANGE, route);
             }
         }
     }
@@ -486,7 +623,7 @@ public final class MediaSession {
         synchronized (mLock) {
             mRoute = new Route(route, options, this);
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_ROUTE_CONNECTED, mRoute);
+                mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_CONNECTED, mRoute);
             }
         }
     }
@@ -495,16 +632,16 @@ public final class MediaSession {
         synchronized (mLock) {
             if (mRoute != null && TextUtils.equals(mRoute.getRouteInfo().getId(), route.getId())) {
                 for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                    mCallbacks.get(i).post(MSG_ROUTE_DISCONNECTED, mRoute, reason);
+                    mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_DISCONNECTED, mRoute,
+                            reason);
                 }
             }
         }
     }
 
     /**
-     * Receives commands or updates from controllers and routes. An app can
-     * specify what commands and buttons it supports by setting them on the
-     * MediaSession.
+     * Receives generic commands or updates from controllers and the system.
+     * Callbacks may be registered using {@link #addCallback}.
      */
     public abstract static class Callback {
 
@@ -580,6 +717,82 @@ public final class MediaSession {
     }
 
     /**
+     * Receives transport control commands. Callbacks may be registered using
+     * {@link #addTransportControlsCallback}.
+     */
+    public static abstract class TransportControlsCallback {
+
+        /**
+         * Override to handle requests to begin playback.
+         */
+        public void onPlay() {
+        }
+
+        /**
+         * Override to handle requests to pause playback.
+         */
+        public void onPause() {
+        }
+
+        /**
+         * Override to handle requests to skip to the next media item.
+         */
+        public void onSkipToNext() {
+        }
+
+        /**
+         * Override to handle requests to skip to the previous media item.
+         */
+        public void onSkipToPrevious() {
+        }
+
+        /**
+         * Override to handle requests to fast forward.
+         */
+        public void onFastForward() {
+        }
+
+        /**
+         * Override to handle requests to rewind.
+         */
+        public void onRewind() {
+        }
+
+        /**
+         * Override to handle requests to stop playback.
+         */
+        public void onStop() {
+        }
+
+        /**
+         * Override to handle requests to seek to a specific position in ms.
+         *
+         * @param pos New position to move to, in milliseconds.
+         */
+        public void onSeekTo(long pos) {
+        }
+
+        /**
+         * Override to handle the item being rated.
+         *
+         * @param rating
+         */
+        public void onSetRating(Rating rating) {
+        }
+
+        /**
+         * Report that audio focus has changed on the app. This only happens if
+         * you have indicated you have started playing with
+         * {@link #setPlaybackState}.
+         *
+         * @param focusChange The type of focus change, TBD.
+         * @hide
+         */
+        public void onRouteFocusChange(int focusChange) {
+        }
+    }
+
+    /**
      * @hide
      */
     public static class CallbackStub extends ISessionCallback.Stub {
@@ -641,10 +854,7 @@ public final class MediaSession {
         public void onPlay() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchPlay();
-                }
+                session.dispatchPlay();
             }
         }
 
@@ -652,10 +862,7 @@ public final class MediaSession {
         public void onPause() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchPause();
-                }
+                session.dispatchPause();
             }
         }
 
@@ -663,10 +870,7 @@ public final class MediaSession {
         public void onStop() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchStop();
-                }
+                session.dispatchStop();
             }
         }
 
@@ -674,10 +878,7 @@ public final class MediaSession {
         public void onNext() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchNext();
-                }
+                session.dispatchNext();
             }
         }
 
@@ -685,10 +886,7 @@ public final class MediaSession {
         public void onPrevious() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchPrevious();
-                }
+                session.dispatchPrevious();
             }
         }
 
@@ -696,10 +894,7 @@ public final class MediaSession {
         public void onFastForward() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchFastForward();
-                }
+                session.dispatchFastForward();
             }
         }
 
@@ -707,10 +902,7 @@ public final class MediaSession {
         public void onRewind() throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchRewind();
-                }
+                session.dispatchRewind();
             }
         }
 
@@ -718,10 +910,7 @@ public final class MediaSession {
         public void onSeekTo(long pos) throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchSeekTo(pos);
-                }
+                session.dispatchSeekTo(pos);
             }
         }
 
@@ -729,10 +918,7 @@ public final class MediaSession {
         public void onRate(Rating rating) throws RemoteException {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                TransportPerformer tp = session.getTransportPerformer();
-                if (tp != null) {
-                    tp.dispatchRate(rating);
-                }
+                session.dispatchRate(rating);
             }
         }
 
@@ -758,10 +944,16 @@ public final class MediaSession {
 
     }
 
-    private class MessageHandler extends Handler {
+    private class CallbackMessageHandler extends Handler {
+        private static final int MSG_MEDIA_BUTTON = 1;
+        private static final int MSG_COMMAND = 2;
+        private static final int MSG_ROUTE_CHANGE = 3;
+        private static final int MSG_ROUTE_CONNECTED = 4;
+        private static final int MSG_ROUTE_DISCONNECTED = 5;
+
         private MediaSession.Callback mCallback;
 
-        public MessageHandler(Looper looper, MediaSession.Callback callback) {
+        public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
             super(looper, null, true);
             mCallback = callback;
         }
@@ -811,6 +1003,66 @@ public final class MediaSession {
             this.command = command;
             this.extras = extras;
             this.stub = stub;
+        }
+    }
+
+    private class TransportMessageHandler extends Handler {
+        private static final int MSG_PLAY = 1;
+        private static final int MSG_PAUSE = 2;
+        private static final int MSG_STOP = 3;
+        private static final int MSG_NEXT = 4;
+        private static final int MSG_PREVIOUS = 5;
+        private static final int MSG_FAST_FORWARD = 6;
+        private static final int MSG_REWIND = 7;
+        private static final int MSG_SEEK_TO = 8;
+        private static final int MSG_RATE = 9;
+
+        private TransportControlsCallback mCallback;
+
+        public TransportMessageHandler(Looper looper, TransportControlsCallback cb) {
+            super(looper);
+            mCallback = cb;
+        }
+
+        public void post(int what, Object obj) {
+            obtainMessage(what, obj).sendToTarget();
+        }
+
+        public void post(int what) {
+            post(what, null);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_PLAY:
+                    mCallback.onPlay();
+                    break;
+                case MSG_PAUSE:
+                    mCallback.onPause();
+                    break;
+                case MSG_STOP:
+                    mCallback.onStop();
+                    break;
+                case MSG_NEXT:
+                    mCallback.onSkipToNext();
+                    break;
+                case MSG_PREVIOUS:
+                    mCallback.onSkipToPrevious();
+                    break;
+                case MSG_FAST_FORWARD:
+                    mCallback.onFastForward();
+                    break;
+                case MSG_REWIND:
+                    mCallback.onRewind();
+                    break;
+                case MSG_SEEK_TO:
+                    mCallback.onSeekTo((Long) msg.obj);
+                    break;
+                case MSG_RATE:
+                    mCallback.onSetRating((Rating) msg.obj);
+                    break;
+            }
         }
     }
 }

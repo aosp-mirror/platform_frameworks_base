@@ -76,13 +76,13 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    public void addRccListener(PendingIntent pi, TransportPerformer.Callback listener) {
+    public void addRccListener(PendingIntent pi,
+            MediaSession.TransportControlsCallback listener) {
         if (pi == null) {
             Log.w(TAG, "Pending intent was null, can't add rcc listener.");
             return;
         }
         SessionHolder holder = getHolder(pi, true);
-        TransportPerformer performer = holder.mSession.getTransportPerformer();
         if (holder.mRccListener != null) {
             if (holder.mRccListener == listener) {
                 if (DEBUG) {
@@ -92,9 +92,9 @@ public class MediaSessionLegacyHelper {
                 return;
             }
             // Otherwise it changed so we need to switch to the new one
-            performer.removeCallback(holder.mRccListener);
+            holder.mSession.removeTransportControlsCallback(holder.mRccListener);
         }
-        performer.addCallback(listener, mHandler);
+        holder.mSession.addTransportControlsCallback(listener, mHandler);
         holder.mRccListener = listener;
         holder.mFlags |= MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
         holder.mSession.setFlags(holder.mFlags);
@@ -110,7 +110,7 @@ public class MediaSessionLegacyHelper {
         }
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mRccListener != null) {
-            holder.mSession.getTransportPerformer().removeCallback(holder.mRccListener);
+            holder.mSession.removeTransportControlsCallback(holder.mRccListener);
             holder.mRccListener = null;
             holder.mFlags &= ~MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
             holder.mSession.setFlags(holder.mFlags);
@@ -141,7 +141,7 @@ public class MediaSessionLegacyHelper {
         // set this flag
         holder.mFlags |= MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
         holder.mSession.setFlags(holder.mFlags);
-        holder.mSession.getTransportPerformer().addCallback(holder.mMediaButtonListener, mHandler);
+        holder.mSession.addTransportControlsCallback(holder.mMediaButtonListener, mHandler);
 
         holder.mMediaButtonReceiver = new MediaButtonReceiver(pi, context);
         holder.mSession.addCallback(holder.mMediaButtonReceiver, mHandler);
@@ -156,7 +156,7 @@ public class MediaSessionLegacyHelper {
         }
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mMediaButtonListener != null) {
-            holder.mSession.getTransportPerformer().removeCallback(holder.mMediaButtonListener);
+            holder.mSession.removeTransportControlsCallback(holder.mMediaButtonListener);
             holder.mFlags &= ~MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
             holder.mSession.setFlags(holder.mFlags);
             holder.mMediaButtonListener = null;
@@ -206,7 +206,7 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    private static final class MediaButtonListener extends TransportPerformer.Callback {
+    private static final class MediaButtonListener extends MediaSession.TransportControlsCallback {
         private final PendingIntent mPendingIntent;
         private final Context mContext;
 
@@ -272,7 +272,7 @@ public class MediaSessionLegacyHelper {
         public final PendingIntent mPi;
         public MediaButtonListener mMediaButtonListener;
         public MediaButtonReceiver mMediaButtonReceiver;
-        public TransportPerformer.Callback mRccListener;
+        public MediaSession.TransportControlsCallback mRccListener;
         public int mFlags;
 
         public SessionHolder(MediaSession session, PendingIntent pi) {

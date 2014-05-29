@@ -27,7 +27,6 @@ import android.graphics.RectF;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
-import android.media.session.TransportPerformer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -584,7 +583,7 @@ public class RemoteControlClient
 
                 // USE_SESSIONS
                 if (mSession != null && mMetadataBuilder != null) {
-                    mSession.getTransportPerformer().setMetadata(mMetadataBuilder.build());
+                    mSession.setMetadata(mMetadataBuilder.build());
                 }
                 mApplied = true;
             }
@@ -702,7 +701,7 @@ public class RemoteControlClient
                     mSessionPlaybackState.setState(pbState, hasPosition ?
                             mPlaybackPositionMs : PlaybackState.PLAYBACK_POSITION_UNKNOWN,
                             playbackSpeed);
-                    mSession.getTransportPerformer().setPlaybackState(mSessionPlaybackState);
+                    mSession.setPlaybackState(mSessionPlaybackState);
                 }
             }
         }
@@ -789,7 +788,7 @@ public class RemoteControlClient
             if (mSession != null) {
                 mSessionPlaybackState.setActions(PlaybackState
                         .getActionsFromRccControlFlags(transportControlFlags));
-                mSession.getTransportPerformer().setPlaybackState(mSessionPlaybackState);
+                mSession.setPlaybackState(mSessionPlaybackState);
             }
         }
     }
@@ -1317,7 +1316,8 @@ public class RemoteControlClient
     }
 
     // USE_SESSIONS
-    private TransportPerformer.Callback mTransportListener = new TransportPerformer.Callback() {
+    private MediaSession.TransportControlsCallback mTransportListener
+            = new MediaSession.TransportControlsCallback() {
 
         @Override
         public void onSeekTo(long pos) {
