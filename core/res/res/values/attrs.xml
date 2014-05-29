@@ -6144,6 +6144,11 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this trust agent. -->
         <attr name="settingsActivity" />
+        <!-- Title for a preference that allows that user to launch the
+             activity to modify trust agent settings. -->
+        <attr name="title" />
+        <!-- Summary for the same preference as the title. -->
+        <attr name="summary" />
     </declare-styleable>
 
     <!-- =============================== -->
