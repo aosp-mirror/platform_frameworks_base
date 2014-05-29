@@ -592,7 +592,7 @@ public class Toolbar extends ViewGroup {
      */
     public void setNavigationContentDescription(int resId) {
         ensureNavButtonView();
-        mNavButtonView.setContentDescription(getContext().getText(resId));
+        mNavButtonView.setContentDescription(resId != 0 ? getContext().getText(resId) : null);
     }
 
     /**
