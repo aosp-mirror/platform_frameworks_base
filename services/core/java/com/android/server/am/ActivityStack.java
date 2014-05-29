@@ -2331,7 +2331,7 @@ final class ActivityStack {
 
         if (callingUid > 0) {
             mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
-                    data, r.getUriPermissionsLocked());
+                    data, r.getUriPermissionsLocked(), r.userId);
         }
 
         if (DEBUG_RESULTS) Slog.v(TAG, "Send activity result to " + r
@@ -2514,10 +2514,13 @@ final class ActivityStack {
             if (DEBUG_RESULTS) Slog.v(TAG, "Adding result to " + resultTo
                     + " who=" + r.resultWho + " req=" + r.requestCode
                     + " res=" + resultCode + " data=" + resultData);
+            if (resultTo.userId != r.userId) {
+                resultData.prepareToLeaveUser(r.userId);
+            }
             if (r.info.applicationInfo.uid > 0) {
                 mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
                         resultTo.packageName, resultData,
-                        resultTo.getUriPermissionsLocked());
+                        resultTo.getUriPermissionsLocked(), resultTo.userId);
             }
             resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode,
                                      resultData);

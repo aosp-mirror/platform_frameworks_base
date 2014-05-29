@@ -308,7 +308,7 @@ public final class ActiveServices {
         }
         ServiceRecord r = res.record;
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
-                callingUid, r.packageName, service, service.getFlags(), null);
+                callingUid, r.packageName, service, service.getFlags(), null, r.userId);
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
             if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
         }
