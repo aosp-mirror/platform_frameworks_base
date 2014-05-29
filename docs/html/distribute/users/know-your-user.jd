@@ -15,13 +15,9 @@ page.tags="users, growth, global"
   when they use your app, and how often they return to it.
 </p>
 
-<div class="headerLine">
-  <h1 id="read-ratings-comments">
+  <h2 id="read-ratings-comments">
   Read Ratings Comments
-  </h1>
-
-  <hr>
-</div>
+  </h2>
 
 <p>
   The most obvious way to get to know your users is by reading review comments
@@ -46,11 +42,11 @@ page.tags="users, growth, global"
 </div>
 
 <div class="headerLine">
-  <h1 id="start-community">
+  <h2 id="start-community">
   Start a Community
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -68,11 +64,11 @@ page.tags="users, growth, global"
 </p>
 
 <div class="headerLine">
-  <h1 id="create-survey">
+  <h2 id="create-survey">
   Create a Survey
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -92,11 +88,11 @@ page.tags="users, growth, global"
 </p>
 
 <div class="headerLine">
-  <h1 id="add-analytics">
+  <h2 id="add-analytics">
   Add Analytics to your Apps
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -121,11 +117,11 @@ page.tags="users, growth, global"
 </div>
 
 <div class="headerLine">
-  <h1 id="use-google">
+  <h2 id="use-google">
   Use Google+
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -142,8 +138,8 @@ page.tags="users, growth, global"
   <img src="{@docRoot}images/gp-your-user-2.jpg">
 </div>
 
-<div class="headerLine clearfloat">
-<h1 id="related-resources">Related Resources</h1><hr>
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"

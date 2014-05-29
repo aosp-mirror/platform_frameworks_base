@@ -33,11 +33,11 @@ page.image=/distribute/images/getting-started.jpg
 </p>
 
 <div class="headerLine">
-  <h1>
+  <h2>
     Register for a Publisher Account
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="sidebox-wrapper" style="float:right;">
@@ -92,11 +92,11 @@ page.image=/distribute/images/getting-started.jpg
 </ol>
 
 <div class="headerLine">
-  <h1 id="merchant-account">
+  <h2 id="merchant-account">
     Set Up a Google Wallet Merchant Account
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure" style="width:200px;">
@@ -135,11 +135,11 @@ page.image=/distribute/images/getting-started.jpg
 </p>
 
 <div class="headerLine">
-  <h1>
+  <h2>
     Explore the Developer Console
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -153,7 +153,7 @@ page.image=/distribute/images/getting-started.jpg
 </div>
 
 <div class="headerLine">
-<h1 id="related-resources">Related Resources</h1><hr />
+<h2 id="related-resources">Related Resources</h2><hr />
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"

@@ -58,11 +58,11 @@ page.image=/distribute/images/about-play.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="ratings-reviews">
+  <h2 id="ratings-reviews">
     User Ratings and Reviews
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -83,11 +83,11 @@ page.image=/distribute/images/about-play.jpg
 </div>
 
 <div class="headerLine">
-  <h1 id="category-browsing">
+  <h2 id="category-browsing">
     Category Browsing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -98,11 +98,11 @@ page.image=/distribute/images/about-play.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="search">
+  <h2 id="search">
     Search
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -113,11 +113,11 @@ page.image=/distribute/images/about-play.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="top-charts-and-lists">
+  <h2 id="top-charts-and-lists">
     Top Charts and Lists
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -195,11 +195,11 @@ page.image=/distribute/images/about-play.jpg
 </table>
 
 <div class="headerLine">
-  <h1 id="featured-staff-picks">
+  <h2 id="featured-staff-picks">
     Featured, Staff Picks, Collections, and Badges
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -313,11 +313,11 @@ page.image=/distribute/images/about-play.jpg
 </p>
 
 <div class="headerLine">
-  <h1 id="product-detail-pages">
+  <h2 id="product-detail-pages">
     Store Listing Pages
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -357,8 +357,11 @@ page.image=/distribute/images/about-play.jpg
   Products</a> to find out how.
 </p>
 
-<div class="headerLine clearfloat">
-<h1>Related Resources</h1><hr>
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>Related Resources</h2>
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"

@@ -104,7 +104,7 @@ page.image=/distribute/images/advertising.png
   DoubleClick for Publishers Small Business</a>.
 </p>
 
-<div class="headerLine"><h1 id="related-resources">Related resources</h1><hr></div>
+<div class="headerLine"><h2 id="related-resources">Related resources</h2></div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/monetize/advertising"
