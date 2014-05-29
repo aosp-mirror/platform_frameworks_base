@@ -49,28 +49,6 @@ interface ITelephony {
     void call(String callingPackage, String number);
 
     /**
-     * If there is currently a call in progress, show the call screen.
-     * The DTMF dialpad may or may not be visible initially, depending on
-     * whether it was up when the user last exited the InCallScreen.
-     *
-     * @return true if the call screen was shown.
-     */
-    boolean showCallScreen();
-
-    /**
-     * Variation of showCallScreen() that also specifies whether the
-     * DTMF dialpad should be initially visible when the InCallScreen
-     * comes up.
-     *
-     * @param showDialpad if true, make the dialpad visible initially,
-     *                    otherwise hide the dialpad initially.
-     * @return true if the call screen was shown.
-     *
-     * @see showCallScreen
-     */
-    boolean showCallScreenWithDialpad(boolean showDialpad);
-
-    /**
      * End call if there is a call in progress, otherwise does nothing.
      *
      * @return whether it hung up

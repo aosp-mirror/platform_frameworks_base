@@ -43,7 +43,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.android.internal.R;
-import com.android.internal.telephony.ITelephony;
 import com.google.android.collect.Lists;
 
 import java.security.MessageDigest;
@@ -1360,19 +1359,11 @@ public class LockPatternUtils {
     /**
      * Resumes a call in progress. Typically launched from the EmergencyCall button
      * on various lockscreens.
-     *
-     * @return true if we were able to tell InCallScreen to show.
      */
-    public boolean resumeCall() {
-        ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-        try {
-            if (phone != null && phone.showCallScreen()) {
-                return true;
-            }
-        } catch (RemoteException e) {
-            // What can we do?
-        }
-        return false;
+    public void resumeCall() {
+        TelephonyManager telephonyManager =
+                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.showCallScreen();
     }
 
     private void finishBiometricWeak() {
