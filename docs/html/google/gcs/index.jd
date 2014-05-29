@@ -1,0 +1,30 @@
+page.title=Google Cloud Save
+page.tags="gcs"
+header.hide=1
+@jd:body
+
+
+<div class="landing-banner">
+
+<div class="col-5" style="min-height:100px">
+  <img src="{@docRoot}images/google/gcs.png" />
+</div>
+<div class="col-7">
+
+  <h1 itemprop="name" style="margin-bottom:0;">Google Cloud Save</h1>
+  <p itemprop="description">
+  Google Cloud Save is a service that enables per-user data storage
+and sync in your apps with no backend programming required. Google Cloud Save
+stores its data
+in <a href="http://developers.google.com/datastore/">Google Cloud Datastore</a>,
+ a fully managed, schemaless database for storing non-relational data. Cloud
+Datastore automatically scales with your users.
+Google Cloud Save works even when your device is offline, and it
+provides an easy transition to server-side coding because
+the same database is accessible via App Engine and Compute Engine.
+Finally, Google Cloud Save provides a generous initial per-user free quota that
+expands as your user base grows.
+</p>
+<a href="{@docRoot}google/gcs/gcs-signup.html" class="button">Sign Up</a>
+</div>
+</div>

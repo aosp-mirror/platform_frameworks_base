@@ -19,7 +19,11 @@ page.title=GCM Cloud Connection Server (XMPP)
         <li><a href="#response">Response format</a></li>
       </ol>
       </li>
-  <li><a href="#upstream">Upstream Messages</a> </li>
+  <li><a href="#upstream">Upstream Messages</a>
+    <ol>
+      <li><a href="#receipts">Receive return receipts</a></li>
+    </ol>
+  </li>
   <li><a href="#flow">Flow Control</a> </li>
   <li><a href="#implement">Implementing an XMPP-based App Server</a>
     <ol class="toc">
@@ -42,9 +46,6 @@ target="_android">CCS and User Notifications Signup Form</a></li>
 
 </div>
 </div>
-
-<p class="note"><strong>Note:</strong> To try out this feature, sign up using
-<a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
 
 <p>The GCM Cloud Connection Server (CCS) is an XMPP endpoint that provides a
 persistent, asynchronous, bidirectional connection to Google servers. The
@@ -149,8 +150,8 @@ exceptions:</p>
   <li>CCS adds the field {@code message_id}, which is required. This ID uniquely
 identifies the message in an XMPP connection. The ACK or NACK from CCS uses the
 {@code message_id} to identify a message sent from 3rd-party app servers to CCS.
-Therefore, it's important that this {@code message_id} not only be unique, but
-always present.</li>
+Therefore, it's important that this {@code message_id} not only be unique (per
+sender ID), but always present.</li>
 </ul>
 
 <p>In addition to regular GCM messages, control messages are sent, indicated by
@@ -188,7 +189,8 @@ parameters and which connection server(s) supports them.</p>
           &quot;hello&quot;:&quot;world&quot;,
       }
       &quot;time_to_live&quot;:&quot;600&quot;,
-      &quot;delay_while_idle&quot;: true/false
+      &quot;delay_while_idle&quot;: true/false,
+      &quot;delivery_receipt_requested&quot;: true/false
   }
   &lt;/gcm&gt;
 &lt;/message&gt;
@@ -227,42 +229,48 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <p>Below are some examples.</p>
 
 <p>Bad registration:</p>
+
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
   {
-    &quot;error&quot;:&quot;BAD_REGISTRATION&quot;,  // error code
+    &quot;message_type&quot;:&quot;nack&quot;,
     &quot;message_id&quot;:&quot;msgId1&quot;,
-    &quot;from&quot;:&quot;PA91bHFOtaQGSwupt5l1og&quot;,
-    &quot;message_type&quot;:&quot;nack&quot;
+    &quot;from&quot;:&quot;SomeInvalidRegistrationId&quot;,
+    &quot;error&quot;:&quot;BAD_REGISTRATION&quot;,
+    &quot;error_description&quot;:&quot;Invalid token on 'to' field: SomeInvalidRegistrationId&quot;
   }
-  &lt;/data:gcm&gt;
+  &lt;/gcm&gt;
 &lt;/message&gt;</pre>
 
-<p>Invalid "time to live":</p>
+<p>Invalid JSON:</p>
 
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
-  {
-     &quot;error&quot;:&quot;InvalidJson : INVALID_TTL : Invalid value (-1) for \&quot;time_to_live\&quot;: must be between 0 and \&quot;2419200\&quot;\n&quot;,
-     &quot;message_id&quot;:&quot;msgId1&quot;,
-     &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
-     &quot;message_type&quot;:&quot;nack&quot;
-  }
-  &lt;/data:gcm&gt;
-&lt;/message&gt;</pre>
+ &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+ {
+   &quot;message_type&quot;:&quot;nack&quot;,
+   &quot;message_id&quot;:&quot;msgId1&quot;,
+   &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
+   &quot;error&quot;:&quot;INVALID_JSON&quot;,
+   &quot;error_description&quot;:&quot;InvalidJson: JSON_TYPE_ERROR : Field \&quot;time_to_live\&quot; must be a JSON java.lang.Number: abc&quot;
+ }
+ &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
 
-<p>JSON type error:</p>
+<p>Quota exceeded:</p>
 
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
-  {
-     &quot;error&quot;:&quot;InvalidJson : JSON_TYPE_ERROR : Field \&quot;delay_while_idle\&quot; must be a JSON java.lang.Boolean: not-boolean-user-supplied-value\n&quot;,
-     &quot;message_id&quot;:&quot;msgId1&quot;,
-     &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
-     &quot;message_type&quot;:&quot;nack&quot;
-  }
-  &lt;/data:gcm&gt;
-&lt;/message&gt;</pre>
+ &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+ {
+   &quot;message_type&quot;:&quot;nack&quot;,
+   &quot;message_id&quot;:&quot;msgId1&quot;,
+   &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
+   &quot;error&quot;:&quot;QUOTA_EXCEEDED&quot;,
+   &quot;error_description&quot;:&quot;Short-term downstream quota exceeded for this registration id&quot;
+ }
+ &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
 
 
 <p>The following table lists NACK error codes. Unless otherwise
@@ -300,7 +308,7 @@ message should be immediately retried over another connection.</td>
 </tr>
 <tr>
 <td>{@code INVALID_JSON}</td>
-<td>The JSON message payload was not valid.</td>
+<td>The JSON message payload is not valid.</td>
 </tr>
 <tr>
 <td>{@code QUOTA_EXCEEDED}</td>
@@ -309,10 +317,10 @@ sender/device pair) is too high. If you want to retry the message, try using a s
 rate.</td>
 </tr>
 <tr>
-<td>{@code SERVICE_UNAVAILABLE}</td>
-<td>CCS is not currently able to process the message. The
-message should be retried over the same connection using exponential backoff
-with an initial delay of 1 second.</td>
+  <td>{@code SERVICE_UNAVAILABLE}</td>
+  <td>CCS is not currently able to process the message. The
+    message should be retried over the same connection using exponential backoff
+    with an initial delay of 1 second.</td>
 </tr>
 </table>
 
@@ -382,8 +390,8 @@ Bundle data = new Bundle();
 // Bundle data consists of a key-value pair
 data.putString("hello", "world");
 // "time to live" parameter
-// This is optional. It specifies a value in seconds up to 4 weeks.
-int ttl = [0 seconds, 4 weeks]
+// This is optional. It specifies a value in seconds up to 24 hours.
+int ttl = [0 seconds, 24 hours]
 
 gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
 </pre>
@@ -418,6 +426,69 @@ response to the above message:</p>
   }
   &lt;/gcm&gt;
 &lt;/message&gt;</pre>
+
+<h3 id="receipts">Receive return receipts</h3>
+
+<p>You can use upstream messaging to get receipt notifications, confirming
+that a given message was sent to a device. Your 3rd-party app server receives the receipt
+notification from CCS once the message has been sent to the device.</p>
+
+<p>To enable this feature, the message your 3rd-party app server sends to CCS must include
+a field called <code>&quot;delivery_receipt_requested&quot;</code>. When this field is set to
+<code>true</code>, CCS sends a return receipt. Here is an XMPP stanza containing a JSON
+message with <code>&quot;delivery_receipt_requested&quot;</code> set to <code>true</code>:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;to&quot;:&quot;REGISTRATION_ID&quot;,
+      &quot;message_id&quot;:&quot;m-1366082849205&quot;
+      &quot;data&quot;:
+      {
+          &quot;hello&quot;:&quot;world&quot;,
+      }
+      &quot;time_to_live&quot;:&quot;600&quot;,
+      &quot;delay_while_idle&quot;: true,
+      <strong>&quot;delivery_receipt_requested&quot;: true</strong>
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
+
+<p>Here is an example of a receipt notification message that CCS sends back to your 3rd-party
+app server:</p>
+
+</p>
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;category&quot;:&quot;com.example.yourapp&quot;, // to know which app sent it
+      &quot;data&quot;:
+      {
+         &#x201c;message_status&quot;:&quot;MESSAGE_SENT_TO_DEVICE&quot;,
+         &#x201c;original_message_id&#x201d;:&#x201d;m-1366082849205&#x201d;
+         &#x201c;device_registration_id&#x201d;: &#x201c;REGISTRATION_ID&#x201d;
+      },
+      &quot;message_id&quot;:&quot;dr2:m-1366082849205&quot;,
+      &quot;message_type&quot;:&quot;receipt&quot;,
+      &quot;from&quot;:&quot;gcm.googleapis.com&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>Note the following:</p>
+
+<ul>
+  <li>The {@code &quot;message_type&quot;} is set to {@code &quot;receipt&quot;}.
+  <li>The {@code &quot;message_status&quot;} is set to {@code &quot;MESSAGE_SENT_TO_DEVICE&quot;},
+  indicating that the message was delivered. Notice that in this case,
+{@code &quot;message_status&quot;} is not a field but rather part of the data payload.</li>
+  <li>The receipt message ID consists of the original message ID, but with a
+<code>dr:</code> prefix. Your 3rd-party app server must send an ACK back with this ID,
+which in this example is {@code dr2:m-1366082849205}.</li>
+  <li>The original message ID and status are inside the
+{@code &quot;data&quot;} field.</li>
+</ul>
 
 <h2 id="flow">Flow Control</h2>
 

@@ -14,8 +14,8 @@ page.title=User Notifications
 <h2>In this document</h2>
 
 <ol class="toc">
-  <li><a href="#request">Request Format</a></li>
-  <li><a href="#create">Generate a Notification Key</a></li>
+  <li><a href="#gen-server">Generate a Notification Key on the Server</a></li>
+  <li><a href="#gen-client">Generate a Notification Key on the Client</a></li>
   <li><a href="#add">Add Registration IDs</a></li>
   <li><a href="#remove">Remove Registration IDs</a></li>
   <li><a href="#upstream">Send Upstream Messages</a></li>
@@ -31,14 +31,10 @@ page.title=User Notifications
 
 <ol class="toc">
 <li><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></li>
-<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
 </div>
 </div>
-
-<p class="note"><strong>Note:</strong> To try out this feature, sign up using <a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
-
 
 <p>With user notifications, 3rd-party app servers can send a single message to
 multiple instance of an app running on devices owned by a single user. This feature
@@ -76,27 +72,23 @@ and then reconciling it with the corresponding notification.
 <p>You can use this feature with either the <a href="ccs.html">XMPP</a> (CCS) or
 <a href="http.html">HTTP</a> connection server.</p>
 
+<p>You can generate notification keys in two different ways: on the server, and on
+the client, if the user has a Google account. All of the associated registration IDs
+can be mapped to a single user.</p>
 
 <p>The examples below show you how to perform generate/add/remove operations,
 and how to send upstream messages. For generate/add/remove operations, the
 message body is JSON.</p>
 
-<h2 id="request">Request Format</h2>
-<p>To send a  message, the application server issues a POST request to
-<code>https://android.googleapis.com/gcm/notification</code>.</p>
+<h2 id="gen-server">Generate a Notification Key on the Server</h2>
 
-<p>Here is the HTTP request header you should use for all create/add/remove operations:</p>
-
-<pre>content-type: "application/json"
-Header : "project_id": &lt;projectID&gt;
-Header: "Authorization", "key=API_KEY"
-</pre>
-
-<h2 id="create">Generate a Notification Key</h2>
+<p>To generate a notification key on the server, you create a new
+create a new <code>notification_key</code> and map it to a
+<code>notification_key_name</code>.</p>
 
 <p>This example shows how to create a new <code>notification_key</code> for a
 <code>notification_key_name</code> called <code>appUser-Chris</code>.
-The {@code notification_key_name} is a name or identifier (can be a username for
+The {@code notification_key_name} is a name or identifier (it can be a username for
 a 3rd-party app) that is unique to a given user. It is used by third parties to
 group together registration IDs for a single user. Note that <code>notification_key_name</code>
 and <code>notification_key</code> are unique to a group of registration IDs. It is also
@@ -116,10 +108,109 @@ to use in subsequent operations:</p>
    &quot;registration_ids&quot;: [&quot;4&quot;, &quot;8&quot;, &quot;15&quot;, &quot;16&quot;, &quot;23&quot;, &quot;42&quot;]
 }</pre>
 
+<h3 id="request-server">Request format</h3>
+
+<p>To send a message in cases where your notification key is generated on the server,
+the application server issues a POST request to
+<code>https://android.googleapis.com/gcm/notification</code>.</p>
+
+<p>Here is the HTTP request header you should use for all server side create/add/remove operations:</p>
+
+<pre>content-type: "application/json"
+Header : "project_id": &lt;projectID&gt;
+Header: "Authorization", "key=API_KEY"
+</pre>
+
+
+<h2 id="gen-client">Generate a Notification Key on the Client</h2>
+
+<p>Generating a notification key on the client is useful for cases where a server is unavailable.
+To generate a notification key on the client, the device must have at least one
+Google account. Note that the process for generating a notification key on the client is significantly
+different from the server process described above.</p>
+
+<p>To generate a notification key on the client:</p>
+
+<ol>
+  <li>Open your project in the <a href="https://cloud.google.com/console">Google Developers Console</a>.</li>
+  <li>Click <strong>APIS &amp; AUTH &gt; Credentials</strong>.</li>
+  <li>Under OAuth, click <strong>Create new Client ID</strong>.</li>
+  <li>In the <strong>Create Client ID</strong> dialog, select <strong>Web Application</strong> as
+the application type, and click <strong>Create Client ID</strong>.</li>
+  <li>Copy the value from <strong>Client ID for web application &gt; Client ID</strong>.
+This client ID represents a Google account "scope" that you will use to generate an {@code id_token}.</li>
+</ol>
+
+<p>Once you've followed the above steps and gotten a client ID from Google Developers Console,
+ you're ready to add this feature to your app. First check the device for the presence of a Google
+account. For example:</p>
+
+<pre>// This snippet takes the simple approach of using the first returned Google account,
+// but you can pick any Google account on the device.
+public String getAccount() {
+    Account[] accounts = AccountManager.get(getActivity()).
+        getAccountsByType(&quot;com.google&quot;);
+    if (accounts.length == 0) {
+        return null;
+    }
+    return accounts[0].name;
+}</pre>
+
+<p>Next, get an authentication token ({@code id_token}) by using the <code><a href=
+"http://developer.android.com/reference/com/google/android/gms/auth/GoogleAuthUtil.html">GoogleAuthUtil</a></code>
+class. For example:</p>
+
+<pre>String accountName = getAccount();
+
+// Initialize the scope using the client ID you got from the Console.
+final String scope = &quot;audience:server:client_id:&quot;
+        + &quot;1262xxx48712-9qs6n32447mcj9dirtnkyrejt82saa52.apps.googleusercontent.com&quot;;
+String id_token = null;
+try {
+    id_token = GoogleAuthUtil.getToken(context, accountName, scope);
+} catch (Exception e) {
+    log(&quot;exception while getting id_token: &quot; + e);
+}
+...</pre>
+
+<p>Now use <code>id_token</code> to authenticate your request.
+This add operation returns a {@code notification_key}.
+Third parties must save this {@code notification_key} (as well as its mapping to the
+<code>notification_key_name</code>)
+to use in subsequent operations. Note that a client request only takes a single regID.
+The only operations supported on the client side are add/remove.</p>
+
+<pre>request:
+{
+   &quot;operation&quot;: &quot;add&quot;,
+   &quot;notification_key_name&quot;: &quot;appUser-Chris&quot;,
+   &quot;registration_ids&quot;: [&quot;4&quot;]
+   &quot;id_token&quot;: &quot;id_token&quot;
+}</pre>
+
+<h3 id="request-client">Request format</h3>
+
+<p>To send a message in cases where your notification key is generated on the client,
+the application server issues a POST request to
+<code>https://android.googleapis.com/gcm/googlenotification</code>.</p>
+
+<p>Here is the HTTP request header you should use for all add/remove operations. The
+client side doesn't support the create operation;
+the add operation has the effect of creating the notification key if it doesn't already
+exist:</p>
+
+<pre>content-type: "application/json"
+Header : "project_id": &lt;projectID&gt;
+</pre>
+
+<p>Note that the authentication token is passed in the JSON body as shown above, not the header.
+This is different from the server case.</p>
+
+
 <h2 id="add">Add Registration IDs</h2>
 
 <p>This example shows how to add registration IDs for a given notification key.
-The maximum number of members allowed for a {@code notification_key} is 10.</p>
+The maximum number of members allowed for a {@code notification_key} is 20.</p>
 
 <p>Note that the <code>notification_key_name</code> is not strictly required for
 adding/removing regIDs. But including it protects you against accidentally using

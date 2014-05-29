@@ -89,6 +89,16 @@ cloud messaging.</p>
     to use Google Cloud Messaging.</p>
 </div>
 
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/gcs-small.png" width="40" >
+  </div>
+    <h4><a href="{@docRoot}google/gcs/index.html"
+    >Google Cloud Save</a></h4>
+    <p>Enable per-user data storage and sync in your apps with no backend programming
+    required.</p>
+</div>
+
 </div><!-- col-6 -->
 
 
