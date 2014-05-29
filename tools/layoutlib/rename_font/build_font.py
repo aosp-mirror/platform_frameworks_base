@@ -15,10 +15,10 @@
 # limitations under the License.
 
 """
-Rename the PS name of all fonts in the input directory and copy them to the
+Rename the PS name of all fonts in the input directories and copy them to the
 output directory.
 
-Usage: build_font.py /path/to/input_fonts/ /path/to/output_fonts/
+Usage: build_font.py /path/to/input_fonts1/ /path/to/input_fonts2/ /path/to/output_fonts/
 
 """
 
@@ -32,48 +32,57 @@ import shutil
 import glob
 
 def main(argv):
-  if len(argv) != 2:
-    print "Usage: build_font.py /path/to/input_fonts/ /path/to/out/dir/"
-    sys.exit(1)
-  if not os.path.isdir(argv[0]):
-    print argv[0] + "is not a valid directory"
-    sys.exit(1)
-  if not os.path.isdir(argv[1]):
-    print argv[1] + "is not a valid directory"
-    sys.exit(1)
+  if len(argv) < 2:
+    sys.exit('Usage: build_font.py /path/to/input_fonts/ /path/to/out/dir/')
+  for dir in argv:
+    if not os.path.isdir(dir):
+      sys.exit(dir + ' is not a valid directory')
+  dest_dir = argv[-1]
+  src_dirs = argv[:-1]
   cwd = os.getcwd()
-  os.chdir(argv[1])
+  os.chdir(dest_dir)
   files = glob.glob('*')
   for filename in files:
     os.remove(filename)
   os.chdir(cwd)
-  for filename in os.listdir(argv[0]):
-    if not os.path.splitext(filename)[1].lower() == ".ttf":
-      shutil.copy(os.path.join(argv[0], filename), argv[1])
-      continue
-    print os.path.join(argv[0], filename)
-    old_ttf_path = os.path.join(argv[0], filename)
-    # run ttx to generate an xml file in the output folder which represents all
-    # its info
-    ttx_args = ["-d", argv[1], old_ttf_path]
-    ttx.main(ttx_args)
-    # the path to the output file. The file name is the fontfilename.ttx
-    ttx_path = os.path.join(argv[1], filename)
-    ttx_path = ttx_path[:-1] + "x"
-    # now parse the xml file to change its PS name.
-    tree = etree.parse(ttx_path)
-    encoding = tree.docinfo.encoding
-    root = tree.getroot()
-    for name in root.iter('name'):
-      [old_ps_name, version] = get_font_info(name)
-      new_ps_name = old_ps_name + version
-      update_name(name, new_ps_name)
-    tree.write(ttx_path, xml_declaration=True, encoding=encoding )
-    # generate the udpated font now.
-    ttx_args = ["-d", argv[1], ttx_path]
-    ttx.main(ttx_args)
-    # delete the temp ttx file.
-    os.remove(ttx_path)
+  for src_dir in src_dirs:
+    for filename in os.listdir(src_dir):
+      if os.path.isdir(os.path.join(src_dir, filename)):
+        continue
+      if not os.path.splitext(filename)[1].lower() == '.ttf':
+        shutil.copy(os.path.join(src_dir, filename), dest_dir)
+        continue
+      old_ttf_path = os.path.join(src_dir, filename)
+      # the path to the output file. The file name is the fontfilename.ttx
+      ttx_path = os.path.join(dest_dir, filename)
+      ttx_path = ttx_path[:-1] + 'x'
+      try:
+        # run ttx to generate an xml file in the output folder which represents all
+        # its info
+        ttx_args = ['-d', dest_dir, old_ttf_path]
+        ttx.main(ttx_args)
+        # now parse the xml file to change its PS name.
+        tree = etree.parse(ttx_path)
+        encoding = tree.docinfo.encoding
+        root = tree.getroot()
+        for name in root.iter('name'):
+          [old_ps_name, version] = get_font_info(name)
+          if old_ps_name is not None and version is not None:
+            new_ps_name = old_ps_name + version
+            update_name(name, new_ps_name)
+        tree.write(ttx_path, xml_declaration=True, encoding=encoding )
+        # generate the udpated font now.
+        ttx_args = ['-d', dest_dir, ttx_path]
+        ttx.main(ttx_args)
+      except Exception:
+        # Some fonts are too big to be handled by the ttx library.
+        # Just copy paste them.
+        shutil.copy(old_ttf_path, dest_dir)
+      try:
+        # delete the temp ttx file is it exists.
+        os.remove(ttx_path)
+      except OSError:
+        pass
 
 def get_font_info(tag):
   ps_name = None
@@ -95,9 +104,7 @@ def get_font_info(tag):
             sys.exit('found multiple possibilities of the font version')
         else:
           ps_version = get_version(namerecord.text)
-  if ps_name is not None and ps_version is not None:
-    return [ps_name, ps_version]
-  sys.exit('didn\'t find the font name or version')
+  return [ps_name, ps_version]
 
 
 def update_name(tag, name):
@@ -110,10 +117,10 @@ def sanitize(string):
   return re.sub(r'[^\w-]+', '', string)
 
 def get_version(string):
-  # The string must begin with "Version n.nn "
+  # The string must begin with 'Version n.nn '
   # to extract n.nn, we return the second entry in the split strings.
   string = string.strip()
-  if not string.startswith("Version "):
+  if not string.startswith('Version '):
     sys.exit('mal-formed font version')
   return sanitize(string.split()[1])
 
