@@ -34,6 +34,7 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -51,7 +52,7 @@ public class NotificationPanelView extends PanelView implements
     PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
-    private View mQsPanel;
+    private QSPanel mQsPanel;
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private View mStackScrollerContainer;
@@ -70,6 +71,7 @@ public class NotificationPanelView extends PanelView implements
      */
     private boolean mIntercepting;
     private boolean mQsExpanded;
+    private boolean mQsFullyExpanded;
     private boolean mKeyguardShowing;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
@@ -81,13 +83,14 @@ public class NotificationPanelView extends PanelView implements
     private int mQsMaxExpansionHeight;
     private int mMinStackHeight;
     private int mQsPeekHeight;
+    private int mQsHeaderPeekHeight;
+    private boolean mQsShowingDetail;
     private float mNotificationTranslation;
     private int mStackScrollerIntrinsicPadding;
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
-
     private Interpolator mFastOutSlowInInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
@@ -130,7 +133,8 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mStackScrollerContainer = findViewById(R.id.notification_container_parent);
         mQsContainer = findViewById(R.id.quick_settings_container);
-        mQsPanel = findViewById(R.id.quick_settings_panel);
+        mQsPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
+        mQsPanel.setCallback(mQsPanelCallback);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
         mNotificationStackScroller = (NotificationStackScrollLayout)
@@ -154,6 +158,7 @@ public class NotificationPanelView extends PanelView implements
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
         mQsPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_peek_height);
+        mQsHeaderPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_header_peek_height);
         mClockPositionAlgorithm.loadDimens(getResources());
     }
 
@@ -165,7 +170,9 @@ public class NotificationPanelView extends PanelView implements
         mQsMinExpansionHeight = mHeader.getCollapsedHeight() + mQsPeekHeight;
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
         if (mQsExpanded) {
-            setQsStackScrollerPadding(mQsMaxExpansionHeight);
+            if (mQsFullyExpanded) {
+                setQsStackScrollerPadding(mQsMaxExpansionHeight);
+            }
         } else {
             setQsExpansion(mQsMinExpansionHeight);
             positionClockAndNotifications();
@@ -518,10 +525,39 @@ public class NotificationPanelView extends PanelView implements
                 ? View.INVISIBLE
                 : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
+        if (mQsShowingDetail) {
+            if (mQsFullyExpanded) {
+                setQsHeaderPeeking(true);
+            }
+        } else {
+            setQsHeaderPeeking(false);
+        }
+    }
+
+    private void setQsHeaderPeeking(boolean peeking) {
+        final boolean stackIsPeeking = mStackScrollerContainer.getTranslationY() != 0;
+        final boolean headerIsPeeking = mHeader.getTranslationY() != 0;
+        final int ty = mQsHeaderPeekHeight - mHeader.getExpandedHeight();
+        if (peeking) {
+            if (!headerIsPeeking) {
+                mHeader.animate().translationY(ty);
+            }
+            if (!stackIsPeeking) {
+                mStackScrollerContainer.animate().translationY(ty);
+            }
+        } else {
+            if (headerIsPeeking) {
+                mHeader.animate().translationY(0);
+            }
+            if (stackIsPeeking) {
+                mStackScrollerContainer.animate().translationY(0);
+            }
+        }
     }
 
     private void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
+        mQsFullyExpanded = height == mQsMaxExpansionHeight;
         if (height > mQsMinExpansionHeight && !mQsExpanded) {
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
@@ -614,10 +650,16 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpansionEnabled) {
             return false;
         }
+        final float ty = mHeader.getTranslationY();
         boolean onHeader = x >= mHeader.getLeft() && x <= mHeader.getRight()
-                && y >= mHeader.getTop() && y <= mHeader.getBottom();
+                && y >= mHeader.getTop() + ty && y <= mHeader.getBottom() + ty;
         if (mQsExpanded) {
-            return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0);
+            if (mQsShowingDetail && onHeader) {
+                // bring back the header, crudely
+                setQsHeaderPeeking(false);
+                mQsPanel.setExpanded(false);
+            }
+            return !mQsShowingDetail && onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0);
         } else {
             return onHeader;
         }
@@ -781,4 +823,12 @@ public class NotificationPanelView extends PanelView implements
     public View getRightIcon() {
         return mKeyguardBottomArea.getCameraImageView();
     }
+
+    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+        @Override
+        public void onShowingDetail(boolean showingDetail) {
+            mQsShowingDetail = showingDetail;
+            updateQsState();
+        }
+    };
 }
