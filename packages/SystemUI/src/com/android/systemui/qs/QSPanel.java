@@ -47,8 +47,10 @@ public class QSPanel extends ViewGroup {
     private int mCellHeight;
     private int mLargeCellWidth;
     private int mLargeCellHeight;
+    private boolean mExpanded;
 
     private TileRecord mDetailRecord;
+    private Callback mCallback;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -64,6 +66,10 @@ public class QSPanel extends ViewGroup {
         addView(mDetail);
         mClipper = new CircularClipper(mDetail);
         updateResources();
+    }
+
+    public void setCallback(Callback callback) {
+        mCallback = callback;
     }
 
     public void updateResources() {
@@ -84,12 +90,14 @@ public class QSPanel extends ViewGroup {
     }
 
     public void setExpanded(boolean expanded) {
-        if (!expanded) {
+        if (mExpanded == expanded) return;
+        mExpanded = expanded;
+        if (!mExpanded) {
             showDetail(false /*show*/, mDetailRecord);
         }
         for (TileRecord r : mRecords) {
-            r.tile.setListening(expanded);
-            if (expanded) {
+            r.tile.setListening(mExpanded);
+            if (mExpanded) {
                 r.tile.refreshState();
             }
         }
@@ -156,6 +164,7 @@ public class QSPanel extends ViewGroup {
             if (mDetailRecord == null) return;
             listener = mTeardownDetailWhenDone;
         }
+        fireShowingDetail(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
         int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
         mClipper.animateCircularClip(x, y, show, listener);
@@ -239,6 +248,12 @@ public class QSPanel extends ViewGroup {
         return cols;
     }
 
+    private void fireShowingDetail(boolean showingDetail) {
+        if (mCallback != null) {
+            mCallback.onShowingDetail(showingDetail);
+        }
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
@@ -265,4 +280,8 @@ public class QSPanel extends ViewGroup {
             mDetailRecord = null;
         };
     };
+
+    public interface Callback {
+        void onShowingDetail(boolean showingDetail);
+    }
 }
