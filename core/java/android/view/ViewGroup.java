@@ -456,6 +456,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // views during a transition when they otherwise would have become gone/invisible
     private ArrayList<View> mVisibilityChangingChildren;
 
+    // Temporary holder of presorted children, only used for
+    // input/software draw dispatch for correctly Z ordering.
+    private ArrayList<View> mPreSortedChildren;
+
     // Indicates how many of this container's child subtrees contain transient state
     @ViewDebug.ExportedProperty(category = "layout")
     private int mChildCountWithTransientState = 0;
@@ -1499,13 +1503,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final float y = event.getY();
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
-                final boolean customChildOrder = isChildrenDrawingOrderEnabled();
+                final ArrayList<View> preorderedList = buildOrderedChildList();
+                final boolean customOrder = preorderedList == null
+                        && isChildrenDrawingOrderEnabled();
                 final View[] children = mChildren;
                 HoverTarget lastHoverTarget = null;
                 for (int i = childrenCount - 1; i >= 0; i--) {
-                    final int childIndex = customChildOrder
-                            ? getChildDrawingOrder(childrenCount, i) : i;
-                    final View child = children[childIndex];
+                    int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+                    final View child = (preorderedList == null)
+                            ? children[childIndex] : preorderedList.get(childIndex);
                     if (!canViewReceivePointerEvents(child)
                             || !isTransformedTouchPointInView(x, y, child, null)) {
                         continue;
@@ -1572,6 +1578,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         break;
                     }
                 }
+                if (preorderedList != null) preorderedList.clear();
             }
         }
 
@@ -1778,23 +1785,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Send the event to the child under the pointer.
         final int childrenCount = mChildrenCount;
         if (childrenCount != 0) {
-            final View[] children = mChildren;
             final float x = event.getX();
             final float y = event.getY();
 
-            final boolean customOrder = isChildrenDrawingOrderEnabled();
+            final ArrayList<View> preorderedList = buildOrderedChildList();
+            final boolean customOrder = preorderedList == null
+                    && isChildrenDrawingOrderEnabled();
+            final View[] children = mChildren;
             for (int i = childrenCount - 1; i >= 0; i--) {
-                final int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
-                final View child = children[childIndex];
+                int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+                final View child = (preorderedList == null)
+                        ? children[childIndex] : preorderedList.get(childIndex);
                 if (!canViewReceivePointerEvents(child)
                         || !isTransformedTouchPointInView(x, y, child, null)) {
                     continue;
                 }
 
                 if (dispatchTransformedGenericPointerEvent(event, child)) {
+                    if (preorderedList != null) preorderedList.clear();
                     return true;
                 }
             }
+            if (preorderedList != null) preorderedList.clear();
         }
 
         // No child handled the event.  Send it to this view group.
@@ -1910,13 +1922,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         final float y = ev.getY(actionIndex);
                         // Find a child that can receive the event.
                         // Scan children from front to back.
+                        final ArrayList<View> preorderedList = buildOrderedChildList();
+                        final boolean customOrder = preorderedList == null
+                                && isChildrenDrawingOrderEnabled();
                         final View[] children = mChildren;
-
-                        final boolean customOrder = isChildrenDrawingOrderEnabled();
                         for (int i = childrenCount - 1; i >= 0; i--) {
-                            final int childIndex = customOrder ?
-                                    getChildDrawingOrder(childrenCount, i) : i;
-                            final View child = children[childIndex];
+                            final int childIndex = customOrder
+                                    ? getChildDrawingOrder(childrenCount, i) : i;
+                            final View child = (preorderedList == null)
+                                    ? children[childIndex] : preorderedList.get(childIndex);
                             if (!canViewReceivePointerEvents(child)
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
                                 continue;
@@ -1934,7 +1948,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
                                 // Child wants to receive touch within its bounds.
                                 mLastTouchDownTime = ev.getDownTime();
-                                mLastTouchDownIndex = childIndex;
+                                if (preorderedList != null) {
+                                    // childIndex points into presorted list, find original index
+                                    for (int j = 0; j < childrenCount; j++) {
+                                        if (children[childIndex] == mChildren[j]) {
+                                            mLastTouchDownIndex = j;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    mLastTouchDownIndex = childIndex;
+                                }
                                 mLastTouchDownX = ev.getX();
                                 mLastTouchDownY = ev.getY();
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
@@ -1942,6 +1966,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 break;
                             }
                         }
+                        if (preorderedList != null) preorderedList.clear();
                     }
 
                     if (newTouchTarget == null && mFirstTouchTarget != null) {
@@ -2928,7 +2953,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        final int count = mChildrenCount;
+        final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         int flags = mGroupFlags;
 
@@ -2936,15 +2961,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
 
             final boolean buildCache = !isHardwareAccelerated();
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < childrenCount; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     final LayoutParams params = child.getLayoutParams();
-                    attachLayoutAnimationParameters(child, params, i, count);
+                    attachLayoutAnimationParameters(child, params, i, childrenCount);
                     bindLayoutAnimation(child);
                     if (cache) {
                         child.setDrawingCacheEnabled(true);
-                        if (buildCache) {                        
+                        if (buildCache) {
                             child.buildDrawingCache(true);
                         }
                     }
@@ -2997,21 +3022,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean more = false;
         final long drawingTime = getDrawingTime();
 
-        if ((flags & FLAG_USE_CHILD_DRAWING_ORDER) == 0) {
-            for (int i = 0; i < count; i++) {
-                final View child = children[i];
-                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
-                    more |= drawChild(canvas, child, drawingTime);
-                }
-            }
-        } else {
-            for (int i = 0; i < count; i++) {
-                final View child = children[getChildDrawingOrder(count, i)];
-                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
-                    more |= drawChild(canvas, child, drawingTime);
-                }
+
+        // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
+        // draw reordering internally
+        final ArrayList<View> preorderedList = canvas.isHardwareAccelerated()
+                ? null : buildOrderedChildList();
+        final boolean customOrder = preorderedList == null
+                && isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
+            int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+            final View child = (preorderedList == null)
+                    ? children[childIndex] : preorderedList.get(childIndex);
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
+                more |= drawChild(canvas, child, drawingTime);
             }
         }
+        if (preorderedList != null) preorderedList.clear();
 
         // Draw any disappearing views that have animations
         if (mDisappearingChildren != null) {
@@ -3094,6 +3120,47 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected int getChildDrawingOrder(int childCount, int i) {
         return i;
+    }
+
+    private boolean hasChildWithZ() {
+        for (int i = 0; i < mChildrenCount; i++) {
+            if (mChildren[i].getZ() != 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Populates (and returns) mPreSortedChildren with a pre-ordered list of the View's children,
+     * sorted first by Z, then by child drawing order (if applicable).
+     *
+     * Uses a stable, insertion sort which is commonly O(n) for ViewGroups with very few elevated
+     * children.
+     */
+    private ArrayList<View> buildOrderedChildList() {
+        final int count = mChildrenCount;
+        if (count <= 1 || !hasChildWithZ()) return null;
+
+        if (mPreSortedChildren == null) {
+            mPreSortedChildren = new ArrayList<View>(count);
+        } else {
+            mPreSortedChildren.ensureCapacity(count);
+        }
+
+        final boolean useCustomOrder = isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < mChildrenCount; i++) {
+            // add next child (in child order) to end of list
+            int childIndex = useCustomOrder ? getChildDrawingOrder(mChildrenCount, i) : i;
+            View nextChild = mChildren[childIndex];
+            float currentZ = nextChild.getZ();
+
+            // insert ahead of any Views with greater Z
+            int insertIndex = i;
+            while (insertIndex > 0 && mPreSortedChildren.get(insertIndex - 1).getZ() > currentZ) {
+                insertIndex--;
+            }
+            mPreSortedChildren.add(insertIndex, nextChild);
+        }
+        return mPreSortedChildren;
     }
 
     private void notifyAnimationListener() {

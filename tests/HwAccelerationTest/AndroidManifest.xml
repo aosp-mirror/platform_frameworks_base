@@ -902,5 +902,14 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+                android:name=".ZOrderingActivity"
+                android:label="Reordering/Z Ordering">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
