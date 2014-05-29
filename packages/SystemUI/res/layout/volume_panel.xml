@@ -24,6 +24,7 @@
         android:id="@+id/slider_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="64dip"
         android:layout_toLeftOf="@+id/expand_button_divider" />
 
     <ImageView

@@ -108,11 +108,7 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
 
     @Override
     protected void handleClick() {
-        if (mState.zen) {
-            mZenController.setZen(false);
-        } else {
-            showDetail(true);
-        }
+        showDetail(true);
     }
 
     @Override
