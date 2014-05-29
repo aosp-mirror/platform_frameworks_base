@@ -822,8 +822,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_ZSL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
      */
-    public static final Key<Integer> REQUEST_AVAILABLE_CAPABILITIES =
-            new Key<Integer>("android.request.availableCapabilities", int.class);
+    public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
+            new Key<int[]>("android.request.availableCapabilities", int[].class);
 
     /**
      * <p>A list of all keys that the camera device has available
