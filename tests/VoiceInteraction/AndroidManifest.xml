@@ -2,7 +2,8 @@
         package="com.android.test.voiceinteraction">
 
     <application>
-        <activity android:name="VoiceInteractionMain" android:label="Voice Interaction">
+        <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"
+                android:theme="@android:style/Theme.Quantum">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

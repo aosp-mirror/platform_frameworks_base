@@ -2290,7 +2290,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mWindowManager.addAppToken(0, r.appToken, taskId, stackId,
                         r.info.screenOrientation, r.fullscreen,
                         (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                        r.userId, r.info.configChanges);
+                        r.userId, r.info.configChanges, task.voiceSession != null);
             }
             mWindowManager.addTask(taskId, stackId, false);
         }

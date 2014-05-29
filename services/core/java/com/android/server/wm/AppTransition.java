@@ -24,9 +24,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.SystemProperties;
 import android.util.Slog;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -299,7 +297,7 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    Animation loadAnimation(WindowManager.LayoutParams lp, int animAttr) {
+    Animation loadAnimationAttr(WindowManager.LayoutParams lp, int animAttr) {
         int anim = 0;
         Context context = mContext;
         if (animAttr >= 0) {
@@ -315,7 +313,19 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    private Animation loadAnimation(String packageName, int resId) {
+    Animation loadAnimationRes(WindowManager.LayoutParams lp, int resId) {
+        Context context = mContext;
+        if (resId >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(lp);
+            if (ent != null) {
+                context = ent.context;
+            }
+            return AnimationUtils.loadAnimation(context, resId);
+        }
+        return null;
+    }
+
+    private Animation loadAnimationRes(String packageName, int resId) {
         int anim = 0;
         Context context = mContext;
         if (resId >= 0) {
@@ -695,11 +705,31 @@ public class AppTransition implements Dump {
 
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-                            int appWidth, int appHeight, int orientation,
-                            Rect containingFrame, Rect contentInsets, boolean isFullScreen) {
+            int appWidth, int appHeight, int orientation, Rect containingFrame, Rect contentInsets,
+            boolean isFullScreen, boolean isVoiceInteraction) {
         Animation a;
-        if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
-            a = loadAnimation(mNextAppTransitionPackage, enter ?
+        if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_TO_FRONT)) {
+            a = loadAnimationRes(lp, enter
+                    ? com.android.internal.R.anim.voice_activity_open_enter
+                    : com.android.internal.R.anim.voice_activity_open_exit);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "applyAnimation voice:"
+                    + " anim=" + a + " transit=" + transit + " isEntrance=" + enter
+                    + " Callers=" + Debug.getCallers(3));
+        } else if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_CLOSE
+                || transit == TRANSIT_TASK_CLOSE
+                || transit == TRANSIT_TASK_TO_BACK)) {
+            a = loadAnimationRes(lp, enter
+                    ? com.android.internal.R.anim.voice_activity_close_enter
+                    : com.android.internal.R.anim.voice_activity_close_exit);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "applyAnimation voice:"
+                    + " anim=" + a + " transit=" + transit + " isEntrance=" + enter
+                    + " Callers=" + Debug.getCallers(3));
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
+            a = loadAnimationRes(mNextAppTransitionPackage, enter ?
                     mNextAppTransitionEnter : mNextAppTransitionExit);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
@@ -782,7 +812,7 @@ public class AppTransition implements Dump {
                             : WindowAnimation_wallpaperIntraCloseExitAnimation;
                     break;
             }
-            a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
+            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr) : null;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a

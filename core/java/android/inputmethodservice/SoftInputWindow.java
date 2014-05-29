@@ -37,6 +37,8 @@ public class SoftInputWindow extends Dialog {
     final Callback mCallback;
     final KeyEvent.Callback mKeyEventCallback;
     final KeyEvent.DispatcherState mDispatcherState;
+    final int mWindowType;
+    final int mGravity;
     final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
 
@@ -64,12 +66,14 @@ public class SoftInputWindow extends Dialog {
      */
     public SoftInputWindow(Context context, String name, int theme, Callback callback,
             KeyEvent.Callback keyEventCallback, KeyEvent.DispatcherState dispatcherState,
-            boolean takesFocus) {
+            int windowType, int gravity, boolean takesFocus) {
         super(context, theme);
         mName = name;
         mCallback = callback;
         mKeyEventCallback = keyEventCallback;
         mDispatcherState = dispatcherState;
+        mWindowType = windowType;
+        mGravity = gravity;
         mTakesFocus = takesFocus;
         initDockWindow();
     }
@@ -97,47 +101,6 @@ public class SoftInputWindow extends Dialog {
     }
 
     /**
-     * Get the size of the DockWindow.
-     * 
-     * @return If the DockWindow sticks to the top or bottom of the screen, the
-     *         return value is the height of the DockWindow, and its width is
-     *         equal to the width of the screen; If the DockWindow sticks to the
-     *         left or right of the screen, the return value is the width of the
-     *         DockWindow, and its height is equal to the height of the screen.
-     */
-    public int getSize() {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
-            return lp.height;
-        } else {
-            return lp.width;
-        }
-    }
-
-    /**
-     * Set the size of the DockWindow.
-     * 
-     * @param size If the DockWindow sticks to the top or bottom of the screen,
-     *        <var>size</var> is the height of the DockWindow, and its width is
-     *        equal to the width of the screen; If the DockWindow sticks to the
-     *        left or right of the screen, <var>size</var> is the width of the
-     *        DockWindow, and its height is equal to the height of the screen.
-     */
-    public void setSize(int size) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
-            lp.width = -1;
-            lp.height = size;
-        } else {
-            lp.width = size;
-            lp.height = -1;
-        }
-        getWindow().setAttributes(lp);
-    }
-
-    /**
      * Set which boundary of the screen the DockWindow sticks to.
      * 
      * @param gravity The boundary of the screen to stick. See {#link
@@ -147,18 +110,18 @@ public class SoftInputWindow extends Dialog {
      */
     public void setGravity(int gravity) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        boolean oldIsVertical = (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM);
-
         lp.gravity = gravity;
+        updateWidthHeight(lp);
+        getWindow().setAttributes(lp);
+    }
 
-        boolean newIsVertical = (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM);
-
-        if (oldIsVertical != newIsVertical) {
-            int tmp = lp.width;
-            lp.width = lp.height;
-            lp.height = tmp;
-            getWindow().setAttributes(lp);
+    private void updateWidthHeight(WindowManager.LayoutParams lp) {
+        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        } else {
+            lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            lp.height = WindowManager.LayoutParams.MATCH_PARENT;
         }
     }
 
@@ -201,14 +164,11 @@ public class SoftInputWindow extends Dialog {
     private void initDockWindow() {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
 
-        lp.type = WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+        lp.type = mWindowType;
         lp.setTitle(mName);
 
-        lp.gravity = Gravity.BOTTOM;
-        lp.width = -1;
-        // Let the input method window's orientation follow sensor based rotation
-        // Turn this off for now, it is very problematic.
-        //lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
+        lp.gravity = mGravity;
+        updateWidthHeight(lp);
 
         getWindow().setAttributes(lp);
 
