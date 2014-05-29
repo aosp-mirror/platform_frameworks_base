@@ -17,11 +17,11 @@ page.tags="google play", "payments", "gift card"
 </p>
 
 <div class="headerLine">
-  <h1 id="dcb">
+  <h2 id="dcb">
   Direct Carrier Billing
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <p>
@@ -33,10 +33,10 @@ page.tags="google play", "payments", "gift card"
 </p>
 
 <div class="headerLine">
-  <h1 id="credit">
+  <h2 id="credit">
   Credit Cards
-  </h1>
-  <hr>
+  </h2>
+
 </div>
 
 <p>
@@ -47,12 +47,12 @@ page.tags="google play", "payments", "gift card"
   setup process.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="gift-cards">
+<div class="headerLine">
+  <h2 id="gift-cards">
   Google Play Gift Cards
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -67,12 +67,14 @@ page.tags="google play", "payments", "gift card"
   "_android">here</a>.
 </p>
 
-<div class="headerLine clearfloat">
-  <h1 id="balance">
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2 id="balance">
   Google Play Balance
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <div class="figure">
@@ -94,7 +96,9 @@ page.tags="google play", "payments", "gift card"
   network, and other factors.
 </p>
  
-<div class="headerLine clearfloat"><h1 id="related-resources">Related Resources</h1><hr></div>
+<p style="clear:both">
+</p>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/monetize/paymentmethods"

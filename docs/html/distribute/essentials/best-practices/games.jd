@@ -20,11 +20,11 @@ page.metaDescription=Essential tips for launching successful games in Google Pla
 </p>
 
 <div class="headerLine">
-  <h1 id="users">
+  <h2 id="users">
   Get Users
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <h3>
@@ -111,11 +111,11 @@ page.metaDescription=Essential tips for launching successful games in Google Pla
 </ul>
 
 <div class="headerLine">
-  <h1 id="engage">
+  <h2 id="engage">
   Engage and Retain
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <h3>
@@ -213,11 +213,11 @@ page.metaDescription=Essential tips for launching successful games in Google Pla
 </ul>
 
 <div class="headerLine">
-  <h1 id="beyond">
+  <h2 id="beyond">
   Beyond the Basics
-  </h1>
+  </h2>
 
-  <hr>
+
 </div>
 
 <ul>
@@ -249,7 +249,7 @@ page.metaDescription=Essential tips for launching successful games in Google Pla
 </ul>
 
 <div class="headerLine">
-<h1 id="related-resources">Related Resources</h1><hr>
+<h2 id="related-resources">Related Resources</h2>
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"
