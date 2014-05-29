@@ -18,11 +18,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +34,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * This ActivityTransitionCoordinator is created by the Activity to manage
@@ -56,6 +51,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private Handler mHandler;
     private boolean mIsCanceled;
     private ObjectAnimator mBackgroundAnimator;
+    private boolean mIsExitTransitionComplete;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames,
@@ -76,6 +72,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             };
             mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+            Bundle state = captureSharedElementState();
+            mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
         }
     }
 
@@ -98,9 +96,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 break;
             case MSG_EXIT_TRANSITION_COMPLETE:
                 if (!mIsCanceled) {
-                    if (!mSharedElementTransitionStarted) {
-                        send(resultCode, resultData);
-                    } else {
+                    mIsExitTransitionComplete = true;
+                    if (mSharedElementTransitionStarted) {
                         onRemoteExitTransitionComplete();
                     }
                 }
@@ -183,6 +180,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         setViewVisibility(mSharedElements, View.VISIBLE);
         ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageViewState =
                 setSharedElementState(sharedElementState, sharedElementSnapshots);
+        requestLayoutForSharedElements();
 
         boolean startEnterTransition = allowOverlappingTransitions();
         boolean startSharedElementTransition = true;
@@ -200,6 +198,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         mResultReceiver = null; // all done sending messages.
     }
 
+    private void requestLayoutForSharedElements() {
+        int numSharedElements = mSharedElements.size();
+        for (int i = 0; i < numSharedElements; i++) {
+            mSharedElements.get(i).requestLayout();
+        }
+    }
+
     private Transition beginTransition(boolean startEnterTransition,
             boolean startSharedElementTransition) {
         Transition sharedElementTransition = null;
@@ -213,6 +218,19 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
+        if (startSharedElementTransition) {
+            if (transition == null) {
+                sharedElementTransitionStarted();
+            } else {
+                transition.addListener(new Transition.TransitionListenerAdapter() {
+                    @Override
+                    public void onTransitionStart(Transition transition) {
+                        transition.removeListener(this);
+                        sharedElementTransitionStarted();
+                    }
+                });
+            }
+        }
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
             if (startSharedElementTransition && !mSharedElementNames.isEmpty()) {
@@ -222,6 +240,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         }
         return transition;
+    }
+
+    private void sharedElementTransitionStarted() {
+        mSharedElementTransitionStarted = true;
+        if (mIsExitTransitionComplete) {
+            send(MSG_EXIT_TRANSITION_COMPLETE, null);
+        }
     }
 
     private void startEnterTransition(Transition transition) {
@@ -310,142 +335,4 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             startEnterTransition(transition);
         }
     }
-
-    private ArrayList<View> createSnapshots(Bundle state, Collection<String> names) {
-        int numSharedElements = names.size();
-        if (numSharedElements == 0) {
-            return null;
-        }
-        ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
-        Context context = getWindow().getContext();
-        int[] parentLoc = new int[2];
-        getDecor().getLocationOnScreen(parentLoc);
-        for (String name: names) {
-            Bundle sharedElementBundle = state.getBundle(name);
-            if (sharedElementBundle != null) {
-                Bitmap bitmap = sharedElementBundle.getParcelable(KEY_BITMAP);
-                View snapshot = new View(context);
-                Resources resources = getWindow().getContext().getResources();
-                snapshot.setBackground(new BitmapDrawable(resources, bitmap));
-                snapshot.setViewName(name);
-                setSharedElementState(snapshot, name, state, parentLoc);
-                snapshots.add(snapshot);
-            }
-        }
-        return snapshots;
-    }
-
-    private static void setSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] parentLoc) {
-        Bundle sharedElementBundle = transitionArgs.getBundle(name);
-        if (sharedElementBundle == null) {
-            return;
-        }
-
-        if (view instanceof ImageView) {
-            int scaleTypeInt = sharedElementBundle.getInt(KEY_SCALE_TYPE, -1);
-            if (scaleTypeInt >= 0) {
-                ImageView imageView = (ImageView) view;
-                ImageView.ScaleType scaleType = SCALE_TYPE_VALUES[scaleTypeInt];
-                imageView.setScaleType(scaleType);
-                if (scaleType == ImageView.ScaleType.MATRIX) {
-                    float[] matrixValues = sharedElementBundle.getFloatArray(KEY_IMAGE_MATRIX);
-                    Matrix matrix = new Matrix();
-                    matrix.setValues(matrixValues);
-                    imageView.setImageMatrix(matrix);
-                }
-            }
-        }
-
-        float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
-        view.setTranslationZ(z);
-
-        int x = sharedElementBundle.getInt(KEY_SCREEN_X);
-        int y = sharedElementBundle.getInt(KEY_SCREEN_Y);
-        int width = sharedElementBundle.getInt(KEY_WIDTH);
-        int height = sharedElementBundle.getInt(KEY_HEIGHT);
-
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-        int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
-        view.measure(widthSpec, heightSpec);
-
-        int left = x - parentLoc[0];
-        int top = y - parentLoc[1];
-        int right = left + width;
-        int bottom = top + height;
-        view.layout(left, top, right, bottom);
-    }
-
-    private ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> setSharedElementState(
-            Bundle sharedElementState, final ArrayList<View> snapshots) {
-        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageState =
-                new ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>>();
-        if (sharedElementState != null) {
-            int[] tempLoc = new int[2];
-            for (int i = 0; i < mSharedElementNames.size(); i++) {
-                View sharedElement = mSharedElements.get(i);
-                String name = mSharedElementNames.get(i);
-                Pair<ImageView.ScaleType, Matrix> originalState = getOldImageState(sharedElement,
-                        name, sharedElementState);
-                if (originalState != null) {
-                    originalImageState.put((ImageView) sharedElement, originalState);
-                }
-                View parent = (View) sharedElement.getParent();
-                parent.getLocationOnScreen(tempLoc);
-                setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
-                sharedElement.requestLayout();
-            }
-        }
-        mListener.setSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
-
-        getDecor().getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
-                        mListener.setSharedElementEnd(mSharedElementNames, mSharedElements,
-                                snapshots);
-                        mSharedElementTransitionStarted = true;
-                        return true;
-                    }
-                }
-        );
-        return originalImageState;
-    }
-
-    private static Pair<ImageView.ScaleType, Matrix> getOldImageState(View view, String name,
-            Bundle transitionArgs) {
-        if (!(view instanceof ImageView)) {
-            return null;
-        }
-        Bundle bundle = transitionArgs.getBundle(name);
-        if (bundle == null) {
-            return null;
-        }
-        int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
-        if (scaleTypeInt < 0) {
-            return null;
-        }
-
-        ImageView imageView = (ImageView) view;
-        ImageView.ScaleType originalScaleType = imageView.getScaleType();
-
-        Matrix originalMatrix = null;
-        if (originalScaleType == ImageView.ScaleType.MATRIX) {
-            originalMatrix = new Matrix(imageView.getImageMatrix());
-        }
-
-        return Pair.create(originalScaleType, originalMatrix);
-    }
-
-    private static void setOriginalImageViewState(
-            ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalState) {
-        for (int i = 0; i < originalState.size(); i++) {
-            ImageView imageView = originalState.keyAt(i);
-            Pair<ImageView.ScaleType, Matrix> state = originalState.valueAt(i);
-            imageView.setScaleType(state.first);
-            imageView.setImageMatrix(state.second);
-        }
-    }
-
 }
