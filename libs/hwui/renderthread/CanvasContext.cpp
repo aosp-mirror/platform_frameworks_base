@@ -485,6 +485,8 @@ void CanvasContext::draw(Rect* dirty) {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
 
+    profiler().markPlaybackStart();
+
     EGLint width, height;
     mGlobalContext->beginFrame(mEglSurface, &width, &height);
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
@@ -492,6 +494,8 @@ void CanvasContext::draw(Rect* dirty) {
         dirty = NULL;
     } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
         dirty = NULL;
+    } else {
+        profiler().unionDirty(dirty);
     }
 
     status_t status;
@@ -505,14 +509,17 @@ void CanvasContext::draw(Rect* dirty) {
     Rect outBounds;
     status |= mCanvas->drawDisplayList(mRootRenderNode.get(), outBounds);
 
-    // TODO: Draw debug info
-    // TODO: Performance tracking
+    profiler().draw(mCanvas);
 
     mCanvas->finish();
+
+    profiler().markPlaybackEnd();
 
     if (status & DrawGlInfo::kStatusDrew) {
         swapBuffers();
     }
+
+    profiler().finishFrame();
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -522,6 +529,8 @@ void CanvasContext::doFrame() {
     }
 
     ATRACE_CALL();
+
+    profiler().startFrame();
 
     TreeInfo info;
     info.evaluateAnimations = true;

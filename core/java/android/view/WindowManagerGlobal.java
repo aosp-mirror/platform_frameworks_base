@@ -430,7 +430,7 @@ public final class WindowManagerGlobal {
                     HardwareRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
-                        renderer.dumpGfxInfo(pw);
+                        renderer.dumpGfxInfo(pw, fd);
                     }
                 }
 
@@ -447,11 +447,6 @@ public final class WindowManagerGlobal {
                     String name = getWindowName(root);
                     pw.printf("  %s\n  %d views, %.2f kB of display lists",
                             name, info[0], info[1] / 1024.0f);
-                    HardwareRenderer renderer =
-                            root.getView().mAttachInfo.mHardwareRenderer;
-                    if (renderer != null) {
-                        pw.printf(", %d frames rendered", renderer.getFrameCount());
-                    }
                     pw.printf("\n\n");
 
                     viewsCount += info[0];
