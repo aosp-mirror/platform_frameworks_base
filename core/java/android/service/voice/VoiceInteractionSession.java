@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.SoftInputWindow;
 import android.os.Binder;
@@ -32,6 +33,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -262,14 +264,14 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      */
     public static final class Insets {
         /**
-         * This is the top part of the UI that is the main content.  It is
+         * This is the part of the UI that is the main content.  It is
          * used to determine the basic space needed, to resize/pan the
          * application behind.  It is assumed that this inset does not
          * change very much, since any change will cause a full resize/pan
          * of the application behind.  This value is relative to the top edge
          * of the input method window.
          */
-        public int contentTopInsets;
+        public final Rect contentInsets = new Rect();
 
         /**
          * This is the region of the UI that is touchable.  It is used when
@@ -311,7 +313,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             new ViewTreeObserver.OnComputeInternalInsetsListener() {
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
             onComputeInsets(mTmpInsets);
-            info.contentInsets.top = info.visibleInsets.top = mTmpInsets.contentTopInsets;
+            info.contentInsets.set(mTmpInsets.contentInsets);
+            info.visibleInsets.set(mTmpInsets.contentInsets);
             info.touchableRegion.set(mTmpInsets.touchableRegion);
             info.setTouchableInsets(mTmpInsets.touchableInsets);
         }
@@ -428,6 +431,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
+            intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess();
             int res = mSystemService.startVoiceActivity(mToken, intent,
                     intent.resolveType(mContext.getContentResolver()));
             Instrumentation.checkStartActivityResult(res, intent);
@@ -460,7 +465,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mInflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
-                mCallbacks, this, mDispatcherState, true);
+                mCallbacks, this, mDispatcherState,
+                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.TOP, true);
         mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
@@ -517,7 +523,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         int[] loc = mTmpLocation;
         View decor = getWindow().getWindow().getDecorView();
         decor.getLocationInWindow(loc);
-        outInsets.contentTopInsets = loc[1];
+        outInsets.contentInsets.top = 0;
+        outInsets.contentInsets.left = 0;
+        outInsets.contentInsets.right = 0;
+        outInsets.contentInsets.bottom = 0;
         outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_FRAME;
         outInsets.touchableRegion.setEmpty();
     }

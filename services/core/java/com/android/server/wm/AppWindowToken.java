@@ -50,6 +50,8 @@ class AppWindowToken extends WindowToken {
 
     final WindowAnimator mAnimator;
 
+    final boolean voiceInteraction;
+
     int groupId = -1;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -107,11 +109,13 @@ class AppWindowToken extends WindowToken {
 
     boolean mDeferRemoval;
 
-    AppWindowToken(WindowManagerService _service, IApplicationToken _token) {
+    AppWindowToken(WindowManagerService _service, IApplicationToken _token,
+            boolean _voiceInteraction) {
         super(_service, _token.asBinder(),
                 WindowManager.LayoutParams.TYPE_APPLICATION, true);
         appWindowToken = this;
         appToken = _token;
+        voiceInteraction = _voiceInteraction;
         mInputApplicationHandle = new InputApplicationHandle(this);
         mAnimator = service.mAnimator;
         mAppAnimator = new AppWindowAnimator(this);
@@ -249,7 +253,7 @@ class AppWindowToken extends WindowToken {
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {
-            pw.print(prefix); pw.println("app=true");
+            pw.print(prefix); pw.print("app=true voiceInteraction="); pw.println(voiceInteraction);
         }
         if (allAppWindows.size() > 0) {
             pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);

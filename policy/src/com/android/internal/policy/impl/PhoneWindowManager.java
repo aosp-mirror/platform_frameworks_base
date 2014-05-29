@@ -355,6 +355,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // the same as mCur*, but may be larger if the screen decor has supplied
     // content insets.
     int mContentLeft, mContentTop, mContentRight, mContentBottom;
+    // During layout, the frame in which voice content should be displayed
+    // to the user, accounting for all screen decoration except for any
+    // space they deem as available for other content.
+    int mVoiceContentLeft, mVoiceContentTop, mVoiceContentRight, mVoiceContentBottom;
     // During layout, the current screen borders along which input method
     // windows are placed.
     int mDockLeft, mDockTop, mDockRight, mDockBottom;
@@ -1266,6 +1270,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_INPUT_METHOD:
             case TYPE_WALLPAPER:
             case TYPE_PRIVATE_PRESENTATION:
+            case TYPE_VOICE_INTERACTION:
                 // The window manager will check these.
                 break;
             case TYPE_PHONE:
@@ -1432,74 +1437,77 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 3;
         case TYPE_SEARCH_BAR:
             return 4;
+        case TYPE_VOICE_INTERACTION:
+            // voice interaction layer is almost immediately above apps.
+            return 5;
         case TYPE_RECENTS_OVERLAY:
         case TYPE_SYSTEM_DIALOG:
-            return 5;
+            return 6;
         case TYPE_TOAST:
             // toasts and the plugged-in battery thing
-            return 6;
+            return 7;
         case TYPE_PRIORITY_PHONE:
             // SIM errors and unlock.  Not sure if this really should be in a high layer.
-            return 7;
+            return 8;
         case TYPE_DREAM:
             // used for Dreams (screensavers with TYPE_DREAM windows)
-            return 8;
+            return 9;
         case TYPE_SYSTEM_ALERT:
             // like the ANR / app crashed dialogs
-            return 9;
+            return 10;
         case TYPE_INPUT_METHOD:
             // on-screen keyboards and other such input method user interfaces go here.
-            return 10;
+            return 11;
         case TYPE_INPUT_METHOD_DIALOG:
             // on-screen keyboards and other such input method user interfaces go here.
-            return 11;
+            return 12;
         case TYPE_KEYGUARD_SCRIM:
             // the safety window that shows behind keyguard while keyguard is starting
-            return 12;
-        case TYPE_STATUS_BAR_SUB_PANEL:
             return 13;
-        case TYPE_STATUS_BAR:
+        case TYPE_STATUS_BAR_SUB_PANEL:
             return 14;
-        case TYPE_STATUS_BAR_PANEL:
+        case TYPE_STATUS_BAR:
             return 15;
-        case TYPE_KEYGUARD_DIALOG:
+        case TYPE_STATUS_BAR_PANEL:
             return 16;
+        case TYPE_KEYGUARD_DIALOG:
+            return 17;
         case TYPE_VOLUME_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 17;
+            return 18;
         case TYPE_SYSTEM_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 18;
+            return 19;
         case TYPE_NAVIGATION_BAR:
             // the navigation bar, if available, shows atop most things
-            return 19;
+            return 20;
         case TYPE_NAVIGATION_BAR_PANEL:
             // some panels (e.g. search) need to show on top of the navigation bar
-            return 20;
+            return 21;
         case TYPE_SYSTEM_ERROR:
             // system-level error dialogs
-            return 21;
+            return 22;
         case TYPE_MAGNIFICATION_OVERLAY:
             // used to highlight the magnified portion of a display
-            return 22;
+            return 23;
         case TYPE_DISPLAY_OVERLAY:
             // used to simulate secondary display devices
-            return 23;
+            return 24;
         case TYPE_DRAG:
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
-            return 24;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 25;
-        case TYPE_BOOT_PROGRESS:
+        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 26;
+        case TYPE_BOOT_PROGRESS:
+            return 27;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 27;
-        case TYPE_HIDDEN_NAV_CONSUMER:
             return 28;
+        case TYPE_HIDDEN_NAV_CONSUMER:
+            return 29;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return 2;
@@ -2711,13 +2719,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mRestrictedScreenTop = mUnrestrictedScreenTop;
         mRestrictedScreenWidth = mSystemGestures.screenWidth = mUnrestrictedScreenWidth;
         mRestrictedScreenHeight = mSystemGestures.screenHeight = mUnrestrictedScreenHeight;
-        mDockLeft = mContentLeft = mStableLeft = mStableFullscreenLeft
+        mDockLeft = mContentLeft = mVoiceContentLeft = mStableLeft = mStableFullscreenLeft
                 = mCurLeft = mUnrestrictedScreenLeft;
-        mDockTop = mContentTop = mStableTop = mStableFullscreenTop
+        mDockTop = mContentTop = mVoiceContentTop = mStableTop = mStableFullscreenTop
                 = mCurTop = mUnrestrictedScreenTop;
-        mDockRight = mContentRight = mStableRight = mStableFullscreenRight
+        mDockRight = mContentRight = mVoiceContentRight = mStableRight = mStableFullscreenRight
                 = mCurRight = displayWidth - overscanRight;
-        mDockBottom = mContentBottom = mStableBottom = mStableFullscreenBottom
+        mDockBottom = mContentBottom = mVoiceContentBottom = mStableBottom = mStableFullscreenBottom
                 = mCurBottom = displayHeight - overscanBottom;
         mDockLayer = 0x10000000;
         mStatusBarLayer = -1;
@@ -2828,10 +2836,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 // Make sure the content and current rectangles are updated to
                 // account for the restrictions from the navigation bar.
-                mContentTop = mCurTop = mDockTop;
-                mContentBottom = mCurBottom = mDockBottom;
-                mContentLeft = mCurLeft = mDockLeft;
-                mContentRight = mCurRight = mDockRight;
+                mContentTop = mVoiceContentTop = mCurTop = mDockTop;
+                mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
+                mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
+                mContentRight = mVoiceContentRight = mCurRight = mDockRight;
                 mStatusBarLayer = mNavigationBar.getSurfaceLayer();
                 // And compute the final frame.
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
@@ -2878,10 +2886,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // status bar is visible.
                     mDockTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
-                    mContentTop = mCurTop = mDockTop;
-                    mContentBottom = mCurBottom = mDockBottom;
-                    mContentLeft = mCurLeft = mDockLeft;
-                    mContentRight = mCurRight = mDockRight;
+                    mContentTop = mVoiceContentTop = mCurTop = mDockTop;
+                    mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
+                    mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
+                    mContentRight = mVoiceContentRight = mCurRight = mDockRight;
 
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " +
                         String.format(
@@ -2952,7 +2960,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Ungh.  So to deal with that, make sure the content frame
                 // we end up using is not covering the IM dock.
                 cf.set(attached.getContentFrameLw());
-                if (attached.getSurfaceLayer() < mDockLayer) {
+                if (attached.isVoiceInteraction()) {
+                    if (cf.left < mVoiceContentLeft) cf.left = mVoiceContentLeft;
+                    if (cf.top < mVoiceContentTop) cf.top = mVoiceContentTop;
+                    if (cf.right > mVoiceContentRight) cf.right = mVoiceContentRight;
+                    if (cf.bottom > mVoiceContentBottom) cf.bottom = mVoiceContentBottom;
+                } else if (attached.getSurfaceLayer() < mDockLayer) {
                     if (cf.left < mContentLeft) cf.left = mContentLeft;
                     if (cf.top < mContentTop) cf.top = mContentTop;
                     if (cf.right > mContentRight) cf.right = mContentRight;
@@ -3160,16 +3173,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
 
                     if ((fl & FLAG_FULLSCREEN) == 0) {
-                        if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
-                            cf.left = mDockLeft;
-                            cf.top = mDockTop;
-                            cf.right = mDockRight;
-                            cf.bottom = mDockBottom;
+                        if (win.isVoiceInteraction()) {
+                            cf.left = mVoiceContentLeft;
+                            cf.top = mVoiceContentTop;
+                            cf.right = mVoiceContentRight;
+                            cf.bottom = mVoiceContentBottom;
                         } else {
-                            cf.left = mContentLeft;
-                            cf.top = mContentTop;
-                            cf.right = mContentRight;
-                            cf.bottom = mContentBottom;
+                            if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                                cf.left = mDockLeft;
+                                cf.top = mDockTop;
+                                cf.right = mDockRight;
+                                cf.bottom = mDockBottom;
+                            } else {
+                                cf.left = mContentLeft;
+                                cf.top = mContentTop;
+                                cf.right = mContentRight;
+                                cf.bottom = mContentBottom;
+                            }
                         }
                     } else {
                         // Full screen windows are always given a layout that is as if the
@@ -3381,6 +3401,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             setLastInputMethodWindowLw(null, null);
             offsetInputMethodWindowLw(win);
         }
+        if (attrs.type == TYPE_VOICE_INTERACTION && win.isVisibleOrBehindKeyguardLw()
+                && !win.getGivenInsetsPendingLw()) {
+            offsetVoiceInputWindowLw(win);
+        }
     }
 
     private void offsetInputMethodWindowLw(WindowState win) {
@@ -3388,6 +3412,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         top += win.getGivenContentInsetsLw().top;
         if (mContentBottom > top) {
             mContentBottom = top;
+        }
+        if (mVoiceContentBottom > top) {
+            mVoiceContentBottom = top;
         }
         top = win.getVisibleFrameLw().top;
         top += win.getGivenVisibleInsetsLw().top;
@@ -3397,6 +3424,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_LAYOUT) Slog.v(TAG, "Input method: mDockBottom="
                 + mDockBottom + " mContentBottom="
                 + mContentBottom + " mCurBottom=" + mCurBottom);
+    }
+
+    private void offsetVoiceInputWindowLw(WindowState win) {
+        final int gravity = win.getAttrs().gravity;
+        switch (gravity&((Gravity.AXIS_PULL_BEFORE|Gravity.AXIS_PULL_AFTER)
+                << Gravity.AXIS_X_SHIFT)) {
+            case Gravity.AXIS_PULL_BEFORE<<Gravity.AXIS_X_SHIFT: {
+                int right = win.getContentFrameLw().right - win.getGivenContentInsetsLw().right;
+                if (mVoiceContentLeft < right) {
+                    mVoiceContentLeft = right;
+                }
+            } break;
+            case Gravity.AXIS_PULL_AFTER<<Gravity.AXIS_X_SHIFT: {
+                int left = win.getContentFrameLw().left - win.getGivenContentInsetsLw().left;
+                if (mVoiceContentRight < left) {
+                    mVoiceContentRight = left;
+                }
+            } break;
+        }
+        switch (gravity&((Gravity.AXIS_PULL_BEFORE|Gravity.AXIS_PULL_AFTER)
+                << Gravity.AXIS_Y_SHIFT)) {
+            case Gravity.AXIS_PULL_BEFORE<<Gravity.AXIS_Y_SHIFT: {
+                int bottom = win.getContentFrameLw().bottom - win.getGivenContentInsetsLw().bottom;
+                if (mVoiceContentTop < bottom) {
+                    mVoiceContentTop = bottom;
+                }
+            } break;
+            case Gravity.AXIS_PULL_AFTER<<Gravity.AXIS_Y_SHIFT: {
+                int top = win.getContentFrameLw().top - win.getGivenContentInsetsLw().top;
+                if (mVoiceContentBottom < top) {
+                    mVoiceContentBottom = top;
+                }
+            } break;
+        }
     }
 
     /** {@inheritDoc} */
@@ -5482,6 +5543,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mContentTop);
                 pw.print(")-("); pw.print(mContentRight);
                 pw.print(","); pw.print(mContentBottom); pw.println(")");
+        pw.print(prefix); pw.print("mVoiceContent=("); pw.print(mVoiceContentLeft);
+                pw.print(","); pw.print(mVoiceContentTop);
+                pw.print(")-("); pw.print(mVoiceContentRight);
+                pw.print(","); pw.print(mVoiceContentBottom); pw.println(")");
         pw.print(prefix); pw.print("mDock=("); pw.print(mDockLeft);
                 pw.print(","); pw.print(mDockTop);
                 pw.print(")-("); pw.print(mDockRight);

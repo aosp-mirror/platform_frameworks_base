@@ -2215,6 +2215,11 @@ public class WindowManagerService extends IWindowManager.Stub
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
+                if (type == TYPE_VOICE_INTERACTION) {
+                    Slog.w(TAG, "Attempted to add voice interaction window with unknown token "
+                          + attrs.token + ".  Aborting.");
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
                 if (type == TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with unknown token "
                           + attrs.token + ".  Aborting.");
@@ -2247,6 +2252,12 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (type == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with bad token "
+                            + attrs.token + ".  Aborting.");
+                      return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
+            } else if (type == TYPE_VOICE_INTERACTION) {
+                if (token.windowType != TYPE_VOICE_INTERACTION) {
+                    Slog.w(TAG, "Attempted to add voice interaction window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
@@ -3173,7 +3184,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean applyAnimationLocked(AppWindowToken atoken,
-            WindowManager.LayoutParams lp, int transit, boolean enter) {
+            WindowManager.LayoutParams lp, int transit, boolean enter, boolean isVoiceInteraction) {
         // Only apply an animation if the display isn't frozen.  If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
@@ -3203,7 +3214,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    mCurConfiguration.orientation, containingFrame, contentInsets, isFullScreen);
+                    mCurConfiguration.orientation, containingFrame, contentInsets, isFullScreen,
+                    isVoiceInteraction);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -3423,7 +3435,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges) {
+            int configChanges, boolean voiceInteraction) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3449,7 +3461,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "Attempted to add existing app token: " + token);
                 return;
             }
-            atoken = new AppWindowToken(this, token);
+            atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.groupId = taskId;
             atoken.appFullscreen = fullscreen;
@@ -4201,7 +4213,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean setTokenVisibilityLocked(AppWindowToken wtoken, WindowManager.LayoutParams lp,
-            boolean visible, int transit, boolean performLayout) {
+            boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
         boolean delayed = false;
 
         if (wtoken.clientHidden == visible) {
@@ -4222,7 +4234,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
                     wtoken.mAppAnimator.animation = null;
                 }
-                if (applyAnimationLocked(wtoken, lp, transit, visible)) {
+                if (applyAnimationLocked(wtoken, lp, transit, visible, isVoiceInteraction)) {
                     delayed = runningAppAnimation = true;
                 }
                 WindowState window = wtoken.findMainWindow();
@@ -4400,7 +4412,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final long origId = Binder.clearCallingIdentity();
             setTokenVisibilityLocked(wtoken, null, visible, AppTransition.TRANSIT_UNSET,
-                    true);
+                    true, wtoken.voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
         }
@@ -4547,7 +4559,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Removing app token: " + wtoken);
                 delayed = setTokenVisibilityLocked(wtoken, null, false,
-                        AppTransition.TRANSIT_UNSET, true);
+                        AppTransition.TRANSIT_UNSET, true, wtoken.voiceInteraction);
                 wtoken.inPendingTransaction = false;
                 mOpeningApps.remove(wtoken);
                 wtoken.waitingToShow = false;
@@ -8530,6 +8542,7 @@ public class WindowManagerService extends IWindowManager.Stub
             LayoutParams animLp = null;
             int bestAnimLayer = -1;
             boolean fullscreenAnim = false;
+            boolean voiceInteraction = false;
 
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "New wallpaper target=" + mWallpaperTarget
@@ -8573,6 +8586,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         openingAppHasWallpaper = true;
                     }
                 }
+
+                voiceInteraction |= wtoken.voiceInteraction;
 
                 if (wtoken.appFullscreen) {
                     WindowState ws = wtoken.findMainWindow();
@@ -8646,7 +8661,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 appAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 appAnimator.animation = null;
-                setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
+                setTokenVisibilityLocked(wtoken, animLp, true, transit, false, voiceInteraction);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
 
@@ -8678,7 +8693,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;
-                setTokenVisibilityLocked(wtoken, animLp, false, transit, false);
+                setTokenVisibilityLocked(wtoken, animLp, false, transit, false, voiceInteraction);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToHide = false;
                 // Force the allDrawn flag, because we want to start
