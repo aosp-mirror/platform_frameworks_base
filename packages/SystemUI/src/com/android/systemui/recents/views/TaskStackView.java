@@ -88,6 +88,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mStackViewsAnimationDuration;
     boolean mStackViewsDirty = true;
     boolean mAwaitingFirstLayout = true;
+    boolean mStartEnterAnimationRequestedAfterLayout;
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
     Rect mTmpRect2 = new Rect();
@@ -703,19 +704,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             setStackScroll(mMaxScroll);
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
-
-            // Update the focused task index to be the next item to the top task
-            if (config.launchedFromAltTab) {
-                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
-            }
-
-            // Animate the task bar of the first task view
-            if (config.launchedWithThumbnailAnimation) {
-                TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
-                if (tv != null) {
-                    tv.animateOnEnterRecents();
-                }
-            }
         }
 
         // Measure each of the children
@@ -758,7 +746,47 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         if (mAwaitingFirstLayout) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+
+            // Update the focused task index to be the next item to the top task
+            if (config.launchedFromAltTab) {
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+            }
+
+            // Prepare the first view for its enter animation
+            if (config.launchedWithThumbnailAnimation) {
+                TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
+                if (tv != null) {
+                    tv.prepareAnimateOnEnterRecents();
+                }
+            }
+
+            // Mark that we have completely the first layout
             mAwaitingFirstLayout = false;
+
+            // If the enter animation started already and we haven't completed a layout yet, do the
+            // enter animation now
+            if (mStartEnterAnimationRequestedAfterLayout) {
+                startOnEnterAnimation();
+            }
+        }
+    }
+
+    /** Requests this task stacks to start it's enter-recents animation */
+    public void startOnEnterAnimation() {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (!config.launchedWithThumbnailAnimation) return;
+
+        // If we are still waiting to layout, then just defer until then
+        if (mAwaitingFirstLayout) {
+            mStartEnterAnimationRequestedAfterLayout = true;
+            return;
+        }
+
+        // Animate the task bar of the first task view
+        TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
+        if (tv != null) {
+            tv.animateOnEnterRecents();
         }
     }
 

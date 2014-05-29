@@ -127,6 +127,11 @@ class SystemUIMessageHandler extends Handler {
                     Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
             Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
                     Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
+        } else if (msg.what == AlternateRecentsComponent.MSG_START_ENTER_ANIMATION) {
+            // Send a broadcast to start the enter animation
+            Intent intent = new Intent(RecentsService.ACTION_START_ENTER_ANIMATION);
+            intent.setPackage(context.getPackageName());
+            context.sendBroadcast(intent);
         }
     }
 }
@@ -135,6 +140,7 @@ class SystemUIMessageHandler extends Handler {
 public class RecentsService extends Service {
     final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+    final static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
 
     Messenger mSystemUIMessenger = new Messenger(new SystemUIMessageHandler(this));
