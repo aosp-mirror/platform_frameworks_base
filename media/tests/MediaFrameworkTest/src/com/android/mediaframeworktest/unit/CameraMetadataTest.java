@@ -1032,11 +1032,14 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         float[] redOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_RED);
         float[] greenOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_GREEN);
         float[] blueOut = mMetadata.get(CaptureResult.TONEMAP_CURVE_BLUE);
-        assertTrue("Input and output tonemap curve should match", Arrays.equals(red, redOut));
-        assertTrue("Input and output tonemap curve should match", Arrays.equals(green, greenOut));
-        assertTrue("Input and output tonemap curve should match", Arrays.equals(blue, blueOut));
+        assertArrayEquals(red, redOut);
+        assertArrayEquals(green, greenOut);
+        assertArrayEquals(blue, blueOut);
         TonemapCurve tcOut = mMetadata.get(CaptureResult.TONEMAP_CURVE);
-        assertTrue("Input and output tonemap curve should match", tcIn.equals(tcOut));
+        assertEquals(tcIn, tcOut);
+        mMetadata.set(CaptureResult.TONEMAP_CURVE_GREEN, null);
+        // If any of channel has null curve, return a null TonemapCurve
+        assertNull(mMetadata.get(CaptureResult.TONEMAP_CURVE));
     }
 
     /**
