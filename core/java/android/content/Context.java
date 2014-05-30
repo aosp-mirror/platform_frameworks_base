@@ -40,6 +40,7 @@ import android.os.Looper;
 import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.DisplayAdjustments;
 import android.view.Display;
@@ -927,6 +928,40 @@ public abstract class Context {
      * @see Environment#getExternalStorageState(File)
      */
     public abstract File[] getExternalCacheDirs();
+
+    /**
+     * Returns absolute paths to application-specific directories on all
+     * external storage devices where the application can place media files.
+     * These files are scanned and made available to other apps through
+     * {@link MediaStore}.
+     * <p>
+     * This is like {@link #getExternalFilesDirs} in that these files will be
+     * deleted when the application is uninstalled, however there are some
+     * important differences:
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.
+     * <li>There is no security enforced with these files.
+     * </ul>
+     * <p>
+     * External storage devices returned here are considered a permanent part of
+     * the device, including both emulated external storage and physical media
+     * slots, such as SD cards in a battery compartment. The returned paths do
+     * not include transient devices, such as USB flash drives.
+     * <p>
+     * An application may store data on any or all of the returned devices. For
+     * example, an app may choose to store large files on the device with the
+     * most available space, as measured by {@link StatFs}.
+     * <p>
+     * No permissions are required to read or write to the returned paths; they
+     * are always accessible to the calling app. Write access outside of these
+     * paths on secondary external storage devices is not available.
+     * <p>
+     * Returned paths may be {@code null} if a storage device is unavailable.
+     *
+     * @see Environment#getExternalStorageState(File)
+     */
+    public abstract File[] getExternalMediaDirs();
 
     /**
      * Returns an array of strings naming the private files associated with
