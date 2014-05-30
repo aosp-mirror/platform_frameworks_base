@@ -293,5 +293,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setQSPanel(QSPanel qsp) {
         mQSPanel = qsp;
+        if (mQSPanel != null) {
+            mQSPanel.setCallback(mQsPanelCallback);
+        }
     }
+
+    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+        @Override
+        public void onShowingDetail(boolean showingDetail) {
+            mBrightnessContainer.animate().alpha(showingDetail ? 0 : 1).withLayer().start();
+        }
+    };
 }
