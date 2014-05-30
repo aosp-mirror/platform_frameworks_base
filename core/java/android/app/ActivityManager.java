@@ -738,7 +738,7 @@ public class ActivityManager {
     public static final int RECENT_INCLUDE_PROFILES = 0x0004;
 
     /**
-     * Return a list of the tasks that the user has recently launched, with
+     * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
      * <p><b>Note: this method is only intended for debugging and presenting
@@ -749,6 +749,15 @@ public class ActivityManager {
      * example, if multiple applications can be actively running at the
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
+     *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this method is
+     * no longer available to third party applications: as the introduction of
+     * document-centric recents means
+     * it can leak personal information to the caller.  For backwards compatibility,
+     * it will still return a small subset of its data: at least the caller's
+     * own tasks (though see {@link #getAppTasks()} for the correct supported
+     * way to retrieve that information), and possibly some other tasks
+     * such as home that are known to not be sensitive.
      *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
@@ -762,6 +771,7 @@ public class ActivityManager {
      * @throws SecurityException Throws SecurityException if the caller does
      * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
+    @Deprecated
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
@@ -946,6 +956,14 @@ public class ActivityManager {
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
      *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this method
+     * is no longer available to third party
+     * applications: the introduction of document-centric recents means
+     * it can leak person information to the caller.  For backwards compatibility,
+     * it will still retu rn a small subset of its data: at least the caller's
+     * own tasks, and possibly some other tasks
+     * such as home that are known to not be sensitive.
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started.
@@ -956,6 +974,7 @@ public class ActivityManager {
      * @throws SecurityException Throws SecurityException if the caller does
      * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
+    @Deprecated
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
         try {
