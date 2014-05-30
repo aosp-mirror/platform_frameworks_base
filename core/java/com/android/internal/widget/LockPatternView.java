@@ -57,6 +57,7 @@ public class LockPatternView extends View {
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
 
     private static final boolean PROFILE_DRAWING = false;
+    private final CellState[][] mCellStates;
     private boolean mDrawingProfilingStarted = false;
 
     private Paint mPaint = new Paint();
@@ -187,6 +188,12 @@ public class LockPatternView extends View {
         }
     }
 
+    public static class CellState {
+        public float scale = 1.0f;
+        public float translateY = 0.0f;
+        public float alpha = 1.0f;
+     }
+
     /**
      * How to display the current pattern.
      */
@@ -296,6 +303,18 @@ public class LockPatternView extends View {
             mBitmapHeight = Math.max(mBitmapHeight, bitmap.getHeight());
         }
 
+        mPaint.setFilterBitmap(true);
+
+        mCellStates = new CellState[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                mCellStates[i][j] = new CellState();
+            }
+        }
+    }
+
+    public CellState[][] getCellStates() {
+        return mCellStates;
     }
 
     private Bitmap getBitmapFor(int resId) {
@@ -873,9 +892,15 @@ public class LockPatternView extends View {
             //float centerY = mPaddingTop + i * mSquareHeight + (mSquareHeight / 2);
             for (int j = 0; j < 3; j++) {
                 float leftX = paddingLeft + j * squareWidth;
-                drawCircle(canvas, (int) leftX, (int) topY, drawLookup[i][j]);
+                float scale = mCellStates[i][j].scale;
+                mPaint.setAlpha((int) (mCellStates[i][j].alpha * 255));
+                float translationY = mCellStates[i][j].translateY;
+                drawCircle(canvas, (int) leftX, (int) topY + translationY, scale, drawLookup[i][j]);
             }
         }
+
+        // Reset the alpha to draw normally
+        mPaint.setAlpha(255);
 
         // TODO: the path should be created and cached every time we hit-detect a cell
         // only the last segment of the path should be computed here
@@ -883,8 +908,6 @@ public class LockPatternView extends View {
         final boolean drawPath = !mInStealthMode;
 
         // draw the arrows associated with the path (unless we are in stealth mode)
-        boolean oldFlag = (mPaint.getFlags() & Paint.FILTER_BITMAP_FLAG) != 0;
-        mPaint.setFilterBitmap(true); // draw with higher quality since we render with transforms
         if (drawPath) {
             for (int i = 0; i < count - 1; i++) {
                 Cell cell = pattern.get(i);
@@ -898,7 +921,8 @@ public class LockPatternView extends View {
                 }
 
                 float leftX = paddingLeft + cell.column * squareWidth;
-                float topY = paddingTop + cell.row * squareHeight;
+                float topY = paddingTop + cell.row * squareHeight
+                        + mCellStates[cell.row][cell.column].translateY;
 
                 drawArrow(canvas, leftX, topY, cell, next);
             }
@@ -919,6 +943,9 @@ public class LockPatternView extends View {
 
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
+
+                // Respect translation in animation
+                centerY += mCellStates[cell.row][cell.column].translateY;
                 if (i == 0) {
                     currentPath.moveTo(centerX, centerY);
                 } else {
@@ -933,8 +960,6 @@ public class LockPatternView extends View {
             }
             canvas.drawPath(currentPath, mPathPaint);
         }
-
-        mPaint.setFilterBitmap(oldFlag); // restore default flag
     }
 
     private void drawArrow(Canvas canvas, float leftX, float topY, Cell start, Cell end) {
@@ -979,7 +1004,8 @@ public class LockPatternView extends View {
      * @param topY
      * @param partOfPattern Whether this circle is part of the pattern.
      */
-    private void drawCircle(Canvas canvas, int leftX, int topY, boolean partOfPattern) {
+    private void drawCircle(Canvas canvas, float leftX, float topY, float scale,
+            boolean partOfPattern) {
         Bitmap outerCircle;
         Bitmap innerCircle;
 
@@ -1019,7 +1045,7 @@ public class LockPatternView extends View {
 
         mCircleMatrix.setTranslate(leftX + offsetX, topY + offsetY);
         mCircleMatrix.preTranslate(mBitmapWidth/2, mBitmapHeight/2);
-        mCircleMatrix.preScale(sx, sy);
+        mCircleMatrix.preScale(sx * scale, sy * scale);
         mCircleMatrix.preTranslate(-mBitmapWidth/2, -mBitmapHeight/2);
 
         canvas.drawBitmap(outerCircle, mCircleMatrix, mPaint);
