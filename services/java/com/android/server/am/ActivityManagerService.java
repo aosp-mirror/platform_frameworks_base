@@ -2686,7 +2686,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return app;
         }
 
-        startProcessLocked(app, hostingType, hostingNameStr);
+        startProcessLocked(app, hostingType, hostingNameStr, null /* ABI override */);
         return (app.pid != 0) ? app : null;
     }
 
@@ -2695,7 +2695,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final void startProcessLocked(ProcessRecord app,
-            String hostingType, String hostingNameStr) {
+            String hostingType, String hostingNameStr, String abiOverride) {
         if (app.pid > 0 && app.pid != MY_PID) {
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
@@ -2780,7 +2780,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
 
-            String requiredAbi = app.info.cpuAbi;
+            String requiredAbi = (abiOverride != null) ? abiOverride : app.info.cpuAbi;
             if (requiredAbi == null) {
                 requiredAbi = Build.SUPPORTED_ABIS[0];
             }
@@ -4804,7 +4804,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
-                    addAppLocked(app.info, false);
+                    addAppLocked(app.info, false, null /* ABI override */);
                 } else {
                     needRestart = true;
                 }
@@ -4912,7 +4912,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.deathRecipient = adr;
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
-            startProcessLocked(app, "link fail", processName);
+            startProcessLocked(app, "link fail", processName, null /* ABI override */);
             return false;
         }
 
@@ -5005,7 +5005,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            startProcessLocked(app, "bind fail", processName);
+            startProcessLocked(app, "bind fail", processName, null /* ABI override */);
             return false;
         }
 
@@ -5174,7 +5174,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int ip=0; ip<NP; ip++) {
                     if (DEBUG_PROCESSES) Slog.v(TAG, "Starting process on hold: "
                             + procs.get(ip));
-                    startProcessLocked(procs.get(ip), "on-hold", null);
+                    startProcessLocked(procs.get(ip), "on-hold", null, null /* ABI override */);
                 }
             }
             
@@ -8175,7 +8175,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return new ProcessRecord(stats, info, proc, uid);
     }
 
-    final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
+    final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated,
+            String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(info.processName, info.uid, true);
@@ -8210,7 +8211,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
-            startProcessLocked(app, "added application", app.processName);
+            startProcessLocked(app, "added application", app.processName,
+                    abiOverride);
         }
 
         return app;
@@ -9401,7 +9403,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 = (ApplicationInfo)apps.get(i);
                             if (info != null &&
                                     !info.packageName.equals("android")) {
-                                addAppLocked(info, false);
+                                addAppLocked(info, false, null /* ABI override */);
                             }
                         }
                     }
@@ -12567,7 +12569,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // We have components that still need to be running in the
             // process, so re-launch it.
             mProcessNames.put(app.processName, app.uid, app);
-            startProcessLocked(app, "restart", app.processName);
+            startProcessLocked(app, "restart", app.processName, null /* ABI override */);
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
             synchronized (mPidsSelfLocked) {
@@ -13858,7 +13860,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
-            int userId) {
+            int userId, String abiOverride) {
         enforceNotIsolatedCaller("startInstrumentation");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, true, "startInstrumentation", null);
@@ -13907,7 +13909,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
-            ProcessRecord app = addAppLocked(ai, false);
+            ProcessRecord app = addAppLocked(ai, false, abiOverride);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
             app.instrumentationProfileFile = profileFile;
@@ -15837,7 +15839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     
                     if (app.persistent) {
                         if (app.persistent) {
-                            addAppLocked(app.info, false);
+                            addAppLocked(app.info, false, null /* ABI override */);
                         }
                     }
                 }
