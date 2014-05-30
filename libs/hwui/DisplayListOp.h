@@ -472,7 +472,7 @@ private:
 
 class SetMatrixOp : public StateOp {
 public:
-    SetMatrixOp(const SkMatrix* matrix)
+    SetMatrixOp(const SkMatrix& matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -480,22 +480,22 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        if (mMatrix) {
-            OP_LOG("SetMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(mMatrix));
-        } else {
+        if (mMatrix.isIdentity()) {
             OP_LOGS("SetMatrix (reset)");
+        } else {
+            OP_LOG("SetMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(&mMatrix));
         }
     }
 
     virtual const char* name() { return "SetMatrix"; }
 
 private:
-    const SkMatrix* mMatrix;
+    const SkMatrix mMatrix;
 };
 
 class ConcatMatrixOp : public StateOp {
 public:
-    ConcatMatrixOp(const SkMatrix* matrix)
+    ConcatMatrixOp(const SkMatrix& matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -503,13 +503,13 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("ConcatMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(mMatrix));
+        OP_LOG("ConcatMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(&mMatrix));
     }
 
     virtual const char* name() { return "ConcatMatrix"; }
 
 private:
-    const SkMatrix* mMatrix;
+    const SkMatrix mMatrix;
 };
 
 class ClipOp : public StateOp {
@@ -746,10 +746,10 @@ protected:
 
 class DrawBitmapMatrixOp : public DrawBoundedOp {
 public:
-    DrawBitmapMatrixOp(const SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint)
+    DrawBitmapMatrixOp(const SkBitmap* bitmap, const SkMatrix& matrix, const SkPaint* paint)
             : DrawBoundedOp(paint), mBitmap(bitmap), mMatrix(matrix) {
         mLocalBounds.set(0, 0, bitmap->width(), bitmap->height());
-        const mat4 transform(*matrix);
+        const mat4 transform(matrix);
         transform.mapRect(mLocalBounds);
     }
 
@@ -758,7 +758,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p matrix " SK_MATRIX_STRING, mBitmap, SK_MATRIX_ARGS(mMatrix));
+        OP_LOG("Draw bitmap %p matrix " SK_MATRIX_STRING, mBitmap, SK_MATRIX_ARGS(&mMatrix));
     }
 
     virtual const char* name() { return "DrawBitmapMatrix"; }
@@ -770,7 +770,7 @@ public:
 
 private:
     const SkBitmap* mBitmap;
-    const SkMatrix* mMatrix;
+    const SkMatrix mMatrix;
 };
 
 class DrawBitmapRectOp : public DrawBoundedOp {

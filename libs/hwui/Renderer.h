@@ -170,8 +170,8 @@ public:
     virtual void scale(float sx, float sy) = 0;
     virtual void skew(float sx, float sy) = 0;
 
-    virtual void setMatrix(const SkMatrix* matrix) = 0;
-    virtual void concatMatrix(const SkMatrix* matrix) = 0;
+    virtual void setMatrix(const SkMatrix& matrix) = 0;
+    virtual void concatMatrix(const SkMatrix& matrix) = 0;
 
     // clip
     virtual const Rect& getLocalClipBounds() const = 0;
@@ -193,7 +193,7 @@ public:
     // Bitmap-based
     virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
             const SkPaint* paint) = 0;
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
             const SkPaint* paint) = 0;
     virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,

@@ -86,8 +86,8 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    virtual void setMatrix(const SkMatrix* matrix);
-    virtual void concatMatrix(const SkMatrix* matrix);
+    virtual void setMatrix(const SkMatrix& matrix);
+    virtual void concatMatrix(const SkMatrix& matrix);
 
     // Clip
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
@@ -106,7 +106,7 @@ public:
     // Bitmap-based
     virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
             const SkPaint* paint);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
             const SkPaint* paint);
     virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
@@ -231,17 +231,6 @@ private:
         }
 
         return regionCopy;
-    }
-
-    inline const SkMatrix* refMatrix(const SkMatrix* matrix) {
-        if (matrix) {
-            // Copying the matrix is cheap and prevents against the user changing
-            // the original matrix before the operation that uses it
-            const SkMatrix* copy = new SkMatrix(*matrix);
-            mDisplayListData->matrices.add(copy);
-            return copy;
-        }
-        return matrix;
     }
 
     inline Layer* refLayer(Layer* layer) {

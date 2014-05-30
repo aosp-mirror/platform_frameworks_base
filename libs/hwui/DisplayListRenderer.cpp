@@ -141,14 +141,12 @@ void DisplayListRenderer::skew(float sx, float sy) {
     StatefulBaseRenderer::skew(sx, sy);
 }
 
-void DisplayListRenderer::setMatrix(const SkMatrix* matrix) {
-    matrix = refMatrix(matrix);
+void DisplayListRenderer::setMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) SetMatrixOp(matrix));
     StatefulBaseRenderer::setMatrix(matrix);
 }
 
-void DisplayListRenderer::concatMatrix(const SkMatrix* matrix) {
-    matrix = refMatrix(matrix);
+void DisplayListRenderer::concatMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
     StatefulBaseRenderer::concatMatrix(matrix);
 }
@@ -203,10 +201,9 @@ status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float left, flo
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
         const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
-    matrix = refMatrix(matrix);
     paint = refPaint(paint);
 
     addDrawOp(new (alloc()) DrawBitmapMatrixOp(bitmap, matrix, paint));

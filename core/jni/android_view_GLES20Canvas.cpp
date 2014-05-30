@@ -373,7 +373,7 @@ static void android_view_GLES20Canvas_setMatrix(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong matrixPtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    renderer->setMatrix(matrix);
+    renderer->setMatrix(matrix ? *matrix : SkMatrix::I());
 }
 
 static void android_view_GLES20Canvas_getMatrix(JNIEnv* env, jobject clazz,
@@ -387,7 +387,7 @@ static void android_view_GLES20Canvas_concatMatrix(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong matrixPtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    renderer->concatMatrix(matrix);
+    renderer->concatMatrix(*matrix);
 }
 
 // ----------------------------------------------------------------------------
@@ -430,7 +430,7 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-    renderer->drawBitmap(bitmap, matrix, paint);
+    renderer->drawBitmap(bitmap, *matrix, paint);
 }
 
 static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
