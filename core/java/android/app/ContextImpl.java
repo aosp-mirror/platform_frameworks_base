@@ -251,6 +251,8 @@ class ContextImpl extends Context {
     private File[] mExternalFilesDirs;
     @GuardedBy("mSync")
     private File[] mExternalCacheDirs;
+    @GuardedBy("mSync")
+    private File[] mExternalMediaDirs;
 
     private static final String[] EMPTY_FILE_LIST = {};
 
@@ -1035,6 +1037,18 @@ class ContextImpl extends Context {
 
             // Create dirs if needed
             return ensureDirsExistOrFilter(mExternalCacheDirs);
+        }
+    }
+
+    @Override
+    public File[] getExternalMediaDirs() {
+        synchronized (mSync) {
+            if (mExternalMediaDirs == null) {
+                mExternalMediaDirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
+            }
+
+            // Create dirs if needed
+            return ensureDirsExistOrFilter(mExternalMediaDirs);
         }
     }
 

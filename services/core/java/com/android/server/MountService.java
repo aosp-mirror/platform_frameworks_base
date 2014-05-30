@@ -2372,6 +2372,18 @@ class MountService extends IMountService.Stub
             }
         }
 
+        voldPath = maybeTranslatePathForVold(appPath,
+                userEnv.buildExternalStorageAppMediaDirs(callingPkg),
+                userEnv.buildExternalStorageAppMediaDirsForVold(callingPkg));
+        if (voldPath != null) {
+            try {
+                mConnector.execute("volume", "mkdirs", voldPath);
+                return 0;
+            } catch (NativeDaemonConnectorException e) {
+                return e.getCode();
+            }
+        }
+
         throw new SecurityException("Invalid mkdirs path: " + appPath);
     }
 

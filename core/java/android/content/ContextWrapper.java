@@ -237,6 +237,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File[] getExternalMediaDirs() {
+        return mBase.getExternalMediaDirs();
+    }
+
+    @Override
     public File getDir(String name, int mode) {
         return mBase.getDir(name, mode);
     }

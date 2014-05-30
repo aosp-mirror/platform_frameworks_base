@@ -6906,6 +6906,7 @@ package android.content {
     method public abstract java.io.File[] getExternalCacheDirs();
     method public abstract java.io.File getExternalFilesDir(java.lang.String);
     method public abstract java.io.File[] getExternalFilesDirs(java.lang.String);
+    method public abstract java.io.File[] getExternalMediaDirs();
     method public abstract java.io.File getFileStreamPath(java.lang.String);
     method public abstract java.io.File getFilesDir();
     method public abstract android.os.Looper getMainLooper();
@@ -7074,6 +7075,7 @@ package android.content {
     method public java.io.File[] getExternalCacheDirs();
     method public java.io.File getExternalFilesDir(java.lang.String);
     method public java.io.File[] getExternalFilesDirs(java.lang.String);
+    method public java.io.File[] getExternalMediaDirs();
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
@@ -28713,6 +28715,7 @@ package android.test.mock {
     method public java.io.File[] getExternalCacheDirs();
     method public java.io.File getExternalFilesDir(java.lang.String);
     method public java.io.File[] getExternalFilesDirs(java.lang.String);
+    method public java.io.File[] getExternalMediaDirs();
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
