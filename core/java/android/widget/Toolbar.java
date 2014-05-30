@@ -557,6 +557,28 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
+     * Sets the text color, size, style, hint color, and highlight color
+     * from the specified TextAppearance resource.
+     */
+    public void setTitleTextAppearance(Context context, int resId) {
+        mTitleTextAppearance = resId;
+        if (mTitleTextView != null) {
+            mTitleTextView.setTextAppearance(context, resId);
+        }
+    }
+
+    /**
+     * Sets the text color, size, style, hint color, and highlight color
+     * from the specified TextAppearance resource.
+     */
+    public void setSubtitleTextAppearance(Context context, int resId) {
+        mSubtitleTextAppearance = resId;
+        if (mSubtitleTextView != null) {
+            mSubtitleTextView.setTextAppearance(context, resId);
+        }
+    }
+
+    /**
      * Set the icon to use for the toolbar's navigation button.
      *
      * <p>The navigation button appears at the start of the toolbar if present. Setting an icon

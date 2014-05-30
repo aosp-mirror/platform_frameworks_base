@@ -132,6 +132,16 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             mToolbar.setContentInsetsRelative(contentInsetStart, contentInsetEnd);
         }
 
+        final int titleTextStyle = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
+        if (titleTextStyle != 0) {
+            mToolbar.setTitleTextAppearance(mToolbar.getContext(), titleTextStyle);
+        }
+
+        final int subtitleTextStyle = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
+        if (subtitleTextStyle != 0) {
+            mToolbar.setSubtitleTextAppearance(mToolbar.getContext(), subtitleTextStyle);
+        }
+
         a.recycle();
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
