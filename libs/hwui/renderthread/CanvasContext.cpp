@@ -427,27 +427,11 @@ void CanvasContext::makeCurrent() {
     mHaveNewSurface |= mGlobalContext->makeCurrent(mEglSurface);
 }
 
-void CanvasContext::prepareDraw(const Vector<DeferredLayerUpdater*>* layerUpdaters,
-        TreeInfo& info) {
-    LOG_ALWAYS_FATAL_IF(!mCanvas, "Cannot prepareDraw without a canvas!");
-    makeCurrent();
-
-    processLayerUpdates(layerUpdaters, info);
-    if (info.out.hasAnimations) {
-        // TODO: Uh... crap?
-    }
-    prepareTree(info);
-}
-
-void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters,
-        TreeInfo& info) {
-    for (size_t i = 0; i < layerUpdaters->size(); i++) {
-        DeferredLayerUpdater* update = layerUpdaters->itemAt(i);
-        bool success = update->apply(info);
-        LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
-        if (update->backingLayer()->deferredUpdateScheduled) {
-            mCanvas->pushLayerUpdate(update->backingLayer());
-        }
+void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater, TreeInfo& info) {
+    bool success = layerUpdater->apply(info);
+    LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
+    if (layerUpdater->backingLayer()->deferredUpdateScheduled) {
+        mCanvas->pushLayerUpdate(layerUpdater->backingLayer());
     }
 }
 

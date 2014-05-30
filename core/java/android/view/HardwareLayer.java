@@ -22,6 +22,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 
+import com.android.internal.util.VirtualRefBasePtr;
+
 /**
  * A hardware layer can be used to render graphics operations into a hardware
  * friendly buffer. For instance, with an OpenGL backend a hardware layer
@@ -36,7 +38,7 @@ final class HardwareLayer {
     private static final int LAYER_TYPE_DISPLAY_LIST = 2;
 
     private HardwareRenderer mRenderer;
-    private Finalizer mFinalizer;
+    private VirtualRefBasePtr mFinalizer;
     private RenderNode mDisplayList;
     private final int mLayerType;
 
@@ -47,16 +49,17 @@ final class HardwareLayer {
         }
         mRenderer = renderer;
         mLayerType = type;
-        mFinalizer = new Finalizer(deferredUpdater);
-
-        // Layer is considered initialized at this point, notify the HardwareRenderer
-        mRenderer.onLayerCreated(this);
+        mFinalizer = new VirtualRefBasePtr(deferredUpdater);
     }
 
     private void assertType(int type) {
         if (mLayerType != type) {
             throw new IllegalAccessError("Method not appropriate for this layer type! " + mLayerType);
         }
+    }
+
+    boolean hasDisplayList() {
+        return mDisplayList != null;
     }
 
     /**
@@ -66,7 +69,8 @@ final class HardwareLayer {
      * @see View#setLayerPaint(android.graphics.Paint)
      */
     public void setLayerPaint(Paint paint) {
-        nSetLayerPaint(mFinalizer.mDeferredUpdater, paint.mNativePaint);
+        nSetLayerPaint(mFinalizer.get(), paint.mNativePaint);
+        mRenderer.pushLayerUpdate(this);
     }
 
     /**
@@ -75,7 +79,7 @@ final class HardwareLayer {
      * @return True if the layer can be rendered into, false otherwise
      */
     public boolean isValid() {
-        return mFinalizer != null && mFinalizer.mDeferredUpdater != 0;
+        return mFinalizer != null && mFinalizer.get() != 0;
     }
 
     /**
@@ -91,35 +95,14 @@ final class HardwareLayer {
             mDisplayList.destroyDisplayListData();
             mDisplayList = null;
         }
-        if (mRenderer != null) {
-            mRenderer.onLayerDestroyed(this);
-            mRenderer = null;
-        }
-        doDestroyLayerUpdater();
+        mRenderer.onLayerDestroyed(this);
+        mRenderer = null;
+        mFinalizer.release();
+        mFinalizer = null;
     }
 
     public long getDeferredLayerUpdater() {
-        return mFinalizer.mDeferredUpdater;
-    }
-
-    /**
-     * Destroys the deferred layer updater but not the backing layer. The
-     * backing layer is instead returned and is the caller's responsibility
-     * to destroy/recycle as appropriate.
-     *
-     * It is safe to call this in onLayerDestroyed only
-     */
-    public long detachBackingLayer() {
-        long backingLayer = nDetachBackingLayer(mFinalizer.mDeferredUpdater);
-        doDestroyLayerUpdater();
-        return backingLayer;
-    }
-
-    private void doDestroyLayerUpdater() {
-        if (mFinalizer != null) {
-            mFinalizer.destroy();
-            mFinalizer = null;
-        }
+        return mFinalizer.get();
     }
 
     public RenderNode startRecording() {
@@ -132,7 +115,7 @@ final class HardwareLayer {
     }
 
     public void endRecording(Rect dirtyRect) {
-        nUpdateRenderLayer(mFinalizer.mDeferredUpdater, mDisplayList.getNativeDisplayList(),
+        nUpdateRenderLayer(mFinalizer.get(), mDisplayList.getNativeDisplayList(),
                 dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
         mRenderer.pushLayerUpdate(this);
     }
@@ -160,7 +143,7 @@ final class HardwareLayer {
      *         match the desired values.
      */
     public boolean prepare(int width, int height, boolean isOpaque) {
-        return nPrepare(mFinalizer.mDeferredUpdater, width, height, isOpaque);
+        return nPrepare(mFinalizer.get(), width, height, isOpaque);
     }
 
     /**
@@ -169,7 +152,8 @@ final class HardwareLayer {
      * @param matrix The transform to apply to the layer.
      */
     public void setTransform(Matrix matrix) {
-        nSetTransform(mFinalizer.mDeferredUpdater, matrix.native_instance);
+        nSetTransform(mFinalizer.get(), matrix.native_instance);
+        mRenderer.pushLayerUpdate(this);
     }
 
     /**
@@ -183,7 +167,7 @@ final class HardwareLayer {
                 surface.detachFromGLContext();
                 // SurfaceTexture owns the texture name and detachFromGLContext
                 // should have deleted it
-                nOnTextureDestroyed(mFinalizer.mDeferredUpdater);
+                nOnTextureDestroyed(mFinalizer.get());
             }
         });
     }
@@ -200,24 +184,26 @@ final class HardwareLayer {
             return;
         }
 
-        boolean success = nFlushChanges(mFinalizer.mDeferredUpdater);
+        boolean success = nFlushChanges(mFinalizer.get());
         if (!success) {
             destroy();
         }
     }
 
     public long getLayer() {
-        return nGetLayer(mFinalizer.mDeferredUpdater);
+        return nGetLayer(mFinalizer.get());
     }
 
     public void setSurfaceTexture(SurfaceTexture surface) {
         assertType(LAYER_TYPE_TEXTURE);
-        nSetSurfaceTexture(mFinalizer.mDeferredUpdater, surface, false);
+        nSetSurfaceTexture(mFinalizer.get(), surface, false);
+        mRenderer.pushLayerUpdate(this);
     }
 
     public void updateSurfaceTexture() {
         assertType(LAYER_TYPE_TEXTURE);
-        nUpdateSurfaceTexture(mFinalizer.mDeferredUpdater);
+        nUpdateSurfaceTexture(mFinalizer.get());
+        mRenderer.pushLayerUpdate(this);
     }
 
     /**
@@ -225,8 +211,8 @@ final class HardwareLayer {
      */
     SurfaceTexture createSurfaceTexture() {
         assertType(LAYER_TYPE_TEXTURE);
-        SurfaceTexture st = new SurfaceTexture(nGetTexName(mFinalizer.mDeferredUpdater));
-        nSetSurfaceTexture(mFinalizer.mDeferredUpdater, st, true);
+        SurfaceTexture st = new SurfaceTexture(nGetTexName(mFinalizer.get()));
+        nSetSurfaceTexture(mFinalizer.get(), st, true);
         return st;
     }
 
@@ -258,15 +244,6 @@ final class HardwareLayer {
     private static native long nCreateRenderLayer(int width, int height);
 
     private static native void nOnTextureDestroyed(long layerUpdater);
-    private static native long nDetachBackingLayer(long layerUpdater);
-
-    /** This also destroys the underlying layer if it is still attached.
-     *  Note it does not recycle the underlying layer, but instead queues it
-     *  for deferred deletion.
-     *  The HardwareRenderer should use detachBackingLayer() in the
-     *  onLayerDestroyed() callback to do recycling if desired.
-     */
-    private static native void nDestroyLayerUpdater(long layerUpdater);
 
     private static native boolean nPrepare(long layerUpdater, int width, int height, boolean isOpaque);
     private static native void nSetLayerPaint(long layerUpdater, long paint);
@@ -281,28 +258,4 @@ final class HardwareLayer {
 
     private static native long nGetLayer(long layerUpdater);
     private static native int nGetTexName(long layerUpdater);
-
-    private static class Finalizer {
-        private long mDeferredUpdater;
-
-        public Finalizer(long deferredUpdater) {
-            mDeferredUpdater = deferredUpdater;
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                destroy();
-            } finally {
-                super.finalize();
-            }
-        }
-
-        void destroy() {
-            if (mDeferredUpdater != 0) {
-                nDestroyLayerUpdater(mDeferredUpdater);
-                mDeferredUpdater = 0;
-            }
-        }
-    }
 }

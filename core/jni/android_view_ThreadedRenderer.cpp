@@ -287,11 +287,18 @@ static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject
     return proxy->copyLayerInto(layer, bitmap);
 }
 
-static void android_view_ThreadedRenderer_destroyLayer(JNIEnv* env, jobject clazz,
+static void android_view_ThreadedRenderer_pushLayerUpdate(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong layerPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
-    proxy->destroyLayer(layer);
+    proxy->pushLayerUpdate(layer);
+}
+
+static void android_view_ThreadedRenderer_cancelLayerUpdate(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong layerPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->cancelLayerUpdate(layer);
 }
 
 static void android_view_ThreadedRenderer_flushCaches(JNIEnv* env, jobject clazz,
@@ -347,7 +354,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
-    { "nDestroyLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_destroyLayer },
+    { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
+    { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },
     { "nFlushCaches", "(JI)V", (void*) android_view_ThreadedRenderer_flushCaches },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
