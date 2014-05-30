@@ -1434,30 +1434,58 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final int features = getLocalFeatures();
         if (value == PROGRESS_VISIBILITY_ON) {
             if ((features & (1 << FEATURE_PROGRESS)) != 0) {
-                int level = horizontalProgressBar.getProgress();
-                int visibility = (horizontalProgressBar.isIndeterminate() || level < 10000) ?
-                        View.VISIBLE : View.INVISIBLE;
-                horizontalProgressBar.setVisibility(visibility);
+                if (horizontalProgressBar != null) {
+                    int level = horizontalProgressBar.getProgress();
+                    int visibility = (horizontalProgressBar.isIndeterminate() || level < 10000) ?
+                            View.VISIBLE : View.INVISIBLE;
+                    horizontalProgressBar.setVisibility(visibility);
+                } else {
+                    Log.e(TAG, "Horizontal progress bar not located in current window decor");
+                }
             }
             if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
-                circularProgressBar.setVisibility(View.VISIBLE);
+                if (circularProgressBar != null) {
+                    circularProgressBar.setVisibility(View.VISIBLE);
+                } else {
+                    Log.e(TAG, "Circular progress bar not located in current window decor");
+                }
             }
         } else if (value == PROGRESS_VISIBILITY_OFF) {
             if ((features & (1 << FEATURE_PROGRESS)) != 0) {
-                horizontalProgressBar.setVisibility(View.GONE);
+                if (horizontalProgressBar != null) {
+                    horizontalProgressBar.setVisibility(View.GONE);
+                } else {
+                    Log.e(TAG, "Horizontal progress bar not located in current window decor");
+                }
             }
             if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
-                circularProgressBar.setVisibility(View.GONE);
+                if (circularProgressBar != null) {
+                    circularProgressBar.setVisibility(View.GONE);
+                } else {
+                    Log.e(TAG, "Circular progress bar not located in current window decor");
+                }
             }
         } else if (value == PROGRESS_INDETERMINATE_ON) {
-            horizontalProgressBar.setIndeterminate(true);
+            if (horizontalProgressBar != null) {
+                horizontalProgressBar.setIndeterminate(true);
+            } else {
+                Log.e(TAG, "Horizontal progress bar not located in current window decor");
+            }
         } else if (value == PROGRESS_INDETERMINATE_OFF) {
-            horizontalProgressBar.setIndeterminate(false);
+            if (horizontalProgressBar != null) {
+                horizontalProgressBar.setIndeterminate(false);
+            } else {
+                Log.e(TAG, "Horizontal progress bar not located in current window decor");
+            }
         } else if (PROGRESS_START <= value && value <= PROGRESS_END) {
             // We want to set the progress value before testing for visibility
             // so that when the progress bar becomes visible again, it has the
             // correct level.
-            horizontalProgressBar.setProgress(value - PROGRESS_START);
+            if (horizontalProgressBar != null) {
+                horizontalProgressBar.setProgress(value - PROGRESS_START);
+            } else {
+                Log.e(TAG, "Horizontal progress bar not located in current window decor");
+            }
 
             if (value < PROGRESS_END) {
                 showProgressBars(horizontalProgressBar, circularProgressBar);
@@ -1465,7 +1493,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 hideProgressBars(horizontalProgressBar, circularProgressBar);
             }
         } else if (PROGRESS_SECONDARY_START <= value && value <= PROGRESS_SECONDARY_END) {
-            horizontalProgressBar.setSecondaryProgress(value - PROGRESS_SECONDARY_START);
+            if (horizontalProgressBar != null) {
+                horizontalProgressBar.setSecondaryProgress(value - PROGRESS_SECONDARY_START);
+            } else {
+                Log.e(TAG, "Horizontal progress bar not located in current window decor");
+            }
 
             showProgressBars(horizontalProgressBar, circularProgressBar);
         }
@@ -1475,11 +1507,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private void showProgressBars(ProgressBar horizontalProgressBar, ProgressBar spinnyProgressBar) {
         final int features = getLocalFeatures();
         if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0 &&
-                spinnyProgressBar.getVisibility() == View.INVISIBLE) {
+                spinnyProgressBar != null && spinnyProgressBar.getVisibility() == View.INVISIBLE) {
             spinnyProgressBar.setVisibility(View.VISIBLE);
         }
         // Only show the progress bars if the primary progress is not complete
-        if ((features & (1 << FEATURE_PROGRESS)) != 0 &&
+        if ((features & (1 << FEATURE_PROGRESS)) != 0 && horizontalProgressBar != null &&
                 horizontalProgressBar.getProgress() < 10000) {
             horizontalProgressBar.setVisibility(View.VISIBLE);
         }
@@ -1490,11 +1522,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         Animation anim = AnimationUtils.loadAnimation(getContext(), com.android.internal.R.anim.fade_out);
         anim.setDuration(1000);
         if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0 &&
+                spinnyProgressBar != null &&
                 spinnyProgressBar.getVisibility() == View.VISIBLE) {
             spinnyProgressBar.startAnimation(anim);
             spinnyProgressBar.setVisibility(View.INVISIBLE);
         }
-        if ((features & (1 << FEATURE_PROGRESS)) != 0 &&
+        if ((features & (1 << FEATURE_PROGRESS)) != 0 && horizontalProgressBar != null &&
                 horizontalProgressBar.getVisibility() == View.VISIBLE) {
             horizontalProgressBar.startAnimation(anim);
             horizontalProgressBar.setVisibility(View.INVISIBLE);
