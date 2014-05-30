@@ -1413,12 +1413,14 @@ public class WifiManager {
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation failed due to an internal error.
+     * @hide
      */
     public static final int ERROR                       = 0;
 
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation is already in progress
+     * @hide
      */
     public static final int IN_PROGRESS                 = 1;
 
@@ -1426,28 +1428,30 @@ public class WifiManager {
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation failed because the framework is busy and
      * unable to service the request
+     * @hide
      */
     public static final int BUSY                        = 2;
 
     /* WPS specific errors */
-    /** WPS overlap detected */
+    /** WPS overlap detected {@hide} */
     public static final int WPS_OVERLAP_ERROR           = 3;
-    /** WEP on WPS is prohibited */
+    /** WEP on WPS is prohibited {@hide} */
     public static final int WPS_WEP_PROHIBITED          = 4;
-    /** TKIP only prohibited */
+    /** TKIP only prohibited {@hide} */
     public static final int WPS_TKIP_ONLY_PROHIBITED    = 5;
-    /** Authentication failure on WPS */
+    /** Authentication failure on WPS {@hide} */
     public static final int WPS_AUTH_FAILURE            = 6;
-    /** WPS timed out */
+    /** WPS timed out {@hide} */
     public static final int WPS_TIMED_OUT               = 7;
 
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation failed due to invalid inputs
+     * @hide
      */
     public static final int INVALID_ARGS                = 8;
 
-    /** Interface for callback invocation on an application action */
+    /** Interface for callback invocation on an application action {@hide} */
     public interface ActionListener {
         /** The operation succeeded */
         public void onSuccess();
@@ -1459,7 +1463,7 @@ public class WifiManager {
         public void onFailure(int reason);
     }
 
-    /** Interface for callback invocation on a start WPS action */
+    /** Interface for callback invocation on a start WPS action {@hide} */
     public interface WpsListener {
         /** WPS start succeeded */
         public void onStartSuccess(String pin);
@@ -1741,6 +1745,7 @@ public class WifiManager {
      * @param listener for callbacks on success or failure. Can be null.
      * @throws IllegalStateException if the WifiManager instance needs to be
      * initialized again
+     * @hide
      */
     public void startWps(WpsInfo config, WpsListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
@@ -1754,6 +1759,7 @@ public class WifiManager {
      * @param listener for callbacks on success or failure. Can be null.
      * @throws IllegalStateException if the WifiManager instance needs to be
      * initialized again
+     * @hide
      */
     public void cancelWps(ActionListener listener) {
         validateChannel();
