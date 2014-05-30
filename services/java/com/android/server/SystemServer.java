@@ -308,7 +308,6 @@ public final class SystemServer {
         IPackageManager pm = null;
         WindowManagerService wm = null;
         BluetoothManagerService bluetooth = null;
-        DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
         RecognitionManagerService recognition = null;
@@ -743,13 +742,7 @@ public final class SystemServer {
             }
 
             if (!disableNonCoreServices) {
-                try {
-                    Slog.i(TAG, "Dock Observer");
-                    // Listen for dock station changes
-                    dock = new DockObserver(context);
-                } catch (Throwable e) {
-                    reportWtf("starting DockObserver", e);
-                }
+                mSystemServiceManager.startService(DockObserver.class);
             }
 
             if (!disableMedia) {
@@ -993,7 +986,6 @@ public final class SystemServer {
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
-        final DockObserver dockF = dock;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
@@ -1059,11 +1051,6 @@ public final class SystemServer {
                     if (connectivityF != null) connectivityF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Connectivity Service ready", e);
-                }
-                try {
-                    if (dockF != null) dockF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Dock Service ready", e);
                 }
                 try {
                     if (recognitionF != null) recognitionF.systemReady();
