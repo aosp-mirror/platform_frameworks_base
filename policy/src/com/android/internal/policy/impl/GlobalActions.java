@@ -185,7 +185,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // If we only have 1 item and it's a simple press action, just do this action.
         if (mAdapter.getCount() == 1
-                && mAdapter.getItem(0) instanceof SinglePressAction) {
+                && mAdapter.getItem(0) instanceof SinglePressAction
+                && !(mAdapter.getItem(0) instanceof LongPressAction)) {
             ((SinglePressAction) mAdapter.getItem(0)).onPress();
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
@@ -262,7 +263,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 continue;
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                mItems.add(getPowerAction());
+                mItems.add(new PowerAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)
@@ -300,7 +301,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
                             long id) {
-                        return mAdapter.getItem(position).onLongPress();
+                        final Action action = mAdapter.getItem(position);
+                        if (action instanceof LongPressAction) {
+                            return ((LongPressAction) action).onLongPress();
+                        }
+                        return false;
                     }
         });
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
@@ -310,29 +315,33 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         return dialog;
     }
 
-    private Action getPowerAction() {
-        return new SinglePressAction(
-                com.android.internal.R.drawable.ic_lock_power_off,
-                R.string.global_action_power_off) {
+    private final class PowerAction extends SinglePressAction implements LongPressAction {
+        private PowerAction() {
+            super(com.android.internal.R.drawable.ic_lock_power_off,
+                R.string.global_action_power_off);
+        }
 
-            public void onPress() {
-                // shutdown by making sure radio and power are handled accordingly.
-                mWindowManagerFuncs.shutdown(true);
-            }
+        @Override
+        public boolean onLongPress() {
+            mWindowManagerFuncs.rebootSafeMode(true);
+            return true;
+        }
 
-            public boolean onLongPress() {
-                mWindowManagerFuncs.rebootSafeMode(true);
-                return true;
-            }
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
 
-            public boolean showDuringKeyguard() {
-                return true;
-            }
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
 
-            public boolean showBeforeProvisioning() {
-                return true;
-            }
-        };
+        @Override
+        public void onPress() {
+            // shutdown by making sure radio and power are handled accordingly.
+            mWindowManagerFuncs.shutdown(false /* confirm */);
+        }
     }
 
     private Action getBugReportAction() {
@@ -367,10 +376,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 dialog.show();
             }
 
-            public boolean onLongPress() {
-                return false;
-            }
-
             public boolean showDuringKeyguard() {
                 return true;
             }
@@ -390,11 +395,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 Intent intent = new Intent(Settings.ACTION_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(intent);
-            }
-
-            @Override
-            public boolean onLongPress() {
-                return false;
             }
 
             @Override
@@ -583,8 +583,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         void onPress();
 
-        public boolean onLongPress();
-
         /**
          * @return whether this action should appear in the dialog when the keygaurd
          *    is showing.
@@ -598,6 +596,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         boolean showBeforeProvisioning();
 
         boolean isEnabled();
+    }
+
+    /**
+     * An action that also supports long press.
+     */
+    private interface LongPressAction extends Action {
+        boolean onLongPress();
     }
 
     /**
@@ -636,10 +641,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         abstract public void onPress();
-
-        public boolean onLongPress() {
-            return false;
-        }
 
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
@@ -769,10 +770,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             changeStateFromPress(nowOn);
         }
 
-        public boolean onLongPress() {
-            return false;
-        }
-
         public boolean isEnabled() {
             return !mState.inTransition();
         }
@@ -860,10 +857,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         public void onPress() {
-        }
-
-        public boolean onLongPress() {
-            return false;
         }
 
         public boolean showDuringKeyguard() {
