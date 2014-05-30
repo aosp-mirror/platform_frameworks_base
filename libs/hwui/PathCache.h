@@ -293,7 +293,7 @@ private:
     class PathTask: public Task<SkBitmap*> {
     public:
         PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
-            path(path), paint(paint), texture(texture) {
+            path(path), paint(*paint), texture(texture) {
         }
 
         ~PathTask() {
@@ -301,7 +301,8 @@ private:
         }
 
         const SkPath* path;
-        const SkPaint* paint;
+        //copied, since input paint may not be immutable
+        const SkPaint paint;
         PathTexture* texture;
     };
 
