@@ -18,6 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.util.Rational;
 import android.util.SizeF;
@@ -787,6 +788,22 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                         3.0f, 4.0f,
                         5.0f, 6.0f,
                         7.0f, 8.0f));
+    }
+
+    @SmallTest
+    public void testReadWritePair() {
+        // float x 2
+        checkKeyMarshal("android.lens.focusRange",
+                new TypeReference<Pair<Float, Float>>() {{ }},
+                Pair.create(1.0f / 2.0f, 1.0f / 3.0f),
+                toByteArray(1.0f / 2.0f, 1.0f / 3.0f));
+
+        // byte, int (fake from TYPE_BYTE)
+        // This takes advantage of the TYPE_BYTE -> int marshaler designed for enums.
+        checkKeyMarshal("android.flash.mode",
+                new TypeReference<Pair<Byte, Integer>>() {{ }},
+                Pair.create((byte)123, 22),
+                toByteArray((byte)123, (byte)22));
     }
 
     @SmallTest
