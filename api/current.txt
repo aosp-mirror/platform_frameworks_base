@@ -12659,6 +12659,9 @@ package android.hardware.camera2.params {
     method public int getWidth();
     method public int getX();
     method public int getY();
+    field public static final int METERING_WEIGHT_DONT_CARE = 0; // 0x0
+    field public static final int METERING_WEIGHT_MAX = 1000; // 0x3e8
+    field public static final int METERING_WEIGHT_MIN = 0; // 0x0
   }
 
   public final class RggbChannelVector {
