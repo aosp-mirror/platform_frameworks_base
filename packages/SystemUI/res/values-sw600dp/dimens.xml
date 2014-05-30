@@ -46,6 +46,9 @@
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
 
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.075</item>
+
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">384dp</dimen>
 

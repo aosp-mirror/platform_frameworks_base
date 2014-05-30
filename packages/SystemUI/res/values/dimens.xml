@@ -232,11 +232,20 @@
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
 
+    <!-- The amount of highlight to make on each task view. -->
+    <dimen name="recents_task_view_highlight">1dp</dimen>
+
     <!-- The amount of space a user has to scroll to dismiss any info panes. -->
     <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
 
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
+
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.04444</item>
+
+    <!-- The top offset for the task stack. -->
+    <dimen name="recents_stack_top_padding">16dp</dimen>
 
     <!-- Used to calculate the translation animation duration, the expected amount of movement 
          in dps over one second of time. -->

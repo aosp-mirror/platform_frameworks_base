@@ -18,6 +18,10 @@ package com.android.systemui.recents.views;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
@@ -41,6 +45,8 @@ class TaskBarView extends FrameLayout {
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
 
+    static Paint sHighlightPaint;
+
     public TaskBarView(Context context) {
         this(context, null);
     }
@@ -55,9 +61,23 @@ class TaskBarView extends FrameLayout {
 
     public TaskBarView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWillNotDraw(false);
+
+        // Load the dismiss resources
         Resources res = context.getResources();
         mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
+
+        // Configure the highlight paint
+        if (sHighlightPaint == null) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            sHighlightPaint = new Paint();
+            sHighlightPaint.setStyle(Paint.Style.STROKE);
+            sHighlightPaint.setStrokeWidth(config.taskViewHighlightPx);
+            sHighlightPaint.setColor(config.taskBarViewHighlightColor);
+            sHighlightPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            sHighlightPaint.setAntiAlias(true);
+        }
     }
 
     @Override
@@ -66,6 +86,17 @@ class TaskBarView extends FrameLayout {
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+
+        // Draw the highlight at the top edge (but put the bottom edge just out of view)
+        float offset = config.taskViewHighlightPx / 2f;
+        float radius = config.taskViewRoundedCornerRadiusPx;
+        canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
+                getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
     }
 
     /** Synchronizes this bar view's properties with the task's transform */

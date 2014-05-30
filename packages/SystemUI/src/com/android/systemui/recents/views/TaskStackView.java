@@ -645,6 +645,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
 
         // Compute the stack rects
         mRect.set(0, 0, width, height);
@@ -652,23 +653,21 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackRect.left += insetLeft;
         mStackRect.bottom -= insetBottom;
 
-        int smallestDimension = Math.min(width, height);
-        int padding = (int) (Constants.Values.TaskStackView.StackPaddingPct * smallestDimension / 2f);
+        int widthPadding = (int) (config.taskStackWidthPaddingPct * mStackRect.width());
+        int heightPadding = config.taskStackTopPaddingPx;
         if (Constants.DebugFlags.App.EnableSearchLayout) {
-            mStackRect.top += padding;
-            mStackRect.left += padding;
-            mStackRect.right -= padding;
-            mStackRect.bottom -= padding;
+            mStackRect.top += heightPadding;
+            mStackRect.left += widthPadding;
+            mStackRect.right -= widthPadding;
+            mStackRect.bottom -= heightPadding;
         } else {
-            mStackRect.inset(padding, padding);
+            mStackRect.inset(widthPadding, heightPadding);
         }
         mStackRectSansPeek.set(mStackRect);
         mStackRectSansPeek.top += Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height();
 
         // Compute the task rect
-        int minHeight = (int) (mStackRect.height() -
-                (Constants.Values.TaskStackView.StackPeekHeightPct * mStackRect.height()));
-        int size = Math.min(minHeight, Math.min(mStackRect.width(), mStackRect.height()));
+        int size = mStackRect.width();
         int left = mStackRect.left + (mStackRect.width() - size) / 2;
         mTaskRect.set(left, mStackRectSansPeek.top,
                 left + size, mStackRectSansPeek.top + size);

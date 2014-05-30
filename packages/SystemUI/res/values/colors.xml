@@ -72,6 +72,8 @@
     <color name="recents_task_bar_light_dismiss_color">#ffeeeeee</color>
     <!-- The recents task bar dark dismiss icon color to be drawn on top of light backgrounds. -->
     <color name="recents_task_bar_dark_dismiss_color">#ff333333</color>
+    <!-- The recents task bar highlight color. -->
+    <color name="recents_task_bar_highlight_color">#28ffffff</color>
 
     <color name="keyguard_affordance">#ffffffff</color>
 
