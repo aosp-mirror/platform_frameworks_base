@@ -21,7 +21,7 @@ package com.android.internal.telecomm;
  * commands that were previously handled by ITelephony.
  * {@hide}
  */
-oneway interface ITelecommService {
+interface ITelecommService {
 
     /**
      * Silence the ringer if an incoming call is currently ringing.
@@ -31,4 +31,11 @@ oneway interface ITelecommService {
      * even if there's no incoming call.  (If so, this method will do nothing.)
      */
     void silenceRinger();
+
+    /**
+     * Brings the in-call screen to the foreground if there is an active call.
+     *
+     * @param showDialpad if true, make the dialpad visible initially.
+     */
+    void showCallScreen(boolean showDialpad);
 }

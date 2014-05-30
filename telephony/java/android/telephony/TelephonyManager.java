@@ -1988,9 +1988,10 @@ public class TelephonyManager {
     @PrivateApi
     public boolean showCallScreen() {
         try {
-            return getITelephony().showCallScreen();
+            getTelecommService().showCallScreen(false);
+            return true;
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#showCallScreen", e);
+            Log.e(TAG, "Error calling ITelecommService#showCallScreen", e);
         }
         return false;
     }
@@ -1999,9 +2000,10 @@ public class TelephonyManager {
     @PrivateApi
     public boolean showCallScreenWithDialpad(boolean showDialpad) {
         try {
-            return getITelephony().showCallScreenWithDialpad(showDialpad);
+            getTelecommService().showCallScreen(showDialpad);
+            return true;
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#showCallScreenWithDialpad", e);
+            Log.e(TAG, "Error calling ITelecommService#showCallScreen(" + showDialpad + ")", e);
         }
         return false;
     }
