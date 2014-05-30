@@ -18,6 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="8dp"
     >
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -29,9 +30,16 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
-        android:layout_marginTop="10dp"
-        android:textSize="12sp"
+        android:layout_marginTop="16dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#ffffffff"
+        />
+
+    <Button android:id="@+id/abort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/abortVoice"
         />
 
 </LinearLayout>

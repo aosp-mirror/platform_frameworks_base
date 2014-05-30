@@ -5029,6 +5029,11 @@ package android.app {
     method public boolean[] supportsCommands(java.lang.String[]);
   }
 
+  public static class VoiceInteractor.AbortVoiceRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.AbortVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onAbortResult(android.os.Bundle);
+  }
+
   public static class VoiceInteractor.CommandRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.CommandRequest(java.lang.String, android.os.Bundle);
     method public void onCommandResult(android.os.Bundle);
@@ -26261,16 +26266,17 @@ package android.service.voice {
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.Dialog getWindow();
     method public void hideWindow();
+    method public void onAbortVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onBackPressed();
     method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
     method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
-    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onCreate(android.os.Bundle);
     method public android.view.View onCreateContentView();
     method public void onDestroy();
-    method public abstract boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
+    method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
@@ -26297,6 +26303,7 @@ package android.service.voice {
   }
 
   public static class VoiceInteractionSession.Request {
+    method public void sendAbortVoiceResult(android.os.Bundle);
     method public void sendCancelResult();
     method public void sendCommandResult(boolean, android.os.Bundle);
     method public void sendConfirmResult(boolean, android.os.Bundle);

@@ -21,12 +21,15 @@ import android.app.VoiceInteractor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
-public class TestInteractionActivity extends Activity {
+public class TestInteractionActivity extends Activity implements View.OnClickListener {
     static final String TAG = "TestInteractionActivity";
 
     VoiceInteractor mInteractor;
+    Button mAbortButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public class TestInteractionActivity extends Activity {
         }
 
         setContentView(R.layout.test_interaction);
+        mAbortButton = (Button)findViewById(R.id.abort);
+        mAbortButton.setOnClickListener(this);
 
         // Framework should take care of these.
         getWindow().setGravity(Gravity.TOP);
@@ -66,6 +71,26 @@ public class TestInteractionActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == mAbortButton) {
+            VoiceInteractor.AbortVoiceRequest req = new VoiceInteractor.AbortVoiceRequest(
+                    "Dammit, we suck :(", null) {
+                @Override
+                public void onCancel() {
+                    Log.i(TAG, "Canceled!");
+                }
+
+                @Override
+                public void onAbortResult(Bundle result) {
+                    Log.i(TAG, "Abort result: result=" + result);
+                    getActivity().finish();
+                }
+            };
+            mInteractor.submitRequest(req);
+        }
     }
 
     @Override
