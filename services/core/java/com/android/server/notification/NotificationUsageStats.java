@@ -16,8 +16,6 @@
 
 package com.android.server.notification;
 
-import com.android.server.notification.NotificationManagerService.NotificationRecord;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

@@ -15,8 +15,6 @@
  */
 package com.android.server.notification;
 
-import com.android.server.notification.NotificationManagerService.NotificationRecord;
-
 import java.util.concurrent.TimeUnit;
 
 /**

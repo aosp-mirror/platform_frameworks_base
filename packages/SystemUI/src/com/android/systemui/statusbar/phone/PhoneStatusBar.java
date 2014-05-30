@@ -1050,7 +1050,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shadeEntry == null) {
             return;
         }
-        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification)) {
+        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification, ranking)) {
             // Forward the ranking so we can sort the new notification.
             mNotificationData.updateRanking(ranking);
             return;
@@ -1111,6 +1111,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void updateNotificationInternal(StatusBarNotification notification, Ranking ranking) {
         super.updateNotificationInternal(notification, ranking);
         mIntercepted.update(notification);
+    }
+
+    @Override
+    protected void updateRankingInternal(Ranking ranking) {
+        mNotificationData.updateRanking(ranking);
+        mIntercepted.retryIntercepts(ranking);
+        updateNotifications();
     }
 
     @Override

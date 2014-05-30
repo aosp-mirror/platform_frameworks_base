@@ -337,8 +337,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mNotificationData.updateRanking(currentRanking);
-                    updateNotifications();
+                    updateRankingInternal(currentRanking);
                 }
             });
         }
@@ -1280,6 +1279,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     public abstract void addNotificationInternal(StatusBarNotification notification,
             Ranking ranking);
 
+    protected abstract void updateRankingInternal(Ranking ranking);
+
     @Override
     public void removeNotification(String key) {
         if (!USE_NOTIFICATION_LISTENER) {
@@ -1287,7 +1288,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected abstract void removeNotificationInternal(String key, Ranking ranking);
+    public abstract void removeNotificationInternal(String key, Ranking ranking);
 
     public void updateNotification(StatusBarNotification notification) {
         if (!USE_NOTIFICATION_LISTENER) {

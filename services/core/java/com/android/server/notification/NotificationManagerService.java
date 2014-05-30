@@ -43,7 +43,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
@@ -60,13 +59,13 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.notification.INotificationListener;
+import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
+import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
-import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -87,7 +86,6 @@ import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
-import com.android.server.notification.NotificationUsageStats.SingleNotificationStats;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import libcore.io.IoUtils;
@@ -103,10 +101,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -210,8 +206,6 @@ public class NotificationManagerService extends SystemService {
     private NotificationListeners mListeners;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
-
-    private static final String EXTRA_INTERCEPT = "android.intercept";
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -423,144 +417,6 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return true;
-    }
-
-    private static String idDebugString(Context baseContext, String packageName, int id) {
-        Context c = null;
-
-        if (packageName != null) {
-            try {
-                c = baseContext.createPackageContext(packageName, 0);
-            } catch (NameNotFoundException e) {
-                c = baseContext;
-            }
-        } else {
-            c = baseContext;
-        }
-
-        String pkg;
-        String type;
-        String name;
-
-        Resources r = c.getResources();
-        try {
-            return r.getResourceName(id);
-        } catch (Resources.NotFoundException e) {
-            return "<name unknown>";
-        }
-    }
-
-
-
-    public static final class NotificationRecord {
-        final StatusBarNotification sbn;
-        SingleNotificationStats stats;
-        boolean isCanceled;
-
-        // These members are used by NotificationSignalExtractors
-        // to communicate with the ranking module.
-        private float mContactAffinity;
-        private boolean mRecentlyIntrusive;
-
-        NotificationRecord(StatusBarNotification sbn)
-        {
-            this.sbn = sbn;
-        }
-
-        public Notification getNotification() { return sbn.getNotification(); }
-        public int getFlags() { return sbn.getNotification().flags; }
-        public int getUserId() { return sbn.getUserId(); }
-        public String getKey() { return sbn.getKey(); }
-
-        void dump(PrintWriter pw, String prefix, Context baseContext) {
-            final Notification notification = sbn.getNotification();
-            pw.println(prefix + this);
-            pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
-            pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
-                    + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
-            pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
-            pw.println(prefix + "  key=" + sbn.getKey());
-            pw.println(prefix + "  contentIntent=" + notification.contentIntent);
-            pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
-            pw.println(prefix + "  tickerText=" + notification.tickerText);
-            pw.println(prefix + "  contentView=" + notification.contentView);
-            pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
-                    notification.defaults, notification.flags));
-            pw.println(prefix + "  sound=" + notification.sound);
-            pw.println(prefix + String.format("  color=0x%08x", notification.color));
-            pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
-            pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
-                    notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
-            if (notification.actions != null && notification.actions.length > 0) {
-                pw.println(prefix + "  actions={");
-                final int N = notification.actions.length;
-                for (int i=0; i<N; i++) {
-                    final Notification.Action action = notification.actions[i];
-                    pw.println(String.format("%s    [%d] \"%s\" -> %s",
-                            prefix,
-                            i,
-                            action.title,
-                            action.actionIntent.toString()
-                            ));
-                }
-                pw.println(prefix + "  }");
-            }
-            if (notification.extras != null && notification.extras.size() > 0) {
-                pw.println(prefix + "  extras={");
-                for (String key : notification.extras.keySet()) {
-                    pw.print(prefix + "    " + key + "=");
-                    Object val = notification.extras.get(key);
-                    if (val == null) {
-                        pw.println("null");
-                    } else {
-                        pw.print(val.getClass().getSimpleName());
-                        if (val instanceof CharSequence || val instanceof String) {
-                            // redact contents from bugreports
-                        } else if (val instanceof Bitmap) {
-                            pw.print(String.format(" (%dx%d)",
-                                    ((Bitmap) val).getWidth(),
-                                    ((Bitmap) val).getHeight()));
-                        } else if (val.getClass().isArray()) {
-                            final int N = Array.getLength(val);
-                            pw.println(" (" + N + ")");
-                        } else {
-                            pw.print(" (" + String.valueOf(val) + ")");
-                        }
-                        pw.println();
-                    }
-                }
-                pw.println(prefix + "  }");
-            }
-            pw.println(prefix + "  stats=" + stats.toString());
-            pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
-            pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
-        }
-
-        @Override
-        public final String toString() {
-            return String.format(
-                    "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
-                    System.identityHashCode(this),
-                    this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
-                    this.sbn.getTag(), this.sbn.getScore(), this.sbn.getKey(),
-                    this.sbn.getNotification());
-        }
-
-        public void setContactAffinity(float contactAffinity) {
-            mContactAffinity = contactAffinity;
-        }
-
-        public float getContactAffinity() {
-            return mContactAffinity;
-        }
-
-        public void setRecentlyIntusive(boolean recentlyIntrusive) {
-            mRecentlyIntrusive = recentlyIntrusive;
-        }
-
-        public boolean isRecentlyIntrusive() {
-            return mRecentlyIntrusive;
-        }
     }
 
     private static final class ToastRecord
@@ -1657,15 +1513,15 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
 
-                // Is this notification intercepted by zen mode?
-                final boolean intercept = mZenModeHelper.shouldIntercept(pkg, notification);
-                notification.extras.putBoolean(EXTRA_INTERCEPT, intercept);
-
-                // Should this notification make noise, vibe, or use the LED?
-                final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) && !intercept;
-                if (DBG || intercept) Slog.v(TAG,
-                        "pkg=" + pkg + " canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
+                    applyZenModeLocked(r);
+
+                    // Should this notification make noise, vibe, or use the LED?
+                    final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) &&
+                            !r.isIntercepted();
+                    if (DBG || r.isIntercepted()) Slog.v(TAG,
+                            "pkg=" + pkg + " canInterrupt=" + canInterrupt +
+                                    " intercept=" + r.isIntercepted());
                     NotificationRecord old = null;
                     int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
@@ -1678,6 +1534,8 @@ public class NotificationManagerService extends SystemService {
                         // Make sure we don't lose the foreground service state.
                         notification.flags |=
                             old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
+                        // Retain ranking information from previous record
+                        r.copyRankingInformation(old);
                         mNotificationsByKey.remove(old.sbn.getKey());
                     }
                     mNotificationsByKey.put(n.getKey(), r);
@@ -1724,7 +1582,7 @@ public class NotificationManagerService extends SystemService {
                             sendAccessibilityEvent(notification, pkg);
                         }
 
-                        mListeners.notifyPostedLocked(r.sbn, cloneNotificationListLocked());
+                        mListeners.notifyPostedLocked(r.sbn);
                     } else {
                         Slog.e(TAG, "Not posting notification with icon==0: " + notification);
                         if (old != null && !old.isCanceled) {
@@ -1735,7 +1593,7 @@ public class NotificationManagerService extends SystemService {
                                 Binder.restoreCallingIdentity(identity);
                             }
 
-                            mListeners.notifyRemovedLocked(r.sbn, cloneNotificationListLocked());
+                            mListeners.notifyRemovedLocked(r.sbn);
                         }
                         // ATTENTION: in a future release we will bail out here
                         // so that we do not play sounds, show lights, etc. for invalid
@@ -1992,21 +1850,30 @@ public class NotificationManagerService extends SystemService {
         if (!(message.obj instanceof RankingReconsideration)) return;
         RankingReconsideration recon = (RankingReconsideration) message.obj;
         recon.run();
-        boolean orderChanged;
+        boolean changed;
         synchronized (mNotificationList) {
             final NotificationRecord record = mNotificationsByKey.get(recon.getKey());
             if (record == null) {
                 return;
             }
-            int before = findNotificationRecordIndexLocked(record);
+            int indexBefore = findNotificationRecordIndexLocked(record);
+            boolean interceptBefore = record.isIntercepted();
             recon.applyChangesLocked(record);
+            applyZenModeLocked(record);
             Collections.sort(mNotificationList, mRankingComparator);
-            int after = findNotificationRecordIndexLocked(record);
-            orderChanged = before != after;
+            int indexAfter = findNotificationRecordIndexLocked(record);
+            boolean interceptAfter = record.isIntercepted();
+            changed = indexBefore != indexAfter || interceptBefore != interceptAfter;
         }
-        if (orderChanged) {
+        if (changed) {
             scheduleSendRankingUpdate();
         }
+    }
+
+    // let zen mode evaluate this record and then make note of that for the future
+    private void applyZenModeLocked(NotificationRecord record) {
+        record.setIntercepted(mZenModeHelper.shouldIntercept(record, record.wasTouchedByZen()));
+        record.setTouchedByZen();
     }
 
     // lock on mNotificationList
@@ -2022,17 +1889,8 @@ public class NotificationManagerService extends SystemService {
 
     private void handleSendRankingUpdate() {
         synchronized (mNotificationList) {
-            mListeners.notifyRankingUpdateLocked(cloneNotificationListLocked());
+            mListeners.notifyRankingUpdateLocked();
         }
-    }
-
-    private ArrayList<StatusBarNotification> cloneNotificationListLocked() {
-        final int N = mNotificationList.size();
-        ArrayList<StatusBarNotification> sbns = new ArrayList<StatusBarNotification>(N);
-        for (int i = 0; i < N; i++) {
-            sbns.add(mNotificationList.get(i).sbn);
-        }
-        return sbns;
     }
 
     private final class WorkerHandler extends Handler
@@ -2120,7 +1978,7 @@ public class NotificationManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
             r.isCanceled = true;
-            mListeners.notifyRemovedLocked(r.sbn, cloneNotificationListLocked());
+            mListeners.notifyRemovedLocked(r.sbn);
         }
 
         // sound
@@ -2441,22 +2299,25 @@ public class NotificationManagerService extends SystemService {
     /**
      * Generates a NotificationRankingUpdate from 'sbns', considering only
      * notifications visible to the given listener.
+     *
+     * <p>Caller must hold a lock on mNotificationList.</p>
      */
-    private static NotificationRankingUpdate makeRankingUpdateForListener(ManagedServiceInfo info,
-            ArrayList<StatusBarNotification> sbns) {
+    private NotificationRankingUpdate makeRankingUpdateLocked(ManagedServiceInfo info) {
         int speedBumpIndex = -1;
-        ArrayList<String> keys = new ArrayList<String>(sbns.size());
-        ArrayList<String> dndKeys = new ArrayList<String>(sbns.size());
-        for (StatusBarNotification sbn: sbns) {
-            if (!info.enabledAndUserMatches(sbn.getUserId())) {
+        final int N = mNotificationList.size();
+        ArrayList<String> keys = new ArrayList<String>(N);
+        ArrayList<String> dndKeys = new ArrayList<String>(N);
+        for (int i = 0; i < N; i++) {
+            NotificationRecord record = mNotificationList.get(i);
+            if (!info.enabledAndUserMatches(record.sbn.getUserId())) {
                 continue;
             }
-            keys.add(sbn.getKey());
-            if (sbn.getNotification().extras.getBoolean(EXTRA_INTERCEPT)) {
-                dndKeys.add(sbn.getKey());
+            keys.add(record.sbn.getKey());
+            if (record.isIntercepted()) {
+                dndKeys.add(record.sbn.getKey());
             }
             if (speedBumpIndex == -1 &&
-                    sbn.getNotification().priority == Notification.PRIORITY_MIN) {
+                    record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
                 speedBumpIndex = keys.size() - 1;
             }
         }
@@ -2491,12 +2352,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onServiceAdded(ManagedServiceInfo info) {
             final INotificationListener listener = (INotificationListener) info.service;
-            final ArrayList<StatusBarNotification> sbns;
+            final NotificationRankingUpdate update;
             synchronized (mNotificationList) {
-                sbns = cloneNotificationListLocked();
+                update = makeRankingUpdateLocked(info);
             }
             try {
-                listener.onListenerConnected(makeRankingUpdateForListener(info, sbns));
+                listener.onListenerConnected(update);
             } catch (RemoteException e) {
                 // we tried
             }
@@ -2505,15 +2366,14 @@ public class NotificationManagerService extends SystemService {
         /**
          * asynchronously notify all listeners about a new notification
          */
-        public void notifyPostedLocked(StatusBarNotification sbn,
-                final ArrayList<StatusBarNotification> sbns) {
+        public void notifyPostedLocked(StatusBarNotification sbn) {
             // make a copy in case changes are made to the underlying Notification object
             final StatusBarNotification sbnClone = sbn.clone();
             for (final ManagedServiceInfo info : mServices) {
                 if (!info.isEnabledForCurrentProfiles()) {
                     continue;
                 }
-                final NotificationRankingUpdate update = makeRankingUpdateForListener(info, sbns);
+                final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
                 if (update.getOrderedKeys().length == 0) {
                     continue;
                 }
@@ -2529,8 +2389,7 @@ public class NotificationManagerService extends SystemService {
         /**
          * asynchronously notify all listeners about a removed notification
          */
-        public void notifyRemovedLocked(StatusBarNotification sbn,
-                final ArrayList<StatusBarNotification> sbns) {
+        public void notifyRemovedLocked(StatusBarNotification sbn) {
             // make a copy in case changes are made to the underlying Notification object
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
@@ -2539,11 +2398,11 @@ public class NotificationManagerService extends SystemService {
                 if (!info.isEnabledForCurrentProfiles()) {
                     continue;
                 }
+                final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyRemovedIfUserMatch(info, sbnLight,
-                                makeRankingUpdateForListener(info, sbns));
+                        notifyRemovedIfUserMatch(info, sbnLight, update);
                     }
                 });
             }
@@ -2551,20 +2410,18 @@ public class NotificationManagerService extends SystemService {
 
         /**
          * asynchronously notify all listeners about a reordering of notifications
-         * @param sbns an array of {@link StatusBarNotification}s to consider.  This code
-         *             must not rely on mutable members of these objects, such as the
-         *             {@link Notification}.
          */
-        public void notifyRankingUpdateLocked(final ArrayList<StatusBarNotification> sbns) {
+        public void notifyRankingUpdateLocked() {
             for (final ManagedServiceInfo serviceInfo : mServices) {
                 if (!serviceInfo.isEnabledForCurrentProfiles()) {
                     continue;
                 }
+                final NotificationRankingUpdate update =
+                        makeRankingUpdateLocked(serviceInfo);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyRankingUpdate(serviceInfo,
-                                makeRankingUpdateForListener(serviceInfo, sbns));
+                        notifyRankingUpdate(serviceInfo, update);
                     }
                 });
             }

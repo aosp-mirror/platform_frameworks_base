@@ -1,0 +1,204 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.server.notification;
+
+import android.app.Notification;
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.service.notification.StatusBarNotification;
+
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
+/**
+ * Holds data about notifications that should not be shared with the
+ * {@link android.service.notification.NotificationListenerService}s.
+ *
+ * <p>These objects should not be mutated unless the code is synchronized
+ * on {@link NotificationManagerService#mNotificationList}, and any
+ * modification should be followed by a sorting of that list.</p>
+ *
+ * <p>Is sortable by {@link NotificationComparator}.</p>
+ *
+ * {@hide}
+ */
+public final class NotificationRecord {
+    final StatusBarNotification sbn;
+    NotificationUsageStats.SingleNotificationStats stats;
+    boolean isCanceled;
+
+    // These members are used by NotificationSignalExtractors
+    // to communicate with the ranking module.
+    private float mContactAffinity;
+    private boolean mRecentlyIntrusive;
+
+    // is this notification currently being intercepted by Zen Mode?
+    private boolean mIntercept;
+    // InterceptedNotifications needs to know if this has been previously evaluated.
+    private boolean mTouchedByZen;
+
+    NotificationRecord(StatusBarNotification sbn)
+    {
+        this.sbn = sbn;
+    }
+
+    // copy any notes that the ranking system may have made before the update
+    public void copyRankingInformation(NotificationRecord previous) {
+        mContactAffinity = previous.mContactAffinity;
+        mRecentlyIntrusive = previous.mRecentlyIntrusive;
+        mTouchedByZen = previous.mTouchedByZen;
+        mIntercept = previous.mIntercept;
+    }
+
+    public Notification getNotification() { return sbn.getNotification(); }
+    public int getFlags() { return sbn.getNotification().flags; }
+    public int getUserId() { return sbn.getUserId(); }
+    public String getKey() { return sbn.getKey(); }
+
+    void dump(PrintWriter pw, String prefix, Context baseContext) {
+        final Notification notification = sbn.getNotification();
+        pw.println(prefix + this);
+        pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
+        pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
+                + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
+        pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
+        pw.println(prefix + "  key=" + sbn.getKey());
+        pw.println(prefix + "  contentIntent=" + notification.contentIntent);
+        pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
+        pw.println(prefix + "  tickerText=" + notification.tickerText);
+        pw.println(prefix + "  contentView=" + notification.contentView);
+        pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
+                notification.defaults, notification.flags));
+        pw.println(prefix + "  sound=" + notification.sound);
+        pw.println(prefix + String.format("  color=0x%08x", notification.color));
+        pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
+        pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
+                notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+        if (notification.actions != null && notification.actions.length > 0) {
+            pw.println(prefix + "  actions={");
+            final int N = notification.actions.length;
+            for (int i=0; i<N; i++) {
+                final Notification.Action action = notification.actions[i];
+                pw.println(String.format("%s    [%d] \"%s\" -> %s",
+                        prefix,
+                        i,
+                        action.title,
+                        action.actionIntent.toString()
+                        ));
+            }
+            pw.println(prefix + "  }");
+        }
+        if (notification.extras != null && notification.extras.size() > 0) {
+            pw.println(prefix + "  extras={");
+            for (String key : notification.extras.keySet()) {
+                pw.print(prefix + "    " + key + "=");
+                Object val = notification.extras.get(key);
+                if (val == null) {
+                    pw.println("null");
+                } else {
+                    pw.print(val.getClass().getSimpleName());
+                    if (val instanceof CharSequence || val instanceof String) {
+                        // redact contents from bugreports
+                    } else if (val instanceof Bitmap) {
+                        pw.print(String.format(" (%dx%d)",
+                                ((Bitmap) val).getWidth(),
+                                ((Bitmap) val).getHeight()));
+                    } else if (val.getClass().isArray()) {
+                        final int N = Array.getLength(val);
+                        pw.println(" (" + N + ")");
+                    } else {
+                        pw.print(" (" + String.valueOf(val) + ")");
+                    }
+                    pw.println();
+                }
+            }
+            pw.println(prefix + "  }");
+        }
+        pw.println(prefix + "  stats=" + stats.toString());
+        pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
+        pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
+        pw.println(prefix + "  mIntercept=" + mIntercept);
+    }
+
+
+    static String idDebugString(Context baseContext, String packageName, int id) {
+        Context c;
+
+        if (packageName != null) {
+            try {
+                c = baseContext.createPackageContext(packageName, 0);
+            } catch (NameNotFoundException e) {
+                c = baseContext;
+            }
+        } else {
+            c = baseContext;
+        }
+
+        Resources r = c.getResources();
+        try {
+            return r.getResourceName(id);
+        } catch (Resources.NotFoundException e) {
+            return "<name unknown>";
+        }
+    }
+
+    @Override
+    public final String toString() {
+        return String.format(
+                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
+                System.identityHashCode(this),
+                this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
+                this.sbn.getTag(), this.sbn.getScore(), this.sbn.getKey(),
+                this.sbn.getNotification());
+    }
+
+    public void setContactAffinity(float contactAffinity) {
+        mContactAffinity = contactAffinity;
+    }
+
+    public float getContactAffinity() {
+        return mContactAffinity;
+    }
+
+    public void setRecentlyIntusive(boolean recentlyIntrusive) {
+        mRecentlyIntrusive = recentlyIntrusive;
+    }
+
+    public boolean isRecentlyIntrusive() {
+        return mRecentlyIntrusive;
+    }
+
+    public boolean setIntercepted(boolean intercept) {
+        mIntercept = intercept;
+        return mIntercept;
+    }
+
+    public boolean isIntercepted() {
+        return mIntercept;
+    }
+
+    public boolean wasTouchedByZen() {
+        return mTouchedByZen;
+    }
+
+    public void setTouchedByZen() {
+        mTouchedByZen = true;
+    }
+
+}
