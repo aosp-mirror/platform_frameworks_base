@@ -33,18 +33,18 @@ public class MediaSessionStack {
      * bump priority regardless of the old state.
      */
     private static final int[] ALWAYS_PRIORITY_STATES = {
-            PlaybackState.PLAYSTATE_FAST_FORWARDING,
-            PlaybackState.PLAYSTATE_REWINDING,
-            PlaybackState.PLAYSTATE_SKIPPING_BACKWARDS,
-            PlaybackState.PLAYSTATE_SKIPPING_FORWARDS };
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+            PlaybackState.STATE_SKIPPING_TO_NEXT };
     /**
      * These are states that usually indicate the user took an action if they
      * were entered from a non-priority state.
      */
     private static final int[] TRANSITION_PRIORITY_STATES = {
-            PlaybackState.PLAYSTATE_BUFFERING,
-            PlaybackState.PLAYSTATE_CONNECTING,
-            PlaybackState.PLAYSTATE_PLAYING };
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_CONNECTING,
+            PlaybackState.STATE_PLAYING };
 
     private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
 

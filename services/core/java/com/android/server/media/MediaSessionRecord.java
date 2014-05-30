@@ -66,13 +66,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * These are the playback states that count as currently active.
      */
     private static final int[] ACTIVE_STATES = {
-            PlaybackState.PLAYSTATE_FAST_FORWARDING,
-            PlaybackState.PLAYSTATE_REWINDING,
-            PlaybackState.PLAYSTATE_SKIPPING_BACKWARDS,
-            PlaybackState.PLAYSTATE_SKIPPING_FORWARDS,
-            PlaybackState.PLAYSTATE_BUFFERING,
-            PlaybackState.PLAYSTATE_CONNECTING,
-            PlaybackState.PLAYSTATE_PLAYING };
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+            PlaybackState.STATE_SKIPPING_TO_NEXT,
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_CONNECTING,
+            PlaybackState.STATE_PLAYING };
 
     /**
      * The length of time a session will still be considered active after
@@ -301,7 +301,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         if (isActiveState(state)) {
             return true;
         }
-        if (state == mPlaybackState.PLAYSTATE_PAUSED) {
+        if (state == mPlaybackState.STATE_PAUSED) {
             long inactiveTime = SystemClock.uptimeMillis() - mLastActiveTime;
             if (inactiveTime < ACTIVE_BUFFER) {
                 return true;
@@ -509,12 +509,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
         PlaybackState result = null;
         if (state != null) {
-            if (state.getState() == PlaybackState.PLAYSTATE_PLAYING
-                    || state.getState() == PlaybackState.PLAYSTATE_FAST_FORWARDING
-                    || state.getState() == PlaybackState.PLAYSTATE_REWINDING) {
+            if (state.getState() == PlaybackState.STATE_PLAYING
+                    || state.getState() == PlaybackState.STATE_FAST_FORWARDING
+                    || state.getState() == PlaybackState.STATE_REWINDING) {
                 long updateTime = state.getLastPositionUpdateTime();
                 if (updateTime > 0) {
-                    long position = (long) (state.getRate()
+                    long position = (long) (state.getPlaybackRate()
                             * (SystemClock.elapsedRealtime() - updateTime)) + state.getPosition();
                     if (duration >= 0 && position > duration) {
                         position = duration;
@@ -522,7 +522,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                         position = 0;
                     }
                     result = new PlaybackState(state);
-                    result.setState(state.getState(), position, state.getRate());
+                    result.setState(state.getState(), position, state.getPlaybackRate());
                 }
             }
         }
@@ -588,7 +588,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setPlaybackState(PlaybackState state) {
             int oldState = mPlaybackState == null ? 0 : mPlaybackState.getState();
             int newState = state == null ? 0 : state.getState();
-            if (isActiveState(oldState) && newState == PlaybackState.PLAYSTATE_PAUSED) {
+            if (isActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
                 mLastActiveTime = SystemClock.elapsedRealtime();
             }
             mPlaybackState = state;
@@ -649,14 +649,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             mCb = cb;
         }
 
-        public void sendMediaButton(KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
+        public boolean sendMediaButton(KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
             Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
             try {
                 mCb.onMediaButton(mediaButtonIntent, sequenceId, cb);
+                return true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
+            return false;
         }
 
         public void sendCommand(String command, Bundle extras, ResultReceiver cb) {
@@ -788,8 +790,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void sendMediaButton(KeyEvent mediaButtonIntent) {
-            mSessionCb.sendMediaButton(mediaButtonIntent, 0, null);
+        public boolean sendMediaButton(KeyEvent mediaButtonIntent) {
+            return mSessionCb.sendMediaButton(mediaButtonIntent, 0, null);
         }
 
         @Override

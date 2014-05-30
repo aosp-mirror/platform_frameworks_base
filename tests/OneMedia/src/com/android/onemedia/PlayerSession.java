@@ -25,7 +25,6 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionToken;
 import android.media.session.PlaybackState;
-import android.media.session.TransportPerformer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,7 +44,6 @@ public class PlayerSession {
     protected Renderer mRenderer;
     protected MediaSession.Callback mCallback;
     protected Renderer.Listener mRenderListener;
-    protected TransportPerformer mPerformer;
 
     protected PlaybackState mPlaybackState;
     protected Listener mListener;
@@ -84,9 +82,8 @@ public class PlayerSession {
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
         mSession = man.createSession("OneMedia");
         mSession.addCallback(mCallback);
-        mPerformer = mSession.getTransportPerformer();
-        mPerformer.addListener(new TransportListener());
-        mPerformer.setPlaybackState(mPlaybackState);
+        mSession.addTransportControlsCallback(new TransportListener());
+        mSession.setPlaybackState(mPlaybackState);
         mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mSession.setRouteOptions(mRouteOptions);
         mSession.setActive(true);
@@ -120,10 +117,10 @@ public class PlayerSession {
     }
 
     private void updateState(int newState) {
-        float rate = newState == PlaybackState.PLAYSTATE_PLAYING ? 1 : 0;
+        float rate = newState == PlaybackState.STATE_PLAYING ? 1 : 0;
         long position = mRenderer == null ? -1 : mRenderer.getSeekPosition();
         mPlaybackState.setState(newState, position, rate);
-        mPerformer.setPlaybackState(mPlaybackState);
+        mSession.setPlaybackState(mPlaybackState);
     }
 
     public interface Listener {
@@ -135,11 +132,11 @@ public class PlayerSession {
         @Override
         public void onError(int type, int extra, Bundle extras, Throwable error) {
             Log.d(TAG, "Sending onError with type " + type + " and extra " + extra);
-            mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, -1, 0);
+            mPlaybackState.setState(PlaybackState.STATE_ERROR, -1, 0);
             if (error != null) {
                 mPlaybackState.setErrorMessage(error.getLocalizedMessage());
             }
-            mPerformer.setPlaybackState(mPlaybackState);
+            mSession.setPlaybackState(mPlaybackState);
             if (mListener != null) {
                 mListener.onPlayStateChanged(mPlaybackState);
             }
@@ -157,27 +154,27 @@ public class PlayerSession {
             switch (newState) {
                 case Renderer.STATE_ENDED:
                 case Renderer.STATE_STOPPED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_STOPPED, position, 0);
+                    mPlaybackState.setState(PlaybackState.STATE_STOPPED, position, 0);
                     break;
                 case Renderer.STATE_INIT:
                 case Renderer.STATE_PREPARING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_BUFFERING, position, 0);
+                    mPlaybackState.setState(PlaybackState.STATE_BUFFERING, position, 0);
                     break;
                 case Renderer.STATE_ERROR:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
+                    mPlaybackState.setState(PlaybackState.STATE_ERROR, position, 0);
                     break;
                 case Renderer.STATE_PAUSED:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, position, 0);
+                    mPlaybackState.setState(PlaybackState.STATE_PAUSED, position, 0);
                     break;
                 case Renderer.STATE_PLAYING:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_PLAYING, position, 1);
+                    mPlaybackState.setState(PlaybackState.STATE_PLAYING, position, 1);
                     break;
                 default:
-                    mPlaybackState.setState(PlaybackState.PLAYSTATE_ERROR, position, 0);
+                    mPlaybackState.setState(PlaybackState.STATE_ERROR, position, 0);
                     mPlaybackState.setErrorMessage("unkown state");
                     break;
             }
-            mPerformer.setPlaybackState(mPlaybackState);
+            mSession.setPlaybackState(mPlaybackState);
             if (mListener != null) {
                 mListener.onPlayStateChanged(mPlaybackState);
             }
@@ -191,8 +188,8 @@ public class PlayerSession {
         public void onFocusLost() {
             Log.d(TAG, "Focus lost, changing state to " + Renderer.STATE_PAUSED);
             long position = mRenderer == null ? -1 : mRenderer.getSeekPosition();
-            mPlaybackState.setState(PlaybackState.PLAYSTATE_PAUSED, position, 0);
-            mPerformer.setPlaybackState(mPlaybackState);
+            mPlaybackState.setState(PlaybackState.STATE_PAUSED, position, 0);
+            mSession.setPlaybackState(mPlaybackState);
             if (mListener != null) {
                 mListener.onPlayStateChanged(mPlaybackState);
             }
@@ -206,7 +203,7 @@ public class PlayerSession {
 
     private class SessionCb extends MediaSession.Callback {
         @Override
-        public void onMediaButton(Intent mediaRequestIntent) {
+        public void onMediaButtonEvent(Intent mediaRequestIntent) {
             if (Intent.ACTION_MEDIA_BUTTON.equals(mediaRequestIntent.getAction())) {
                 KeyEvent event = (KeyEvent) mediaRequestIntent
                         .getParcelableExtra(Intent.EXTRA_KEY_EVENT);
@@ -233,12 +230,12 @@ public class PlayerSession {
                 mRoute = null;
                 mRenderer = new LocalRenderer(mContext, null);
                 mRenderer.registerListener(mRenderListener);
-                updateState(PlaybackState.PLAYSTATE_NONE);
+                updateState(PlaybackState.STATE_NONE);
             } else {
                 // Use remote route
                 mSession.connect(route, mRouteOptions.get(0));
                 mRenderer = null;
-                updateState(PlaybackState.PLAYSTATE_CONNECTING);
+                updateState(PlaybackState.STATE_CONNECTING);
             }
         }
 
@@ -249,7 +246,7 @@ public class PlayerSession {
             mRouteControls.addListener(mRouteListener);
             Log.d(TAG, "Connected to route, registering listener");
             mRenderer = new OneMRPRenderer(mRouteControls);
-            updateState(PlaybackState.PLAYSTATE_NONE);
+            updateState(PlaybackState.STATE_NONE);
         }
 
         @Override
@@ -258,7 +255,7 @@ public class PlayerSession {
         }
     }
 
-    private class TransportListener extends TransportPerformer.Listener {
+    private class TransportListener extends MediaSession.TransportControlsCallback {
         @Override
         public void onPlay() {
             mRenderer.onPlay();

@@ -103,11 +103,11 @@ public class PlayerService extends Service {
         @Override
         public void onPlayStateChanged(PlaybackState state) {
             switch (state.getState()) {
-                case PlaybackState.PLAYSTATE_PLAYING:
+                case PlaybackState.STATE_PLAYING:
                     onPlaybackStarted();
                     break;
-                case PlaybackState.PLAYSTATE_STOPPED:
-                case PlaybackState.PLAYSTATE_ERROR:
+                case PlaybackState.STATE_STOPPED:
+                case PlaybackState.STATE_ERROR:
                     onPlaybackEnded();
                     break;
             }

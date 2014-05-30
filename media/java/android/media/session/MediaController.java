@@ -17,6 +17,7 @@
 package android.media.session;
 
 import android.media.MediaMetadata;
+import android.media.Rating;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,8 +46,8 @@ public final class MediaController {
     private static final String TAG = "SessionController";
 
     private static final int MSG_EVENT = 1;
-    private static final int MESSAGE_PLAYBACK_STATE = 2;
-    private static final int MESSAGE_METADATA = 3;
+    private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
+    private static final int MSG_UPDATE_METADATA = 3;
     private static final int MSG_ROUTE = 4;
 
     private final ISessionController mSessionBinder;
@@ -57,10 +58,11 @@ public final class MediaController {
 
     private boolean mCbRegistered = false;
 
-    private TransportController mTransportController;
+    private TransportControls mTransportController;
 
     private MediaController(ISessionController sessionBinder) {
         mSessionBinder = sessionBinder;
+        mTransportController = new TransportControls();
     }
 
     /**
@@ -70,9 +72,6 @@ public final class MediaController {
         MediaController controller = new MediaController(sessionBinder);
         try {
             controller.mSessionBinder.registerCallbackListener(controller.mCbStub);
-            if (controller.mSessionBinder.isTransportControlEnabled()) {
-                controller.mTransportController = new TransportController(sessionBinder);
-            }
         } catch (RemoteException e) {
             Log.wtf(TAG, "MediaController created with expired token", e);
             controller = null;
@@ -93,33 +92,84 @@ public final class MediaController {
     }
 
     /**
-     * Get a TransportController if the session supports it. If it is not
-     * supported null will be returned.
+     * Get a {@link TransportControls} instance for this session.
      *
-     * @return A TransportController or null
+     * @return A controls instance
      */
-    public TransportController getTransportController() {
+    public TransportControls getTransportControls() {
         return mTransportController;
     }
 
     /**
-     * Send the specified media button to the session. Only media keys can be
-     * sent using this method.
+     * Send the specified media button event to the session. Only media keys can
+     * be sent by this method, other keys will be ignored.
      *
-     * @param keycode The media button keycode, such as
-     *            {@link KeyEvent#KEYCODE_MEDIA_PLAY}.
+     * @param keyEvent The media button event to dispatch.
+     * @return true if the event was sent to the session, false otherwise.
      */
-    public void sendMediaButton(int keycode) {
-        if (!KeyEvent.isMediaKey(keycode)) {
-            throw new IllegalArgumentException("May only send media buttons through "
-                    + "sendMediaButton");
+    public boolean dispatchMediaButtonEvent(KeyEvent keyEvent) {
+        if (keyEvent == null) {
+            throw new IllegalArgumentException("KeyEvent may not be null");
         }
-        // TODO do something better than key down/up events
-        KeyEvent event = new KeyEvent(KeyEvent.ACTION_UP, keycode);
+        if (!KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
+            return false;
+        }
         try {
-            mSessionBinder.sendMediaButton(event);
+            return mSessionBinder.sendMediaButton(keyEvent);
         } catch (RemoteException e) {
-            Log.d(TAG, "Dead object in sendMediaButton", e);
+            // System is dead. =(
+        }
+        return false;
+    }
+
+    /**
+     * Get the current playback state for this session.
+     *
+     * @return The current PlaybackState or null
+     */
+    public PlaybackState getPlaybackState() {
+        try {
+            return mSessionBinder.getPlaybackState();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getPlaybackState.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get the current metadata for this session.
+     *
+     * @return The current MediaMetadata or null.
+     */
+    public MediaMetadata getMetadata() {
+        try {
+            return mSessionBinder.getMetadata();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getMetadata.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get the rating type supported by the session. One of:
+     * <ul>
+     * <li>{@link Rating#RATING_NONE}</li>
+     * <li>{@link Rating#RATING_HEART}</li>
+     * <li>{@link Rating#RATING_THUMB_UP_DOWN}</li>
+     * <li>{@link Rating#RATING_3_STARS}</li>
+     * <li>{@link Rating#RATING_4_STARS}</li>
+     * <li>{@link Rating#RATING_5_STARS}</li>
+     * <li>{@link Rating#RATING_PERCENTAGE}</li>
+     * </ul>
+     *
+     * @return The supported rating type
+     */
+    public int getRatingType() {
+        try {
+            return mSessionBinder.getRatingType();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getRatingType.", e);
+            return Rating.RATING_NONE;
         }
     }
 
@@ -171,7 +221,7 @@ public final class MediaController {
      * @param params Any parameters to include with the command
      * @param cb The callback to receive the result on
      */
-    public void sendCommand(String command, Bundle params, ResultReceiver cb) {
+    public void sendControlCommand(String command, Bundle params, ResultReceiver cb) {
         if (TextUtils.isEmpty(command)) {
             throw new IllegalArgumentException("command cannot be null or empty");
         }
@@ -254,18 +304,10 @@ public final class MediaController {
         return null;
     }
 
-    private void postEvent(String event, Bundle extras) {
+    private final void postMessage(int what, Object obj, Bundle data) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_EVENT, event, extras);
-            }
-        }
-    }
-
-    private void postRouteChanged(RouteInfo route) {
-        synchronized (mLock) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(MSG_ROUTE, route, null);
+                mCallbacks.get(i).post(what, obj, data);
             }
         }
     }
@@ -282,7 +324,7 @@ public final class MediaController {
          *
          * @param event
          */
-        public void onEvent(String event, Bundle extras) {
+        public void onSessionEvent(String event, Bundle extras) {
         }
 
         /**
@@ -292,6 +334,143 @@ public final class MediaController {
          * @hide
          */
         public void onRouteChanged(RouteInfo route) {
+        }
+
+        /**
+         * Override to handle changes in playback state.
+         *
+         * @param state The new playback state of the session
+         */
+        public void onPlaybackStateChanged(PlaybackState state) {
+        }
+
+        /**
+         * Override to handle changes to the current metadata.
+         *
+         * @see MediaMetadata
+         * @param metadata The current metadata for the session or null
+         */
+        public void onMetadataChanged(MediaMetadata metadata) {
+        }
+    }
+
+    /**
+     * Interface for controlling media playback on a session. This allows an app
+     * to send media transport commands to the session.
+     */
+    public final class TransportControls {
+        private static final String TAG = "TransportController";
+
+        private TransportControls() {
+        }
+
+        /**
+         * Request that the player start its playback at its current position.
+         */
+        public void play() {
+            try {
+                mSessionBinder.play();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling play.", e);
+            }
+        }
+
+        /**
+         * Request that the player pause its playback and stay at its current
+         * position.
+         */
+        public void pause() {
+            try {
+                mSessionBinder.pause();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling pause.", e);
+            }
+        }
+
+        /**
+         * Request that the player stop its playback; it may clear its state in
+         * whatever way is appropriate.
+         */
+        public void stop() {
+            try {
+                mSessionBinder.stop();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling stop.", e);
+            }
+        }
+
+        /**
+         * Move to a new location in the media stream.
+         *
+         * @param pos Position to move to, in milliseconds.
+         */
+        public void seekTo(long pos) {
+            try {
+                mSessionBinder.seekTo(pos);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling seekTo.", e);
+            }
+        }
+
+        /**
+         * Start fast forwarding. If playback is already fast forwarding this
+         * may increase the rate.
+         */
+        public void fastForward() {
+            try {
+                mSessionBinder.fastForward();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling fastForward.", e);
+            }
+        }
+
+        /**
+         * Skip to the next item.
+         */
+        public void skipToNext() {
+            try {
+                mSessionBinder.next();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling next.", e);
+            }
+        }
+
+        /**
+         * Start rewinding. If playback is already rewinding this may increase
+         * the rate.
+         */
+        public void rewind() {
+            try {
+                mSessionBinder.rewind();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling rewind.", e);
+            }
+        }
+
+        /**
+         * Skip to the previous item.
+         */
+        public void skipToPrevious() {
+            try {
+                mSessionBinder.previous();
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling previous.", e);
+            }
+        }
+
+        /**
+         * Rate the current content. This will cause the rating to be set for
+         * the current user. The Rating type must match the type returned by
+         * {@link #getRatingType()}.
+         *
+         * @param rating The rating to set for the current content
+         */
+        public void setRating(Rating rating) {
+            try {
+                mSessionBinder.rate(rating);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling rate.", e);
+            }
         }
     }
 
@@ -306,7 +485,7 @@ public final class MediaController {
         public void onEvent(String event, Bundle extras) {
             MediaController controller = mController.get();
             if (controller != null) {
-                controller.postEvent(event, extras);
+                controller.postMessage(MSG_EVENT, event, extras);
             }
         }
 
@@ -314,7 +493,7 @@ public final class MediaController {
         public void onRouteChanged(RouteInfo route) {
             MediaController controller = mController.get();
             if (controller != null) {
-                controller.postRouteChanged(route);
+                controller.postMessage(MSG_ROUTE, route, null);
             }
         }
 
@@ -322,10 +501,7 @@ public final class MediaController {
         public void onPlaybackStateChanged(PlaybackState state) {
             MediaController controller = mController.get();
             if (controller != null) {
-                TransportController tc = controller.getTransportController();
-                if (tc != null) {
-                    tc.postPlaybackStateChanged(state);
-                }
+                controller.postMessage(MSG_UPDATE_PLAYBACK_STATE, state, null);
             }
         }
 
@@ -333,10 +509,7 @@ public final class MediaController {
         public void onMetadataChanged(MediaMetadata metadata) {
             MediaController controller = mController.get();
             if (controller != null) {
-                TransportController tc = controller.getTransportController();
-                if (tc != null) {
-                    tc.postMetadataChanged(metadata);
-                }
+                controller.postMessage(MSG_UPDATE_METADATA, metadata, null);
             }
         }
 
@@ -354,10 +527,17 @@ public final class MediaController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_EVENT:
-                    mCallback.onEvent((String) msg.obj, msg.getData());
+                    mCallback.onSessionEvent((String) msg.obj, msg.getData());
                     break;
                 case MSG_ROUTE:
                     mCallback.onRouteChanged((RouteInfo) msg.obj);
+                    break;
+                case MSG_UPDATE_PLAYBACK_STATE:
+                    mCallback.onPlaybackStateChanged((PlaybackState) msg.obj);
+                    break;
+                case MSG_UPDATE_METADATA:
+                    mCallback.onMetadataChanged((MediaMetadata) msg.obj);
+                    break;
             }
         }
 

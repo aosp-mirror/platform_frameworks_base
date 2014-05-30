@@ -23,6 +23,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.util.Set;
+
 /**
  * Contains metadata about an item, such as the title, artist, etc.
  */
@@ -298,6 +300,15 @@ public final class MediaMetadata implements Parcelable {
      */
     public int size() {
         return mBundle.size();
+    }
+
+    /**
+     * Returns a Set containing the Strings used as keys in this metadata.
+     *
+     * @return a Set of String keys
+     */
+    public Set<String> keySet() {
+        return mBundle.keySet();
     }
 
     /**
