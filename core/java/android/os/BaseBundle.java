@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * A mapping from String values to various types.
  */
-abstract class CommonBundle implements Parcelable, Cloneable {
+public class BaseBundle {
     private static final String TAG = "Bundle";
     static final boolean DEBUG = false;
 
@@ -63,7 +63,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * inside of the Bundle.
      * @param capacity Initial size of the ArrayMap.
      */
-    CommonBundle(ClassLoader loader, int capacity) {
+    BaseBundle(ClassLoader loader, int capacity) {
         mMap = capacity > 0 ?
                 new ArrayMap<String, Object>(capacity) : new ArrayMap<String, Object>();
         mClassLoader = loader == null ? getClass().getClassLoader() : loader;
@@ -72,7 +72,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
     /**
      * Constructs a new, empty Bundle.
      */
-    CommonBundle() {
+    BaseBundle() {
         this((ClassLoader) null, 0);
     }
 
@@ -82,11 +82,11 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @param parcelledData a Parcel containing a Bundle
      */
-    CommonBundle(Parcel parcelledData) {
+    BaseBundle(Parcel parcelledData) {
         readFromParcelInner(parcelledData);
     }
 
-    CommonBundle(Parcel parcelledData, int length) {
+    BaseBundle(Parcel parcelledData, int length) {
         readFromParcelInner(parcelledData, length);
     }
 
@@ -97,7 +97,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param loader An explicit ClassLoader to use when instantiating objects
      * inside of the Bundle.
      */
-    CommonBundle(ClassLoader loader) {
+    BaseBundle(ClassLoader loader) {
         this(loader, 0);
     }
 
@@ -107,7 +107,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @param capacity the initial capacity of the Bundle
      */
-    CommonBundle(int capacity) {
+    BaseBundle(int capacity) {
         this((ClassLoader) null, capacity);
     }
 
@@ -117,7 +117,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @param b a Bundle to be copied.
      */
-    CommonBundle(CommonBundle b) {
+    BaseBundle(BaseBundle b) {
         if (b.mParcelledData != null) {
             if (b.mParcelledData == EMPTY_PARCEL) {
                 mParcelledData = EMPTY_PARCEL;
@@ -148,7 +148,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @hide
      */
-    String getPairValue() {
+    public String getPairValue() {
         unparcel();
         int size = mMap.size();
         if (size > 1) {
@@ -228,7 +228,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
     /**
      * @hide
      */
-    boolean isParcelled() {
+    public boolean isParcelled() {
         return mParcelledData != null;
     }
 
@@ -237,7 +237,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @return the number of mappings as an int.
      */
-    int size() {
+    public int size() {
         unparcel();
         return mMap.size();
     }
@@ -245,7 +245,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
     /**
      * Returns true if the mapping of this Bundle is empty, false otherwise.
      */
-    boolean isEmpty() {
+    public boolean isEmpty() {
         unparcel();
         return mMap.isEmpty();
     }
@@ -253,7 +253,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
     /**
      * Removes all elements from the mapping of this Bundle.
      */
-    void clear() {
+    public void clear() {
         unparcel();
         mMap.clear();
     }
@@ -265,7 +265,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String key
      * @return true if the key is part of the mapping, false otherwise
      */
-    boolean containsKey(String key) {
+    public boolean containsKey(String key) {
         unparcel();
         return mMap.containsKey(key);
     }
@@ -276,7 +276,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String key
      * @return an Object, or null
      */
-    Object get(String key) {
+    public Object get(String key) {
         unparcel();
         return mMap.get(key);
     }
@@ -286,24 +286,24 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @param key a String key
      */
-    void remove(String key) {
+    public void remove(String key) {
         unparcel();
         mMap.remove(key);
     }
 
     /**
-     * Inserts all mappings from the given PersistableBundle into this CommonBundle.
+     * Inserts all mappings from the given PersistableBundle into this BaseBundle.
      *
      * @param bundle a PersistableBundle
      */
-    void putAll(PersistableBundle bundle) {
+    public void putAll(PersistableBundle bundle) {
         unparcel();
         bundle.unparcel();
         mMap.putAll(bundle.mMap);
     }
 
     /**
-     * Inserts all mappings from the given Map into this CommonBundle.
+     * Inserts all mappings from the given Map into this BaseBundle.
      *
      * @param map a Map
      */
@@ -317,7 +317,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      *
      * @return a Set of String keys
      */
-    Set<String> keySet() {
+    public Set<String> keySet() {
         unparcel();
         return mMap.keySet();
     }
@@ -377,7 +377,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value an int, or null
      */
-    void putInt(String key, int value) {
+    public void putInt(String key, int value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -389,7 +389,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a long
      */
-    void putLong(String key, long value) {
+    public void putLong(String key, long value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -413,7 +413,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a double
      */
-    void putDouble(String key, double value) {
+    public void putDouble(String key, double value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -425,7 +425,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a String, or null
      */
-    void putString(String key, String value) {
+    public void putString(String key, String value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -545,7 +545,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value an int array object, or null
      */
-    void putIntArray(String key, int[] value) {
+    public void putIntArray(String key, int[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -557,7 +557,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a long array object, or null
      */
-    void putLongArray(String key, long[] value) {
+    public void putLongArray(String key, long[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -581,7 +581,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a double array object, or null
      */
-    void putDoubleArray(String key, double[] value) {
+    public void putDoubleArray(String key, double[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -593,7 +593,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @param value a String array object, or null
      */
-    void putStringArray(String key, String[] value) {
+    public void putStringArray(String key, String[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -606,18 +606,6 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param value a CharSequence array object, or null
      */
     void putCharSequenceArray(String key, CharSequence[] value) {
-        unparcel();
-        mMap.put(key, value);
-    }
-
-    /**
-     * Inserts a PersistableBundle value into the mapping of this Bundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a Bundle object, or null
-     */
-    void putPersistableBundle(String key, PersistableBundle value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -789,7 +777,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String
      * @return an int value
      */
-    int getInt(String key) {
+    public int getInt(String key) {
         unparcel();
         return getInt(key, 0);
     }
@@ -802,7 +790,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param defaultValue Value to return if key does not exist
      * @return an int value
      */
-    int getInt(String key, int defaultValue) {
+   public int getInt(String key, int defaultValue) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -823,7 +811,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String
      * @return a long value
      */
-    long getLong(String key) {
+    public long getLong(String key) {
         unparcel();
         return getLong(key, 0L);
     }
@@ -836,7 +824,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param defaultValue Value to return if key does not exist
      * @return a long value
      */
-    long getLong(String key, long defaultValue) {
+    public long getLong(String key, long defaultValue) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -891,7 +879,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String
      * @return a double value
      */
-    double getDouble(String key) {
+    public double getDouble(String key) {
         unparcel();
         return getDouble(key, 0.0);
     }
@@ -904,7 +892,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param defaultValue Value to return if key does not exist
      * @return a double value
      */
-    double getDouble(String key, double defaultValue) {
+    public double getDouble(String key, double defaultValue) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -926,7 +914,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @return a String value, or null
      */
-    String getString(String key) {
+    public String getString(String key) {
         unparcel();
         final Object o = mMap.get(key);
         try {
@@ -946,7 +934,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @return the String value associated with the given key, or defaultValue
      *     if no valid String object is currently mapped to that key.
      */
-    String getString(String key, String defaultValue) {
+    public String getString(String key, String defaultValue) {
         final String s = getString(key);
         return (s == null) ? defaultValue : s;
     }
@@ -982,28 +970,6 @@ abstract class CommonBundle implements Parcelable, Cloneable {
     CharSequence getCharSequence(String key, CharSequence defaultValue) {
         final CharSequence cs = getCharSequence(key);
         return (cs == null) ? defaultValue : cs;
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a Bundle value, or null
-     */
-    PersistableBundle getPersistableBundle(String key) {
-        unparcel();
-        Object o = mMap.get(key);
-        if (o == null) {
-            return null;
-        }
-        try {
-            return (PersistableBundle) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "Bundle", e);
-            return null;
-        }
     }
 
     /**
@@ -1190,7 +1156,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @return an int[] value, or null
      */
-    int[] getIntArray(String key) {
+    public int[] getIntArray(String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1212,7 +1178,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @return a long[] value, or null
      */
-    long[] getLongArray(String key) {
+    public long[] getLongArray(String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1256,7 +1222,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @return a double[] value, or null
      */
-    double[] getDoubleArray(String key) {
+    public double[] getDoubleArray(String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1278,7 +1244,7 @@ abstract class CommonBundle implements Parcelable, Cloneable {
      * @param key a String, or null
      * @return a String[] value, or null
      */
-    String[] getStringArray(String key) {
+    public String[] getStringArray(String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {

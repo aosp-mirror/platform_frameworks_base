@@ -32,7 +32,8 @@ import java.util.Set;
  * restored.
  *
  */
-public final class PersistableBundle extends CommonBundle implements XmlUtils.WriteMapCallback {
+public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
+        XmlUtils.WriteMapCallback {
     private static final String TAG_PERSISTABLEMAP = "pbundle_as_map";
     public static final PersistableBundle EMPTY;
     static final Parcel EMPTY_PARCEL;
@@ -40,7 +41,7 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
     static {
         EMPTY = new PersistableBundle();
         EMPTY.mMap = ArrayMap.EMPTY;
-        EMPTY_PARCEL = CommonBundle.EMPTY_PARCEL;
+        EMPTY_PARCEL = BaseBundle.EMPTY_PARCEL;
     }
 
     /**
@@ -48,31 +49,6 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
      */
     public PersistableBundle() {
         super();
-    }
-
-    /**
-     * Constructs a PersistableBundle whose data is stored as a Parcel.  The data
-     * will be unparcelled on first contact, using the assigned ClassLoader.
-     *
-     * @param parcelledData a Parcel containing a PersistableBundle
-     */
-    PersistableBundle(Parcel parcelledData) {
-        super(parcelledData);
-    }
-
-    /* package */ PersistableBundle(Parcel parcelledData, int length) {
-        super(parcelledData, length);
-    }
-
-    /**
-     * Constructs a new, empty PersistableBundle that uses a specific ClassLoader for
-     * instantiating Parcelable and Serializable objects.
-     *
-     * @param loader An explicit ClassLoader to use when instantiating objects
-     * inside of the PersistableBundle.
-     */
-    public PersistableBundle(ClassLoader loader) {
-        super(loader);
     }
 
     /**
@@ -127,6 +103,10 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
         }
     }
 
+    /* package */ PersistableBundle(Parcel parcelledData, int length) {
+        super(parcelledData, length);
+    }
+
     /**
      * Make a PersistableBundle for a single key/value pair.
      *
@@ -139,33 +119,6 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
     }
 
     /**
-     * @hide
-     */
-    @Override
-    public String getPairValue() {
-        return super.getPairValue();
-    }
-
-    /**
-     * Changes the ClassLoader this PersistableBundle uses when instantiating objects.
-     *
-     * @param loader An explicit ClassLoader to use when instantiating objects
-     * inside of the PersistableBundle.
-     */
-    @Override
-    public void setClassLoader(ClassLoader loader) {
-        super.setClassLoader(loader);
-    }
-
-    /**
-     * Return the ClassLoader currently associated with this PersistableBundle.
-     */
-    @Override
-    public ClassLoader getClassLoader() {
-        return super.getClassLoader();
-    }
-
-    /**
      * Clones the current PersistableBundle. The internal map is cloned, but the keys and
      * values to which it refers are copied by reference.
      */
@@ -175,300 +128,15 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
     }
 
     /**
-     * @hide
-     */
-    @Override
-    public boolean isParcelled() {
-        return super.isParcelled();
-    }
-
-    /**
-     * Returns the number of mappings contained in this PersistableBundle.
-     *
-     * @return the number of mappings as an int.
-     */
-    @Override
-    public int size() {
-        return super.size();
-    }
-
-    /**
-     * Returns true if the mapping of this PersistableBundle is empty, false otherwise.
-     */
-    @Override
-    public boolean isEmpty() {
-        return super.isEmpty();
-    }
-
-    /**
-     * Removes all elements from the mapping of this PersistableBundle.
-     */
-    @Override
-    public void clear() {
-        super.clear();
-    }
-
-    /**
-     * Returns true if the given key is contained in the mapping
-     * of this PersistableBundle.
-     *
-     * @param key a String key
-     * @return true if the key is part of the mapping, false otherwise
-     */
-    @Override
-    public boolean containsKey(String key) {
-        return super.containsKey(key);
-    }
-
-    /**
-     * Returns the entry with the given key as an object.
-     *
-     * @param key a String key
-     * @return an Object, or null
-     */
-    @Override
-    public Object get(String key) {
-        return super.get(key);
-    }
-
-    /**
-     * Removes any entry with the given key from the mapping of this PersistableBundle.
-     *
-     * @param key a String key
-     */
-    @Override
-    public void remove(String key) {
-        super.remove(key);
-    }
-
-    /**
-     * Inserts all mappings from the given PersistableBundle into this Bundle.
-     *
-     * @param bundle a PersistableBundle
-     */
-    @Override
-    public void putAll(PersistableBundle bundle) {
-        super.putAll(bundle);
-    }
-
-    /**
-     * Returns a Set containing the Strings used as keys in this PersistableBundle.
-     *
-     * @return a Set of String keys
-     */
-    @Override
-    public Set<String> keySet() {
-        return super.keySet();
-    }
-
-    /**
-     * Inserts an int value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.
-     *
-     * @param key a String, or null
-     * @param value an int, or null
-     */
-    @Override
-    public void putInt(String key, int value) {
-        super.putInt(key, value);
-    }
-
-    /**
-     * Inserts a long value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.
-     *
-     * @param key a String, or null
-     * @param value a long
-     */
-    @Override
-    public void putLong(String key, long value) {
-        super.putLong(key, value);
-    }
-
-    /**
-     * Inserts a double value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.
-     *
-     * @param key a String, or null
-     * @param value a double
-     */
-    @Override
-    public void putDouble(String key, double value) {
-        super.putDouble(key, value);
-    }
-
-    /**
-     * Inserts a String value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a String, or null
-     */
-    @Override
-    public void putString(String key, String value) {
-        super.putString(key, value);
-    }
-
-    /**
-     * Inserts an int array value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value an int array object, or null
-     */
-    @Override
-    public void putIntArray(String key, int[] value) {
-        super.putIntArray(key, value);
-    }
-
-    /**
-     * Inserts a long array value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a long array object, or null
-     */
-    @Override
-    public void putLongArray(String key, long[] value) {
-        super.putLongArray(key, value);
-    }
-
-    /**
-     * Inserts a double array value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a double array object, or null
-     */
-    @Override
-    public void putDoubleArray(String key, double[] value) {
-        super.putDoubleArray(key, value);
-    }
-
-    /**
-     * Inserts a String array value into the mapping of this PersistableBundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a String array object, or null
-     */
-    @Override
-    public void putStringArray(String key, String[] value) {
-        super.putStringArray(key, value);
-    }
-
-    /**
      * Inserts a PersistableBundle value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
      * @param key a String, or null
      * @param value a Bundle object, or null
      */
-    @Override
     public void putPersistableBundle(String key, PersistableBundle value) {
-        super.putPersistableBundle(key, value);
-    }
-
-    /**
-     * Returns the value associated with the given key, or 0 if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @return an int value
-     */
-    @Override
-    public int getInt(String key) {
-        return super.getInt(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @param defaultValue Value to return if key does not exist
-     * @return an int value
-     */
-    @Override
-    public int getInt(String key, int defaultValue) {
-        return super.getInt(key, defaultValue);
-    }
-
-    /**
-     * Returns the value associated with the given key, or 0L if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @return a long value
-     */
-    @Override
-    public long getLong(String key) {
-        return super.getLong(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @param defaultValue Value to return if key does not exist
-     * @return a long value
-     */
-    @Override
-    public long getLong(String key, long defaultValue) {
-        return super.getLong(key, defaultValue);
-    }
-
-    /**
-     * Returns the value associated with the given key, or 0.0 if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @return a double value
-     */
-    @Override
-    public double getDouble(String key) {
-        return super.getDouble(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String
-     * @param defaultValue Value to return if key does not exist
-     * @return a double value
-     */
-    @Override
-    public double getDouble(String key, double defaultValue) {
-        return super.getDouble(key, defaultValue);
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a String value, or null
-     */
-    @Override
-    public String getString(String key) {
-        return super.getString(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
-     *
-     * @param key a String, or null
-     * @param defaultValue Value to return if key does not exist
-     * @return the String value associated with the given key, or defaultValue
-     *     if no valid String object is currently mapped to that key.
-     */
-    @Override
-    public String getString(String key, String defaultValue) {
-        return super.getString(key, defaultValue);
+        unparcel();
+        mMap.put(key, value);
     }
 
     /**
@@ -479,61 +147,18 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
      * @param key a String, or null
      * @return a Bundle value, or null
      */
-    @Override
     public PersistableBundle getPersistableBundle(String key) {
-        return super.getPersistableBundle(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return an int[] value, or null
-     */
-    @Override
-    public int[] getIntArray(String key) {
-        return super.getIntArray(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a long[] value, or null
-     */
-    @Override
-    public long[] getLongArray(String key) {
-        return super.getLongArray(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a double[] value, or null
-     */
-    @Override
-    public double[] getDoubleArray(String key) {
-        return super.getDoubleArray(key);
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a String[] value, or null
-     */
-    @Override
-    public String[] getStringArray(String key) {
-        return super.getStringArray(key);
+        unparcel();
+        Object o = mMap.get(key);
+        if (o == null) {
+            return null;
+        }
+        try {
+            return (PersistableBundle) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "Bundle", e);
+            return null;
+        }
     }
 
     public static final Parcelable.Creator<PersistableBundle> CREATOR =
@@ -548,38 +173,6 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
                     return new PersistableBundle[size];
                 }
             };
-
-    /**
-     * Report the nature of this Parcelable's contents
-     */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * Writes the PersistableBundle contents to a Parcel, typically in order for
-     * it to be passed through an IBinder connection.
-     * @param parcel The parcel to copy this bundle to.
-     */
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        final boolean oldAllowFds = parcel.pushAllowFds(false);
-        try {
-            super.writeToParcelInner(parcel, flags);
-        } finally {
-            parcel.restoreAllowFds(oldAllowFds);
-        }
-    }
-
-    /**
-     * Reads the Parcel contents into this PersistableBundle, typically in order for
-     * it to be passed through an IBinder connection.
-     * @param parcel The parcel to overwrite this bundle from.
-     */
-    public void readFromParcel(Parcel parcel) {
-        super.readFromParcelInner(parcel);
-    }
 
     /** @hide */
     @Override
@@ -614,8 +207,29 @@ public final class PersistableBundle extends CommonBundle implements XmlUtils.Wr
     }
 
     /**
-     * @hide
+     * Report the nature of this Parcelable's contents
      */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Writes the PersistableBundle contents to a Parcel, typically in order for
+     * it to be passed through an IBinder connection.
+     * @param parcel The parcel to copy this bundle to.
+     */
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        final boolean oldAllowFds = parcel.pushAllowFds(false);
+        try {
+            writeToParcelInner(parcel, flags);
+        } finally {
+            parcel.restoreAllowFds(oldAllowFds);
+        }
+    }
+
+    /** @hide */
     public static PersistableBundle restoreFromXml(XmlPullParser in) throws IOException,
             XmlPullParserException {
         final int outerDepth = in.getDepth();
