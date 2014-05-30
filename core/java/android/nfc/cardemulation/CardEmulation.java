@@ -303,12 +303,13 @@ public final class CardEmulation {
     }
 
     /**
-     * Registers a group of AIDs for the specified service.
+     * Registers a list of AIDs for a specific category for the
+     * specified service.
      *
-     * <p>If an AID group for that category was previously
+     * <p>If a list of AIDs for that category was previously
      * registered for this service (either statically
      * through the manifest, or dynamically by using this API),
-     * that AID group will be replaced with this one.
+     * that list of AIDs will be replaced with this one.
      *
      * <p>Note that you can only register AIDs for a service that
      * is running under the same UID as the caller of this API. Typically
@@ -317,10 +318,13 @@ public final class CardEmulation {
      * be shared between packages using shared UIDs.
      *
      * @param service The component name of the service
-     * @param aidGroup The group of AIDs to be registered
+     * @param category The category of AIDs to be registered
+     * @param aids A list containing the AIDs to be registered
      * @return whether the registration was successful.
      */
-    public boolean registerAidGroupForService(ComponentName service, AidGroup aidGroup) {
+    public boolean registerAidsForService(ComponentName service, String category,
+            List<String> aids) {
+        AidGroup aidGroup = new AidGroup(aids, category);
         try {
             return sService.registerAidGroupForService(UserHandle.myUserId(), service, aidGroup);
         } catch (RemoteException e) {
@@ -341,21 +345,24 @@ public final class CardEmulation {
     }
 
     /**
-     * Retrieves the currently registered AID group for the specified
+     * Retrieves the currently registered AIDs for the specified
      * category for a service.
      *
-     * <p>Note that this will only return AID groups that were dynamically
-     * registered using {@link #registerAidGroupForService(ComponentName, AidGroup)}
-     * method. It will *not* return AID groups that were statically registered
+     * <p>Note that this will only return AIDs that were dynamically
+     * registered using {@link #registerAidsForService(ComponentName, String, List)}
+     * method. It will *not* return AIDs that were statically registered
      * in the manifest.
      *
      * @param service The component name of the service
-     * @param category The category of the AID group to be returned, e.g. {@link #CATEGORY_PAYMENT}
-     * @return The AID group, or null if it couldn't be found
+     * @param category The category for which the AIDs were registered,
+     *                 e.g. {@link #CATEGORY_PAYMENT}
+     * @return The list of AIDs registered for this category, or null if it couldn't be found.
      */
-    public AidGroup getAidGroupForService(ComponentName service, String category) {
+    public List<String> getAidsForService(ComponentName service, String category) {
         try {
-            return sService.getAidGroupForService(UserHandle.myUserId(), service, category);
+            AidGroup group =  sService.getAidGroupForService(UserHandle.myUserId(), service,
+                    category);
+            return (group != null ? group.getAids() : null);
         } catch (RemoteException e) {
             recoverService();
             if (sService == null) {
@@ -363,7 +370,9 @@ public final class CardEmulation {
                 return null;
             }
             try {
-                return sService.getAidGroupForService(UserHandle.myUserId(), service, category);
+                AidGroup group = sService.getAidGroupForService(UserHandle.myUserId(), service,
+                        category);
+                return (group != null ? group.getAids() : null);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover CardEmulationService.");
                 return null;
@@ -372,21 +381,21 @@ public final class CardEmulation {
     }
 
     /**
-     * Removes a registered AID group for the specified category for the
+     * Removes a previously registered list of AIDs for the specified category for the
      * service provided.
      *
-     * <p>Note that this will only remove AID groups that were dynamically
-     * registered using the {@link #registerAidGroupForService(ComponentName, AidGroup)}
-     * method. It will *not* remove AID groups that were statically registered in
-     * the manifest. If a dynamically registered AID group is removed using
+     * <p>Note that this will only remove AIDs that were dynamically
+     * registered using the {@link #registerAidsForService(ComponentName, String, List)}
+     * method. It will *not* remove AIDs that were statically registered in
+     * the manifest. If dynamically registered AIDs are removed using
      * this method, and a statically registered AID group for the same category
      * exists in the manifest, the static AID group will become active again.
      *
      * @param service The component name of the service
-     * @param category The category of the AID group to be removed, e.g. {@link #CATEGORY_PAYMENT}
+     * @param category The category of the AIDs to be removed, e.g. {@link #CATEGORY_PAYMENT}
      * @return whether the group was successfully removed.
      */
-    public boolean removeAidGroupForService(ComponentName service, String category) {
+    public boolean removeAidsForService(ComponentName service, String category) {
         try {
             return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
         } catch (RemoteException e) {
