@@ -1681,6 +1681,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethodId = null;
             unbindCurrentMethodLocked(true, false);
         }
+        // Here is not the perfect place to reset the switching controller. Ideally
+        // mSwitchingController and mSettings should be able to share the same state.
+        // TODO: Make sure that mSwitchingController and mSettings are sharing the
+        // the same enabled IMEs list.
+        mSwitchingController.resetCircularListLocked(mContext);
     }
 
     /* package */ void setInputMethodLocked(String id, int subtypeId) {
@@ -2650,7 +2655,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodEnabledLocked(defaultImiId, true);
             }
         }
-
+        // Here is not the perfect place to reset the switching controller. Ideally
+        // mSwitchingController and mSettings should be able to share the same state.
+        // TODO: Make sure that mSwitchingController and mSettings are sharing the
+        // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
     }
 
