@@ -21,6 +21,9 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -28,10 +31,13 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -41,7 +47,8 @@ import com.android.internal.widget.LockPatternView;
 import java.io.IOException;
 import java.util.List;
 
-public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView {
+public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView,
+        AppearAnimationCreator<LockPatternView.CellState> {
 
     private static final String TAG = "SecurityPatternView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -59,6 +66,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final AppearAnimationUtils mAppearAnimationUtils;
 
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
@@ -87,6 +95,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private SecurityMessageDisplay mSecurityMessageDisplay;
     private View mEcaView;
     private Drawable mBouncerFrame;
+    private ViewGroup mKeyguardBouncerFrame;
+    private KeyguardMessageArea mHelpMessage;
 
     enum FooterMode {
         Normal,
@@ -101,6 +111,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     public KeyguardPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mAppearAnimationUtils = new AppearAnimationUtils(context, 1.5f /* delayScale */,
+                2.0f /* transitionScale */);
     }
 
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
@@ -148,6 +160,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (bouncerFrameView != null) {
             mBouncerFrame = bouncerFrameView.getBackground();
         }
+
+        mKeyguardBouncerFrame = (ViewGroup) findViewById(R.id.keyguard_bouncer_frame);
+        mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
     }
 
     private void updateFooter(FooterMode mode) {
@@ -403,8 +418,69 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void startAppearAnimation() {
-        // TODO: Fancy animation.
-        setAlpha(0);
-        animate().alpha(1).withLayer().setDuration(200);
+        enableClipping(false);
+        mAppearAnimationUtils.startAppearAnimation(
+                mLockPatternView.getCellStates(),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        enableClipping(true);
+                    }
+                },
+                this);
+        if (!TextUtils.isEmpty(mHelpMessage.getText())) {
+            mAppearAnimationUtils.createAnimation(mHelpMessage, 0,
+                    AppearAnimationUtils.APPEAR_DURATION,
+                    mAppearAnimationUtils.getStartTranslation(),
+                    mAppearAnimationUtils.getInterpolator(),
+                    null /* finishRunnable */);
+        }
+    }
+
+    private void enableClipping(boolean enable) {
+        setClipChildren(enable);
+        mKeyguardBouncerFrame.setClipToPadding(enable);
+        mKeyguardBouncerFrame.setClipChildren(enable);
+    }
+
+    @Override
+    public void createAnimation(final LockPatternView.CellState animatedCell, long delay,
+            long duration, float startTranslationY, Interpolator interpolator,
+            final Runnable finishListener) {
+        animatedCell.scale = 0.0f;
+        animatedCell.translateY = startTranslationY;
+        ValueAnimator animator = ValueAnimator.ofFloat(startTranslationY, 0.0f);
+        animator.setInterpolator(interpolator);
+        animator.setDuration(duration);
+        animator.setStartDelay(delay);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float animatedFraction = animation.getAnimatedFraction();
+                animatedCell.scale = animatedFraction;
+                animatedCell.translateY = (float) animation.getAnimatedValue();
+                mLockPatternView.invalidate();
+            }
+        });
+        if (finishListener != null) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    finishListener.run();
+                }
+            });
+
+            // Also animate the Emergency call
+            mAppearAnimationUtils.createAnimation(mEcaView, delay, duration, startTranslationY,
+            interpolator, null);
+
+            // And the forgot pattern button
+            if (mForgotPatternButton.getVisibility() == View.VISIBLE) {
+                mAppearAnimationUtils.createAnimation(mForgotPatternButton, delay, duration,
+                        startTranslationY, interpolator, null);
+            }
+        }
+        animator.start();
+        mLockPatternView.invalidate();
     }
 }
