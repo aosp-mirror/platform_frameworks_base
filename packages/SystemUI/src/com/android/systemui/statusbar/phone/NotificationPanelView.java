@@ -48,6 +48,8 @@ public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
         View.OnClickListener, KeyguardPageSwipeHelper.Callback {
 
+    private static float EXPANSION_RUBBER_BAND_EXTRA_FACTOR = 0.4f;
+
     private KeyguardPageSwipeHelper mPageSwiper;
     PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
@@ -743,8 +745,11 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onOverExpansionChanged(float overExpansion) {
         float currentOverScroll = mNotificationStackScroller.getCurrentOverScrolledPixels(true);
-        mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + overExpansion
-                        - mOverExpansion, true /* onTop */, false /* animate */);
+        float expansionChange = overExpansion - mOverExpansion;
+        expansionChange *= EXPANSION_RUBBER_BAND_EXTRA_FACTOR;
+        mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + expansionChange,
+                true /* onTop */,
+                false /* animate */);
         super.onOverExpansionChanged(overExpansion);
     }
 
