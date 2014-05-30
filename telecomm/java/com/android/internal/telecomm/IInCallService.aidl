@@ -40,4 +40,6 @@ oneway interface IInCallService {
     void setPostDialWait(String callId, String remaining);
 
     void onAudioStateChanged(in CallAudioState audioState);
+
+    void bringToForeground(boolean showDialpad);
 }

@@ -42,6 +42,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_SET_POST_DIAL = 4;
     private static final int MSG_SET_POST_DIAL_WAIT = 5;
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 6;
+    private static final int MSG_BRING_TO_FOREGROUND = 7;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -82,6 +83,9 @@ public abstract class InCallService extends Service {
                 }
                 case MSG_ON_AUDIO_STATE_CHANGED:
                     onAudioStateChanged((CallAudioState) msg.obj);
+                    break;
+                case MSG_BRING_TO_FOREGROUND:
+                    bringToForeground(msg.arg1 == 1);
                     break;
                 default:
                     break;
@@ -129,6 +133,12 @@ public abstract class InCallService extends Service {
         @Override
         public void onAudioStateChanged(CallAudioState audioState) {
             mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void bringToForeground(boolean showDialpad) {
+            mHandler.obtainMessage(MSG_BRING_TO_FOREGROUND, showDialpad ? 1 : 0, 0).sendToTarget();
         }
     }
 
@@ -206,4 +216,11 @@ public abstract class InCallService extends Service {
      * @param audioState The new {@link CallAudioState}.
      */
     protected abstract void onAudioStateChanged(CallAudioState audioState);
+
+    /**
+     * Brings the in-call screen to the foreground.
+     *
+     * @param showDialpad If true, put up the dialpad when the screen is shown.
+     */
+    protected abstract void bringToForeground(boolean showDialpad);
 }
