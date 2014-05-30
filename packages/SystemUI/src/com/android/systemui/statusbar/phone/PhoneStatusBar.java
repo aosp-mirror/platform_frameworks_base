@@ -2348,16 +2348,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned) {
+    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
-        try {
-            // Dismiss the lock screen when Settings starts.
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-        } catch (RemoteException e) {
-        }
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        animateCollapsePanels();
+
+        dismissKeyguardThenExecute(new OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                try {
+                    // Dismiss the lock screen when Settings starts.
+                    ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                } catch (RemoteException e) {
+                }
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                animateCollapsePanels();
+
+                return DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+            }
+        });
     }
 
     private View.OnClickListener mClockClickListener = new View.OnClickListener() {
@@ -2418,7 +2426,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     @Override
-    protected void startNotificationActivity(OnDismissAction action) {
+    protected void dismissKeyguardThenExecute(OnDismissAction action) {
         if (mStatusBarKeyguardViewManager.isShowing()) {
             mStatusBarKeyguardViewManager.dismissWithAction(action);
         } else {

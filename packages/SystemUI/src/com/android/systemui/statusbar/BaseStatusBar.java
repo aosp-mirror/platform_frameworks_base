@@ -83,6 +83,7 @@ import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 
@@ -116,6 +117,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
+
+    /** If true, delays dismissing the Keyguard until the ActivityManager calls back. */
+    protected static final boolean DELAY_DISMISS_TO_ACTIVITY_LAUNCH = false;
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -228,7 +232,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
-                startNotificationActivity(new OnDismissAction() {
+                dismissKeyguardThenExecute(new OnDismissAction() {
                     @Override
                     public boolean onDismiss() {
                         try {
@@ -250,7 +254,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                             visibilityChanged(false);
                         }
-                        return handled; // Wait for activity start.
+                        // Wait for activity start.
+                        return handled && DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
                     }
                 });
                 return true;
@@ -479,7 +484,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      * Takes the necessary steps to prepare the status bar for starting an activity, then starts it.
      * @param action A dismiss action that is called if it's safe to start the activity.
      */
-    protected void startNotificationActivity(OnDismissAction action) {
+    protected void dismissKeyguardThenExecute(OnDismissAction action) {
         action.onDismiss();
     }
 
@@ -1049,7 +1054,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         public void onClick(final View v) {
-            startNotificationActivity(new OnDismissAction() {
+            dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
                     try {
                         // The intent we are sending is for the application, which
@@ -1069,7 +1074,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         v.getLocationOnScreen(pos);
                         Intent overlay = new Intent();
                         overlay.setSourceBounds(new Rect(pos[0], pos[1],
-                                pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+                                pos[0] + v.getWidth(), pos[1] + v.getHeight()));
                         try {
                             mIntent.send(mContext, 0, overlay);
                             sent = true;
@@ -1094,7 +1099,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     visibilityChanged(false);
 
                     boolean waitForActivityLaunch = sent && mIntent.isActivity();
-                    return waitForActivityLaunch;
+                    return waitForActivityLaunch && DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
                 }
             });
         }
