@@ -1466,4 +1466,10 @@ public final class BridgeContext extends Context {
         // pass
         return new File[0];
     }
+
+    @Override
+    public File[] getExternalMediaDirs() {
+        // pass
+        return new File[0];
+    }
 }

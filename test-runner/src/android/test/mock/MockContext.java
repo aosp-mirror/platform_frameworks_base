@@ -608,4 +608,9 @@ public class MockContext extends Context {
     public File[] getExternalCacheDirs() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public File[] getExternalMediaDirs() {
+        throw new UnsupportedOperationException();
+    }
 }
