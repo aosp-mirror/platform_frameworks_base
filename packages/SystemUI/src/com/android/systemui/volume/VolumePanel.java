@@ -25,6 +25,8 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
@@ -45,6 +47,7 @@ import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -304,17 +307,26 @@ public class VolumePanel extends Handler {
             lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
             lp.width = res.getDimensionPixelSize(com.android.systemui.R.dimen.volume_panel_width);
             lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
+            lp.format = PixelFormat.TRANSLUCENT;
             lp.windowAnimations = R.style.Animation_VolumePanel;
-            window.setBackgroundDrawableResource(com.android.systemui.R.drawable.qs_panel_background);
             window.setAttributes(lp);
             window.setGravity(Gravity.TOP);
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.requestFeature(Window.FEATURE_NO_TITLE);
             window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE
                     | LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                    | LayoutParams.FLAG_HARDWARE_ACCELERATED);
             mDialog.setCanceledOnTouchOutside(true);
-            mDialog.setContentView(layoutId);
+            // temporary workaround for no window shadows
+            final FrameLayout layout = new FrameLayout(mContext);
+            final int z = res.getDimensionPixelSize(com.android.systemui.R.dimen.volume_panel_z);
+            layout.setPadding(z, z, z, z);
+            final View v = LayoutInflater.from(mContext).inflate(layoutId, layout, false);
+            v.setBackgroundResource(com.android.systemui.R.drawable.qs_panel_background);
+            v.setElevation(z);
+            layout.addView(v);
+            mDialog.setContentView(layout);
             mDialog.setOnDismissListener(new OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
@@ -324,6 +336,7 @@ public class VolumePanel extends Handler {
             });
 
             mDialog.create();
+            mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
 
             mView = window.findViewById(R.id.content);
             mView.setOnTouchListener(new View.OnTouchListener() {
