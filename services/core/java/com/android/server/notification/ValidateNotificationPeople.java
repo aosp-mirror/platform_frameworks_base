@@ -49,9 +49,20 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private static final int MAX_PEOPLE = 10;
     private static final int PEOPLE_CACHE_SIZE = 200;
 
-    private static final float NONE = 0f;
-    private static final float VALID_CONTACT = 0.5f;
-    private static final float STARRED_CONTACT = 1f;
+    /** Indicates that the notification does not reference any valid contacts. */
+    static final float NONE = 0f;
+
+    /**
+     * Affinity will be equal to or greater than this value on notifications
+     * that reference a valid contact.
+     */
+    static final float VALID_CONTACT = 0.5f;
+
+    /**
+     * Affinity will be equal to or greater than this value on notifications
+     * that reference a starred contact.
+     */
+    static final float STARRED_CONTACT = 1f;
 
     protected boolean mEnabled;
     private Context mContext;

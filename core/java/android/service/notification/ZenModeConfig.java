@@ -41,12 +41,18 @@ public class ZenModeConfig implements Parcelable {
     public static final String SLEEP_MODE_NIGHTS = "nights";
     public static final String SLEEP_MODE_WEEKNIGHTS = "weeknights";
 
+    public static final int SOURCE_ANYONE = 0;
+    public static final int SOURCE_CONTACT = 1;
+    public static final int SOURCE_STAR = 2;
+    public static final int MAX_SOURCE = SOURCE_STAR;
+
     private static final int XML_VERSION = 1;
     private static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ALLOW_TAG = "allow";
     private static final String ALLOW_ATT_CALLS = "calls";
     private static final String ALLOW_ATT_MESSAGES = "messages";
+    private static final String ALLOW_ATT_FROM = "from";
     private static final String SLEEP_TAG = "sleep";
     private static final String SLEEP_ATT_MODE = "mode";
 
@@ -61,6 +67,7 @@ public class ZenModeConfig implements Parcelable {
 
     public boolean allowCalls;
     public boolean allowMessages;
+    public int allowFrom = SOURCE_ANYONE;
 
     public String sleepMode;
     public int sleepStartHour;
@@ -92,6 +99,7 @@ public class ZenModeConfig implements Parcelable {
             conditionIds = new Uri[len];
             source.readTypedArray(conditionIds, Uri.CREATOR);
         }
+        allowFrom = source.readInt();
     }
 
     @Override
@@ -120,6 +128,7 @@ public class ZenModeConfig implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(allowFrom);
     }
 
     @Override
@@ -127,6 +136,7 @@ public class ZenModeConfig implements Parcelable {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
             .append("allowCalls=").append(allowCalls)
             .append(",allowMessages=").append(allowMessages)
+            .append(",allowFrom=").append(sourceToString(allowFrom))
             .append(",sleepMode=").append(sleepMode)
             .append(",sleepStart=").append(sleepStartHour).append('.').append(sleepStartMinute)
             .append(",sleepEnd=").append(sleepEndHour).append('.').append(sleepEndMinute)
@@ -137,6 +147,19 @@ public class ZenModeConfig implements Parcelable {
             .append(']').toString();
     }
 
+    public static String sourceToString(int source) {
+        switch (source) {
+            case SOURCE_ANYONE:
+                return "anyone";
+            case SOURCE_CONTACT:
+                return "contacts";
+            case SOURCE_STAR:
+                return "stars";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ZenModeConfig)) return false;
@@ -144,6 +167,7 @@ public class ZenModeConfig implements Parcelable {
         final ZenModeConfig other = (ZenModeConfig) o;
         return other.allowCalls == allowCalls
                 && other.allowMessages == allowMessages
+                && other.allowFrom == allowFrom
                 && Objects.equals(other.sleepMode, sleepMode)
                 && other.sleepStartHour == sleepStartHour
                 && other.sleepStartMinute == sleepStartMinute
@@ -155,8 +179,8 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowCalls, allowMessages, sleepMode, sleepStartHour,
-                sleepStartMinute, sleepEndHour, sleepEndMinute,
+        return Objects.hash(allowCalls, allowMessages, allowFrom, sleepMode,
+                sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
                 Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds));
     }
 
@@ -191,6 +215,10 @@ public class ZenModeConfig implements Parcelable {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS, false);
                     rt.allowMessages = safeBoolean(parser, ALLOW_ATT_MESSAGES, false);
+                    rt.allowFrom = safeInt(parser, ALLOW_ATT_FROM, SOURCE_ANYONE);
+                    if (rt.allowFrom < SOURCE_ANYONE || rt.allowFrom > MAX_SOURCE) {
+                        throw new IndexOutOfBoundsException("bad source in config:" + rt.allowFrom);
+                    }
                 } else if (SLEEP_TAG.equals(tag)) {
                     final String mode = parser.getAttributeValue(null, SLEEP_ATT_MODE);
                     rt.sleepMode = (SLEEP_MODE_NIGHTS.equals(mode)
@@ -224,6 +252,7 @@ public class ZenModeConfig implements Parcelable {
         out.startTag(null, ALLOW_TAG);
         out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
         out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
+        out.attribute(null, ALLOW_ATT_FROM, Integer.toString(allowFrom));
         out.endTag(null, ALLOW_TAG);
 
         out.startTag(null, SLEEP_TAG);
