@@ -1122,6 +1122,12 @@
         interface of a voice interaction service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageVoiceKeyphrases">manage voice keyphrases</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageVoiceKeyphrases">Allows the holder to manage the keyphrases for voice hotword detection.
+        Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindRemoteDisplay">bind to a remote display</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindRemoteDisplay">Allows the holder to bind to the top-level

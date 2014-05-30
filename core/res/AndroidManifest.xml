@@ -2070,6 +2070,14 @@
         android:description="@string/permdesc_bindVoiceInteraction"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by hotword enrollment application,
+         to ensure that only the system can interact with it.
+         @hide <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES"
+        android:label="@string/permlab_manageVoiceKeyphrases"
+        android:description="@string/permdesc_manageVoiceKeyphrases"
+        android:protectionLevel="signature|system" />
+
     <!-- Must be required by a {@link com.android.media.remotedisplay.RemoteDisplayProvider},
          to ensure that only the system can bind to it.
          @hide -->
