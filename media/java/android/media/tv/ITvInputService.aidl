@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
-import android.content.ComponentName;
+import android.media.tv.ITvInputServiceCallback;
+import android.media.tv.ITvInputSessionCallback;
+import android.view.InputChannel;
 
 /**
- * Helper interface for ITvInputService to allow the TV input to notify the client when its status
- * has been changed.
+ * Top-level interface to a TV input component (implemented in a Service).
  * @hide
  */
-oneway interface ITvInputServiceCallback {
-    void onAvailabilityChanged(in String inputId, boolean isAvailable);
+oneway interface ITvInputService {
+    void registerCallback(ITvInputServiceCallback callback);
+    void unregisterCallback(in ITvInputServiceCallback callback);
+    void createSession(in InputChannel channel, ITvInputSessionCallback callback);
 }

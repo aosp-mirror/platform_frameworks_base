@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 parcelable TvInputInfo;

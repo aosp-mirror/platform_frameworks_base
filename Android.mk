@@ -216,14 +216,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
-	core/java/android/tv/ITvInputClient.aidl \
-	core/java/android/tv/ITvInputHardware.aidl \
-	core/java/android/tv/ITvInputHardwareCallback.aidl \
-	core/java/android/tv/ITvInputManager.aidl \
-	core/java/android/tv/ITvInputService.aidl \
-	core/java/android/tv/ITvInputServiceCallback.aidl \
-	core/java/android/tv/ITvInputSession.aidl \
-	core/java/android/tv/ITvInputSessionCallback.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
@@ -321,6 +313,14 @@ LOCAL_SRC_FILES += \
         media/java/android/media/session/ISession.aidl \
         media/java/android/media/session/ISessionCallback.aidl \
         media/java/android/media/session/ISessionManager.aidl \
+	media/java/android/media/tv/ITvInputClient.aidl \
+	media/java/android/media/tv/ITvInputHardware.aidl \
+	media/java/android/media/tv/ITvInputHardwareCallback.aidl \
+	media/java/android/media/tv/ITvInputManager.aidl \
+	media/java/android/media/tv/ITvInputService.aidl \
+	media/java/android/media/tv/ITvInputServiceCallback.aidl \
+	media/java/android/media/tv/ITvInputSession.aidl \
+	media/java/android/media/tv/ITvInputSessionCallback.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallService.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
@@ -425,7 +425,6 @@ LOCAL_JAR_PACKAGES := \
 	android.test\* \
 	android.text\* \
 	android.transition\* \
-	android.tv\* \
 	android.util\* \
 	android.view\* \
 	android.webkit\* \

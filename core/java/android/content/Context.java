@@ -2742,11 +2742,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.tv.TvInputManager} for interacting with TV inputs on the
-     * device.
+     * {@link android.media.tv.TvInputManager} for interacting with TV inputs
+     * on the device.
      *
      * @see #getSystemService
-     * @see android.tv.TvInputManager
+     * @see android.media.tv.TvInputManager
      */
     public static final String TV_INPUT_SERVICE = "tv_input";
 
