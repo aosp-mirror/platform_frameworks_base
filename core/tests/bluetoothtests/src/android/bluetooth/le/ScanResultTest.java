@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package android.bluetooth;
+package android.bluetooth.le;
 
-import android.bluetooth.BluetoothLeScanner.ScanResult;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -25,17 +26,18 @@ import junit.framework.TestCase;
 /**
  * Unit test cases for Bluetooth LE scans.
  * <p>
- * To run this test, use adb shell am instrument -e class 'android.bluetooth.BluetoothLeScannerTest'
- * -w 'com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner'
+ * To run this test, use adb shell am instrument -e class 'android.bluetooth.ScanResultTest' -w
+ * 'com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner'
  */
-public class BluetoothLeScannerTest extends TestCase {
+public class ScanResultTest extends TestCase {
 
     /**
      * Test read and write parcel of ScanResult
      */
     @SmallTest
     public void testScanResultParceling() {
-        BluetoothDevice device = new BluetoothDevice("01:02:03:04:05:06");
+        BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+                "01:02:03:04:05:06");
         byte[] scanRecord = new byte[] {
                 1, 2, 3 };
         int rssi = -10;

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.bluetooth;
+package android.bluetooth.le;
 
-parcelable BluetoothLeAdvertiser.Settings;
+parcelable ScanResult;
