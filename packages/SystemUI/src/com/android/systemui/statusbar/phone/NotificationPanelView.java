@@ -72,6 +72,7 @@ public class NotificationPanelView extends PanelView implements
      */
     private boolean mIntercepting;
     private boolean mQsExpanded;
+    private boolean mQsFullyExpanded;
     private boolean mKeyguardShowing;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
@@ -167,7 +168,9 @@ public class NotificationPanelView extends PanelView implements
         mQsMinExpansionHeight = mHeader.getCollapsedHeight() + mQsPeekHeight;
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
         if (mQsExpanded) {
-            setQsStackScrollerPadding(mQsMaxExpansionHeight);
+            if (mQsFullyExpanded) {
+                setQsStackScrollerPadding(mQsMaxExpansionHeight);
+            }
         } else {
             setQsExpansion(mQsMinExpansionHeight);
             positionClockAndNotifications();
@@ -524,6 +527,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
+        mQsFullyExpanded = height == mQsMaxExpansionHeight;
         if (height > mQsMinExpansionHeight && !mQsExpanded) {
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
