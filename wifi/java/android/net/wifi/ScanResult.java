@@ -90,6 +90,19 @@ public class ScanResult implements Parcelable {
      */
     public final static int UNSPECIFIED = -1;
 
+    /** information element from beacon
+     * @hide
+     */
+    public static class InformationElement {
+        public int id;
+        public byte[] bytes;
+    }
+
+    /** information elements found in the beacon
+     * @hide
+     */
+    public InformationElement informationElements[];
+
     /** {@hide} */
     public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
             long tsf) {
@@ -199,6 +212,16 @@ public class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        if (informationElements != null) {
+            dest.writeInt(informationElements.length);
+            for (int i = 0; i < informationElements.length; i++) {
+                dest.writeInt(informationElements[i].id);
+                dest.writeInt(informationElements[i].bytes.length);
+                dest.writeByteArray(informationElements[i].bytes);
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -223,6 +246,17 @@ public class ScanResult implements Parcelable {
                 if (in.readInt() == 1) {
                     sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }
+                int n = in.readInt();
+                if (n != 0) {
+                    sr.informationElements = new InformationElement[n];
+                    for (int i = 0; i < n; i++) {
+                        sr.informationElements[i] = new InformationElement();
+                        sr.informationElements[i].id = in.readInt();
+                        int len = in.readInt();
+                        sr.informationElements[i].bytes = new byte[len];
+                        in.readByteArray(sr.informationElements[i].bytes);
+                    }
+                }
                 return sr;
             }
 
@@ -230,5 +264,4 @@ public class ScanResult implements Parcelable {
                 return new ScanResult[size];
             }
         };
-
 }
