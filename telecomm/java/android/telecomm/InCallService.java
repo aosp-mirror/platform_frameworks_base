@@ -206,4 +206,11 @@ public abstract class InCallService extends Service {
      * @param audioState The new {@link CallAudioState}.
      */
     protected abstract void onAudioStateChanged(CallAudioState audioState);
+
+    /**
+     * Brings the in-call screen to the foreground.
+     *
+     * @param showDialpad If true, put up the dialpad when the screen is shown.
+     */
+    protected abstract void bringToForeground(boolean showDialpad);
 }
