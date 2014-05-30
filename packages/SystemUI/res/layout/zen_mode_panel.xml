@@ -21,9 +21,7 @@
     android:layout_height="wrap_content"
     android:background="@color/system_primary_color"
     android:orientation="vertical"
-    android:paddingTop="@dimen/qs_panel_padding"
-    android:paddingLeft="@dimen/qs_panel_padding"
-    android:paddingRight="@dimen/qs_panel_padding" >
+    android:paddingTop="@dimen/qs_panel_padding" >
 
     <TextView
         android:id="@android:id/title"
@@ -31,8 +29,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="8dp"
+        android:layout_marginStart="@dimen/qs_panel_padding"
+        android:layout_marginEnd="@dimen/qs_panel_padding"
         android:text="@string/zen_mode_title"
-        android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+        android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary" />
 
     <LinearLayout
         android:id="@android:id/content"
@@ -46,6 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
+        android:layout_marginEnd="4dp"
         android:layout_gravity="end"
         android:text="@string/quick_settings_more_settings"
         android:textAppearance="@style/TextAppearance.QS.DetailButton" />

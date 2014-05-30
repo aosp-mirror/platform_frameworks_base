@@ -26,7 +26,7 @@
         android:layout_alignParentStart="true"
         android:contentDescription="@string/accessibility_quick_settings_close"
         android:padding="@dimen/qs_panel_padding"
-        android:src="@drawable/ic_qs_close" />
+        android:src="@drawable/ic_qs_back" />
 
     <TextView
         android:id="@android:id/title"
