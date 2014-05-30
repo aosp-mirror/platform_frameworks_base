@@ -588,7 +588,7 @@ public class WindowDecorActionBar extends ActionBar implements
             return;
         }
 
-        final FragmentTransaction trans = ((View) mDecorToolbar).isInEditMode() ? null :
+        final FragmentTransaction trans = mDecorToolbar.getViewGroup().isInEditMode() ? null :
                 mActivity.getFragmentManager().beginTransaction().disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
@@ -847,7 +847,7 @@ public class WindowDecorActionBar extends ActionBar implements
         mDecorToolbar.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
         if (mTabScrollView != null && !mDecorToolbar.hasEmbeddedTabs() &&
-                isCollapsed((View) mDecorToolbar)) {
+                isCollapsed(mDecorToolbar.getViewGroup())) {
             mTabScrollView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         }
     }
@@ -959,7 +959,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
             // Clear out the context mode views after the animation finishes
             mContextView.closeMode();
-            ((View) mDecorToolbar).sendAccessibilityEvent(
+            mDecorToolbar.getViewGroup().sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             mOverlayLayout.setHideOnContentScrollEnabled(mHideOnContentScroll);
 
