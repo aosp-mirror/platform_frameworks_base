@@ -28,8 +28,6 @@ import android.text.TextUtils;
 import android.util.LruCache;
 import android.util.Slog;
 
-import com.android.server.notification.NotificationManagerService.NotificationRecord;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
