@@ -913,6 +913,22 @@ please see themes_device_defaults.xml.
         <item name="windowNoTitle">true</item>
     </style>
 
+    <!-- Quantum theme for an activity that is to be used for voice interaction.
+         This gives the activity a floating dialog style, to incorporate with the
+         system voice experience. -->
+    <style name="Theme.Quantum.Voice" parent="@style/Theme.Quantum.Dialog">
+        <item name="windowAnimationStyle">@style/Animation.VoiceActivity</item>
+        <item name="backgroundDimEnabled">false</item>
+    </style>
+
+    <!-- Quantum light theme for an activity that is to be used for voice interaction.
+         This gives the activity a floating dialog style, to incorporate with the
+         system voice experience. -->
+    <style name="Theme.Quantum.Light.Voice" parent="@style/Theme.Quantum.Light.Dialog">
+        <item name="windowAnimationStyle">@style/Animation.VoiceActivity</item>
+        <item name="backgroundDimEnabled">false</item>
+    </style>
+
     <!-- Default theme for quantum style input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations
@@ -929,7 +945,7 @@ please see themes_device_defaults.xml.
          this inherits from Theme.Panel, but sets up appropriate animations
          and a few custom attributes. -->
     <style name="Theme.Quantum.VoiceInteractionSession" parent="Theme.Quantum.Light.Panel">
-        <item name="android:windowAnimationStyle">@android:style/Animation.VoiceInteractionSession</item>
+        <item name="windowAnimationStyle">@style/Animation.VoiceInteractionSession</item>
     </style>
 
     <!-- Theme for the search input bar. -->

@@ -716,6 +716,7 @@ public class Activity extends ContextThemeWrapper
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
         ArrayMap<String, LoaderManagerImpl> loaders;
+        VoiceInteractor voiceInteractor;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -920,6 +921,9 @@ public class Activity extends ContextThemeWrapper
         }
         mFragments.dispatchCreate();
         getApplication().dispatchActivityCreated(this, savedInstanceState);
+        if (mVoiceInteractor != null) {
+            mVoiceInteractor.attachActivity(this);
+        }
         mCalled = true;
     }
 
@@ -1830,7 +1834,8 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
-        if (activity == null && children == null && fragments == null && !retainLoaders) {
+        if (activity == null && children == null && fragments == null && !retainLoaders
+                && mVoiceInteractor == null) {
             return null;
         }
         
@@ -1839,6 +1844,7 @@ public class Activity extends ContextThemeWrapper
         nci.children = children;
         nci.fragments = fragments;
         nci.loaders = mAllLoaderManagers;
+        nci.voiceInteractor = mVoiceInteractor;
         return nci;
     }
 
@@ -5632,8 +5638,14 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
-        mVoiceInteractor = voiceInteractor != null
-                ? new VoiceInteractor(this, this, voiceInteractor, Looper.myLooper()) : null;
+        if (voiceInteractor != null) {
+            if (lastNonConfigurationInstances != null) {
+                mVoiceInteractor = lastNonConfigurationInstances.voiceInteractor;
+            } else {
+                mVoiceInteractor = new VoiceInteractor(voiceInteractor, this, this,
+                        Looper.myLooper());
+            }
+        }
 
         mWindow.setWindowManager(
                 (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),
@@ -5841,6 +5853,9 @@ public class Activity extends ContextThemeWrapper
         onDestroy();
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
+        }
+        if (mVoiceInteractor != null) {
+            mVoiceInteractor.detachActivity();
         }
     }
 
