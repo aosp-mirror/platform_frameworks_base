@@ -1792,8 +1792,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>If variable focus not supported, can still report
      * fixed depth of field range</p>
      */
-    public static final Key<android.util.Range<Float>> LENS_FOCUS_RANGE =
-            new Key<android.util.Range<Float>>("android.lens.focusRange", new TypeReference<android.util.Range<Float>>() {{ }});
+    public static final Key<android.util.Pair<Float,Float>> LENS_FOCUS_RANGE =
+            new Key<android.util.Pair<Float,Float>>("android.lens.focusRange", new TypeReference<android.util.Pair<Float,Float>>() {{ }});
 
     /**
      * <p>Sets whether the camera device uses optical image stabilization (OIS)
