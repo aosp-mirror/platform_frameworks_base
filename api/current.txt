@@ -27781,6 +27781,7 @@ package android.telecomm {
   public abstract class InCallService extends android.app.Service {
     ctor protected InCallService();
     method protected abstract void addCall(android.telecomm.InCallCall);
+    method protected abstract void bringToForeground(boolean);
     method protected final android.telecomm.InCallAdapter getAdapter();
     method protected void onAdapterAttached(android.telecomm.InCallAdapter);
     method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
