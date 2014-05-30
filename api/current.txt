@@ -17648,25 +17648,15 @@ package android.nfc {
 
 package android.nfc.cardemulation {
 
-  public final class AidGroup implements android.os.Parcelable {
-    ctor public AidGroup(java.util.ArrayList<java.lang.String>, java.lang.String);
-    method public int describeContents();
-    method public java.util.ArrayList<java.lang.String> getAids();
-    method public java.lang.String getCategory();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int MAX_NUM_AIDS = 256; // 0x100
-  }
-
   public final class CardEmulation {
     method public boolean categoryAllowsForegroundPreference(java.lang.String);
-    method public android.nfc.cardemulation.AidGroup getAidGroupForService(android.content.ComponentName, java.lang.String);
+    method public java.util.List<java.lang.String> getAidsForService(android.content.ComponentName, java.lang.String);
     method public static synchronized android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
     method public int getSelectionModeForCategory(java.lang.String);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, java.lang.String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
-    method public boolean registerAidGroupForService(android.content.ComponentName, android.nfc.cardemulation.AidGroup);
-    method public boolean removeAidGroupForService(android.content.ComponentName, java.lang.String);
+    method public boolean registerAidsForService(android.content.ComponentName, java.lang.String, java.util.List<java.lang.String>);
+    method public boolean removeAidsForService(android.content.ComponentName, java.lang.String);
     method public boolean setPreferredService(android.app.Activity, android.content.ComponentName);
     method public boolean unsetPreferredService(android.app.Activity);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";

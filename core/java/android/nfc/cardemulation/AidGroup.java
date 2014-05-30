@@ -2,6 +2,7 @@ package android.nfc.cardemulation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -21,6 +22,8 @@ import android.util.Log;
  * <p>The format of AIDs is defined in the ISO/IEC 7816-4 specification. This class
  * requires the AIDs to be input as a hexadecimal string, with an even amount of
  * hexadecimal characters, e.g. "F014811481".
+ *
+ * @hide
  */
 public final class AidGroup implements Parcelable {
     /**
@@ -30,7 +33,7 @@ public final class AidGroup implements Parcelable {
 
     static final String TAG = "AidGroup";
 
-    final ArrayList<String> aids;
+    final List<String> aids;
     final String category;
     final String description;
 
@@ -40,7 +43,7 @@ public final class AidGroup implements Parcelable {
      * @param aids The list of AIDs present in the group
      * @param category The category of this group, e.g. {@link CardEmulation#CATEGORY_PAYMENT}
      */
-    public AidGroup(ArrayList<String> aids, String category) {
+    public AidGroup(List<String> aids, String category) {
         if (aids == null || aids.size() == 0) {
             throw new IllegalArgumentException("No AIDS in AID group.");
         }
@@ -72,7 +75,7 @@ public final class AidGroup implements Parcelable {
     /**
      * @return the list of  AIDs in this group
      */
-    public ArrayList<String> getAids() {
+    public List<String> getAids() {
         return aids;
     }
 
@@ -121,11 +124,6 @@ public final class AidGroup implements Parcelable {
         }
     };
 
-    /**
-     * @hide
-     * Note: description is not serialized, since it's not localized
-     * and resource identifiers don't make sense to persist.
-     */
     static public AidGroup createFromXml(XmlPullParser parser) throws XmlPullParserException, IOException {
         String category = parser.getAttributeValue(null, "category");
         ArrayList<String> aids = new ArrayList<String>();
@@ -152,9 +150,6 @@ public final class AidGroup implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
     public void writeAsXml(XmlSerializer out) throws IOException {
         out.attribute(null, "category", category);
         for (String aid : aids) {
