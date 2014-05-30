@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -80,16 +81,20 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     public ToolbarWidgetWrapper(Toolbar toolbar) {
         mToolbar = toolbar;
 
+        mTitle = toolbar.getTitle();
+        mSubtitle = toolbar.getSubtitle();
+        mTitleSet = !TextUtils.isEmpty(mTitle);
+
         final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
                 R.styleable.ActionBar, R.attr.actionBarStyle, 0);
 
         final CharSequence title = a.getText(R.styleable.ActionBar_title);
-        if (title != null) {
+        if (!TextUtils.isEmpty(title)) {
             setTitle(title);
         }
 
         final CharSequence subtitle = a.getText(R.styleable.ActionBar_subtitle);
-        if (subtitle != null) {
+        if (!TextUtils.isEmpty(subtitle)) {
             setSubtitle(subtitle);
         }
 

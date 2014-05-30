@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
@@ -1011,6 +1012,26 @@ public abstract class ActionBar {
     /** @hide */
     public ActionMode startActionMode(ActionMode.Callback callback) {
         return null;
+    }
+
+    /** @hide */
+    public boolean openOptionsMenu() {
+        return false;
+    }
+
+    /** @hide */
+    public boolean invalidateOptionsMenu() {
+        return false;
+    }
+
+    /** @hide */
+    public boolean onMenuKeyEvent(KeyEvent event) {
+        return false;
+    }
+
+    /** @hide */
+    public boolean collapseActionView() {
+        return false;
     }
 
     /**
