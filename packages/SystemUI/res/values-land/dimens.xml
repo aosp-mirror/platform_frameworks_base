@@ -38,6 +38,9 @@
     <dimen name="status_bar_recents_app_icon_left_margin">8dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
 
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.2229</item>
+
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">384dp</dimen>
 </resources>

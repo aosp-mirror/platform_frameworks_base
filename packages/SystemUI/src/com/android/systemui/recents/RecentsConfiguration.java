@@ -52,10 +52,12 @@ public class RecentsConfiguration {
 
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
-    public int taskBarEnterAnimDuration;
-    public int taskBarExitAnimDuration;
+
     public int taskStackScrollDismissInfoPaneDistance;
     public int taskStackMaxDim;
+    public float taskStackWidthPaddingPct;
+    public int taskStackTopPaddingPx;
+
     public int taskViewInfoPaneAnimDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
@@ -63,12 +65,18 @@ public class RecentsConfiguration {
     public int taskViewTranslationZIncrementPx;
     public int taskViewShadowOutlineBottomInsetPx;
     public int taskViewRoundedCornerRadiusPx;
+    public int taskViewHighlightPx;
+
     public int searchBarSpaceHeightPx;
 
     public int taskBarViewDefaultBackgroundColor;
     public int taskBarViewDefaultTextColor;
     public int taskBarViewLightTextColor;
     public int taskBarViewDarkTextColor;
+    public int taskBarViewHighlightColor;
+
+    public int taskBarEnterAnimDuration;
+    public int taskBarExitAnimDuration;
 
     public boolean launchedFromAltTab;
     public boolean launchedWithThumbnailAnimation;
@@ -115,13 +123,16 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
         filteringNewViewsMinAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
-        taskBarEnterAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
-        taskBarExitAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
+
         taskStackScrollDismissInfoPaneDistance = res.getDimensionPixelSize(
                 R.dimen.recents_task_stack_scroll_dismiss_info_pane_distance);
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
+
+        TypedValue widthPaddingPctValue = new TypedValue();
+        res.getValue(R.dimen.recents_stack_width_padding_percentage, widthPaddingPctValue, true);
+        taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
+        taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
+
         taskViewInfoPaneAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_info_pane_duration);
         taskViewRemoveAnimDuration =
@@ -130,11 +141,13 @@ public class RecentsConfiguration {
                 res.getDimensionPixelSize(R.dimen.recents_task_view_remove_anim_translation_x);
         taskViewRoundedCornerRadiusPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
+        taskViewHighlightPx = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         taskViewTranslationZIncrementPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
         taskViewShadowOutlineBottomInsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_shadow_outline_bottom_inset);
+
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
 
         taskBarViewDefaultBackgroundColor =
@@ -145,6 +158,13 @@ public class RecentsConfiguration {
                 res.getColor(R.color.recents_task_bar_light_text_color);
         taskBarViewDarkTextColor =
                 res.getColor(R.color.recents_task_bar_dark_text_color);
+        taskBarViewHighlightColor =
+                res.getColor(R.color.recents_task_bar_highlight_color);
+
+        taskBarEnterAnimDuration =
+                res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
+        taskBarExitAnimDuration =
+                res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
 
         fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                         com.android.internal.R.interpolator.fast_out_slow_in);

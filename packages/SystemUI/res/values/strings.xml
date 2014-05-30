@@ -522,7 +522,7 @@
     <string name="quick_settings_notifications_label">Notifications</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
-    <string name="recents_empty_message">RECENTS</string>
+    <string name="recents_empty_message">No recent apps</string>
     <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
     <string name="recents_app_info_button_label">Application Info</string>
     <!-- Recents: Temporary string for the button in the recents search bar. [CHAR LIMIT=NONE] -->
