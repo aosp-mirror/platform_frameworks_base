@@ -3425,11 +3425,11 @@ package android.app {
     method public static void getMyMemoryState(android.app.ActivityManager.RunningAppProcessInfo);
     method public android.os.Debug.MemoryInfo[] getProcessMemoryInfo(int[]);
     method public java.util.List<android.app.ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
-    method public java.util.List<android.app.ActivityManager.RecentTaskInfo> getRecentTasks(int, int) throws java.lang.SecurityException;
+    method public deprecated java.util.List<android.app.ActivityManager.RecentTaskInfo> getRecentTasks(int, int) throws java.lang.SecurityException;
     method public java.util.List<android.app.ActivityManager.RunningAppProcessInfo> getRunningAppProcesses();
     method public android.app.PendingIntent getRunningServiceControlPanel(android.content.ComponentName) throws java.lang.SecurityException;
     method public java.util.List<android.app.ActivityManager.RunningServiceInfo> getRunningServices(int) throws java.lang.SecurityException;
-    method public java.util.List<android.app.ActivityManager.RunningTaskInfo> getRunningTasks(int) throws java.lang.SecurityException;
+    method public deprecated java.util.List<android.app.ActivityManager.RunningTaskInfo> getRunningTasks(int) throws java.lang.SecurityException;
     method public boolean isLowRamDevice();
     method public static boolean isRunningInTestHarness();
     method public static boolean isUserAMonkey();
