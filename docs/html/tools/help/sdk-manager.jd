@@ -3,7 +3,9 @@ page.title=SDK Manager
 
 
 <p>The Android SDK separates tools, platforms, and other components into packages you can
-  download using the SDK Manager.</p>
+  download using the SDK Manager. For example, when the SDK Tools are updated or a new version of
+the Android platform is released, you can use the SDK Manager to quickly download them to
+your environment.</p>
 
 <p>You can launch the SDK Manager in one of the following ways:</p>
 <ul>
@@ -23,6 +25,14 @@ click <strong>Install</strong> to install the selected packages.</p>
 <img src="{@docRoot}images/sdk_manager_packages.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
 SDK packages that are available, already installed, or for which an update is available.</p>
+
+
+<p>There are several different packages available for the Android SDK. The table below describes
+most of the available packages and where they're located in your SDK directory
+once you download them.</p>
+
+
+
 
 
 <h2 id="Recommended">Recommended Packages</h2>
@@ -69,3 +79,77 @@ matches the API Level of the Android platform that you plan to use.</dd>
 <p class="note"><strong>Tip:</strong> For easy access to the SDK tools from a command line, add the
 location of the SDK's <code>tools/</code> and
 <code>platform-tools</code> to your <code>PATH</code> environment variable.</p>
+
+
+<p>The above list is not comprehensive and you can <a
+href="#AddingSites">add new sites</a> to download additional packages from third-parties.</p>
+
+<p>In some cases, an SDK package may require a specific minimum revision of
+another package or SDK tool.
+The development tools will notify you with warnings if there is dependency that you need to
+address. The Android SDK Manager also enforces dependencies by requiring that you download any
+packages that are needed by those you have selected.</p>
+
+
+
+
+
+<h2 id="AddingSites">Adding New Sites</h2>
+
+<p>By default, <strong>Available Packages</strong> displays packages available from the
+<em>Android Repository</em> and <em>Third party Add-ons</em>. You can add other sites that host
+their own Android SDK add-ons, then download the SDK add-ons
+from those sites.</p>
+
+<p>For example, a mobile carrier or device manufacturer might offer additional
+API libraries that are supported by their own Android-powered devices. In order
+to develop using their libraries, you must install their Android SDK add-on, if it's not already
+available under <em>Third party Add-ons</em>. </p>
+
+<p>If a carrier or device manufacturer has hosted an SDK add-on repository file
+on their web site, follow these steps to add their site to the Android SDK
+Manager:</p>
+
+<ol>
+  <li>Select <strong>Available Packages</strong> in the left panel.</li>
+  <li>Click <strong>Add Add-on Site</strong> and enter the URL of the
+<code>repository.xml</code> file. Click <strong>OK</strong>.</li>
+</ol>
+<p>Any SDK packages available from the site will now be listed under a new item named
+<strong>User Add-ons</strong>.</p>
+
+
+
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<p><strong>Problems connecting to the SDK repository</strong></p>
+
+<p>If you are using the Android SDK Manager to download packages and are encountering
+connection problems, try connecting over http, rather than https. To switch the
+protocol used by the Android SDK Manager, follow these steps: </p>
+
+<ol>
+  <li>With the Android SDK Manager window open, select "Settings" in the
+  left pane. </li>
+  <li>On the right, in the "Misc" section, check the checkbox labeled "Force
+  https://... sources to be fetched using http://..." </li>
+  <li>Click <strong>Save &amp; Apply</strong>.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
