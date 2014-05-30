@@ -208,6 +208,14 @@ following:</p>
 a draft to the Google Play Developer Console. You also need to create a product list for the in-app
 items that are available for purchase in the sample application. The following instructions show you
 how to do this.</p>
+
+<p class="caution"><strong>Caution:</strong> Draft applications are no longer
+supported. To test an application, publish it in the <a
+href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">alpha
+or beta channels</a>. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.</p>
+
 <ol>
   <li><strong>Upload the release version of the sample application to Google Play.</strong>
     <p>Do not publish the sample application; leave it as an unpublished draft application. The
@@ -928,10 +936,12 @@ public class BillingReceiver extends BroadcastReceiver {
   // Intent actions that we receive in the BillingReceiver from Google Play.
   // These are defined by Google Play and cannot be changed.
   // The sample application defines these in the Consts.java file.
-  public static final String ACTION_NOTIFY = "com.android.vending.billing.IN_APP_NOTIFY";
-  public static final String ACTION_RESPONSE_CODE = "com.android.vending.billing.RESPONSE_CODE";
+  public static final String ACTION_NOTIFY =
+      "com.android.vending.billing.IN_APP_NOTIFY";
+  public static final String ACTION_RESPONSE_CODE =
+      "com.android.vending.billing.RESPONSE_CODE";
   public static final String ACTION_PURCHASE_STATE_CHANGED =
-    "com.android.vending.billing.PURCHASE_STATE_CHANGED";
+      "com.android.vending.billing.PURCHASE_STATE_CHANGED";
 
   // The intent extras that are passed in an intent from Google Play.
   // These are defined by Google Play and cannot be changed.
@@ -962,7 +972,8 @@ public class BillingReceiver extends BroadcastReceiver {
       Log.w(TAG, "unexpected action: " + action);
     }
   }
-  // Perform other processing here, such as forwarding intent messages to your local service.
+  // Perform other processing here, such as forwarding intent messages
+  // to your local service.
 }
 </pre>
 
