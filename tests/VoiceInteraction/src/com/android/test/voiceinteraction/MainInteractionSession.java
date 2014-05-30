@@ -33,9 +33,17 @@ public class MainInteractionSession extends VoiceInteractionSession
     View mContentView;
     TextView mText;
     Button mStartButton;
+    Button mConfirmButton;
+    Button mAbortButton;
 
+    static final int STATE_IDLE = 0;
+    static final int STATE_LAUNCHING = 1;
+    static final int STATE_CONFIRM = 2;
+    static final int STATE_COMMAND = 3;
+    static final int STATE_ABORT_VOICE = 4;
+
+    int mState = STATE_IDLE;
     Request mPendingRequest;
-    boolean mPendingConfirm;
 
     MainInteractionSession(Context context) {
         super(context);
@@ -54,21 +62,39 @@ public class MainInteractionSession extends VoiceInteractionSession
         mText = (TextView)mContentView.findViewById(R.id.text);
         mStartButton = (Button)mContentView.findViewById(R.id.start);
         mStartButton.setOnClickListener(this);
+        mConfirmButton = (Button)mContentView.findViewById(R.id.confirm);
+        mConfirmButton.setOnClickListener(this);
+        mAbortButton = (Button)mContentView.findViewById(R.id.abort);
+        mAbortButton.setOnClickListener(this);
+        updateState();
         return mContentView;
     }
 
+    void updateState() {
+        mStartButton.setEnabled(mState == STATE_IDLE);
+        mConfirmButton.setEnabled(mState == STATE_CONFIRM || mState == STATE_COMMAND);
+        mAbortButton.setEnabled(mState == STATE_ABORT_VOICE);
+    }
+
     public void onClick(View v) {
-        if (mPendingRequest == null) {
-            mStartButton.setEnabled(false);
+        if (v == mStartButton) {
+            mState = STATE_LAUNCHING;
+            updateState();
             startVoiceActivity(mStartIntent);
-        } else {
-            if (mPendingConfirm) {
+        } else if (v == mConfirmButton) {
+            if (mState == STATE_CONFIRM) {
                 mPendingRequest.sendConfirmResult(true, null);
             } else {
                 mPendingRequest.sendCommandResult(true, null);
             }
             mPendingRequest = null;
-            mStartButton.setText("Start");
+            mState = STATE_IDLE;
+            updateState();
+        } else if (v == mAbortButton) {
+            mPendingRequest.sendAbortVoiceResult(null);
+            mPendingRequest = null;
+            mState = STATE_IDLE;
+            updateState();
         }
     }
 
@@ -78,23 +104,32 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onConfirm(Caller caller, Request request, String prompt, Bundle extras) {
+    public void onConfirm(Caller caller, Request request, CharSequence prompt, Bundle extras) {
         Log.i(TAG, "onConfirm: prompt=" + prompt + " extras=" + extras);
         mText.setText(prompt);
-        mStartButton.setEnabled(true);
         mStartButton.setText("Confirm");
         mPendingRequest = request;
-        mPendingConfirm = true;
+        mState = STATE_CONFIRM;
+        updateState();
+    }
+
+    @Override
+    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
+        Log.i(TAG, "onAbortVoice: message=" + message + " extras=" + extras);
+        mText.setText(message);
+        mPendingRequest = request;
+        mState = STATE_ABORT_VOICE;
+        updateState();
     }
 
     @Override
     public void onCommand(Caller caller, Request request, String command, Bundle extras) {
         Log.i(TAG, "onCommand: command=" + command + " extras=" + extras);
         mText.setText("Command: " + command);
-        mStartButton.setEnabled(true);
         mStartButton.setText("Finish Command");
         mPendingRequest = request;
-        mPendingConfirm = false;
+        mState = STATE_COMMAND;
+        updateState();
     }
 
     @Override

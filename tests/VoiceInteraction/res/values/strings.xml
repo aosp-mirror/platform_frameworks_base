@@ -16,7 +16,10 @@
 
 <resources>
 
-    <string name="start">Start!</string>
+    <string name="start">Start</string>
+    <string name="confirm">Confirm</string>
+    <string name="abort">Abort</string>
+    <string name="abortVoice">Abort Voice</string>
 
 </resources>
 
