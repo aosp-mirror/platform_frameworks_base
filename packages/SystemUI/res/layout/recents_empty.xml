@@ -19,8 +19,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:textSize="40sp"
+    android:textSize="20sp"
     android:textColor="#ffffffff"
+    android:textStyle="italic"
     android:text="@string/recents_empty_message"
-    android:fontFamily="sans-serif-thin"
+    android:fontFamily="sans-serif-light"
     android:visibility="gone" />
