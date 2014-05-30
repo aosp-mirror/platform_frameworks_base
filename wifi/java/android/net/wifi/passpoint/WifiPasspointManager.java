@@ -35,6 +35,7 @@ import java.util.List;
 
 /**
  * Provides APIs for managing Wifi Passpoint credentials.
+ * @hide
  */
 public class WifiPasspointManager {
 
