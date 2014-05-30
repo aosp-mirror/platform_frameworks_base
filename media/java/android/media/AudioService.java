@@ -4141,8 +4141,9 @@ public class AudioService extends IAudioService.Stub {
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
                 setBluetoothA2dpOnInt(true);
             }
-            boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0) ||
-                            ((device & AudioSystem.DEVICE_IN_ALL_USB) != 0);
+            boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
+                            (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
+                             ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
             handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
@@ -4159,7 +4160,7 @@ public class AudioService extends IAudioService.Stub {
                             MUSIC_ACTIVE_POLL_PERIOD_MS);
                 }
             }
-            if (!isUsb) {
+            if (!isUsb && (device != AudioSystem.DEVICE_IN_WIRED_HEADSET)) {
                 sendDeviceConnectionIntent(device, state, name);
             }
         }
@@ -4175,7 +4176,8 @@ public class AudioService extends IAudioService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            int device;
+            int outDevice;
+            int inDevice;
             int state;
 
             if (action.equals(Intent.ACTION_DOCK_EVENT)) {
@@ -4210,7 +4212,8 @@ public class AudioService extends IAudioService.Stub {
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
-                device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
+                outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
+                inDevice = AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET;
                 String address = null;
 
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -4224,10 +4227,10 @@ public class AudioService extends IAudioService.Stub {
                     switch (btClass.getDeviceClass()) {
                     case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
                     case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                        outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
                         break;
                     case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                        outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                         break;
                     }
                 }
@@ -4237,7 +4240,9 @@ public class AudioService extends IAudioService.Stub {
                 }
 
                 boolean connected = (state == BluetoothProfile.STATE_CONNECTED);
-                if (handleDeviceConnection(connected, device, address)) {
+                boolean success = handleDeviceConnection(connected, outDevice, address) &&
+                                      handleDeviceConnection(connected, inDevice, address);
+                if (success) {
                     synchronized (mScoClients) {
                         if (connected) {
                             mBluetoothHeadsetDevice = btDevice;
@@ -4257,8 +4262,8 @@ public class AudioService extends IAudioService.Stub {
                                     : "card=" + alsaCard + ";device=" + alsaDevice);
 
                 // Playback Device
-                device = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
-                setWiredDeviceConnectionState(device, state, params);
+                outDevice = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
+                setWiredDeviceConnectionState(outDevice, state, params);
             } else if (action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
 
@@ -4273,14 +4278,14 @@ public class AudioService extends IAudioService.Stub {
 
                 // Playback Device
                 if (hasPlayback) {
-                    device = AudioSystem.DEVICE_OUT_USB_DEVICE;
-                    setWiredDeviceConnectionState(device, state, params);
+                    outDevice = AudioSystem.DEVICE_OUT_USB_DEVICE;
+                    setWiredDeviceConnectionState(outDevice, state, params);
                 }
 
                 // Capture Device
                 if (hasCapture) {
-                    device = AudioSystem.DEVICE_IN_USB_DEVICE;
-                    setWiredDeviceConnectionState(device, state, params);
+                    inDevice = AudioSystem.DEVICE_IN_USB_DEVICE;
+                    setWiredDeviceConnectionState(inDevice, state, params);
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;

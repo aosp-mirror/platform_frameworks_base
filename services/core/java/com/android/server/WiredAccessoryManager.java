@@ -246,7 +246,8 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
     private void setDeviceStateLocked(int headset,
             int headsetState, int prevHeadsetState, String headsetName) {
         if ((headsetState & headset) != (prevHeadsetState & headset)) {
-            int device;
+            int outDevice = 0;
+            int inDevice = 0;
             int state;
 
             if ((headsetState & headset) != 0) {
@@ -256,15 +257,16 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             }
 
             if (headset == BIT_HEADSET) {
-                device = AudioManager.DEVICE_OUT_WIRED_HEADSET;
+                outDevice = AudioManager.DEVICE_OUT_WIRED_HEADSET;
+                inDevice = AudioManager.DEVICE_IN_WIRED_HEADSET;
             } else if (headset == BIT_HEADSET_NO_MIC){
-                device = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
+                outDevice = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
             } else if (headset == BIT_USB_HEADSET_ANLG) {
-                device = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
+                outDevice = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
             } else if (headset == BIT_USB_HEADSET_DGTL) {
-                device = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
+                outDevice = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
             } else if (headset == BIT_HDMI_AUDIO) {
-                device = AudioManager.DEVICE_OUT_HDMI;
+                outDevice = AudioManager.DEVICE_OUT_HDMI;
             } else {
                 Slog.e(TAG, "setDeviceState() invalid headset type: "+headset);
                 return;
@@ -273,7 +275,12 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             if (LOG)
                 Slog.v(TAG, "device "+headsetName+((state == 1) ? " connected" : " disconnected"));
 
-            mAudioManager.setWiredDeviceConnectionState(device, state, headsetName);
+            if (outDevice != 0) {
+              mAudioManager.setWiredDeviceConnectionState(outDevice, state, headsetName);
+            }
+            if (inDevice != 0) {
+              mAudioManager.setWiredDeviceConnectionState(inDevice, state, headsetName);
+            }
         }
     }
 
