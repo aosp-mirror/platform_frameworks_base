@@ -34,6 +34,7 @@
            a25,25 -30 0,1 100,-50 l 50,-25
            a25,37 -30 0,1 100,-50 l 50,-25
            a25,50 -30 0,1 100,-50 l 50,-25"
+            android:fill="#00000000"
             android:stroke="#FF00FF00"
             android:strokeWidth="10" />
     </group>

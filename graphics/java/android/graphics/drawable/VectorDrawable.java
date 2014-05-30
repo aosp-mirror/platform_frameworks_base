@@ -18,6 +18,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -134,8 +135,6 @@ public class VectorDrawable extends Drawable {
 
     private final VectorDrawableState mVectorState;
 
-    private int mAlpha = 0xFF;
-
     public VectorDrawable() {
         mVectorState = new VectorDrawableState(null);
     }
@@ -164,9 +163,8 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void setAlpha(int alpha) {
-        // TODO correct handling of transparent
-        if (mAlpha != alpha) {
-            mAlpha = alpha;
+        if (mVectorState.mVPathRenderer.getRootAlpha() != alpha) {
+            mVectorState.mVPathRenderer.setRootAlpha(alpha);
             invalidateSelf();
         }
     }
@@ -271,6 +269,13 @@ public class VectorDrawable extends Drawable {
             Log.e(LOGTAG, "parser error", e);
         }
         return null;
+    }
+
+    private static int applyAlpha(int color, float alpha) {
+        int alphaBytes = Color.alpha(color);
+        color &= 0x00FFFFFF;
+        color |= ((int) (alphaBytes * alpha)) << 24;
+        return color;
     }
 
     private VPathRenderer inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
@@ -434,11 +439,20 @@ public class VectorDrawable extends Drawable {
         private float mBaseHeight = 0;
         private float mViewportWidth = 0;
         private float mViewportHeight = 0;
+        private int mRootAlpha = 0xFF;
 
         private final Matrix mFinalPathMatrix = new Matrix();
 
         public VPathRenderer() {
             mRootGroup = new VGroup();
+        }
+
+        public void setRootAlpha(int alpha) {
+            mRootAlpha = alpha;
+        }
+
+        public int getRootAlpha() {
+            return mRootAlpha;
         }
 
         public VPathRenderer(VPathRenderer copy) {
@@ -519,7 +533,7 @@ public class VectorDrawable extends Drawable {
         }
 
         private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
-                Canvas canvas, int w, int h) {
+                float currentAlpha, Canvas canvas, int w, int h) {
             // Calculate current group's matrix by preConcat the parent's and
             // and the current one on the top of the stack.
             // Basically the Mfinal = Mviewport * M0 * M1 * M2;
@@ -528,20 +542,21 @@ public class VectorDrawable extends Drawable {
 
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
-            drawPath(currentGroup, canvas, w, h);
+            float stackedAlpha = currentAlpha * currentGroup.mGroupAlpha;
+            drawPath(currentGroup, stackedAlpha, canvas, w, h);
             // Draw the group tree in post order.
             for (int i = 0 ; i < currentGroup.mChildGroupList.size(); i++) {
                 drawGroupTree(currentGroup.mChildGroupList.get(i),
-                        currentGroup.mStackedMatrix, canvas, w, h);
+                        currentGroup.mStackedMatrix, stackedAlpha, canvas, w, h);
             }
         }
 
         public void draw(Canvas canvas, int w, int h) {
             // Travese the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h);
+            drawGroupTree(mRootGroup, IDENTITY_MATRIX, ((float) mRootAlpha) / 0xFF, canvas, w, h);
         }
 
-        private void drawPath(VGroup vGroup, Canvas canvas, int w, int h) {
+        private void drawPath(VGroup vGroup, float stackedAlpha, Canvas canvas, int w, int h) {
             final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
             mFinalPathMatrix.set(vGroup.mStackedMatrix);
@@ -582,41 +597,41 @@ public class VectorDrawable extends Drawable {
 
                 if (vPath.mClip) {
                     canvas.clipPath(mRenderPath, Region.Op.REPLACE);
-                }
-
-                if (vPath.mFillColor != 0) {
-                    if (mFillPaint == null) {
-                        mFillPaint = new Paint();
-                        mFillPaint.setColorFilter(mColorFilter);
-                        mFillPaint.setStyle(Paint.Style.FILL);
-                        mFillPaint.setAntiAlias(true);
+                } else {
+                   if (vPath.mFillColor != 0) {
+                        if (mFillPaint == null) {
+                            mFillPaint = new Paint();
+                            mFillPaint.setColorFilter(mColorFilter);
+                            mFillPaint.setStyle(Paint.Style.FILL);
+                            mFillPaint.setAntiAlias(true);
+                        }
+                        mFillPaint.setColor(applyAlpha(vPath.mFillColor, stackedAlpha));
+                        canvas.drawPath(mRenderPath, mFillPaint);
                     }
 
-                    mFillPaint.setColor(vPath.mFillColor);
-                    canvas.drawPath(mRenderPath, mFillPaint);
-                }
+                    if (vPath.mStrokeColor != 0) {
+                        if (mStrokePaint == null) {
+                            mStrokePaint = new Paint();
+                            mStrokePaint.setColorFilter(mColorFilter);
+                            mStrokePaint.setStyle(Paint.Style.STROKE);
+                            mStrokePaint.setAntiAlias(true);
+                        }
 
-                if (vPath.mStrokeColor != 0) {
-                    if (mStrokePaint == null) {
-                        mStrokePaint = new Paint();
-                        mStrokePaint.setColorFilter(mColorFilter);
-                        mStrokePaint.setStyle(Paint.Style.STROKE);
-                        mStrokePaint.setAntiAlias(true);
+                        final Paint strokePaint = mStrokePaint;
+                        if (vPath.mStrokeLineJoin != null) {
+                            strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
+                        }
+
+                        if (vPath.mStrokeLineCap != null) {
+                            strokePaint.setStrokeCap(vPath.mStrokeLineCap);
+                        }
+
+                        strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
+
+                        strokePaint.setColor(applyAlpha(vPath.mStrokeColor, stackedAlpha));
+                        strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
+                        canvas.drawPath(mRenderPath, strokePaint);
                     }
-
-                    final Paint strokePaint = mStrokePaint;
-                    if (vPath.mStrokeLineJoin != null) {
-                        strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
-                    }
-
-                    if (vPath.mStrokeLineCap != null) {
-                        strokePaint.setStrokeCap(vPath.mStrokeLineCap);
-                    }
-
-                    strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
-                    strokePaint.setColor(vPath.mStrokeColor);
-                    strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
-                    canvas.drawPath(mRenderPath, strokePaint);
                 }
             }
         }
@@ -669,7 +684,7 @@ public class VectorDrawable extends Drawable {
         private float mScaleY = 1;
         private float mTranslateX = 0;
         private float mTranslateY = 0;
-        private float mAlpha = 1;
+        private float mGroupAlpha = 1;
 
         // mLocalMatrix is parsed from the XML.
         private final Matrix mLocalMatrix = new Matrix();
@@ -714,7 +729,7 @@ public class VectorDrawable extends Drawable {
             mScaleY = a.getFloat(R.styleable.VectorDrawableGroup_scaleY, mScaleY);
             mTranslateX = a.getFloat(R.styleable.VectorDrawableGroup_translateX, mTranslateX);
             mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
-            mAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mAlpha);
+            mGroupAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mGroupAlpha);
             updateLocalMatrix();
             if (a.hasValue(R.styleable.VectorDrawableGroup_name)) {
                 mName = a.getString(R.styleable.VectorDrawableGroup_name);
@@ -763,7 +778,7 @@ public class VectorDrawable extends Drawable {
             }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_alpha] == 0) {
-                mAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mAlpha);
+                mGroupAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mGroupAlpha);
             }
 
             updateLocalMatrix();
@@ -799,7 +814,7 @@ public class VectorDrawable extends Drawable {
         float mStrokeWidth = 0;
         float mStrokeOpacity = Float.NaN;
 
-        int mFillColor = 0;
+        int mFillColor = Color.BLACK;
         int mFillRule;
         float mFillOpacity = Float.NaN;
 
@@ -984,13 +999,11 @@ public class VectorDrawable extends Drawable {
 
         private void updateColorAlphas() {
             if (!Float.isNaN(mFillOpacity)) {
-                mFillColor &= 0x00FFFFFF;
-                mFillColor |= ((int) (0xFF * mFillOpacity)) << 24;
+                mFillColor = applyAlpha(mFillColor, mFillOpacity);
             }
 
             if (!Float.isNaN(mStrokeOpacity)) {
-                mStrokeColor &= 0x00FFFFFF;
-                mStrokeColor |= ((int) (0xFF * mStrokeOpacity)) << 24;
+                mStrokeColor = applyAlpha(mStrokeColor, mStrokeOpacity);
             }
         }
 

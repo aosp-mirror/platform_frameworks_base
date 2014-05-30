@@ -29,6 +29,7 @@
             android:pathData="M10,300 Q400,550 600,300 T1000,300"
             android:pivotX="90"
             android:pivotY="100"
+            android:fill="#00000000"
             android:stroke="#FFFF0000"
             android:strokeWidth="60" />
     </group>
