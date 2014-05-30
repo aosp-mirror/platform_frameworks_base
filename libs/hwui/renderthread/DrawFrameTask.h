@@ -16,10 +16,11 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
+#include <vector>
+
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
-#include <utils/Vector.h>
 
 #include "RenderTask.h"
 
@@ -56,8 +57,8 @@ public:
 
     void setContext(RenderThread* thread, CanvasContext* context);
 
-    void addLayer(DeferredLayerUpdater* layer);
-    void removeLayer(DeferredLayerUpdater* layer);
+    void pushLayerUpdate(DeferredLayerUpdater* layer);
+    void removeLayerUpdate(DeferredLayerUpdater* layer);
 
     void setDirty(int left, int top, int right, int bottom);
     void setDensity(float density) { mDensity = density; }
@@ -83,13 +84,9 @@ private:
     nsecs_t mFrameTimeNanos;
     nsecs_t mRecordDurationNanos;
     float mDensity;
+    std::vector< sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
-
-    /*********************************************
-     *  Multi frame data
-     *********************************************/
-    Vector<DeferredLayerUpdater*> mLayers;
 };
 
 } /* namespace renderthread */

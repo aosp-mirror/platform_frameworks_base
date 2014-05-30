@@ -55,7 +55,8 @@ public:
     void setup(int width, int height, const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
     void makeCurrent();
-    void prepareDraw(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
+    void processLayerUpdate(DeferredLayerUpdater* layerUpdater, TreeInfo& info);
+    void prepareTree(TreeInfo& info);
     void draw(Rect* dirty);
     void destroyCanvasAndSurface();
 
@@ -82,9 +83,6 @@ public:
 
 private:
     friend class RegisterFrameCallbackTask;
-
-    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters, TreeInfo& info);
-    void prepareTree(TreeInfo& info);
 
     void setSurface(ANativeWindow* window);
     void swapBuffers();

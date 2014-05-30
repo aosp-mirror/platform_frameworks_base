@@ -21,6 +21,7 @@
 #include <utils/Log.h>
 #include <utils/Trace.h>
 
+#include "../DeferredLayerUpdater.h"
 #include "../DisplayList.h"
 #include "../RenderNode.h"
 #include "CanvasContext.h"
@@ -47,17 +48,22 @@ void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context) {
     mContext = context;
 }
 
-void DrawFrameTask::addLayer(DeferredLayerUpdater* layer) {
-    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to addLayer with!");
+void DrawFrameTask::pushLayerUpdate(DeferredLayerUpdater* layer) {
+    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to pushLayerUpdate with!");
 
-    mLayers.push(layer);
+    for (size_t i = 0; i < mLayers.size(); i++) {
+        if (mLayers[i].get() == layer) {
+            return;
+        }
+    }
+    mLayers.push_back(layer);
 }
 
-void DrawFrameTask::removeLayer(DeferredLayerUpdater* layer) {
+void DrawFrameTask::removeLayerUpdate(DeferredLayerUpdater* layer) {
     for (size_t i = 0; i < mLayers.size(); i++) {
-        if (mLayers[i] == layer) {
-            mLayers.removeAt(i);
-            break;
+        if (mLayers[i].get() == layer) {
+            mLayers.erase(mLayers.begin() + i);
+            return;
         }
     }
 }
@@ -132,7 +138,16 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
     initTreeInfo(info);
-    mContext->prepareDraw(&mLayers, info);
+
+    for (size_t i = 0; i < mLayers.size(); i++) {
+        mContext->processLayerUpdate(mLayers[i].get(), info);
+    }
+    mLayers.clear();
+    if (info.out.hasAnimations) {
+        // TODO: Uh... crap?
+    }
+    mContext->prepareTree(info);
+
     if (info.out.hasAnimations) {
         // TODO: dirty calculations, for now just do a full-screen inval
         mDirty.setEmpty();

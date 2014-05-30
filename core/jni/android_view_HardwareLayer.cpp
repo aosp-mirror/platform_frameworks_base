@@ -55,27 +55,13 @@ static jlong android_view_HardwareLayer_createRenderLayer(JNIEnv* env, jobject c
     Layer* layer = LayerRenderer::createRenderLayer(width, height);
     if (!layer) return 0;
 
-    OpenGLRenderer* renderer = new LayerRenderer(layer);
-    renderer->initProperties();
-    return reinterpret_cast<jlong>( new DeferredLayerUpdater(layer, renderer) );
+    return reinterpret_cast<jlong>( new DeferredLayerUpdater(layer) );
 }
 
 static void android_view_HardwareLayer_onTextureDestroyed(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     layer->backingLayer()->clearTexture();
-}
-
-static jlong android_view_HardwareLayer_detachBackingLayer(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    return reinterpret_cast<jlong>( layer->detachBackingLayer() );
-}
-
-static void android_view_HardwareLayer_destroyLayerUpdater(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    delete layer;
 }
 
 static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
@@ -157,8 +143,6 @@ static JNINativeMethod gMethods[] = {
     { "nCreateTextureLayer",     "()J",        (void*) android_view_HardwareLayer_createTextureLayer },
     { "nCreateRenderLayer",      "(II)J",      (void*) android_view_HardwareLayer_createRenderLayer },
     { "nOnTextureDestroyed",     "(J)V",       (void*) android_view_HardwareLayer_onTextureDestroyed },
-    { "nDetachBackingLayer",     "(J)J",       (void*) android_view_HardwareLayer_detachBackingLayer },
-    { "nDestroyLayerUpdater",    "(J)V",       (void*) android_view_HardwareLayer_destroyLayerUpdater },
 
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
     { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },

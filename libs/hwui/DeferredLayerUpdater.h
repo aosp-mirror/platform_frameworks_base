@@ -30,13 +30,15 @@
 namespace android {
 namespace uirenderer {
 
+typedef void (*LayerDestroyer)(Layer* layer);
+
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
-class DeferredLayerUpdater {
+class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API DeferredLayerUpdater(Layer* layer, OpenGLRenderer* renderer = 0);
+    ANDROID_API DeferredLayerUpdater(Layer* layer, LayerDestroyer = 0);
     ANDROID_API ~DeferredLayerUpdater();
 
     ANDROID_API bool setSize(uint32_t width, uint32_t height) {
@@ -83,12 +85,6 @@ public:
         return mLayer;
     }
 
-    ANDROID_API Layer* detachBackingLayer() {
-        Layer* layer = mLayer;
-        mLayer = 0;
-        return layer;
-    }
-
 private:
     // Generic properties
     uint32_t mWidth;
@@ -110,6 +106,8 @@ private:
 
     Layer* mLayer;
     Caches& mCaches;
+
+    LayerDestroyer mDestroyer;
 
     void doUpdateTexImage();
 };
