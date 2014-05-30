@@ -943,7 +943,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             b = data.readStrongBinder();
             IUiAutomationConnection c = IUiAutomationConnection.Stub.asInterface(b);
             int userId = data.readInt();
-            boolean res = startInstrumentation(className, profileFile, fl, arguments, w, c, userId);
+            String abiOverride = data.readString();
+            boolean res = startInstrumentation(className, profileFile, fl, arguments, w, c, userId,
+                    abiOverride);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -3339,7 +3341,8 @@ class ActivityManagerProxy implements IActivityManager
 
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher,
-            IUiAutomationConnection connection, int userId) throws RemoteException {
+            IUiAutomationConnection connection, int userId, String instructionSet)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3350,6 +3353,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
         data.writeStrongBinder(connection != null ? connection.asBinder() : null);
         data.writeInt(userId);
+        data.writeString(instructionSet);
         mRemote.transact(START_INSTRUMENTATION_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
