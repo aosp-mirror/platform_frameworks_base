@@ -323,12 +323,6 @@ public abstract class HardwareRenderer {
     abstract void pushLayerUpdate(HardwareLayer layer);
 
     /**
-     * Tells the HardwareRenderer that a layer was created. The renderer should
-     * make sure to apply any pending layer changes at the start of a new frame
-     */
-    abstract void onLayerCreated(HardwareLayer hardwareLayer);
-
-    /**
      * Tells the HardwareRenderer that the layer is destroyed. The renderer
      * should remove the layer from any update queues.
      */

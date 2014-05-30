@@ -294,12 +294,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void pushLayerUpdate(HardwareLayer layer) {
-        // TODO: Remove this, it's not needed outside of GLRenderer
-    }
-
-    @Override
-    void onLayerCreated(HardwareLayer layer) {
-        // TODO: Is this actually useful?
+        nPushLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
     @Override
@@ -309,7 +304,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void onLayerDestroyed(HardwareLayer layer) {
-        nDestroyLayer(mNativeProxy, layer.getDeferredLayerUpdater());
+        nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
     @Override
@@ -398,7 +393,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
-    private static native void nDestroyLayer(long nativeProxy, long layer);
+    private static native void nPushLayerUpdate(long nativeProxy, long layer);
+    private static native void nCancelLayerUpdate(long nativeProxy, long layer);
 
     private static native void nFlushCaches(long nativeProxy, int flushMode);
 

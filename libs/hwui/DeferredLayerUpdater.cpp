@@ -22,14 +22,19 @@
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* renderer)
+static void defaultLayerDestroyer(Layer* layer) {
+    Caches::getInstance().resourceCache.decrementRefcount(layer);
+}
+
+DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, LayerDestroyer destroyer)
         : mDisplayList(0)
         , mSurfaceTexture(0)
         , mTransform(0)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
-        , mCaches(Caches::getInstance()) {
+        , mCaches(Caches::getInstance())
+        , mDestroyer(destroyer) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
@@ -37,14 +42,16 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
     mAlpha = mLayer->getAlpha();
     mMode = mLayer->getMode();
     mDirtyRect.setEmpty();
+
+    if (!mDestroyer) {
+        mDestroyer = defaultLayerDestroyer;
+    }
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
     setTransform(0);
-    if (mLayer) {
-        mCaches.resourceCache.decrementRefcount(mLayer);
-    }
+    mDestroyer(mLayer);
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {

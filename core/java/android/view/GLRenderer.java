@@ -178,7 +178,7 @@ public class GLRenderer extends HardwareRenderer {
     private static EGLSurface sPbuffer;
     private static final Object[] sPbufferLock = new Object[0];
 
-    private List<HardwareLayer> mAttachedLayers = new ArrayList<HardwareLayer>();
+    private List<HardwareLayer> mLayerUpdates = new ArrayList<HardwareLayer>();
 
     private static class GLRendererEglContext extends ManagedEGLContext {
         final Handler mHandler = new Handler();
@@ -471,7 +471,7 @@ public class GLRenderer extends HardwareRenderer {
 
     @Override
     void pushLayerUpdate(HardwareLayer layer) {
-        mGlCanvas.pushLayerUpdate(layer);
+        mLayerUpdates.add(layer);
     }
 
     @Override
@@ -494,11 +494,6 @@ public class GLRenderer extends HardwareRenderer {
         return HardwareLayer.createDisplayListLayer(this, width, height);
     }
 
-    @Override
-    void onLayerCreated(HardwareLayer hardwareLayer) {
-        mAttachedLayers.add(hardwareLayer);
-    }
-
     boolean hasContext() {
         return sEgl != null && mEglContext != null
                 && mEglContext.equals(sEgl.eglGetCurrentContext());
@@ -509,11 +504,7 @@ public class GLRenderer extends HardwareRenderer {
         if (mGlCanvas != null) {
             mGlCanvas.cancelLayerUpdate(layer);
         }
-        if (hasContext()) {
-            long backingLayer = layer.detachBackingLayer();
-            nDestroyLayer(backingLayer);
-        }
-        mAttachedLayers.remove(layer);
+        mLayerUpdates.remove(layer);
     }
 
     @Override
@@ -1198,16 +1189,19 @@ public class GLRenderer extends HardwareRenderer {
 
     private void flushLayerChanges() {
         // Loop through and apply any pending layer changes
-        for (int i = 0; i < mAttachedLayers.size(); i++) {
-            HardwareLayer layer = mAttachedLayers.get(i);
+        for (int i = 0; i < mLayerUpdates.size(); i++) {
+            HardwareLayer layer = mLayerUpdates.get(i);
             layer.flushChanges();
             if (!layer.isValid()) {
                 // The layer was removed from mAttachedLayers, rewind i by 1
                 // Note that this shouldn't actually happen as View.getHardwareLayer()
                 // is already flushing for error checking reasons
                 i--;
+            } else if (layer.hasDisplayList()) {
+                mCanvas.pushLayerUpdate(layer);
             }
         }
+        mLayerUpdates.clear();
     }
 
     @Override

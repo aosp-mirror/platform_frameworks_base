@@ -32,11 +32,17 @@ public final class VirtualRefBasePtr {
         return mNativePtr;
     }
 
+    public void release() {
+        if (mNativePtr != 0) {
+            nDecStrong(mNativePtr);
+            mNativePtr = 0;
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            nDecStrong(mNativePtr);
-            mNativePtr = 0;
+            release();
         } finally {
             super.finalize();
         }
