@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 /**
@@ -47,21 +48,22 @@ public class LauncherActivityInfo {
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
     private UserHandle mUser;
-    // TODO: Fetch this value from PM
     private long mFirstInstallTime;
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
-     * 
+     *
      * @param context The context for fetching resources.
      * @param info ResolveInfo from which to create the LauncherActivityInfo.
      * @param user The UserHandle of the profile to which this activity belongs.
      */
-    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user) {
+    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user,
+            long firstInstallTime) {
         this(context);
-        this.mActivityInfo = info.activityInfo;
-        this.mComponentName = LauncherApps.getComponentName(info);
-        this.mUser = user;
+        mActivityInfo = info.activityInfo;
+        mComponentName = LauncherApps.getComponentName(info);
+        mUser = user;
+        mFirstInstallTime = firstInstallTime;
     }
 
     LauncherActivityInfo(Context context) {
@@ -79,7 +81,13 @@ public class LauncherActivityInfo {
     }
 
     /**
-     * Returns the user handle of the user profile that this activity belongs to.
+     * Returns the user handle of the user profile that this activity belongs to. In order to
+     * persist the identity of the profile, do not store the UserHandle. Instead retrieve its
+     * serial number from UserManager. You can convert the serial number back to a UserHandle
+     * for later use.
+     *
+     * @see UserManager#getSerialNumberForUser(UserHandle)
+     * @see UserManager#getUserForSerialNumber(long)
      *
      * @return The UserHandle of the profile.
      */
@@ -89,7 +97,7 @@ public class LauncherActivityInfo {
 
     /**
      * Retrieves the label for the activity.
-     * 
+     *
      * @return The label for the activity.
      */
     public CharSequence getLabel() {
@@ -98,8 +106,10 @@ public class LauncherActivityInfo {
 
     /**
      * Returns the icon for this activity, without any badging for the profile.
-     * @param density The preferred density of the icon, zero for default density.
+     * @param density The preferred density of the icon, zero for default density. Use
+     * density DPI values from {@link DisplayMetrics}.
      * @see #getBadgedIcon(int)
+     * @see DisplayMetrics
      * @return The drawable associated with the activity
      */
     public Drawable getIcon(int density) {
@@ -109,15 +119,25 @@ public class LauncherActivityInfo {
 
     /**
      * Returns the application flags from the ApplicationInfo of the activity.
-     * 
+     *
      * @return Application flags
+     * @hide remove before shipping
      */
     public int getApplicationFlags() {
         return mActivityInfo.applicationInfo.flags;
     }
 
     /**
+     * Returns the application info for the appliction this activity belongs to.
+     * @return
+     */
+    public ApplicationInfo getApplicationInfo() {
+        return mActivityInfo.applicationInfo;
+    }
+
+    /**
      * Returns the time at which the package was first installed.
+     *
      * @return The time of installation of the package, in milliseconds.
      */
     public long getFirstInstallTime() {
@@ -134,7 +154,9 @@ public class LauncherActivityInfo {
 
     /**
      * Returns the activity icon with badging appropriate for the profile.
-     * @param density Optional density for the icon, or 0 to use the default density.
+     * @param density Optional density for the icon, or 0 to use the default density. Use
+     * {@link DisplayMetrics} for DPI values.
+     * @see DisplayMetrics
      * @return A badged icon for the activity.
      */
     public Drawable getBadgedIcon(int density) {
