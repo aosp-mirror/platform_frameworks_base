@@ -38092,8 +38092,10 @@ package android.widget {
     method public void setOnMenuItemClickListener(android.widget.Toolbar.OnMenuItemClickListener);
     method public void setSubtitle(int);
     method public void setSubtitle(java.lang.CharSequence);
+    method public void setSubtitleTextAppearance(android.content.Context, int);
     method public void setTitle(int);
     method public void setTitle(java.lang.CharSequence);
+    method public void setTitleTextAppearance(android.content.Context, int);
     method public boolean showOverflowMenu();
   }
 
