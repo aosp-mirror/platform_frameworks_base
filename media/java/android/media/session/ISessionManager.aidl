@@ -29,4 +29,5 @@ interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
     List<IBinder> getSessions(in ComponentName compName, int userId);
     void dispatchMediaKeyEvent(in KeyEvent keyEvent, boolean needWakeLock);
+    void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags);
 }

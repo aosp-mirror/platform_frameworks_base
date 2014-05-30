@@ -166,4 +166,22 @@ public final class MediaSessionManager {
             Log.e(TAG, "Failed to send key event.", e);
         }
     }
+
+    /**
+     * Dispatch an adjust volume request to the system. It will be routed to the
+     * most relevant stream/session.
+     *
+     * @param suggestedStream The stream to fall back to if there isn't a
+     *            relevant stream
+     * @param delta The amount to adjust the volume by.
+     * @param flags Any flags to include with the volume change.
+     * @hide
+     */
+    public void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags) {
+        try {
+            mService.dispatchAdjustVolumeBy(suggestedStream, delta, flags);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send adjust volume.", e);
+        }
+    }
 }
