@@ -172,24 +172,6 @@ final class HardwareLayer {
         });
     }
 
-    /**
-     * This exists to minimize impact into the current HardwareLayer paths as
-     * some of the specifics of how to handle error cases in the fully
-     * deferred model will work
-     */
-    @Deprecated
-    public void flushChanges() {
-        if (HardwareRenderer.sUseRenderThread) {
-            // Not supported, don't try.
-            return;
-        }
-
-        boolean success = nFlushChanges(mFinalizer.get());
-        if (!success) {
-            destroy();
-        }
-    }
-
     public long getLayer() {
         return nGetLayer(mFinalizer.get());
     }
@@ -216,32 +198,13 @@ final class HardwareLayer {
         return st;
     }
 
-    /**
-     * This should only be used by HardwareRenderer! Do not call directly
-     */
-    static HardwareLayer createTextureLayer(HardwareRenderer renderer) {
-        return new HardwareLayer(renderer, nCreateTextureLayer(), LAYER_TYPE_TEXTURE);
-    }
-
     static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
         return new HardwareLayer(renderer, layer, LAYER_TYPE_TEXTURE);
-    }
-
-    /**
-     * This should only be used by HardwareRenderer! Do not call directly
-     */
-    static HardwareLayer createDisplayListLayer(HardwareRenderer renderer,
-            int width, int height) {
-        return new HardwareLayer(renderer, nCreateRenderLayer(width, height), LAYER_TYPE_DISPLAY_LIST);
     }
 
     static HardwareLayer adoptDisplayListLayer(HardwareRenderer renderer, long layer) {
         return new HardwareLayer(renderer, layer, LAYER_TYPE_DISPLAY_LIST);
     }
-
-    /** This also creates the underlying layer */
-    private static native long nCreateTextureLayer();
-    private static native long nCreateRenderLayer(int width, int height);
 
     private static native void nOnTextureDestroyed(long layerUpdater);
 

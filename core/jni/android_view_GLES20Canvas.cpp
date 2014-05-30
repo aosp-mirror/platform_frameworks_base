@@ -91,52 +91,8 @@ static struct {
 } gRectClassInfo;
 
 // ----------------------------------------------------------------------------
-// Caching
-// ----------------------------------------------------------------------------
-
-static void android_view_GLES20Canvas_flushCaches(JNIEnv* env, jobject clazz,
-        jint mode) {
-    if (Caches::hasInstance()) {
-        Caches::getInstance().flush(static_cast<Caches::FlushMode>(mode));
-    }
-}
-
-static jboolean android_view_GLES20Canvas_initCaches(JNIEnv* env, jobject clazz) {
-    if (Caches::hasInstance()) {
-        return Caches::getInstance().init() ? JNI_TRUE : JNI_FALSE;
-    }
-    return JNI_FALSE;
-}
-
-static void android_view_GLES20Canvas_terminateCaches(JNIEnv* env, jobject clazz) {
-    if (Caches::hasInstance()) {
-        Caches::getInstance().terminate();
-    }
-}
-
-// ----------------------------------------------------------------------------
-// Caching
-// ----------------------------------------------------------------------------
-
-static void android_view_GLES20Canvas_initAtlas(JNIEnv* env, jobject clazz,
-        jobject graphicBuffer, jlongArray atlasMapArray, jint count) {
-
-    sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
-    jlong* jAtlasMap = env->GetLongArrayElements(atlasMapArray, NULL);
-    Caches::getInstance().assetAtlas.init(buffer, jAtlasMap, count);
-    env->ReleaseLongArrayElements(atlasMapArray, jAtlasMap, 0);
-}
-
-// ----------------------------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------------------------
-
-static jlong android_view_GLES20Canvas_createRenderer(JNIEnv* env, jobject clazz) {
-    RENDERER_LOGD("Create OpenGLRenderer");
-    OpenGLRenderer* renderer = new OpenGLRenderer();
-    renderer->initProperties();
-    return reinterpret_cast<jlong>(renderer);
-}
 
 static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
@@ -172,10 +128,6 @@ static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     renderer->finish();
-}
-
-static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz) {
-    return Stencil::getStencilSize();
 }
 
 static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
@@ -577,15 +529,6 @@ static void android_view_GLES20Canvas_drawRegionAsRects(JNIEnv* env, jobject cla
     }
 }
 
-static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jfloatArray rects, jint count, jlong paintPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    jfloat* storage = env->GetFloatArrayElements(rects, NULL);
-    SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-    renderer->drawRects(storage, count, paint);
-    env->ReleaseFloatArrayElements(rects, storage, 0);
-}
-
 static void android_view_GLES20Canvas_drawPoints(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jfloatArray points, jint offset, jint count, jlong paintPtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
@@ -924,39 +867,6 @@ static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
     renderer->drawLayer(layer, x, y);
 }
 
-static jboolean android_view_GLES20Canvas_copyLayer(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jlong bitmapPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
-    return LayerRenderer::copyLayer(layer, bitmap);
-}
-
-static void android_view_GLES20Canvas_pushLayerUpdate(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong layerPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    renderer->pushLayerUpdate(layer);
-}
-
-static void android_view_GLES20Canvas_cancelLayerUpdate(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong layerPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    renderer->cancelLayerUpdate(layer);
-}
-
-static void android_view_GLES20Canvas_clearLayerUpdates(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    renderer->clearLayerUpdates();
-}
-
-static void android_view_GLES20Canvas_flushLayerUpdates(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    renderer->flushLayerUpdates();
-}
-
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -1001,14 +911,7 @@ static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
 
 #ifdef USE_OPENGL_RENDERER
-    { "nFlushCaches",       "(I)V",            (void*) android_view_GLES20Canvas_flushCaches },
-    { "nInitCaches",        "()Z",             (void*) android_view_GLES20Canvas_initCaches },
-    { "nTerminateCaches",   "()V",             (void*) android_view_GLES20Canvas_terminateCaches },
 
-    { "nInitAtlas",         "(Landroid/view/GraphicBuffer;[JI)V",
-            (void*) android_view_GLES20Canvas_initAtlas },
-
-    { "nCreateRenderer",    "()J",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(J)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(JII)V",          (void*) android_view_GLES20Canvas_setViewport },
     { "nPrepare",           "(JZ)I",           (void*) android_view_GLES20Canvas_prepare },
@@ -1016,9 +919,6 @@ static JNINativeMethod gMethods[] = {
     { "nFinish",            "(J)V",            (void*) android_view_GLES20Canvas_finish },
     { "nSetProperty",           "(Ljava/lang/String;Ljava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setProperty },
-
-
-    { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
     { "nCallDrawGLFunction", "(JJ)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
 
@@ -1059,7 +959,6 @@ static JNINativeMethod gMethods[] = {
     { "nDrawColor",         "(JII)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(JFFFFJ)V",       (void*) android_view_GLES20Canvas_drawRect },
     { "nDrawRects",         "(JJJ)V",          (void*) android_view_GLES20Canvas_drawRegionAsRects },
-    { "nDrawRects",         "(J[FIJ)V",        (void*) android_view_GLES20Canvas_drawRects },
     { "nDrawRoundRect",     "(JFFFFFFJ)V",     (void*) android_view_GLES20Canvas_drawRoundRect },
     { "nDrawCircle",        "(JFFFJ)V",        (void*) android_view_GLES20Canvas_drawCircle },
     { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_GLES20Canvas_drawCircleProps },
@@ -1099,11 +998,6 @@ static JNINativeMethod gMethods[] = {
     { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
 
     { "nDrawLayer",              "(JJFF)V",    (void*) android_view_GLES20Canvas_drawLayer },
-    { "nCopyLayer",              "(JJ)Z",      (void*) android_view_GLES20Canvas_copyLayer },
-    { "nClearLayerUpdates",      "(J)V",       (void*) android_view_GLES20Canvas_clearLayerUpdates },
-    { "nFlushLayerUpdates",      "(J)V",       (void*) android_view_GLES20Canvas_flushLayerUpdates },
-    { "nPushLayerUpdate",        "(JJ)V",      (void*) android_view_GLES20Canvas_pushLayerUpdate },
-    { "nCancelLayerUpdate",      "(JJ)V",      (void*) android_view_GLES20Canvas_cancelLayerUpdate },
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },

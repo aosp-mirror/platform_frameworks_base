@@ -36,7 +36,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     RenderNode mNode;
 
     private GLES20RecordingCanvas() {
-        super(true, true);
+        super();
     }
 
     static GLES20RecordingCanvas obtain(@NonNull RenderNode node) {
