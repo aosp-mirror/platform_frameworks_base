@@ -30,6 +30,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Stores a mapping of global keys.
@@ -122,5 +123,22 @@ final class GlobalKeyManager {
                 parser.close();
             }
         }
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        final int numKeys = mKeyMapping.size();
+        if (numKeys == 0) {
+            pw.print(prefix); pw.println("mKeyMapping.size=0");
+            return;
+        }
+        pw.print(prefix); pw.println("mKeyMapping={");
+        for (int i = 0; i < numKeys; ++i) {
+            pw.print("  ");
+            pw.print(prefix);
+            pw.print(KeyEvent.keyCodeToString(mKeyMapping.keyAt(i)));
+            pw.print("=");
+            pw.println(mKeyMapping.valueAt(i).flattenToString());
+        }
+        pw.print(prefix); pw.println("}");
     }
 }
