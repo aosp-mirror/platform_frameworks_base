@@ -312,6 +312,24 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Uid of app creating the configuration
+     */
+    public int creatorUid;
+
+    /**
+     * @hide
+     * Uid of last app issuing a connection related command
+     */
+    public int lastConnectUid;
+
+    /**
+     * @hide
+     * Uid of last app modifying the configuration
+     */
+    public int lastUpdateUid;
+
+    /**
+     * @hide
      * BSSID list on which this configuration was seen.
      * TODO: prevent this list to grow infinitely, age-out the results
      */
@@ -429,10 +447,17 @@ public class WifiConfiguration implements Parcelable {
     /** @hide
      * if this is set, the WifiConfiguration cannot use linkages so as to bump
      * it's relative priority.
+     * - status between and 128 indicate various level of blacklisting depending
+     * on the severity or frequency of the connection error
+     * - deleted status indicates that the user is deleting the configuration, and so
+     * although it may have been self added we will not re-self-add it, ignore it,
+     * not return it to applications, and not connect to it
      * */
     public static final int AUTO_JOIN_TEMPORARY_DISABLED  = 1;
     /** @hide */
-    public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 2;
+    public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 128;
+    /** @hide */
+    public static final int AUTO_JOIN_DELETED  = 200;
 
     /**
      * @hide
@@ -441,9 +466,21 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * Set if the configuration was self added by the framework
+     * This boolean is cleared if we get a connect/save/ update or
+     * any wifiManager command that indicate the user interacted with the configuration
+     * since we will now consider that the configuration belong to him.
      * @hide
      */
     public boolean selfAdded;
+
+    /**
+     * Set if the configuration was self added by the framework
+     * This boolean is set once and never cleared. It is used
+     * so as we never loose track of who created the
+     * configuration in the first place.
+     * @hide
+     */
+    public boolean didSelfAdd;
 
     /**
      * @hide
@@ -499,6 +536,7 @@ public class WifiConfiguration implements Parcelable {
         enterpriseConfig = new WifiEnterpriseConfig();
         autoJoinStatus = AUTO_JOIN_ENABLED;
         selfAdded = false;
+        didSelfAdd = false;
         ephemeral = false;
         mIpConfiguration = new IpConfiguration();
     }
@@ -634,6 +672,10 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append('\n');
 
         sbuf.append(mIpConfiguration.toString());
+
+        if (selfAdded)  sbuf.append("selfAdded");
+        if (creatorUid != 0)  sbuf.append("uid=" + Integer.toString(creatorUid));
+
 
         return sbuf.toString();
     }
@@ -868,6 +910,7 @@ public class WifiConfiguration implements Parcelable {
             networkId = source.networkId;
             status = source.status;
             disableReason = source.disableReason;
+            disableReason = source.disableReason;
             SSID = source.SSID;
             BSSID = source.BSSID;
             preSharedKey = source.preSharedKey;
@@ -916,6 +959,10 @@ public class WifiConfiguration implements Parcelable {
             }
 
             lastFailure = source.lastFailure;
+            didSelfAdd = source.didSelfAdd;
+            lastConnectUid = source.lastConnectUid;
+            lastUpdateUid = source.lastUpdateUid;
+            creatorUid = source.creatorUid;
         }
     }
 
@@ -953,6 +1000,10 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(defaultGwMacAddress);
         dest.writeInt(autoJoinStatus);
         dest.writeInt(selfAdded ? 1 : 0);
+        dest.writeInt(didSelfAdd ? 1 : 0);
+        dest.writeInt(creatorUid);
+        dest.writeInt(lastConnectUid);
+        dest.writeInt(lastUpdateUid);
         /*
         TODO: should we write the cache results to the parcel?
         if (scanResultCache != null) {
@@ -996,6 +1047,10 @@ public class WifiConfiguration implements Parcelable {
                 config.defaultGwMacAddress = in.readString();
                 config.autoJoinStatus = in.readInt();
                 config.selfAdded = in.readInt() != 0;
+                config.didSelfAdd = in.readInt() != 0;
+                config.creatorUid = in.readInt();
+                config.lastConnectUid = in.readInt();
+                config.lastUpdateUid = in.readInt();
                 /*
                 TODO: should we write the cache results to the parcel?
                 boolean done = false;
