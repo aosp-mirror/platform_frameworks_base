@@ -22,9 +22,6 @@ import android.os.Looper;
 import android.os.Message;
 
 public class HandlerCaller {
-
-    public final Context mContext;
-
     final Looper mMainLooper;
     final Handler mH;
 
@@ -47,7 +44,6 @@ public class HandlerCaller {
 
     public HandlerCaller(Context context, Looper looper, Callback callback,
             boolean asyncHandler) {
-        mContext = context;
         mMainLooper = looper != null ? looper : context.getMainLooper();
         mH = new MyHandler(mMainLooper, asyncHandler);
         mCallback = callback;

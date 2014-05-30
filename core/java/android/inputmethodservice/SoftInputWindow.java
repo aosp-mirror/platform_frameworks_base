@@ -115,6 +115,10 @@ public class SoftInputWindow extends Dialog {
         getWindow().setAttributes(lp);
     }
 
+    public int getGravity() {
+        return getWindow().getAttributes().gravity;
+    }
+
     private void updateWidthHeight(WindowManager.LayoutParams lp) {
         if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
             lp.width = WindowManager.LayoutParams.MATCH_PARENT;

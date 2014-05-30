@@ -247,7 +247,8 @@ public final class ActiveServices {
             maxBg = Integer.parseInt(SystemProperties.get("ro.config.max_starting_bg", "0"));
         } catch(RuntimeException e) {
         }
-        mMaxStartingBackground = maxBg > 0 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
+        mMaxStartingBackground = maxBg > 0
+                ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
     }
 
     ServiceRecord getServiceByName(ComponentName name, int callingUser) {

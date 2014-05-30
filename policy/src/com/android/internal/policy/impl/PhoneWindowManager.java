@@ -3348,7 +3348,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.top = mContentTop;
                     pf.right = mContentRight;
                     pf.bottom = mContentBottom;
-                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                    if (win.isVoiceInteraction()) {
+                        df.left = of.left = cf.left = mVoiceContentLeft;
+                        df.top = of.top = cf.top = mVoiceContentTop;
+                        df.right = of.right = cf.right = mVoiceContentRight;
+                        df.bottom = of.bottom = cf.bottom = mVoiceContentBottom;
+                    } else if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         df.left = of.left = cf.left = mDockLeft;
                         df.top = of.top = cf.top = mDockTop;
                         df.right = of.right = cf.right = mDockRight;
