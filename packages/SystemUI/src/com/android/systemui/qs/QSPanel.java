@@ -61,6 +61,7 @@ public class QSPanel extends ViewGroup {
         mContext = context;
 
         mDetail = new FrameLayout(mContext);
+        mDetail.setBackgroundColor(mContext.getResources().getColor(R.color.system_primary_color));
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
         addView(mDetail);
@@ -204,7 +205,7 @@ public class QSPanel extends ViewGroup {
         mDetail.measure(exactly(width), unspecified());
         if (mDetail.getVisibility() == VISIBLE && mDetail.getChildCount() > 0) {
             final int dmh = mDetail.getMeasuredHeight();
-            if (dmh > 0) h = dmh;
+            if (dmh > 0) h = Math.max(h, dmh);
         }
         setMeasuredDimension(width, h);
     }
@@ -231,7 +232,8 @@ public class QSPanel extends ViewGroup {
                     left + record.tileView.getMeasuredWidth(),
                     top + record.tileView.getMeasuredHeight());
         }
-        mDetail.layout(0, 0, mDetail.getMeasuredWidth(), mDetail.getMeasuredHeight());
+        final int dh = Math.max(mDetail.getMeasuredHeight(), getMeasuredHeight());
+        mDetail.layout(0, 0, mDetail.getMeasuredWidth(), dh);
     }
 
     private int getRowTop(int row) {
