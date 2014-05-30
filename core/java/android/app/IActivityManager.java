@@ -171,7 +171,8 @@ public interface IActivityManager extends IInterface {
 
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher,
-            IUiAutomationConnection connection, int userId) throws RemoteException;
+            IUiAutomationConnection connection, int userId,
+            String abiOverride) throws RemoteException;
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) throws RemoteException;
 

@@ -35,6 +35,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -45,6 +46,8 @@ import android.os.UserHandle;
 import android.util.AndroidException;
 import android.view.IWindowManager;
 import com.android.internal.os.BaseCommand;
+
+import dalvik.system.VMRuntime;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -94,7 +97,11 @@ public class Am extends BaseCommand {
                 "       am broadcast [--user <USER_ID> | all | current] <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
-                "               [--no-window-animation] <COMPONENT>\n" +
+                "               [--no-window-animation]\n" +
+                "               [--abi <ABI>]\n : Launch the instrumented process with the "  +
+                "                   selected ABI. This assumes that the process supports the" +
+                "                   selected ABI." +
+                "               <COMPONENT>\n" +
                 "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
@@ -808,6 +815,7 @@ public class Am extends BaseCommand {
         Bundle args = new Bundle();
         String argKey = null, argValue = null;
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        String abi = null;
 
         String opt;
         while ((opt=nextOption()) != null) {
@@ -826,6 +834,8 @@ public class Am extends BaseCommand {
                 no_window_animation = true;
             } else if (opt.equals("--user")) {
                 userId = parseUserArg(nextArgRequired());
+            } else if (opt.equals("--abi")) {
+                abi = nextArgRequired();
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
@@ -856,7 +866,24 @@ public class Am extends BaseCommand {
             wm.setAnimationScale(1, 0.0f);
         }
 
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId)) {
+        if (abi != null) {
+            final String[] supportedAbis = Build.SUPPORTED_ABIS;
+            boolean matched = false;
+            for (String supportedAbi : supportedAbis) {
+                if (supportedAbi.equals(abi)) {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) {
+                throw new AndroidException(
+                        "INSTRUMENTATION_FAILED: Unsupported instruction set " + abi);
+            }
+        }
+
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId,
+                abi)) {
             throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 
