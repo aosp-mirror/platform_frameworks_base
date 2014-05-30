@@ -460,8 +460,8 @@ public abstract class TextToSpeechService extends Service {
     }
 
     private String[] getSettingsLocale() {
-        final String locale = mEngineHelper.getLocalePrefForEngine(mPackageName);
-        return TtsEngines.parseLocalePref(locale);
+        final Locale locale = mEngineHelper.getLocalePrefForEngine(mPackageName);
+        return TtsEngines.toOldLocaleStringFormat(locale);
     }
 
     private int getSecureSettingInt(String name, int defaultValue) {

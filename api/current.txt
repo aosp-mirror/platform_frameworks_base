@@ -26673,6 +26673,7 @@ package android.speech.tts {
   }
 
   public static final class TextToSpeechClient.EngineStatus {
+    method public java.util.Locale getDefaultLocale();
     method public java.lang.String getEnginePackage();
     method public java.util.List<android.speech.tts.VoiceInfo> getVoices();
   }
