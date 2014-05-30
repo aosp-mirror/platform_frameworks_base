@@ -308,4 +308,7 @@
 
     <!-- Volume panel dialog width -->
     <dimen name="volume_panel_width">300dp</dimen>
+
+    <!-- Volume panel z depth -->
+    <dimen name="volume_panel_z">3dp</dimen>
 </resources>
