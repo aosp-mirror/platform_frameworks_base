@@ -1671,7 +1671,6 @@ public class Notification implements Parcelable
         private Notification mPublicVersion = null;
         private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
-        private boolean mPreQuantum;
         private int mColor = COLOR_DEFAULT;
 
         /**
@@ -1694,6 +1693,15 @@ public class Notification implements Parcelable
          *            object.
          */
         public Builder(Context context) {
+            /*
+             * Important compatibility note!
+             * Some apps out in the wild create a Notification.Builder in their Activity subclass
+             * constructor for later use. At this point Activities - themselves subclasses of
+             * ContextWrapper - do not have their inner Context populated yet. This means that
+             * any calls to Context methods from within this constructor can cause NPEs in existing
+             * apps. Any data populated from mContext should therefore be populated lazily to
+             * preserve compatibility.
+             */
             mContext = context;
 
             // Set defaults to match the defaults of a Notification
@@ -1702,7 +1710,6 @@ public class Notification implements Parcelable
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
-            mPreQuantum = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L;
             mColorUtil = NotificationColorUtil.getInstance();
         }
 
