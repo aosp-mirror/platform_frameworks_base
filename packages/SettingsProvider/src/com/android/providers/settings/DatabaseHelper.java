@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 103;
+    private static final int DATABASE_VERSION = 104;
 
     private Context mContext;
     private int mUserHandle;
@@ -1660,6 +1660,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 103;
         }
+
+        if (upgradeVersion == 103) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.WAKE_GESTURE_ENABLED,
+                        R.bool.def_wake_gesture_enabled);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 104;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2221,6 +2238,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
                     R.bool.def_install_non_market_apps);
+
+            loadBooleanSetting(stmt, Settings.Secure.WAKE_GESTURE_ENABLED,
+                    R.bool.def_wake_gesture_enabled);
 
         } finally {
             if (stmt != null) stmt.close();

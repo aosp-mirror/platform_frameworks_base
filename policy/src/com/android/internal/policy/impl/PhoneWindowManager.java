@@ -289,6 +289,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDemoHdmiRotation;
     boolean mDemoHdmiRotationLock;
 
+    boolean mWakeGestureEnabledSetting;
+    MyWakeGestureListener mWakeGestureListener;
+
     // Default display does not rotate, apps that require non-default orientation will have to
     // have the orientation emulated.
     private boolean mForceDefaultOrientation = false;
@@ -525,6 +528,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.WAKE_GESTURE_ENABLED), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this,
                     UserHandle.USER_ALL);
@@ -552,6 +558,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override public void onChange(boolean selfChange) {
             updateSettings();
             updateRotation(false);
+        }
+    }
+
+    class MyWakeGestureListener extends WakeGestureListener {
+        MyWakeGestureListener(Context context, Handler handler) {
+            super(context, handler);
+        }
+
+        @Override
+        public void onWakeUp() {
+            synchronized (mLock) {
+                if (shouldEnableWakeGestureLp()) {
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                }
+            }
         }
     }
 
@@ -856,6 +877,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mHandler = new PolicyHandler();
+        mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler);
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
             mOrientationListener.setCurrentRotation(windowManager.getRotation());
@@ -1142,6 +1164,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
 
+            // Configure wake gesture.
+            boolean wakeGestureEnabledSetting = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.WAKE_GESTURE_ENABLED, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            if (mWakeGestureEnabledSetting != wakeGestureEnabledSetting) {
+                mWakeGestureEnabledSetting = wakeGestureEnabledSetting;
+                updateWakeGestureListenerLp();
+            }
+
             // Configure rotation lock.
             int userRotation = Settings.System.getIntForUser(resolver,
                     Settings.System.USER_ROTATION, Surface.ROTATION_0,
@@ -1187,6 +1218,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (updateRotation) {
             updateRotation(true);
         }
+    }
+
+    private void updateWakeGestureListenerLp() {
+        if (shouldEnableWakeGestureLp()) {
+            mWakeGestureListener.requestWakeUpTrigger();
+        } else {
+            mWakeGestureListener.cancelWakeUpTrigger();
+        }
+    }
+
+    private boolean shouldEnableWakeGestureLp() {
+        return mWakeGestureEnabledSetting && !mScreenOnEarly
+                && (!mLidControlsSleep || mLidState != LID_CLOSED)
+                && mWakeGestureListener.isSupported();
     }
 
     private void enablePointerLocation() {
@@ -4406,6 +4451,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardDelegate.onScreenTurnedOff(why);
         }
         synchronized (mLock) {
+            updateWakeGestureListenerLp();
             updateOrientationListenerLp();
             updateLockScreenTimeout();
         }
@@ -4422,6 +4468,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         synchronized (mLock) {
             mScreenOnEarly = true;
+            updateWakeGestureListenerLp();
             updateOrientationListenerLp();
             updateLockScreenTimeout();
         }
@@ -5022,6 +5069,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     PowerManager.GO_TO_SLEEP_REASON_USER,
                     PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         }
+
+        synchronized (mLock) {
+            updateWakeGestureListenerLp();
+        }
     }
 
     void updateRotation(boolean alwaysSendConfiguration) {
@@ -5482,6 +5533,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pw.print(prefix); pw.print("mLastFocusNeedsMenu=");
                     pw.println(mLastFocusNeedsMenu);
         }
+        pw.print(prefix); pw.print("mWakeGestureEnabledSetting=");
+                pw.println(mWakeGestureEnabledSetting);
+
         pw.print(prefix); pw.print("mSupportAutoRotation="); pw.println(mSupportAutoRotation);
         pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
                 pw.print(" mDockMode="); pw.print(mDockMode);
@@ -5628,6 +5682,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mNavigationBarController.dump(pw, prefix);
         PolicyControl.dump(prefix, pw);
 
+        if (mWakeGestureListener != null) {
+            mWakeGestureListener.dump(pw, prefix);
+        }
         if (mOrientationListener != null) {
             mOrientationListener.dump(pw, prefix);
         }

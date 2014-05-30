@@ -192,4 +192,7 @@
     <!-- Default for Settings.Global.DEVICE_NAME $1=BRAND $2=MODEL-->
     <string name="def_device_name">%1$s %2$s</string>
 
+    <!-- Default for Settings.Secure.WAKE_GESTURE_ENABLED -->
+    <bool name="def_wake_gesture_enabled">true</bool>
+
 </resources>
