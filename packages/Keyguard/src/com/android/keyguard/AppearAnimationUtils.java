@@ -16,84 +16,124 @@
 
 package com.android.keyguard;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 /**
  * A class to make nice appear transitions for views in a tabular layout.
  */
-public class AppearAnimationUtils {
+public class AppearAnimationUtils implements AppearAnimationCreator<View> {
 
     public static final long APPEAR_DURATION = 220;
 
     private final Interpolator mLinearOutSlowIn;
     private final float mStartTranslation;
+    private final AppearAnimationProperties mProperties = new AppearAnimationProperties();
+    private final float mDelayScale;
 
     public AppearAnimationUtils(Context ctx) {
-        mLinearOutSlowIn = AnimationUtils.loadInterpolator(
-                ctx, android.R.interpolator.linear_out_slow_in);
-        mStartTranslation =
-                ctx.getResources().getDimensionPixelOffset(R.dimen.appear_y_translation_start);
+        this(ctx, 1.0f, 1.0f);
     }
 
-    public void startAppearAnimation(View[][] views, final Runnable finishListener) {
+    public AppearAnimationUtils(Context ctx, float delayScaleFactor,
+            float translationScaleFactor) {
+        mLinearOutSlowIn = AnimationUtils.loadInterpolator(
+                ctx, android.R.interpolator.linear_out_slow_in);
+        mStartTranslation = ctx.getResources().getDimensionPixelOffset(
+                R.dimen.appear_y_translation_start) * translationScaleFactor;
+        mDelayScale = delayScaleFactor;
+    }
+
+    public void startAppearAnimation(View[][] objects, final Runnable finishListener) {
+        startAppearAnimation(objects, finishListener, this);
+    }
+
+    public <T> void startAppearAnimation(T[][] objects, final Runnable finishListener,
+            AppearAnimationCreator<T> creator) {
+        AppearAnimationProperties properties = getDelays(objects);
+        startAnimations(properties, objects, finishListener, creator);
+    }
+
+    private <T> void startAnimations(AppearAnimationProperties properties, T[][] objects,
+            final Runnable finishListener, AppearAnimationCreator creator) {;
+        if (properties.maxDelayRowIndex == -1 || properties.maxDelayColIndex == -1) {
+            finishListener.run();
+            return;
+        }
+        for (int row = 0; row < properties.delays.length; row++) {
+            long[] columns = properties.delays[row];
+            for (int col = 0; col < columns.length; col++) {
+                long delay = columns[col];
+                Runnable endRunnable = null;
+                if (properties.maxDelayRowIndex == row && properties.maxDelayColIndex == col) {
+                    endRunnable = finishListener;
+                }
+                creator.createAnimation(objects[row][col], delay, APPEAR_DURATION,
+                        mStartTranslation, mLinearOutSlowIn, endRunnable);
+            }
+        }
+
+    }
+
+    private <T> AppearAnimationProperties getDelays(T[][] items) {
         long maxDelay = 0;
-        ViewPropertyAnimator maxDelayAnimator = null;
-        for (int row = 0; row < views.length; row++) {
-            View[] columns = views[row];
+        mProperties.maxDelayColIndex = -1;
+        mProperties.maxDelayRowIndex = -1;
+        mProperties.delays = new long[items.length][];
+        for (int row = 0; row < items.length; row++) {
+            T[] columns = items[row];
+            mProperties.delays[row] = new long[columns.length];
             for (int col = 0; col < columns.length; col++) {
                 long delay = calculateDelay(row, col);
-                ViewPropertyAnimator animator = startAppearAnimation(columns[col], delay);
-                if (animator != null && delay > maxDelay) {
+                mProperties.delays[row][col] = delay;
+                if (items[row][col] != null && delay > maxDelay) {
                     maxDelay = delay;
-                    maxDelayAnimator = animator;
+                    mProperties.maxDelayColIndex = col;
+                    mProperties.maxDelayRowIndex = row;
                 }
             }
         }
-        if (maxDelayAnimator != null) {
-            maxDelayAnimator.setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    finishListener.run();
-                }
-            });
-        } else {
-            finishListener.run();
-        }
-    }
-
-    private ViewPropertyAnimator startAppearAnimation(View view, long delay) {
-        if (view == null) return null;
-        view.setAlpha(0f);
-        view.setTranslationY(mStartTranslation);
-        view.animate()
-                .alpha(1f)
-                .translationY(0)
-                .setInterpolator(mLinearOutSlowIn)
-                .setDuration(APPEAR_DURATION)
-                .setStartDelay(delay)
-                .setListener(null);
-        if (view.hasOverlappingRendering()) {
-            view.animate().withLayer();
-        }
-        return view.animate();
+        return mProperties;
     }
 
     private long calculateDelay(int row, int col) {
-        return (long) (row * 40 + col * (Math.pow(row, 0.4) + 0.4) * 20);
+        return (long) ((row * 40 + col * (Math.pow(row, 0.4) + 0.4) * 20) * mDelayScale);
     }
 
-    public TimeInterpolator getInterpolator() {
+    public Interpolator getInterpolator() {
         return mLinearOutSlowIn;
     }
 
     public float getStartTranslation() {
         return mStartTranslation;
+    }
+
+    @Override
+    public void createAnimation(View view, long delay, long duration, float startTranslationY,
+            Interpolator interpolator, Runnable endRunnable) {
+        if (view != null) {
+            view.setAlpha(0f);
+            view.setTranslationY(startTranslationY);
+            view.animate()
+                    .alpha(1f)
+                    .translationY(0)
+                    .setInterpolator(interpolator)
+                    .setDuration(duration)
+                    .setStartDelay(delay);
+            if (view.hasOverlappingRendering()) {
+                view.animate().withLayer();
+            }
+            if (endRunnable != null) {
+                view.animate().withEndAction(endRunnable);
+            }
+        }
+    }
+
+    public class AppearAnimationProperties {
+        public long[][] delays;
+        public int maxDelayRowIndex;
+        public int maxDelayColIndex;
     }
 }

@@ -162,5 +162,5 @@
     <dimen name="big_font_size">120dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
-    <dimen name="appear_y_translation_start">24dp</dimen>
+    <dimen name="appear_y_translation_start">32dp</dimen>
 </resources>
