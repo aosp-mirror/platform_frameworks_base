@@ -197,7 +197,7 @@
     <dimen name="qs_dual_tile_padding">12dp</dimen>
 
     <!-- How far the hidden header peeks from the top of the screen when QS is in detail mode. -->
-    <dimen name="qs_header_peek_height">16dp</dimen>
+    <dimen name="qs_header_peek_height">8dp</dimen>
 
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>

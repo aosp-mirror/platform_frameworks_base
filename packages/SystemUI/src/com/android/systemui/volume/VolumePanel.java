@@ -31,6 +31,7 @@ import android.media.AudioSystem;
 import android.media.RingtoneManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -76,6 +77,7 @@ public class VolumePanel extends Handler {
     private static final int MAX_VOLUME = 100;
     private static final int FREE_DELAY = 10000;
     private static final int TIMEOUT_DELAY = 3000;
+    private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
     private static final int MSG_FREE_RESOURCES = 1;
@@ -103,6 +105,7 @@ public class VolumePanel extends Handler {
     private boolean mRingIsSilent;
     private boolean mVoiceCapable;
     private boolean mZenModeCapable;
+    private int mTimeoutDelay = TIMEOUT_DELAY;
 
     // True if we want to play tones on the system stream when the master stream is specified.
     private final boolean mPlayMasterStreamTones;
@@ -513,6 +516,7 @@ public class VolumePanel extends Handler {
 
                 @Override
                 public void onInteraction() {
+                    resetTimeout();
                     if (mZenPanelCallback != null) {
                         mZenPanelCallback.onInteraction();
                     }
@@ -521,6 +525,8 @@ public class VolumePanel extends Handler {
         }
         mZenPanel.setVisibility(View.VISIBLE);
         mZenPanelDivider.setVisibility(View.VISIBLE);
+        mTimeoutDelay = TIMEOUT_DELAY_EXPANDED;
+        resetTimeout();
     }
 
     private void collapse() {
@@ -529,6 +535,8 @@ public class VolumePanel extends Handler {
             mZenPanel.setVisibility(View.GONE);
         }
         mZenPanelDivider.setVisibility(View.GONE);
+        mTimeoutDelay = TIMEOUT_DELAY;
+        resetTimeout();
     }
 
     public void updateStates() {
@@ -1082,7 +1090,7 @@ public class VolumePanel extends Handler {
     public void resetTimeout() {
         if (LOGD) Log.d(mTag, "resetTimeout at " + System.currentTimeMillis());
         removeMessages(MSG_TIMEOUT);
-        sendEmptyMessageDelayed(MSG_TIMEOUT, TIMEOUT_DELAY);
+        sendEmptyMessageDelayed(MSG_TIMEOUT, mTimeoutDelay);
     }
 
     private void forceTimeout() {
@@ -1134,7 +1142,12 @@ public class VolumePanel extends Handler {
         public void onClick(View v) {
             if (v == mExpandButton && mZenController != null) {
                 final boolean newZen = !mZenController.isZen();
-                mZenController.setZen(newZen);
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mZenController.setZen(newZen);
+                    }
+                });
                 if (newZen) {
                     expand();
                 } else {
