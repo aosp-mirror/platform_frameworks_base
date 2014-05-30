@@ -17,10 +17,14 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardViewBase;
@@ -43,6 +47,8 @@ public class KeyguardBouncer {
     private StatusBarWindowManager mWindowManager;
     private KeyguardViewBase mKeyguardView;
     private ViewGroup mRoot;
+    private Interpolator mFadeOutInterpolator = new LinearInterpolator();
+    private boolean mFadingOut;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
@@ -86,6 +92,29 @@ public class KeyguardBouncer {
         }
     }
 
+    public void animateHide(long delay, long duration) {
+        if (isShowing()) {
+            mFadingOut = true;
+            mKeyguardView.animate()
+                    .alpha(0)
+                    .withLayer()
+
+                    // Make it disappear faster, as the focus should be on the activity behind.
+                    .setDuration(duration / 3)
+                    .setInterpolator(mFadeOutInterpolator)
+                    .setStartDelay(delay)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFadingOut = false;
+                            hide(true /* destroyView */);
+                        }
+                    });
+        } else {
+            hide(true /* destroyView */);
+        }
+    }
+
     /**
      * Reset the state of the view.
      */
@@ -110,7 +139,7 @@ public class KeyguardBouncer {
     }
 
     public boolean isShowing() {
-        return mRoot != null && mRoot.getVisibility() == View.VISIBLE;
+        return mRoot != null && mRoot.getVisibility() == View.VISIBLE && !mFadingOut;
     }
 
     public void prepare() {

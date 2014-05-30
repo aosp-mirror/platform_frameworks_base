@@ -200,8 +200,10 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 mTrackingPointer = -1;
                 trackMovement(event);
-                boolean expand = flingWithCurrentVelocity();
+                float vel = getCurrentVelocity();
+                boolean expand = flingExpands(vel);
                 onTrackingStopped(expand);
+                fling(vel, expand);
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -323,18 +325,15 @@ public abstract class PanelView extends FrameLayout {
     }
 
     /**
-     * @return whether the panel will be expanded after the animation
+     * @param vel the current velocity of the motion
+     * @return whether a fling should expands the panel; contracts otherwise
      */
-    private boolean flingWithCurrentVelocity() {
-        float vel = getCurrentVelocity();
-        boolean expand;
+    private boolean flingExpands(float vel) {
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-            expand = getExpandedFraction() > 0.5f;
+            return getExpandedFraction() > 0.5f;
         } else {
-            expand = vel > 0;
+            return vel > 0;
         }
-        fling(vel, expand);
-        return expand;
     }
 
     protected void fling(float vel, boolean expand) {
@@ -342,6 +341,7 @@ public abstract class PanelView extends FrameLayout {
         float target = expand ? getMaxPanelHeight() : 0.0f;
         if (target == mExpandedHeight) {
             onExpandingFinished();
+            mBar.panelExpansionChanged(this, mExpandedFraction);
             return;
         }
         ValueAnimator animator = ValueAnimator.ofFloat(mExpandedHeight, target);
@@ -430,7 +430,7 @@ public abstract class PanelView extends FrameLayout {
 
     public void setExpandedHeightInternal(float h) {
         float fh = getMaxPanelHeight();
-        mExpandedHeight = Math.min(fh, h);
+        mExpandedHeight = Math.max(0, Math.min(fh, h));
         float overExpansion = h - fh;
         overExpansion = Math.max(0, overExpansion);
         if (overExpansion != mOverExpansion) {
@@ -442,7 +442,7 @@ public abstract class PanelView extends FrameLayout {
         }
 
         onHeightUpdated(mExpandedHeight);
-        mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
+        mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : mExpandedHeight / fh);
     }
 
     protected void onOverExpansionChanged(float overExpansion) {

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.View;
@@ -183,11 +184,23 @@ public class StatusBarKeyguardViewManager {
     /**
      * Hides the keyguard view
      */
-    public void hide() {
+    public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
         mPhoneStatusBar.hideKeyguard();
+        mStatusBarWindowManager.setKeyguardFadingAway(true);
         mStatusBarWindowManager.setKeyguardShowing(false);
-        mBouncer.hide(true /* destroyView */);
+        long uptimeMillis = SystemClock.uptimeMillis();
+        long delay = startTime - uptimeMillis;
+        if (delay < 0) {
+            delay = 0;
+        }
+        mBouncer.animateHide(delay, fadeoutDuration);
+        mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
+            @Override
+            public void run() {
+                mStatusBarWindowManager.setKeyguardFadingAway(false);
+            }
+        });
         mViewMediatorCallback.keyguardGone();
         updateStates();
     }

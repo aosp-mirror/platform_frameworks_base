@@ -60,6 +60,9 @@ interface IKeyguardService {
     /**
      * Notifies that the activity behind has now been drawn and it's safe to remove the wallpaper
      * and keyguard flag.
+     *
+     * @param startTime the start time of the animation in uptime milliseconds
+     * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    oneway void startKeyguardExitAnimation(long fadeoutDuration);
+    oneway void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
 }

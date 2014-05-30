@@ -274,9 +274,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.currentUser = newUserId;
     }
 
-    public void startKeyguardExitAnimation(long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardService != null) {
-            mKeyguardService.startKeyguardExitAnimation(fadeoutDuration);
+            mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }
 
