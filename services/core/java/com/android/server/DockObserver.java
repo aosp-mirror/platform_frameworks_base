@@ -19,10 +19,12 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -33,62 +35,62 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.PrintWriter;
 
 /**
- * <p>DockObserver monitors for a docking station.
+ * DockObserver monitors for a docking station.
  */
-final class DockObserver extends UEventObserver {
-    private static final String TAG = DockObserver.class.getSimpleName();
+final class DockObserver extends SystemService {
+    private static final String TAG = "DockObserver";
 
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
 
     private static final int MSG_DOCK_STATE_CHANGED = 0;
 
-    private final Object mLock = new Object();
-
-    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-    private int mPreviousDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-
-    private boolean mSystemReady;
-
-    private final Context mContext;
     private final PowerManager mPowerManager;
     private final PowerManager.WakeLock mWakeLock;
 
-    public DockObserver(Context context) {
-        mContext = context;
+    private final Object mLock = new Object();
 
-        mPowerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+    private boolean mSystemReady;
+
+    private int mActualDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
+    private int mReportedDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+    private int mPreviousDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
+    private boolean mUpdatesStopped;
+
+    public DockObserver(Context context) {
+        super(context);
+
+        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         init();  // set initial status
-        startObserving(DOCK_UEVENT_MATCH);
+
+        mObserver.startObserving(DOCK_UEVENT_MATCH);
     }
 
     @Override
-    public void onUEvent(UEventObserver.UEvent event) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Slog.v(TAG, "Dock UEVENT: " + event.toString());
-        }
+    public void onStart() {
+        publishBinderService(TAG, new BinderService());
+    }
 
-        synchronized (mLock) {
-            try {
-                int newState = Integer.parseInt(event.get("SWITCH_STATE"));
-                if (newState != mDockState) {
-                    mPreviousDockState = mDockState;
-                    mDockState = newState;
-                    if (mSystemReady) {
-                        // Wake up immediately when docked or undocked.
-                        mPowerManager.wakeUp(SystemClock.uptimeMillis());
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+            synchronized (mLock) {
+                mSystemReady = true;
 
-                        updateLocked();
-                    }
+                // don't bother broadcasting undocked here
+                if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                    updateLocked();
                 }
-            } catch (NumberFormatException e) {
-                Slog.e(TAG, "Could not parse switch state from event " + event);
             }
         }
     }
@@ -100,8 +102,8 @@ final class DockObserver extends UEventObserver {
                 FileReader file = new FileReader(DOCK_STATE_PATH);
                 try {
                     int len = file.read(buffer, 0, 1024);
-                    mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
-                    mPreviousDockState = mDockState;
+                    setActualDockStateLocked(Integer.valueOf((new String(buffer, 0, len)).trim()));
+                    mPreviousDockState = mActualDockState;
                 } finally {
                     file.close();
                 }
@@ -113,13 +115,21 @@ final class DockObserver extends UEventObserver {
         }
     }
 
-    void systemReady() {
-        synchronized (mLock) {
-            // don't bother broadcasting undocked here
-            if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+    private void setActualDockStateLocked(int newState) {
+        mActualDockState = newState;
+        if (!mUpdatesStopped) {
+            setDockStateLocked(newState);
+        }
+    }
+
+    private void setDockStateLocked(int newState) {
+        if (newState != mReportedDockState) {
+            mReportedDockState = newState;
+            if (mSystemReady) {
+                // Wake up immediately when docked or undocked.
+                mPowerManager.wakeUp(SystemClock.uptimeMillis());
                 updateLocked();
             }
-            mSystemReady = true;
         }
     }
 
@@ -130,10 +140,13 @@ final class DockObserver extends UEventObserver {
 
     private void handleDockStateChange() {
         synchronized (mLock) {
-            Slog.i(TAG, "Dock state changed: " + mDockState);
+            Slog.i(TAG, "Dock state changed from " + mPreviousDockState + " to "
+                    + mReportedDockState);
+            final int previousDockState = mPreviousDockState;
+            mPreviousDockState = mReportedDockState;
 
             // Skip the dock intent if not yet provisioned.
-            final ContentResolver cr = mContext.getContentResolver();
+            final ContentResolver cr = getContext().getContentResolver();
             if (Settings.Global.getInt(cr,
                     Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
                 Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
@@ -143,27 +156,27 @@ final class DockObserver extends UEventObserver {
             // Pack up the values and broadcast them to everyone
             Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
+            intent.putExtra(Intent.EXTRA_DOCK_STATE, mReportedDockState);
 
             // Play a sound to provide feedback to confirm dock connection.
             // Particularly useful for flaky contact pins...
             if (Settings.Global.getInt(cr,
                     Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1) {
                 String whichSound = null;
-                if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                    if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
-                        (mPreviousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                        (mPreviousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
+                if (mReportedDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                    if ((previousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                        (previousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                        (previousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
                         whichSound = Settings.Global.DESK_UNDOCK_SOUND;
-                    } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                    } else if (previousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
                         whichSound = Settings.Global.CAR_UNDOCK_SOUND;
                     }
                 } else {
-                    if ((mDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
-                        (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                        (mDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
+                    if ((mReportedDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                        (mReportedDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                        (mReportedDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
                         whichSound = Settings.Global.DESK_DOCK_SOUND;
-                    } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                    } else if (mReportedDockState == Intent.EXTRA_DOCK_STATE_CAR) {
                         whichSound = Settings.Global.CAR_DOCK_SOUND;
                     }
                 }
@@ -173,7 +186,8 @@ final class DockObserver extends UEventObserver {
                     if (soundPath != null) {
                         final Uri soundUri = Uri.parse("file://" + soundPath);
                         if (soundUri != null) {
-                            final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                            final Ringtone sfx = RingtoneManager.getRingtone(
+                                    getContext(), soundUri);
                             if (sfx != null) {
                                 sfx.setStreamType(AudioManager.STREAM_SYSTEM);
                                 sfx.play();
@@ -186,7 +200,7 @@ final class DockObserver extends UEventObserver {
             // Send the dock event intent.
             // There are many components in the system watching for this so as to
             // adjust audio routing, screen orientation, etc.
-            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            getContext().sendStickyBroadcastAsUser(intent, UserHandle.ALL);
 
             // Release the wake lock that was acquired when the message was posted.
             mWakeLock.release();
@@ -203,4 +217,71 @@ final class DockObserver extends UEventObserver {
             }
         }
     };
+
+    private final UEventObserver mObserver = new UEventObserver() {
+        @Override
+        public void onUEvent(UEventObserver.UEvent event) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Slog.v(TAG, "Dock UEVENT: " + event.toString());
+            }
+
+            try {
+                synchronized (mLock) {
+                    setActualDockStateLocked(Integer.parseInt(event.get("SWITCH_STATE")));
+                }
+            } catch (NumberFormatException e) {
+                Slog.e(TAG, "Could not parse switch state from event " + event);
+            }
+        }
+    };
+
+    private final class BinderService extends Binder {
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump dock observer service from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (args == null || args.length == 0 || "-a".equals(args[0])) {
+                        pw.println("Current Dock Observer Service state:");
+                        if (mUpdatesStopped) {
+                            pw.println("  (UPDATES STOPPED -- use 'reset' to restart)");
+                        }
+                        pw.println("  reported state: " + mReportedDockState);
+                        pw.println("  previous state: " + mPreviousDockState);
+                        pw.println("  actual state: " + mActualDockState);
+                    } else if (args.length == 3 && "set".equals(args[0])) {
+                        String key = args[1];
+                        String value = args[2];
+                        try {
+                            if ("state".equals(key)) {
+                                mUpdatesStopped = true;
+                                setDockStateLocked(Integer.parseInt(value));
+                            } else {
+                                pw.println("Unknown set option: " + key);
+                            }
+                        } catch (NumberFormatException ex) {
+                            pw.println("Bad value: " + value);
+                        }
+                    } else if (args.length == 1 && "reset".equals(args[0])) {
+                        mUpdatesStopped = false;
+                        setDockStateLocked(mActualDockState);
+                    } else {
+                        pw.println("Dump current dock state, or:");
+                        pw.println("  set state <value>");
+                        pw.println("  reset");
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
 }
