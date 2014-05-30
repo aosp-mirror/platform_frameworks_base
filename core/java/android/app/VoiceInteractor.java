@@ -30,7 +30,7 @@ import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
-import java.util.WeakHashMap;
+import java.util.ArrayList;
 
 /**
  * Interface for an {@link Activity} to interact with the user through voice.
@@ -39,9 +39,11 @@ public class VoiceInteractor {
     static final String TAG = "VoiceInteractor";
     static final boolean DEBUG = true;
 
-    final Context mContext;
-    final Activity mActivity;
     final IVoiceInteractor mInteractor;
+
+    Context mContext;
+    Activity mActivity;
+
     final HandlerCaller mHandlerCaller;
     final HandlerCaller.Callback mHandlerCallerCallback = new HandlerCaller.Callback() {
         @Override
@@ -140,6 +142,12 @@ public class VoiceInteractor {
         public void onCancel() {
         }
 
+        public void onAttached(Activity activity) {
+        }
+
+        public void onDetached() {
+        }
+
         void clear() {
             mRequestInterface = null;
             mContext = null;
@@ -220,11 +228,11 @@ public class VoiceInteractor {
         }
    }
 
-    VoiceInteractor(Context context, Activity activity, IVoiceInteractor interactor,
+    VoiceInteractor(IVoiceInteractor interactor, Context context, Activity activity,
             Looper looper) {
+        mInteractor = interactor;
         mContext = context;
         mActivity = activity;
-        mInteractor = interactor;
         mHandlerCaller = new HandlerCaller(context, looper, mHandlerCallerCallback, true);
     }
 
@@ -236,6 +244,49 @@ public class VoiceInteractor {
             }
             return req;
         }
+    }
+
+    private ArrayList<Request> makeRequestList() {
+        final int N = mActiveRequests.size();
+        if (N < 1) {
+            return null;
+        }
+        ArrayList<Request> list = new ArrayList<Request>(N);
+        for (int i=0; i<N; i++) {
+            list.add(mActiveRequests.valueAt(i));
+        }
+        return list;
+    }
+
+    void attachActivity(Activity activity) {
+        if (mActivity == activity) {
+            return;
+        }
+        mContext = activity;
+        mActivity = activity;
+        ArrayList<Request> reqs = makeRequestList();
+        if (reqs != null) {
+            for (int i=0; i<reqs.size(); i++) {
+                Request req = reqs.get(i);
+                req.mContext = activity;
+                req.mActivity = activity;
+                req.onAttached(activity);
+            }
+        }
+    }
+
+    void detachActivity() {
+        ArrayList<Request> reqs = makeRequestList();
+        if (reqs != null) {
+            for (int i=0; i<reqs.size(); i++) {
+                Request req = reqs.get(i);
+                req.onDetached();
+                req.mActivity = null;
+                req.mContext = null;
+            }
+        }
+        mContext = null;
+        mActivity = null;
     }
 
     public boolean submitRequest(Request request) {

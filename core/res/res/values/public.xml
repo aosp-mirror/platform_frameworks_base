@@ -2256,6 +2256,7 @@
   <public type="style" name="Theme.Quantum.NoActionBar.Overscan" />
   <public type="style" name="Theme.Quantum.NoActionBar.TranslucentDecor" />
   <public type="style" name="Theme.Quantum.Panel" />
+  <public type="style" name="Theme.Quantum.Voice" />
   <public type="style" name="Theme.Quantum.Wallpaper" />
   <public type="style" name="Theme.Quantum.Wallpaper.NoTitleBar" />
 
@@ -2272,6 +2273,7 @@
   <public type="style" name="Theme.Quantum.Light.NoActionBar.Overscan" />
   <public type="style" name="Theme.Quantum.Light.NoActionBar.TranslucentDecor" />
   <public type="style" name="Theme.Quantum.Light.Panel" />
+  <public type="style" name="Theme.Quantum.Light.Voice" />
 
   <public type="style" name="ThemeOverlay" />
   <public type="style" name="ThemeOverlay.Quantum" />

@@ -23,7 +23,8 @@
                 android:permission="android.permission.BIND_VOICE_INTERACTION"
                 android:process=":session">
         </service>
-        <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target">
+        <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target"
+                  android:theme="@android:style/Theme.Quantum.Light.Voice">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -169,6 +169,12 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/input_method_exit</item>
     </style>
 
+    <!-- Window animations that are applied to voice activity windows. -->
+    <style name="Animation.VoiceActivity">
+        <item name="windowEnterAnimation">@anim/voice_activity_open_enter</item>
+        <item name="windowExitAnimation">@anim/voice_activity_close_exit</item>
+    </style>
+
     <!-- Window animations that are applied to voice interaction overlay windows. -->
     <style name="Animation.VoiceInteractionSession">
         <item name="windowEnterAnimation">@anim/voice_layer_enter</item>

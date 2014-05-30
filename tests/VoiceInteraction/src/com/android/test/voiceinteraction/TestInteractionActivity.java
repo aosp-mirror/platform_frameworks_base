@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.app.VoiceInteractor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
 
 public class TestInteractionActivity extends Activity {
     static final String TAG = "TestInteractionActivity";
@@ -37,6 +39,11 @@ public class TestInteractionActivity extends Activity {
         }
 
         setContentView(R.layout.test_interaction);
+
+        // Framework should take care of these.
+        getWindow().setGravity(Gravity.TOP);
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mInteractor = getVoiceInteractor();
         VoiceInteractor.ConfirmationRequest req = new VoiceInteractor.ConfirmationRequest(
