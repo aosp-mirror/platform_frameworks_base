@@ -514,6 +514,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // sequence number of NetworkRequests
     private int mNextNetworkRequestId = 1;
 
+    private static final int UID_UNUSED = -1;
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -1673,10 +1675,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
+        final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
             LinkProperties lp = tracker.getLinkProperties();
-            boolean ok = addRouteToAddress(lp, addr, exempt, tracker.getNetwork().netId);
+            boolean ok = modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt,
+                    tracker.getNetwork().netId, uid);
             if (DBG) log("requestRouteToHostAddress ok=" + ok);
             return ok;
         } finally {
@@ -1686,24 +1690,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean addRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable,
             boolean exempt, int netId) {
-        return modifyRoute(p, r, 0, ADD, toDefaultTable, exempt, netId);
+        return modifyRoute(p, r, 0, ADD, toDefaultTable, exempt, netId, false, UID_UNUSED);
     }
 
     private boolean removeRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable, int netId) {
-        return modifyRoute(p, r, 0, REMOVE, toDefaultTable, UNEXEMPT, netId);
-    }
-
-    private boolean addRouteToAddress(LinkProperties lp, InetAddress addr, boolean exempt,
-                                      int netId) {
-        return modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt, netId);
-    }
-
-    private boolean removeRouteToAddress(LinkProperties lp, InetAddress addr, int netId) {
-        return modifyRouteToAddress(lp, addr, REMOVE, TO_DEFAULT_TABLE, UNEXEMPT, netId);
+        return modifyRoute(p, r, 0, REMOVE, toDefaultTable, UNEXEMPT, netId, false, UID_UNUSED);
     }
 
     private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
-            boolean toDefaultTable, boolean exempt, int netId) {
+            boolean toDefaultTable, boolean exempt, int netId, int uid) {
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), addr);
         if (bestRoute == null) {
             bestRoute = RouteInfo.makeHostRoute(addr, lp.getInterfaceName());
@@ -1718,11 +1713,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway(), iface);
             }
         }
-        return modifyRoute(lp, bestRoute, 0, doAdd, toDefaultTable, exempt, netId);
+        return modifyRoute(lp, bestRoute, 0, doAdd, toDefaultTable, exempt, netId, true, uid);
     }
 
+    /*
+     * TODO: Clean all this stuff up. Once we have UID-based routing, stuff will break due to
+     *       incorrect tracking of mAddedRoutes, so a cleanup becomes necessary and urgent. But at
+     *       the same time, there'll be no more need to track mAddedRoutes or mExemptAddresses,
+     *       or even have the concept of an exempt address, or do things like "selectBestRoute", or
+     *       determine "default" vs "secondary" table, etc., so the cleanup becomes possible.
+     */
     private boolean modifyRoute(LinkProperties lp, RouteInfo r, int cycleCount, boolean doAdd,
-            boolean toDefaultTable, boolean exempt, int netId) {
+            boolean toDefaultTable, boolean exempt, int netId, boolean legacy, int uid) {
         if ((lp == null) || (r == null)) {
             if (DBG) log("modifyRoute got unexpected null: " + lp + ", " + r);
             return false;
@@ -1751,7 +1753,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                                         bestRoute.getGateway(),
                                                         ifaceName);
                 }
-                modifyRoute(lp, bestRoute, cycleCount+1, doAdd, toDefaultTable, exempt, netId);
+                modifyRoute(lp, bestRoute, cycleCount+1, doAdd, toDefaultTable, exempt, netId,
+                        legacy, uid);
             }
         }
         if (doAdd) {
@@ -1761,7 +1764,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     synchronized (mRoutesLock) {
                         // only track default table - only one apps can effect
                         mAddedRoutes.add(r);
-                        mNetd.addRoute(netId, r);
+                        if (legacy) {
+                            mNetd.addLegacyRouteForNetId(netId, r, uid);
+                        } else {
+                            mNetd.addRoute(netId, r);
+                        }
                         if (exempt) {
                             LinkAddress dest = r.getDestination();
                             if (!mExemptAddresses.contains(dest)) {
@@ -1771,7 +1778,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                     }
                 } else {
-                    mNetd.addRoute(netId, r);
+                    if (legacy) {
+                        mNetd.addLegacyRouteForNetId(netId, r, uid);
+                    } else {
+                        mNetd.addRoute(netId, r);
+                    }
                 }
             } catch (Exception e) {
                 // never crash - catch them all
@@ -1787,7 +1798,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (mAddedRoutes.contains(r) == false) {
                         if (VDBG) log("Removing " + r + " for interface " + ifaceName);
                         try {
-                            mNetd.removeRoute(netId, r);
+                            if (legacy) {
+                                mNetd.removeLegacyRouteForNetId(netId, r, uid);
+                            } else {
+                                mNetd.removeRoute(netId, r);
+                            }
                             LinkAddress dest = r.getDestination();
                             if (mExemptAddresses.contains(dest)) {
                                 mNetd.clearHostExemption(dest);
@@ -1805,7 +1820,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } else {
                 if (VDBG) log("Removing " + r + " for interface " + ifaceName);
                 try {
-                    mNetd.removeRoute(netId, r);
+                    if (legacy) {
+                        mNetd.removeLegacyRouteForNetId(netId, r, uid);
+                    } else {
+                        mNetd.removeRoute(netId, r);
+                    }
                 } catch (Exception e) {
                     // never crash - catch them all
                     if (VDBG) loge("Exception trying to remove a route: " + e);
