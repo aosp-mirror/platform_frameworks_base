@@ -89,6 +89,13 @@ public abstract class ConnectionService extends CallService {
         public void onDestroyed(Connection c) {
             removeConnection(c);
         }
+
+        @Override
+        public void onRequestingRingback(Connection c, boolean ringback) {
+            String id = mIdByConnection.get(c);
+            Log.d(this, "Adapter onRingback %b", ringback);
+            getAdapter().setRequestingRingback(id, ringback);
+        }
     };
 
     @Override
