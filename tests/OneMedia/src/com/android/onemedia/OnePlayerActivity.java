@@ -99,10 +99,10 @@ public class OnePlayerActivity extends Activity {
             switch (v.getId()) {
                 case R.id.play_button:
                     Log.d(TAG, "Play button pressed, in state " + mPlaybackState);
-                    if (mPlaybackState == PlaybackState.PLAYSTATE_PAUSED
-                            || mPlaybackState == PlaybackState.PLAYSTATE_STOPPED) {
+                    if (mPlaybackState == PlaybackState.STATE_PAUSED
+                            || mPlaybackState == PlaybackState.STATE_STOPPED) {
                         mPlayer.play();
-                    } else if (mPlaybackState == PlaybackState.PLAYSTATE_PLAYING) {
+                    } else if (mPlaybackState == PlaybackState.STATE_PLAYING) {
                         mPlayer.pause();
                     }
                     break;
@@ -126,31 +126,31 @@ public class OnePlayerActivity extends Activity {
             boolean enableControls = true;
             StringBuilder statusBuilder = new StringBuilder();
             switch (mPlaybackState) {
-                case PlaybackState.PLAYSTATE_PLAYING:
+                case PlaybackState.STATE_PLAYING:
                     statusBuilder.append("playing");
                     mPlayButton.setText("Pause");
                     enablePlay = true;
                     break;
-                case PlaybackState.PLAYSTATE_PAUSED:
+                case PlaybackState.STATE_PAUSED:
                     statusBuilder.append("paused");
                     mPlayButton.setText("Play");
                     enablePlay = true;
                     break;
-                case PlaybackState.PLAYSTATE_STOPPED:
+                case PlaybackState.STATE_STOPPED:
                     statusBuilder.append("ended");
                     mPlayButton.setText("Play");
                     enablePlay = true;
                     break;
-                case PlaybackState.PLAYSTATE_ERROR:
+                case PlaybackState.STATE_ERROR:
                     statusBuilder.append("error: ").append(state.getErrorMessage());
                     break;
-                case PlaybackState.PLAYSTATE_BUFFERING:
+                case PlaybackState.STATE_BUFFERING:
                     statusBuilder.append("buffering");
                     break;
-                case PlaybackState.PLAYSTATE_NONE:
+                case PlaybackState.STATE_NONE:
                     statusBuilder.append("none");
                     break;
-                case PlaybackState.PLAYSTATE_CONNECTING:
+                case PlaybackState.STATE_CONNECTING:
                     statusBuilder.append("connecting");
                     enableControls = false;
                     break;

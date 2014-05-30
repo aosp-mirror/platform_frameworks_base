@@ -22,7 +22,7 @@ import android.os.SystemClock;
 
 /**
  * Playback state for a {@link MediaSession}. This includes a state like
- * {@link PlaybackState#PLAYSTATE_PLAYING}, the current playback position,
+ * {@link PlaybackState#STATE_PLAYING}, the current playback position,
  * and the current control capabilities.
  */
 public final class PlaybackState implements Parcelable {
@@ -59,28 +59,28 @@ public final class PlaybackState implements Parcelable {
      *
      * @see #setActions
      */
-    public static final long ACTION_PREVIOUS_ITEM = 1 << 4;
+    public static final long ACTION_SKIP_TO_PREVIOUS = 1 << 4;
 
     /**
      * Indicates this performer supports the next command.
      *
      * @see #setActions
      */
-    public static final long ACTION_NEXT_ITEM = 1 << 5;
+    public static final long ACTION_SKIP_TO_NEXT = 1 << 5;
 
     /**
      * Indicates this performer supports the fast forward command.
      *
      * @see #setActions
      */
-    public static final long ACTION_FASTFORWARD = 1 << 6;
+    public static final long ACTION_FAST_FORWARD = 1 << 6;
 
     /**
      * Indicates this performer supports the set rating command.
      *
      * @see #setActions
      */
-    public static final long ACTION_RATING = 1 << 7;
+    public static final long ACTION_SET_RATING = 1 << 7;
 
     /**
      * Indicates this performer supports the seek to command.
@@ -102,42 +102,42 @@ public final class PlaybackState implements Parcelable {
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_NONE = 0;
+    public final static int STATE_NONE = 0;
 
     /**
      * State indicating this item is currently stopped.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_STOPPED = 1;
+    public final static int STATE_STOPPED = 1;
 
     /**
      * State indicating this item is currently paused.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_PAUSED = 2;
+    public final static int STATE_PAUSED = 2;
 
     /**
      * State indicating this item is currently playing.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_PLAYING = 3;
+    public final static int STATE_PLAYING = 3;
 
     /**
      * State indicating this item is currently fast forwarding.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_FAST_FORWARDING = 4;
+    public final static int STATE_FAST_FORWARDING = 4;
 
     /**
      * State indicating this item is currently rewinding.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_REWINDING = 5;
+    public final static int STATE_REWINDING = 5;
 
     /**
      * State indicating this item is currently buffering and will begin playing
@@ -145,7 +145,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_BUFFERING = 6;
+    public final static int STATE_BUFFERING = 6;
 
     /**
      * State indicating this item is currently in an error state. The error
@@ -153,30 +153,30 @@ public final class PlaybackState implements Parcelable {
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_ERROR = 7;
+    public final static int STATE_ERROR = 7;
 
     /**
      * State indicating the class doing playback is currently connecting to a
      * route. Depending on the implementation you may return to the previous
-     * state when the connection finishes or enter {@link #PLAYSTATE_NONE}. If
-     * the connection failed {@link #PLAYSTATE_ERROR} should be used.
+     * state when the connection finishes or enter {@link #STATE_NONE}. If
+     * the connection failed {@link #STATE_ERROR} should be used.
      * @hide
      */
-    public final static int PLAYSTATE_CONNECTING = 8;
+    public final static int STATE_CONNECTING = 8;
 
     /**
      * State indicating the player is currently skipping to the previous item.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_SKIPPING_BACKWARDS = 9;
+    public final static int STATE_SKIPPING_TO_PREVIOUS = 9;
 
     /**
      * State indicating the player is currently skipping to the next item.
      *
      * @see #setState
      */
-    public final static int PLAYSTATE_SKIPPING_FORWARDS = 10;
+    public final static int STATE_SKIPPING_TO_NEXT = 10;
 
     /**
      * Use this value for the position to indicate the position is not known.
@@ -188,7 +188,7 @@ public final class PlaybackState implements Parcelable {
     private long mBufferPosition;
     private float mRate;
     private long mActions;
-    private String mErrorMessage;
+    private CharSequence mErrorMessage;
     private long mUpdateTime;
 
     /**
@@ -221,7 +221,7 @@ public final class PlaybackState implements Parcelable {
         mUpdateTime = in.readLong();
         mBufferPosition = in.readLong();
         mActions = in.readLong();
-        mErrorMessage = in.readString();
+        mErrorMessage = in.readCharSequence();
 
     }
 
@@ -252,20 +252,20 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mUpdateTime);
         dest.writeLong(mBufferPosition);
         dest.writeLong(mActions);
-        dest.writeString(mErrorMessage);
+        dest.writeCharSequence(mErrorMessage);
     }
 
     /**
      * Get the current state of playback. One of the following:
      * <ul>
-     * <li> {@link PlaybackState#PLAYSTATE_NONE}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_STOPPED}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_PLAYING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_PAUSED}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_FAST_FORWARDING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_REWINDING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_BUFFERING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_ERROR}</li>
+     * <li> {@link PlaybackState#STATE_NONE}</li>
+     * <li> {@link PlaybackState#STATE_STOPPED}</li>
+     * <li> {@link PlaybackState#STATE_PLAYING}</li>
+     * <li> {@link PlaybackState#STATE_PAUSED}</li>
+     * <li> {@link PlaybackState#STATE_FAST_FORWARDING}</li>
+     * <li> {@link PlaybackState#STATE_REWINDING}</li>
+     * <li> {@link PlaybackState#STATE_BUFFERING}</li>
+     * <li> {@link PlaybackState#STATE_ERROR}</li>
      */
     public int getState() {
         return mState;
@@ -283,25 +283,25 @@ public final class PlaybackState implements Parcelable {
      * <p>
      * The state must be one of the following:
      * <ul>
-     * <li> {@link PlaybackState#PLAYSTATE_NONE}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_STOPPED}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_PLAYING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_PAUSED}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_FAST_FORWARDING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_REWINDING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_BUFFERING}</li>
-     * <li> {@link PlaybackState#PLAYSTATE_ERROR}</li>
+     * <li> {@link PlaybackState#STATE_NONE}</li>
+     * <li> {@link PlaybackState#STATE_STOPPED}</li>
+     * <li> {@link PlaybackState#STATE_PLAYING}</li>
+     * <li> {@link PlaybackState#STATE_PAUSED}</li>
+     * <li> {@link PlaybackState#STATE_FAST_FORWARDING}</li>
+     * <li> {@link PlaybackState#STATE_REWINDING}</li>
+     * <li> {@link PlaybackState#STATE_BUFFERING}</li>
+     * <li> {@link PlaybackState#STATE_ERROR}</li>
      * </ul>
      *
      * @param state The current state of playback.
      * @param position The position in the current track in ms.
-     * @param rate The current rate of playback as a multiple of normal
+     * @param playbackRate The current rate of playback as a multiple of normal
      *            playback.
      */
-    public void setState(int state, long position, float rate) {
+    public void setState(int state, long position, float playbackRate) {
         this.mState = state;
         this.mPosition = position;
-        this.mRate = rate;
+        this.mRate = playbackRate;
         mUpdateTime = SystemClock.elapsedRealtime();
     }
 
@@ -337,7 +337,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @return The current rate of playback.
      */
-    public float getRate() {
+    public float getPlaybackRate() {
         return mRate;
     }
 
@@ -345,15 +345,15 @@ public final class PlaybackState implements Parcelable {
      * Get the current actions available on this session. This should use a
      * bitmask of the available actions.
      * <ul>
-     * <li> {@link PlaybackState#ACTION_PREVIOUS_ITEM}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_PREVIOUS}</li>
      * <li> {@link PlaybackState#ACTION_REWIND}</li>
      * <li> {@link PlaybackState#ACTION_PLAY}</li>
      * <li> {@link PlaybackState#ACTION_PAUSE}</li>
      * <li> {@link PlaybackState#ACTION_STOP}</li>
-     * <li> {@link PlaybackState#ACTION_FASTFORWARD}</li>
-     * <li> {@link PlaybackState#ACTION_NEXT_ITEM}</li>
+     * <li> {@link PlaybackState#ACTION_FAST_FORWARD}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
      * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
-     * <li> {@link PlaybackState#ACTION_RATING}</li>
+     * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
      * </ul>
      */
     public long getActions() {
@@ -364,15 +364,15 @@ public final class PlaybackState implements Parcelable {
      * Set the current capabilities available on this session. This should use a
      * bitmask of the available capabilities.
      * <ul>
-     * <li> {@link PlaybackState#ACTION_PREVIOUS_ITEM}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_PREVIOUS}</li>
      * <li> {@link PlaybackState#ACTION_REWIND}</li>
      * <li> {@link PlaybackState#ACTION_PLAY}</li>
      * <li> {@link PlaybackState#ACTION_PAUSE}</li>
      * <li> {@link PlaybackState#ACTION_STOP}</li>
-     * <li> {@link PlaybackState#ACTION_FASTFORWARD}</li>
-     * <li> {@link PlaybackState#ACTION_NEXT_ITEM}</li>
+     * <li> {@link PlaybackState#ACTION_FAST_FORWARD}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
      * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
-     * <li> {@link PlaybackState#ACTION_RATING}</li>
+     * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
      * </ul>
      */
     public void setActions(long capabilities) {
@@ -381,9 +381,9 @@ public final class PlaybackState implements Parcelable {
 
     /**
      * Get a user readable error message. This should be set when the state is
-     * {@link PlaybackState#PLAYSTATE_ERROR}.
+     * {@link PlaybackState#STATE_ERROR}.
      */
-    public String getErrorMessage() {
+    public CharSequence getErrorMessage() {
         return mErrorMessage;
     }
 
@@ -400,9 +400,9 @@ public final class PlaybackState implements Parcelable {
 
     /**
      * Set a user readable error message. This should be set when the state is
-     * {@link PlaybackState#PLAYSTATE_ERROR}.
+     * {@link PlaybackState#STATE_ERROR}.
      */
-    public void setErrorMessage(String errorMessage) {
+    public void setErrorMessage(CharSequence errorMessage) {
         mErrorMessage = errorMessage;
     }
 
@@ -417,23 +417,23 @@ public final class PlaybackState implements Parcelable {
     public static int getStateFromRccState(int rccState) {
         switch (rccState) {
             case RemoteControlClient.PLAYSTATE_BUFFERING:
-                return PLAYSTATE_BUFFERING;
+                return STATE_BUFFERING;
             case RemoteControlClient.PLAYSTATE_ERROR:
-                return PLAYSTATE_ERROR;
+                return STATE_ERROR;
             case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
-                return PLAYSTATE_FAST_FORWARDING;
+                return STATE_FAST_FORWARDING;
             case RemoteControlClient.PLAYSTATE_NONE:
-                return PLAYSTATE_NONE;
+                return STATE_NONE;
             case RemoteControlClient.PLAYSTATE_PAUSED:
-                return PLAYSTATE_PAUSED;
+                return STATE_PAUSED;
             case RemoteControlClient.PLAYSTATE_PLAYING:
-                return PLAYSTATE_PLAYING;
+                return STATE_PLAYING;
             case RemoteControlClient.PLAYSTATE_REWINDING:
-                return PLAYSTATE_REWINDING;
+                return STATE_REWINDING;
             case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
-                return PLAYSTATE_SKIPPING_BACKWARDS;
+                return STATE_SKIPPING_TO_PREVIOUS;
             case RemoteControlClient.PLAYSTATE_STOPPED:
-                return PLAYSTATE_STOPPED;
+                return STATE_STOPPED;
             default:
                 return -1;
         }
@@ -457,7 +457,7 @@ public final class PlaybackState implements Parcelable {
     private static long getActionForRccFlag(int flag) {
         switch (flag) {
             case RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS:
-                return ACTION_PREVIOUS_ITEM;
+                return ACTION_SKIP_TO_PREVIOUS;
             case RemoteControlClient.FLAG_KEY_MEDIA_REWIND:
                 return ACTION_REWIND;
             case RemoteControlClient.FLAG_KEY_MEDIA_PLAY:
@@ -469,13 +469,13 @@ public final class PlaybackState implements Parcelable {
             case RemoteControlClient.FLAG_KEY_MEDIA_STOP:
                 return ACTION_STOP;
             case RemoteControlClient.FLAG_KEY_MEDIA_FAST_FORWARD:
-                return ACTION_FASTFORWARD;
+                return ACTION_FAST_FORWARD;
             case RemoteControlClient.FLAG_KEY_MEDIA_NEXT:
-                return ACTION_NEXT_ITEM;
+                return ACTION_SKIP_TO_NEXT;
             case RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE:
                 return ACTION_SEEK_TO;
             case RemoteControlClient.FLAG_KEY_MEDIA_RATING:
-                return ACTION_RATING;
+                return ACTION_SET_RATING;
         }
         return 0;
     }

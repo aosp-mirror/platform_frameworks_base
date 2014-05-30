@@ -21,7 +21,6 @@ import android.media.session.MediaController;
 import android.media.session.RouteInfo;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
-import android.media.session.TransportController;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,12 +41,11 @@ public class PlayerController {
 
     protected MediaController mController;
     protected IPlayerService mBinder;
-    protected TransportController mTransportControls;
+    protected MediaController.TransportControls mTransportControls;
 
     private final Intent mServiceIntent;
     private Context mContext;
     private Listener mListener;
-    private TransportListener mTransportListener = new TransportListener();
     private SessionCallback mControllerCb;
     private MediaSessionManager mManager;
     private Handler mHandler = new Handler();
@@ -161,16 +159,13 @@ public class PlayerController {
                 return;
             }
             mController.addCallback(mControllerCb, mHandler);
-            mTransportControls = mController.getTransportController();
-            if (mTransportControls != null) {
-                mTransportControls.addStateListener(mTransportListener);
-            }
+            mTransportControls = mController.getTransportControls();
             Log.d(TAG, "Ready to use PlayerService");
 
             if (mListener != null) {
                 mListener.onConnectionStateChange(STATE_CONNECTED);
                 if (mTransportControls != null) {
-                    mListener.onPlaybackStateChange(mTransportControls.getPlaybackState());
+                    mListener.onPlaybackStateChange(mController.getPlaybackState());
                 }
             }
         }
@@ -181,9 +176,7 @@ public class PlayerController {
         public void onRouteChanged(RouteInfo route) {
             // TODO
         }
-    }
 
-    private class TransportListener extends TransportController.TransportStateListener {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             if (state == null) {

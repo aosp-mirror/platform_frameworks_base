@@ -14577,6 +14577,7 @@ package android.media {
     method public long getLong(java.lang.String);
     method public android.media.Rating getRating(java.lang.String);
     method public java.lang.String getString(java.lang.String);
+    method public java.util.Set<java.lang.String> keySet();
     method public int size();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -15714,56 +15715,81 @@ package android.media.session {
   public final class MediaController {
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
+    method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
-    method public android.media.session.TransportController getTransportController();
+    method public android.media.MediaMetadata getMetadata();
+    method public android.media.session.PlaybackState getPlaybackState();
+    method public int getRatingType();
+    method public android.media.session.MediaController.TransportControls getTransportControls();
     method public void removeCallback(android.media.session.MediaController.Callback);
-    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void sendMediaButton(int);
+    method public void sendControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
   }
 
   public static abstract class MediaController.Callback {
     ctor public MediaController.Callback();
-    method public void onEvent(java.lang.String, android.os.Bundle);
+    method public void onMetadataChanged(android.media.MediaMetadata);
+    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
+    method public void onSessionEvent(java.lang.String, android.os.Bundle);
+  }
+
+  public final class MediaController.TransportControls {
+    method public void fastForward();
+    method public void pause();
+    method public void play();
+    method public void rewind();
+    method public void seekTo(long);
+    method public void setRating(android.media.Rating);
+    method public void skipToNext();
+    method public void skipToPrevious();
+    method public void stop();
   }
 
   public final class MediaSession {
     method public void addCallback(android.media.session.MediaSession.Callback);
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
+    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
+    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
     method public android.media.session.MediaSessionToken getSessionToken();
-    method public android.media.session.TransportPerformer getTransportPerformer();
     method public boolean isActive();
     method public void release();
     method public void removeCallback(android.media.session.MediaSession.Callback);
-    method public void sendEvent(java.lang.String, android.os.Bundle);
+    method public void removeTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
+    method public void sendSessionEvent(java.lang.String, android.os.Bundle);
     method public void setActive(boolean);
     method public void setFlags(int);
     method public void setLaunchPendingIntent(android.app.PendingIntent);
-    method public void useLocalPlayback(int);
-    method public void useRemotePlayback(android.media.session.RemoteVolumeProvider);
+    method public void setMetadata(android.media.MediaMetadata);
+    method public void setPlaybackState(android.media.session.PlaybackState);
+    method public void setPlaybackToLocal(int);
+    method public void setPlaybackToRemote(android.media.session.RemoteVolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
   }
 
   public static abstract class MediaSession.Callback {
     ctor public MediaSession.Callback();
-    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onMediaButton(android.content.Intent);
+    method public void onControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void onMediaButtonEvent(android.content.Intent);
   }
 
-  public final class MediaSessionInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.lang.String getId();
-    method public java.lang.String getPackageName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+  public static abstract class MediaSession.TransportControlsCallback {
+    ctor public MediaSession.TransportControlsCallback();
+    method public void onFastForward();
+    method public void onPause();
+    method public void onPlay();
+    method public void onRewind();
+    method public void onSeekTo(long);
+    method public void onSetRating(android.media.Rating);
+    method public void onSkipToNext();
+    method public void onSkipToPrevious();
+    method public void onStop();
   }
 
   public final class MediaSessionManager {
     method public android.media.session.MediaSession createSession(java.lang.String);
-    method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
   }
 
-  public class MediaSessionToken implements android.os.Parcelable {
+  public final class MediaSessionToken implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -15775,95 +15801,50 @@ package android.media.session {
     method public int describeContents();
     method public long getActions();
     method public long getBufferPosition();
-    method public java.lang.String getErrorMessage();
+    method public java.lang.CharSequence getErrorMessage();
+    method public float getPlaybackRate();
     method public long getPosition();
-    method public float getRate();
     method public int getState();
     method public void setActions(long);
     method public void setBufferPosition(long);
-    method public void setErrorMessage(java.lang.String);
+    method public void setErrorMessage(java.lang.CharSequence);
     method public void setState(int, long, float);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final long ACTION_FASTFORWARD = 64L; // 0x40L
-    field public static final long ACTION_NEXT_ITEM = 32L; // 0x20L
+    field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
     field public static final long ACTION_PLAY = 4L; // 0x4L
     field public static final long ACTION_PLAY_PAUSE = 512L; // 0x200L
-    field public static final long ACTION_PREVIOUS_ITEM = 16L; // 0x10L
-    field public static final long ACTION_RATING = 128L; // 0x80L
     field public static final long ACTION_REWIND = 8L; // 0x8L
     field public static final long ACTION_SEEK_TO = 256L; // 0x100L
+    field public static final long ACTION_SET_RATING = 128L; // 0x80L
+    field public static final long ACTION_SKIP_TO_NEXT = 32L; // 0x20L
+    field public static final long ACTION_SKIP_TO_PREVIOUS = 16L; // 0x10L
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
-    field public static final int PLAYSTATE_BUFFERING = 6; // 0x6
-    field public static final int PLAYSTATE_ERROR = 7; // 0x7
-    field public static final int PLAYSTATE_FAST_FORWARDING = 4; // 0x4
-    field public static final int PLAYSTATE_NONE = 0; // 0x0
-    field public static final int PLAYSTATE_PAUSED = 2; // 0x2
-    field public static final int PLAYSTATE_PLAYING = 3; // 0x3
-    field public static final int PLAYSTATE_REWINDING = 5; // 0x5
-    field public static final int PLAYSTATE_SKIPPING_BACKWARDS = 9; // 0x9
-    field public static final int PLAYSTATE_SKIPPING_FORWARDS = 10; // 0xa
-    field public static final int PLAYSTATE_STOPPED = 1; // 0x1
+    field public static final int STATE_BUFFERING = 6; // 0x6
+    field public static final int STATE_ERROR = 7; // 0x7
+    field public static final int STATE_FAST_FORWARDING = 4; // 0x4
+    field public static final int STATE_NONE = 0; // 0x0
+    field public static final int STATE_PAUSED = 2; // 0x2
+    field public static final int STATE_PLAYING = 3; // 0x3
+    field public static final int STATE_REWINDING = 5; // 0x5
+    field public static final int STATE_SKIPPING_TO_NEXT = 10; // 0xa
+    field public static final int STATE_SKIPPING_TO_PREVIOUS = 9; // 0x9
+    field public static final int STATE_STOPPED = 1; // 0x1
   }
 
   public abstract class RemoteVolumeProvider {
     ctor public RemoteVolumeProvider(int, int);
-    method public abstract int getCurrentVolume();
-    method public final int getFlags();
     method public final int getMaxVolume();
+    method public final int getVolumeControl();
     method public final void notifyVolumeChanged();
-    method public void onAdjustVolume(int);
-    method public void onSetVolume(int);
-    field public static final int FLAG_VOLUME_ABSOLUTE = 2; // 0x2
-    field public static final int FLAG_VOLUME_RELATIVE = 1; // 0x1
-  }
-
-  public final class TransportController {
-    method public void addStateListener(android.media.session.TransportController.TransportStateListener);
-    method public void addStateListener(android.media.session.TransportController.TransportStateListener, android.os.Handler);
-    method public void fastForward();
-    method public android.media.MediaMetadata getMetadata();
-    method public android.media.session.PlaybackState getPlaybackState();
-    method public int getRatingType();
-    method public void next();
-    method public void pause();
-    method public void play();
-    method public void previous();
-    method public void rate(android.media.Rating);
-    method public void removeStateListener(android.media.session.TransportController.TransportStateListener);
-    method public void rewind();
-    method public void seekTo(long);
-    method public void stop();
-  }
-
-  public static abstract class TransportController.TransportStateListener {
-    ctor public TransportController.TransportStateListener();
-    method public void onMetadataChanged(android.media.MediaMetadata);
-    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
-  }
-
-  public final class TransportPerformer {
-    method public void addListener(android.media.session.TransportPerformer.Listener);
-    method public void addListener(android.media.session.TransportPerformer.Listener, android.os.Handler);
-    method public void removeListener(android.media.session.TransportPerformer.Listener);
-    method public final void setMetadata(android.media.MediaMetadata);
-    method public final void setPlaybackState(android.media.session.PlaybackState);
-  }
-
-  public static abstract class TransportPerformer.Listener {
-    ctor public TransportPerformer.Listener();
-    method public void onFastForward();
-    method public void onNext();
-    method public void onPause();
-    method public void onPlay();
-    method public void onPrevious();
-    method public void onRate(android.media.Rating);
-    method public void onRewind();
-    method public void onRouteFocusChange(int);
-    method public void onSeekTo(long);
-    method public void onStop();
+    method public void onAdjustVolumeBy(int);
+    method public abstract int onGetCurrentVolume();
+    method public void onSetVolumeTo(int);
+    field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
+    field public static final int VOLUME_CONTROL_FIXED = 0; // 0x0
+    field public static final int VOLUME_CONTROL_RELATIVE = 1; // 0x1
   }
 
 }
