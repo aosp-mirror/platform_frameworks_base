@@ -784,12 +784,12 @@ public final class ClientOperation implements Operation, BaseStream {
                     mReplyHeader.responseCode = ResponseCodes.OBEX_HTTP_CONTINUE;
                 }
 
-                while (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE) {
+                while (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE && !mOperationDone) {
                     if (!sendRequest(ObexHelper.OBEX_OPCODE_GET_FINAL)) {
                         break;
                     }
                 }
-                while (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE) {
+                while (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE && !mOperationDone) {
                     mParent.sendRequest(ObexHelper.OBEX_OPCODE_GET_FINAL, null,
                             mReplyHeader, mPrivateInput, false);
                     // Regardless of the SRM state, wait for the response.
