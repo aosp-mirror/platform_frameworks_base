@@ -405,7 +405,9 @@ public class TextureView extends View {
             // To cancel updates, the easiest thing to do is simply to remove the
             // updates listener
             if (visibility == VISIBLE) {
-                mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+                if (mLayer != null) {
+                    mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+                }
                 updateLayerAndInvalidate();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
