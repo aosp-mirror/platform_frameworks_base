@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.bluetooth;
+package android.bluetooth.le;
 
 import android.annotation.Nullable;
-import android.bluetooth.BluetoothLeAdvertiseScanData.ScanRecord;
-import android.bluetooth.BluetoothLeScanner.ScanResult;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -29,8 +29,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * {@link BluetoothLeScanFilter} abstracts different scan filters across Bluetooth Advertisement
- * packet fields.
+ * {@link ScanFilter} abstracts different scan filters across Bluetooth Advertisement packet fields.
  * <p>
  * Current filtering on the following fields are supported:
  * <li>Service UUIDs which identify the bluetooth gatt services running on the device.
@@ -40,10 +39,10 @@ import java.util.UUID;
  * <li>Service data which is the data associated with a service.
  * <li>Manufacturer specific data which is the data associated with a particular manufacturer.
  *
- * @see BluetoothLeAdvertiseScanData.ScanRecord
+ * @see ScanRecord
  * @see BluetoothLeScanner
  */
-public final class BluetoothLeScanFilter implements Parcelable {
+public final class ScanFilter implements Parcelable {
 
     @Nullable
     private final String mLocalName;
@@ -70,7 +69,7 @@ public final class BluetoothLeScanFilter implements Parcelable {
     private final int mMinRssi;
     private final int mMaxRssi;
 
-    private BluetoothLeScanFilter(String name, String macAddress, ParcelUuid uuid,
+    private ScanFilter(String name, String macAddress, ParcelUuid uuid,
             ParcelUuid uuidMask, byte[] serviceData, byte[] serviceDataMask,
             int manufacturerId, byte[] manufacturerData, byte[] manufacturerDataMask,
             int minRssi, int maxRssi) {
@@ -105,88 +104,93 @@ public final class BluetoothLeScanFilter implements Parcelable {
         dest.writeInt(mServiceUuid == null ? 0 : 1);
         if (mServiceUuid != null) {
             dest.writeParcelable(mServiceUuid, flags);
-        }
-        dest.writeInt(mServiceUuidMask == null ? 0 : 1);
-        if (mServiceUuidMask != null) {
-            dest.writeParcelable(mServiceUuidMask, flags);
+            dest.writeInt(mServiceUuidMask == null ? 0 : 1);
+            if (mServiceUuidMask != null) {
+                dest.writeParcelable(mServiceUuidMask, flags);
+            }
         }
         dest.writeInt(mServiceData == null ? 0 : mServiceData.length);
         if (mServiceData != null) {
             dest.writeByteArray(mServiceData);
-        }
-        dest.writeInt(mServiceDataMask == null ? 0 : mServiceDataMask.length);
-        if (mServiceDataMask != null) {
-            dest.writeByteArray(mServiceDataMask);
+            dest.writeInt(mServiceDataMask == null ? 0 : mServiceDataMask.length);
+            if (mServiceDataMask != null) {
+                dest.writeByteArray(mServiceDataMask);
+            }
         }
         dest.writeInt(mManufacturerId);
         dest.writeInt(mManufacturerData == null ? 0 : mManufacturerData.length);
         if (mManufacturerData != null) {
             dest.writeByteArray(mManufacturerData);
-        }
-        dest.writeInt(mManufacturerDataMask == null ? 0 : mManufacturerDataMask.length);
-        if (mManufacturerDataMask != null) {
-            dest.writeByteArray(mManufacturerDataMask);
+            dest.writeInt(mManufacturerDataMask == null ? 0 : mManufacturerDataMask.length);
+            if (mManufacturerDataMask != null) {
+                dest.writeByteArray(mManufacturerDataMask);
+            }
         }
         dest.writeInt(mMinRssi);
         dest.writeInt(mMaxRssi);
     }
 
     /**
-     * A {@link android.os.Parcelable.Creator} to create {@link BluetoothLeScanFilter} form parcel.
+     * A {@link android.os.Parcelable.Creator} to create {@link ScanFilter} form parcel.
      */
-    public static final Creator<BluetoothLeScanFilter>
-            CREATOR = new Creator<BluetoothLeScanFilter>() {
+    public static final Creator<ScanFilter>
+            CREATOR = new Creator<ScanFilter>() {
 
                     @Override
-                public BluetoothLeScanFilter[] newArray(int size) {
-                    return new BluetoothLeScanFilter[size];
+                public ScanFilter[] newArray(int size) {
+                    return new ScanFilter[size];
                 }
 
                     @Override
-                public BluetoothLeScanFilter createFromParcel(Parcel in) {
-                    Builder builder = newBuilder();
+                public ScanFilter createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
                     if (in.readInt() == 1) {
-                        builder.name(in.readString());
+                        builder.setName(in.readString());
                     }
                     if (in.readInt() == 1) {
-                        builder.macAddress(in.readString());
+                        builder.setMacAddress(in.readString());
                     }
                     if (in.readInt() == 1) {
                         ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
-                        builder.serviceUuid(uuid);
+                        builder.setServiceUuid(uuid);
+                        if (in.readInt() == 1) {
+                            ParcelUuid uuidMask = in.readParcelable(
+                                    ParcelUuid.class.getClassLoader());
+                            builder.setServiceUuid(uuid, uuidMask);
+                        }
                     }
-                    if (in.readInt() == 1) {
-                        ParcelUuid uuidMask = in.readParcelable(ParcelUuid.class.getClassLoader());
-                        builder.serviceUuidMask(uuidMask);
-                    }
+
                     int serviceDataLength = in.readInt();
                     if (serviceDataLength > 0) {
                         byte[] serviceData = new byte[serviceDataLength];
                         in.readByteArray(serviceData);
-                        builder.serviceData(serviceData);
+                        builder.setServiceData(serviceData);
+                        int serviceDataMaskLength = in.readInt();
+                        if (serviceDataMaskLength > 0) {
+                            byte[] serviceDataMask = new byte[serviceDataMaskLength];
+                            in.readByteArray(serviceDataMask);
+                            builder.setServiceData(serviceData, serviceDataMask);
+                        }
                     }
-                    int serviceDataMaskLength = in.readInt();
-                    if (serviceDataMaskLength > 0) {
-                        byte[] serviceDataMask = new byte[serviceDataMaskLength];
-                        in.readByteArray(serviceDataMask);
-                        builder.serviceDataMask(serviceDataMask);
-                    }
+
                     int manufacturerId = in.readInt();
                     int manufacturerDataLength = in.readInt();
                     if (manufacturerDataLength > 0) {
                         byte[] manufacturerData = new byte[manufacturerDataLength];
                         in.readByteArray(manufacturerData);
-                        builder.manufacturerData(manufacturerId, manufacturerData);
+                        builder.setManufacturerData(manufacturerId, manufacturerData);
+                        int manufacturerDataMaskLength = in.readInt();
+                        if (manufacturerDataMaskLength > 0) {
+                            byte[] manufacturerDataMask = new byte[manufacturerDataMaskLength];
+                            in.readByteArray(manufacturerDataMask);
+                            builder.setManufacturerData(manufacturerId, manufacturerData,
+                                    manufacturerDataMask);
+                        }
                     }
-                    int manufacturerDataMaskLength = in.readInt();
-                    if (manufacturerDataMaskLength > 0) {
-                        byte[] manufacturerDataMask = new byte[manufacturerDataMaskLength];
-                        in.readByteArray(manufacturerDataMask);
-                        builder.manufacturerDataMask(manufacturerDataMask);
-                    }
+
                     int minRssi = in.readInt();
                     int maxRssi = in.readInt();
-                    builder.rssiRange(minRssi, maxRssi);
+                    builder.setRssiRange(minRssi, maxRssi);
                     return builder.build();
                 }
             };
@@ -199,9 +203,10 @@ public final class BluetoothLeScanFilter implements Parcelable {
         return mLocalName;
     }
 
-    @Nullable /**
-               * Returns the filter set on the service uuid.
-               */
+    /**
+     * Returns the filter set on the service uuid.
+     */
+    @Nullable
     public ParcelUuid getServiceUuid() {
         return mServiceUuid;
     }
@@ -277,7 +282,7 @@ public final class BluetoothLeScanFilter implements Parcelable {
         }
 
         byte[] scanRecordBytes = scanResult.getScanRecord();
-        ScanRecord scanRecord = ScanRecord.getParser().parseFromScanRecord(scanRecordBytes);
+        ScanRecord scanRecord = ScanRecord.parseFromBytes(scanRecordBytes);
 
         // Scan record is null but there exist filters on it.
         if (scanRecord == null
@@ -386,13 +391,13 @@ public final class BluetoothLeScanFilter implements Parcelable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        BluetoothLeScanFilter other = (BluetoothLeScanFilter) obj;
+        ScanFilter other = (ScanFilter) obj;
         return Objects.equals(mLocalName, other.mLocalName) &&
                 Objects.equals(mMacAddress, other.mMacAddress) &&
-                mManufacturerId == other.mManufacturerId &&
+                        mManufacturerId == other.mManufacturerId &&
                 Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
                 Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
-                mMinRssi == other.mMinRssi && mMaxRssi == other.mMaxRssi &&
+                        mMinRssi == other.mMinRssi && mMaxRssi == other.mMaxRssi &&
                 Objects.deepEquals(mServiceData, other.mServiceData) &&
                 Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
                 Objects.equals(mServiceUuid, other.mServiceUuid) &&
@@ -400,17 +405,9 @@ public final class BluetoothLeScanFilter implements Parcelable {
     }
 
     /**
-     * Returns the {@link Builder} for {@link BluetoothLeScanFilter}.
+     * Builder class for {@link ScanFilter}.
      */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * Builder class for {@link BluetoothLeScanFilter}. Use
-     * {@link BluetoothLeScanFilter#newBuilder()} to get an instance of the {@link Builder}.
-     */
-    public static class Builder {
+    public static final class Builder {
 
         private String mLocalName;
         private String mMacAddress;
@@ -428,27 +425,23 @@ public final class BluetoothLeScanFilter implements Parcelable {
         private int mMinRssi = Integer.MIN_VALUE;
         private int mMaxRssi = Integer.MAX_VALUE;
 
-        // Private constructor, use BluetoothLeScanFilter.newBuilder instead.
-        private Builder() {
-        }
-
         /**
-         * Set filtering on local name.
+         * Set filter on local name.
          */
-        public Builder name(String localName) {
+        public Builder setName(String localName) {
             mLocalName = localName;
             return this;
         }
 
         /**
-         * Set filtering on device mac address.
+         * Set filter on device mac address.
          *
          * @param macAddress The device mac address for the filter. It needs to be in the format of
          *            "01:02:03:AB:CD:EF". The mac address can be validated using
          *            {@link BluetoothAdapter#checkBluetoothAddress}.
          * @throws IllegalArgumentException If the {@code macAddress} is invalid.
          */
-        public Builder macAddress(String macAddress) {
+        public Builder setMacAddress(String macAddress) {
             if (macAddress != null && !BluetoothAdapter.checkBluetoothAddress(macAddress)) {
                 throw new IllegalArgumentException("invalid mac address " + macAddress);
             }
@@ -457,92 +450,51 @@ public final class BluetoothLeScanFilter implements Parcelable {
         }
 
         /**
-         * Set filtering on service uuid.
+         * Set filter on service uuid.
          */
-        public Builder serviceUuid(ParcelUuid serviceUuid) {
+        public Builder setServiceUuid(ParcelUuid serviceUuid) {
             mServiceUuid = serviceUuid;
+            mUuidMask = null; // clear uuid mask
             return this;
         }
 
         /**
-         * Set partial uuid filter. The {@code uuidMask} is the bit mask for the {@code uuid} set
-         * through {@link #serviceUuid(ParcelUuid)} method. Set any bit in the mask to 1 to indicate
-         * a match is needed for the bit in {@code serviceUuid}, and 0 to ignore that bit.
-         * <p>
-         * The length of {@code uuidMask} must be the same as {@code serviceUuid}.
+         * Set filter on partial service uuid. The {@code uuidMask} is the bit mask for the
+         * {@code serviceUuid}. Set any bit in the mask to 1 to indicate a match is needed for the
+         * bit in {@code serviceUuid}, and 0 to ignore that bit.
+         *
+         * @throws IllegalArgumentException If {@code serviceUuid} is {@code null} but
+         *             {@code uuidMask} is not {@code null}.
          */
-        public Builder serviceUuidMask(ParcelUuid uuidMask) {
+        public Builder setServiceUuid(ParcelUuid serviceUuid, ParcelUuid uuidMask) {
+            if (mUuidMask != null && mServiceUuid == null) {
+                throw new IllegalArgumentException("uuid is null while uuidMask is not null!");
+            }
+            mServiceUuid = serviceUuid;
             mUuidMask = uuidMask;
             return this;
         }
 
         /**
-         * Set service data filter.
+         * Set filtering on service data.
          */
-        public Builder serviceData(byte[] serviceData) {
+        public Builder setServiceData(byte[] serviceData) {
             mServiceData = serviceData;
+            mServiceDataMask = null; // clear service data mask
             return this;
         }
 
         /**
-         * Set partial service data filter bit mask. For any bit in the mask, set it to 1 if it
-         * needs to match the one in service data, otherwise set it to 0 to ignore that bit.
+         * Set partial filter on service data. For any bit in the mask, set it to 1 if it needs to
+         * match the one in service data, otherwise set it to 0 to ignore that bit.
          * <p>
-         * The {@code serviceDataMask} must have the same length of the {@code serviceData} set
-         * through {@link #serviceData(byte[])}.
-         */
-        public Builder serviceDataMask(byte[] serviceDataMask) {
-            mServiceDataMask = serviceDataMask;
-            return this;
-        }
-
-        /**
-         * Set manufacturerId and manufacturerData. A negative manufacturerId is considered as
-         * invalid id.
-         * <p>
-         * Note the first two bytes of the {@code manufacturerData} is the manufacturerId.
-         */
-        public Builder manufacturerData(int manufacturerId, byte[] manufacturerData) {
-            if (manufacturerData != null && manufacturerId < 0) {
-                throw new IllegalArgumentException("invalid manufacture id");
-            }
-            mManufacturerId = manufacturerId;
-            mManufacturerData = manufacturerData;
-            return this;
-        }
-
-        /**
-         * Set partial manufacture data filter bit mask. For any bit in the mask, set it the 1 if it
-         * needs to match the one in manufacturer data, otherwise set it to 0.
-         * <p>
-         * The {@code manufacturerDataMask} must have the same length of {@code manufacturerData}
-         * set through {@link #manufacturerData(int, byte[])}.
-         */
-        public Builder manufacturerDataMask(byte[] manufacturerDataMask) {
-            mManufacturerDataMask = manufacturerDataMask;
-            return this;
-        }
-
-        /**
-         * Set the desired rssi range for the filter. A scan result with rssi in the range of
-         * [minRssi, maxRssi] will be consider as a match.
-         */
-        public Builder rssiRange(int minRssi, int maxRssi) {
-            mMinRssi = minRssi;
-            mMaxRssi = maxRssi;
-            return this;
-        }
-
-        /**
-         * Build {@link BluetoothLeScanFilter}.
+         * The {@code serviceDataMask} must have the same length of the {@code serviceData}.
          *
-         * @throws IllegalArgumentException If the filter cannot be built.
+         * @throws IllegalArgumentException If {@code serviceDataMask} is {@code null} while
+         *             {@code serviceData} is not or {@code serviceDataMask} and {@code serviceData}
+         *             has different length.
          */
-        public BluetoothLeScanFilter build() {
-            if (mUuidMask != null && mServiceUuid == null) {
-                throw new IllegalArgumentException("uuid is null while uuidMask is not null!");
-            }
-
+        public Builder setServiceData(byte[] serviceData, byte[] serviceDataMask) {
             if (mServiceDataMask != null) {
                 if (mServiceData == null) {
                     throw new IllegalArgumentException(
@@ -555,7 +507,44 @@ public final class BluetoothLeScanFilter implements Parcelable {
                             "size mismatch for service data and service data mask");
                 }
             }
+            mServiceData = serviceData;
+            mServiceDataMask = serviceDataMask;
+            return this;
+        }
 
+        /**
+         * Set filter on on manufacturerData. A negative manufacturerId is considered as invalid id.
+         * <p>
+         * Note the first two bytes of the {@code manufacturerData} is the manufacturerId.
+         *
+         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid.
+         */
+        public Builder setManufacturerData(int manufacturerId, byte[] manufacturerData) {
+            if (manufacturerData != null && manufacturerId < 0) {
+                throw new IllegalArgumentException("invalid manufacture id");
+            }
+            mManufacturerId = manufacturerId;
+            mManufacturerData = manufacturerData;
+            mManufacturerDataMask = null; // clear manufacturer data mask
+            return this;
+        }
+
+        /**
+         * Set filter on partial manufacture data. For any bit in the mask, set it the 1 if it
+         * needs to match the one in manufacturer data, otherwise set it to 0.
+         * <p>
+         * The {@code manufacturerDataMask} must have the same length of {@code manufacturerData}.
+         *
+         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid, or
+         *             {@code manufacturerData} is null while {@code manufacturerDataMask} is not,
+         *             or {@code manufacturerData} and {@code manufacturerDataMask} have different
+         *             length.
+         */
+        public Builder setManufacturerData(int manufacturerId, byte[] manufacturerData,
+                byte[] manufacturerDataMask) {
+            if (manufacturerData != null && manufacturerId < 0) {
+                throw new IllegalArgumentException("invalid manufacture id");
+            }
             if (mManufacturerDataMask != null) {
                 if (mManufacturerData == null) {
                     throw new IllegalArgumentException(
@@ -568,7 +557,29 @@ public final class BluetoothLeScanFilter implements Parcelable {
                             "size mismatch for manufacturerData and manufacturerDataMask");
                 }
             }
-            return new BluetoothLeScanFilter(mLocalName, mMacAddress,
+            mManufacturerId = manufacturerId;
+            mManufacturerData = manufacturerData;
+            mManufacturerDataMask = manufacturerDataMask;
+            return this;
+        }
+
+        /**
+         * Set the desired rssi range for the filter. A scan result with rssi in the range of
+         * [minRssi, maxRssi] will be consider as a match.
+         */
+        public Builder setRssiRange(int minRssi, int maxRssi) {
+            mMinRssi = minRssi;
+            mMaxRssi = maxRssi;
+            return this;
+        }
+
+        /**
+         * Build {@link ScanFilter}.
+         *
+         * @throws IllegalArgumentException If the filter cannot be built.
+         */
+        public ScanFilter build() {
+            return new ScanFilter(mLocalName, mMacAddress,
                     mServiceUuid, mUuidMask,
                     mServiceData, mServiceDataMask,
                     mManufacturerId, mManufacturerData, mManufacturerDataMask, mMinRssi, mMaxRssi);

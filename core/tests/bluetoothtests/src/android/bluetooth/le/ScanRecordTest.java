@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.bluetooth;
+package android.bluetooth.le;
 
+import android.bluetooth.le.ScanRecord;
 import android.os.ParcelUuid;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -24,13 +25,13 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 
 /**
- * Unit test cases for {@link BluetoothLeAdvertiseScanData}.
+ * Unit test cases for {@link ScanRecord}.
  * <p>
  * To run this test, use adb shell am instrument -e class
- * 'android.bluetooth.BluetoothLeAdvertiseScanDataTest' -w
+ * 'android.bluetooth.ScanRecordTest' -w
  * 'com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner'
  */
-public class BluetoothLeAdvertiseScanDataTest extends TestCase {
+public class ScanRecordTest extends TestCase {
 
     @SmallTest
     public void testParser() {
@@ -43,8 +44,7 @@ public class BluetoothLeAdvertiseScanDataTest extends TestCase {
                 0x05, (byte) 0xff, (byte) 0xe0, 0x00, 0x02, 0x15, // manufacturer specific data
                 0x03, 0x50, 0x01, 0x02, // an unknown data type won't cause trouble
         };
-        BluetoothLeAdvertiseScanData.ScanRecord data = BluetoothLeAdvertiseScanData.ScanRecord
-                .getParser().parseFromScanRecord(scanRecord);
+        ScanRecord data = ScanRecord.parseFromBytes(scanRecord);
         assertEquals(0x1a, data.getAdvertiseFlags());
         ParcelUuid uuid1 = ParcelUuid.fromString("0000110A-0000-1000-8000-00805F9B34FB");
         ParcelUuid uuid2 = ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB");
