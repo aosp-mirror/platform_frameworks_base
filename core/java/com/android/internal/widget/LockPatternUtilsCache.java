@@ -28,6 +28,11 @@ import android.util.ArrayMap;
  */
 public class LockPatternUtilsCache implements ILockSettings {
 
+    private static final String HAS_LOCK_PATTERN_CACHE_KEY
+            = "LockPatternUtils.Cache.HasLockPatternCacheKey";
+    private static final String HAS_LOCK_PASSWORD_CACHE_KEY
+            = "LockPatternUtils.Cache.HasLockPasswordCacheKey";
+
     private static LockPatternUtilsCache sInstance;
 
     private final ILockSettings mService;
@@ -109,7 +114,9 @@ public class LockPatternUtilsCache implements ILockSettings {
 
     @Override
     public void setLockPattern(String pattern, int userId) throws RemoteException {
+        invalidateCache(HAS_LOCK_PATTERN_CACHE_KEY, userId);
         mService.setLockPattern(pattern, userId);
+        putCache(HAS_LOCK_PATTERN_CACHE_KEY, userId, pattern != null);
     }
 
     @Override
@@ -119,7 +126,9 @@ public class LockPatternUtilsCache implements ILockSettings {
 
     @Override
     public void setLockPassword(String password, int userId) throws RemoteException {
+        invalidateCache(HAS_LOCK_PASSWORD_CACHE_KEY, userId);
         mService.setLockPassword(password, userId);
+        putCache(HAS_LOCK_PASSWORD_CACHE_KEY, userId, password != null);
     }
 
     @Override
@@ -134,12 +143,24 @@ public class LockPatternUtilsCache implements ILockSettings {
 
     @Override
     public boolean havePattern(int userId) throws RemoteException {
-        return mService.havePattern(userId);
+        Object value = peekCache(HAS_LOCK_PATTERN_CACHE_KEY, userId);
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        }
+        boolean result = mService.havePattern(userId);
+        putCache(HAS_LOCK_PATTERN_CACHE_KEY, userId, result);
+        return result;
     }
 
     @Override
     public boolean havePassword(int userId) throws RemoteException {
-        return mService.havePassword(userId);
+        Object value = peekCache(HAS_LOCK_PASSWORD_CACHE_KEY, userId);
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        }
+        boolean result = mService.havePassword(userId);
+        putCache(HAS_LOCK_PASSWORD_CACHE_KEY, userId, result);
+        return result;
     }
 
     @Override
