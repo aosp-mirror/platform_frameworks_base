@@ -127,6 +127,8 @@ public class Toolbar extends ViewGroup {
     // Clear me after use.
     private final ArrayList<View> mTempViews = new ArrayList<View>();
 
+    private final int[] mTempMargins = new int[2];
+
     private OnMenuItemClickListener mOnMenuItemClickListener;
 
     private final ActionMenuView.OnMenuItemClickListener mMenuViewItemClickListener =
@@ -928,11 +930,48 @@ public class Toolbar extends ViewGroup {
         child.measure(childWidthSpec, childHeightSpec);
     }
 
+    /**
+     * Returns the width + uncollapsed margins
+     */
+    private int measureChildCollapseMargins(View child,
+            int parentWidthMeasureSpec, int widthUsed,
+            int parentHeightMeasureSpec, int heightUsed, int[] collapsingMargins) {
+        final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+
+        final int leftDiff = lp.leftMargin - collapsingMargins[0];
+        final int rightDiff = lp.rightMargin - collapsingMargins[1];
+        final int leftMargin = Math.max(0, leftDiff);
+        final int rightMargin = Math.max(0, rightDiff);
+        final int hMargins = leftMargin + rightMargin;
+        collapsingMargins[0] = Math.max(0, -leftDiff);
+        collapsingMargins[1] = Math.max(0, -rightDiff);
+
+        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                mPaddingLeft + mPaddingRight + hMargins + widthUsed, lp.width);
+        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+                mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin
+                        + heightUsed, lp.height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+        return child.getMeasuredWidth() + hMargins;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = 0;
         int height = 0;
         int childState = 0;
+
+        final int[] collapsingMargins = mTempMargins;
+        final int marginStartIndex;
+        final int marginEndIndex;
+        if (isLayoutRtl()) {
+            marginStartIndex = 1;
+            marginEndIndex = 0;
+        } else {
+            marginStartIndex = 0;
+            marginEndIndex = 1;
+        }
 
         // System views measure first.
 
@@ -956,7 +995,9 @@ public class Toolbar extends ViewGroup {
             childState = combineMeasuredStates(childState, mCollapseButtonView.getMeasuredState());
         }
 
-        width += Math.max(getContentInsetStart(), navWidth);
+        final int contentInsetStart = getContentInsetStart();
+        width += Math.max(contentInsetStart, navWidth);
+        collapsingMargins[marginStartIndex] = Math.max(0, contentInsetStart - navWidth);
 
         int menuWidth = 0;
         if (shouldLayout(mMenuView)) {
@@ -968,21 +1009,21 @@ public class Toolbar extends ViewGroup {
             childState = combineMeasuredStates(childState, mMenuView.getMeasuredState());
         }
 
-        width += Math.max(getContentInsetEnd(), menuWidth);
+        final int contentInsetEnd = getContentInsetEnd();
+        width += Math.max(contentInsetEnd, menuWidth);
+        collapsingMargins[marginEndIndex] = Math.max(0, contentInsetEnd - menuWidth);
 
         if (shouldLayout(mExpandedActionView)) {
-            measureChildWithMargins(mExpandedActionView, widthMeasureSpec, width,
-                    heightMeasureSpec, 0);
-            width += mExpandedActionView.getMeasuredWidth() +
-                    getHorizontalMargins(mExpandedActionView);
+            width += measureChildCollapseMargins(mExpandedActionView, widthMeasureSpec, width,
+                    heightMeasureSpec, 0, collapsingMargins);
             height = Math.max(height, mExpandedActionView.getMeasuredHeight() +
                     getVerticalMargins(mExpandedActionView));
             childState = combineMeasuredStates(childState, mExpandedActionView.getMeasuredState());
         }
 
         if (shouldLayout(mLogoView)) {
-            measureChildWithMargins(mLogoView, widthMeasureSpec, width, heightMeasureSpec, 0);
-            width += mLogoView.getMeasuredWidth() + getHorizontalMargins(mLogoView);
+            width += measureChildCollapseMargins(mLogoView, widthMeasureSpec, width,
+                    heightMeasureSpec, 0, collapsingMargins);
             height = Math.max(height, mLogoView.getMeasuredHeight() +
                     getVerticalMargins(mLogoView));
             childState = combineMeasuredStates(childState, mLogoView.getMeasuredState());
@@ -993,17 +1034,18 @@ public class Toolbar extends ViewGroup {
         final int titleVertMargins = mTitleMarginTop + mTitleMarginBottom;
         final int titleHorizMargins = mTitleMarginStart + mTitleMarginEnd;
         if (shouldLayout(mTitleTextView)) {
-            measureChildWithMargins(mTitleTextView, widthMeasureSpec, width + titleHorizMargins,
-                    heightMeasureSpec, titleVertMargins);
+            titleWidth = measureChildCollapseMargins(mTitleTextView, widthMeasureSpec,
+                    width + titleHorizMargins, heightMeasureSpec, titleVertMargins,
+                    collapsingMargins);
             titleWidth = mTitleTextView.getMeasuredWidth() + getHorizontalMargins(mTitleTextView);
             titleHeight = mTitleTextView.getMeasuredHeight() + getVerticalMargins(mTitleTextView);
             childState = combineMeasuredStates(childState, mTitleTextView.getMeasuredState());
         }
         if (shouldLayout(mSubtitleTextView)) {
-            measureChildWithMargins(mSubtitleTextView, widthMeasureSpec, width + titleHorizMargins,
-                    heightMeasureSpec, titleHeight + titleVertMargins);
-            titleWidth = Math.max(titleWidth, mSubtitleTextView.getMeasuredWidth() +
-                    getHorizontalMargins(mSubtitleTextView));
+            titleWidth = Math.max(titleWidth, measureChildCollapseMargins(mSubtitleTextView,
+                    widthMeasureSpec, width + titleHorizMargins,
+                    heightMeasureSpec, titleHeight + titleVertMargins,
+                    collapsingMargins));
             titleHeight += mSubtitleTextView.getMeasuredHeight() +
                     getVerticalMargins(mSubtitleTextView);
             childState = combineMeasuredStates(childState, mSubtitleTextView.getMeasuredState());
@@ -1021,8 +1063,8 @@ public class Toolbar extends ViewGroup {
                 continue;
             }
 
-            measureChildWithMargins(child, widthMeasureSpec, width, heightMeasureSpec, 0);
-            width += child.getMeasuredWidth() + getHorizontalMargins(child);
+            width += measureChildCollapseMargins(child, widthMeasureSpec, width,
+                    heightMeasureSpec, 0, collapsingMargins);
             height = Math.max(height, child.getMeasuredHeight() + getVerticalMargins(child));
             childState = combineMeasuredStates(childState, child.getMeasuredState());
         }
@@ -1053,46 +1095,51 @@ public class Toolbar extends ViewGroup {
         int left = paddingLeft;
         int right = width - paddingRight;
 
+        final int[] collapsingMargins = mTempMargins;
+        collapsingMargins[0] = collapsingMargins[1] = 0;
+
         if (shouldLayout(mNavButtonView)) {
             if (isRtl) {
-                right = layoutChildRight(mNavButtonView, right);
+                right = layoutChildRight(mNavButtonView, right, collapsingMargins);
             } else {
-                left = layoutChildLeft(mNavButtonView, left);
+                left = layoutChildLeft(mNavButtonView, left, collapsingMargins);
             }
         }
 
         if (shouldLayout(mCollapseButtonView)) {
             if (isRtl) {
-                right = layoutChildRight(mCollapseButtonView, right);
+                right = layoutChildRight(mCollapseButtonView, right, collapsingMargins);
             } else {
-                left = layoutChildLeft(mCollapseButtonView, left);
+                left = layoutChildLeft(mCollapseButtonView, left, collapsingMargins);
             }
         }
 
         if (shouldLayout(mMenuView)) {
             if (isRtl) {
-                left = layoutChildLeft(mMenuView, left);
+                left = layoutChildLeft(mMenuView, left, collapsingMargins);
             } else {
-                right = layoutChildRight(mMenuView, right);
+                right = layoutChildRight(mMenuView, right, collapsingMargins);
             }
         }
 
+        collapsingMargins[0] = Math.max(0, getContentInsetLeft() - left);
+        collapsingMargins[1] = Math.max(0, getContentInsetRight() - (width - paddingRight - right));
         left = Math.max(left, getContentInsetLeft());
         right = Math.min(right, width - paddingRight - getContentInsetRight());
 
         if (shouldLayout(mExpandedActionView)) {
             if (isRtl) {
-                right = layoutChildRight(mExpandedActionView, right);
+                right = layoutChildRight(mExpandedActionView, right, collapsingMargins);
             } else {
-                left = layoutChildLeft(mExpandedActionView, left);
+                left = layoutChildLeft(mExpandedActionView, left, collapsingMargins);
             }
         }
 
         if (shouldLayout(mLogoView)) {
             if (isRtl) {
-                right = layoutChildRight(mLogoView, right);
+                right = layoutChildRight(mLogoView, right, collapsingMargins);
             } else {
-                left = layoutChildLeft(mLogoView, left);
+                left = layoutChildLeft(mLogoView, left, collapsingMargins);
             }
         }
 
@@ -1141,48 +1188,52 @@ public class Toolbar extends ViewGroup {
                     break;
             }
             if (isRtl) {
+                final int rd = mTitleMarginStart - collapsingMargins[1];
+                right -= Math.max(0, rd);
+                collapsingMargins[1] = Math.max(0, -rd);
                 int titleRight = right;
                 int subtitleRight = right;
+
                 if (layoutTitle) {
                     final LayoutParams lp = (LayoutParams) mTitleTextView.getLayoutParams();
-                    titleRight -= lp.rightMargin + mTitleMarginStart;
                     final int titleLeft = titleRight - mTitleTextView.getMeasuredWidth();
                     final int titleBottom = titleTop + mTitleTextView.getMeasuredHeight();
                     mTitleTextView.layout(titleLeft, titleTop, titleRight, titleBottom);
-                    titleRight = titleLeft - lp.leftMargin - mTitleMarginEnd;
+                    titleRight = titleLeft - mTitleMarginEnd;
                     titleTop = titleBottom + lp.bottomMargin;
                 }
                 if (layoutSubtitle) {
                     final LayoutParams lp = (LayoutParams) mSubtitleTextView.getLayoutParams();
-                    subtitleRight -= lp.rightMargin + mTitleMarginStart;
                     titleTop += lp.topMargin;
                     final int subtitleLeft = subtitleRight - mSubtitleTextView.getMeasuredWidth();
                     final int subtitleBottom = titleTop + mSubtitleTextView.getMeasuredHeight();
                     mSubtitleTextView.layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
-                    subtitleRight = subtitleRight - lp.leftMargin - mTitleMarginEnd;
+                    subtitleRight = subtitleRight - mTitleMarginEnd;
                     titleTop = subtitleBottom + lp.bottomMargin;
                 }
                 right = Math.max(titleRight, subtitleRight);
             } else {
+                final int ld = mTitleMarginStart - collapsingMargins[0];
+                left += Math.max(0, ld);
+                collapsingMargins[0] = Math.max(0, -ld);
                 int titleLeft = left;
                 int subtitleLeft = left;
+
                 if (layoutTitle) {
                     final LayoutParams lp = (LayoutParams) mTitleTextView.getLayoutParams();
-                    titleLeft += lp.leftMargin + mTitleMarginStart;
                     final int titleRight = titleLeft + mTitleTextView.getMeasuredWidth();
                     final int titleBottom = titleTop + mTitleTextView.getMeasuredHeight();
                     mTitleTextView.layout(titleLeft, titleTop, titleRight, titleBottom);
-                    titleLeft = titleRight + lp.rightMargin + mTitleMarginEnd;
+                    titleLeft = titleRight + mTitleMarginEnd;
                     titleTop = titleBottom + lp.bottomMargin;
                 }
                 if (layoutSubtitle) {
                     final LayoutParams lp = (LayoutParams) mSubtitleTextView.getLayoutParams();
-                    subtitleLeft += lp.leftMargin + mTitleMarginStart;
                     titleTop += lp.topMargin;
                     final int subtitleRight = subtitleLeft + mSubtitleTextView.getMeasuredWidth();
                     final int subtitleBottom = titleTop + mSubtitleTextView.getMeasuredHeight();
                     mSubtitleTextView.layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
-                    subtitleLeft = subtitleRight + lp.rightMargin + mTitleMarginEnd;
+                    subtitleLeft = subtitleRight + mTitleMarginEnd;
                     titleTop = subtitleBottom + lp.bottomMargin;
                 }
                 left = Math.max(titleLeft, subtitleLeft);
@@ -1195,19 +1246,19 @@ public class Toolbar extends ViewGroup {
         addCustomViewsWithGravity(mTempViews, Gravity.LEFT);
         final int leftViewsCount = mTempViews.size();
         for (int i = 0; i < leftViewsCount; i++) {
-            left = layoutChildLeft(mTempViews.get(i), left);
+            left = layoutChildLeft(mTempViews.get(i), left, collapsingMargins);
         }
 
         addCustomViewsWithGravity(mTempViews, Gravity.RIGHT);
         final int rightViewsCount = mTempViews.size();
         for (int i = 0; i < rightViewsCount; i++) {
-            right = layoutChildRight(mTempViews.get(i), right);
+            right = layoutChildRight(mTempViews.get(i), right, collapsingMargins);
         }
 
         // Centered views try to center with respect to the whole bar, but views pinned
         // to the left or right can push the mass of centered views to one side or the other.
         addCustomViewsWithGravity(mTempViews, Gravity.CENTER_HORIZONTAL);
-        final int centerViewsWidth = getViewListMeasuredWidth(mTempViews);
+        final int centerViewsWidth = getViewListMeasuredWidth(mTempViews, collapsingMargins);
         final int parentCenter = paddingLeft + (width - paddingLeft - paddingRight) / 2;
         final int halfCenterViewsWidth = centerViewsWidth / 2;
         int centerLeft = parentCenter - halfCenterViewsWidth;
@@ -1220,25 +1271,35 @@ public class Toolbar extends ViewGroup {
 
         final int centerViewsCount = mTempViews.size();
         for (int i = 0; i < centerViewsCount; i++) {
-            centerLeft = layoutChildLeft(mTempViews.get(i), centerLeft);
+            centerLeft = layoutChildLeft(mTempViews.get(i), centerLeft, collapsingMargins);
         }
         mTempViews.clear();
     }
 
-    private int getViewListMeasuredWidth(List<View> views) {
+    private int getViewListMeasuredWidth(List<View> views, int[] collapsingMargins) {
+        int collapseLeft = collapsingMargins[0];
+        int collapseRight = collapsingMargins[1];
         int width = 0;
         final int count = views.size();
         for (int i = 0; i < count; i++) {
             final View v = views.get(i);
             final LayoutParams lp = (LayoutParams) v.getLayoutParams();
-            width += lp.leftMargin + v.getMeasuredWidth() + lp.rightMargin;
+            final int l = lp.leftMargin - collapseLeft;
+            final int r = lp.rightMargin - collapseRight;
+            final int leftMargin = Math.max(0, l);
+            final int rightMargin = Math.max(0, r);
+            collapseLeft = Math.max(0, -l);
+            collapseRight = Math.max(0, -r);
+            width += leftMargin + v.getMeasuredWidth() + rightMargin;
         }
         return width;
     }
 
-    private int layoutChildLeft(View child, int left) {
+    private int layoutChildLeft(View child, int left, int[] collapsingMargins) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        left += lp.leftMargin;
+        final int l = lp.leftMargin - collapsingMargins[0];
+        left += Math.max(0, l);
+        collapsingMargins[0] = Math.max(0, -l);
         final int top = getChildTop(child);
         final int childWidth = child.getMeasuredWidth();
         child.layout(left, top, left + childWidth, top + child.getMeasuredHeight());
@@ -1246,9 +1307,11 @@ public class Toolbar extends ViewGroup {
         return left;
     }
 
-    private int layoutChildRight(View child, int right) {
+    private int layoutChildRight(View child, int right, int[] collapsingMargins) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        right -= lp.rightMargin;
+        final int r = lp.rightMargin - collapsingMargins[1];
+        right -= Math.max(0, r);
+        collapsingMargins[1] = Math.max(0, -r);
         final int top = getChildTop(child);
         final int childWidth = child.getMeasuredWidth();
         child.layout(right - childWidth, top, right, top + child.getMeasuredHeight());
