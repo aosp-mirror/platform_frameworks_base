@@ -17,13 +17,14 @@
 <com.android.systemui.statusbar.policy.HeadsUpNotificationView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:background="@drawable/heads_up_scrim">
 
         <FrameLayout
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/notification_side_padding"
-                android:layout_marginEnd="@dimen/notification_side_padding"
-                android:elevation="16dp"
+                android:paddingStart="@dimen/notification_side_padding"
+                android:paddingEnd="@dimen/notification_side_padding"
+                android:elevation="8dp"
                 android:id="@+id/content_holder"
                 style="@style/NotificationsQuickSettings" />
 
