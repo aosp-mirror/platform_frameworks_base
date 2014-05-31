@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.graphics.FontFamily_Delegate.FontVariant;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.FontMetricsInt;
 import android.text.TextUtils;
@@ -30,7 +31,6 @@ import java.awt.Font;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,7 +81,8 @@ public class Paint_Delegate {
     private float mTextScaleX;
     private float mTextSkewX;
     private int mHintingMode = Paint.HINTING_ON;
-    private boolean mIsCompact = true;
+    // Variant of the font.
+    private FontVariant mFontVariant = FontVariant.NONE;
 
     private Xfermode_Delegate mXfermode;
     private ColorFilter_Delegate mColorFilter;
@@ -437,7 +438,7 @@ public class Paint_Delegate {
     /*package*/ static boolean isElegantTextHeight(Paint thisPaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
-        return delegate != null && !delegate.mIsCompact;
+        return delegate != null && delegate.mFontVariant == FontVariant.ELEGANT;
     }
 
     @LayoutlibDelegate
@@ -448,7 +449,7 @@ public class Paint_Delegate {
             return;
         }
 
-        delegate.mIsCompact = !elegant;
+        delegate.mFontVariant = elegant ? FontVariant.ELEGANT : FontVariant.COMPACT;
     }
 
     @LayoutlibDelegate
@@ -1022,31 +1023,31 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_getTextPath(long native_object, int bidiFlags,
-                char[] text, int index, int count, float x, float y, long path) {
+    /*package*/ static void native_getTextPath(long native_object, long native_typeface,
+            int bidiFlags, char[] text, int index, int count, float x, float y, long path) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Paint.getTextPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_getTextPath(long native_object, int bidiFlags,
-            String text, int start, int end, float x, float y, long path) {
+    /*package*/ static void native_getTextPath(long native_object, long native_typeface,
+            int bidiFlags, String text, int start, int end, float x, float y, long path) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Paint.getTextPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeGetStringBounds(long nativePaint, String text, int start,
-            int end, int bidiFlags, Rect bounds) {
-        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start, bidiFlags,
-                bounds);
+    /*package*/ static void nativeGetStringBounds(long nativePaint, long native_typeface,
+            String text, int start, int end, int bidiFlags, Rect bounds) {
+        nativeGetCharArrayBounds(nativePaint, native_typeface, text.toCharArray(), start,
+                end - start, bidiFlags, bounds);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeGetCharArrayBounds(long nativePaint, char[] text, int index,
-            int count, int bidiFlags, Rect bounds) {
+    /*package*/ static void nativeGetCharArrayBounds(long nativePaint, long native_typeface,
+            char[] text, int index, int count, int bidiFlags, Rect bounds) {
 
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
@@ -1124,7 +1125,7 @@ public class Paint_Delegate {
     private void updateFontObject() {
         if (mTypeface != null) {
             // Get the fonts from the TypeFace object.
-            List<Font> fonts = mTypeface.getFonts(mIsCompact);
+            List<Font> fonts = mTypeface.getFonts(mFontVariant);
 
             // create new font objects as well as FontMetrics, based on the current text size
             // and skew info.
