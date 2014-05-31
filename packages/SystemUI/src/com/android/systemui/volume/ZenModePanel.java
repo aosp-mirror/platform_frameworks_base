@@ -45,6 +45,7 @@ public class ZenModePanel extends LinearLayout {
     private static final int[] MINUTES = new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
     public static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
+    private final Context mContext;
     private final LayoutInflater mInflater;
     private final HashSet<RadioButton> mRadioButtons = new HashSet<RadioButton>();
     private final H mHandler = new H();
@@ -56,6 +57,7 @@ public class ZenModePanel extends LinearLayout {
 
     public ZenModePanel(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
         mInflater = LayoutInflater.from(new ContextThemeWrapper(context, R.style.QSWhiteTheme));
     }
 
