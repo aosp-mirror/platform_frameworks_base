@@ -18,13 +18,10 @@ package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
 import android.content.res.Configuration;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
-
 import android.util.AttributeSet;
 import android.util.Log;
-
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -40,8 +37,8 @@ import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
-import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
 import java.util.ArrayList;
 
@@ -121,6 +118,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mOverScrolledBottomPixels;
 
     private OnChildLocationsChangedListener mListener;
+    private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
@@ -875,7 +873,22 @@ public class NotificationStackScrollLayout extends ViewGroup
             setOverScrolledPixels(amount / RUBBER_BAND_FACTOR, onTop);
             mAmbientState.setOverScrollAmount(amount, onTop);
             requestChildrenUpdate();
+            if (onTop) {
+                float scrollAmount = mOwnScrollY < 0 ? -mOwnScrollY : 0;
+                notifyOverscrollTopListener(scrollAmount + amount);
+            }
         }
+    }
+
+    private void notifyOverscrollTopListener(float amount) {
+        if (mOverscrollTopChangedListener != null) {
+            mOverscrollTopChangedListener.onOverscrollTopChanged(amount);
+        }
+    }
+
+    public void setOverscrollTopChangedListener(
+            OnOverscrollTopChangedListener overscrollTopChangedListener) {
+        mOverscrollTopChangedListener = overscrollTopChangedListener;
     }
 
     public float getCurrentOverScrollAmount(boolean top) {
@@ -913,6 +926,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                 onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
                 invalidateParentIfNeeded();
                 updateChildren();
+                float overScrollTop = getCurrentOverScrollAmount(true);
+                if (mOwnScrollY < 0) {
+                    notifyOverscrollTopListener(-mOwnScrollY + overScrollTop);
+                } else {
+                    notifyOverscrollTopListener(overScrollTop);
+                }
             }
         } else {
             customScrollTo(scrollY);
@@ -1594,6 +1613,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public interface OnChildLocationsChangedListener {
         public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
+    }
+
+    /**
+     * A listener that gets notified when the overscroll at the top has changed.
+     */
+    public interface OnOverscrollTopChangedListener {
+        public void onOverscrollTopChanged(float amount);
     }
 
     static class AnimationEvent {
