@@ -25,19 +25,17 @@ import java.util.HashMap;
 /**
  * Required Mobile Device Management Tree Structure
  *
- *                           +----------+
- *                           | ./(Root) |
- *                           +----+-----+
- *                                |
- *          +---------+           |         +---------+   +---------+
- *          | DevInfo |-----------+---------| Wi-Fi   |---|SP FQDN* |
- *          +---------+           |         +---------+   +---------+
- *          +---------+           |
- *          |DevDetail|-----------+
- *          +---------+
- *
- * For example,
- * ./Wi-Fi/wi-fi.org/PerproviderSubscription/Cred01/Policy/PreferredRoamingPartnerList/Roa01/FQDN_Math
+ *                   +----------+
+ *                   | ./(Root) |
+ *                   +----+-----+
+ *                        |
+ *  +---------+           |         +---------+  +---------+
+ *  | DevInfo |-----------+---------|  Wi-Fi  |--|SP FQDN* |
+ *  +---------+           |         +---------+  +---------+
+ *  +---------+           |                           |
+ *  |DevDetail|-----------+                      +-----------------------+
+ *  +---------+                                  |PerproviderSubscription|--<X>+
+ *                                               +-----------------------+
  *
  * This class contains all nodes start from Wi-Fi
  * @hide

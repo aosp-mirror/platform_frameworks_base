@@ -20,10 +20,13 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
 
 /**
  * A class representing a Wi-Fi Passpoint credential.
@@ -32,64 +35,76 @@ import java.util.Map;
 public class WifiPasspointCredential implements Parcelable {
 
     private final static String TAG = "PasspointCredential";
-    private String mWifiTreePath;
-    private String mWifiSPFQDN;
+    private final static boolean DBG = true;
+
+    /** Wi-Fi nodes**/
+    private String mWifiSpFqdn;
+
+    /** PerProviderSubscription nodes **/
     private String mCredentialName;
-    private String mUpdateIdentifier;
+
+    /** SubscriptionUpdate nodes **/
+    private String mSubscriptionUpdateInterval;
     private String mSubscriptionUpdateMethod;
-    private WifiEnterpriseConfig mEnterpriseConfig;
+    private String mSubscriptionUpdateRestriction;
+    private String mSubscriptionUpdateURI;
+    private String mSubscriptionUpdateUsername;
+    private String mSubscriptionUpdatePassword;
+
+    /** HomeSP nodes **/
+    private String mHomeSpFqdn;
+    private String mFriendlyName;
+    private Collection<WifiPasspointDmTree.HomeOIList> mHomeOIList;
+    private Collection<WifiPasspointDmTree.OtherHomePartners> mOtherHomePartnerList;
+
+    /** SubscriptionParameters nodes**/
+    private String mCreationDate;
+    private String mExpirationDate;
+
+    /** Credential nodes **/
     private String mType;
     private String mInnerMethod;
     private String mCertType;
     private String mCertSha256Fingerprint;
+    private String mUpdateIdentifier;
     private String mUsername;
     private String mPasswd;
+    private String mRealm;
     private String mImsi;
     private String mMcc;
     private String mMnc;
     private String mCaRootCert;
-    private String mRealm;
-    private int mPriority; //User preferred priority; The smaller, the higher
-    private boolean mUserPreferred = false;
-    private String mHomeSpFqdn;
-    private String mFriendlyName;
-    private String mOtherhomepartnerFqdn;
     private String mClientCert;
-    private String mCreationDate;
-    private String mExpirationDate;
-
-    private String mSubscriptionDMAccUsername;
-    private String mSubscriptionDMAccPassword;
-    private String mSubscriptionUpdateInterval;
-
-    private String mPolicyUpdateURI;
-    private String mPolicyUpdateInterval;
-    private String mPolicyDMAccUsername;
-    private String mPolicyDMAccPassword;
-    private String mPolicyUpdateRestriction;
-    private String mPolicyUpdateMethod;
-
-    private Collection<WifiPasspointDmTree.PreferredRoamingPartnerList> mPreferredRoamingPartnerList;
-    private Collection<WifiPasspointDmTree.HomeOIList> mHomeOIList;
-    private Collection<WifiPasspointDmTree.MinBackhaulThresholdNetwork> mMinBackhaulThresholdNetwork;
-    private Collection<WifiPasspointDmTree.RequiredProtoPortTuple> mRequiredProtoPortTuple;
-    private Collection<WifiPasspointDmTree.SPExclusionList> mSpExclusionList;
-    private String mMaxBssLoad;
-
-    private boolean mIsMachineRemediation;
-
-    private String mAAACertURL;
-    private String mAAASha256Fingerprint;
-
-    private String mSubscriptionUpdateRestriction;
-    private String mSubscriptionUpdateURI;
-
     private boolean mCheckAaaServerCertStatus;
 
-    /** @hide */
-    public WifiPasspointCredential() {
+    /** Policy nodes **/
+    private String mPolicyUpdateUri;
+    private String mPolicyUpdateInterval;
+    private String mPolicyUpdateUsername;
+    private String mPolicyUpdatePassword;
+    private String mPolicyUpdateRestriction;
+    private String mPolicyUpdateMethod;
+    private Collection<WifiPasspointDmTree.PreferredRoamingPartnerList> mPreferredRoamingPartnerList;
+    private Collection<WifiPasspointDmTree.MinBackhaulThresholdNetwork> mMinBackhaulThresholdNetwork;
+    private Collection<WifiPasspointDmTree.SPExclusionList> mSpExclusionList;
+    private Collection<WifiPasspointDmTree.RequiredProtoPortTuple> mRequiredProtoPortTuple;
+    private String mMaxBssLoad;
 
-    }
+    /** CrednetialPriority node **/
+    private int mCrednetialPriority;
+
+    /** AAAServerTrustRoot nodes **/
+    private String mAaaCertUrl;
+    private String mAaaSha256Fingerprint;
+
+    /** Others **/
+    private boolean mIsMachineRemediation;
+    private boolean mUserPreferred = false;
+    private String mWifiTreePath;
+    private WifiEnterpriseConfig mEnterpriseConfig;
+
+    /** @hide */
+    public WifiPasspointCredential() {}
 
     /**
      * Constructor
@@ -114,84 +129,6 @@ public class WifiPasspointCredential implements Parcelable {
     public WifiPasspointCredential(String type,
             String caroot,
             String clientcert,
-            WifiPasspointDmTree.SpFqdn sp,
-            WifiPasspointDmTree.CredentialInfo credinfo) {
-
-        if (credinfo == null) {
-            return;
-        }
-
-        mType = type;
-        mCaRootCert = caroot;
-        mClientCert = clientcert;
-
-        mWifiSPFQDN = sp.nodeName;
-        mUpdateIdentifier = sp.perProviderSubscription.UpdateIdentifier;
-
-        mCredentialName = credinfo.nodeName;
-        Set set = credinfo.homeSP.otherHomePartners.entrySet();
-        Iterator i = set.iterator();
-        if (i.hasNext()) {
-            Map.Entry entry3 = (Map.Entry) i.next();
-            WifiPasspointDmTree.OtherHomePartners ohp = (WifiPasspointDmTree.OtherHomePartners) entry3.getValue();
-            mOtherhomepartnerFqdn = ohp.FQDN;
-        }
-
-        set = credinfo.aAAServerTrustRoot.entrySet();
-        i = set.iterator();
-        if (i.hasNext()) {
-            Map.Entry entry3 = (Map.Entry) i.next();
-            WifiPasspointDmTree.AAAServerTrustRoot aaa = (WifiPasspointDmTree.AAAServerTrustRoot) entry3.getValue();
-            mAAACertURL = aaa.CertURL;
-            mAAASha256Fingerprint = aaa.CertSHA256Fingerprint;
-        }
-
-        mCertType = credinfo.credential.digitalCertificate.CertificateType;
-        mCertSha256Fingerprint = credinfo.credential.digitalCertificate.CertSHA256Fingerprint;
-        mUsername = credinfo.credential.usernamePassword.Username;
-        mPasswd = credinfo.credential.usernamePassword.Password;
-        mIsMachineRemediation = credinfo.credential.usernamePassword.MachineManaged;
-        mInnerMethod = credinfo.credential.usernamePassword.eAPMethod.InnerMethod;
-        mImsi = credinfo.credential.sim.IMSI;
-        mCreationDate = credinfo.credential.CreationDate;
-        mExpirationDate = credinfo.credential.ExpirationDate;
-        mRealm = credinfo.credential.Realm;
-
-        if (credinfo.credentialPriority == null) {
-            credinfo.credentialPriority = "128";
-        }
-        mPriority = Integer.parseInt(credinfo.credentialPriority);
-
-        mHomeSpFqdn = credinfo.homeSP.FQDN;
-
-        mSubscriptionUpdateInterval = credinfo.subscriptionUpdate.UpdateInterval;
-        mSubscriptionUpdateMethod = credinfo.subscriptionUpdate.UpdateMethod;
-        mSubscriptionUpdateRestriction = credinfo.subscriptionUpdate.Restriction;
-        mSubscriptionUpdateURI = credinfo.subscriptionUpdate.URI;
-        mSubscriptionDMAccUsername = credinfo.subscriptionUpdate.usernamePassword.Username;
-        mSubscriptionDMAccPassword = credinfo.subscriptionUpdate.usernamePassword.Password;
-
-        mPolicyUpdateURI = credinfo.policy.policyUpdate.URI;
-        mPolicyUpdateInterval = credinfo.policy.policyUpdate.UpdateInterval;
-        mPolicyDMAccUsername = credinfo.policy.policyUpdate.usernamePassword.Username;
-        mPolicyDMAccPassword = credinfo.policy.policyUpdate.usernamePassword.Password;
-        mPolicyUpdateRestriction = credinfo.policy.policyUpdate.Restriction;
-        mPolicyUpdateMethod = credinfo.policy.policyUpdate.UpdateMethod;
-        mPreferredRoamingPartnerList = credinfo.policy.preferredRoamingPartnerList.values();
-        mMinBackhaulThresholdNetwork = credinfo.policy.minBackhaulThreshold.values();
-        mRequiredProtoPortTuple = credinfo.policy.requiredProtoPortTuple.values();
-        mMaxBssLoad = credinfo.policy.maximumBSSLoadValue;
-        mSpExclusionList = credinfo.policy.sPExclusionList.values();
-
-        mHomeOIList = credinfo.homeSP.homeOIList.values();
-        mFriendlyName = credinfo.homeSP.FriendlyName;
-        mCheckAaaServerCertStatus = credinfo.credential.CheckAAAServerCertStatus;
-    }
-
-    /** @hide */
-    public WifiPasspointCredential(String type,
-            String caroot,
-            String clientcert,
             String mcc,
             String mnc,
             WifiPasspointDmTree.SpFqdn sp,
@@ -205,25 +142,19 @@ public class WifiPasspointCredential implements Parcelable {
         mCaRootCert = caroot;
         mClientCert = clientcert;
 
-        mWifiSPFQDN = sp.nodeName;
+        mWifiSpFqdn = sp.nodeName;
         mUpdateIdentifier = sp.perProviderSubscription.UpdateIdentifier;
 
         mCredentialName = credinfo.nodeName;
-        Set set = credinfo.homeSP.otherHomePartners.entrySet();
+        mOtherHomePartnerList = credinfo.homeSP.otherHomePartners.values();
+
+        Set set = credinfo.aAAServerTrustRoot.entrySet();
         Iterator i = set.iterator();
         if (i.hasNext()) {
             Map.Entry entry3 = (Map.Entry) i.next();
-            WifiPasspointDmTree.OtherHomePartners ohp = (WifiPasspointDmTree.OtherHomePartners) entry3.getValue();
-            mOtherhomepartnerFqdn = ohp.FQDN;
-        }
-
-        set = credinfo.aAAServerTrustRoot.entrySet();
-        i = set.iterator();
-        if (i.hasNext()) {
-            Map.Entry entry3 = (Map.Entry) i.next();
             WifiPasspointDmTree.AAAServerTrustRoot aaa = (WifiPasspointDmTree.AAAServerTrustRoot) entry3.getValue();
-            mAAACertURL = aaa.CertURL;
-            mAAASha256Fingerprint = aaa.CertSHA256Fingerprint;
+            mAaaCertUrl = aaa.CertURL;
+            mAaaSha256Fingerprint = aaa.CertSHA256Fingerprint;
         }
 
         mCertType = credinfo.credential.digitalCertificate.CertificateType;
@@ -240,22 +171,24 @@ public class WifiPasspointCredential implements Parcelable {
         mRealm = credinfo.credential.Realm;
 
         if (credinfo.credentialPriority == null) {
-            credinfo.credentialPriority = "128";
+            mCrednetialPriority = 128;
+        } else {
+            mCrednetialPriority = Integer.parseInt(credinfo.credentialPriority);
         }
-        mPriority = Integer.parseInt(credinfo.credentialPriority);
 
         mHomeSpFqdn = credinfo.homeSP.FQDN;
 
+        mSubscriptionUpdateInterval = credinfo.subscriptionUpdate.UpdateInterval;
         mSubscriptionUpdateMethod = credinfo.subscriptionUpdate.UpdateMethod;
         mSubscriptionUpdateRestriction = credinfo.subscriptionUpdate.Restriction;
         mSubscriptionUpdateURI = credinfo.subscriptionUpdate.URI;
-        mSubscriptionDMAccUsername = credinfo.subscriptionUpdate.usernamePassword.Username;
-        mSubscriptionDMAccPassword = credinfo.subscriptionUpdate.usernamePassword.Password;
+        mSubscriptionUpdateUsername = credinfo.subscriptionUpdate.usernamePassword.Username;
+        mSubscriptionUpdatePassword = credinfo.subscriptionUpdate.usernamePassword.Password;
 
-        mPolicyUpdateURI = credinfo.policy.policyUpdate.URI;
+        mPolicyUpdateUri = credinfo.policy.policyUpdate.URI;
         mPolicyUpdateInterval = credinfo.policy.policyUpdate.UpdateInterval;
-        mPolicyDMAccUsername = credinfo.policy.policyUpdate.usernamePassword.Username;
-        mPolicyDMAccPassword = credinfo.policy.policyUpdate.usernamePassword.Password;
+        mPolicyUpdateUsername = credinfo.policy.policyUpdate.usernamePassword.Username;
+        mPolicyUpdatePassword = credinfo.policy.policyUpdate.usernamePassword.Password;
         mPolicyUpdateRestriction = credinfo.policy.policyUpdate.Restriction;
         mPolicyUpdateMethod = credinfo.policy.policyUpdate.UpdateMethod;
         mPreferredRoamingPartnerList = credinfo.policy.preferredRoamingPartnerList.values();
@@ -266,6 +199,7 @@ public class WifiPasspointCredential implements Parcelable {
 
         mHomeOIList = credinfo.homeSP.homeOIList.values();
         mFriendlyName = credinfo.homeSP.FriendlyName;
+        mCheckAaaServerCertStatus = credinfo.credential.CheckAAAServerCertStatus;
     }
 
     /** @hide */
@@ -284,8 +218,8 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /** @hide */
-    public String getWifiSPFQDN() {
-        return mWifiSPFQDN;
+    public String getWifiSpFqdn() {
+        return mWifiSpFqdn;
     }
 
     /** @hide */
@@ -294,7 +228,7 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /** @hide */
-    public String getEapMethodStr() {
+    public String getType() {
         return mType;
     }
 
@@ -384,14 +318,14 @@ public class WifiPasspointCredential implements Parcelable {
             return 0;
         }
 
-        return mPriority;
+        return mCrednetialPriority;
     }
 
     /**
      * Get the fully qualified domain name (FQDN) of this Passpoint credential.
      * @return FQDN
      */
-    public String getFqdn() {
+    public String getHomeSpFqdn() {
         return mHomeSpFqdn;
     }
 
@@ -405,23 +339,23 @@ public class WifiPasspointCredential implements Parcelable {
 
 
     /** @hide */
-    public String getOtherhomepartners() {
-        return mOtherhomepartnerFqdn;
+    public Collection<WifiPasspointDmTree.OtherHomePartners> getOtherHomePartnerList() {
+        return mOtherHomePartnerList;
     }
 
     /** @hide */
-    public String getSubscriptionDMAccUsername() {
-        return mSubscriptionDMAccUsername;
+    public String getSubscriptionUpdateUsername() {
+        return mSubscriptionUpdateUsername;
     }
 
     /** @hide */
-    public String getSubscriptionDMAccPassword() {
-        return mSubscriptionDMAccPassword;
+    public String getSubscriptionUpdatePassword() {
+        return mSubscriptionUpdatePassword;
     }
 
     /** @hide */
-    public String getPolicyUpdateURI() {
-        return mPolicyUpdateURI;
+    public String getPolicyUpdateUri() {
+        return mPolicyUpdateUri;
     }
 
     /** @hide */
@@ -430,13 +364,13 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /** @hide */
-    public String getPolicyDMAccUsername() {
-        return mPolicyDMAccUsername;
+    public String getPolicyUpdateUsername() {
+        return mPolicyUpdateUsername;
     }
 
     /** @hide */
-    public String getPolicyDMAccPassword() {
-        return mPolicyDMAccPassword;
+    public String getPolicyUpdatePassword() {
+        return mPolicyUpdatePassword;
     }
 
     /** @hide */
@@ -465,12 +399,12 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /** @hide */
-    public Collection<WifiPasspointDmTree.PreferredRoamingPartnerList> getPrpList() {
+    public Collection<WifiPasspointDmTree.PreferredRoamingPartnerList> getPreferredRoamingPartnerList() {
         return mPreferredRoamingPartnerList;
     }
 
     /** @hide */
-    public Collection<WifiPasspointDmTree.HomeOIList> getHomeOIList() {
+    public Collection<WifiPasspointDmTree.HomeOIList> getHomeOiList() {
         return mHomeOIList;
     }
 
@@ -495,13 +429,13 @@ public class WifiPasspointCredential implements Parcelable {
     }
 
     /** @hide */
-    public String getAAACertURL() {
-        return mAAACertURL;
+    public String getAaaCertUrl() {
+        return mAaaCertUrl;
     }
 
     /** @hide */
-    public String getAAASha256Fingerprint() {
-        return mAAASha256Fingerprint;
+    public String getAaaSha256Fingerprint() {
+        return mAaaSha256Fingerprint;
     }
 
     /** @hide */
@@ -578,72 +512,75 @@ public class WifiPasspointCredential implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String none = "<none>";
 
-        sb.append(", UpdateIdentifier: ")
-                .append(mUpdateIdentifier == null ? none : mUpdateIdentifier).
-                append(", SubscriptionUpdateMethod: ")
-                .append(mSubscriptionUpdateMethod == null ? none : mSubscriptionUpdateMethod).
-                append(", Type: ").append(mType == null ? none : mType).
-                append(", Username: ").append(mUsername == null ? none : mUsername).
-                append(", Passwd: ").append(mPasswd == null ? none : mPasswd).
-                append(", SubDMAccUsername: ")
-                .append(mSubscriptionDMAccUsername == null ? none : mSubscriptionDMAccUsername).
-                append(", SubDMAccPassword: ")
-                .append(mSubscriptionDMAccPassword == null ? none : mSubscriptionDMAccPassword).
-                append(", PolDMAccUsername: ")
-                .append(mPolicyDMAccUsername == null ? none : mPolicyDMAccUsername).
-                append(", PolDMAccPassword: ")
-                .append(mPolicyDMAccPassword == null ? none : mPolicyDMAccPassword).
-                append(", Imsi: ").append(mImsi == null ? none : mImsi).
-                append(", Mcc: ").append(mMcc == null ? none : mMcc).
-                append(", Mnc: ").append(mMnc == null ? none : mMnc).
-                append(", CaRootCert: ").append(mCaRootCert == null ? none : mCaRootCert).
-                append(", Realm: ").append(mRealm == null ? none : mRealm).
-                append(", Priority: ").append(mPriority).
-                append(", Fqdn: ").append(mHomeSpFqdn == null ? none : mHomeSpFqdn).
-                append(", Otherhomepartners: ")
-                .append(mOtherhomepartnerFqdn == null ? none : mOtherhomepartnerFqdn).
-                append(", ExpirationDate: ")
-                .append(mExpirationDate == null ? none : mExpirationDate).
-                append(", MaxBssLoad: ").append(mMaxBssLoad == null ? none : mMaxBssLoad).
-                append(", SPExclusionList: ").append(mSpExclusionList);
+        if (!DBG) {
+            sb.append(none);
+        } else {
+            sb.append(", UpdateIdentifier: ")
+            .append(mUpdateIdentifier == null ? none : mUpdateIdentifier)
+            .append(", SubscriptionUpdateMethod: ")
+            .append(mSubscriptionUpdateMethod == null ? none : mSubscriptionUpdateMethod)
+            .append(", Type: ").append(mType == null ? none : mType)
+            .append(", Username: ").append(mUsername == null ? none : mUsername)
+            .append(", Passwd: ").append(mPasswd == null ? none : mPasswd)
+            .append(", SubDMAccUsername: ")
+            .append(mSubscriptionUpdateUsername == null ? none : mSubscriptionUpdateUsername)
+            .append(", SubDMAccPassword: ")
+            .append(mSubscriptionUpdatePassword == null ? none : mSubscriptionUpdatePassword)
+            .append(", PolDMAccUsername: ")
+            .append(mPolicyUpdateUsername == null ? none : mPolicyUpdateUsername)
+            .append(", PolDMAccPassword: ")
+            .append(mPolicyUpdatePassword == null ? none : mPolicyUpdatePassword)
+            .append(", Imsi: ").append(mImsi == null ? none : mImsi)
+            .append(", Mcc: ").append(mMcc == null ? none : mMcc)
+            .append(", Mnc: ").append(mMnc == null ? none : mMnc)
+            .append(", CaRootCert: ").append(mCaRootCert == null ? none : mCaRootCert)
+            .append(", Realm: ").append(mRealm == null ? none : mRealm)
+            .append(", Priority: ").append(mCrednetialPriority)
+            .append(", Fqdn: ").append(mHomeSpFqdn == null ? none : mHomeSpFqdn)
+            .append(", Otherhomepartners: ")
+            .append(mOtherHomePartnerList == null ? none : mOtherHomePartnerList)
+            .append(", ExpirationDate: ")
+            .append(mExpirationDate == null ? none : mExpirationDate)
+            .append(", MaxBssLoad: ").append(mMaxBssLoad == null ? none : mMaxBssLoad)
+            .append(", SPExclusionList: ").append(mSpExclusionList);
 
-        if (mPreferredRoamingPartnerList != null) {
-            sb.append("PreferredRoamingPartnerList:");
-            for (WifiPasspointDmTree.PreferredRoamingPartnerList prpListItem : mPreferredRoamingPartnerList) {
-                sb.append("[fqdnmatch:").append(prpListItem.FQDN_Match).
-                        append(", priority:").append(prpListItem.Priority).
-                        append(", country:").append(prpListItem.Country).append("]");
+            if (mPreferredRoamingPartnerList != null) {
+                sb.append("PreferredRoamingPartnerList:");
+                for (WifiPasspointDmTree.PreferredRoamingPartnerList prpListItem : mPreferredRoamingPartnerList) {
+                    sb.append("[fqdnmatch:").append(prpListItem.FQDN_Match).
+                            append(", priority:").append(prpListItem.Priority).
+                            append(", country:").append(prpListItem.Country).append("]");
+                }
+            }
+
+            if (mHomeOIList != null) {
+                sb.append("HomeOIList:");
+                for (WifiPasspointDmTree.HomeOIList HomeOIListItem : mHomeOIList) {
+                    sb.append("[HomeOI:").append(HomeOIListItem.HomeOI).
+                            append(", HomeOIRequired:").append(HomeOIListItem.HomeOIRequired).
+                            append("]");
+                }
+            }
+
+            if (mMinBackhaulThresholdNetwork != null) {
+                sb.append("BackHaulThreshold:");
+                for (WifiPasspointDmTree.MinBackhaulThresholdNetwork BhtListItem : mMinBackhaulThresholdNetwork) {
+                    sb.append("[networkType:").append(BhtListItem.NetworkType).
+                            append(", dlBandwidth:").append(BhtListItem.DLBandwidth).
+                            append(", ulBandwidth:").append(BhtListItem.ULBandwidth).
+                            append("]");
+                }
+            }
+
+            if (mRequiredProtoPortTuple != null) {
+                sb.append("WifiMORequiredProtoPortTupleList:");
+                for (WifiPasspointDmTree.RequiredProtoPortTuple RpptListItem : mRequiredProtoPortTuple) {
+                    sb.append("[IPProtocol:").append(RpptListItem.IPProtocol).
+                            append(", PortNumber:").append(RpptListItem.PortNumber).
+                            append("]");
+                }
             }
         }
-
-        if (mHomeOIList != null) {
-            sb.append("HomeOIList:");
-            for (WifiPasspointDmTree.HomeOIList HomeOIListItem : mHomeOIList) {
-                sb.append("[HomeOI:").append(HomeOIListItem.HomeOI).
-                        append(", HomeOIRequired:").append(HomeOIListItem.HomeOIRequired).
-                        append("]");
-            }
-        }
-
-        if (mMinBackhaulThresholdNetwork != null) {
-            sb.append("BackHaulThreshold:");
-            for (WifiPasspointDmTree.MinBackhaulThresholdNetwork BhtListItem : mMinBackhaulThresholdNetwork) {
-                sb.append("[networkType:").append(BhtListItem.NetworkType).
-                        append(", dlBandwidth:").append(BhtListItem.DLBandwidth).
-                        append(", ulBandwidth:").append(BhtListItem.ULBandwidth).
-                        append("]");
-            }
-        }
-
-        if (mRequiredProtoPortTuple != null) {
-            sb.append("WifiMORequiredProtoPortTupleList:");
-            for (WifiPasspointDmTree.RequiredProtoPortTuple RpptListItem : mRequiredProtoPortTuple) {
-                sb.append("[IPProtocol:").append(RpptListItem.IPProtocol).
-                        append(", PortNumber:").append(RpptListItem.PortNumber).
-                        append("]");
-            }
-        }
-
         return sb.toString();
     }
 
@@ -654,19 +591,22 @@ public class WifiPasspointCredential implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mWifiSpFqdn);
+        dest.writeString(mCredentialName);
         dest.writeString(mType);
-        dest.writeString(mUsername);
-        dest.writeString(mPasswd);
-        dest.writeString(mImsi);
-        dest.writeString(mMcc);
-        dest.writeString(mMnc);
-        dest.writeString(mCaRootCert);
-        dest.writeString(mRealm);
-        dest.writeInt(mPriority);
+        dest.writeInt(mCrednetialPriority);
         dest.writeString(mHomeSpFqdn);
-        dest.writeString(mOtherhomepartnerFqdn);
-        dest.writeString(mClientCert);
-        dest.writeString(mExpirationDate);
+        dest.writeString(mRealm);
+    }
+
+    /** Implement the Parcelable interface {@hide} */
+    public void readFromParcel(Parcel in) {
+        mWifiSpFqdn = in.readString();
+        mCredentialName = in.readString();
+        mType = in.readString();
+        mCrednetialPriority = in.readInt();
+        mHomeSpFqdn = in.readString();
+        mRealm = in.readString();
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -674,19 +614,12 @@ public class WifiPasspointCredential implements Parcelable {
             new Creator<WifiPasspointCredential>() {
                 public WifiPasspointCredential createFromParcel(Parcel in) {
                     WifiPasspointCredential pc = new WifiPasspointCredential();
+                    pc.mWifiSpFqdn = in.readString();
+                    pc.mCredentialName = in.readString();
                     pc.mType = in.readString();
-                    pc.mUsername = in.readString();
-                    pc.mPasswd = in.readString();
-                    pc.mImsi = in.readString();
-                    pc.mMcc = in.readString();
-                    pc.mMnc = in.readString();
-                    pc.mCaRootCert = in.readString();
-                    pc.mRealm = in.readString();
-                    pc.mPriority = in.readInt();
+                    pc.mCrednetialPriority = in.readInt();
                     pc.mHomeSpFqdn = in.readString();
-                    pc.mOtherhomepartnerFqdn = in.readString();
-                    pc.mClientCert = in.readString();
-                    pc.mExpirationDate = in.readString();
+                    pc.mRealm = in.readString();
                     return pc;
                 }
 
@@ -699,9 +632,9 @@ public class WifiPasspointCredential implements Parcelable {
     public int compareTo(WifiPasspointCredential another) {
 
         //The smaller the higher
-        if (mPriority < another.mPriority) {
+        if (mCrednetialPriority < another.mCrednetialPriority) {
             return -1;
-        } else if (mPriority == another.mPriority) {
+        } else if (mCrednetialPriority == another.mCrednetialPriority) {
             return this.mType.compareTo(another.mType);
         } else {
             return 1;

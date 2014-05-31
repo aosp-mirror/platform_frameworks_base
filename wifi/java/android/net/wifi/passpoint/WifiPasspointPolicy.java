@@ -35,7 +35,7 @@ public class WifiPasspointPolicy implements Parcelable {
     public static final int UNRESTRICTED = 2;
 
     private String mName;
-    private int mSubscriptionPriority;
+    private int mCredentialPriority;
     private int mRoamingPriority;
     private String mBssid;
     private String mSsid;
@@ -44,11 +44,13 @@ public class WifiPasspointPolicy implements Parcelable {
     private boolean mIsHomeSp;
 
     /** @hide */
-    public WifiPasspointPolicy(String name, int priority, String ssid,
+    public WifiPasspointPolicy(String name, String ssid,
             String bssid, WifiPasspointCredential pc,
             int restriction, boolean ishomesp) {
         mName = name;
-        mSubscriptionPriority = priority;
+        if (pc != null) {
+            mCredentialPriority = pc.getPriority();
+        }
         //PerProviderSubscription/<X+>/Policy/PreferredRoamingPartnerList/<X+>/Priority
         mRoamingPriority = 128; //default priority value of 128
         mSsid = ssid;
@@ -102,8 +104,8 @@ public class WifiPasspointPolicy implements Parcelable {
     }
 
     /** @hide */
-    public void setSubscriptionPriority(int priority) {
-        mSubscriptionPriority = priority;
+    public void setCredentialPriority(int priority) {
+        mCredentialPriority = priority;
     }
 
     /** @hide */
@@ -111,8 +113,8 @@ public class WifiPasspointPolicy implements Parcelable {
         mRoamingPriority = priority;
     }
 
-    public int getSubscriptionPriority() {
-        return mSubscriptionPriority;
+    public int getCredentialPriority() {
+        return mCredentialPriority;
     }
 
     public int getRoamingPriority() {
@@ -132,11 +134,11 @@ public class WifiPasspointPolicy implements Parcelable {
             return -1;
         } else if ((this.mIsHomeSp == true && another.getHomeSp() == true)) {
             Log.d(TAG, "both HomeSP");
-            //if both home sp, compare subscription priority
-            if (this.mSubscriptionPriority < another.getSubscriptionPriority()) {
+            //if both home sp, compare credential priority
+            if (this.mCredentialPriority < another.getCredentialPriority()) {
                 Log.d(TAG, "this priority is higher");
                 return -1;
-            } else if (this.mSubscriptionPriority == another.getSubscriptionPriority()) {
+            } else if (this.mCredentialPriority == another.getCredentialPriority()) {
                 Log.d(TAG, "both priorities equal");
                 //if priority still the same, compare name(ssid)
                 if (this.mName.compareTo(another.mName) != 0) {
@@ -192,7 +194,7 @@ public class WifiPasspointPolicy implements Parcelable {
     @Override
     /** @hide */
     public String toString() {
-        return "PasspointPolicy: name=" + mName + " SubscriptionPriority=" + mSubscriptionPriority +
+        return "PasspointPolicy: name=" + mName + " CredentialPriority=" + mCredentialPriority +
                 " mRoamingPriority" + mRoamingPriority +
                 " ssid=" + mSsid + " restriction=" + mRestriction +
                 " ishomesp=" + mIsHomeSp + " Credential=" + mCredential;
