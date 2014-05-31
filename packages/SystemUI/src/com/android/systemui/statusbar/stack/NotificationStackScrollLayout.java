@@ -449,6 +449,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
+    public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
+        return false;
+    }
+
     public void onBeginDrag(View v) {
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);

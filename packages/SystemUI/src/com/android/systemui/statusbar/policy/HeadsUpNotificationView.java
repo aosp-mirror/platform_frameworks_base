@@ -47,7 +47,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     int[] mTmpTwoArray = new int[2];
 
     private final int mTouchSensitivityDelay;
-    private final float mMaxAlpha = 0.95f;
+    private final float mMaxAlpha = 1f;
     private SwipeHelper mSwipeHelper;
     private EdgeSwipeHelper mEdgeSwipeHelper;
 
@@ -114,7 +114,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         float pagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
         float touchSlop = viewConfiguration.getScaledTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-        mSwipeHelper.setMaxAlpha(mMaxAlpha);
+        mSwipeHelper.setMaxSwipeProgress(mMaxAlpha);
         mEdgeSwipeHelper = new EdgeSwipeHelper(touchSlop);
 
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
@@ -184,7 +184,13 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         Outline o = new Outline();
-        o.setRect(0, 0, mContentHolder.getWidth(), mContentHolder.getHeight());
+
+        // Apply padding to shadow.
+        int outlineLeft = mContentHolder.getPaddingLeft();
+        int outlineTop = mContentHolder.getPaddingTop();
+        o.setRect(outlineLeft, outlineTop,
+                mContentHolder.getWidth() - outlineLeft - mContentHolder.getPaddingRight(),
+                mContentHolder.getHeight() - outlineTop - mContentHolder.getPaddingBottom());
         mContentHolder.setOutline(o);
     }
 
@@ -243,6 +249,12 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public void onChildSnappedBack(View animView) {
+    }
+
+    @Override
+    public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
+        getBackground().setAlpha((int) (255 * swipeProgress));
+        return false;
     }
 
     @Override

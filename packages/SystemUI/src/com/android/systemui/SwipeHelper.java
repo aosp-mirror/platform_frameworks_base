@@ -51,12 +51,12 @@ public class SwipeHelper implements Gefingerpoken {
     private int MAX_DISMISS_VELOCITY = 2000; // dp/sec
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
 
-    public static float ALPHA_FADE_START = 0f; // fraction of thumbnail width
+    public static float SWIPE_PROGRESS_FADE_START = 0f; // fraction of thumbnail width
                                                  // where fade starts
-    static final float ALPHA_FADE_END = 0.5f; // fraction of thumbnail width
-                                              // beyond which alpha->0
-    private float mMinAlpha = 0f;
-    private float mMaxAlpha = 1f;
+    static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
+                                              // beyond which swipe progress->0
+    private float mMinSwipeProgress = 0f;
+    private float mMaxSwipeProgress = 1f;
 
     private float mPagingTouchSlop;
     private Callback mCallback;
@@ -137,36 +137,39 @@ public class SwipeHelper implements Gefingerpoken {
                 v.getMeasuredHeight();
     }
 
-    public void setMinAlpha(float minAlpha) {
-        mMinAlpha = minAlpha;
+    public void setMinSwipeProgress(float minSwipeProgress) {
+        mMinSwipeProgress = minSwipeProgress;
     }
 
-    public void setMaxAlpha(float maxAlpha) {
-        mMaxAlpha = maxAlpha;
+    public void setMaxSwipeProgress(float maxSwipeProgress) {
+        mMaxSwipeProgress = maxSwipeProgress;
     }
 
-    private float getAlphaForOffset(View view) {
+    private float getSwipeProgressForOffset(View view) {
         float viewSize = getSize(view);
-        final float fadeSize = ALPHA_FADE_END * viewSize;
+        final float fadeSize = SWIPE_PROGRESS_FADE_END * viewSize;
         float result = 1.0f;
         float pos = getTranslation(view);
-        if (pos >= viewSize * ALPHA_FADE_START) {
-            result = 1.0f - (pos - viewSize * ALPHA_FADE_START) / fadeSize;
-        } else if (pos < viewSize * (1.0f - ALPHA_FADE_START)) {
-            result = 1.0f + (viewSize * ALPHA_FADE_START + pos) / fadeSize;
+        if (pos >= viewSize * SWIPE_PROGRESS_FADE_START) {
+            result = 1.0f - (pos - viewSize * SWIPE_PROGRESS_FADE_START) / fadeSize;
+        } else if (pos < viewSize * (1.0f - SWIPE_PROGRESS_FADE_START)) {
+            result = 1.0f + (viewSize * SWIPE_PROGRESS_FADE_START + pos) / fadeSize;
         }
-        return Math.min(Math.max(mMinAlpha, result), mMaxAlpha);
+        return Math.min(Math.max(mMinSwipeProgress, result), mMaxSwipeProgress);
     }
 
-    private void updateAlphaFromOffset(View animView, boolean dismissable) {
-        if (FADE_OUT_DURING_SWIPE && dismissable) {
-            float alpha = getAlphaForOffset(animView);
-            if (alpha != 0f && alpha != 1f) {
-                animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            } else {
-                animView.setLayerType(View.LAYER_TYPE_NONE, null);
+    private void updateSwipeProgressFromOffset(View animView, boolean dismissable) {
+        float swipeProgress = getSwipeProgressForOffset(animView);
+        if (!mCallback.updateSwipeProgress(animView, dismissable, swipeProgress)) {
+            if (FADE_OUT_DURING_SWIPE && dismissable) {
+                float alpha = swipeProgress;
+                if (alpha != 0f && alpha != 1f) {
+                    animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                } else {
+                    animView.setLayerType(View.LAYER_TYPE_NONE, null);
+                }
+                animView.setAlpha(getSwipeProgressForOffset(animView));
             }
-            animView.setAlpha(getAlphaForOffset(animView));
         }
         invalidateGlobalRegion(animView);
     }
@@ -307,7 +310,7 @@ public class SwipeHelper implements Gefingerpoken {
         });
         anim.addUpdateListener(new AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
-                updateAlphaFromOffset(animView, canAnimViewBeDismissed);
+                updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
             }
         });
         anim.start();
@@ -321,12 +324,12 @@ public class SwipeHelper implements Gefingerpoken {
         anim.setDuration(duration);
         anim.addUpdateListener(new AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
-                updateAlphaFromOffset(animView, canAnimViewBeDismissed);
+                updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
             }
         });
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animator) {
-                updateAlphaFromOffset(animView, canAnimViewBeDismissed);
+                updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
                 mCallback.onChildSnappedBack(animView);
             }
         });
@@ -365,7 +368,7 @@ public class SwipeHelper implements Gefingerpoken {
                     }
                     setTranslation(mCurrAnimView, delta);
 
-                    updateAlphaFromOffset(mCurrAnimView, mCanCurrViewBeDimissed);
+                    updateSwipeProgressFromOffset(mCurrAnimView, mCanCurrViewBeDimissed);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -415,5 +418,12 @@ public class SwipeHelper implements Gefingerpoken {
         void onDragCancelled(View v);
 
         void onChildSnappedBack(View animView);
+
+        /**
+         * Updates the swipe progress on a child.
+         *
+         * @return if true, prevents the default alpha fading.
+         */
+        boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress);
     }
 }
