@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+#include <cutils/log.h>
+
 #include "SkPaint.h"
 #include "minikin/Layout.h"
 #include "TypefaceImpl.h"
@@ -23,23 +26,37 @@
 
 namespace android {
 
+// Do an sprintf starting at offset n, abort on overflow
+static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    int n = vsnprintf(buf + off, size - off, format, args);
+    LOG_ALWAYS_FATAL_IF(n >= size - off, "String overflow in setting layout properties");
+    va_end(args);
+    return off + n;
+}
+
 void MinikinUtils::SetLayoutProperties(Layout* layout, const SkPaint* paint, int flags,
     TypefaceImpl* typeface) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
     char css[256];
-    int off = snprintf(css, sizeof(css),
-        "font-size: %d; font-weight: %d; font-style: %s; -minikin-bidi: %d;",
+    int off = snprintfcat(css, 0, sizeof(css),
+        "font-size: %d; font-scale-x: %f; font-skew-x: %f; -paint-flags: %d;"
+        " font-weight: %d; font-style: %s; -minikin-bidi: %d;",
         (int)paint->getTextSize(),
+        paint->getTextScaleX(),
+        paint->getTextSkewX(),
+        MinikinFontSkia::packPaintFlags(paint),
         style.getWeight() * 100,
         style.getItalic() ? "italic" : "normal",
         flags);
     SkString langString = paint->getPaintOptionsAndroid().getLanguage().getTag();
-    off += snprintf(css + off, sizeof(css) - off, " lang: %s;", langString.c_str());
+    off = snprintfcat(css, off, sizeof(css), " lang: %s;", langString.c_str());
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
     const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
-    off += snprintf(css + off, sizeof(css) - off, " -minikin-variant: %s;", varstr);
+    off = snprintfcat(css, off, sizeof(css), " -minikin-variant: %s;", varstr);
     layout->setProperties(css);
 }
 
