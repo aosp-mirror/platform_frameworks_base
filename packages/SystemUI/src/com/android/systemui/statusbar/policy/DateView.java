@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -28,8 +29,6 @@ import com.android.systemui.R;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import libcore.icu.ICU;
 
 public class DateView extends TextView {
     private static final String TAG = "DateView";
@@ -87,7 +86,7 @@ public class DateView extends TextView {
         if (mDateFormat == null) {
             final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
             final Locale l = Locale.getDefault();
-            final String fmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
+            final String fmt = DateFormat.getBestDateTimePattern(l, dateFormat);
             mDateFormat = new SimpleDateFormat(fmt, l);
         }
 

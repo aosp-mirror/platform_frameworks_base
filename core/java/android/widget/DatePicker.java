@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.InputType;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -814,8 +815,7 @@ public class DatePicker extends FrameLayout {
             mSpinners.removeAllViews();
             // We use numeric spinners for year and day, but textual months. Ask icu4c what
             // order the user's locale uses for that combination. http://b/7207103.
-            String pattern = ICU.getBestDateTimePattern("yyyyMMMdd",
-                    Locale.getDefault().toString());
+            String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyyMMMdd");
             char[] order = ICU.getDateFormatOrder(pattern);
             final int spinnerCount = order.length;
             for (int i = 0; i < spinnerCount; i++) {
