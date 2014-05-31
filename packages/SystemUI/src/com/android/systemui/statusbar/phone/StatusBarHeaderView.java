@@ -44,6 +44,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private static final float EXPANSION_RUBBERBAND_FACTOR = 0.35f;
 
     private boolean mExpanded;
+    private boolean mOverscrolled;
     private boolean mKeyguardShowing;
 
     private View mBackground;
@@ -125,10 +126,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         return mExpandedHeight;
     }
 
-    public void setExpanded(boolean expanded) {
+    public void setExpanded(boolean expanded, boolean overscrolled) {
         boolean changed = expanded != mExpanded;
+        boolean overscrollChanged = overscrolled != mOverscrolled;
         mExpanded = expanded;
-        if (changed) {
+        mOverscrolled = overscrolled;
+        if (changed || overscrollChanged) {
             updateHeights();
             updateVisibilities();
             updateSystemIconsLayoutParams();
@@ -136,7 +139,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateZTranslation();
             updateClickTargets();
             if (mQSPanel != null) {
-                mQSPanel.setExpanded(expanded);
+                mQSPanel.setExpanded(expanded && !overscrolled);
             }
         }
     }
@@ -184,13 +187,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateTime.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
         mKeyguardCarrierText.setVisibility(onKeyguardAndCollapsed ? View.VISIBLE : View.GONE);
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
-        mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mBrightnessContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(!mExpanded ? View.VISIBLE : View.GONE);
+            mStatusIcons.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
         if (mSignalCluster != null) {
-            mSignalCluster.setVisibility(!mExpanded ? View.VISIBLE : View.GONE);
+            mSignalCluster.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
     }
 
