@@ -284,7 +284,7 @@ public class WindowAnimator {
                     } else if (mKeyguardGoingAway && !nowAnimating) {
                         // Timeout!!
                         Slog.e(TAG, "Timeout waiting for animation to startup");
-                        mPolicy.startKeyguardExitAnimation(0);
+                        mPolicy.startKeyguardExitAnimation(0, 0);
                         mKeyguardGoingAway = false;
                     }
                     if (win.isReadyForDisplay()) {
@@ -392,7 +392,9 @@ public class WindowAnimator {
                     winAnimator.mAnimationIsEntrance = true;
                     if (startKeyguardExit) {
                         // Do one time only.
-                        mPolicy.startKeyguardExitAnimation(a.getStartOffset());
+                        mPolicy.startKeyguardExitAnimation(mCurrentTime + a.getStartOffset(),
+                                a.getDuration());
+                        mKeyguardGoingAway = false;
                         startKeyguardExit = false;
                     }
                 }

@@ -124,7 +124,8 @@ public class StatusBarWindowManager {
     }
 
     private void applyHeight(State state) {
-        boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded;
+        boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded
+                || state.keyguardFadingAway;
         if (expanded) {
             mLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
@@ -201,6 +202,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setKeyguardFadingAway(boolean keyguardFadingAway) {
+        mCurrentState.keyguardFadingAway = keyguardFadingAway;
+        apply(mCurrentState);
+    }
+
     /**
      * @param state The {@link StatusBarState} of the status bar.
      */
@@ -217,6 +223,7 @@ public class StatusBarWindowManager {
         boolean statusBarFocusable;
         long keyguardUserActivityTimeout;
         boolean bouncerShowing;
+        boolean keyguardFadingAway;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.

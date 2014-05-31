@@ -1083,7 +1083,8 @@ public class KeyguardViewMediator extends SystemUI {
                     handleDismiss();
                     break;
                 case START_KEYGUARD_EXIT_ANIM:
-                    handleStartKeyguardExitAnimation((Long) msg.obj);
+                    StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
+                    handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
                     break;
             }
         }
@@ -1227,7 +1228,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
     }
 
-    private void handleStartKeyguardExitAnimation(long fadeoutDuration) {
+    private void handleStartKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         synchronized (KeyguardViewMediator.this) {
 
             // only play "unlock" noises if not on a call (since the incall UI
@@ -1236,7 +1237,7 @@ public class KeyguardViewMediator extends SystemUI {
                 playSounds(false);
             }
 
-            mStatusBarKeyguardViewManager.hide();
+            mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             mShowing = false;
             mKeyguardDonePending = false;
             updateActivityLockScreenState();
@@ -1346,12 +1347,24 @@ public class KeyguardViewMediator extends SystemUI {
         return mStatusBarKeyguardViewManager;
     }
 
-    public void startKeyguardExitAnimation(long fadeoutDuration) {
-        Message msg = mHandler.obtainMessage(START_KEYGUARD_EXIT_ANIM, fadeoutDuration);
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+        Message msg = mHandler.obtainMessage(START_KEYGUARD_EXIT_ANIM,
+                new StartKeyguardExitAnimParams(startTime, fadeoutDuration));
         mHandler.sendMessage(msg);
     }
 
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
+    }
+
+    private static class StartKeyguardExitAnimParams {
+
+        long startTime;
+        long fadeoutDuration;
+
+        private StartKeyguardExitAnimParams(long startTime, long fadeoutDuration) {
+            this.startTime = startTime;
+            this.fadeoutDuration = fadeoutDuration;
+        }
     }
 }

@@ -19,16 +19,12 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -53,6 +49,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private boolean mAnimateChange;
     private boolean mUpdatePending;
     private boolean mExpanding;
+    private boolean mAnimateKeyguardFadingOut;
+    private long mDurationOverride = -1;
+    private long mAnimationDelay;
+    private Runnable mOnAnimationFinished;
+    private boolean mAnimationStarted;
 
     private final Interpolator mInterpolator = new DecelerateInterpolator();
 
@@ -87,14 +88,26 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         scheduleUpdate();
     }
 
+    public void animateKeyguardFadingOut(long delay, long duration, Runnable onAnimationFinished) {
+        mAnimateKeyguardFadingOut = true;
+        mDurationOverride = duration;
+        mAnimationDelay = delay;
+        mAnimateChange = true;
+        mOnAnimationFinished = onAnimationFinished;
+        scheduleUpdate();
+    }
+
     private void scheduleUpdate() {
         if (mUpdatePending) return;
+
+        // Make sure that a frame gets scheduled.
+        mScrimBehind.invalidate();
         mScrimBehind.getViewTreeObserver().addOnPreDrawListener(this);
         mUpdatePending = true;
     }
 
     private void updateScrims() {
-        if (!mKeyguardShowing) {
+        if (!mKeyguardShowing || mAnimateKeyguardFadingOut) {
             updateScrimNormal();
             setScrimInFrontColor(0);
         } else {
@@ -170,8 +183,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             }
         });
         anim.setInterpolator(mInterpolator);
-        anim.setDuration(ANIMATION_DURATION);
+        anim.setStartDelay(mAnimationDelay);
+        anim.setDuration(mDurationOverride != -1 ? mDurationOverride : ANIMATION_DURATION);
+        anim.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mOnAnimationFinished != null) {
+                    mOnAnimationFinished.run();
+                    mOnAnimationFinished = null;
+                }
+            }
+        });
         anim.start();
+        mAnimationStarted = true;
     }
 
     private int getBackgroundAlpha(View scrim) {
@@ -188,6 +213,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         mScrimBehind.getViewTreeObserver().removeOnPreDrawListener(this);
         mUpdatePending = false;
         updateScrims();
+        mAnimateKeyguardFadingOut = false;
+        mDurationOverride = -1;
+        mAnimationDelay = 0;
+
+        // Make sure that we always call the listener even if we didn't start an animation.
+        if (!mAnimationStarted && mOnAnimationFinished != null) {
+            mOnAnimationFinished.run();
+            mOnAnimationFinished = null;
+        }
+        mAnimationStarted = false;
         return true;
     }
 }

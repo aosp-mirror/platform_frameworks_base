@@ -190,9 +190,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    public void startKeyguardExitAnimation(long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         try {
-            mService.startKeyguardExitAnimation(fadeoutDuration);
+            mService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
