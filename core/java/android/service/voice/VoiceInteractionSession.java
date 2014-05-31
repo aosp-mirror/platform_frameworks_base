@@ -47,9 +47,22 @@ import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.lang.ref.WeakReference;
+
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+/**
+ * An active voice interaction session, providing a facility for the implementation
+ * to interact with the user in the voice interaction layer.  This interface is no shown
+ * by default, but you can request that it be shown with {@link #showWindow()}, which
+ * will result in a later call to {@link #onCreateContentView()} in which the UI can be
+ * built
+ *
+ * <p>A voice interaction session can be self-contained, ultimately calling {@link #finish}
+ * when done.  It can also initiate voice interactions with applications by calling
+ * {@link #startVoiceActivity}</p>.
+ */
 public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final String TAG = "VoiceInteractionSession";
     static final boolean DEBUG = true;
@@ -80,11 +93,14 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
+    final WeakReference<VoiceInteractionSession> mWeakRef
+            = new WeakReference<VoiceInteractionSession>(this);
+
     final IVoiceInteractor mInteractor = new IVoiceInteractor.Stub() {
         @Override
         public IVoiceInteractorRequest startConfirmation(String callingPackage,
-                IVoiceInteractorCallback callback, String prompt, Bundle extras) {
-            Request request = findRequest(callback, true);
+                IVoiceInteractorCallback callback, CharSequence prompt, Bundle extras) {
+            Request request = newRequest(callback);
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_CONFIRMATION,
                     new Caller(callingPackage, Binder.getCallingUid()), request,
                     prompt, extras));
@@ -92,9 +108,19 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
 
         @Override
+        public IVoiceInteractorRequest startAbortVoice(String callingPackage,
+                IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
+            Request request = newRequest(callback);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_ABORT_VOICE,
+                    new Caller(callingPackage, Binder.getCallingUid()), request,
+                    message, extras));
+            return request.mInterface;
+        }
+
+        @Override
         public IVoiceInteractorRequest startCommand(String callingPackage,
                 IVoiceInteractorCallback callback, String command, Bundle extras) {
-            Request request = findRequest(callback, true);
+            Request request = newRequest(callback);
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_COMMAND,
                     new Caller(callingPackage, Binder.getCallingUid()), request,
                     command, extras));
@@ -143,21 +169,51 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         final IVoiceInteractorRequest mInterface = new IVoiceInteractorRequest.Stub() {
             @Override
             public void cancel() throws RemoteException {
-                mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_CANCEL, Request.this));
+                VoiceInteractionSession session = mSession.get();
+                if (session != null) {
+                    session.mHandlerCaller.sendMessage(
+                            session.mHandlerCaller.obtainMessageO(MSG_CANCEL, Request.this));
+                }
             }
         };
         final IVoiceInteractorCallback mCallback;
-        final HandlerCaller mHandlerCaller;
-        Request(IVoiceInteractorCallback callback, HandlerCaller handlerCaller) {
+        final WeakReference<VoiceInteractionSession> mSession;
+
+        Request(IVoiceInteractorCallback callback, VoiceInteractionSession session) {
             mCallback = callback;
-            mHandlerCaller = handlerCaller;
+            mSession = session.mWeakRef;
+        }
+
+        void finishRequest() {
+            VoiceInteractionSession session = mSession.get();
+            if (session == null) {
+                throw new IllegalStateException("VoiceInteractionSession has been destroyed");
+            }
+            Request req = session.removeRequest(mInterface.asBinder());
+            if (req == null) {
+                throw new IllegalStateException("Request not active: " + this);
+            } else if (req != this) {
+                throw new IllegalStateException("Current active request " + req
+                        + " not same as calling request " + this);
+            }
         }
 
         public void sendConfirmResult(boolean confirmed, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
                         + " confirmed=" + confirmed + " result=" + result);
+                finishRequest();
                 mCallback.deliverConfirmationResult(mInterface, confirmed, result);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void sendAbortVoiceResult(Bundle result) {
+            try {
+                if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
+                        + " result=" + result);
+                finishRequest();
+                mCallback.deliverAbortVoiceResult(mInterface, result);
             } catch (RemoteException e) {
             }
         }
@@ -166,6 +222,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             try {
                 if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
                         + " result=" + result);
+                finishRequest();
                 mCallback.deliverCommandResult(mInterface, complete, result);
             } catch (RemoteException e) {
             }
@@ -174,6 +231,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         public void sendCancelResult() {
             try {
                 if (DEBUG) Log.d(TAG, "sendCancelResult: req=" + mInterface);
+                finishRequest();
                 mCallback.deliverCancel(mInterface);
             } catch (RemoteException e) {
             }
@@ -191,9 +249,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     static final int MSG_START_CONFIRMATION = 1;
-    static final int MSG_START_COMMAND = 2;
-    static final int MSG_SUPPORTS_COMMANDS = 3;
-    static final int MSG_CANCEL = 4;
+    static final int MSG_START_ABORT_VOICE = 2;
+    static final int MSG_START_COMMAND = 3;
+    static final int MSG_SUPPORTS_COMMANDS = 4;
+    static final int MSG_CANCEL = 5;
 
     static final int MSG_TASK_STARTED = 100;
     static final int MSG_TASK_FINISHED = 101;
@@ -209,8 +268,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                     args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onConfirm: req=" + ((Request) args.arg2).mInterface
                             + " prompt=" + args.arg3 + " extras=" + args.arg4);
-                    onConfirm((Caller)args.arg1, (Request)args.arg2, (String)args.arg3,
+                    onConfirm((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
                             (Bundle)args.arg4);
+                    break;
+                case MSG_START_ABORT_VOICE:
+                    args = (SomeArgs)msg.obj;
+                    if (DEBUG) Log.d(TAG, "onAbortVoice: req=" + ((Request) args.arg2).mInterface
+                            + " message=" + args.arg3 + " extras=" + args.arg4);
+                    onAbortVoice((Caller) args.arg1, (Request) args.arg2, (CharSequence) args.arg3,
+                            (Bundle) args.arg4);
                     break;
                 case MSG_START_COMMAND:
                     args = (SomeArgs)msg.obj;
@@ -329,18 +395,20 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                 mCallbacks, true);
     }
 
-    Request findRequest(IVoiceInteractorCallback callback, boolean newRequest) {
+    Request newRequest(IVoiceInteractorCallback callback) {
         synchronized (this) {
-            Request req = mActiveRequests.get(callback.asBinder());
+            Request req = new Request(callback, this);
+            mActiveRequests.put(req.mInterface.asBinder(), req);
+            return req;
+        }
+    }
+
+    Request removeRequest(IBinder reqInterface) {
+        synchronized (this) {
+            Request req = mActiveRequests.get(reqInterface);
             if (req != null) {
-                if (newRequest) {
-                    throw new IllegalArgumentException("Given request callback " + callback
-                            + " is already active");
-                }
-                return req;
+                mActiveRequests.remove(req);
             }
-            req = new Request(callback, mHandlerCaller);
-            mActiveRequests.put(callback.asBinder(), req);
             return req;
         }
     }
@@ -425,6 +493,27 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mTheme = theme;
     }
 
+    /**
+     * Ask that a new activity be started for voice interaction.  This will create a
+     * new dedicated task in the activity manager for this voice interaction session;
+     * this means that {@link Intent#FLAG_ACTIVITY_NEW_TASK Intent.FLAG_ACTIVITY_NEW_TASK}
+     * will be set for you to make it a new task.
+     *
+     * <p>The newly started activity will be displayed to the user in a special way, as
+     * a layer under the voice interaction UI.</p>
+     *
+     * <p>As the voice activity runs, it can retrieve a {@link android.app.VoiceInteractor}
+     * through which it can perform voice interactions through your session.  These requests
+     * for voice interactions will appear as callbacks on {@link #onGetSupportedCommands},
+     * {@link #onConfirm}, {@link #onCommand}, and {@link #onCancel}.
+     *
+     * <p>You will receive a call to {@link #onTaskStarted} when the task starts up
+     * and {@link #onTaskFinished} when the last activity has finished.
+     *
+     * @param intent The Intent to start this voice interaction.  The given Intent will
+     * always have {@link Intent#CATEGORY_VOICE Intent.CATEGORY_VOICE} added to it, since
+     * this is part of a voice interaction.
+     */
     public void startVoiceActivity(Intent intent) {
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
@@ -439,14 +528,23 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
+    /**
+     * Convenience for inflating views.
+     */
     public LayoutInflater getLayoutInflater() {
         return mInflater;
     }
 
+    /**
+     * Retrieve the window being used to show the session's UI.
+     */
     public Dialog getWindow() {
         return mWindow;
     }
 
+    /**
+     * Finish the session.
+     */
     public void finish() {
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
@@ -458,6 +556,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
+    /**
+     * Initiatize a new session.
+     *
+     * @param args The arguments that were supplied to
+     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
+     */
     public void onCreate(Bundle args) {
         mTheme = mTheme != 0 ? mTheme
                 : com.android.internal.R.style.Theme_DeviceDefault_VoiceInteractionSession;
@@ -472,9 +576,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mWindow.setToken(mToken);
     }
 
+    /**
+     * Last callback to the session as it is being finished.
+     */
     public void onDestroy() {
     }
 
+    /**
+     * Hook in which to create the session's UI.
+     */
     public View onCreateContentView() {
         return null;
     }
@@ -507,6 +617,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         finish();
     }
 
+    /**
+     * Sessions automatically watch for requests that all system UI be closed (such as when
+     * the user presses HOME), which will appear here.  The default implementation always
+     * calls {@link #finish}.
+     */
     public void onCloseSystemDialogs() {
         finish();
     }
@@ -530,15 +645,98 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         outInsets.touchableRegion.setEmpty();
     }
 
+    /**
+     * Called when a task initiated by {@link #startVoiceActivity(android.content.Intent)}
+     * has actually started.
+     *
+     * @param intent The original {@link Intent} supplied to
+     * {@link #startVoiceActivity(android.content.Intent)}.
+     * @param taskId Unique ID of the now running task.
+     */
     public void onTaskStarted(Intent intent, int taskId) {
     }
 
+    /**
+     * Called when the last activity of a task initiated by
+     * {@link #startVoiceActivity(android.content.Intent)} has finished.  The default
+     * implementation calls {@link #finish()} on the assumption that this represents
+     * the completion of a voice action.  You can override the implementation if you would
+     * like a different behavior.
+     *
+     * @param intent The original {@link Intent} supplied to
+     * {@link #startVoiceActivity(android.content.Intent)}.
+     * @param taskId Unique ID of the finished task.
+     */
     public void onTaskFinished(Intent intent, int taskId) {
         finish();
     }
 
-    public abstract boolean[] onGetSupportedCommands(Caller caller, String[] commands);
-    public abstract void onConfirm(Caller caller, Request request, String prompt, Bundle extras);
+    /**
+     * Request to query for what extended commands the session supports.
+     *
+     * @param caller Who is making the request.
+     * @param commands An array of commands that are being queried.
+     * @return Return an array of booleans indicating which of each entry in the
+     * command array is supported.  A true entry in the array indicates the command
+     * is supported; false indicates it is not.  The default implementation returns
+     * an array of all false entries.
+     */
+    public boolean[] onGetSupportedCommands(Caller caller, String[] commands) {
+        return new boolean[commands.length];
+    }
+
+    /**
+     * Request to confirm with the user before proceeding with an unrecoverable operation,
+     * corresponding to a {@link android.app.VoiceInteractor.ConfirmationRequest
+     * VoiceInteractor.ConfirmationRequest}.
+     *
+     * @param caller Who is making the request.
+     * @param request The active request.
+     * @param prompt The prompt informing the user of what will happen, as per
+     * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
+     * @param extras Any additional information, as per
+     * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
+     */
+    public abstract void onConfirm(Caller caller, Request request, CharSequence prompt,
+            Bundle extras);
+
+    /**
+     * Request to abort the voice interaction session because the voice activity can not
+     * complete its interaction using voice.  Corresponds to
+     * {@link android.app.VoiceInteractor.AbortVoiceRequest
+     * VoiceInteractor.AbortVoiceRequest}.  The default implementation just sends an empty
+     * confirmation back to allow the activity to exit.
+     *
+     * @param caller Who is making the request.
+     * @param request The active request.
+     * @param message The message informing the user of the problem, as per
+     * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+     * @param extras Any additional information, as per
+     * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+     */
+    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
+        request.sendAbortVoiceResult(null);
+    }
+
+    /**
+     * Process an arbitrary extended command from the caller,
+     * corresponding to a {@link android.app.VoiceInteractor.CommandRequest
+     * VoiceInteractor.CommandRequest}.
+     *
+     * @param caller Who is making the request.
+     * @param request The active request.
+     * @param command The command that is being executed, as per
+     * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+     * @param extras Any additional information, as per
+     * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+     */
     public abstract void onCommand(Caller caller, Request request, String command, Bundle extras);
+
+    /**
+     * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
+     * that was previously delivered to {@link #onConfirm} or {@link #onCommand}.
+     *
+     * @param request The request that is being canceled.
+     */
     public abstract void onCancel(Request request);
 }

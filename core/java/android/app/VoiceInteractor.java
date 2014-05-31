@@ -33,7 +33,26 @@ import com.android.internal.os.SomeArgs;
 import java.util.ArrayList;
 
 /**
- * Interface for an {@link Activity} to interact with the user through voice.
+ * Interface for an {@link Activity} to interact with the user through voice.  Use
+ * {@link android.app.Activity#getVoiceInteractor() Activity.getVoiceInteractor}
+ * to retrieve the interface, if the activity is currently involved in a voice interaction.
+ *
+ * <p>The voice interactor revolves around submitting voice interaction requests to the
+ * back-end voice interaction service that is working with the user.  These requests are
+ * submitted with {@link #submitRequest}, providing a new instance of a
+ * {@link Request} subclass describing the type of operation to perform -- currently the
+ * possible requests are {@link ConfirmationRequest} and {@link CommandRequest}.
+ *
+ * <p>Once a request is submitted, the voice system will process it and evetually deliver
+ * the result to the request object.  The application can cancel a pending request at any
+ * time.
+ *
+ * <p>The VoiceInteractor is integrated with Activity's state saving mechanism, so that
+ * if an activity is being restarted with retained state, it will retain the current
+ * VoiceInteractor and any outstanding requests.  Because of this, you should always use
+ * {@link Request#getActivity() Request.getActivity} to get back to the activity of a
+ * request, rather than holding on to the actvitity instance yourself, either explicitly
+ * or implicitly through a non-static inner class.
  */
 public class VoiceInteractor {
     static final String TAG = "VoiceInteractor";
@@ -59,6 +78,16 @@ public class VoiceInteractor {
                     if (request != null) {
                         ((ConfirmationRequest)request).onConfirmationResult(msg.arg1 != 0,
                                 (Bundle) args.arg2);
+                        request.clear();
+                    }
+                    break;
+                case MSG_ABORT_VOICE_RESULT:
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
+                    if (DEBUG) Log.d(TAG, "onAbortVoice: req="
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
+                            + " result=" + args.arg1);
+                    if (request != null) {
+                        ((AbortVoiceRequest)request).onAbortResult((Bundle) args.arg2);
                         request.clear();
                     }
                     break;
@@ -96,6 +125,12 @@ public class VoiceInteractor {
         }
 
         @Override
+        public void deliverAbortVoiceResult(IVoiceInteractorRequest request, Bundle result) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(
+                    MSG_ABORT_VOICE_RESULT, request, result));
+        }
+
+        @Override
         public void deliverCommandResult(IVoiceInteractorRequest request, boolean complete,
                 Bundle result) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(
@@ -112,8 +147,9 @@ public class VoiceInteractor {
     final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
-    static final int MSG_COMMAND_RESULT = 2;
-    static final int MSG_CANCEL_RESULT = 3;
+    static final int MSG_ABORT_VOICE_RESULT = 2;
+    static final int MSG_COMMAND_RESULT = 3;
+    static final int MSG_CANCEL_RESULT = 4;
 
     public static abstract class Request {
         IVoiceInteractorRequest mRequestInterface;
@@ -188,9 +224,42 @@ public class VoiceInteractor {
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
-            return interactor.startConfirmation(packageName, callback, mPrompt.toString(), mExtras);
+            return interactor.startConfirmation(packageName, callback, mPrompt, mExtras);
         }
-   }
+    }
+
+    public static class AbortVoiceRequest extends Request {
+        final CharSequence mMessage;
+        final Bundle mExtras;
+
+        /**
+         * Reports that the current interaction can not be complete with voice, so the
+         * application will need to switch to a traditional input UI.  Applications should
+         * only use this when they need to completely bail out of the voice interaction
+         * and switch to a traditional UI.  When the resonsponse comes back, the voice
+         * system has handled the request and is ready to switch; at that point the application
+         * can start a new non-voice activity.  Be sure when starting the new activity
+         * to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+         * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
+         * interaction task.
+         *
+         * @param message Optional message to tell user about not being able to complete
+         * the interaction with voice.
+         * @param extras Additional optional information.
+         */
+        public AbortVoiceRequest(CharSequence message, Bundle extras) {
+            mMessage = message;
+            mExtras = extras;
+        }
+
+        public void onAbortResult(Bundle result) {
+        }
+
+        IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
+                IVoiceInteractorCallback callback) throws RemoteException {
+            return interactor.startAbortVoice(packageName, callback, mMessage, mExtras);
+        }
+    }
 
     public static class CommandRequest extends Request {
         final String mCommand;
