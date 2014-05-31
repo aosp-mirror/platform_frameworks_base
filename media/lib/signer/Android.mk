@@ -23,7 +23,8 @@ LOCAL_MODULE:= com.android.mediadrm.signer
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-            $(call all-java-files-under, java)
+            $(call all-java-files-under, java) \
+            $(call all-aidl-files-under, java)
 
 include $(BUILD_JAVA_LIBRARY)
 
