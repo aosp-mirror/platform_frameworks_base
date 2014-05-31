@@ -32,6 +32,7 @@
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/Layout.h>
+#include "SkPaint.h"
 #include "MinikinSkia.h"
 #endif
 

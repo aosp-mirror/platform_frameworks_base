@@ -38,6 +38,8 @@ public:
 
     SkTypeface *GetSkTypeface();
 
+    static uint32_t packPaintFlags(const SkPaint* paint);
+    static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
 private:
     SkTypeface *mTypeface;
 };
