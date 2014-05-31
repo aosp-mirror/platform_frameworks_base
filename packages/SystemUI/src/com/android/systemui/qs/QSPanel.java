@@ -152,6 +152,7 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleShowDetail(TileRecord r, boolean show) {
+        if (r == null) return;
         AnimatorListener listener = null;
         if (show) {
             if (mDetailRecord != null) return;
