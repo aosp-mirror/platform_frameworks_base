@@ -1959,9 +1959,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public Animation createForceHideEnterAnimation(boolean onWallpaper) {
-        return AnimationUtils.loadAnimation(mContext, onWallpaper
-                ? com.android.internal.R.anim.lock_screen_wallpaper_behind_enter
-                : com.android.internal.R.anim.lock_screen_behind_enter);
+        return AnimationUtils.loadAnimation(mContext,
+                com.android.internal.R.anim.lock_screen_behind_enter);
     }
 
     private static void awakenDreams() {
@@ -4618,14 +4617,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(final long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardDelegate != null) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mKeyguardDelegate.startKeyguardExitAnimation(fadeoutDuration);
-                }
-            });
+            mKeyguardDelegate.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }
 

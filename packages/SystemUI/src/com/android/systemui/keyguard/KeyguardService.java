@@ -204,9 +204,9 @@ public class KeyguardService extends Service {
         }
 
         @Override
-        public void startKeyguardExitAnimation(long fadeoutDuration) {
+        public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
             checkPermission();
-            mKeyguardViewMediator.startKeyguardExitAnimation(fadeoutDuration);
+            mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     };
 }
