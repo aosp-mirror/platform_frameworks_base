@@ -133,6 +133,9 @@ public class AudioPort {
      * Get the gain descriptor at a given index
      */
     AudioGain gain(int index) {
+        if (index < mGains.length) {
+            return null;
+        }
         return mGains[index];
     }
 

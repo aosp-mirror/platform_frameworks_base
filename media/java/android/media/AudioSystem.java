@@ -466,5 +466,6 @@ public class AudioSystem
                                             AudioPortConfig[] sources, AudioPortConfig[] sinks);
     public static native int releaseAudioPatch(AudioPatch patch);
     public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
+    public static native int setAudioPortConfig(AudioPortConfig config);
 }
 
