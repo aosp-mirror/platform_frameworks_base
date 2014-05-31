@@ -41,6 +41,7 @@ import android.view.KeyEvent;
 import java.util.HashMap;
 import java.util.ArrayList;
 
+
 /**
  * AudioManager provides access to volume and ringer mode control.
  * <p>
@@ -61,6 +62,7 @@ public class AudioManager {
     private final boolean mUseVolumeKeySounds;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
+    AudioPortEventHandler mAudioPortEventHandler;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -438,6 +440,7 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
+        mAudioPortEventHandler = new AudioPortEventHandler(this);
     }
 
     private static IAudioService getService()
@@ -3116,17 +3119,19 @@ public class AudioManager {
     }
 
     /**
-     * Register an audio port update listener.
+     * Register an audio port list update listener.
      * @hide
      */
     public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
+        mAudioPortEventHandler.registerListener(l);
     }
 
     /**
-     * Unregister an audio port update listener.
+     * Unregister an audio port list update listener.
      * @hide
      */
     public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
+        mAudioPortEventHandler.unregisterListener(l);
     }
 
     //

@@ -99,6 +99,9 @@ static struct {
     // other fields unused by JNI
 } gAudioPatchFields;
 
+static const char* const kEventHandlerClassPathName =
+        "android/media/AudioPortEventHandler";
+static jmethodID gPostEventFromNative;
 
 enum AudioError {
     kAudioStatusOk = 0,
@@ -106,7 +109,84 @@ enum AudioError {
     kAudioStatusMediaServerDied = 100
 };
 
+enum  {
+    AUDIOPORT_EVENT_PORT_LIST_UPDATED = 1,
+    AUDIOPORT_EVENT_PATCH_LIST_UPDATED = 2,
+    AUDIOPORT_EVENT_SERVICE_DIED = 3,
+};
+
 #define MAX_PORT_GENERATION_SYNC_ATTEMPTS 5
+
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class JNIAudioPortCallback: public AudioSystem::AudioPortCallback
+{
+public:
+    JNIAudioPortCallback(JNIEnv* env, jobject thiz, jobject weak_thiz);
+    ~JNIAudioPortCallback();
+
+    virtual void onAudioPortListUpdate();
+    virtual void onAudioPatchListUpdate();
+    virtual void onServiceDied();
+
+private:
+    void sendEvent(int event);
+
+    jclass      mClass;     // Reference to AudioPortEventHandlerDelegate class
+    jobject     mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
+};
+
+JNIAudioPortCallback::JNIAudioPortCallback(JNIEnv* env, jobject thiz, jobject weak_thiz)
+{
+
+    // Hold onto the SoundTriggerModule class for use in calling the static method
+    // that posts events to the application thread.
+    jclass clazz = env->GetObjectClass(thiz);
+    if (clazz == NULL) {
+        ALOGE("Can't find class %s", kEventHandlerClassPathName);
+        return;
+    }
+    mClass = (jclass)env->NewGlobalRef(clazz);
+
+    // We use a weak reference so the SoundTriggerModule object can be garbage collected.
+    // The reference is only used as a proxy for callbacks.
+    mObject  = env->NewGlobalRef(weak_thiz);
+}
+
+JNIAudioPortCallback::~JNIAudioPortCallback()
+{
+    // remove global references
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteGlobalRef(mObject);
+    env->DeleteGlobalRef(mClass);
+}
+
+void JNIAudioPortCallback::sendEvent(int event)
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    env->CallStaticVoidMethod(mClass, gPostEventFromNative, mObject,
+                              event, 0, 0, NULL);
+    if (env->ExceptionCheck()) {
+        ALOGW("An exception occurred while notifying an event.");
+        env->ExceptionClear();
+    }
+}
+
+void JNIAudioPortCallback::onAudioPortListUpdate()
+{
+    sendEvent(AUDIOPORT_EVENT_PORT_LIST_UPDATED);
+}
+
+void JNIAudioPortCallback::onAudioPatchListUpdate()
+{
+    sendEvent(AUDIOPORT_EVENT_PATCH_LIST_UPDATED);
+}
+
+void JNIAudioPortCallback::onServiceDied()
+{
+    sendEvent(AUDIOPORT_EVENT_SERVICE_DIED);
+}
 
 static int check_AudioSystem_Command(status_t status)
 {
@@ -1145,6 +1225,26 @@ exit:
     return jStatus;
 }
 
+static void
+android_media_AudioSystem_eventHandlerSetup(JNIEnv *env, jobject thiz, jobject weak_this)
+{
+    ALOGV("eventHandlerSetup");
+
+    sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(env, thiz, weak_this);
+
+    AudioSystem::setAudioPortCallback(callback);
+}
+
+static void
+android_media_AudioSystem_eventHandlerFinalize(JNIEnv *env, jobject thiz)
+{
+    ALOGV("eventHandlerFinalize");
+
+    sp<JNIAudioPortCallback> callback;
+
+    AudioSystem::setAudioPortCallback(callback);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -1183,6 +1283,15 @@ static JNINativeMethod gMethods[] = {
                                                 (void *)android_media_AudioSystem_listAudioPatches},
 };
 
+
+static JNINativeMethod gEventHandlerMethods[] = {
+    {"native_setup",
+        "(Ljava/lang/Object;)V",
+        (void *)android_media_AudioSystem_eventHandlerSetup},
+    {"native_finalize",
+        "()V",
+        (void *)android_media_AudioSystem_eventHandlerFinalize},
+};
 
 int register_android_media_AudioSystem(JNIEnv *env)
 {
@@ -1265,8 +1374,19 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioPatchFields.mHandle = env->GetFieldID(audioPatchClass, "mHandle",
                                                 "Landroid/media/AudioHandle;");
 
+    jclass eventHandlerClass = env->FindClass(kEventHandlerClassPathName);
+    gPostEventFromNative = env->GetStaticMethodID(eventHandlerClass, "postEventFromNative",
+                                            "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+
+
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
 
-    return AndroidRuntime::registerNativeMethods(env,
+    int status = AndroidRuntime::registerNativeMethods(env,
                 kClassPathName, gMethods, NELEM(gMethods));
+
+    if (status == 0) {
+        status = AndroidRuntime::registerNativeMethods(env,
+                kEventHandlerClassPathName, gEventHandlerMethods, NELEM(gEventHandlerMethods));
+    }
+    return status;
 }
