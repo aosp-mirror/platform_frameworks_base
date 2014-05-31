@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 
 import java.util.List;
 
@@ -105,7 +106,7 @@ public abstract class WindowManagerInternal {
      * Set by the accessibility layer to specify the magnification and panning to
      * be applied to all windows that should be magnified.
      *
-     * @param callbacks The callbacks to invoke.
+     * @param spec The MagnficationSpec to set.
      *
      * @see #setMagnificationCallbacks(MagnificationCallbacks)
      */
@@ -161,4 +162,10 @@ public abstract class WindowManagerInternal {
      * @param outBounds The frame to populate.
      */
     public abstract void getWindowFrame(IBinder token, Rect outBounds);
+
+    /**
+     * Invalidate all visible windows. Then report back on the callback once all windows have
+     * redrawn.
+     */
+    public abstract void waitForAllWindowsDrawn(IRemoteCallback callback, long timeout);
 }

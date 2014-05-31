@@ -91,6 +91,7 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -102,14 +103,17 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardServiceConstants;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
+import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowListener;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
+import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static android.view.WindowManager.LayoutParams.*;
@@ -131,6 +135,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
+    static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
@@ -223,6 +228,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Context mContext;
     IWindowManager mWindowManager;
     WindowManagerFuncs mWindowManagerFuncs;
+    WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
     IStatusBarService mStatusBarService;
     boolean mPreloadedRecentApps;
@@ -264,6 +270,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarWidthForRotation = new int[4];
 
     KeyguardServiceDelegate mKeyguardDelegate;
+    // The following are only accessed on the mHandler thread.
+    boolean mKeyguardDrawComplete;
+    boolean mWindowManagerDrawComplete;
+    ArrayList<ScreenOnListener> mScreenOnListeners = new ArrayList<ScreenOnListener>();
+    final IRemoteCallback mWindowManagerDrawCallback = new IRemoteCallback.Stub() {
+        @Override
+        public void sendResult(Bundle data) {
+            if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for display!");
+            mHandler.sendEmptyMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE);
+        }
+    };
+    final ShowListener mKeyguardDelegateCallback = new ShowListener() {
+        @Override
+        public void onShown(IBinder windowToken) {
+            if (DEBUG_WAKEUP) Slog.d(TAG, "mKeyguardDelegate.ShowListener.onShown.");
+            mHandler.sendEmptyMessage(MSG_KEYGUARD_DRAWN_COMPLETE);
+        }
+    };
+
     GlobalActions mGlobalActions;
     volatile boolean mPowerKeyHandled; // accessed from input reader and handler thread
     boolean mPendingPowerKeyUpCanceled;
@@ -483,6 +508,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
+    private static final int MSG_KEYGUARD_DRAWN_COMPLETE = 5;
+    private static final int MSG_KEYGUARD_DRAWN_TIMEOUT = 6;
+    private static final int MSG_WINDOW_MANAGER_DRAWN_COMPLETE = 7;
+    private static final int MSG_WAKING_UP = 8;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -499,6 +528,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK:
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
+                    break;
+                case MSG_KEYGUARD_DRAWN_COMPLETE:
+                    if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
+                    mKeyguardDrawComplete = true;
+                    finishScreenTurningOn();
+                    break;
+                case MSG_KEYGUARD_DRAWN_TIMEOUT:
+                    Slog.w(TAG, "Keyguard drawn timeout. Setting mKeyguardDrawComplete");
+                    mKeyguardDrawComplete = true;
+                    finishScreenTurningOn();
+                    break;
+                case MSG_WINDOW_MANAGER_DRAWN_COMPLETE:
+                    if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mWindowManagerDrawComplete");
+                    mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
+                    mWindowManagerDrawComplete = true;
+                    finishScreenTurningOn();
+                    break;
+                case MSG_WAKING_UP:
+                    handleWakingUp((ScreenOnListener) msg.obj);
                     break;
             }
         }
@@ -855,6 +903,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mContext = context;
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
+        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
@@ -4418,10 +4468,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void wakingUp(final ScreenOnListener screenOnListener) {
         EventLog.writeEvent(70000, 1);
-        if (false) {
-            RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
-            Slog.i(TAG, "Screen turning on...", here);
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turning on...",
+                new RuntimeException("here").fillInStackTrace());
+        mHandler.obtainMessage(MSG_WAKING_UP, screenOnListener).sendToTarget();
+    }
+
+    // Called on the mHandler thread.
+    private void handleWakingUp(final ScreenOnListener screenOnListener) {
+        if (screenOnListener != null) {
+            mScreenOnListeners.add(screenOnListener);
         }
 
         synchronized (mLock) {
@@ -4430,51 +4485,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateLockScreenTimeout();
         }
 
-        waitForKeyguard(screenOnListener);
-    }
-
-    private void waitForKeyguard(final ScreenOnListener screenOnListener) {
+        mKeyguardDrawComplete = false;
+        mWindowManagerDrawComplete = false;
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onScreenTurnedOn(new KeyguardServiceDelegate.ShowListener() {
-                @Override
-                public void onShown(IBinder windowToken) {
-                    waitForKeyguardWindowDrawn(windowToken, screenOnListener);
-                }
-            });
+            mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
+            mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
+            mKeyguardDelegate.onScreenTurnedOn(mKeyguardDelegateCallback);
         } else {
-            Slog.i(TAG, "No keyguard interface!");
-            finishScreenTurningOn(screenOnListener);
+            if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
+            mKeyguardDrawComplete = true;
         }
+        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback, 500);
     }
 
-    private void waitForKeyguardWindowDrawn(IBinder windowToken,
-            final ScreenOnListener screenOnListener) {
-        if (windowToken != null && !mHideLockScreen) {
-            try {
-                if (mWindowManager.waitForWindowDrawn(
-                        windowToken, new IRemoteCallback.Stub() {
-                    @Override
-                    public void sendResult(Bundle data) {
-                        Slog.i(TAG, "Lock screen displayed!");
-                        finishScreenTurningOn(screenOnListener);
-                        setKeyguardDrawn();
-                    }
-                })) {
-                    return;
-                }
-                Slog.i(TAG, "No lock screen! waitForWindowDrawn false");
-
-            } catch (RemoteException ex) {
-                // Can't happen in system process.
-            }
+    // Called on the mHandler thread.
+    private void finishScreenTurningOn() {
+        if (DEBUG_WAKEUP) Slog.d(TAG,
+                "finishScreenTurningOn: mKeyguardDrawComplete=" + mKeyguardDrawComplete
+                        + " mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
+        if (!mKeyguardDrawComplete || !mWindowManagerDrawComplete) {
+            return;
         }
 
-        Slog.i(TAG, "No lock screen! windowToken=" + windowToken);
-        finishScreenTurningOn(screenOnListener);
-        setKeyguardDrawn();
-    }
-
-    private void finishScreenTurningOn(ScreenOnListener screenOnListener) {
         synchronized (mLock) {
             mScreenOnFully = true;
         }
@@ -4484,9 +4516,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException unhandled) {
         }
 
-        if (screenOnListener != null) {
-            screenOnListener.onScreenOn();
+        for (int i = mScreenOnListeners.size() - 1; i >=0; --i) {
+            mScreenOnListeners.remove(i).onScreenOn();
         }
+
+        setKeyguardDrawn();
     }
 
     @Override
@@ -4859,7 +4893,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mSystemBooted = true;
         }
-        waitForKeyguard(null);
+        wakingUp(null);
     }
 
     ProgressDialog mBootMsgDialog = null;
