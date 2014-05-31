@@ -15,6 +15,6 @@
 -->
 
 <permissions>
-    <library name="com.android.media.drm.signer"
-            file="/system/framework/com.android.media.drm.signer.jar" />
+    <library name="com.android.mediadrm.signer"
+            file="/system/framework/com.android.mediadrm.signer.jar" />
 </permissions>
