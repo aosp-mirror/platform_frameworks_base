@@ -16,6 +16,7 @@
 
 package android.media;
 
+import java.util.ArrayList;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -459,4 +460,11 @@ public class AudioSystem
 
     public static native int setLowRamDevice(boolean isLowRamDevice);
     public static native int checkAudioFlinger();
+
+    public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);
+    public static native int createAudioPatch(AudioPatch[] patch,
+                                            AudioPortConfig[] sources, AudioPortConfig[] sinks);
+    public static native int releaseAudioPatch(AudioPatch patch);
+    public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
 }
+
