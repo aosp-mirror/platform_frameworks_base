@@ -24,19 +24,21 @@
 
     <ImageView
         android:id="@+id/stream_icon"
+        style="@style/BorderlessButton.Tiny"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="16dip"
-        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dip"
         android:contentDescription="@null" />
-
     <SeekBar
         style="?android:attr/seekBarStyle"
         android:id="@+id/seekbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="16dip"
+        android:paddingTop="16dip"
+        android:paddingBottom="16dip"
+        android:paddingStart="11dip"
+        android:paddingEnd="11dip"
         android:layout_marginEnd="16dip" />
 
 </LinearLayout>
