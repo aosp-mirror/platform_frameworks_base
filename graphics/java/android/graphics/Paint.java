@@ -2131,7 +2131,7 @@ public class Paint {
         if ((index | count) < 0 || index + count > text.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        native_getTextPath(mNativePaint, mBidiFlags, text, index, count, x, y, 
+        native_getTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, index, count, x, y,
                 path.ni());
     }
 
@@ -2153,7 +2153,7 @@ public class Paint {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_getTextPath(mNativePaint, mBidiFlags, text, start, end, x, y, 
+        native_getTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y,
                 path.ni());
     }
     
@@ -2261,10 +2261,10 @@ public class Paint {
     private native int native_getTextRunCursor(long native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt);
 
-    private static native void native_getTextPath(long native_object, int bidiFlags,
-                char[] text, int index, int count, float x, float y, long path);
-    private static native void native_getTextPath(long native_object, int bidiFlags,
-                String text, int start, int end, float x, float y, long path);
+    private static native void native_getTextPath(long native_object, long native_typeface,
+            int bidiFlags, char[] text, int index, int count, float x, float y, long path);
+    private static native void native_getTextPath(long native_object, long native_typeface,
+            int bidiFlags, String text, int start, int end, float x, float y, long path);
     private static native void nativeGetStringBounds(long nativePaint,
                                 String text, int start, int end, int bidiFlags, Rect bounds);
     private static native void nativeGetCharArrayBounds(long nativePaint,

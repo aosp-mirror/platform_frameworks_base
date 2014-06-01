@@ -17,6 +17,7 @@
 #define LOG_TAG "TextLayoutCache"
 
 #include <utils/JenkinsHash.h>
+#include <utils/CallStack.h>
 
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
@@ -89,6 +90,11 @@ void TextLayoutCache::purgeCaches() {
 sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
             const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
+#ifdef USE_MINIKIN
+    // We want to get rid of all legacy calls in the Minikin case, so log
+    ALOGW("TextLayoutCache being invoked!");
+    CallStack _cs(LOG_TAG);
+#endif
     nsecs_t startTime = 0;
     if (mDebugEnabled) {
         startTime = systemTime(SYSTEM_TIME_MONOTONIC);
