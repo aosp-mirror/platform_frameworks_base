@@ -339,6 +339,12 @@ public class AudioManager {
     public static final int FLAG_BLUETOOTH_ABS_VOLUME = 1 << 6;
 
     /**
+     * Adjusting the volume was prevented due to silent mode, display a hint in the UI.
+     * @hide
+     */
+    public static final int FLAG_SHOW_SILENT_HINT = 1 << 7;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *

@@ -115,6 +115,9 @@ public class AudioService extends IAudioService.Stub {
     /** Allow volume changes to set ringer mode to silent? */
     private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
 
+    /** In silent mode, are volume adjustments (raises) prevented? */
+    private static final boolean PREVENT_VOLUME_ADJUSTMENT_IF_SILENT = true;
+
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -125,6 +128,11 @@ public class AudioService extends IAudioService.Stub {
      * PhoneWindow will implement this part.
      */
     public static final int PLAY_SOUND_DELAY = 300;
+
+    /**
+     * Only used in the result from {@link #checkForRingerModeChange(int, int, int)}
+     */
+    private static final int FLAG_ADJUST_VOLUME = 1;
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -941,7 +949,12 @@ public class AudioService extends IAudioService.Stub {
             }
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
-            adjustVolume = checkForRingerModeChange(aliasIndex, direction, step);
+            final int result = checkForRingerModeChange(aliasIndex, direction, step);
+            adjustVolume = (result & FLAG_ADJUST_VOLUME) != 0;
+            // If suppressing a volume adjustment in silent mode, display the UI hint
+            if ((result & AudioManager.FLAG_SHOW_SILENT_HINT) != 0) {
+                flags |= AudioManager.FLAG_SHOW_SILENT_HINT;
+            }
         }
 
         int oldIndex = mStreamStates[streamType].getIndex(device);
@@ -2538,8 +2551,8 @@ public class AudioService extends IAudioService.Stub {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private boolean checkForRingerModeChange(int oldIndex, int direction,  int step) {
-        boolean adjustVolumeIndex = true;
+    private int checkForRingerModeChange(int oldIndex, int direction,  int step) {
+        int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerMode();
 
         switch (ringerMode) {
@@ -2578,17 +2591,21 @@ public class AudioService extends IAudioService.Stub {
             } else if (direction == AudioManager.ADJUST_RAISE) {
                 ringerMode = RINGER_MODE_NORMAL;
             }
-            adjustVolumeIndex = false;
+            result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
             if (direction == AudioManager.ADJUST_RAISE) {
-                if (mHasVibrator) {
-                    ringerMode = RINGER_MODE_VIBRATE;
+                if (PREVENT_VOLUME_ADJUSTMENT_IF_SILENT) {
+                    result |= AudioManager.FLAG_SHOW_SILENT_HINT;
                 } else {
-                    ringerMode = RINGER_MODE_NORMAL;
+                  if (mHasVibrator) {
+                      ringerMode = RINGER_MODE_VIBRATE;
+                  } else {
+                      ringerMode = RINGER_MODE_NORMAL;
+                  }
                 }
             }
-            adjustVolumeIndex = false;
+            result &= ~FLAG_ADJUST_VOLUME;
             break;
         default:
             Log.e(TAG, "checkForRingerModeChange() wrong ringer mode: "+ringerMode);
@@ -2599,7 +2616,7 @@ public class AudioService extends IAudioService.Stub {
 
         mPrevVolDirection = direction;
 
-        return adjustVolumeIndex;
+        return result;
     }
 
     @Override

@@ -898,6 +898,11 @@ public class VolumePanel extends Handler {
                 mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
         }
+
+        // Pulse the slider icon if an adjustment was suppressed due to silent mode.
+        if (sc != null && (flags & AudioManager.FLAG_SHOW_SILENT_HINT) != 0) {
+            pulseIcon(sc.icon);
+        }
     }
 
     private boolean isShowing() {
