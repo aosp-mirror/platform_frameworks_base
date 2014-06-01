@@ -16,6 +16,7 @@
 
 package android.tv;
 
+import android.os.Bundle;
 import android.tv.ITvInputSession;
 
 /**
@@ -25,4 +26,6 @@ import android.tv.ITvInputSession;
  */
 oneway interface ITvInputSessionCallback {
     void onSessionCreated(ITvInputSession session);
+    void onSessionEvent(in String name, in Bundle args);
+    void onVideoSizeChanged(int width, int height);
 }

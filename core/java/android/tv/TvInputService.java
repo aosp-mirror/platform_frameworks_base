@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -156,6 +157,7 @@ public abstract class TvInputService extends Service {
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
+        private ITvInputSessionCallback mSessionCallback;
 
         public TvInputSessionImpl() {
             mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
@@ -182,6 +184,52 @@ public abstract class TvInputService extends Service {
                         }
                     } else {
                         removeOverlayView(false);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Dispatches an event to the application using this session.
+         *
+         * @param eventType The type of the event.
+         * @param eventArgs Optional arguments of the event.
+         * @hide
+         */
+        public void dispatchSessionEvent(final String eventType, final Bundle eventArgs) {
+            if (eventType == null) {
+                throw new IllegalArgumentException("eventType should not be null.");
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchSessionEvent(" + eventType + ")");
+                        mSessionCallback.onSessionEvent(eventType, eventArgs);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in sending event (event=" + eventType + ")");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the change on the size of the video. This is expected to be called at the
+         * beginning of the playback and later when the size has been changed.
+         *
+         * @param width The width of the video.
+         * @param height The height of the video.
+         * @hide
+         */
+        public void dispatchVideoSizeChanged(final int width, final int height) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchVideoSizeChanged");
+                        mSessionCallback.onVideoSizeChanged(width, height);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchVideoSizeChanged");
                     }
                 }
             });
@@ -394,9 +442,7 @@ public abstract class TvInputService extends Service {
                 mWindowManager.removeView(mOverlayView);
                 mOverlayView = null;
             }
-            if (DEBUG) {
-                Log.d(TAG, "create overlay view(" + frame + ")");
-            }
+            if (DEBUG) Log.d(TAG, "create overlay view(" + frame + ")");
             mWindowToken = windowToken;
             mOverlayFrame = frame;
             if (!mOverlayViewEnabled) {
@@ -431,9 +477,7 @@ public abstract class TvInputService extends Service {
          * @param frame A new position of the overlay view.
          */
         void relayoutOverlayView(Rect frame) {
-            if (DEBUG) {
-                Log.d(TAG, "relayout overlay view(" + frame + ")");
-            }
+            if (DEBUG) Log.d(TAG, "relayoutOverlayView(" + frame + ")");
             mOverlayFrame = frame;
             if (!mOverlayViewEnabled || mOverlayView == null) {
                 return;
@@ -449,9 +493,7 @@ public abstract class TvInputService extends Service {
          * Removes the current overlay view.
          */
         void removeOverlayView(boolean clearWindowToken) {
-            if (DEBUG) {
-                Log.d(TAG, "remove overlay view(" + mOverlayView + ")");
-            }
+            if (DEBUG) Log.d(TAG, "removeOverlayView(" + mOverlayView + ")");
             if (clearWindowToken) {
                 mWindowToken = null;
                 mOverlayFrame = null;
@@ -498,6 +540,10 @@ public abstract class TvInputService extends Service {
             mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
             return Session.DISPATCH_IN_PROGRESS;
         }
+
+        private void setSessionCallback(ITvInputSessionCallback callback) {
+            mSessionCallback = callback;
+        }
     }
 
     private final class ServiceHandler extends Handler {
@@ -517,6 +563,7 @@ public abstract class TvInputService extends Service {
                             // Failed to create a session.
                             cb.onSessionCreated(null);
                         } else {
+                            sessionImpl.setSessionCallback(cb);
                             ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
                                     sessionImpl, channel);
                             cb.onSessionCreated(stub);
