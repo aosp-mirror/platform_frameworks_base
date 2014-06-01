@@ -16,8 +16,14 @@
 
 <!-- Colors specific to Quantum themes. -->
 <resources>
-    <color name="background_quantum_dark">#ff303030</color>
-    <color name="background_quantum_light">@color/white</color>
+    <color name="background_quantum_dark">#ff414042</color>
+    <color name="background_quantum_light">#fff1f2f2</color>
+
+    <color name="ripple_quantum_dark">#30ffffff</color>
+    <color name="ripple_quantum_light">#30000000</color>
+
+    <color name="button_quantum_dark">#ff5a595b</color>
+    <color name="button_quantum_light">#ffd6d7d7</color>
 
     <color name="bright_foreground_quantum_dark">@color/white</color>
     <color name="bright_foreground_quantum_light">@color/black</color>

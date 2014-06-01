@@ -101,6 +101,7 @@ please see themes_device_defaults.xml.
         <item name="mediaRouteButtonStyle">@style/Widget.Quantum.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@drawable/item_background_quantum</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/item_background_borderless_quantum</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Button.Borderless</item>
         <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
 
@@ -125,8 +126,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_anim</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_anim</item>
 
-        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum</item>
-
+        <item name="listChoiceBackgroundIndicator">?attr/selectableItemBackground</item>
         <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum</item>
 
         <item name="listDividerAlertDialog">@drawable/list_divider_quantum</item>
@@ -308,7 +308,7 @@ please see themes_device_defaults.xml.
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
         <item name="actionBarTheme">@null</item>
-        <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
+        <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum</item>
@@ -378,8 +378,8 @@ please see themes_device_defaults.xml.
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorPrimary</item>
-        <item name="colorControlHighlight">#30ffffff</item>
 
+        <item name="colorControlHighlight">@color/ripple_quantum_dark</item>
         <item name="colorButtonNormal">@color/btn_default_quantum_dark</item>
     </style>
 
@@ -446,6 +446,7 @@ please see themes_device_defaults.xml.
         <item name="mediaRouteButtonStyle">@style/Widget.Quantum.Light.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@drawable/item_background_quantum</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/item_background_borderless_quantum</item>
         <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless</item>
         <item name="homeAsUpIndicator">@drawable/ic_ab_back_quantum</item>
 
@@ -470,8 +471,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_quantum_anim</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_quantum_anim</item>
 
-        <item name="listChoiceBackgroundIndicator">@drawable/list_selector_quantum</item>
-
+        <item name="listChoiceBackgroundIndicator">?attr/selectableItemBackground</item>
         <item name="activatedBackgroundIndicator">@drawable/activated_background_quantum</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
@@ -655,7 +655,7 @@ please see themes_device_defaults.xml.
         <item name="actionModePopupWindowStyle">@style/Widget.Quantum.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@style/ThemeOverlay.Quantum.ActionBarWidget</item>
         <item name="actionBarTheme">@null</item>
-        <item name="actionBarItemBackground">@drawable/item_background_quantum</item>
+        <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_quantum</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_quantum</item>
@@ -721,8 +721,8 @@ please see themes_device_defaults.xml.
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorPrimary</item>
-        <item name="colorControlHighlight">#30000000</item>
 
+        <item name="colorControlHighlight">@color/ripple_quantum_light</item>
         <item name="colorButtonNormal">@color/btn_default_quantum_light</item>
     </style>
 
@@ -770,7 +770,8 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
 
-        <item name="colorButtonNormal">@color/quantum_grey_100</item>
+        <item name="colorControlHighlight">@color/ripple_quantum_light</item>
+        <item name="colorButtonNormal">@color/btn_default_quantum_light</item>
     </style>
 
     <!-- Theme overlay that replaces colors with their dark versions but preserves
@@ -805,7 +806,8 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
 
-        <item name="colorButtonNormal">@color/quantum_grey_700</item>
+        <item name="colorControlHighlight">@color/ripple_quantum_dark</item>
+        <item name="colorButtonNormal">@color/btn_default_quantum_dark</item>
     </style>
 
     <!-- Theme overlay that replaces the activated control color (which by default
