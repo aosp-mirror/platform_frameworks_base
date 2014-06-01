@@ -213,6 +213,7 @@ public class RippleDrawable extends LayerDrawable {
 
         if (!mOverrideBounds) {
             mHotspotBounds.set(bounds);
+            onHotspotBoundsChanged();
         }
 
         invalidateSelf();
@@ -452,6 +453,19 @@ public class RippleDrawable extends LayerDrawable {
     public void setHotspotBounds(int left, int top, int right, int bottom) {
         mOverrideBounds = true;
         mHotspotBounds.set(left, top, right, bottom);
+
+        onHotspotBoundsChanged();
+    }
+
+    /**
+     * Notifies all the animating ripples that the hotspot bounds have changed.
+     */
+    private void onHotspotBoundsChanged() {
+        final int count = mAnimatingRipplesCount;
+        final Ripple[] ripples = mAnimatingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].onHotspotBoundsChanged();
+        }
     }
 
     @Override
