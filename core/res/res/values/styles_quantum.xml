@@ -405,7 +405,9 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">96dip</item>
-        <item name="stateListAnimator">@anim/button_state_list_anim_quantum</item>
+
+        <!-- TODO: Turn this back on when we support inset drawable outlines. -->
+        <!-- <item name="stateListAnimator">@anim/button_state_list_anim_quantum</item> -->
     </style>
 
     <!-- Small bordered ink button -->
@@ -434,7 +436,6 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/btn_toggle_quantum</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="textAppearance">?attr/textAppearanceSmall</item>
         <item name="minHeight">48dip</item>
     </style>
 
@@ -468,34 +469,29 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">8dp</item>
     </style>
 
-    <style name="Widget.Quantum.CheckedTextView" parent="Widget.CheckedTextView">
-        <item name="drawablePadding">4dip</item>
-    </style>
-
+    <style name="Widget.Quantum.CheckedTextView" parent="Widget.CheckedTextView" />
     <style name="Widget.Quantum.TextSelectHandle" parent="Widget.TextSelectHandle"/>
     <style name="Widget.Quantum.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow"/>
     <style name="Widget.Quantum.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
+        <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_quantum</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton" parent="Widget.CompoundButton"/>
 
     <style name="Widget.Quantum.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
-        <item name="background">?attr/selectableItemBackground</item>
-        <item name="drawablePadding">4dip</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
-        <item name="background">?attr/selectableItemBackground</item>
-        <item name="drawablePadding">4dip</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton.Star" parent="Widget.CompoundButton.Star">
         <item name="button">@drawable/btn_star_quantum</item>
-        <item name="background">?attr/selectableItemBackground</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Quantum.CompoundButton.Switch">
@@ -507,7 +503,7 @@ please see styles_device_defaults.xml.
         <item name="textOff"></item>
         <item name="switchMinWidth">4dip</item>
         <item name="switchPadding">4dip</item>
-        <item name="background">?attr/selectableItemBackground</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Quantum.EditText" parent="Widget.EditText"/>
@@ -586,7 +582,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.PopupWindow" parent="Widget.PopupWindow"/>
 
     <style name="Widget.Quantum.PopupWindow.ActionMode">
-        <item name="popupBackground">@color/black</item>
+        <item name="popupBackground">@drawable/popup_background_quantum</item>
         <item name="popupAnimationStyle">@style/Animation.PopupWindow.ActionMode</item>
     </style>
 
@@ -626,7 +622,7 @@ please see styles_device_defaults.xml.
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
-        <item name="background">?attr/selectableItemBackground</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Quantum.RatingBar" parent="Widget.RatingBar">
@@ -653,7 +649,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
         <item name="background">@drawable/spinner_background_quantum</item>
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
+        <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_quantum</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
@@ -712,7 +708,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_quantum</item>
+        <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_quantum</item>
         <item name="popupAnimationStyle">@style/Animation.Quantum.Popup</item>
         <item name="dropDownVerticalOffset">0dip</item>
@@ -809,7 +805,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.MediaRouteButton">
-        <item name="background">?attr/selectableItemBackground</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
         <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_quantum</item>
         <item name="minWidth">56dp</item>
         <item name="minHeight">48dp</item>
@@ -879,12 +875,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ListView" parent="Widget.Quantum.ListView"/>
     <style name="Widget.Quantum.Light.ListView.White" parent="Widget.Quantum.ListView.White"/>
     <style name="Widget.Quantum.Light.PopupWindow" parent="Widget.Quantum.PopupWindow"/>
-
-    <style name="Widget.Quantum.Light.PopupWindow.ActionMode">
-        <item name="popupBackground">@color/white</item>
-        <item name="popupAnimationStyle">@style/Animation.PopupWindow.ActionMode</item>
-    </style>
-
+    <style name="Widget.Quantum.Light.PopupWindow.ActionMode" parent="Widget.Quantum.PopupWindow.ActionMode"/>
     <style name="Widget.Quantum.Light.ProgressBar" parent="Widget.Quantum.ProgressBar"/>
     <style name="Widget.Quantum.Light.ProgressBar.Horizontal" parent="Widget.Quantum.ProgressBar.Horizontal"/>
     <style name="Widget.Quantum.Light.ProgressBar.Small" parent="Widget.Quantum.ProgressBar.Small"/>
@@ -894,7 +885,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.ProgressBar.Small.Inverse" parent="Widget.Quantum.ProgressBar.Small.Inverse"/>
     <style name="Widget.Quantum.Light.ProgressBar.Large.Inverse" parent="Widget.Quantum.ProgressBar.Large.Inverse"/>
     <style name="Widget.Quantum.Light.SeekBar" parent="Widget.Quantum.SeekBar"/>
-
     <style name="Widget.Quantum.Light.RatingBar" parent="Widget.Quantum.RatingBar" />
 
     <style name="Widget.Quantum.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">

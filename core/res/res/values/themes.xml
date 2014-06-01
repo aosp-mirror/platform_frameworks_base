@@ -124,6 +124,7 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background</item>
+        <item name="selectableItemBackgroundBorderless">?android:attr/selectableItemBackground</item>
         <item name="borderlessButtonStyle">?android:attr/buttonStyle</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
@@ -1032,6 +1033,7 @@ please see themes_device_defaults.xml.
         <item name="mediaRouteButtonStyle">@android:style/Widget.Holo.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
+        <item name="selectableItemBackgroundBorderless">?android:attr/selectableItemBackground</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
@@ -1372,6 +1374,7 @@ please see themes_device_defaults.xml.
         <item name="mediaRouteButtonStyle">@android:style/Widget.Holo.Light.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
+        <item name="selectableItemBackgroundBorderless">?android:attr/selectableItemBackground</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
 
