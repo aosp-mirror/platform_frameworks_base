@@ -998,8 +998,7 @@ public final class SystemServer {
 
             try {
                 Slog.i(TAG, "LauncherAppsService");
-                LauncherAppsService las = new LauncherAppsService(context);
-                ServiceManager.addService(Context.LAUNCHER_APPS_SERVICE, las);
+                mSystemServiceManager.startService(LauncherAppsService.class);
             } catch (Throwable t) {
                 reportWtf("starting LauncherAppsService", t);
             }
