@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -49,7 +51,8 @@ import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.widget.FrameLayout;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -83,6 +86,7 @@ public class VolumePanel extends Handler {
     private static final int FREE_DELAY = 10000;
     private static final int TIMEOUT_DELAY = 3000;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
+    private static final float ICON_PULSE_SCALE = 1.3f;
 
     private static final int MSG_VOLUME_CHANGED = 0;
     private static final int MSG_FREE_RESOURCES = 1;
@@ -107,6 +111,7 @@ public class VolumePanel extends Handler {
     protected final Context mContext;
     private final AudioManager mAudioManager;
     private final ZenModeController mZenController;
+    private final Interpolator mFastOutSlowInInterpolator;
     private boolean mRingIsSilent;
     private boolean mVoiceCapable;
     private boolean mZenModeCapable;
@@ -222,6 +227,7 @@ public class VolumePanel extends Handler {
         ViewGroup group;
         ImageView icon;
         SeekBar seekbarView;
+        View seekbarContainer;
         int iconRes;
         int iconMuteRes;
     }
@@ -275,6 +281,8 @@ public class VolumePanel extends Handler {
         mParent = parent;
         mZenController = zenController;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
+                android.R.interpolator.fast_out_slow_in);
 
         // For now, only show master volume if master volume is supported
         final Resources res = context.getResources();
@@ -473,6 +481,8 @@ public class VolumePanel extends Handler {
                     }
                 });
             }
+            sc.seekbarContainer =
+                    sc.group.findViewById(com.android.systemui.R.id.seekbar_container);
             sc.seekbarView = (SeekBar) sc.group.findViewById(com.android.systemui.R.id.seekbar);
             final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
                     streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
@@ -533,7 +543,8 @@ public class VolumePanel extends Handler {
         updateSliderEnabled(sc, muted, false);
     }
 
-    private void updateSliderEnabled(StreamControl sc, boolean muted, boolean fixedVolume) {
+    private void updateSliderEnabled(final StreamControl sc, boolean muted, boolean fixedVolume) {
+        final boolean wasEnabled = sc.seekbarView.isEnabled();
         if (sc.streamType == AudioService.STREAM_REMOTE_MUSIC) {
             // never disable touch interactions for remote playback, the muting is not tied to
             // the state of the phone.
@@ -548,6 +559,34 @@ public class VolumePanel extends Handler {
         } else {
             sc.seekbarView.setEnabled(true);
         }
+        // pulse the ringer icon when the disabled slider is touched in silent mode
+        if (sc.icon.isClickable() && wasEnabled != sc.seekbarView.isEnabled()) {
+            if (sc.seekbarView.isEnabled()) {
+                sc.seekbarContainer.setOnTouchListener(null);
+            } else {
+                sc.seekbarContainer.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        resetTimeout();
+                        pulseIcon(sc.icon);
+                        return false;
+                    }
+                });
+            }
+        }
+    }
+
+    private void pulseIcon(final ImageView icon) {
+        if (icon.getScaleX() != 1) return;  // already running
+        icon.animate().cancel();
+        icon.animate().scaleX(ICON_PULSE_SCALE).scaleY(ICON_PULSE_SCALE)
+                .setInterpolator(mFastOutSlowInInterpolator)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        icon.animate().scaleX(1).scaleY(1).setListener(null);
+                    }
+                });
     }
 
     private static boolean isNotificationOrRing(int streamType) {

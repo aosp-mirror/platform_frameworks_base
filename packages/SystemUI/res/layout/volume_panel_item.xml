@@ -15,30 +15,34 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="80dip"
-    android:orientation="horizontal"
-    android:layout_marginTop="8dip"
-    android:layout_marginBottom="8dip"
-    android:gravity="start|center_vertical">
+        android:layout_width="match_parent"
+        android:layout_height="80dip"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dip"
+        android:layout_marginBottom="8dip"
+        android:gravity="start|center_vertical">
 
     <ImageView
-        android:id="@+id/stream_icon"
-        style="@style/BorderlessButton.Tiny"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dip"
-        android:contentDescription="@null" />
-    <SeekBar
-        style="?android:attr/seekBarStyle"
-        android:id="@+id/seekbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingTop="16dip"
-        android:paddingBottom="16dip"
-        android:paddingStart="11dip"
-        android:paddingEnd="11dip"
-        android:layout_marginEnd="16dip" />
-
+            android:id="@+id/stream_icon"
+            style="@style/BorderlessButton.Tiny"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dip"
+            android:contentDescription="@null" />
+    <FrameLayout
+            android:id="@+id/seekbar_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+        <SeekBar
+                style="?android:attr/seekBarStyle"
+                android:id="@+id/seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dip"
+                android:paddingBottom="16dip"
+                android:paddingStart="11dip"
+                android:paddingEnd="11dip"
+                android:layout_marginEnd="16dip" />
+    </FrameLayout>
 </LinearLayout>
