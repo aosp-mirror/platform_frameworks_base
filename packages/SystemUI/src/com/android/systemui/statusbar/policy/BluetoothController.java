@@ -16,14 +16,18 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
-
 public interface BluetoothController {
-    void addStateChangedCallback(BluetoothStateChangeCallback callback);
-    void removeStateChangedCallback(BluetoothStateChangeCallback callback);
+    void addStateChangedCallback(Callback callback);
+    void removeStateChangedCallback(Callback callback);
 
     boolean isBluetoothSupported();
     boolean isBluetoothEnabled();
     boolean isBluetoothConnected();
+    boolean isBluetoothConnecting();
+    String getLastDeviceName();
     void setBluetoothEnabled(boolean enabled);
+
+    public interface Callback {
+        void onBluetoothStateChange(boolean enabled, boolean connecting);
+    }
 }
