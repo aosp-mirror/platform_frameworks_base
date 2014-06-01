@@ -890,8 +890,11 @@
              with the appearance of a singel button broken into segments. -->
         <attr name="segmentedButtonStyle" format="reference" />
 
-        <!-- Background drawable for standalone items that need focus/pressed states. -->
+        <!-- Background drawable for bordered standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackground" format="reference" />
+
+        <!-- Background drawable for borderless standalone items that need focus/pressed states. -->
+        <attr name="selectableItemBackgroundBorderless" format="reference" />
 
         <!-- Style for buttons without an explicit border, often used in groups. -->
         <attr name="borderlessButtonStyle" format="reference" />
@@ -4658,11 +4661,11 @@
 
     <!-- Drawable used to show animated touch feedback. -->
     <declare-styleable name="RippleDrawable">
-        <!-- The tint to use for feedback ripples. This attribute is required. -->
+        <!-- The tint to use for ripple effects. This attribute is required. -->
         <attr name="tint" />
-        <!-- Specifies the Porter-Duff blending mode used to apply the tint. The default vlaue is src_atop, which draws over the opaque parts of the drawable. -->
+        <!-- Specifies the Porter-Duff blending mode used to apply the tint. The default value is src_atop, which draws over the opaque parts of the drawable. -->
         <attr name="tintMode" />
-        <!-- Whether to pin feedback ripples to the center of the drawable. Default value is false. -->
+        <!-- Whether to pin ripple effects to the center of the drawable. Default value is false. -->
         <attr name="pinned" format="boolean" />
     </declare-styleable>
 

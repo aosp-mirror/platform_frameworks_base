@@ -2495,17 +2495,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Positions the selector in a way that mimics keyboard focus. If the
-     * selector drawable supports hotspots, this manages the focus hotspot.
+     * Positions the selector in a way that mimics keyboard focus.
      */
     void positionSelectorLikeFocus(int position, View sel) {
+        // If we're changing position, update the visibility since the selector
+        // is technically being detached from the previous selection.
+        final Drawable selector = mSelector;
+        final boolean manageState = selector != null && mSelectorPosition != position
+                && position != INVALID_POSITION;
+        if (manageState) {
+            selector.setVisible(false, false);
+        }
+
         positionSelector(position, sel);
 
-        final Drawable selector = mSelector;
-        if (selector != null && position != INVALID_POSITION) {
+        if (manageState) {
             final Rect bounds = mSelectorRect;
             final float x = bounds.exactCenterX();
             final float y = bounds.exactCenterY();
+            selector.setVisible(getVisibility() == VISIBLE, false);
             selector.setHotspot(x, y);
         }
     }
@@ -2520,8 +2528,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (sel instanceof SelectionBoundsAdjuster) {
             ((SelectionBoundsAdjuster)sel).adjustListItemSelectionBounds(selectorRect);
         }
-        positionSelector(selectorRect.left, selectorRect.top, selectorRect.right,
-                selectorRect.bottom);
+
+        // Adjust for selection padding.
+        selectorRect.left -= mSelectionLeftPadding;
+        selectorRect.top -= mSelectionTopPadding;
+        selectorRect.right += mSelectionRightPadding;
+        selectorRect.bottom += mSelectionBottomPadding;
+
+        // Update the selector drawable.
+        final Drawable selector = mSelector;
+        if (selector != null) {
+            selector.setBounds(selectorRect);
+        }
 
         final boolean isChildViewEnabled = mIsChildViewEnabled;
         if (sel.isEnabled() != isChildViewEnabled) {
@@ -2530,11 +2548,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 refreshDrawableState();
             }
         }
-    }
-
-    private void positionSelector(int l, int t, int r, int b) {
-        mSelectorRect.set(l - mSelectionLeftPadding, t - mSelectionTopPadding, r
-                + mSelectionRightPadding, b + mSelectionBottomPadding);
     }
 
     @Override

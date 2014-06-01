@@ -1015,6 +1015,7 @@ package android {
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
     field public static final int selectableItemBackground = 16843534; // 0x101030e
+    field public static final int selectableItemBackgroundBorderless = 16843867; // 0x101045b
     field public static final int selectedDateVerticalBar = 16843591; // 0x1010347
     field public static final int selectedWeekBackgroundColor = 16843586; // 0x1010342
     field public static final int sessionService = 16843841; // 0x1010441
@@ -11470,6 +11471,7 @@ package android.graphics.drawable {
   }
 
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
+    ctor public RippleDrawable(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
   }
 
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {

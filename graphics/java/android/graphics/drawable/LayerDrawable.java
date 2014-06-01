@@ -304,7 +304,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param right The right padding of the new layer.
      * @param bottom The bottom padding of the new layer.
      */
-    private void addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
+    void addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
             int bottom) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
