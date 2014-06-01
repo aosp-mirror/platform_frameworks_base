@@ -17,6 +17,7 @@
 package android.tv;
 
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.tv.ITvInputSession;
 import android.view.InputChannel;
 
@@ -29,4 +30,6 @@ oneway interface ITvInputClient {
     void onSessionCreated(in String inputId, IBinder token, in InputChannel channel, int seq);
     void onAvailabilityChanged(in String inputId, boolean isAvailable);
     void onSessionReleased(int seq);
+    void onSessionEvent(in String name, in Bundle args, int seq);
+    void onVideoSizeChanged(int width, int height, int seq);
 }

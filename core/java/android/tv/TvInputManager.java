@@ -18,6 +18,7 @@ package android.tv;
 
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -85,6 +86,29 @@ public final class TvInputManager {
          */
         public void onSessionReleased(Session session) {
         }
+
+        /**
+         * This is called at the beginning of the playback of a channel and later when the size of
+         * the video has been changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param width the width of the video
+         * @param height the height of the video
+         * @hide
+         */
+        public void onVideoSizeChanged(Session session, int width, int height) {
+        }
+
+        /**
+         * This is called when a custom event has been sent from this session.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param eventType The type of the event.
+         * @param eventArgs Optional arguments of the event.
+         * @hide
+         */
+        public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
+        }
     }
 
     private static final class SessionCallbackRecord {
@@ -113,6 +137,24 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onSessionReleased(mSession);
+                }
+            });
+        }
+
+        public void postVideoSizeChanged(final int width, final int height) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onVideoSizeChanged(mSession, width, height);
+                }
+            });
+        }
+
+        public void postSessionEvent(final String eventType, final Bundle eventArgs) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionEvent(mSession, eventType, eventArgs);
                 }
             });
         }
@@ -192,6 +234,30 @@ public final class TvInputManager {
                     }
                     record.mSession.releaseInternal();
                     record.postSessionReleased();
+                }
+            }
+
+            @Override
+            public void onVideoSizeChanged(int width, int height, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postVideoSizeChanged(width, height);
+                }
+            }
+
+            @Override
+            public void onSessionEvent(String eventType, Bundle eventArgs, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSessionEvent(eventType, eventArgs);
                 }
             }
 

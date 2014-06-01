@@ -33,6 +33,7 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -336,6 +337,41 @@ public final class TvInputManagerService extends SystemService {
                                 sessionToken, channels[0], sessionState.mSeq, userId);
                     }
                     channels[0].dispose();
+                }
+            }
+
+            @Override
+            public void onVideoSizeChanged(int width, int height) throws RemoteException {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onVideoSizeChanged(width, height, sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onSessionEvent");
+                    }
+                }
+            }
+
+            @Override
+            public void onSessionEvent(String eventType, Bundle eventArgs) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onEvent(what=" + eventType + ", data=" + eventArgs + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onSessionEvent(eventType, eventArgs,
+                                sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onSessionEvent");
+                    }
                 }
             }
         };
