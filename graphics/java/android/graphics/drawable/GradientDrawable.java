@@ -1153,6 +1153,10 @@ public class GradientDrawable extends Drawable {
         // Extract the theme attributes, if any.
         st.mAttrPadding = a.extractThemeAttrs();
 
+        if (st.mPadding == null) {
+            st.mPadding = new Rect();
+        }
+
         final Rect pad = st.mPadding;
         pad.set(a.getDimensionPixelOffset(R.styleable.GradientDrawablePadding_left, pad.left),
                 a.getDimensionPixelOffset(R.styleable.GradientDrawablePadding_top, pad.top),
@@ -1424,8 +1428,6 @@ public class GradientDrawable extends Drawable {
     }
 
     final static class GradientState extends ConstantState {
-        public final Rect mPadding = new Rect();
-
         public int mChangingConfigurations;
         public int mShape = RECTANGLE;
         public int mGradient = LINEAR_GRADIENT;
@@ -1442,6 +1444,7 @@ public class GradientDrawable extends Drawable {
         public float mStrokeDashGap;
         public float mRadius;    // use this if mRadiusArray is null
         public float[] mRadiusArray;
+        public Rect mPadding;
         public int mWidth = -1;
         public int mHeight = -1;
         public float mInnerRadiusRatio = DEFAULT_INNER_RADIUS_RATIO;
@@ -1491,7 +1494,7 @@ public class GradientDrawable extends Drawable {
                 mRadiusArray = state.mRadiusArray.clone();
             }
             if (state.mPadding != null) {
-                mPadding.set(state.mPadding);
+                mPadding = new Rect(state.mPadding);
             }
             mWidth = state.mWidth;
             mHeight = state.mHeight;
