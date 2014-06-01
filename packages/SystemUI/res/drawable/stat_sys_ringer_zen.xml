@@ -15,8 +15,8 @@ Copyright (C) 2014 The Android Open Source Project
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" >
     <size
-        android:width="19dp"
-        android:height="19dp"/>
+        android:width="18dp"
+        android:height="18dp"/>
 
     <viewport
         android:viewportWidth="48.0"

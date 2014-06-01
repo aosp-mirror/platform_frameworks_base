@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,14 +30,13 @@ import java.util.Set;
 public class BluetoothControllerImpl extends BroadcastReceiver implements BluetoothController {
     private static final String TAG = "StatusBar.BluetoothController";
 
+    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+    private final Set<BluetoothDevice> mBondedDevices = new HashSet<BluetoothDevice>();
     private final BluetoothAdapter mAdapter;
 
-    private boolean mEnabled = false;
-
-    private Set<BluetoothDevice> mBondedDevices = new HashSet<BluetoothDevice>();
-
-    private ArrayList<BluetoothStateChangeCallback> mChangeCallbacks =
-            new ArrayList<BluetoothStateChangeCallback>();
+    private boolean mEnabled;
+    private boolean mConnecting;
+    private BluetoothDevice mLastDevice;
 
     public BluetoothControllerImpl(Context context) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -57,14 +55,14 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
         updateBondedBluetoothDevices();
     }
 
-    public void addStateChangedCallback(BluetoothStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
+    public void addStateChangedCallback(Callback cb) {
+        mCallbacks.add(cb);
         fireCallback(cb);
     }
 
     @Override
-    public void removeStateChangedCallback(BluetoothStateChangeCallback cb) {
-        mChangeCallbacks.remove(cb);
+    public void removeStateChangedCallback(Callback cb) {
+        mCallbacks.remove(cb);
     }
 
     @Override
@@ -76,6 +74,12 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
     public boolean isBluetoothConnected() {
         return mAdapter != null
                 && mAdapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED;
+    }
+
+    @Override
+    public boolean isBluetoothConnecting() {
+        return mAdapter != null
+                && mAdapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTING;
     }
 
     @Override
@@ -99,12 +103,24 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
     }
 
     @Override
+    public String getLastDeviceName() {
+        return mLastDevice != null ? mLastDevice.getName()
+                : mBondedDevices.size() == 1 ? mBondedDevices.iterator().next().getName()
+                : null;
+    }
+
+    @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
 
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             handleAdapterStateChange(
                     intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR));
+        }
+        if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+            mConnecting = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1)
+                    == BluetoothAdapter.STATE_CONNECTING;
+            mLastDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
         }
         fireCallbacks();
         updateBondedBluetoothDevices();
@@ -131,12 +147,12 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
     }
 
     private void fireCallbacks() {
-        for (BluetoothStateChangeCallback cb : mChangeCallbacks) {
+        for (Callback cb : mCallbacks) {
             fireCallback(cb);
         }
     }
 
-    private void fireCallback(BluetoothStateChangeCallback cb) {
-        cb.onBluetoothStateChange(mEnabled);
+    private void fireCallback(Callback cb) {
+        cb.onBluetoothStateChange(mEnabled, mConnecting);
     }
 }

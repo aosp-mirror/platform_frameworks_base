@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.Intent;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -70,18 +71,27 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         final boolean supported = mController.isBluetoothSupported();
         final boolean enabled = mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
+        final boolean connecting = mController.isBluetoothConnecting();
         state.visible = supported;
         state.value = enabled;
         final String stateContentDescription;
         if (enabled) {
+            state.label = null;
             if (connected) {
                 state.iconId = R.drawable.ic_qs_bluetooth_connected;
                 stateContentDescription = mContext.getString(R.string.accessibility_desc_connected);
+                state.label = mController.getLastDeviceName();
+            } else if (connecting) {
+                state.iconId = R.drawable.ic_qs_bluetooth_connecting;
+                stateContentDescription = mContext.getString(R.string.accessibility_desc_connecting);
+                state.label = mController.getLastDeviceName();
             } else {
                 state.iconId = R.drawable.ic_qs_bluetooth_on;
                 stateContentDescription = mContext.getString(R.string.accessibility_desc_on);
             }
-            state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
+            if (TextUtils.isEmpty(state.label)) {
+                state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
+            }
         } else {
             state.iconId = R.drawable.ic_qs_bluetooth_off;
             state.label = mContext.getString(R.string.quick_settings_bluetooth_off_label);
@@ -91,9 +101,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                 R.string.accessibility_quick_settings_bluetooth, stateContentDescription);
     }
 
-    private final BluetoothStateChangeCallback mCallback = new BluetoothStateChangeCallback() {
+    private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {
         @Override
-        public void onBluetoothStateChange(boolean on) {
+        public void onBluetoothStateChange(boolean enabled, boolean connecting) {
             refreshState();
         }
     };
