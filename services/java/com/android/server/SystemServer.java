@@ -80,6 +80,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
@@ -938,6 +939,12 @@ public final class SystemServer {
                 }
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
+            }
+
+            try {
+                mSystemServiceManager.startService(RestrictionsManagerService.class);
+            } catch (Throwable e) {
+                reportWtf("starting RestrictionsManagerService", e);
             }
 
             try {

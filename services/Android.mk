@@ -25,6 +25,7 @@ services := \
     backup \
     devicepolicy \
     print \
+    restrictions \
     usb \
     voiceinteraction
 

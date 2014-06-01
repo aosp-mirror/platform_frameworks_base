@@ -130,6 +130,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final boolean DBG = false;
 
+    private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
+
     final Context mContext;
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
@@ -189,6 +191,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // This is the list of component allowed to start lock task mode.
         final List<ComponentName> mLockTaskComponents = new ArrayList<ComponentName>();
+
+        ComponentName mRestrictionsProvider;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -944,6 +948,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, "policies");
+            if (policy.mRestrictionsProvider != null) {
+                out.attribute(null, ATTR_PERMISSION_PROVIDER,
+                        policy.mRestrictionsProvider.flattenToString());
+            }
 
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -1039,6 +1047,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new XmlPullParserException(
                         "Settings do not start with policies tag: found " + tag);
             }
+
+            // Extract the permission provider component name if available
+            String permissionProvider = parser.getAttributeValue(null, ATTR_PERMISSION_PROVIDER);
+            if (permissionProvider != null) {
+                policy.mRestrictionsProvider = ComponentName.unflattenFromString(permissionProvider);
+            }
+
             type = parser.next();
             int outerDepth = parser.getDepth();
             policy.mLockTaskComponents.clear();
@@ -3300,6 +3315,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 restoreCallingIdentity(id);
             }
+        }
+    }
+
+    @Override
+    public void setRestrictionsProvider(ComponentName who, ComponentName permissionProvider) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            int userHandle = UserHandle.getCallingUserId();
+            DevicePolicyData userData = getUserData(userHandle);
+            userData.mRestrictionsProvider = permissionProvider;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    @Override
+    public ComponentName getRestrictionsProvider(int userHandle) {
+        synchronized (this) {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("Only the system can query the permission provider");
+            }
+            DevicePolicyData userData = getUserData(userHandle);
+            return userData != null ? userData.mRestrictionsProvider : null;
         }
     }
 

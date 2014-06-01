@@ -35,7 +35,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IIntentReceiver;
 import android.content.IntentSender;
+import android.content.IRestrictionsManager;
 import android.content.ReceiverCallNotAllowedException;
+import android.content.RestrictionsManager;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -662,6 +664,13 @@ class ContextImpl extends Context {
             }
         });
 
+        registerService(RESTRICTIONS_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(RESTRICTIONS_SERVICE);
+                IRestrictionsManager service = IRestrictionsManager.Stub.asInterface(b);
+                return new RestrictionsManager(ctx, service);
+            }
+        });
         registerService(PRINT_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);

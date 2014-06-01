@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.RestrictionsManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -2320,4 +2321,23 @@ public class DevicePolicyManager {
         }
     }
 
+    /**
+     * Designates a specific broadcast receiver component as the provider for
+     * making permission requests of a local or remote administrator of the user.
+     * <p/>
+     * Only a profile owner can designate the restrictions provider.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param receiver The component name of a BroadcastReceiver that handles the
+     * {@link RestrictionsManager#ACTION_REQUEST_PERMISSION} intent. If this param is null,
+     * it removes the restrictions provider previously assigned.
+     */
+    public void setRestrictionsProvider(ComponentName admin, ComponentName receiver) {
+        if (mService != null) {
+            try {
+                mService.setRestrictionsProvider(admin, receiver);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to set permission provider on device policy service");
+            }
+        }
+    }
 }
