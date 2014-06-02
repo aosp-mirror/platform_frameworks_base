@@ -715,6 +715,9 @@ public class StackStateAnimator {
 
     public void animateOverScrollToAmount(float targetAmount, final boolean onTop) {
         final float startOverScrollAmount = mHostLayout.getCurrentOverScrollAmount(onTop);
+        if (targetAmount == startOverScrollAmount) {
+            return;
+        }
         cancelOverScrollAnimators(onTop);
         ValueAnimator overScrollAnimator = ValueAnimator.ofFloat(startOverScrollAmount,
                 targetAmount);

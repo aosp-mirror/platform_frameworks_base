@@ -27,10 +27,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.StatusBarState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,13 +47,16 @@ public abstract class PanelView extends FrameLayout {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
+    protected PhoneStatusBar mStatusBar;
     private float mPeekHeight;
+    private float mHintDistance;
     private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
     private boolean mJustPeeked;
     private boolean mClosing;
     private boolean mTracking;
+    private boolean mTouchSlopExceeded;
     private int mTrackingPointer;
     protected int mTouchSlop;
 
@@ -65,6 +71,9 @@ public abstract class PanelView extends FrameLayout {
     private String mViewName;
     private float mInitialTouchY;
     private float mInitialTouchX;
+
+    private Interpolator mLinearOutSlowInInterpolator;
+    private Interpolator mBounceInterpolator;
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
@@ -89,6 +98,9 @@ public abstract class PanelView extends FrameLayout {
     public PanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
+        mLinearOutSlowInInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
+        mBounceInterpolator = new BounceInterpolator();
     }
 
     protected void loadDimens() {
@@ -98,6 +110,7 @@ public abstract class PanelView extends FrameLayout {
 
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
+        mHintDistance = res.getDimension(R.dimen.hint_move_distance);
     }
 
     private void trackMovement(MotionEvent event) {
@@ -138,6 +151,7 @@ public abstract class PanelView extends FrameLayout {
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 mInitialOffsetOnTouch = mExpandedHeight;
+                mTouchSlopExceeded = false;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -170,16 +184,18 @@ public abstract class PanelView extends FrameLayout {
 
             case MotionEvent.ACTION_MOVE:
                 float h = y - mInitialTouchY;
-                if (waitForTouchSlop && !mTracking && Math.abs(h) > mTouchSlop
-                        && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
-                    mInitialOffsetOnTouch = mExpandedHeight;
-                    mInitialTouchX = x;
-                    mInitialTouchY = y;
-                    if (mHeightAnimator != null) {
-                        mHeightAnimator.cancel(); // end any outstanding animations
+                if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
+                    mTouchSlopExceeded = true;
+                    if (waitForTouchSlop && !mTracking) {
+                        mInitialOffsetOnTouch = mExpandedHeight;
+                        mInitialTouchX = x;
+                        mInitialTouchY = y;
+                        if (mHeightAnimator != null) {
+                            mHeightAnimator.cancel(); // end any outstanding animations
+                        }
+                        onTrackingStarted();
+                        h = 0;
                     }
-                    onTrackingStarted();
-                    h = 0;
                 }
                 final float newHeight = h + mInitialOffsetOnTouch;
                 if (newHeight > mPeekHeight) {
@@ -200,10 +216,15 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 mTrackingPointer = -1;
                 trackMovement(event);
-                float vel = getCurrentVelocity();
-                boolean expand = flingExpands(vel);
-                onTrackingStopped(expand);
-                fling(vel, expand);
+                if (mTracking && mTouchSlopExceeded) {
+                    float vel = getCurrentVelocity();
+                    boolean expand = flingExpands(vel);
+                    onTrackingStopped(expand);
+                    fling(vel, expand);
+                } else {
+                    boolean expands = onEmptySpaceClick();
+                    onTrackingStopped(expands);
+                }
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -264,6 +285,7 @@ public abstract class PanelView extends FrameLayout {
                 }
                 mInitialTouchY = y;
                 mInitialTouchX = x;
+                mTouchSlopExceeded = false;
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -287,6 +309,7 @@ public abstract class PanelView extends FrameLayout {
                         mInitialTouchY = y;
                         mInitialTouchX = x;
                         mTracking = true;
+                        mTouchSlopExceeded = true;
                         onTrackingStarted();
                         return true;
                     }
@@ -344,7 +367,7 @@ public abstract class PanelView extends FrameLayout {
             mBar.panelExpansionChanged(this, mExpandedFraction);
             return;
         }
-        ValueAnimator animator = ValueAnimator.ofFloat(mExpandedHeight, target);
+        ValueAnimator animator = createHeightAnimator(target);
         if (expand) {
             mFlingAnimationUtils.apply(animator, mExpandedHeight, target, vel, getHeight());
         } else {
@@ -356,12 +379,6 @@ public abstract class PanelView extends FrameLayout {
                 animator.setDuration((long) (animator.getDuration() / 1.75f));
             }
         }
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                setExpandedHeight((Float) animation.getAnimatedValue());
-            }
-        });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -449,9 +466,7 @@ public abstract class PanelView extends FrameLayout {
         mOverExpansion = overExpansion;
     }
 
-    protected void onHeightUpdated(float expandedHeight) {
-        requestLayout();
-    }
+    protected abstract void onHeightUpdated(float expandedHeight);
 
     /**
      * This returns the maximum height of the panel. Children should override this if their
@@ -523,6 +538,101 @@ public abstract class PanelView extends FrameLayout {
     public void cancelPeek() {
         if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
             mPeekAnimator.cancel();
+        }
+    }
+
+    protected void startUnlockHintAnimation() {
+
+        // We don't need to hint the user if an animation is already running or the user is changing
+        // the expansion.
+        if (mHeightAnimator != null || mTracking) {
+            return;
+        }
+        cancelPeek();
+        onExpandingStarted();
+        startUnlockHintAnimationPhase1();
+        mStatusBar.onUnlockHintStarted();
+    }
+
+    /**
+     * Phase 1: Move everything upwards.
+     */
+    private void startUnlockHintAnimationPhase1() {
+        float target = Math.max(0, getMaxPanelHeight() - mHintDistance);
+        ValueAnimator animator = createHeightAnimator(target);
+        animator.setDuration(250);
+        animator.setInterpolator(mLinearOutSlowInInterpolator);
+        animator.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mCancelled) {
+                    mHeightAnimator = null;
+                    onExpandingFinished();
+                    mStatusBar.onUnlockHintFinished();
+                } else {
+                    startUnlockHintAnimationPhase2();
+                }
+            }
+        });
+        animator.start();
+        mHeightAnimator = animator;
+    }
+
+    /**
+     * Phase 2: Bounce down.
+     */
+    private void startUnlockHintAnimationPhase2() {
+        ValueAnimator animator = createHeightAnimator(getMaxPanelHeight());
+        animator.setDuration(450);
+        animator.setInterpolator(mBounceInterpolator);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mHeightAnimator = null;
+                onExpandingFinished();
+                mStatusBar.onUnlockHintFinished();
+            }
+        });
+        animator.start();
+        mHeightAnimator = animator;
+    }
+
+    private ValueAnimator createHeightAnimator(float targetHeight) {
+        ValueAnimator animator = ValueAnimator.ofFloat(mExpandedHeight, targetHeight);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                setExpandedHeight((Float) animation.getAnimatedValue());
+            }
+        });
+        return animator;
+    }
+
+    /**
+     * Gets called when the user performs a click anywhere in the empty area of the panel.
+     *
+     * @return whether the panel will be expanded after the action performed by this method
+     */
+    private boolean onEmptySpaceClick() {
+        switch (mStatusBar.getBarState()) {
+            case StatusBarState.KEYGUARD:
+                startUnlockHintAnimation();
+                return true;
+            case StatusBarState.SHADE_LOCKED:
+                // TODO: Go to Keyguard again.
+                return true;
+            case StatusBarState.SHADE:
+                collapse();
+                return false;
+            default:
+                return true;
         }
     }
 
