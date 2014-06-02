@@ -570,9 +570,9 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             mMenu = new MenuBuilder(context);
             mMenu.setCallback(new MenuBuilderCallback());
             mPresenter = new ActionMenuPresenter(context);
-            mPresenter.setMenuView(this);
             mPresenter.setCallback(new ActionMenuPresenterCallback());
             mMenu.addMenuPresenter(mPresenter);
+            mPresenter.setMenuView(this);
         }
 
         return mMenu;
@@ -650,6 +650,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         return false;
+    }
+
+    /** @hide */
+    public void setExpandedActionViewsExclusive(boolean exclusive) {
+        mPresenter.setExpandedActionViewsExclusive(exclusive);
     }
 
     /**

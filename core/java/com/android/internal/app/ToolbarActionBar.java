@@ -23,37 +23,50 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.view.ActionMode;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.SpinnerAdapter;
 import android.widget.Toolbar;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.widget.DecorToolbar;
+import com.android.internal.widget.ToolbarWidgetWrapper;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class ToolbarActionBar extends ActionBar {
     private Toolbar mToolbar;
-    private View mCustomView;
-
-    private int mDisplayOptions;
-
-    private int mNavResId;
-    private int mIconResId;
-    private int mLogoResId;
-    private Drawable mNavDrawable;
-    private Drawable mIconDrawable;
-    private Drawable mLogoDrawable;
-    private int mTitleResId;
-    private int mSubtitleResId;
-    private CharSequence mTitle;
-    private CharSequence mSubtitle;
+    private DecorToolbar mDecorToolbar;
+    private Window.Callback mWindowCallback;
 
     private boolean mLastMenuVisibility;
     private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
             new ArrayList<OnMenuVisibilityListener>();
 
-    public ToolbarActionBar(Toolbar toolbar) {
+    private final Runnable mMenuInvalidator = new Runnable() {
+        @Override
+        public void run() {
+            populateOptionsMenu();
+        }
+    };
+
+    private final Toolbar.OnMenuItemClickListener mMenuClicker =
+            new Toolbar.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            return mWindowCallback.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, item);
+        }
+    };
+
+    public ToolbarActionBar(Toolbar toolbar, CharSequence title, Window.Callback windowCallback) {
         mToolbar = toolbar;
+        mDecorToolbar = new ToolbarWidgetWrapper(toolbar);
+        mWindowCallback = windowCallback;
+        toolbar.setOnMenuItemClickListener(mMenuClicker);
+        mDecorToolbar.setWindowTitle(title);
     }
 
     @Override
@@ -63,19 +76,8 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setCustomView(View view, LayoutParams layoutParams) {
-        if (mCustomView != null) {
-            mToolbar.removeView(mCustomView);
-        }
-        mCustomView = view;
-        if (view != null) {
-            mToolbar.addView(view, generateLayoutParams(layoutParams));
-        }
-    }
-
-    private Toolbar.LayoutParams generateLayoutParams(LayoutParams lp) {
-        final Toolbar.LayoutParams result = new Toolbar.LayoutParams(lp);
-        result.gravity = lp.gravity;
-        return result;
+        view.setLayoutParams(layoutParams);
+        mDecorToolbar.setCustomView(view);
     }
 
     @Override
@@ -86,48 +88,22 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setIcon(int resId) {
-        mIconResId = resId;
-        mIconDrawable = null;
-        updateToolbarLogo();
+        mDecorToolbar.setIcon(resId);
     }
 
     @Override
     public void setIcon(Drawable icon) {
-        mIconResId = 0;
-        mIconDrawable = icon;
-        updateToolbarLogo();
+        mDecorToolbar.setIcon(icon);
     }
 
     @Override
     public void setLogo(int resId) {
-        mLogoResId = resId;
-        mLogoDrawable = null;
-        updateToolbarLogo();
+        mDecorToolbar.setLogo(resId);
     }
 
     @Override
     public void setLogo(Drawable logo) {
-        mLogoResId = 0;
-        mLogoDrawable = logo;
-        updateToolbarLogo();
-    }
-
-    private void updateToolbarLogo() {
-        Drawable drawable = null;
-        if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) != 0) {
-            final int resId;
-            if ((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
-                resId = mLogoResId;
-                drawable = mLogoDrawable;
-            } else {
-                resId = mIconResId;
-                drawable = mIconDrawable;
-            }
-            if (resId != 0) {
-                drawable = mToolbar.getContext().getDrawable(resId);
-            }
-        }
-        mToolbar.setLogo(drawable);
+        mDecorToolbar.setLogo(logo);
     }
 
     @Override
@@ -219,42 +195,22 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setTitle(CharSequence title) {
-        mTitle = title;
-        mTitleResId = 0;
-        updateToolbarTitle();
+        mDecorToolbar.setTitle(title);
     }
 
     @Override
     public void setTitle(int resId) {
-        mTitleResId = resId;
-        mTitle = null;
-        updateToolbarTitle();
+        mDecorToolbar.setTitle(resId != 0 ? mDecorToolbar.getContext().getText(resId) : null);
     }
 
     @Override
     public void setSubtitle(CharSequence subtitle) {
-        mSubtitle = subtitle;
-        mSubtitleResId = 0;
-        updateToolbarTitle();
+        mDecorToolbar.setSubtitle(subtitle);
     }
 
     @Override
     public void setSubtitle(int resId) {
-        mSubtitleResId = resId;
-        mSubtitle = null;
-        updateToolbarTitle();
-    }
-
-    private void updateToolbarTitle() {
-        final Context context = mToolbar.getContext();
-        CharSequence title = null;
-        CharSequence subtitle = null;
-        if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-            title = mTitleResId != 0 ? context.getText(mTitleResId) : mTitle;
-            subtitle = mSubtitleResId != 0 ? context.getText(mSubtitleResId) : mSubtitle;
-        }
-        mToolbar.setTitle(title);
-        mToolbar.setSubtitle(subtitle);
+        mDecorToolbar.setSubtitle(resId != 0 ? mDecorToolbar.getContext().getText(resId) : null);
     }
 
     @Override
@@ -264,9 +220,8 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setDisplayOptions(@DisplayOptions int options, @DisplayOptions int mask) {
-        final int oldOptions = mDisplayOptions;
-        mDisplayOptions = (options & mask) | (mDisplayOptions & ~mask);
-        final int optionsChanged = oldOptions ^ mDisplayOptions;
+        mDecorToolbar.setDisplayOptions((options & mask) |
+                mDecorToolbar.getDisplayOptions() & ~mask);
     }
 
     @Override
@@ -301,7 +256,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public View getCustomView() {
-        return mCustomView;
+        return mDecorToolbar.getCustomView();
     }
 
     @Override
@@ -327,7 +282,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public int getDisplayOptions() {
-        return mDisplayOptions;
+        return mDecorToolbar.getDisplayOptions();
     }
 
     @Override
@@ -423,6 +378,54 @@ public class ToolbarActionBar extends ActionBar {
     @Override
     public boolean isShowing() {
         return mToolbar.getVisibility() == View.VISIBLE;
+    }
+
+    @Override
+    public boolean openOptionsMenu() {
+        return mToolbar.showOverflowMenu();
+    }
+
+    @Override
+    public boolean invalidateOptionsMenu() {
+        mToolbar.removeCallbacks(mMenuInvalidator);
+        mToolbar.postOnAnimation(mMenuInvalidator);
+        return true;
+    }
+
+    @Override
+    public boolean collapseActionView() {
+        if (mToolbar.hasExpandedActionView()) {
+            mToolbar.collapseActionView();
+            return true;
+        }
+        return false;
+    }
+
+    void populateOptionsMenu() {
+        final Menu menu = mToolbar.getMenu();
+        final MenuBuilder mb = menu instanceof MenuBuilder ? (MenuBuilder) menu : null;
+        if (mb != null) {
+            mb.stopDispatchingItemsChanged();
+        }
+        try {
+            menu.clear();
+            if (!mWindowCallback.onCreatePanelMenu(Window.FEATURE_OPTIONS_PANEL, menu) ||
+                    !mWindowCallback.onPreparePanel(Window.FEATURE_OPTIONS_PANEL, null, menu)) {
+                menu.clear();
+            }
+        } finally {
+            if (mb != null) {
+                mb.startDispatchingItemsChanged();
+            }
+        }
+    }
+
+    @Override
+    public boolean onMenuKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            openOptionsMenu();
+        }
+        return true;
     }
 
     public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {

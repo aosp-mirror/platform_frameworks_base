@@ -2083,7 +2083,8 @@ public class Activity extends ContextThemeWrapper
                     "by the window decor. Do not request Window.FEATURE_ACTION_BAR and set " +
                     "android:windowActionBar to false in your theme to use a Toolbar instead.");
         }
-        mActionBar = new ToolbarActionBar(toolbar);
+        mActionBar = new ToolbarActionBar(toolbar, getTitle(), this);
+        mActionBar.invalidateOptionsMenu();
     }
     
     /**
@@ -2449,6 +2450,10 @@ public class Activity extends ContextThemeWrapper
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
+        if (mActionBar != null && mActionBar.collapseActionView()) {
+            return;
+        }
+
         if (!mFragments.popBackStackImmediate()) {
             finishAfterTransition();
         }
@@ -2660,6 +2665,14 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         onUserInteraction();
+
+        // Let action bars open menus in response to the menu key prioritized over
+        // the window handling it
+        if (event.getKeyCode() == KeyEvent.KEYCODE_MENU &&
+                mActionBar != null && mActionBar.onMenuKeyEvent(event)) {
+            return true;
+        }
+
         Window win = getWindow();
         if (win.superDispatchKeyEvent(event)) {
             return true;
@@ -2907,7 +2920,9 @@ public class Activity extends ContextThemeWrapper
      * time it needs to be displayed.
      */
     public void invalidateOptionsMenu() {
-        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+        if (mActionBar == null || !mActionBar.invalidateOptionsMenu()) {
+            mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+        }
     }
     
     /**
@@ -3117,7 +3132,9 @@ public class Activity extends ContextThemeWrapper
      * open, this method does nothing.
      */
     public void openOptionsMenu() {
-        mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
+        if (mActionBar == null || !mActionBar.openOptionsMenu()) {
+            mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
+        }
     }
     
     /**
