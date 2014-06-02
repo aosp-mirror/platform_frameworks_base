@@ -905,7 +905,7 @@ public class ConnectivityManager {
         return null;
     }
 
-    private int networkTypeForNetworkCapabilities(NetworkCapabilities netCap) {
+    private int legacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
         if (netCap == null) return TYPE_NONE;
         if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
             return TYPE_MOBILE_CBS;
@@ -927,6 +927,9 @@ public class ConnectivityManager {
         }
         if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             return TYPE_MOBILE_HIPRI;
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P)) {
+            return TYPE_WIFI_P2P;
         }
         return TYPE_NONE;
     }
@@ -988,7 +991,7 @@ public class ConnectivityManager {
 
     private NetworkRequest requestNetworkForFeatureLocked(NetworkCapabilities netCap) {
         int delay = -1;
-        int type = networkTypeForNetworkCapabilities(netCap);
+        int type = legacyTypeForNetworkCapabilities(netCap);
         try {
             delay = mService.getRestoreDefaultNetworkDelay(type);
         } catch (RemoteException e) {}
@@ -997,7 +1000,7 @@ public class ConnectivityManager {
         l.delay = delay;
         l.expireSequenceNumber = 0;
         l.networkRequest = sendRequestForNetwork(netCap, l.networkCallbackListener, 0,
-                REQUEST, true);
+                REQUEST, type);
         if (l.networkRequest == null) return null;
         sLegacyRequests.put(netCap, l);
         sendExpireMsgForFeature(netCap, l.expireSequenceNumber, delay);
@@ -2144,7 +2147,7 @@ public class ConnectivityManager {
 
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
             NetworkCallbackListener networkCallbackListener, int timeoutSec, int action,
-            boolean legacy) {
+            int legacyType) {
         NetworkRequest networkRequest = null;
         if (networkCallbackListener == null) {
             throw new IllegalArgumentException("null NetworkCallbackListener");
@@ -2157,7 +2160,7 @@ public class ConnectivityManager {
                         new Binder());
             } else {
                 networkRequest = mService.requestNetwork(need, new Messenger(sCallbackHandler),
-                        timeoutSec, new Binder(), legacy);
+                        timeoutSec, new Binder(), legacyType);
             }
             if (networkRequest != null) {
                 synchronized(sNetworkCallbackListener) {
@@ -2187,7 +2190,7 @@ public class ConnectivityManager {
      */
     public NetworkRequest requestNetwork(NetworkCapabilities need,
             NetworkCallbackListener networkCallbackListener) {
-        return sendRequestForNetwork(need, networkCallbackListener, 0, REQUEST, false);
+        return sendRequestForNetwork(need, networkCallbackListener, 0, REQUEST, TYPE_NONE);
     }
 
     /**
@@ -2210,7 +2213,8 @@ public class ConnectivityManager {
      */
     public NetworkRequest requestNetwork(NetworkCapabilities need,
             NetworkCallbackListener networkCallbackListener, int timeoutSec) {
-        return sendRequestForNetwork(need, networkCallbackListener, timeoutSec, REQUEST, false);
+        return sendRequestForNetwork(need, networkCallbackListener, timeoutSec, REQUEST,
+                TYPE_NONE);
     }
 
     /**
@@ -2288,7 +2292,7 @@ public class ConnectivityManager {
      */
     public NetworkRequest listenForNetwork(NetworkCapabilities need,
             NetworkCallbackListener networkCallbackListener) {
-        return sendRequestForNetwork(need, networkCallbackListener, 0, LISTEN, false);
+        return sendRequestForNetwork(need, networkCallbackListener, 0, LISTEN, TYPE_NONE);
     }
 
     /**

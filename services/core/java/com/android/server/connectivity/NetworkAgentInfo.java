@@ -45,18 +45,6 @@ public class NetworkAgentInfo {
     public int currentScore;
     public final NetworkMonitor networkMonitor;
 
-    /**
-     * Indicates we need to send CONNECTIVITY_ACTION broadcasts for this network.
-     * For example the built-in default network request and any requsts coming from
-     * the deprecated startUsingNetworkFeature API will have this set.  Networks
-     * responding to the new requestNetwork API will rely on point to point callbacks.
-     *
-     * Gets set if any legacy requests get affiliated with this network and
-     * stays set for life so we send disconnected bcasts to match the connected,
-     * even if the legacy request has moved on.
-     */
-    public boolean needsBroadcasts = false;
-
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
     public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
@@ -78,8 +66,6 @@ public class NetworkAgentInfo {
     }
 
     public void addRequest(NetworkRequest networkRequest) {
-        if (networkRequest.needsBroadcasts) needsBroadcasts = true;
-
         networkRequests.put(networkRequest.requestId, networkRequest);
     }
 

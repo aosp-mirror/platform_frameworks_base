@@ -188,6 +188,15 @@ public class NetworkInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public void setType(int type) {
+        synchronized (this) {
+            mNetworkType = type;
+        }
+    }
+
+    /**
      * Return a network-type-specific integer describing the subtype
      * of the network.
      * @return the network subtype
