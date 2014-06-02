@@ -95,7 +95,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         if (dr == null) {

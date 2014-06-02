@@ -574,7 +574,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                     throw new FileNotFoundException("Failed to open " + uri);
                 }
                 try {
-                    return Drawable.createFromStreamThemed(stream, null, mContext.getTheme());
+                    return Drawable.createFromStream(stream, null);
                 } finally {
                     try {
                         stream.close();

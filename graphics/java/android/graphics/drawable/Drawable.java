@@ -892,13 +892,9 @@ public abstract class Drawable {
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
-        return createFromStreamThemed(is, srcName, null);
-    }
-
-    public static Drawable createFromStreamThemed(InputStream is, String srcName, Theme theme) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
         try {
-            return createFromResourceStreamThemed(null, null, is, srcName, theme);
+            return createFromResourceStream(null, null, is, srcName);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -910,14 +906,9 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
-        return createFromResourceStreamThemed(res, value, is, srcName, null);
-    }
-
-    public static Drawable createFromResourceStreamThemed(Resources res, TypedValue value,
-            InputStream is, String srcName, Theme theme) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
         try {
-            return createFromResourceStreamThemed(res, value, is, srcName, null, theme);
+            return createFromResourceStream(res, value, is, srcName);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -929,11 +920,6 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName, BitmapFactory.Options opts) {
-        return createFromResourceStreamThemed(res, value, is, srcName, opts, null);
-    }
-
-    public static Drawable createFromResourceStreamThemed(Resources res, TypedValue value,
-            InputStream is, String srcName, BitmapFactory.Options opts, Theme theme) {
         if (is == null) {
             return null;
         }
@@ -981,15 +967,15 @@ public abstract class Drawable {
      */
     public static Drawable createFromXml(Resources r, XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        return createFromXmlThemed(r, parser, null);
+        return createFromXml(r, parser, null);
     }
 
     /**
-     * Create a themed drawable from an XML document. For more information on
-     * how to create resources in XML, see
+     * Create a drawable from an XML document using an optional {@link Theme}.
+     * For more information on how to create resources in XML, see
      * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
      */
-    public static Drawable createFromXmlThemed(Resources r, XmlPullParser parser, Theme theme)
+    public static Drawable createFromXml(Resources r, XmlPullParser parser, Theme theme)
             throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
@@ -1003,7 +989,7 @@ public abstract class Drawable {
             throw new XmlPullParserException("No start tag found");
         }
 
-        Drawable drawable = createFromXmlInnerThemed(r, parser, attrs, theme);
+        Drawable drawable = createFromXmlInner(r, parser, attrs, theme);
 
         if (drawable == null) {
             throw new RuntimeException("Unknown initial tag: " + parser.getName());
@@ -1019,16 +1005,17 @@ public abstract class Drawable {
      */
     public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-        return createFromXmlInnerThemed(r, parser, attrs, null);
+        return createFromXmlInner(r, parser, attrs, null);
     }
 
     /**
-     * Create a themed drawable from inside an XML document. Called on a parser
-     * positioned at a tag in an XML document, tries to create a Drawable from
-     * that tag. Returns null if the tag is not a valid drawable.
+     * Create a drawable from inside an XML document using an optional
+     * {@link Theme}. Called on a parser positioned at a tag in an XML
+     * document, tries to create a Drawable from that tag. Returns {@code null}
+     * if the tag is not a valid drawable.
      */
-    public static Drawable createFromXmlInnerThemed(Resources r, XmlPullParser parser,
-            AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
+    public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
         final Drawable drawable;
 
         final String name = parser.getName();
