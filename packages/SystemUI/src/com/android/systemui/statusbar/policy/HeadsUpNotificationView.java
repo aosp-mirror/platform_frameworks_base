@@ -225,6 +225,11 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         }
     }
 
+    @Override
+    public void expansionStateChanged(boolean isExpanding) {
+
+    }
+
     // SwipeHelper.Callback methods
 
     @Override

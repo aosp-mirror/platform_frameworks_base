@@ -131,10 +131,14 @@ public class StackScrollAlgorithm {
         algorithmState.scrolledPixelsTop = 0;
         algorithmState.itemsInBottomStack = 0.0f;
         algorithmState.partialInBottom = 0.0f;
-        float topOverScroll = ambientState.getOverScrollAmount(true /* onTop */);
         float bottomOverScroll = ambientState.getOverScrollAmount(false /* onTop */);
-        algorithmState.scrollY = (int) (ambientState.getScrollY() + mCollapsedSize
-                + bottomOverScroll - topOverScroll);
+
+        int scrollY = ambientState.getScrollY();
+
+        // Due to the overScroller, the stackscroller can have negative scroll state. This is
+        // already accounted for by the top padding and doesn't need an additional adaption
+        scrollY = Math.max(0, scrollY);
+        algorithmState.scrollY = (int) (scrollY + mCollapsedSize + bottomOverScroll);
 
         updateVisibleChildren(resultState, algorithmState);
 

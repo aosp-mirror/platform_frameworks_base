@@ -83,10 +83,7 @@ public class NotificationPanelView extends PanelView implements
     private float mQsExpansionHeight;
     private int mQsMinExpansionHeight;
     private int mQsMaxExpansionHeight;
-    private int mMinStackHeight;
     private int mQsPeekHeight;
-    private float mNotificationTranslation;
-    private int mStackScrollerIntrinsicPadding;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
@@ -165,7 +162,6 @@ public class NotificationPanelView extends PanelView implements
         super.loadDimens();
         mNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notifications_top_padding);
-        mMinStackHeight = getResources().getDimensionPixelSize(R.dimen.collapsed_stack_height);
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.4f);
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
@@ -185,7 +181,8 @@ public class NotificationPanelView extends PanelView implements
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
         if (mQsExpanded) {
             if (mQsFullyExpanded) {
-                setQsStackScrollerPadding(mQsMaxExpansionHeight);
+                mQsExpansionHeight = mQsMaxExpansionHeight;
+                requestScrollerTopPaddingUpdate(false /* animate */);
             }
         } else {
             if (!mStackScrollerOverscrolling) {
@@ -202,11 +199,12 @@ public class NotificationPanelView extends PanelView implements
      */
     private void positionClockAndNotifications() {
         boolean animateClock = mNotificationStackScroller.isAddOrRemoveAnimationPending();
+        int stackScrollerPadding;
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
             int bottom = mStackScrollerOverscrolling
                     ? mHeader.getCollapsedHeight()
                     : mHeader.getBottom();
-            mStackScrollerIntrinsicPadding = bottom + mQsPeekHeight
+            stackScrollerPadding = bottom + mQsPeekHeight
                     + mNotificationTopPadding;
             mTopPaddingAdjustment = 0;
         } else {
@@ -224,11 +222,11 @@ public class NotificationPanelView extends PanelView implements
                 mKeyguardStatusView.setY(mClockPositionResult.clockY);
             }
             applyClockAlpha(mClockPositionResult.clockAlpha);
-            mStackScrollerIntrinsicPadding = mClockPositionResult.stackScrollerPadding;
+            stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
             mTopPaddingAdjustment = mClockPositionResult.stackScrollerPaddingAdjustment;
         }
-        mNotificationStackScroller.setTopPadding(mStackScrollerIntrinsicPadding,
-                mAnimateNextTopPaddingChange || animateClock);
+        mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
+        requestScrollerTopPaddingUpdate(animateClock);
         mAnimateNextTopPaddingChange = false;
     }
 
@@ -384,6 +382,7 @@ public class NotificationPanelView extends PanelView implements
                     mInitialTouchX = x;
                     mQsTracking = true;
                     mIntercepting = false;
+                    mNotificationStackScroller.removeLongPressCallback();
                     return true;
                 }
                 break;
@@ -523,6 +522,13 @@ public class NotificationPanelView extends PanelView implements
         updateQsState();
     }
 
+    @Override
+    public void flingTopOverscroll(float velocity, boolean open) {
+        mStackScrollerOverscrolling = false;
+        setQsExpansion(mQsExpansionHeight);
+        flingSettings(velocity, open);
+    }
+
     private void onQsExpansionStarted() {
         onQsExpansionStarted(0);
     }
@@ -554,7 +560,9 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setExpanded(expandVisually, mStackScrollerOverscrolling);
         mNotificationStackScroller.setEnabled(!mQsExpanded);
         mQsPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-        mQsContainer.setVisibility(mKeyguardShowing && !mQsExpanded ? View.INVISIBLE : View.VISIBLE);
+        mQsContainer.setVisibility(mKeyguardShowing && !expandVisually
+                ? View.INVISIBLE
+                : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
     }
 
@@ -569,9 +577,7 @@ public class NotificationPanelView extends PanelView implements
         mQsExpansionHeight = height;
         mHeader.setExpansion(height - mQsPeekHeight);
         setQsTranslation(height);
-        if (!mStackScrollerOverscrolling) {
-            setQsStackScrollerPadding(height);
-        }
+        requestScrollerTopPaddingUpdate(false /* animate */);
         mStatusBar.userActivity();
     }
 
@@ -579,24 +585,11 @@ public class NotificationPanelView extends PanelView implements
         mQsContainer.setY(height - mQsContainer.getHeight());
     }
 
-    private void setQsStackScrollerPadding(float height) {
-        float start = height - mScrollView.getScrollY() + mNotificationTopPadding;
-        float stackHeight = mNotificationStackScroller.getHeight() - start;
-        if (stackHeight <= mMinStackHeight) {
-            float overflow = mMinStackHeight - stackHeight;
-            stackHeight = mMinStackHeight;
-            start = mNotificationStackScroller.getHeight() - stackHeight;
-            mNotificationStackScroller.setTranslationY(overflow);
-            mNotificationTranslation = overflow + mScrollView.getScrollY();
-        } else {
-            mNotificationStackScroller.setTranslationY(0);
-            mNotificationTranslation = mScrollView.getScrollY();
-        }
-        mNotificationStackScroller.setTopPadding(clampQsStackScrollerPadding((int) start), false);
-    }
 
-    private int clampQsStackScrollerPadding(int desiredPadding) {
-        return Math.max(desiredPadding, mStackScrollerIntrinsicPadding);
+    private void requestScrollerTopPaddingUpdate(boolean animate) {
+        mNotificationStackScroller.updateTopPadding(mQsExpansionHeight,
+                mScrollView.getScrollY(),
+                mAnimateNextTopPaddingChange || animate);
     }
 
     private void trackMovement(MotionEvent event) {
@@ -705,9 +698,11 @@ public class NotificationPanelView extends PanelView implements
     protected int getMaxPanelHeight() {
         // TODO: Figure out transition for collapsing when QS is open, adjust height here.
         int maxPanelHeight = super.getMaxPanelHeight();
-        int emptyBottomMargin = mStackScrollerContainer.getHeight()
-                - mNotificationStackScroller.getHeight()
-                + mNotificationStackScroller.getEmptyBottomMargin();
+        int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
+        emptyBottomMargin = (int) Math.max(0,
+                emptyBottomMargin - mNotificationStackScroller.getCurrentOverScrollAmount(true));
+        emptyBottomMargin += mStackScrollerContainer.getHeight()
+                - mNotificationStackScroller.getHeight();
         int maxHeight = maxPanelHeight - emptyBottomMargin - mTopPaddingAdjustment;
         maxHeight = Math.max(maxHeight, mStatusBarMinHeight);
         return maxHeight;
@@ -814,13 +809,14 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onOverExpansionChanged(float overExpansion) {
-        float currentOverScroll = mNotificationStackScroller.getCurrentOverScrolledPixels(true);
-        float expansionChange = overExpansion - mOverExpansion;
-        expansionChange *= EXPANSION_RUBBER_BAND_EXTRA_FACTOR;
-        mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + expansionChange,
-                true /* onTop */,
-                false /* animate */);
-        super.onOverExpansionChanged(overExpansion);
+        if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
+            float currentOverScroll = mNotificationStackScroller.getCurrentOverScrolledPixels(true);
+            float expansionChange = overExpansion - mOverExpansion;
+            expansionChange *= EXPANSION_RUBBER_BAND_EXTRA_FACTOR;
+            mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + expansionChange,
+                    true /* onTop */,
+                    false /* animate */);
+        }
     }
 
     @Override
@@ -835,7 +831,6 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onTrackingStopped(boolean expand) {
         super.onTrackingStopped(expand);
-        mOverExpansion = 0.0f;
         mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */, true /* animate */);
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
@@ -860,8 +855,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void onScrollChanged() {
         if (mQsExpanded) {
-            mNotificationStackScroller.setTranslationY(
-                    mNotificationTranslation - mScrollView.getScrollY());
+            requestScrollerTopPaddingUpdate(false /* animate */);
         }
     }
 

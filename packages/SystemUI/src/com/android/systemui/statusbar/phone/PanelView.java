@@ -53,7 +53,7 @@ public abstract class PanelView extends FrameLayout {
     private int mEdgeTapAreaWidth;
     private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
-    private float mExpandedHeight = 0;
+    protected float mExpandedHeight = 0;
     private boolean mJustPeeked;
     private boolean mClosing;
     protected boolean mTracking;
@@ -369,8 +369,10 @@ public abstract class PanelView extends FrameLayout {
     protected void fling(float vel, boolean expand) {
         cancelPeek();
         float target = expand ? getMaxPanelHeight() : 0.0f;
-        if (target == mExpandedHeight) {
+        if (target == mExpandedHeight || mOverExpansion > 0) {
             onExpandingFinished();
+            mExpandedHeight = target;
+            mOverExpansion = 0.0f;
             mBar.panelExpansionChanged(this, mExpandedFraction);
             return;
         }
@@ -459,6 +461,7 @@ public abstract class PanelView extends FrameLayout {
         overExpansion = Math.max(0, overExpansion);
         if (overExpansion != mOverExpansion) {
             onOverExpansionChanged(overExpansion);
+            mOverExpansion = overExpansion;
         }
 
         if (DEBUG) {
@@ -469,9 +472,7 @@ public abstract class PanelView extends FrameLayout {
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : mExpandedHeight / fh);
     }
 
-    protected void onOverExpansionChanged(float overExpansion) {
-        mOverExpansion = overExpansion;
-    }
+    protected abstract void onOverExpansionChanged(float overExpansion);
 
     protected abstract void onHeightUpdated(float expandedHeight);
 
