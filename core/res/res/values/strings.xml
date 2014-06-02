@@ -419,6 +419,8 @@
         current device state, to send as an e-mail message.  It will take a little
         time from starting the bug report until it is ready to be sent; please be
         patient.</string>
+    <!-- Format for build summary info [CHAR LIMIT=NONE] -->
+    <string name="bugreport_status" translatable="false">%s (%s)</string>
 
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
