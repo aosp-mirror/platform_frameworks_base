@@ -107,6 +107,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_TYPE_STRING_ARRAY = "sa";
     private static final String ATTR_TYPE_STRING = "s";
     private static final String ATTR_TYPE_BOOLEAN = "b";
+    private static final String ATTR_TYPE_INTEGER = "i";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
@@ -1532,16 +1533,18 @@ public class UserManagerService extends IUserManager.Stub {
                         String [] valueStrings = new String[values.size()];
                         values.toArray(valueStrings);
                         restrictions.putStringArray(key, valueStrings);
-                    } else if (ATTR_TYPE_BOOLEAN.equals(valType)) {
-                        restrictions.putBoolean(key, Boolean.parseBoolean(
-                                parser.nextText().trim()));
                     } else {
                         String value = parser.nextText().trim();
-                        restrictions.putString(key, value);
+                        if (ATTR_TYPE_BOOLEAN.equals(valType)) {
+                            restrictions.putBoolean(key, Boolean.parseBoolean(value));
+                        } else if (ATTR_TYPE_INTEGER.equals(valType)) {
+                            restrictions.putInt(key, Integer.parseInt(value));
+                        } else {
+                            restrictions.putString(key, value);
+                        }
                     }
                 }
             }
-
         } catch (IOException ioe) {
         } catch (XmlPullParserException pe) {
         } finally {
@@ -1580,6 +1583,9 @@ public class UserManagerService extends IUserManager.Stub {
 
                 if (value instanceof Boolean) {
                     serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
+                    serializer.text(value.toString());
+                } else if (value instanceof Integer) {
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_INTEGER);
                     serializer.text(value.toString());
                 } else if (value == null || value instanceof String) {
                     serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);

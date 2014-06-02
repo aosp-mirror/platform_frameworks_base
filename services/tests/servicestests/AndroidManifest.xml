@@ -35,7 +35,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+
     <application>
         <uses-library android:name="android.test.runner" />
 
@@ -52,6 +53,15 @@
             <action android:name="android.accessibilityservice.AccessibilityService"/>
           </intent-filter>
         </service>
+
+        <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
+                android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data android:name="android.app.device_admin"
+                       android:resource="@xml/device_admin_sample" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
