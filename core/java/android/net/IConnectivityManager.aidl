@@ -158,7 +158,7 @@ interface IConnectivityManager
             in NetworkCapabilities nc, int score);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, int timeoutSec, in IBinder binder);
+            in Messenger messenger, int timeoutSec, in IBinder binder, boolean legacy);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation);
@@ -170,4 +170,6 @@ interface IConnectivityManager
             in PendingIntent operation);
 
     void releaseNetworkRequest(in NetworkRequest networkRequest);
+
+    int getRestoreDefaultNetworkDelay(int networkType);
 }
