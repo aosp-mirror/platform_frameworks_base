@@ -2537,7 +2537,9 @@ final class ActivityStack {
                     + " who=" + r.resultWho + " req=" + r.requestCode
                     + " res=" + resultCode + " data=" + resultData);
             if (resultTo.userId != r.userId) {
-                resultData.prepareToLeaveUser(r.userId);
+                if (resultData != null) {
+                    resultData.prepareToLeaveUser(r.userId);
+                }
             }
             if (r.info.applicationInfo.uid > 0) {
                 mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
