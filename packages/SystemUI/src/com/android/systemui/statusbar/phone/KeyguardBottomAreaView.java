@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
@@ -32,6 +33,10 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 
 /**
@@ -43,6 +48,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
+    private static final Intent SECURE_CAMERA_INTENT =
+            new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
+                    .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    private static final Intent INSECURE_CAMERA_INTENT =
+            new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
     private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
 
     private ImageView mCameraImageView;
@@ -51,6 +61,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private ActivityStarter mActivityStarter;
     private UnlockMethodCache mUnlockMethodCache;
+    private LockPatternUtils mLockPatternUtils;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -72,10 +83,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mLockPatternUtils = new LockPatternUtils(mContext);
         mCameraImageView = (ImageView) findViewById(R.id.camera_button);
         mPhoneImageView = (ImageView) findViewById(R.id.phone_button);
         mLockIcon = (ImageView) findViewById(R.id.lock_icon);
-        watchForDevicePolicyChanges();
+        watchForCameraPolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
         updatePhoneVisibility();
@@ -88,8 +100,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mActivityStarter = activityStarter;
     }
 
+    private Intent getCameraIntent() {
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        boolean currentUserHasTrust = updateMonitor.getUserHasTrust(
+                mLockPatternUtils.getCurrentUser());
+        return mLockPatternUtils.isSecure() && !currentUserHasTrust
+                ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+    }
+
     private void updateCameraVisibility() {
-        boolean visible = !isCameraDisabledByDpm();
+        ResolveInfo resolved = mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                mLockPatternUtils.getCurrentUser());
+        boolean visible = !isCameraDisabledByDpm() && resolved != null;
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
@@ -122,19 +145,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return false;
     }
 
-    private void watchForDevicePolicyChanges() {
+    private void watchForCameraPolicyChanges() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        getContext().registerReceiver(new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateCameraVisibility();
-                    }
-                });
-            }
-        }, filter);
+        getContext().registerReceiverAsUser(mDevicePolicyReceiver,
+                UserHandle.ALL, filter, null, null);
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
     }
 
     private void watchForAccessibilityChanges() {
@@ -171,9 +187,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchCamera() {
-        mContext.startActivityAsUser(
-                new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE),
-                UserHandle.CURRENT);
+        Intent intent = getCameraIntent();
+        if (intent == SECURE_CAMERA_INTENT) {
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        } else {
+            mActivityStarter.startActivity(intent);
+        }
     }
 
     public void launchPhone() {
@@ -186,6 +205,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onVisibilityChanged(changedView, visibility);
         if (changedView == this && visibility == VISIBLE) {
             updateTrust();
+            updateCameraVisibility();
         }
     }
 
@@ -214,5 +234,25 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     public void onMethodSecureChanged(boolean methodSecure) {
         updateTrust();
+        updateCameraVisibility();
     }
+
+    private final BroadcastReceiver mDevicePolicyReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    updateCameraVisibility();
+                }
+            });
+        }
+    };
+
+    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            updateCameraVisibility();
+        }
+    };
 }
