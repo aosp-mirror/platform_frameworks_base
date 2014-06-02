@@ -20,9 +20,6 @@ import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -176,13 +173,59 @@ final class HdmiCecController {
      *                         Otherwise, scan address will start from {@code preferredAddress}
      * @param callback callback interface to report allocated logical address to caller
      */
-    void allocateLogicalAddress(int deviceType, int preferredAddress,
-            AllocateLogicalAddressCallback callback) {
-        Message msg = mIoHandler.obtainMessage(MSG_ALLOCATE_LOGICAL_ADDRESS);
-        msg.arg1 = deviceType;
-        msg.arg2 = preferredAddress;
-        msg.obj = callback;
-        mIoHandler.sendMessage(msg);
+    void allocateLogicalAddress(final int deviceType, final int preferredAddress,
+            final AllocateLogicalAddressCallback callback) {
+        runOnIoThread(new Runnable() {
+            @Override
+            public void run() {
+                handleAllocateLogicalAddress(deviceType, preferredAddress, callback);
+            }
+        });
+    }
+
+    private void handleAllocateLogicalAddress(final int deviceType, int preferredAddress,
+            final AllocateLogicalAddressCallback callback) {
+        int startAddress = preferredAddress;
+        // If preferred address is "unregistered", start address will be the smallest
+        // address matched with the given device type.
+        if (preferredAddress == HdmiCec.ADDR_UNREGISTERED) {
+            for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
+                if (deviceType == HdmiCec.getTypeFromAddress(i)) {
+                    startAddress = i;
+                    break;
+                }
+            }
+        }
+
+        int logicalAddress = HdmiCec.ADDR_UNREGISTERED;
+        // Iterates all possible addresses which has the same device type.
+        for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
+            int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
+            if (curAddress != HdmiCec.ADDR_UNREGISTERED
+                    && deviceType == HdmiCec.getTypeFromAddress(i)) {
+                // <Polling Message> is a message which has empty body and
+                // uses same address for both source and destination address.
+                // If sending <Polling Message> failed (NAK), it becomes
+                // new logical address for the device because no device uses
+                // it as logical address of the device.
+                int error = nativeSendCecCommand(mNativePtr, curAddress, curAddress,
+                        EMPTY_BODY);
+                if (error != ERROR_SUCCESS) {
+                    logicalAddress = curAddress;
+                    break;
+                }
+            }
+        }
+
+        final int assignedAddress = logicalAddress;
+        if (callback != null) {
+            runOnServiceThread(new Runnable() {
+                    @Override
+                public void run() {
+                    callback.onAllocated(deviceType, assignedAddress);
+                }
+            });
+        }
     }
 
     private static byte[] buildBody(int opcode, byte[] params) {
@@ -190,101 +233,6 @@ final class HdmiCecController {
         body[0] = (byte) opcode;
         System.arraycopy(params, 0, body, 1, params.length);
         return body;
-    }
-
-    private final class IoHandler extends Handler {
-        private IoHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_SEND_CEC_COMMAND:
-                    HdmiCecMessage cecMessage = (HdmiCecMessage) msg.obj;
-                    byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
-                    nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
-                            cecMessage.getDestination(), body);
-                    break;
-                case MSG_ALLOCATE_LOGICAL_ADDRESS:
-                    int deviceType = msg.arg1;
-                    int preferredAddress = msg.arg2;
-                    AllocateLogicalAddressCallback callback =
-                            (AllocateLogicalAddressCallback) msg.obj;
-                    handleAllocateLogicalAddress(deviceType, preferredAddress, callback);
-                    break;
-                default:
-                    Slog.w(TAG, "Unsupported CEC Io request:" + msg.what);
-                    break;
-            }
-        }
-
-        private void handleAllocateLogicalAddress(int deviceType, int preferredAddress,
-                AllocateLogicalAddressCallback callback) {
-            int startAddress = preferredAddress;
-            // If preferred address is "unregistered", start_index will be the smallest
-            // address matched with the given device type.
-            if (preferredAddress == HdmiCec.ADDR_UNREGISTERED) {
-                for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
-                    if (deviceType == HdmiCec.getTypeFromAddress(i)) {
-                        startAddress = i;
-                        break;
-                    }
-                }
-            }
-
-            int logcialAddress = HdmiCec.ADDR_UNREGISTERED;
-            // Iterates all possible addresses which has the same device type.
-            for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
-                int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
-                if (curAddress != HdmiCec.ADDR_UNREGISTERED
-                        && deviceType == HdmiCec.getTypeFromAddress(i)) {
-                    // <Polling Message> is a message which has empty body and
-                    // uses same address for both source and destination address.
-                    // If sending <Polling Message> failed (NAK), it becomes
-                    // new logical address for the device because no device uses
-                    // it as logical address of the device.
-                    int error = nativeSendCecCommand(mNativePtr, curAddress, curAddress,
-                            EMPTY_BODY);
-                    if (error != ERROR_SUCCESS) {
-                        logcialAddress = curAddress;
-                        break;
-                    }
-                }
-            }
-
-            Message msg = mControlHandler.obtainMessage(MSG_REPORT_LOGICAL_ADDRESS);
-            msg.arg1 = deviceType;
-            msg.arg2 = logcialAddress;
-            msg.obj = callback;
-            mControlHandler.sendMessage(msg);
-        }
-    }
-
-    private final class ControlHandler extends Handler {
-        private ControlHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_RECEIVE_CEC_COMMAND:
-                    // TODO: delegate it to HdmiControl service.
-                    onReceiveCommand((HdmiCecMessage) msg.obj);
-                    break;
-                case MSG_REPORT_LOGICAL_ADDRESS:
-                    int deviceType = msg.arg1;
-                    int logicalAddress = msg.arg2;
-                    AllocateLogicalAddressCallback callback =
-                            (AllocateLogicalAddressCallback) msg.obj;
-                    callback.onAllocated(deviceType, logicalAddress);
-                    break;
-                default:
-                    Slog.i(TAG, "Unsupported message type:" + msg.what);
-                    break;
-            }
-        }
     }
 
     /**
@@ -411,10 +359,18 @@ final class HdmiCecController {
         return nativeGetVendorId(mNativePtr);
     }
 
+    private void runOnIoThread(Runnable runnable) {
+        mIoHandler.post(runnable);
+    }
+
+    private void runOnServiceThread(Runnable runnable) {
+        mControlHandler.post(runnable);
+    }
+
     private void init(HdmiControlService service, long nativePtr) {
         mService = service;
-        mIoHandler = new IoHandler(service.getServiceLooper());
-        mControlHandler = new ControlHandler(service.getServiceLooper());
+        mIoHandler = new Handler(service.getServiceLooper());
+        mControlHandler = new Handler(service.getServiceLooper());
         mNativePtr = nativePtr;
     }
 
@@ -438,13 +394,27 @@ final class HdmiCecController {
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand
                 (sourceAddress, message.getSource(), message.getOpcode(),
                         HdmiCecMessageBuilder.ABORT_REFUSED);
-        sendCommand(cecMessage);
-
+        sendCommand(cecMessage, null);
     }
 
-    boolean sendCommand(HdmiCecMessage cecMessage) {
-        Message message = mIoHandler.obtainMessage(MSG_SEND_CEC_COMMAND, cecMessage);
-        return mIoHandler.sendMessage(message);
+    void sendCommand(final HdmiCecMessage cecMessage,
+            final HdmiControlService.SendMessageCallback callback) {
+        runOnIoThread(new Runnable() {
+            @Override
+            public void run() {
+                byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
+                final int error = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
+                        cecMessage.getDestination(), body);
+                if (callback != null) {
+                    runOnServiceThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSendCompleted(error);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -453,12 +423,15 @@ final class HdmiCecController {
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         byte opcode = body[0];
         byte params[] = Arrays.copyOfRange(body, 1, body.length);
-        HdmiCecMessage cecMessage = new HdmiCecMessage(srcAddress, dstAddress, opcode, params);
+        final HdmiCecMessage cecMessage = new HdmiCecMessage(srcAddress, dstAddress, opcode, params);
 
         // Delegate message to main handler so that it handles in main thread.
-        Message message = mControlHandler.obtainMessage(
-                MSG_RECEIVE_CEC_COMMAND, cecMessage);
-        mControlHandler.sendMessage(message);
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                onReceiveCommand(cecMessage);
+            }
+        });
     }
 
     /**

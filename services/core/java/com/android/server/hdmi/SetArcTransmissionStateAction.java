@@ -64,31 +64,44 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     @Override
     boolean start() {
         if (mEnabled) {
-            if (sendCommand(
-                    HdmiCecMessageBuilder.buildReportArcInitiated(mSourceAddress, mAvrAddress))) {
-                // Enable ARC status immediately after sending <Report Arc Initiated>.
-                // If AVR responds with <Feature Abort>, disable ARC status again.
-                // This is different from spec that says that turns ARC status to "Enabled"
-                // if <Report ARC Initiated> is acknowledged and no <Feature Abort> is received.
-                // But implemented this way to save the time having to wait for <Feature Abort>.
-                setArcStatus(true);
-                // If succeeds to send <Report ARC Initiated>, wait general timeout
-                // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
-                mState = STATE_WAITING_TIMEOUT;
-                addTimer(mState, TIMEOUT_MS);
-            } else {
-                // If fails to send <Report ARC Initiated>, disable ARC and
-                // send <Report ARC Terminated> directly.
-                Slog.w(TAG, "Failed to send <Report ARC Initiated>:[source:" + mSourceAddress
-                        + ", avr Address:" + mAvrAddress + "]");
-                setArcStatus(false);
-                finish();
-            }
+            sendReportArcInitiated();
         } else {
             setArcStatus(false);
             finish();
         }
         return true;
+    }
+
+    private void sendReportArcInitiated() {
+        HdmiCecMessage command =
+                HdmiCecMessageBuilder.buildReportArcInitiated(mSourceAddress, mAvrAddress);
+        sendCommand(command, new HdmiControlService.SendMessageCallback() {
+            @Override
+            public void onSendCompleted(int error) {
+                if (error == 0) {
+                    // Enable ARC status immediately after sending <Report Arc Initiated>.
+                    // If AVR responds with <Feature Abort>, disable ARC status again.
+                    // This is different from spec that says that turns ARC status to
+                    // "Enabled" if <Report ARC Initiated> is acknowledged and no
+                    // <Feature Abort> is received.
+                    // But implemented this way to save the time having to wait for
+                    // <Feature Abort>.
+                    setArcStatus(true);
+                    // If succeeds to send <Report ARC Initiated>, wait general timeout
+                    // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
+                    mState = STATE_WAITING_TIMEOUT;
+                    addTimer(mState, TIMEOUT_MS);
+                } else {
+                    // If fails to send <Report ARC Initiated>, disable ARC and
+                    // send <Report ARC Terminated> directly.
+                    Slog.w(TAG, "Failed to send <Report ARC Initiated>:[source:"
+                            + mSourceAddress
+                            + ", avr Address:" + mAvrAddress + "]");
+                    setArcStatus(false);
+                    finish();
+                }
+            }
+        });
     }
 
     private void setArcStatus(boolean enabled) {
