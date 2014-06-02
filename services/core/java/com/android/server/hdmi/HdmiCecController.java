@@ -21,7 +21,6 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import libcore.util.EmptyArray;
 
@@ -75,14 +74,12 @@ final class HdmiCecController {
     // used as key of container.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos =
             new SparseArray<HdmiCecDeviceInfo>();
-    // Set-like container for all local devices' logical address.
-    // Key and value are same.
-    private final SparseIntArray mLocalAddresses = new SparseIntArray();
+
+    // Stores the local CEC devices in the system.
+    private final ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController() {
-        // TODO: Consider restoring the local device addresses from persistent storage
-        //       to allocate the same addresses again if possible.
     }
 
     /**
@@ -96,53 +93,41 @@ final class HdmiCecController {
      *         returns {@code null}.
      */
     static HdmiCecController create(HdmiControlService service) {
-        HdmiCecController handler = new HdmiCecController();
-        long nativePtr = nativeInit(handler);
+        HdmiCecController controller = new HdmiCecController();
+        long nativePtr = nativeInit(controller);
         if (nativePtr == 0L) {
-            handler = null;
+            controller = null;
             return null;
         }
 
-        handler.init(service, nativePtr);
-        return handler;
+        controller.init(service, nativePtr);
+        return controller;
+    }
+
+    private void init(HdmiControlService service, long nativePtr) {
+        mService = service;
+        mIoHandler = new Handler(service.getServiceLooper());
+        mControlHandler = new Handler(service.getServiceLooper());
+        mNativePtr = nativePtr;
     }
 
     /**
-     * Initialize {@link #mLocalAddresses} by allocating logical addresses for each hosted type.
+     * Perform initialization for each hosted device.
      *
-     * @param deviceTypes local device types
+     * @param deviceTypes array of device types
      */
     void initializeLocalDevices(int[] deviceTypes) {
-        for (int deviceType : deviceTypes) {
-            int preferred = getPreferredAddress(deviceType);
-            allocateLogicalAddress(deviceType, preferred, new AllocateLogicalAddressCallback() {
-                @Override
-                public void onAllocated(int deviceType, int logicalAddress) {
-                    addLogicalAddress(logicalAddress);
-                }
-            });
-        }
-    }
-
-    /**
-     * Get the preferred address for a given type.
-     *
-     * @param deviceType logical device type to get the address for
-     * @return preferred address; {@link HdmiCec#ADDR_UNREGISTERED} if not available.
-     */
-    private int getPreferredAddress(int deviceType) {
-        // Uses the data restored from persistent memory at boot up if they are available.
-        // Otherwise we return UNREGISTERED indicating there is no preferred address.
-        // Note that for address SPECIFIC_USE(14), HdmiCec.getTypeFromAddress() returns DEVICE_TV,
-        // meaning that we do not support device type video processor yet.
-        for (int i = 0; i < mLocalAddresses.size(); ++i) {
-            int address = mLocalAddresses.keyAt(i);
-            int type = HdmiCec.getTypeFromAddress(address);
-            if (type == deviceType) {
-                return address;
+        for (int type : deviceTypes) {
+            HdmiCecLocalDevice device = HdmiCecLocalDevice.create(this, type);
+            if (device == null) {
+                continue;
             }
+            // TODO: Consider restoring the local device addresses from persistent storage
+            //       to allocate the same addresses again if possible.
+            device.setPreferredAddress(HdmiCec.ADDR_UNREGISTERED);
+            mLocalDevices.add(device);
+            device.init();
         }
-        return HdmiCec.ADDR_UNREGISTERED;
     }
 
     /**
@@ -310,7 +295,6 @@ final class HdmiCecController {
      */
     int addLogicalAddress(int newLogicalAddress) {
         if (HdmiCec.isValidAddress(newLogicalAddress)) {
-            mLocalAddresses.put(newLogicalAddress, newLogicalAddress);
             return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
             return -1;
@@ -325,7 +309,9 @@ final class HdmiCecController {
     void clearLogicalAddress() {
         // TODO: consider to backup logical address so that new logical address
         // allocation can use it as preferred address.
-        mLocalAddresses.clear();
+        for (HdmiCecLocalDevice device : mLocalDevices) {
+            device.clearAddress();
+        }
         nativeClearLogicalAddress(mNativePtr);
     }
 
@@ -367,18 +353,17 @@ final class HdmiCecController {
         mControlHandler.post(runnable);
     }
 
-    private void init(HdmiControlService service, long nativePtr) {
-        mService = service;
-        mIoHandler = new Handler(service.getServiceLooper());
-        mControlHandler = new Handler(service.getServiceLooper());
-        mNativePtr = nativePtr;
-    }
-
     private boolean isAcceptableAddress(int address) {
-        // Can access command targeting devices available in local device or
-        // broadcast command.
-        return address == HdmiCec.ADDR_BROADCAST
-                || mLocalAddresses.indexOfKey(address) < 0;
+        // Can access command targeting devices available in local device or broadcast command.
+        if (address == HdmiCec.ADDR_BROADCAST) {
+            return true;
+        }
+        for (HdmiCecLocalDevice device : mLocalDevices) {
+            if (device.isAddressOf(address)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void onReceiveCommand(HdmiCecMessage message) {
@@ -394,6 +379,10 @@ final class HdmiCecController {
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand
                 (sourceAddress, message.getSource(), message.getOpcode(),
                         HdmiCecMessageBuilder.ABORT_REFUSED);
+        sendCommand(cecMessage, null);
+    }
+
+    void sendCommand(HdmiCecMessage cecMessage) {
         sendCommand(cecMessage, null);
     }
 
