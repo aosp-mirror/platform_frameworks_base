@@ -176,6 +176,7 @@ enum DebugLevel {
 #define PROPERTY_RENDER_BUFFER_CACHE_SIZE "ro.hwui.r_buffer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
+#define PROPERTY_VERTEX_CACHE_SIZE "ro.hwui.vertex_cache_size"
 #define PROPERTY_PATCH_CACHE_SIZE "ro.hwui.patch_cache_size"
 #define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
 #define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
@@ -222,6 +223,7 @@ enum DebugLevel {
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
 #define DEFAULT_PATH_CACHE_SIZE 10.0f
+#define DEFAULT_VERTEX_CACHE_SIZE 1.0f
 #define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f

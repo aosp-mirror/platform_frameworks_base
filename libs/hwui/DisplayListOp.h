@@ -1114,6 +1114,15 @@ public:
         OP_LOG("Draw RoundRect "RECT_STRING", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
     }
 
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
+        DrawStrokableOp::onDefer(renderer, deferInfo, state);
+        if (!mPaint->getPathEffect()) {
+            renderer.getCaches().tessellationCache.precacheRoundRect(state.mMatrix,
+                    mLocalBounds.getWidth(), mLocalBounds.getHeight(), mRx, mRy, mPaint);
+        }
+    }
+
     virtual const char* name() { return "DrawRoundRect"; }
 
 private:
@@ -1533,9 +1542,23 @@ public:
         }
     }
 
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
+        renderer.getCaches().tessellationCache.precacheShadows(&state.mMatrix,
+                renderer.getLocalClipBounds(), isCasterOpaque(), &mOutline,
+                &mTransformXY, &mTransformZ, renderer.getLightCenter(), renderer.getLightRadius());
+    }
+
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawShadow(mTransformXY, mTransformZ,
-                mCasterAlpha, mCasterUnclipped, &mOutline);
+        TessellationCache::vertexBuffer_pair_t buffers;
+        Matrix4 drawTransform;
+        renderer.getMatrix(&drawTransform);
+        renderer.getCaches().tessellationCache.getShadowBuffers(&drawTransform,
+                renderer.getLocalClipBounds(), isCasterOpaque(), &mOutline,
+                &mTransformXY, &mTransformZ, renderer.getLightCenter(), renderer.getLightRadius(),
+                buffers);
+
+        return renderer.drawShadow(mCasterAlpha, buffers.first, buffers.second);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1545,6 +1568,8 @@ public:
     virtual const char* name() { return "DrawShadow"; }
 
 private:
+    bool isCasterOpaque() { return mCasterAlpha >= 1.0f && mCasterUnclipped; }
+
     const mat4 mTransformXY;
     const mat4 mTransformZ;
     const float mCasterAlpha;

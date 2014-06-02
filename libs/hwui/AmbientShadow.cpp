@@ -44,18 +44,18 @@ namespace uirenderer {
  * @param shadowVertexBuffer Return an floating point array of (x, y, a)
  *               triangle strips mode.
  */
-VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
+void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         const Vector3* vertices, int vertexCount, const Vector3& centroid3d,
         float heightFactor, float geomFactor, VertexBuffer& shadowVertexBuffer) {
     const int rays = SHADOW_RAY_COUNT;
-    VertexBufferMode mode = kVertexBufferMode_OnePolyRingShadow;
+    VertexBuffer::Mode mode = VertexBuffer::kOnePolyRingShadow;
     // Validate the inputs.
     if (vertexCount < 3 || heightFactor <= 0 || rays <= 0
         || geomFactor <= 0) {
 #if DEBUG_SHADOW
         ALOGW("Invalid input for createAmbientShadow(), early return!");
 #endif
-        return mode; // vertex buffer is empty, so any mode doesn't matter.
+        return;
     }
 
     Vector<Vector2> dir; // TODO: use C++11 unique_ptr
@@ -127,7 +127,7 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     // If caster isn't opaque, we need to to fill the umbra by storing the umbra's
     // centroid in the innermost ring of vertices.
     if (!isCasterOpaque) {
-        mode = kVertexBufferMode_TwoPolyRingShadow;
+        mode = VertexBuffer::kTwoPolyRingShadow;
         float centroidAlpha = 1.0 / (1 + centroid3d.z * heightFactor);
         AlphaVertex centroidXYA;
         AlphaVertex::set(&centroidXYA, centroid2d.x, centroid2d.y, centroidAlpha);
@@ -135,6 +135,7 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
             shadowVertices[2 * rays + rayIndex] = centroidXYA;
         }
     }
+    shadowVertexBuffer.setMode(mode);
 
 #if DEBUG_SHADOW
     for (int i = 0; i < SHADOW_VERTEX_COUNT; i++) {
@@ -142,7 +143,6 @@ VertexBufferMode AmbientShadow::createAmbientShadow(bool isCasterOpaque,
                 shadowVertices[i].y, shadowVertices[i].alpha);
     }
 #endif
-    return mode;
 }
 
 /**

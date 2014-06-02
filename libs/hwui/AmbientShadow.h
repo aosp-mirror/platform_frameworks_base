@@ -35,7 +35,7 @@ namespace uirenderer {
  */
 class AmbientShadow {
 public:
-    static VertexBufferMode createAmbientShadow(bool isCasterOpaque, const Vector3* poly,
+    static void createAmbientShadow(bool isCasterOpaque, const Vector3* poly,
             int polyLength, const Vector3& centroid3d, float heightFactor,
             float geomFactor, VertexBuffer& shadowVertexBuffer);
 

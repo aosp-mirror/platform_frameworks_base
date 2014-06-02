@@ -23,10 +23,18 @@ namespace uirenderer {
 
 class VertexBuffer {
 public:
-    VertexBuffer():
-        mBuffer(0),
-        mVertexCount(0),
-        mCleanupMethod(NULL)
+    enum Mode {
+        kStandard = 0,
+        kOnePolyRingShadow = 1,
+        kTwoPolyRingShadow = 2
+    };
+
+    VertexBuffer()
+            : mBuffer(0)
+            , mVertexCount(0)
+            , mByteCount(0)
+            , mMode(kStandard)
+            , mCleanupMethod(NULL)
     {}
 
     ~VertexBuffer() {
@@ -37,7 +45,7 @@ public:
        This should be the only method used by the Tessellator. Subsequent calls to
        alloc will allocate space within the first allocation (useful if you want to
        eventually allocate multiple regions within a single VertexBuffer, such as
-       with PathTessellator::tesselateLines())
+       with PathTessellator::tessellateLines())
      */
     template <class TYPE>
     TYPE* alloc(int vertexCount) {
@@ -52,6 +60,7 @@ public:
             return reallocBuffer;
         }
         mVertexCount = vertexCount;
+        mByteCount = mVertexCount * sizeof(TYPE);
         mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
         mCleanupMethod = &(cleanup<TYPE>);
 
@@ -71,7 +80,13 @@ public:
     }
 
     const void* getBuffer() const { return mBuffer; }
+    const Rect& getBounds() const { return mBounds; }
     unsigned int getVertexCount() const { return mVertexCount; }
+    unsigned int getSize() const { return mByteCount; }
+    Mode getMode() const { return mMode; }
+
+    void setBounds(Rect bounds) { mBounds = bounds; }
+    void setMode(Mode mode) { mMode = mode; }
 
     template <class TYPE>
     void createDegenerateSeparators(int allocSize) {
@@ -88,8 +103,11 @@ private:
         delete[] (TYPE*)buffer;
     }
 
+    Rect mBounds;
     void* mBuffer;
     unsigned int mVertexCount;
+    unsigned int mByteCount;
+    Mode mMode;
 
     void* mReallocBuffer; // used for multi-allocation
 

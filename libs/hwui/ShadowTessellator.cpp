@@ -34,7 +34,7 @@ static inline T max(T a, T b) {
     return a > b ? a : b;
 }
 
-VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
+void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& centroid3d, const Rect& casterBounds,
         const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer) {
@@ -57,16 +57,15 @@ VertexBufferMode ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 #if DEBUG_SHADOW
         ALOGD("Ambient shadow is out of clip rect!");
 #endif
-        return kVertexBufferMode_OnePolyRingShadow;
+        return;
     }
 
-    return AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon,
+    AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon,
             casterVertexCount, centroid3d, heightFactor, geomFactor,
             shadowVertexBuffer);
-
 }
 
-VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
+void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
         const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
         const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
@@ -107,19 +106,17 @@ VertexBufferMode ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
 #if DEBUG_SHADOW
         ALOGD("Spot shadow is out of clip rect!");
 #endif
-        return kVertexBufferMode_OnePolyRingShadow;
+        return;
     }
 
-    VertexBufferMode mode = SpotShadow::createSpotShadow(isCasterOpaque,
+    SpotShadow::createSpotShadow(isCasterOpaque,
             casterPolygon, casterVertexCount, adjustedLightCenter, lightRadius,
             lightVertexCount, shadowVertexBuffer);
-
 #if DEBUG_SHADOW
      if(shadowVertexBuffer.getVertexCount() <= 0) {
         ALOGD("Spot shadow generation failed %d", shadowVertexBuffer.getVertexCount());
      }
 #endif
-     return mode;
 }
 
 void ShadowTessellator::generateShadowIndices(uint16_t* shadowIndices) {
