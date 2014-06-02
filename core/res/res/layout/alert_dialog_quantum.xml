@@ -23,7 +23,10 @@
     android:orientation="vertical"
     android:background="@drawable/dialog_background_quantum"
     android:translationZ="@dimen/floating_window_z"
-    android:layout_margin="@dimen/floating_window_margin">
+    android:layout_marginLeft="@dimen/floating_window_margin_left"
+    android:layout_marginTop="@dimen/floating_window_margin_top"
+    android:layout_marginRight="@dimen/floating_window_margin_right"
+    android:layout_marginBottom="@dimen/floating_window_margin_bottom">
 
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
@@ -44,7 +47,7 @@
                 android:scaleType="fitCenter"
                 android:src="@null" />
             <TextView android:id="@+id/alertTitle"
-                style="?android:attr/windowTitleStyle"
+                style="?attr/windowTitleStyle"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
@@ -65,7 +68,7 @@
             android:layout_height="wrap_content"
             android:clipToPadding="false">
             <TextView android:id="@+id/message"
-                style="?android:attr/textAppearanceMedium"
+                style="?attr/textAppearanceMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="16dip"
@@ -92,26 +95,24 @@
         android:gravity="end"
         android:padding="16dip">
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
+            style="?attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layoutDirection="locale">
             <Button android:id="@+id/button3"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="8dip"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
             <Button android:id="@+id/button2"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
             <Button android:id="@+id/button1"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_marginLeft="8dip"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
