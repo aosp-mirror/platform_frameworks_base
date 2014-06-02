@@ -18,9 +18,7 @@ package com.android.internal.app;
 
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
-import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.widget.AdapterView;
 import android.widget.Toolbar;
 import com.android.internal.R;
 import com.android.internal.view.ActionBarPolicy;
@@ -30,7 +28,6 @@ import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
-import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.DecorToolbar;
 import com.android.internal.widget.ScrollingTabContainerView;
 
@@ -59,7 +56,6 @@ import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.SpinnerAdapter;
-import com.android.internal.widget.ToolbarWidgetWrapper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -1313,23 +1309,4 @@ public class WindowDecorActionBar extends ActionBar implements
         }
     }
 
-    static class NavItemSelectedListener implements AdapterView.OnItemSelectedListener {
-        private final OnNavigationListener mListener;
-
-        public NavItemSelectedListener(OnNavigationListener listener) {
-            mListener = listener;
-        }
-
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (mListener != null) {
-                mListener.onNavigationItemSelected(position, id);
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            // Do nothing
-        }
-    }
 }

@@ -173,14 +173,19 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setListNavigationCallbacks(SpinnerAdapter adapter, OnNavigationListener callback) {
-        throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+        mDecorToolbar.setDropdownParams(adapter, new NavItemSelectedListener(callback));
     }
 
     @Override
     public void setSelectedNavigationItem(int position) {
-        throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+        switch (mDecorToolbar.getNavigationMode()) {
+            case NAVIGATION_MODE_LIST:
+                mDecorToolbar.setDropdownSelectedPosition(position);
+                break;
+            default:
+                throw new IllegalStateException(
+                        "setSelectedNavigationIndex not valid for current navigation mode");
+        }
     }
 
     @Override
@@ -276,8 +281,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setNavigationMode(@NavigationMode int mode) {
-        throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+        mDecorToolbar.setNavigationMode(mode);
     }
 
     @Override
@@ -288,67 +292,67 @@ public class ToolbarActionBar extends ActionBar {
     @Override
     public Tab newTab() {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void addTab(Tab tab) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void addTab(Tab tab, boolean setSelected) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void addTab(Tab tab, int position) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void addTab(Tab tab, int position, boolean setSelected) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void removeTab(Tab tab) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void removeTabAt(int position) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void removeAllTabs() {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public void selectTab(Tab tab) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public Tab getSelectedTab() {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
     public Tab getTabAt(int index) {
         throw new UnsupportedOperationException(
-                "Navigation modes are not supported in toolbar action bars");
+                "Tabs are not supported in toolbar action bars");
     }
 
     @Override
