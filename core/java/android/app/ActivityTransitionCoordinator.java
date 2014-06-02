@@ -129,8 +129,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected static final String KEY_SCALE_TYPE = "shared_element:scaleType";
     protected static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
 
-    // The background fade in/out duration. 150ms is pretty quick, but not abrupt.
-    public static final int FADE_BACKGROUND_DURATION_MS = 150;
+    // The background fade in/out duration. TODO: Enable tuning this.
+    public static final int FADE_BACKGROUND_DURATION_MS = 300;
 
     protected static final ImageView.ScaleType[] SCALE_TYPE_VALUES = ImageView.ScaleType.values();
 
@@ -194,6 +194,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * When returning, this is the destination location for the shared element.
      */
     public static final int MSG_SHARED_ELEMENT_DESTINATION = 107;
+
+    /**
+     * Send the shared element positions.
+     */
+    public static final int MSG_SEND_SHARED_ELEMENT_DESTINATION = 108;
 
     final private Window mWindow;
     final protected ArrayList<String> mAllSharedElementNames;

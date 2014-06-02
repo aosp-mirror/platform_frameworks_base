@@ -294,7 +294,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void finishIfNecessary() {
-        if (mIsReturning && mExitNotified && (mSharedElements.isEmpty()
+        if (mIsReturning && mExitNotified && mActivity != null && (mSharedElements.isEmpty()
                 || mSharedElements.get(0).getVisibility() == View.INVISIBLE)) {
             mActivity.finish();
             mActivity.overridePendingTransition(0, 0);
