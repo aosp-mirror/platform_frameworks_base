@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.content.res.AssetManager;
+
 import java.io.File;
 
 /**
@@ -58,11 +60,17 @@ public class FontFamily {
         }
     }
 
-    public boolean addFont(File path) {
-        return nAddFont(mNativePtr, path.getAbsolutePath());
+    public boolean addFont(String path) {
+        return nAddFont(mNativePtr, path);
     }
 
-    static native long nCreateFamily(String lang, int variant);
-    static native void nUnrefFamily(long nativePtr);
-    static native boolean nAddFont(long nativeFamily, String path);
+    public boolean addFontFromAsset(AssetManager mgr, String path) {
+        return nAddFontFromAsset(mNativePtr, mgr, path);
+    }
+
+    private static native long nCreateFamily(String lang, int variant);
+    private static native void nUnrefFamily(long nativePtr);
+    private static native boolean nAddFont(long nativeFamily, String path);
+    private static native boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr,
+            String path);
 }
