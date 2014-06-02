@@ -350,18 +350,54 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
-            public void onVideoSizeChanged(int width, int height) throws RemoteException {
+            public void onVideoStreamChanged(int width, int height, boolean interlaced) {
                 synchronized (mLock) {
                     if (DEBUG) {
-                        Slog.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
+                        Slog.d(TAG, "onVideoStreamChanged(" + width + ", " + height + ")");
                     }
                     if (sessionState.mSession == null || sessionState.mClient == null) {
                         return;
                     }
                     try {
-                        sessionState.mClient.onVideoSizeChanged(width, height, sessionState.mSeq);
+                        sessionState.mClient.onVideoStreamChanged(width, height, interlaced,
+                                sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onSessionEvent");
+                        Slog.e(TAG, "error in onVideoStreamChanged");
+                    }
+                }
+            }
+
+            @Override
+            public void onAudioStreamChanged(int channelCount) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onAudioStreamChanged(" + channelCount + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onAudioStreamChanged(channelCount, sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onAudioStreamChanged");
+                    }
+                }
+            }
+
+            @Override
+            public void onClosedCaptionStreamChanged(boolean hasClosedCaption) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onClosedCaptionStreamChanged(" + hasClosedCaption + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onClosedCaptionStreamChanged(hasClosedCaption,
+                                sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onClosedCaptionStreamChanged");
                     }
                 }
             }
