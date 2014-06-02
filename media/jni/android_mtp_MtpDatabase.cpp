@@ -433,16 +433,14 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
             case MTP_TYPE_STR:
             {
                 jstring stringValue = (jstring)env->GetObjectArrayElement(stringValuesArray, 0);
+                const char* str = (stringValue ? env->GetStringUTFChars(stringValue, NULL) : NULL);
                 if (stringValue) {
-                    const char* str = env->GetStringUTFChars(stringValue, NULL);
-                    if (str == NULL) {
-                        return MTP_RESPONSE_GENERAL_ERROR;
-                    }
                     packet.putString(str);
                     env->ReleaseStringUTFChars(stringValue, str);
                 } else {
                     packet.putEmptyString();
                 }
+                env->DeleteLocalRef(stringValue);
                 break;
              }
             default:
