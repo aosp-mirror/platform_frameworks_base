@@ -210,6 +210,8 @@
     <skip />
     <!-- no translation found for accessibility_desc_connected (8366256693719499665) -->
     <skip />
+    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
+    <skip />
     <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
     <skip />
     <!-- no translation found for accessibility_data_connection_1x (994133468120244018) -->
@@ -392,7 +394,7 @@
     <skip />
     <!-- no translation found for quick_settings_notifications_label (4818156442169154523) -->
     <skip />
-    <!-- no translation found for recents_empty_message (2269156590813544104) -->
+    <!-- no translation found for recents_empty_message (7883614615463619450) -->
     <skip />
     <!-- no translation found for recents_app_info_button_label (2890317189376000030) -->
     <skip />

@@ -120,6 +120,8 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Bật."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Tắt."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Đã kết nối."</string>
+    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
+    <skip />
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -211,7 +213,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Điểm phát sóng"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Thông báo"</string>
-    <string name="recents_empty_message" msgid="2269156590813544104">"GẦN ĐÂY"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"Không có ứng dụng nào gần đây"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Thông tin ứng dụng"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tìm kiếm"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mạng có thể\nđược giám sát"</string>
