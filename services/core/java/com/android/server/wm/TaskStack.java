@@ -174,14 +174,14 @@ public class TaskStack {
             stackNdx = 0;
         } else {
             stackNdx = mTasks.size();
-            final int currentUserId = mService.mCurrentUserId;
-            if (task.mUserId != currentUserId) {
+            if (!mService.isCurrentProfileLocked(task.mUserId)) {
                 // Place the task below all current user tasks.
                 while (--stackNdx >= 0) {
-                    if (currentUserId != mTasks.get(stackNdx).mUserId) {
+                    if (!mService.isCurrentProfileLocked(mTasks.get(stackNdx).mUserId)) {
                         break;
                     }
                 }
+                // Put it above first non-current user task.
                 ++stackNdx;
             }
         }
@@ -352,7 +352,7 @@ public class TaskStack {
         int top = mTasks.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
             Task task = mTasks.get(taskNdx);
-            if (task.mUserId == userId) {
+            if (mService.isCurrentProfileLocked(task.mUserId)) {
                 mTasks.remove(taskNdx);
                 mTasks.add(task);
                 --top;
