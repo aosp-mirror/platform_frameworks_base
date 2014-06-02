@@ -30,10 +30,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
+import com.android.server.hdmi.HdmiCecLocalDevice.AddressAllocationCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -130,7 +132,22 @@ public final class HdmiControlService extends SystemService {
         mIoThread.start();
         mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
-            mCecController.initializeLocalDevices(mLocalDevices);
+            mCecController.initializeLocalDevices(mLocalDevices, new AddressAllocationCallback() {
+                private final SparseIntArray mAllocated = new SparseIntArray();
+
+                @Override
+                public void onAddressAllocated(int deviceType, int logicalAddress) {
+                    mAllocated.append(deviceType, logicalAddress);
+                    // TODO: get HdmiLCecLocalDevice and call onAddressAllocated here.
+
+                    // Once all logical allocation is done, launch device discovery
+                    // action if one of local device is TV.
+                    int tvAddress = mAllocated.get(HdmiCec.DEVICE_TV, -1);
+                    if (mLocalDevices.length == mAllocated.size() && tvAddress != -1) {
+                        launchDeviceDiscovery(tvAddress);
+                    }
+                }
+            });
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
@@ -286,6 +303,9 @@ public final class HdmiControlService extends SystemService {
             case HdmiCec.MESSAGE_TERMINATE_ARC:
                 handleTerminateArc(message);
                 return true;
+            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+                handleReportPhysicalAddress(message);
+                return true;
             // TODO: Add remaining system information query such as
             // <Give Device Power Status> and <Request Active Source> handler.
             default:
@@ -296,7 +316,7 @@ public final class HdmiControlService extends SystemService {
     /**
      * Called when a new hotplug event is issued.
      *
-     * @param port hdmi port number where hot plug event issued.
+     * @param portNo hdmi port number where hot plug event issued.
      * @param connected whether to be plugged in or not
      */
     void onHotplug(int portNo, boolean connected) {
@@ -312,6 +332,22 @@ public final class HdmiControlService extends SystemService {
      */
     void pollDevices(DevicePollingCallback callback, int retryCount) {
         mCecController.pollDevices(callback, retryCount);
+    }
+
+    private void handleReportPhysicalAddress(HdmiCecMessage message) {
+        // At first, try to consume it.
+        if (dispatchMessageToAction(message)) {
+            return;
+        }
+
+        // Ignore if [Device Discovery Action] is on going ignore message.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
+                    + "because Device Discovery Action is on-going:" + message);
+            return;
+        }
+
+        // TODO: start new device action.
     }
 
     private void handleInitiateArc(HdmiCecMessage message){
@@ -427,12 +463,12 @@ public final class HdmiControlService extends SystemService {
     // Launch device discovery sequence.
     // It starts with clearing the existing device info list.
     // Note that it assumes that logical address of all local devices is already allocated.
-    void launchDeviceDiscovery() {
+    private void launchDeviceDiscovery(int sourceAddress) {
         // At first, clear all existing device infos.
         mCecController.clearDeviceInfoList();
 
         // TODO: check whether TV is one of local devices.
-        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, HdmiCec.ADDR_TV,
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
                 new DeviceDiscoveryCallback() {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {

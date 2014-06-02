@@ -115,12 +115,12 @@ final class DeviceDiscoveryAction extends FeatureAction {
             @Override
             public void onPollingFinished(List<Integer> ackedAddress) {
                 if (ackedAddress.isEmpty()) {
-                    Slog.i(TAG, "No device is detected.");
+                    Slog.v(TAG, "No device is detected.");
                     finish();
                     return;
                 }
 
-                Slog.i(TAG, "Device detected: " + ackedAddress);
+                Slog.v(TAG, "Device detected: " + ackedAddress);
                 allocateDevices(ackedAddress);
                 startPhysicalAddressStage();
             }
@@ -136,6 +136,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
     }
 
     private void startPhysicalAddressStage() {
+        Slog.v(TAG, "Start [Physical Address Stage]:" + mDevices.size());
         mProcessedDeviceCount = 0;
         mState = STATE_WAITING_FOR_PHYSICAL_ADDRESS;
 
@@ -158,6 +159,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
     }
 
     private void startOsdNameStage() {
+        Slog.v(TAG, "Start [Osd Name Stage]:" + mDevices.size());
         mProcessedDeviceCount = 0;
         mState = STATE_WAITING_FOR_OSD_NAME;
 
@@ -176,6 +178,8 @@ final class DeviceDiscoveryAction extends FeatureAction {
     }
 
     private void startVendorIdStage() {
+        Slog.v(TAG, "Start [Vendor Id Stage]:" + mDevices.size());
+
         mProcessedDeviceCount = 0;
         mState = STATE_WAITING_FOR_VENDOR_ID;
 
@@ -301,11 +305,14 @@ final class DeviceDiscoveryAction extends FeatureAction {
     }
 
     private void wrapUpAndFinish() {
+        Slog.v(TAG, "---------Wrap up Device Discovery:[" + mDevices.size() + "]---------");
         ArrayList<HdmiCecDeviceInfo> result = new ArrayList<>();
         for (DeviceInfo info : mDevices) {
             HdmiCecDeviceInfo cecDeviceInfo = info.toHdmiCecDeviceInfo();
+            Slog.v(TAG, " DeviceInfo: " + cecDeviceInfo);
             result.add(cecDeviceInfo);
         }
+        Slog.v(TAG, "--------------------------------------------");
         mCallback.onDeviceDiscoveryDone(result);
         finish();
     }
@@ -355,6 +362,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
             return;
         }
 
+        Slog.v(TAG, "Timeout[State=" + mState + ", Processed=" + mProcessedDeviceCount);
         removeDevice(mProcessedDeviceCount);
         checkAndProceedStage();
     }
