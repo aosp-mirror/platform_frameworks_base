@@ -1609,6 +1609,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @return the y position of the first notification
+     */
+    public float getNotificationsTopY() {
+        return mTopPadding + getTranslationY();
+    }
+
+    /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {

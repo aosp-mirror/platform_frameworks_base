@@ -319,6 +319,9 @@
     <!-- Volume panel z depth -->
     <dimen name="volume_panel_z">3dp</dimen>
 
+    <!-- Distance between notifications and header when they are considered to be colliding. -->
+    <dimen name="header_notifications_collide_distance">24dp</dimen>
+
     <!-- Move distance for the hint animations on the lockscreen (unlock, phone, camera)-->
     <dimen name="hint_move_distance">75dp</dimen>
 </resources>
