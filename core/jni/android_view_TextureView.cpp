@@ -29,6 +29,8 @@
 #include <SkCanvas.h>
 #include <SkImage.h>
 
+#include "android/graphics/GraphicsJNI.h"
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -45,7 +47,7 @@ static struct {
 
 static struct {
     jfieldID mSurfaceFormat;
-    jmethodID safeCanvasSwap;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
 
 static struct {
@@ -159,12 +161,11 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     }
 
     SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer.format);
-
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(&bitmap));
 
     SkRect clipRect;
     clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
+    SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
     nativeCanvas->clipRect(clipRect);
 
     if (dirtyRect) {
@@ -178,8 +179,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong nativeWindow, jobject canvas) {
 
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     if (nativeWindow) {
         sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
@@ -228,7 +228,7 @@ int register_android_view_TextureView(JNIEnv* env) {
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
-    GET_METHOD_ID(gCanvasClassInfo.safeCanvasSwap, clazz, "safeCanvasSwap", "(JZ)V");
+    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
 
     FIND_CLASS(clazz, "android/view/TextureView");
     GET_FIELD_ID(gTextureViewClassInfo.nativeWindow, clazz, "mNativeWindow", "J");

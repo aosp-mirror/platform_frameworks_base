@@ -21,6 +21,7 @@
 
 #include "android_os_Parcel.h"
 #include "android_view_GraphicBuffer.h"
+#include "android/graphics/GraphicsJNI.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -75,7 +76,7 @@ static struct {
 
 static struct {
     jfieldID mSurfaceFormat;
-    jmethodID safeCanvasSwap;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
 
 #define GET_INT(object, field) \
@@ -197,12 +198,11 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     }
 
     SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer->getPixelFormat());
-
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(&bitmap));
 
     SkRect clipRect;
     clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
+    SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
     nativeCanvas->clipRect(clipRect);
 
     if (dirtyRect) {
@@ -218,8 +218,7 @@ static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobj
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    INVOKEV(canvas, gCanvasClassInfo.safeCanvasSwap, (jlong)nativeCanvas, false);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     if (wrapper) {
         status_t status = wrapper->buffer->unlock();
@@ -319,7 +318,7 @@ int register_android_view_GraphicBuffer(JNIEnv* env) {
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
-    GET_METHOD_ID(gCanvasClassInfo.safeCanvasSwap, clazz, "safeCanvasSwap", "(JZ)V");
+    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

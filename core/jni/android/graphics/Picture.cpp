@@ -56,7 +56,7 @@ public:
 
     static void draw(JNIEnv* env, jobject, jlong canvasHandle,
                             jlong pictureHandle) {
-        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(canvasHandle);
         SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
         SkASSERT(canvas);
         SkASSERT(picture);
