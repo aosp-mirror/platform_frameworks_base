@@ -290,8 +290,7 @@ public final class HdmiControlService extends SystemService {
             // TODO: Add remaining system information query such as
             // <Give Device Power Status> and <Request Active Source> handler.
             default:
-                Slog.w(TAG, "Unsupported cec command:" + message.toString());
-                return false;
+                return dispatchMessageToAction(message);
         }
     }
 
@@ -392,6 +391,16 @@ public final class HdmiControlService extends SystemService {
         } else {
             Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
         }
+    }
+
+    private boolean dispatchMessageToAction(HdmiCecMessage message) {
+        for (FeatureAction action : mActions) {
+            if (action.processCommand(message)) {
+                return true;
+            }
+        }
+        Slog.w(TAG, "Unsupported cec command:" + message);
+        return false;
     }
 
     // Record class that monitors the event of the caller of being killed. Used to clean up
