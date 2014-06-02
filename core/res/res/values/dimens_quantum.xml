@@ -52,7 +52,10 @@
     <dimen name="text_size_small_quantum">14sp</dimen>
 
     <dimen name="floating_window_z">16dp</dimen>
-    <dimen name="floating_window_margin">32dp</dimen>
+    <dimen name="floating_window_margin_left">16dp</dimen>
+    <dimen name="floating_window_margin_top">8dp</dimen>
+    <dimen name="floating_window_margin_right">16dp</dimen>
+    <dimen name="floating_window_margin_bottom">32dp</dimen>
 
     <!-- the amount of elevation for pressed button state-->
     <dimen name="button_pressed_z">2dp</dimen>

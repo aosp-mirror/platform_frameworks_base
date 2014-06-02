@@ -404,7 +404,7 @@ please see styles_device_defaults.xml.
         <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
-        <item name="minWidth">96dip</item>
+        <item name="minWidth">88dip</item>
 
         <!-- TODO: Turn this back on when we support inset drawable outlines. -->
         <!-- <item name="stateListAnimator">@anim/button_state_list_anim_quantum</item> -->
