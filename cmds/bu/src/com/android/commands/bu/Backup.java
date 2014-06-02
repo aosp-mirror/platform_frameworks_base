@@ -20,6 +20,7 @@ import android.app.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.system.OsConstants;
 import android.util.Log;
 
 import java.io.IOException;
@@ -50,13 +51,11 @@ public final class Backup {
             return;
         }
 
-        int socketFd = Integer.parseInt(nextArg());
-
         String arg = nextArg();
         if (arg.equals("backup")) {
-            doFullBackup(socketFd);
+            doFullBackup(OsConstants.STDOUT_FILENO);
         } else if (arg.equals("restore")) {
-            doFullRestore(socketFd);
+            doFullRestore(OsConstants.STDIN_FILENO);
         } else {
             Log.e(TAG, "Invalid operation '" + arg + "'");
         }
