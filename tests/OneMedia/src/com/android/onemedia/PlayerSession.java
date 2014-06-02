@@ -82,7 +82,7 @@ public class PlayerSession {
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
         mSession = man.createSession("OneMedia");
         mSession.addCallback(mCallback);
-        mSession.addTransportControlsCallback(new TransportListener());
+        mSession.addTransportControlsCallback(new TransportCallback());
         mSession.setPlaybackState(mPlaybackState);
         mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mSession.setRouteOptions(mRouteOptions);
@@ -255,7 +255,7 @@ public class PlayerSession {
         }
     }
 
-    private class TransportListener extends MediaSession.TransportControlsCallback {
+    private class TransportCallback extends MediaSession.TransportControlsCallback {
         @Override
         public void onPlay() {
             mRenderer.onPlay();

@@ -45,4 +45,8 @@ oneway interface ISessionCallback {
     void onRewind();
     void onSeekTo(long pos);
     void onRate(in Rating rating);
+
+    // These callbacks are for volume handling
+    void onAdjustVolumeBy(int delta);
+    void onSetVolumeTo(int value);
 }

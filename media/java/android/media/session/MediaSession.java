@@ -124,9 +124,21 @@ public final class MediaSession {
      */
     public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
 
-    private static final String KEY_COMMAND = "command";
-    private static final String KEY_EXTRAS = "extras";
-    private static final String KEY_CALLBACK = "callback";
+    /**
+     * The session uses local playback. Used for configuring volume handling
+     * with the system.
+     *
+     * @hide
+     */
+    public static final int VOLUME_TYPE_LOCAL = 1;
+
+    /**
+     * The session uses remote playback. Used for configuring volume handling
+     * with the system.
+     *
+     * @hide
+     */
+    public static final int VOLUME_TYPE_REMOTE = 2;
 
     private final Object mLock = new Object();
 
@@ -143,6 +155,7 @@ public final class MediaSession {
             = new ArrayMap<String, RouteInterface.EventListener>();
 
     private Route mRoute;
+    private RemoteVolumeProvider mVolumeProvider;
 
     private boolean mActive = false;;
 
@@ -242,7 +255,11 @@ public final class MediaSession {
      * @param stream The {@link AudioManager} stream this session is playing on.
      */
     public void setPlaybackToLocal(int stream) {
-        // TODO
+        try {
+            mBinder.configureVolumeHandling(VOLUME_TYPE_LOCAL, stream, 0);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setPlaybackToLocal.", e);
+        }
     }
 
     /**
@@ -259,7 +276,14 @@ public final class MediaSession {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
-        // TODO
+        mVolumeProvider = volumeProvider;
+
+        try {
+            mBinder.configureVolumeHandling(VOLUME_TYPE_REMOTE, volumeProvider.getVolumeControl(),
+                    volumeProvider.getMaxVolume());
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);
+        }
     }
 
     /**
@@ -939,6 +963,26 @@ public final class MediaSession {
         @Override
         public void onRouteStateChange(int state) throws RemoteException {
             // TODO
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see android.media.session.ISessionCallback#onAdjustVolumeBy(int)
+         */
+        @Override
+        public void onAdjustVolumeBy(int delta) throws RemoteException {
+            // TODO(epastern): Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see android.media.session.ISessionCallback#onSetVolumeTo(int)
+         */
+        @Override
+        public void onSetVolumeTo(int value) throws RemoteException {
+            // TODO(epastern): Auto-generated method stub
 
         }
 

@@ -76,6 +76,13 @@ public class MediaSessionLegacyHelper {
         }
     }
 
+    public void sendAdjustVolumeBy(int suggestedStream, int delta, int flags) {
+        mSessionManager.dispatchAdjustVolumeBy(suggestedStream, delta, flags);
+        if (DEBUG) {
+            Log.d(TAG, "dispatched volume adjustment");
+        }
+    }
+
     public void addRccListener(PendingIntent pi,
             MediaSession.TransportControlsCallback listener) {
         if (pi == null) {

@@ -52,6 +52,7 @@ public class MediaSessionStack {
 
     private MediaSessionRecord mCachedButtonReceiver;
     private MediaSessionRecord mCachedDefault;
+    private MediaSessionRecord mCachedVolumeDefault;
     private ArrayList<MediaSessionRecord> mCachedActiveList;
     private ArrayList<MediaSessionRecord> mCachedTransportControlList;
 
@@ -93,6 +94,9 @@ public class MediaSessionStack {
             mSessions.remove(record);
             mSessions.add(0, record);
             clearCache();
+        } else if (newState == PlaybackState.STATE_PAUSED) {
+            // Just clear the volume cache in this case
+            mCachedVolumeDefault = null;
         }
     }
 
@@ -177,6 +181,25 @@ public class MediaSessionStack {
         return mCachedButtonReceiver;
     }
 
+    public MediaSessionRecord getDefaultVolumeSession(int userId) {
+        if (mGlobalPrioritySession != null && mGlobalPrioritySession.isActive()) {
+            return mGlobalPrioritySession;
+        }
+        if (mCachedVolumeDefault != null) {
+            return mCachedVolumeDefault;
+        }
+        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userId);
+        int size = records.size();
+        for (int i = 0; i < size; i++) {
+            MediaSessionRecord record = records.get(i);
+            if (record.isPlaybackActive(false)) {
+                mCachedVolumeDefault = record;
+                return record;
+            }
+        }
+        return null;
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
                 UserHandle.USER_ALL);
@@ -237,7 +260,7 @@ public class MediaSessionStack {
                 lastLocalIndex++;
                 lastActiveIndex++;
                 lastPublishedIndex++;
-            } else if (session.isPlaybackActive()) {
+            } else if (session.isPlaybackActive(true)) {
                 // TODO replace getRoute() == null with real local route check
                 if(session.getRoute() == null) {
                     // Active local sessions get top priority
@@ -284,6 +307,7 @@ public class MediaSessionStack {
 
     private void clearCache() {
         mCachedDefault = null;
+        mCachedVolumeDefault = null;
         mCachedButtonReceiver = null;
         mCachedActiveList = null;
         mCachedTransportControlList = null;
