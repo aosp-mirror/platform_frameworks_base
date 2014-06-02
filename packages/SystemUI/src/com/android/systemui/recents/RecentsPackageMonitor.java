@@ -38,6 +38,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
     PackageCallbacks mCb;
     List<ActivityManager.RecentTaskInfo> mTasks;
     SystemServicesProxy mSsp;
+    boolean mRegistered;
 
     public RecentsPackageMonitor(Context context) {
         mSsp = new SystemServicesProxy(context);
@@ -46,13 +47,19 @@ public class RecentsPackageMonitor extends PackageMonitor {
     /** Registers the broadcast receivers with the specified callbacks. */
     public void register(Context context, PackageCallbacks cb) {
         mCb = cb;
-        register(context, Looper.getMainLooper(), false);
+        if (!mRegistered) {
+            register(context, Looper.getMainLooper(), false);
+            mRegistered = true;
+        }
     }
 
     /** Unregisters the broadcast receivers. */
     @Override
     public void unregister() {
-        super.unregister();
+        if (mRegistered) {
+            super.unregister();
+            mRegistered = false;
+        }
         mTasks.clear();
     }
 

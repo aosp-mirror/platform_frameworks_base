@@ -152,6 +152,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     // Recents service binding
     Messenger mService = null;
     Messenger mMessenger;
+    RecentsMessageHandler mHandler;
     boolean mServiceIsBound = false;
     boolean mToggleRecentsUponServiceBound;
     RecentsServiceConnection mConnection = new RecentsServiceConnection();
@@ -168,7 +169,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public AlternateRecentsComponent(Context context) {
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
-        mMessenger = new Messenger(new RecentsMessageHandler());
+        mHandler = new RecentsMessageHandler();
+        mMessenger = new Messenger(mHandler);
     }
 
     public void onStart() {
@@ -507,7 +509,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (!useThumbnailTransition) {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_launcher_enter,
-                    R.anim.recents_from_launcher_exit);
+                    R.anim.recents_from_launcher_exit, mHandler, this);
             startAlternateRecentsActivity(opts, false);
         }
 

@@ -41,7 +41,7 @@ public class RecentsConfiguration {
     public Rect displayRect = new Rect();
 
     boolean isLandscape;
-    boolean transposeSearchLayoutWithOrientation;
+    boolean transposeRecentsLayoutWithOrientation;
     int searchBarAppWidgetId = -1;
 
     public float animationPxMovementPerSecond;
@@ -58,7 +58,6 @@ public class RecentsConfiguration {
     public float taskStackWidthPaddingPct;
     public int taskStackTopPaddingPx;
 
-    public int taskViewInfoPaneAnimDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
@@ -76,7 +75,10 @@ public class RecentsConfiguration {
     public int taskBarViewHighlightColor;
 
     public int taskBarEnterAnimDuration;
+    public int taskBarEnterAnimDelay;
     public int taskBarExitAnimDuration;
+
+    public int navBarScrimEnterDuration;
 
     public boolean launchedFromAltTab;
     public boolean launchedWithThumbnailAnimation;
@@ -108,8 +110,8 @@ public class RecentsConfiguration {
 
         isLandscape = res.getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
-        transposeSearchLayoutWithOrientation =
-                res.getBoolean(R.bool.recents_transpose_search_layout_with_orientation);
+        transposeRecentsLayoutWithOrientation =
+                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
         if (Console.Enabled) {
             Console.log(Constants.Log.UI.MeasureAndLayout,
                     "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
@@ -133,8 +135,6 @@ public class RecentsConfiguration {
         taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 
-        taskViewInfoPaneAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_view_info_pane_duration);
         taskViewRemoveAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_remove_duration);
         taskViewRemoveAnimTranslationXPx =
@@ -163,8 +163,13 @@ public class RecentsConfiguration {
 
         taskBarEnterAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
+        taskBarEnterAnimDelay =
+                res.getInteger(R.integer.recents_animate_task_bar_enter_delay);
         taskBarExitAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
+
+        navBarScrimEnterDuration =
+                res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
 
         fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                         com.android.internal.R.interpolator.fast_out_slow_in);
@@ -203,9 +208,14 @@ public class RecentsConfiguration {
         launchedWithThumbnailAnimation = false;
     }
 
-    /** Returns whether the search bar app widget exists */
+    /** Returns whether the search bar app widget exists. */
     public boolean hasSearchBarAppWidget() {
         return searchBarAppWidgetId >= 0;
+    }
+
+    /** Returns whether the nav bar scrim should be visible. */
+    public boolean hasNavBarScrim() {
+        return !transposeRecentsLayoutWithOrientation || !isLandscape;
     }
 
     /**
@@ -216,7 +226,7 @@ public class RecentsConfiguration {
         if (hasSearchBarAppWidget()) {
             Rect searchBarBounds = new Rect();
             getSearchBarBounds(width, height, searchBarBounds);
-            if (isLandscape && transposeSearchLayoutWithOrientation) {
+            if (isLandscape && transposeRecentsLayoutWithOrientation) {
                 // In landscape, the search bar appears on the left, so shift the task rect right
                 taskStackBounds.set(searchBarBounds.width(), 0, width, height);
             } else {
@@ -239,7 +249,7 @@ public class RecentsConfiguration {
             return;
         }
 
-        if (isLandscape && transposeSearchLayoutWithOrientation) {
+        if (isLandscape && transposeRecentsLayoutWithOrientation) {
             // In landscape, the search bar appears on the left
             searchBarSpaceBounds.set(0, 0, searchBarSpaceHeightPx, height);
         } else {
