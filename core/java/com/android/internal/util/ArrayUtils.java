@@ -169,6 +169,15 @@ public class ArrayUtils
         return false;
     }
 
+    public static boolean contains(long[] array, long value) {
+        for (long element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static long total(long[] array) {
         long total = 0;
         for (long value : array) {
@@ -229,6 +238,14 @@ public class ArrayUtils
         return array;
     }
 
+    /**
+     * Appends a new value to a copy of the array and returns the copy.  If
+     * the value is already present, the original array is returned
+     * @param cur The original array, or null to represent an empty array.
+     * @param val The value to add.
+     * @return A new array that contains all of the values of the original array
+     * with the new value added, or the original array.
+     */
     public static int[] appendInt(int[] cur, int val) {
         if (cur == null) {
             return new int[] { val };
@@ -253,6 +270,50 @@ public class ArrayUtils
         for (int i = 0; i < N; i++) {
             if (cur[i] == val) {
                 int[] ret = new int[N - 1];
+                if (i > 0) {
+                    System.arraycopy(cur, 0, ret, 0, i);
+                }
+                if (i < (N - 1)) {
+                    System.arraycopy(cur, i + 1, ret, i, N - i - 1);
+                }
+                return ret;
+            }
+        }
+        return cur;
+    }
+
+    /**
+     * Appends a new value to a copy of the array and returns the copy.  If
+     * the value is already present, the original array is returned
+     * @param cur The original array, or null to represent an empty array.
+     * @param val The value to add.
+     * @return A new array that contains all of the values of the original array
+     * with the new value added, or the original array.
+     */
+    public static long[] appendLong(long[] cur, long val) {
+        if (cur == null) {
+            return new long[] { val };
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                return cur;
+            }
+        }
+        long[] ret = new long[N + 1];
+        System.arraycopy(cur, 0, ret, 0, N);
+        ret[N] = val;
+        return ret;
+    }
+
+    public static long[] removeLong(long[] cur, long val) {
+        if (cur == null) {
+            return null;
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                long[] ret = new long[N - 1];
                 if (i > 0) {
                     System.arraycopy(cur, 0, ret, 0, i);
                 }
