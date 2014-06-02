@@ -194,6 +194,8 @@ public final class HdmiCec {
         DEVICE_RECORDER,  // ADDR_RECORDER_3
         DEVICE_TUNER,  // ADDR_TUNER_4
         DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
+        DEVICE_RESERVED,
+        DEVICE_RESERVED,
         DEVICE_TV,  // ADDR_SPECIFIC_USE
     };
 
@@ -210,6 +212,8 @@ public final class HdmiCec {
         "Recorder_3",
         "Tuner_4",
         "Playback_3",
+        "Reserved_1",
+        "Reserved_2",
         "Secondary_TV",
     };
 
