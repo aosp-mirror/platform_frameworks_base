@@ -43,7 +43,7 @@ import java.util.ArrayList;
  * {@link Request} subclass describing the type of operation to perform -- currently the
  * possible requests are {@link ConfirmationRequest} and {@link CommandRequest}.
  *
- * <p>Once a request is submitted, the voice system will process it and evetually deliver
+ * <p>Once a request is submitted, the voice system will process it and eventually deliver
  * the result to the request object.  The application can cancel a pending request at any
  * time.
  *
@@ -51,7 +51,7 @@ import java.util.ArrayList;
  * if an activity is being restarted with retained state, it will retain the current
  * VoiceInteractor and any outstanding requests.  Because of this, you should always use
  * {@link Request#getActivity() Request.getActivity} to get back to the activity of a
- * request, rather than holding on to the actvitity instance yourself, either explicitly
+ * request, rather than holding on to the activity instance yourself, either explicitly
  * or implicitly through a non-static inner class.
  */
 public class VoiceInteractor {
@@ -236,7 +236,7 @@ public class VoiceInteractor {
          * Reports that the current interaction can not be complete with voice, so the
          * application will need to switch to a traditional input UI.  Applications should
          * only use this when they need to completely bail out of the voice interaction
-         * and switch to a traditional UI.  When the resonsponse comes back, the voice
+         * and switch to a traditional UI.  When the response comes back, the voice
          * system has handled the request and is ready to switch; at that point the application
          * can start a new non-voice activity.  Be sure when starting the new activity
          * to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
