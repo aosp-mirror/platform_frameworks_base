@@ -508,7 +508,7 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
             break;
          }
         default:
-            ALOGE("unsupported type in getObjectPropertyValue\n");
+            ALOGE("unsupported type in setObjectPropertyValue\n");
             return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
     }
 
