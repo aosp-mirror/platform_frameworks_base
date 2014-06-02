@@ -3669,6 +3669,7 @@ final class ActivityStack {
                 mStacks.remove(this);
                 mStacks.add(0, this);
             }
+            mActivityContainer.onTaskListEmpty();
         }
     }
 

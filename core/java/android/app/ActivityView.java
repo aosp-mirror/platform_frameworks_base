@@ -53,6 +53,7 @@ public class ActivityView extends ViewGroup {
     private int mHeight;
     private Surface mSurface;
     private int mLastVisibility;
+    private ActivityViewCallback mActivityViewCallback;
 
     // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
     IIntentSender mQueuedPendingIntent;
@@ -254,6 +255,25 @@ public class ActivityView extends ViewGroup {
         }
     }
 
+    /**
+     * Set the callback to use to report certain state changes.
+     * @param callback The callback to report events to.
+     *
+     * @see ActivityViewCallback
+     */
+    public void setCallback(ActivityViewCallback callback) {
+        mActivityViewCallback = callback;
+    }
+
+    public static abstract class ActivityViewCallback {
+        /**
+         * Called when all activities in the ActivityView have completed and been removed. Register
+         * using {@link ActivityView#setCallback(ActivityViewCallback)}. Each ActivityView may
+         * have at most one callback registered.
+         */
+        public abstract void onAllActivitiesComplete(ActivityView view);
+    }
+
     private class ActivityViewSurfaceTextureListener implements SurfaceTextureListener {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width,
@@ -312,6 +332,22 @@ public class ActivityView extends ViewGroup {
         public void setVisible(IBinder container, boolean visible) {
             if (DEBUG) Log.v(TAG, "setVisible(): container=" + container + " visible=" + visible +
                     " ActivityView=" + mActivityViewWeakReference.get());
+        }
+
+        @Override
+        public void onAllActivitiesComplete(IBinder container) {
+            final ActivityView activityView = mActivityViewWeakReference.get();
+            if (activityView != null) {
+                final ActivityViewCallback callback = activityView.mActivityViewCallback;
+                if (callback != null) {
+                    activityView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onAllActivitiesComplete(activityView);
+                        }
+                    });
+                }
+            }
         }
     }
 

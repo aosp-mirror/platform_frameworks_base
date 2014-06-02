@@ -126,6 +126,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
     static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
     static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
+    static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 9;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -523,7 +524,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping) {
-		// TODO: Put all stacks in supervisor and iterate through them instead.
+        // TODO: Put all stacks in supervisor and iterate through them instead.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -2931,12 +2932,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 } break;
                 case CONTAINER_CALLBACK_VISIBILITY: {
                     final ActivityContainer container = (ActivityContainer) msg.obj;
-                    try {
-                        // We only send this message if mCallback is non-null.
-                        container.mCallback.setVisible(container.asBinder(), msg.arg1 == 1);
-                    } catch (RemoteException e) {
+                    final IActivityContainerCallback callback = container.mCallback;
+                    if (callback != null) {
+                        try {
+                            callback.setVisible(container.asBinder(), msg.arg1 == 1);
+                        } catch (RemoteException e) {
+                        }
                     }
-                }
+                } break;
+                case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
+                    final ActivityContainer container = (ActivityContainer) msg.obj;
+                    final IActivityContainerCallback callback = container.mCallback;
+                    if (callback != null) {
+                        try {
+                            callback.onAllActivitiesComplete(container.asBinder());
+                        } catch (RemoteException e) {
+                        }
+                    }
+                } break;
             }
         }
     }
@@ -3139,6 +3152,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // You can always start a new task on a regular ActivityStack.
         boolean isEligibleForNewTasks() {
             return true;
+        }
+
+        void onTaskListEmpty() {
+            mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 
         @Override
