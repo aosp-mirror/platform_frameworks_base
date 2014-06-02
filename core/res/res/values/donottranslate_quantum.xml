@@ -27,6 +27,6 @@
     <string name="font_family_body_1_quantum">sans-serif</string>
     <string name="font_family_caption_quantum">sans-serif</string>
     <string name="font_family_menu_quantum">sans-serif-medium</string>
-    <string name="font_family_button_quantum">sans-serif</string>
+    <string name="font_family_button_quantum">sans-serif-medium</string>
 
 </resources>

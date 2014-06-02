@@ -668,7 +668,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Light.Button.Borderless.Small</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Quantum.Light.Button.Borderless</item>
         <item name="segmentedButtonStyle">@style/Widget.Quantum.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
@@ -1004,7 +1004,7 @@ please see themes_device_defaults.xml.
         <item name="colorBackgroundCacheHint">@null</item>
 
         <item name="buttonBarStyle">@style/Widget.Quantum.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@style/Widget.Quantum.Button.Borderless.Small</item>
+        <item name="borderlessButtonStyle">@style/Widget.Quantum.Button.Borderless</item>
 
         <item name="textAppearance">@style/TextAppearance.Quantum</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Inverse</item>
@@ -1123,7 +1123,7 @@ please see themes_device_defaults.xml.
         <item name="colorBackgroundCacheHint">@null</item>
 
         <item name="buttonBarStyle">@style/Widget.Quantum.Light.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless.Small</item>
+        <item name="borderlessButtonStyle">@style/Widget.Quantum.Light.Button.Borderless</item>
 
         <item name="textAppearance">@style/TextAppearance.Quantum</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Quantum.Inverse</item>
