@@ -94,10 +94,10 @@ public class WifiPasspointOsuProvider implements Parcelable {
             sb.append(" serverUri: ").append(serverUri);
         sb.append(" osuMethod: ").append(osuMethod);
         if (iconFileName != null) {
-            sb.append(" icon: [").append(iconWidth).append("x")
+            sb.append(" icon: <").append(iconWidth).append("x")
                     .append(iconHeight).append(" ")
                     .append(iconType).append(" ")
-                    .append(iconFileName);
+                    .append(iconFileName).append(">");
         }
         if (osuNai != null)
             sb.append(" osuNai: ").append(osuNai);
@@ -113,16 +113,16 @@ public class WifiPasspointOsuProvider implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeValue(ssid);
-        out.writeValue(friendlyName);
-        out.writeValue(serverUri);
+        out.writeString(ssid);
+        out.writeString(friendlyName);
+        out.writeString(serverUri);
         out.writeInt(osuMethod);
         out.writeInt(iconWidth);
         out.writeInt(iconHeight);
-        out.writeValue(iconType);
-        out.writeValue(iconFileName);
-        out.writeValue(osuNai);
-        out.writeValue(osuService);
+        out.writeString(iconType);
+        out.writeString(iconFileName);
+        out.writeString(osuNai);
+        out.writeString(osuService);
         // TODO: icon image?
     }
 
@@ -131,16 +131,16 @@ public class WifiPasspointOsuProvider implements Parcelable {
                 @Override
                 public WifiPasspointOsuProvider createFromParcel(Parcel in) {
                     WifiPasspointOsuProvider osu = new WifiPasspointOsuProvider();
-                    osu.ssid = (String) in.readValue(String.class.getClassLoader());
-                    osu.friendlyName = (String) in.readValue(String.class.getClassLoader());
-                    osu.serverUri = (String) in.readValue(String.class.getClassLoader());
+                    osu.ssid = in.readString();
+                    osu.friendlyName = in.readString();
+                    osu.serverUri = in.readString();
                     osu.osuMethod = in.readInt();
                     osu.iconWidth = in.readInt();
                     osu.iconHeight = in.readInt();
-                    osu.iconType = (String) in.readValue(String.class.getClassLoader());
-                    osu.iconFileName = (String) in.readValue(String.class.getClassLoader());
-                    osu.osuNai = (String) in.readValue(String.class.getClassLoader());
-                    osu.osuService = (String) in.readValue(String.class.getClassLoader());
+                    osu.iconType = in.readString();
+                    osu.iconFileName = in.readString();
+                    osu.osuNai = in.readString();
+                    osu.osuService = in.readString();
                     return osu;
                 }
 
