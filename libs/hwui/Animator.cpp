@@ -63,7 +63,6 @@ void BaseRenderNodeAnimator::setStartValue(float value) {
 void BaseRenderNodeAnimator::setupStartValueIfNecessary(RenderNode* target, TreeInfo& info) {
     if (mPlayState == NEEDS_START) {
         setStartValue(getValue(target));
-        mPlayState = PENDING;
     }
 }
 
@@ -154,7 +153,8 @@ RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property, float fi
 }
 
 void RenderPropertyAnimator::onAttached(RenderNode* target) {
-    if (target->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
+    if (mPlayState == NEEDS_START
+            && target->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
         setStartValue((target->stagingProperties().*mPropertyAccess->getter)());
     }
     (target->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());

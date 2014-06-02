@@ -219,6 +219,15 @@ public final class RenderNodeAnimator extends Animator {
         return mTarget;
     }
 
+    /**
+     * WARNING: May only be called once!!!
+     * TODO: Fix above -_-
+     */
+    public void setStartValue(float startValue) {
+        checkMutable();
+        nSetStartValue(mNativePtr.get(), startValue);
+    }
+
     @Override
     public void setStartDelay(long startDelay) {
         checkMutable();
@@ -282,11 +291,12 @@ public final class RenderNodeAnimator extends Animator {
     }
 
     private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            int property, float deltaValue);
+            int property, float finalValue);
     private static native long nCreateCanvasPropertyFloatAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            long canvasProperty, float deltaValue);
+            long canvasProperty, float finalValue);
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            long canvasProperty, int paintField, float deltaValue);
+            long canvasProperty, int paintField, float finalValue);
+    private static native void nSetStartValue(long nativePtr, float startValue);
     private static native void nSetDuration(long nativePtr, long duration);
     private static native long nGetDuration(long nativePtr);
     private static native void nSetStartDelay(long nativePtr, long startDelay);
