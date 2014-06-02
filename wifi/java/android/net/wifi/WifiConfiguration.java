@@ -495,6 +495,12 @@ public class WifiConfiguration implements Parcelable {
     public boolean didSelfAdd;
 
     /**
+     * peer WifiConfiguration this WifiConfiguration was added for
+     * @hide
+     */
+    public String peerWifiConfiguration;
+
+    /**
      * @hide
      * Indicate that a WifiConfiguration is temporary and should not be saved
      * nor considered by AutoJoin.
@@ -980,6 +986,7 @@ public class WifiConfiguration implements Parcelable {
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
             creatorUid = source.creatorUid;
+            peerWifiConfiguration = source.peerWifiConfiguration;
         }
     }
 
