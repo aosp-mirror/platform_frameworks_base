@@ -133,7 +133,8 @@ abstract class FeatureAction {
 
         @Override
         public void sendTimerMessage(int state, long delayMillis) {
-            sendMessageDelayed(obtainMessage(MSG_TIMEOUT, state), delayMillis);
+            // The third argument(0) is not used.
+            sendMessageDelayed(obtainMessage(MSG_TIMEOUT, state, 0), delayMillis);
         }
 
         @Override
