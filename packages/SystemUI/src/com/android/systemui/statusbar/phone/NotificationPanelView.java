@@ -23,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -91,8 +92,12 @@ public class NotificationPanelView extends PanelView implements
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
+    private boolean mHeaderHidden;
+    private int mNotificationsHeaderCollideDistance;
 
     private Interpolator mFastOutSlowInInterpolator;
+    private Interpolator mFastOutLinearInterpolator;
+    private Interpolator mLinearOutSlowInInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
     private int mTopPaddingAdjustment;
@@ -143,6 +148,10 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.linear_out_slow_in);
+        mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.fast_out_linear_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mSwipeTranslationViews.add(mNotificationStackScroller);
         mSwipeTranslationViews.add(mKeyguardStatusView);
@@ -159,6 +168,8 @@ public class NotificationPanelView extends PanelView implements
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
         mQsPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_peek_height);
+        mNotificationsHeaderCollideDistance =
+                getResources().getDimensionPixelSize(R.dimen.header_notifications_collide_distance);
         mClockPositionAlgorithm.loadDimens(getResources());
     }
 
@@ -708,6 +719,43 @@ public class NotificationPanelView extends PanelView implements
             positionClockAndNotifications();
         }
         mNotificationStackScroller.setStackHeight(expandedHeight);
+        updateKeyguardHeaderVisibility();
+    }
+
+    /**
+     * Hides the header when notifications are colliding with it.
+     */
+    private void updateKeyguardHeaderVisibility() {
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
+            boolean hidden = mNotificationStackScroller.getNotificationsTopY()
+                    <= mHeader.getBottom() + mNotificationsHeaderCollideDistance;
+            if (hidden && !mHeaderHidden) {
+                mHeader.animate()
+                        .alpha(0f)
+                        .withLayer()
+                        .translationY(-mHeader.getHeight()/2)
+                        .setInterpolator(mFastOutLinearInterpolator)
+                        .setDuration(200);
+            } else if (!hidden && mHeaderHidden) {
+                mHeader.animate()
+                        .alpha(1f)
+                        .withLayer()
+                        .translationY(0)
+                        .setInterpolator(mLinearOutSlowInInterpolator)
+                        .setDuration(200);
+            }
+            mHeaderHidden = hidden;
+        } else {
+            mHeader.animate().cancel();
+            mHeader.setAlpha(1f);
+            mHeader.setTranslationY(0f);
+            if (mHeader.getLayerType() != LAYER_TYPE_NONE) {
+                mHeader.setLayerType(LAYER_TYPE_NONE, null);
+            }
+            mHeaderHidden = false;
+        }
+
     }
 
     @Override
