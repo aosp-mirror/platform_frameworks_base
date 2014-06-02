@@ -2957,15 +2957,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onTrackingStarted() {
-        if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
-        }
+    }
+
+    public void onUnlockHintStarted() {
+        mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
+    }
+
+    public void onUnlockHintFinished() {
+        mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
     }
 
     public void onTrackingStopped(boolean expand) {
-        if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
-        }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mUnlockMethodCache.isMethodInsecure()) {
                 showBouncer();
