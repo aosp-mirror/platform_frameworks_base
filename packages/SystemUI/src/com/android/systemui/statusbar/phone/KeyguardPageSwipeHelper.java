@@ -281,7 +281,7 @@ public class KeyguardPageSwipeHelper {
     private void setTranslation(float translation, boolean isReset) {
         translation = rightSwipePossible() ? translation : Math.max(0, translation);
         translation = leftSwipePossible() ? translation : Math.min(0, translation);
-        if (translation != mTranslation) {
+        if (translation != mTranslation || isReset) {
             ArrayList<View> translatedViews = mCallback.getTranslationViews();
             for (View view : translatedViews) {
                 view.setTranslationX(translation);
@@ -307,12 +307,17 @@ public class KeyguardPageSwipeHelper {
         }
     }
 
-    private void showAllIcons(boolean animate) {
+    public void showAllIcons(boolean animate) {
         float scale = 1.0f;
         float alpha = SWIPE_RESTING_ALPHA_AMOUNT;
         updateIcon(mRightIcon, scale, alpha, animate);
         updateIcon(mCenterIcon, scale, alpha, animate);
         updateIcon(mLeftIcon, scale, alpha, animate);
+    }
+
+    public void animateHideLeftRightIcon() {
+        updateIcon(mRightIcon, 0f, 0f, true);
+        updateIcon(mLeftIcon, 0f, 0f, true);
     }
 
     private void hideInactiveIcons(boolean animate){
