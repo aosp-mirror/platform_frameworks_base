@@ -41,6 +41,7 @@ protected:
 class BaseRenderNodeAnimator : public VirtualLightRefBase {
     PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
 public:
+    ANDROID_API void setStartValue(float value);
     ANDROID_API void setInterpolator(Interpolator* interpolator);
     ANDROID_API void setDuration(nsecs_t durationInMs);
     ANDROID_API nsecs_t duration() { return mDuration; }
@@ -64,11 +65,9 @@ protected:
     BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
 
-    void setStartValue(float value);
     virtual float getValue(RenderNode* target) const = 0;
     virtual void setValue(RenderNode* target, float value) = 0;
 
-private:
     void callOnFinishedListener(TreeInfo& info);
 
     enum PlayState {
