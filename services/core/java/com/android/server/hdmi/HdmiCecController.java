@@ -80,8 +80,8 @@ final class HdmiCecController {
     // A logical address of device is used as key of container.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos = new SparseArray<>();
 
-    // Stores the local CEC devices in the system.
-    private final ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
+    // Stores the local CEC devices in the system. Device type is used for key.
+    private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
 
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController() {
@@ -131,7 +131,7 @@ final class HdmiCecController {
             // TODO: Consider restoring the local device addresses from persistent storage
             //       to allocate the same addresses again if possible.
             device.setPreferredAddress(HdmiCec.ADDR_UNREGISTERED);
-            mLocalDevices.add(device);
+            mLocalDevices.put(type, device);
             device.init();
         }
     }
@@ -290,6 +290,17 @@ final class HdmiCecController {
     }
 
     /**
+     * Return the locally hosted logical device of a given type.
+     *
+     * @param deviceType logical device type
+     * @return {@link HdmiCecLocalDevice} instance if the instance of the type is available;
+     *          otherwise null.
+     */
+    HdmiCecLocalDevice getLocalDevice(int deviceType) {
+        return mLocalDevices.get(deviceType);
+    }
+
+    /**
      * Add a new logical address to the device. Device's HW should be notified
      * when a new logical address is assigned to a device, so that it can accept
      * a command having available destinations.
@@ -317,8 +328,8 @@ final class HdmiCecController {
         assertRunOnServiceThread();
         // TODO: consider to backup logical address so that new logical address
         // allocation can use it as preferred address.
-        for (HdmiCecLocalDevice device : mLocalDevices) {
-            device.clearAddress();
+        for (int i = 0; i < mLocalDevices.size(); ++i) {
+            mLocalDevices.valueAt(i).clearAddress();
         }
         nativeClearLogicalAddress(mNativePtr);
     }
@@ -379,8 +390,8 @@ final class HdmiCecController {
     }
 
     private boolean isAllocatedLocalDeviceAddress(int address) {
-        for (HdmiCecLocalDevice device : mLocalDevices) {
-            if (device.isAddressOf(address)) {
+        for (int i = 0; i < mLocalDevices.size(); ++i) {
+            if (mLocalDevices.valueAt(i).isAddressOf(address)) {
                 return true;
             }
         }
