@@ -858,6 +858,14 @@
     <!-- Boolean indicating if current platform supports BLE peripheral mode -->
     <bool name="config_bluetooth_le_peripheral_mode_supported">false</bool>
 
+    <!-- Max number of scan filters supported by blutooth controller. 0 if the
+         device does not support hardware scan filters-->
+    <integer translatable="false" name="config_bluetooth_max_scan_filters">0</integer>
+
+    <!-- Max number of advertisers supported by bluetooth controller. 0 if the
+         device does not support multiple advertisement-->
+    <integer translatable="false" name="config_bluetooth_max_advertisers">0</integer>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
