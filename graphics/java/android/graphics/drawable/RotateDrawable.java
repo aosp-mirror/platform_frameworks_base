@@ -438,7 +438,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
-            if ((drawable = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme)) == null) {
+            if ((drawable = Drawable.createFromXmlInner(r, parser, attrs, theme)) == null) {
                 Log.w("drawable", "Bad element under <rotate>: "
                         + parser .getName());
             }

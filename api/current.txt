@@ -11236,14 +11236,11 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Drawable createFromPath(java.lang.String);
     method public static android.graphics.drawable.Drawable createFromResourceStream(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String);
     method public static android.graphics.drawable.Drawable createFromResourceStream(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.graphics.BitmapFactory.Options);
-    method public static android.graphics.drawable.Drawable createFromResourceStreamThemed(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.content.res.Resources.Theme);
-    method public static android.graphics.drawable.Drawable createFromResourceStreamThemed(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.graphics.BitmapFactory.Options, android.content.res.Resources.Theme);
     method public static android.graphics.drawable.Drawable createFromStream(java.io.InputStream, java.lang.String);
-    method public static android.graphics.drawable.Drawable createFromStreamThemed(java.io.InputStream, java.lang.String, android.content.res.Resources.Theme);
     method public static android.graphics.drawable.Drawable createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.graphics.drawable.Drawable createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.graphics.drawable.Drawable createFromXmlInner(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static android.graphics.drawable.Drawable createFromXmlInnerThemed(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static android.graphics.drawable.Drawable createFromXmlThemed(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.graphics.drawable.Drawable createFromXmlInner(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public abstract void draw(android.graphics.Canvas);
     method public int getAlpha();
     method public final android.graphics.Rect getBounds();
@@ -11519,7 +11516,6 @@ package android.graphics.drawable {
     method public android.graphics.Paint getPaint();
     method public android.graphics.drawable.ShapeDrawable.ShaderFactory getShaderFactory();
     method public android.graphics.drawable.shapes.Shape getShape();
-    method public android.content.res.ColorStateList getTint();
     method protected boolean inflateTag(java.lang.String, android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet);
     method protected void onDraw(android.graphics.drawable.shapes.Shape, android.graphics.Canvas, android.graphics.Paint);
     method public void setAlpha(int);
@@ -11530,7 +11526,6 @@ package android.graphics.drawable {
     method public void setPadding(android.graphics.Rect);
     method public void setShaderFactory(android.graphics.drawable.ShapeDrawable.ShaderFactory);
     method public void setShape(android.graphics.drawable.shapes.Shape);
-    method public void setTint(android.content.res.ColorStateList);
   }
 
   public static abstract class ShapeDrawable.ShaderFactory {

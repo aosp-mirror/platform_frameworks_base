@@ -211,7 +211,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                             + ": <item> tag requires a 'drawable' attribute or "
                             + "child tag defining a drawable");
                 }
-                dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+                dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
             addLayer(dr, themeAttrs, id, left, top, right, bottom);
