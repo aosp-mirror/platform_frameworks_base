@@ -55,4 +55,8 @@ oneway interface ICallService {
     void playDtmfTone(String callId, char digit);
 
     void stopDtmfTone(String callId);
+
+    void addToConference(String conferenceCallId, in List<String> callIds);
+
+    void splitFromConference(String conferenceCallId, String callId);
 }

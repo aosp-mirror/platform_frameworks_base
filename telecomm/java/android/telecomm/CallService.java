@@ -27,6 +27,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.ICallService;
 import com.android.internal.telecomm.ICallServiceAdapter;
 
+import java.util.List;
+
 /**
  * Base implementation of CallService which can be used to provide calls for the system
  * in-call UI. CallService is a one-way service from the framework's CallsManager to any app
@@ -59,6 +61,8 @@ public abstract class CallService extends Service {
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 11;
     private static final int MSG_PLAY_DTMF_TONE = 12;
     private static final int MSG_STOP_DTMF_TONE = 13;
+    private static final int MSG_ADD_TO_CONFERENCE = 14;
+    private static final int MSG_SPLIT_FROM_CONFERENCE = 15;
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -123,6 +127,29 @@ public abstract class CallService extends Service {
                 case MSG_STOP_DTMF_TONE:
                     stopDtmfTone((String) msg.obj);
                     break;
+                case MSG_ADD_TO_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        @SuppressWarnings("unchecked")
+                        List<String> callIds = (List<String>) args.arg2;
+                        String conferenceCallId = (String) args.arg1;
+                        addToConference(conferenceCallId, callIds);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_SPLIT_FROM_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String conferenceCallId = (String) args.arg1;
+                        String callId = (String) args.arg2;
+                        splitFromConference(conferenceCallId, callId);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -203,6 +230,22 @@ public abstract class CallService extends Service {
             args.arg1 = callId;
             args.arg2 = audioState;
             mMessageHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void addToConference(String conferenceCallId, List<String> callsToConference) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = conferenceCallId;
+            args.arg2 = callsToConference;
+            mMessageHandler.obtainMessage(MSG_ADD_TO_CONFERENCE, args).sendToTarget();
+        }
+
+        @Override
+        public void splitFromConference(String conferenceCallId, String callId) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = conferenceCallId;
+            args.arg2 = callId;
+            mMessageHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, args).sendToTarget();
         }
     }
 
@@ -359,4 +402,24 @@ public abstract class CallService extends Service {
      * @param audioState The new {@link CallAudioState}.
      */
     public abstract void onAudioStateChanged(String activeCallId, CallAudioState audioState);
+
+    /**
+     * Adds the specified calls to the specified conference call.
+     *
+     * @param conferenceCallId The unique ID of the conference call onto which the specified calls
+     *         should be added.
+     * @param callIds The calls to add to the conference call.
+     * @hide
+     */
+    public abstract void addToConference(String conferenceCallId, List<String> callIds);
+
+    /**
+     * Removes the specified call from the specified conference call. This is a no-op if the call
+     * is not already part of the conference call.
+     *
+     * @param conferenceCallId The conference call.
+     * @param callId The call to remove from the conference call
+     * @hide
+     */
+    public abstract void splitFromConference(String conferenceCallId, String callId);
 }
