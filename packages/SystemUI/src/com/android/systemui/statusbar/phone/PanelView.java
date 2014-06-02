@@ -50,6 +50,7 @@ public abstract class PanelView extends FrameLayout {
     protected PhoneStatusBar mStatusBar;
     private float mPeekHeight;
     private float mHintDistance;
+    private int mEdgeTapAreaWidth;
     private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
@@ -59,6 +60,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mTouchSlopExceeded;
     private int mTrackingPointer;
     protected int mTouchSlop;
+    protected boolean mHintAnimationRunning;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -111,6 +113,7 @@ public abstract class PanelView extends FrameLayout {
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mHintDistance = res.getDimension(R.dimen.hint_move_distance);
+        mEdgeTapAreaWidth = res.getDimensionPixelSize(R.dimen.edge_tap_area_width);
     }
 
     private void trackMovement(MotionEvent event) {
@@ -147,7 +150,6 @@ public abstract class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 mInitialOffsetOnTouch = mExpandedHeight;
@@ -156,10 +158,11 @@ public abstract class PanelView extends FrameLayout {
                     initVelocityTracker();
                 }
                 trackMovement(event);
-                if (!waitForTouchSlop || mHeightAnimator != null) {
+                if (!waitForTouchSlop || (mHeightAnimator != null && !mHintAnimationRunning)) {
                     if (mHeightAnimator != null) {
                         mHeightAnimator.cancel(); // end any outstanding animations
                     }
+                    mTouchSlopExceeded = true;
                     onTrackingStarted();
                 }
                 if (mExpandedHeight == 0) {
@@ -222,7 +225,7 @@ public abstract class PanelView extends FrameLayout {
                     onTrackingStopped(expand);
                     fling(vel, expand);
                 } else {
-                    boolean expands = onEmptySpaceClick();
+                    boolean expands = onEmptySpaceClick(mInitialTouchX);
                     onTrackingStopped(expands);
                 }
                 if (mVelocityTracker != null) {
@@ -279,8 +282,9 @@ public abstract class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (mHeightAnimator != null) {
+                if (mHeightAnimator != null && !mHintAnimationRunning) {
                     mHeightAnimator.cancel(); // end any outstanding animations
+                    mTouchSlopExceeded = true;
                     return true;
                 }
                 mInitialTouchY = y;
@@ -305,6 +309,9 @@ public abstract class PanelView extends FrameLayout {
                 trackMovement(event);
                 if (scrolledToBottom) {
                     if (h < -mTouchSlop && h < -Math.abs(x - mInitialTouchX)) {
+                        if (mHeightAnimator != null) {
+                            mHeightAnimator.cancel();
+                        }
                         mInitialOffsetOnTouch = mExpandedHeight;
                         mInitialTouchY = y;
                         mInitialTouchX = x;
@@ -550,14 +557,22 @@ public abstract class PanelView extends FrameLayout {
         }
         cancelPeek();
         onExpandingStarted();
-        startUnlockHintAnimationPhase1();
+        startUnlockHintAnimationPhase1(new Runnable() {
+            @Override
+            public void run() {
+                onExpandingFinished();
+                mStatusBar.onHintFinished();
+                mHintAnimationRunning = false;
+            }
+        });
         mStatusBar.onUnlockHintStarted();
+        mHintAnimationRunning = true;
     }
 
     /**
      * Phase 1: Move everything upwards.
      */
-    private void startUnlockHintAnimationPhase1() {
+    private void startUnlockHintAnimationPhase1(final Runnable onAnimationFinished) {
         float target = Math.max(0, getMaxPanelHeight() - mHintDistance);
         ValueAnimator animator = createHeightAnimator(target);
         animator.setDuration(250);
@@ -574,10 +589,9 @@ public abstract class PanelView extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 if (mCancelled) {
                     mHeightAnimator = null;
-                    onExpandingFinished();
-                    mStatusBar.onUnlockHintFinished();
+                    onAnimationFinished.run();
                 } else {
-                    startUnlockHintAnimationPhase2();
+                    startUnlockHintAnimationPhase2(onAnimationFinished);
                 }
             }
         });
@@ -588,7 +602,7 @@ public abstract class PanelView extends FrameLayout {
     /**
      * Phase 2: Bounce down.
      */
-    private void startUnlockHintAnimationPhase2() {
+    private void startUnlockHintAnimationPhase2(final Runnable onAnimationFinished) {
         ValueAnimator animator = createHeightAnimator(getMaxPanelHeight());
         animator.setDuration(450);
         animator.setInterpolator(mBounceInterpolator);
@@ -596,8 +610,7 @@ public abstract class PanelView extends FrameLayout {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mHeightAnimator = null;
-                onExpandingFinished();
-                mStatusBar.onUnlockHintFinished();
+                onAnimationFinished.run();
             }
         });
         animator.start();
@@ -620,7 +633,22 @@ public abstract class PanelView extends FrameLayout {
      *
      * @return whether the panel will be expanded after the action performed by this method
      */
-    private boolean onEmptySpaceClick() {
+    private boolean onEmptySpaceClick(float x) {
+        if (mHintAnimationRunning) {
+            return true;
+        }
+        if (x < mEdgeTapAreaWidth) {
+            onEdgeClicked(false /* right */);
+            return true;
+        } else if (x > getWidth() - mEdgeTapAreaWidth) {
+            onEdgeClicked(true /* right */);
+            return true;
+        } else {
+            return onMiddleClicked();
+        }
+    }
+
+    private boolean onMiddleClicked() {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
                 startUnlockHintAnimation();
@@ -635,6 +663,8 @@ public abstract class PanelView extends FrameLayout {
                 return true;
         }
     }
+
+    protected abstract void onEdgeClicked(boolean right);
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"

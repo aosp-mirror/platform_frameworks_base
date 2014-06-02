@@ -2963,8 +2963,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
     }
 
-    public void onUnlockHintFinished() {
+    public void onHintFinished() {
         mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+    }
+
+    public void onCameraHintStarted() {
+        mKeyguardIndicationTextView.switchIndication(R.string.camera_hint);
+    }
+
+    public void onPhoneHintStarted() {
+        mKeyguardIndicationTextView.switchIndication(R.string.phone_hint);
     }
 
     public void onTrackingStopped(boolean expand) {

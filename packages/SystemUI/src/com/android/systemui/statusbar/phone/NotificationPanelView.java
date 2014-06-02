@@ -422,7 +422,9 @@ public class NotificationPanelView extends PanelView implements
         }
         // TODO: Handle doublefinger swipe to notifications again. Look at history for a reference
         // implementation.
-        if (!mIsExpanding && !mQsExpanded && mStatusBar.getBarState() != StatusBarState.SHADE) {
+        if ((!mIsExpanding || mHintAnimationRunning)
+                && !mQsExpanded
+                && mStatusBar.getBarState() != StatusBarState.SHADE) {
             mPageSwiper.onTouchEvent(event);
             if (mPageSwiper.isSwipingInProgress()) {
                 return true;
@@ -796,8 +798,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onTrackingStopped(boolean expand) {
         super.onTrackingStopped(expand);
         mOverExpansion = 0.0f;
-        mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */,
-                true /* animate */);
+        mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */, true /* animate */);
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             mPageSwiper.showAllIcons(true);
@@ -837,14 +838,36 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onAnimationToSideStarted(boolean rightPage) {
-        if (rightPage) {
-            mKeyguardBottomArea.launchCamera();
-        } else {
+        boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? rightPage : !rightPage;
+        if (start) {
             mKeyguardBottomArea.launchPhone();
+        } else {
+            mKeyguardBottomArea.launchCamera();
         }
         mBlockTouches = true;
     }
 
+    @Override
+    protected void onEdgeClicked(boolean right) {
+        if ((right && getRightIcon().getVisibility() != View.VISIBLE)
+                || (!right && getLeftIcon().getVisibility() != View.VISIBLE)) {
+            return;
+        }
+        mHintAnimationRunning = true;
+        mPageSwiper.startHintAnimation(right, new Runnable() {
+            @Override
+            public void run() {
+                mHintAnimationRunning = false;
+                mStatusBar.onHintFinished();
+            }
+        });
+        boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? right : !right;
+        if (start) {
+            mStatusBar.onPhoneHintStarted();
+        } else {
+            mStatusBar.onCameraHintStarted();
+        }
+    }
 
     @Override
     public float getPageWidth() {
@@ -858,7 +881,9 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public View getLeftIcon() {
-        return mKeyguardBottomArea.getPhoneImageView();
+        return getLayoutDirection() == LAYOUT_DIRECTION_RTL
+                ? mKeyguardBottomArea.getCameraImageView()
+                : mKeyguardBottomArea.getPhoneImageView();
     }
 
     @Override
@@ -868,6 +893,8 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public View getRightIcon() {
-        return mKeyguardBottomArea.getCameraImageView();
+        return getLayoutDirection() == LAYOUT_DIRECTION_RTL
+                ? mKeyguardBottomArea.getPhoneImageView()
+                : mKeyguardBottomArea.getCameraImageView();
     }
 }

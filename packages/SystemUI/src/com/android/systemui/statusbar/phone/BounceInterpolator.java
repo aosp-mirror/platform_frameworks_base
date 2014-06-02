@@ -27,6 +27,7 @@ public class BounceInterpolator implements Interpolator {
 
     @Override
     public float getInterpolation(float t) {
+        t *= 11f / 10f;
         if (t < 4f / 11f) {
             return SCALE_FACTOR * t * t;
         } else if (t < 8f / 11f) {
@@ -36,8 +37,7 @@ public class BounceInterpolator implements Interpolator {
             float t2 = t - 9f / 11f;
             return SCALE_FACTOR * t2 * t2 + 15f / 16f;
         } else {
-            float t2 = t - 21f / 22f;
-            return SCALE_FACTOR * t2 * t2 + 63f / 64f;
+            return 1;
         }
     }
 }
