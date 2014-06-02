@@ -49,6 +49,10 @@ public final class HdmiControlService extends SystemService {
     // TODO: Rename the permission to HDMI_CONTROL.
     private static final String PERMISSION = "android.permission.HDMI_CEC";
 
+    static final int SEND_RESULT_SUCCESS = 0;
+    static final int SEND_RESULT_NAK = -1;
+    static final int SEND_RESULT_FAILURE = -2;
+
     /**
      * Interface to report send result.
      */
@@ -56,10 +60,11 @@ public final class HdmiControlService extends SystemService {
         /**
          * Called when {@link HdmiControlService#sendCecCommand} is completed.
          *
-         * @param error result of send request. 0 if succeed. Otherwise it will be
-         *        negative value
+         * @param error result of send request.
+         * @see {@link #SEND_RESULT_SUCCESS}
+         * @see {@link #SEND_RESULT_NAK}
+         * @see {@link #SEND_RESULT_FAILURE}
          */
-        // TODO: define error code as constants and update javadoc.
         void onSendCompleted(int error);
     }
 
