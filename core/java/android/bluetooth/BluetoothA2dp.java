@@ -552,34 +552,4 @@ public final class BluetoothA2dp implements BluetoothProfile {
     private static void log(String msg) {
       Log.d(TAG, msg);
     }
-
-    /** @hide */
-    public void sendPassThroughCmd(int keyCode, int keyState) {
-        if (DBG) Log.d(TAG, "sendPassThroughCmd");
-        if (mService != null && isEnabled()) {
-            try {
-                mService.sendPassThroughCmd(keyCode, keyState);
-                return;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error talking to BT service in sendPassThroughCmd()", e);
-                return;
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    }
-
-    /** @hide */
-    public boolean isAvrcpConnected(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "isAvrcpConnected");
-        if (mService != null && isEnabled()) {
-            try {
-                return mService.isAvrcpConnected(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error talking to BT service in isAvrcpConnected()", e);
-                return false;
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
-    }
 }

@@ -1393,6 +1393,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.A2DP_SINK) {
             BluetoothA2dpSink a2dpSink = new BluetoothA2dpSink(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.AVRCP_CONTROLLER) {
+            BluetoothAvrcpController avrcp = new BluetoothAvrcpController(context, listener);
+            return true;
         } else if (profile == BluetoothProfile.INPUT_DEVICE) {
             BluetoothInputDevice iDev = new BluetoothInputDevice(context, listener);
             return true;
@@ -1439,6 +1442,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.A2DP_SINK:
                 BluetoothA2dpSink a2dpSink = (BluetoothA2dpSink)proxy;
                 a2dpSink.close();
+                break;
+            case BluetoothProfile.AVRCP_CONTROLLER:
+                BluetoothAvrcpController avrcp = (BluetoothAvrcpController)proxy;
+                avrcp.close();
                 break;
             case BluetoothProfile.INPUT_DEVICE:
                 BluetoothInputDevice iDev = (BluetoothInputDevice)proxy;

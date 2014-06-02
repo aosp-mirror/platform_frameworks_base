@@ -110,6 +110,12 @@ public interface BluetoothProfile {
     public static final int A2DP_SINK = 10;
 
     /**
+     * AVRCP Controller Profile
+     * @hide
+     */
+    public static final int AVRCP_CONTROLLER = 11;
+
+    /**
      * Headset Client - HFP HF Role
      * @hide
      */
