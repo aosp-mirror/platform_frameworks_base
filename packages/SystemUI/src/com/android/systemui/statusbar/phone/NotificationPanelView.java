@@ -51,7 +51,6 @@ public class NotificationPanelView extends PanelView implements
     private static float EXPANSION_RUBBER_BAND_EXTRA_FACTOR = 0.6f;
 
     private KeyguardPageSwipeHelper mPageSwiper;
-    PhoneStatusBar mStatusBar;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
     private View mQsPanel;
