@@ -116,6 +116,11 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
     return reinterpret_cast<jlong>( animator );
 }
 
+static void setStartValue(JNIEnv* env, jobject clazz, jlong animatorPtr, jfloat startValue) {
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
+    animator->setStartValue(startValue);
+}
+
 static void setDuration(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong duration) {
     LOG_ALWAYS_FATAL_IF(duration < 0, "Duration cannot be negative");
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
@@ -157,6 +162,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyPaintAnimator },
+    { "nSetStartValue", "(JF)V", (void*) setStartValue },
     { "nSetDuration", "(JJ)V", (void*) setDuration },
     { "nGetDuration", "(J)J", (void*) getDuration },
     { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },

@@ -118,19 +118,25 @@ public class CirclePropActivity extends Activity {
                     mRadius, mToggle ? 250.0f : 150.0f));
 
             mRunningAnimations.add(new RenderNodeAnimator(
-                    mPaint, RenderNodeAnimator.PAINT_ALPHA,
-                    mToggle ? 64.0f : 255.0f));
-
-            mRunningAnimations.add(new RenderNodeAnimator(
                     mPaint, RenderNodeAnimator.PAINT_STROKE_WIDTH,
                     mToggle ? 5.0f : 60.0f));
 
-            TimeInterpolator interp = new OvershootInterpolator(3.0f);
+            mRunningAnimations.add(new RenderNodeAnimator(
+                    mPaint, RenderNodeAnimator.PAINT_ALPHA, 64.0f));
+
+            // Will be "chained" to run after the above
+            mRunningAnimations.add(new RenderNodeAnimator(
+                    mPaint, RenderNodeAnimator.PAINT_ALPHA, 255.0f));
+
             for (int i = 0; i < mRunningAnimations.size(); i++) {
                 RenderNodeAnimator anim = mRunningAnimations.get(i);
-                anim.setInterpolator(interp);
                 anim.setDuration(1000);
                 anim.setTarget(this);
+                if (i == (mRunningAnimations.size() - 1)) {
+                    // "chain" test
+                    anim.setStartValue(64.0f);
+                    anim.setStartDelay(anim.getDuration());
+                }
                 anim.start();
             }
 
