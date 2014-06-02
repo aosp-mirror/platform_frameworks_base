@@ -258,17 +258,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private NetworkStateTracker mNetTrackers[];
 
-    /**
-     * Holds references to all NetworkAgentInfos claiming to support the legacy
-     * NetworkType.  We used to have a static set of of NetworkStateTrackers
-     * for each network type.  This is the new model.
-     * Supports synchronous inspection of state.
-     * These are built out at startup such that an unsupported network
-     * doesn't get an ArrayList instance, making this a tristate:
-     * unsupported, supported but not active and active.
-     */
-    private ArrayList<NetworkAgentInfo> mNetworkAgentInfoForType[];
-
     /* Handles captive portal check on a network */
     private CaptivePortalTracker mCaptivePortalTracker;
 
@@ -516,6 +505,118 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private static final int UID_UNUSED = -1;
 
+    /**
+     * Implements support for the legacy "one network per network type" model.
+     *
+     * We used to have a static array of NetworkStateTrackers, one for each
+     * network type, but that doesn't work any more now that we can have,
+     * for example, more that one wifi network. This class stores all the
+     * NetworkAgentInfo objects that support a given type, but the legacy
+     * API will only see the first one.
+     *
+     * It serves two main purposes:
+     *
+     * 1. Provide information about "the network for a given type" (since this
+     *    API only supports one).
+     * 2. Send legacy connectivity change broadcasts. Broadcasts are sent if
+     *    the first network for a given type changes, or if the default network
+     *    changes.
+     */
+    private class LegacyTypeTracker {
+        /**
+         * Array of lists, one per legacy network type (e.g., TYPE_MOBILE_MMS).
+         * Each list holds references to all NetworkAgentInfos that are used to
+         * satisfy requests for that network type.
+         *
+         * This array is built out at startup such that an unsupported network
+         * doesn't get an ArrayList instance, making this a tristate:
+         * unsupported, supported but not active and active.
+         *
+         * The actual lists are populated when we scan the network types that
+         * are supported on this device.
+         */
+        private ArrayList<NetworkAgentInfo> mTypeLists[];
+
+        public LegacyTypeTracker() {
+            mTypeLists = (ArrayList<NetworkAgentInfo>[])
+                    new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
+        }
+
+        public void addSupportedType(int type) {
+            if (mTypeLists[type] != null) {
+                throw new IllegalStateException(
+                        "legacy list for type " + type + "already initialized");
+            }
+            mTypeLists[type] = new ArrayList<NetworkAgentInfo>();
+        }
+
+        private boolean isDefaultNetwork(NetworkAgentInfo nai) {
+            return mNetworkForRequestId.get(mDefaultRequest.requestId) == nai;
+        }
+
+        public boolean isTypeSupported(int type) {
+            return isNetworkTypeValid(type) && mTypeLists[type] != null;
+        }
+
+        public NetworkAgentInfo getNetworkForType(int type) {
+            if (isTypeSupported(type) && !mTypeLists[type].isEmpty()) {
+                return mTypeLists[type].get(0);
+            } else {
+                return null;
+            }
+        }
+
+        public void add(int type, NetworkAgentInfo nai) {
+            if (!isTypeSupported(type)) {
+                return;  // Invalid network type.
+            }
+            if (VDBG) log("Adding agent " + nai + " for legacy network type " + type);
+
+            ArrayList<NetworkAgentInfo> list = mTypeLists[type];
+            if (list.contains(nai)) {
+                loge("Attempting to register duplicate agent for type " + type + ": " + nai);
+                return;
+            }
+
+            if (list.isEmpty() || isDefaultNetwork(nai)) {
+                if (VDBG) log("Sending connected broadcast for type " + type +
+                              "isDefaultNetwork=" + isDefaultNetwork(nai));
+                sendLegacyNetworkBroadcast(nai, true, type);
+            }
+            list.add(nai);
+        }
+
+        public void remove(NetworkAgentInfo nai) {
+            if (VDBG) log("Removing agent " + nai);
+            for (int type = 0; type < mTypeLists.length; type++) {
+                ArrayList<NetworkAgentInfo> list = mTypeLists[type];
+                if (list == null || list.isEmpty()) {
+                    continue;
+                }
+
+                boolean wasFirstNetwork = false;
+                if (list.get(0).equals(nai)) {
+                    // This network was the first in the list. Send broadcast.
+                    wasFirstNetwork = true;
+                }
+                list.remove(nai);
+
+                if (wasFirstNetwork || isDefaultNetwork(nai)) {
+                    if (VDBG) log("Sending disconnected broadcast for type " + type +
+                                  "isDefaultNetwork=" + isDefaultNetwork(nai));
+                    sendLegacyNetworkBroadcast(nai, false, type);
+                }
+
+                if (!list.isEmpty() && wasFirstNetwork) {
+                    if (VDBG) log("Other network available for type " + type +
+                                  ", sending connected broadcast");
+                    sendLegacyNetworkBroadcast(list.get(0), false, type);
+                }
+            }
+        }
+    }
+    private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -531,7 +632,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        mDefaultRequest = new NetworkRequest(netCap, true, nextNetworkRequestId());
+        mDefaultRequest = new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(null, mDefaultRequest, new Binder(),
                 NetworkRequestInfo.REQUEST);
         mNetworkRequests.put(mDefaultRequest, nri);
@@ -587,9 +688,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_networkTransitionTimeout);
 
-        mNetworkAgentInfoForType = (ArrayList<NetworkAgentInfo>[])
-                new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
-
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
         mCurrentLinkProperties = new LinkProperties[ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -644,7 +742,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             "radio " + n.radio + " in network type " + n.type);
                     continue;
                 }
-                mNetworkAgentInfoForType[n.type] = new ArrayList<NetworkAgentInfo>();
+                mLegacyTypeTracker.addSupportedType(n.type);
 
                 mNetConfigs[n.type] = n;
                 mNetworksDefined++;
@@ -3125,11 +3223,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } else {
                 loge("Error connecting NetworkAgent");
                 NetworkAgentInfo nai = mNetworkAgentInfos.remove(msg.replyTo);
-                try {
-                    mNetworkAgentInfoForType[nai.networkInfo.getType()].remove(nai);
-                } catch (NullPointerException e) {}
                 if (nai != null) {
                     mNetworkForNetId.remove(nai.network.netId);
+                    mLegacyTypeTracker.remove(nai);
                 }
             }
         }
@@ -3160,10 +3256,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
-            try {
-                mNetworkAgentInfoForType[nai.networkInfo.getType()].remove(nai);
-            } catch (NullPointerException e) {}
-
+            mLegacyTypeTracker.remove(nai);
             mNetworkForNetId.remove(nai.network.netId);
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
@@ -3173,7 +3266,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(request.requestId);
                 if (VDBG) {
                     log(" checking request " + request + ", currentNetwork = " +
-                            currentNetwork != null ? currentNetwork.name() : "null");
+                            (currentNetwork != null ? currentNetwork.name() : "null"));
                 }
                 if (currentNetwork != null && currentNetwork.network.netId == nai.network.netId) {
                     mNetworkForRequestId.remove(request.requestId);
@@ -3223,6 +3316,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (bestNetwork != null) {
             if (VDBG) log("using " + bestNetwork.name());
             bestNetwork.addRequest(nri.request);
+            int legacyType = nri.request.legacyType;
+            if (legacyType != TYPE_NONE) {
+                mLegacyTypeTracker.add(legacyType, bestNetwork);
+            }
             notifyNetworkCallback(bestNetwork, nri);
             score = bestNetwork.currentScore;
         }
@@ -5300,7 +5397,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
-            Messenger messenger, int timeoutSec, IBinder binder, boolean legacy) {
+            Messenger messenger, int timeoutSec, IBinder binder, int legacyType) {
         if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
                 == false) {
             enforceConnectivityInternalPermission();
@@ -5312,7 +5409,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             throw new IllegalArgumentException("Bad timeout specified");
         }
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities), legacy, nextNetworkRequestId());
+                networkCapabilities), legacyType, nextNetworkRequestId());
         if (DBG) log("requestNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.REQUEST);
@@ -5338,7 +5435,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
 
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities), false, nextNetworkRequestId());
+                networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         if (DBG) log("listenForNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.LISTEN);
@@ -5420,11 +5517,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
         if (VDBG) log("Got NetworkAgent Messenger");
         mNetworkAgentInfos.put(na.messenger, na);
-        try {
-            mNetworkAgentInfoForType[na.networkInfo.getType()].add(na);
-        } catch (NullPointerException e) {
-            loge("registered NetworkAgent for unsupported type: " + na);
-        }
         mNetworkForNetId.put(na.network.netId, na);
         na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
         NetworkInfo networkInfo = na.networkInfo;
@@ -5681,6 +5773,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
                     newNetwork.addRequest(nri.request);
+                    int legacyType = nri.request.legacyType;
+                    if (legacyType != TYPE_NONE) {
+                        mLegacyTypeTracker.add(legacyType, newNetwork);
+                    }
                     keep = true;
                     // TODO - this could get expensive if we have alot of requests for this
                     // network.  Think about if there is a way to reduce this.  Push
@@ -5694,6 +5790,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         } else {
                             setDefaultDnsSystemProperties(new ArrayList<InetAddress>());
                         }
+                        mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                     }
                 }
             }
@@ -5828,11 +5925,51 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 //        } else if (nai.networkMonitor.isEvaluating()) {
 //            notifyType = NetworkCallbacks.callCallbackForRequest(request, nai, notifyType);
 //        }
-        if (nri.request.needsBroadcasts) {
-        // TODO
-//            sendNetworkBroadcast(nai, notifyType);
-        }
         callCallbackForRequest(nri, nai, notifyType);
+    }
+
+    private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
+        if (connected) {
+            NetworkInfo info = new NetworkInfo(nai.networkInfo);
+            info.setType(type);
+            sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
+        } else {
+            NetworkInfo info = new NetworkInfo(nai.networkInfo);
+            info.setType(type);
+            Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
+            if (info.isFailover()) {
+                intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
+                nai.networkInfo.setFailover(false);
+            }
+            if (info.getReason() != null) {
+                intent.putExtra(ConnectivityManager.EXTRA_REASON, info.getReason());
+            }
+            if (info.getExtraInfo() != null) {
+                intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO, info.getExtraInfo());
+            }
+            NetworkAgentInfo newDefaultAgent = null;
+            if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
+                newDefaultAgent = mNetworkForRequestId.get(mDefaultRequest.requestId);
+                if (newDefaultAgent != null) {
+                    intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO,
+                            newDefaultAgent.networkInfo);
+                } else {
+                    intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+                }
+            }
+            intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION,
+                    mDefaultInetConditionPublished);
+            final Intent immediateIntent = new Intent(intent);
+            immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
+            sendStickyBroadcast(immediateIntent);
+            sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
+            if (newDefaultAgent != null) {
+                sendConnectedBroadcastDelayed(newDefaultAgent.networkInfo,
+                getConnectivityChangeDelay());
+            }
+        }
     }
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType) {
@@ -5843,76 +5980,33 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (VDBG) log(" sending notification for " + nr);
             callCallbackForRequest(nri, networkAgent, notifyType);
         }
-        if (networkAgent.needsBroadcasts) {
-            if (notifyType == ConnectivityManager.CALLBACK_AVAILABLE) {
-                sendConnectedBroadcastDelayed(networkAgent.networkInfo,
-                        getConnectivityChangeDelay());
-            } else if (notifyType == ConnectivityManager.CALLBACK_LOST) {
-                NetworkInfo info = new NetworkInfo(networkAgent.networkInfo);
-                Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-                intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
-                intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
-                if (info.isFailover()) {
-                    intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
-                    networkAgent.networkInfo.setFailover(false);
-                }
-                if (info.getReason() != null) {
-                    intent.putExtra(ConnectivityManager.EXTRA_REASON, info.getReason());
-                }
-                if (info.getExtraInfo() != null) {
-                    intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO, info.getExtraInfo());
-                }
-                NetworkAgentInfo newDefaultAgent = null;
-                if (networkAgent.networkRequests.get(mDefaultRequest.requestId) != null) {
-                    newDefaultAgent = mNetworkForRequestId.get(mDefaultRequest.requestId);
-                    if (newDefaultAgent != null) {
-                        intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO,
-                                newDefaultAgent.networkInfo);
-                    } else {
-                        intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
-                    }
-                }
-                intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION,
-                        mDefaultInetConditionPublished);
-                final Intent immediateIntent = new Intent(intent);
-                immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
-                sendStickyBroadcast(immediateIntent);
-                sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
-                if (newDefaultAgent != null) {
-                    sendConnectedBroadcastDelayed(newDefaultAgent.networkInfo,
-                            getConnectivityChangeDelay());
-                }
-            }
-        }
     }
 
     private LinkProperties getLinkPropertiesForTypeInternal(int networkType) {
-        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
-        if (list == null) return null;
-        try {
-            return new LinkProperties(list.get(0).linkProperties);
-        } catch (IndexOutOfBoundsException e) {
-            return new LinkProperties();
-        }
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        return (nai != null) ?
+                new LinkProperties(nai.linkProperties) :
+                new LinkProperties();
     }
 
     private NetworkInfo getNetworkInfoForType(int networkType) {
-        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
-        if (list == null) return null;
-        try {
-            return new NetworkInfo(list.get(0).networkInfo);
-        } catch (IndexOutOfBoundsException e) {
-            return new NetworkInfo(networkType, 0, "Unknown", "");
+        if (!mLegacyTypeTracker.isTypeSupported(networkType))
+            return null;
+
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        if (nai != null) {
+            NetworkInfo result = new NetworkInfo(nai.networkInfo);
+            result.setType(networkType);
+            return result;
+        } else {
+           return new NetworkInfo(networkType, 0, "Unknown", "");
         }
     }
 
     private NetworkCapabilities getNetworkCapabilitiesForType(int networkType) {
-        ArrayList<NetworkAgentInfo> list = mNetworkAgentInfoForType[networkType];
-        if (list == null) return null;
-        try {
-            return new NetworkCapabilities(list.get(0).networkCapabilities);
-        } catch (IndexOutOfBoundsException e) {
-            return new NetworkCapabilities();
-        }
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        return (nai != null) ?
+                new NetworkCapabilities(nai.networkCapabilities) :
+                new NetworkCapabilities();
     }
 }
