@@ -59,8 +59,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.MultiUserAvatarCache;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.analytics.KeyguardAnalytics;
-import com.android.keyguard.analytics.Session;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -70,7 +68,6 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import java.io.File;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
-import static com.android.keyguard.analytics.KeyguardAnalytics.SessionTypeAdapter;
 
 
 /**
@@ -117,7 +114,6 @@ import static com.android.keyguard.analytics.KeyguardAnalytics.SessionTypeAdapte
 public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     final static boolean DEBUG = false;
-    private static final boolean ENABLE_ANALYTICS = Build.IS_DEBUGGABLE;
     private final static boolean DBG_WAKE = false;
 
     private final static String TAG = "KeyguardViewMediator";
@@ -198,8 +194,6 @@ public class KeyguardViewMediator extends SystemUI {
     private PowerManager.WakeLock mShowKeyguardWakeLock;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-
-    private KeyguardAnalytics mKeyguardAnalytics;
 
     // these are protected by synchronized (this)
 
@@ -469,22 +463,6 @@ public class KeyguardViewMediator extends SystemUI {
                 mViewMediatorCallback, mLockPatternUtils);
         final ContentResolver cr = mContext.getContentResolver();
 
-        if (ENABLE_ANALYTICS && !LockPatternUtils.isSafeModeEnabled() &&
-                Settings.Secure.getInt(cr, KEYGUARD_ANALYTICS_SETTING, 0) == 1) {
-            mKeyguardAnalytics = new KeyguardAnalytics(mContext, new SessionTypeAdapter() {
-
-                @Override
-                public int getSessionType() {
-                    return mLockPatternUtils.isSecure() && !mUpdateMonitor.getUserHasTrust(
-                            mLockPatternUtils.getCurrentUser())
-                            ? Session.TYPE_KEYGUARD_SECURE
-                            : Session.TYPE_KEYGUARD_INSECURE;
-                }
-            }, new File(mContext.getCacheDir(), "keyguard_analytics.bin"));
-        } else {
-            mKeyguardAnalytics = null;
-        }
-
         mScreenOn = mPM.isScreenOn();
 
         mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
@@ -584,9 +562,6 @@ public class KeyguardViewMediator extends SystemUI {
                 doKeyguardLaterLocked();
             } else {
                 doKeyguardLocked(null);
-            }
-            if (ENABLE_ANALYTICS && mKeyguardAnalytics != null) {
-                mKeyguardAnalytics.getCallback().onScreenOff();
             }
         }
         KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
@@ -829,9 +804,6 @@ public class KeyguardViewMediator extends SystemUI {
                 mStatusBarKeyguardViewManager.setOccluded(isOccluded);
                 updateActivityLockScreenState();
                 adjustStatusBarLocked();
-            }
-            if (ENABLE_ANALYTICS && mKeyguardAnalytics != null) {
-                mKeyguardAnalytics.getCallback().onSetOccluded(isOccluded);
             }
         }
     }
