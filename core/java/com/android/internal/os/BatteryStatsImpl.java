@@ -2006,6 +2006,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @Override
+    public void commitCurrentHistoryBatchLocked() {
+        mHistoryLastWritten.cmd = HistoryItem.CMD_NULL;
+    }
+
     void addHistoryBufferLocked(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
@@ -2342,13 +2347,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             // Only care about partial wake locks, since full wake locks
             // will be canceled when the user puts the screen to sleep.
             aggregateLastWakeupUptimeLocked(uptime);
+            if (historyName == null) {
+                historyName = name;
+            }
             if (mRecordAllWakeLocks) {
-                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_START, name, uid, 0)) {
+                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_START, historyName,
+                        uid, 0)) {
                     addHistoryEventLocked(elapsedRealtime, uptime,
-                            HistoryItem.EVENT_WAKE_LOCK_START, name, uid);
+                            HistoryItem.EVENT_WAKE_LOCK_START, historyName, uid);
                 }
             }
-            historyName = historyName == null ? name : historyName;
             if (mWakeLockNesting == 0) {
                 mHistoryCur.states |= HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
@@ -2358,7 +2366,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.wakelockTag.uid = mInitialAcquireWakeUid = uid;
                 mWakeLockImportant = !unimportantForLogging;
                 addHistoryRecordLocked(elapsedRealtime, uptime);
-            } else if (!mWakeLockImportant && !unimportantForLogging) {
+            } else if (!mWakeLockImportant && !unimportantForLogging
+                    && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE) {
                 if (mHistoryLastWritten.wakelockTag != null) {
                     // We'll try to update the last tag.
                     mHistoryLastWritten.wakelockTag = null;
@@ -2386,9 +2395,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
             if (mRecordAllWakeLocks) {
-                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_FINISH, name, uid, 0)) {
+                if (historyName == null) {
+                    historyName = name;
+                }
+                if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_FINISH, historyName,
+                        uid, 0)) {
                     addHistoryEventLocked(elapsedRealtime, uptime,
-                            HistoryItem.EVENT_WAKE_LOCK_FINISH, name, uid);
+                            HistoryItem.EVENT_WAKE_LOCK_FINISH, historyName, uid);
                 }
             }
             if (mWakeLockNesting == 0) {
