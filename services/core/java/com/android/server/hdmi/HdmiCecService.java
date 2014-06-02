@@ -75,13 +75,8 @@ public final class HdmiCecService extends SystemService {
 
     @Override
     public void onStart() {
-        mNativePtr = nativeInit(this);
-        if (mNativePtr != 0) {
-            // TODO: Consider using a dedicated, configurable identifier for OSD name, maybe from
-            //       Settings. It should be ASCII only, not a very long one (limited to 15 chars).
-            setOsdNameLocked(Build.MODEL);
-            publishBinderService(Context.HDMI_CEC_SERVICE, new BinderService());
-        }
+        // Stop publishing the service. Soon to be deprecated.
+        Log.w(TAG, "In transition to HdmiControlService. May not work.");
     }
 
     /**
