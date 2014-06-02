@@ -63,6 +63,10 @@ import com.android.internal.os.SomeArgs;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -145,7 +149,8 @@ public final class TvInputManagerService extends SystemService {
         if (DEBUG) Slog.d(TAG, "buildTvInputList");
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> services = pm.queryIntentServices(
-                new Intent(TvInputService.SERVICE_INTERFACE), PackageManager.GET_SERVICES);
+                new Intent(TvInputService.SERVICE_INTERFACE),
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
             if (!android.Manifest.permission.BIND_TV_INPUT.equals(si.permission)) {
@@ -153,9 +158,13 @@ public final class TvInputManagerService extends SystemService {
                         + android.Manifest.permission.BIND_TV_INPUT);
                 continue;
             }
-            TvInputInfo info = new TvInputInfo(ri);
-            if (DEBUG) Slog.d(TAG, "add " + info.getId());
-            userState.inputMap.put(info.getId(), info);
+            try {
+                TvInputInfo info = TvInputInfo.createTvInputInfo(mContext, ri);
+                if (DEBUG) Slog.d(TAG, "add " + info.getId());
+                userState.inputMap.put(info.getId(), info);
+            } catch (IOException | XmlPullParserException e) {
+                Slog.e(TAG, "Can't load TV input " + si.name, e);
+            }
         }
     }
 
