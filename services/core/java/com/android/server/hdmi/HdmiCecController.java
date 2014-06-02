@@ -76,8 +76,8 @@ final class HdmiCecController {
 
     private HdmiControlService mService;
 
-    // Map-like container of all cec devices. A logical address of device is
-    // used as key of container.
+    // Map-like container of all cec devices including local ones.
+    // A logical address of device is used as key of container.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos = new SparseArray<>();
 
     // Stores the local CEC devices in the system.
@@ -265,7 +265,6 @@ final class HdmiCecController {
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
-    // TODO: put local devices to this list.
     List<HdmiCecDeviceInfo> getDeviceInfoList() {
         assertRunOnServiceThread();
 
