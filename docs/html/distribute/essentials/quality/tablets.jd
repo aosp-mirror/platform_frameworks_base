@@ -158,7 +158,7 @@ across the screen:</p>
 multi-pane UI for tablets (see next section).</li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/optimize"
@@ -219,7 +219,7 @@ different layouts in the appropriate screen size buckets (such as
 <code>sw600dp</code>/<code>sw720</code>).</li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/extrascreen"
@@ -308,7 +308,7 @@ icon at the highest density possible. For example, if a tablet has an {@code xhd
 it will request the {@code xxhdpi} version of the launcher icon.</li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/assets"
@@ -345,7 +345,7 @@ larger touch targets. </li>
 or just centering the icon within the transparent button.</li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/fonts"
@@ -371,7 +371,7 @@ horizontal or square widget). </li>
 possible.</li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/widgets"
@@ -458,7 +458,7 @@ some recommendations:</p>
   </li>
 </ol>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/versions"
@@ -528,7 +528,7 @@ permissions, make sure to explicitly declare a corresponding
   as needed.
 </p>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/hardware"
@@ -560,7 +560,7 @@ app supports. Note that, if possible, you should avoid using the
 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>
 element in your app.</p>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/tabletscreens"
@@ -689,7 +689,7 @@ element in your app.</p>
   </li>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/showcase"
@@ -799,7 +799,7 @@ appropriate.</p>
   recommended.
 </p>
 
-<h3 class="clearfloat">Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/essentials/tabletguidelines/googleplay"
   data-sortOrder="-timestamp"

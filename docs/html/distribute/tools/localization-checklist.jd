@@ -84,9 +84,7 @@ page.image=/distribute/images/localization-checklist.jpg
   development, translation, testing, and marketing efforts to these markets.
 </p>
 
-<h3 id="related-resources">
-  Related Resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/localizationchecklist/identifylocales"
@@ -224,9 +222,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
   directories, without language or locale qualifiers.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
@@ -399,9 +395,7 @@ data-cardsizes="9x3" data-maxresults="6">
 
 &lt;/resources&gt;
 </pre>
-<h3 class="clearfloat">
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/localizationchecklist/managestrings"
@@ -570,9 +564,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
 </div>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/localizationchecklist/translatestrings"
@@ -690,7 +682,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   your localized apps. One way to do that is through beta testing with regional
   users &mdash; Google Play can help you do this. <!-- </p>
 
-<h3 class="clearfloat">Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/toolsreference/localizationchecklist/test"
@@ -887,9 +879,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   helpful reminders for a successful localized launch.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/localizationchecklist/preplaunch"
@@ -968,7 +958,7 @@ data-maxresults="6">
   "{@docRoot}distribute/tools/launch-checklist.html">Launch Checklist</a> to
   learn more about how to plan, build, and launch your app on Google Play.
 </p>
-<h3 class="clearfloat">Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
