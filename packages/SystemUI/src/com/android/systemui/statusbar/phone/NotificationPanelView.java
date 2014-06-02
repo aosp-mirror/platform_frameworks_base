@@ -32,6 +32,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
@@ -861,12 +862,37 @@ public class NotificationPanelView extends PanelView implements
                 mStatusBar.onHintFinished();
             }
         });
+        startHighlightIconAnimation(right ? getRightIcon() : getLeftIcon());
         boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? right : !right;
         if (start) {
             mStatusBar.onPhoneHintStarted();
         } else {
             mStatusBar.onCameraHintStarted();
         }
+    }
+
+    @Override
+    protected void startUnlockHintAnimation() {
+        super.startUnlockHintAnimation();
+        startHighlightIconAnimation(getCenterIcon());
+    }
+
+    /**
+     * Starts the highlight (making it fully opaque) animation on an icon.
+     */
+    private void startHighlightIconAnimation(final View icon) {
+        icon.animate()
+                .alpha(1.0f)
+                .setDuration(KeyguardPageSwipeHelper.HINT_PHASE1_DURATION)
+                .setInterpolator(mFastOutSlowInInterpolator)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        icon.animate().alpha(KeyguardPageSwipeHelper.SWIPE_RESTING_ALPHA_AMOUNT)
+                                .setDuration(KeyguardPageSwipeHelper.HINT_PHASE1_DURATION)
+                                .setInterpolator(mFastOutSlowInInterpolator);
+                    }
+                });
     }
 
     @Override

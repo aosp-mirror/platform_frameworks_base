@@ -174,6 +174,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /** The minimum delay in ms between reports of notification visibility. */
     private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
 
+    /**
+     * The delay to reset the hint text when the hint animation is finished running.
+     */
+    private static final int HINT_RESET_DELAY_MS = 1200;
+
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -488,6 +493,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void onClick(View v) {
             goToLockedShade(null);
+        }
+    };
+
+    private final Runnable mResetIndicationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
         }
     };
 
@@ -2960,18 +2972,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onUnlockHintStarted() {
+        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
         mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
     }
 
     public void onHintFinished() {
-        mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+
+        // Delay the reset a bit so the user can read the text.
+        mStatusBarView.postDelayed(mResetIndicationRunnable, HINT_RESET_DELAY_MS);
     }
 
     public void onCameraHintStarted() {
+        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
         mKeyguardIndicationTextView.switchIndication(R.string.camera_hint);
     }
 
     public void onPhoneHintStarted() {
+        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
         mKeyguardIndicationTextView.switchIndication(R.string.phone_hint);
     }
 
