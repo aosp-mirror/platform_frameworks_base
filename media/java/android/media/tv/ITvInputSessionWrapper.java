@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.tv.TvInputManager.Session;
+import android.media.tv.TvInputService.TvInputSessionImpl;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.tv.TvInputManager.Session;
-import android.tv.TvInputService.TvInputSessionImpl;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.Surface;
 
 import com.android.internal.os.HandlerCaller;

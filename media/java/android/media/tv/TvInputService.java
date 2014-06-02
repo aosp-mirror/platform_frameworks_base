@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.tv.ITvInputService;
+import android.media.tv.TvInputManager.Session;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,7 +31,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.tv.TvInputManager.Session;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.InputChannel;
@@ -59,7 +60,7 @@ public abstract class TvInputService extends Service {
      * must also require the {@link android.Manifest.permission#BIND_TV_INPUT} permission so that
      * other applications cannot abuse it.
      */
-    public static final String SERVICE_INTERFACE = "android.tv.TvInputService";
+    public static final String SERVICE_INTERFACE = "android.media.tv.TvInputService";
 
     private String mId;
     private final Handler mHandler = new ServiceHandler();

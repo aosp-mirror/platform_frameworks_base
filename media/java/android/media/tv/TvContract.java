@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package android.provider;
+package android.media.tv;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
-import android.tv.TvInputService;
+import android.provider.BaseColumns;
 
 import java.util.List;
 
@@ -88,8 +88,8 @@ public final class TvContract {
     /**
      * Builds a URI that points to all browsable channels from a given TV input.
      *
-     * @param name {@link ComponentName} of the {@link android.tv.TvInputService} that implements
-     *            the given TV input.
+     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
+     *            implements the given TV input.
      */
     public static final Uri buildChannelsUriForInput(ComponentName name) {
         return buildChannelsUriForInput(name, true);
@@ -98,8 +98,8 @@ public final class TvContract {
     /**
      * Builds a URI that points to all or browsable-only channels from a given TV input.
      *
-     * @param name {@link ComponentName} of the {@link android.tv.TvInputService} that implements
-     *            the given TV input.
+     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
+     *            implements the given TV input.
      * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
      *            to {@code false} the URI points to all channels regardless of whether they are
      *            browsable or not.

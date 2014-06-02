@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.content.ComponentName;
 import android.content.pm.PackageManager;

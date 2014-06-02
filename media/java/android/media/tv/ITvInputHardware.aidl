@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
-import android.tv.TvStreamConfig;
+import android.media.tv.TvStreamConfig;
 import android.view.KeyEvent;
 import android.view.Surface;
 

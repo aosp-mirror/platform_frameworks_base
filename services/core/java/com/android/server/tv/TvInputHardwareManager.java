@@ -17,12 +17,12 @@
 package com.android.server.tv;
 
 import android.content.Context;
+import android.media.tv.ITvInputHardware;
+import android.media.tv.ITvInputHardwareCallback;
+import android.media.tv.TvInputHardwareInfo;
+import android.media.tv.TvStreamConfig;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.tv.ITvInputHardware;
-import android.tv.ITvInputHardwareCallback;
-import android.tv.TvInputHardwareInfo;
-import android.tv.TvStreamConfig;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyEvent;

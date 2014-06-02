@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
-import android.os.Bundle;
-import android.tv.ITvInputSession;
+import android.content.ComponentName;
 
 /**
- * Helper interface for ITvInputSession to allow the TV input to notify the system service when a
- * new session has been created.
+ * Helper interface for ITvInputService to allow the TV input to notify the client when its status
+ * has been changed.
  * @hide
  */
-oneway interface ITvInputSessionCallback {
-    void onSessionCreated(ITvInputSession session);
-    void onSessionEvent(in String name, in Bundle args);
-    void onVideoSizeChanged(int width, int height);
+oneway interface ITvInputServiceCallback {
+    void onAvailabilityChanged(in String inputId, boolean isAvailable);
 }
