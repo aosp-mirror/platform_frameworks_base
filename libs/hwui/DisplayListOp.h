@@ -788,7 +788,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p src="RECT_STRING", dst="RECT_STRING,
+        OP_LOG("Draw bitmap %p src=" RECT_STRING ", dst=" RECT_STRING,
                 mBitmap, RECT_ARGS(mSrc), RECT_ARGS(mLocalBounds));
     }
 
@@ -978,7 +978,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw patch "RECT_STRING, RECT_ARGS(mLocalBounds));
+        OP_LOG("Draw patch " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawPatch"; }
@@ -1060,7 +1060,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Rect "RECT_STRING, RECT_ARGS(mLocalBounds));
+        OP_LOG("Draw Rect " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
@@ -1111,7 +1111,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw RoundRect "RECT_STRING", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
+        OP_LOG("Draw RoundRect " RECT_STRING ", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
     }
 
     virtual const char* name() { return "DrawRoundRect"; }
@@ -1175,7 +1175,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Oval "RECT_STRING, RECT_ARGS(mLocalBounds));
+        OP_LOG("Draw Oval " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawOval"; }
@@ -1195,7 +1195,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Arc "RECT_STRING", start %f, sweep %f, useCenter %d",
+        OP_LOG("Draw Arc " RECT_STRING ", start %f, sweep %f, useCenter %d",
                 RECT_ARGS(mLocalBounds), mStartAngle, mSweepAngle, mUseCenter);
     }
 
@@ -1232,7 +1232,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Path %p in "RECT_STRING, mPath, RECT_ARGS(mLocalBounds));
+        OP_LOG("Draw Path %p in " RECT_STRING, mPath, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawPath"; }
