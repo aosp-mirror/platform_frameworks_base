@@ -644,7 +644,12 @@ public class AudioManager {
             if (mUseMasterVolume) {
                 service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustVolume(direction, flags, mContext.getOpPackageName());
+                if (USE_SESSIONS) {
+                    MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
+                    helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
+                } else {
+                    service.adjustVolume(direction, flags, mContext.getOpPackageName());
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustVolume", e);
@@ -674,8 +679,13 @@ public class AudioManager {
             if (mUseMasterVolume) {
                 service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags,
-                        mContext.getOpPackageName());
+                if (USE_SESSIONS) {
+                    MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
+                    helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
+                } else {
+                    service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags,
+                            mContext.getOpPackageName());
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);

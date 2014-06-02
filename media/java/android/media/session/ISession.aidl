@@ -47,4 +47,8 @@ interface ISession {
     void setMetadata(in MediaMetadata metadata);
     void setPlaybackState(in PlaybackState state);
     void setRatingType(int type);
+
+    // These commands relate to volume handling
+    void configureVolumeHandling(int type, int arg1, int arg2);
+    void setCurrentVolume(int currentVolume);
 }

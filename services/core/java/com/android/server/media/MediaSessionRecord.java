@@ -25,6 +25,7 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.MediaController;
+import android.media.session.RemoteVolumeProvider;
 import android.media.session.RouteCommand;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
@@ -33,6 +34,7 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionInfo;
 import android.media.session.RouteInterface;
 import android.media.session.PlaybackState;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.os.Bundle;
@@ -111,6 +113,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private int mRatingType;
     private long mLastActiveTime;
     // End TransportPerformer fields
+
+    // Volume handling fields
+    private int mPlaybackType = MediaSession.VOLUME_TYPE_LOCAL;
+    private int mAudioStream = AudioManager.STREAM_MUSIC;
+    private int mVolumeControlType = RemoteVolumeProvider.VOLUME_CONTROL_ABSOLUTE;
+    private int mMaxVolume = 0;
+    private int mCurrentVolume = 0;
+    // End volume handling fields
 
     private boolean mIsActive = false;
     private boolean mDestroyed = false;
@@ -248,6 +258,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
+     * Send a volume adjustment to the session owner.
+     *
+     * @param delta The amount to adjust the volume by.
+     */
+    public void adjustVolumeBy(int delta) {
+        if (mVolumeControlType == RemoteVolumeProvider.VOLUME_CONTROL_FIXED) {
+            // Nothing to do, the volume cannot be changed
+            return;
+        }
+        mSessionCb.adjustVolumeBy(delta);
+    }
+
+    public void setVolumeTo(int value) {
+        if (mVolumeControlType != RemoteVolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
+            // Nothing to do. The volume can't be set directly.
+            return;
+        }
+        mSessionCb.setVolumeTo(value);
+    }
+
+    /**
      * Set the connection to use for the selected route and notify the app it is
      * now connected.
      *
@@ -294,20 +325,70 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * Check if the session is currently performing playback. This will also
      * return true if the session was recently paused.
      *
+     * @param includeRecentlyActive True if playback that was recently paused
+     *            should count, false if it shouldn't.
      * @return True if the session is performing playback, false otherwise.
      */
-    public boolean isPlaybackActive() {
+    public boolean isPlaybackActive(boolean includeRecentlyActive) {
         int state = mPlaybackState == null ? 0 : mPlaybackState.getState();
         if (isActiveState(state)) {
             return true;
         }
-        if (state == mPlaybackState.STATE_PAUSED) {
+        if (includeRecentlyActive && state == mPlaybackState.STATE_PAUSED) {
             long inactiveTime = SystemClock.uptimeMillis() - mLastActiveTime;
             if (inactiveTime < ACTIVE_BUFFER) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Get the type of playback, either local or remote.
+     *
+     * @return The current type of playback.
+     */
+    public int getPlaybackType() {
+        return mPlaybackType;
+    }
+
+    /**
+     * Get the local audio stream being used. Only valid if playback type is
+     * local.
+     *
+     * @return The audio stream the session is using.
+     */
+    public int getAudioStream() {
+        return mAudioStream;
+    }
+
+    /**
+     * Get the type of volume control. Only valid if playback type is remote.
+     *
+     * @return The volume control type being used.
+     */
+    public int getVolumeControl() {
+        return mVolumeControlType;
+    }
+
+    /**
+     * Get the max volume that can be set. Only valid if playback type is
+     * remote.
+     *
+     * @return The max volume that can be set.
+     */
+    public int getMaxVolume() {
+        return mMaxVolume;
+    }
+
+    /**
+     * Get the current volume for this session. Only valid if playback type is
+     * remote.
+     *
+     * @return The current volume of the remote playback.
+     */
+    public int getCurrentVolume() {
+        return mCurrentVolume;
     }
 
     /**
@@ -640,6 +721,40 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mRequests.add(request);
             }
         }
+
+        @Override
+        public void setCurrentVolume(int volume) {
+            mCurrentVolume = volume;
+        }
+
+        @Override
+        public void configureVolumeHandling(int type, int arg1, int arg2) throws RemoteException {
+            switch(type) {
+                case MediaSession.VOLUME_TYPE_LOCAL:
+                    mPlaybackType = type;
+                    int audioStream = arg1;
+                    if (isValidStream(audioStream)) {
+                        mAudioStream = audioStream;
+                    } else {
+                        Log.e(TAG, "Cannot set stream to " + audioStream + ". Using music stream");
+                        mAudioStream = AudioManager.STREAM_MUSIC;
+                    }
+                    break;
+                case MediaSession.VOLUME_TYPE_REMOTE:
+                    mPlaybackType = type;
+                    mVolumeControlType = arg1;
+                    mMaxVolume = arg2;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Volume handling type " + type
+                            + " not recognized.");
+            }
+        }
+
+        private boolean isValidStream(int stream) {
+            return stream >= AudioManager.STREAM_VOICE_CALL
+                    && stream <= AudioManager.STREAM_NOTIFICATION;
+        }
     }
 
     class SessionCb {
@@ -778,6 +893,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onRate(rating);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
+            }
+        }
+
+        public void adjustVolumeBy(int delta) {
+            try {
+                mCb.onAdjustVolumeBy(delta);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in adjustVolumeBy.", e);
+            }
+        }
+
+        public void setVolumeTo(int value) {
+            try {
+                mCb.onSetVolumeTo(value);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in adjustVolumeBy.", e);
             }
         }
     }

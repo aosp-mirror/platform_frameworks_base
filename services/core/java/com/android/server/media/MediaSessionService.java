@@ -26,6 +26,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.IAudioService;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -40,6 +42,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
@@ -79,6 +82,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final PowerManager.WakeLock mMediaEventWakeLock;
 
     private KeyguardManager mKeyguardManager;
+    private IAudioService mAudioService;
 
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
@@ -105,6 +109,12 @@ public class MediaSessionService extends SystemService implements Monitor {
         updateUser();
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
+        mAudioService = getAudioService();
+    }
+
+    private IAudioService getAudioService() {
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        return IAudioService.Stub.asInterface(b);
     }
 
     /**
@@ -703,6 +713,23 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
+        public void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags)
+                throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    MediaSessionRecord session = mPriorityStack
+                            .getDefaultVolumeSession(mCurrentUserId);
+                    dispatchAdjustVolumeByLocked(suggestedStream, delta, flags, session);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -733,6 +760,49 @@ public class MediaSessionService extends SystemService implements Monitor {
                 for (int i = 0; i < count; i++) {
                     UserRecord user = mUserRecords.get(i);
                     user.dumpLocked(pw, "");
+                }
+            }
+        }
+
+        private void dispatchAdjustVolumeByLocked(int suggestedStream, int delta, int flags,
+                MediaSessionRecord session) {
+            int direction = 0;
+            int steps = delta;
+            if (delta > 0) {
+                direction = 1;
+            } else if (delta < 0) {
+                direction = -1;
+                steps = -delta;
+            }
+            if (DEBUG) {
+                String sessionInfo = session == null ? null : session.getSessionInfo().toString();
+                Log.d(TAG, "Adjusting session " + sessionInfo + " by " + delta + ". flags=" + flags
+                        + ", suggestedStream=" + suggestedStream);
+
+            }
+            if (session == null) {
+                for (int i = 0; i < steps; i++) {
+                    try {
+                        mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
+                                flags, getContext().getOpPackageName());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error adjusting default volume.", e);
+                    }
+                }
+            } else {
+                if (session.getPlaybackType() == MediaSession.VOLUME_TYPE_LOCAL) {
+                    for (int i = 0; i < steps; i++) {
+                        try {
+                            mAudioService.adjustSuggestedStreamVolume(direction,
+                                    session.getAudioStream(), flags,
+                                    getContext().getOpPackageName());
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error adjusting volume for stream "
+                                    + session.getAudioStream(), e);
+                        }
+                    }
+                } else if (session.getPlaybackType() == MediaSession.VOLUME_TYPE_REMOTE) {
+                    session.adjustVolumeBy(delta);
                 }
             }
         }
