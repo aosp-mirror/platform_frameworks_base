@@ -222,7 +222,7 @@ public class Toolbar extends ViewGroup {
 
         final CharSequence subtitle = a.getText(R.styleable.Toolbar_subtitle);
         if (!TextUtils.isEmpty(subtitle)) {
-            setSubtitle(title);
+            setSubtitle(subtitle);
         }
         a.recycle();
     }
@@ -705,8 +705,21 @@ public class Toolbar extends ViewGroup {
      * @return The toolbar's Menu
      */
     public Menu getMenu() {
-        ensureMenuView();
+        ensureMenu();
         return mMenuView.getMenu();
+    }
+
+    private void ensureMenu() {
+        ensureMenuView();
+        if (mMenuView.peekMenu() == null) {
+            // Initialize a new menu for the first time.
+            final MenuBuilder menu = (MenuBuilder) mMenuView.getMenu();
+            if (mExpandedMenuPresenter == null) {
+                mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
+            }
+            mMenuView.setExpandedActionViewsExclusive(true);
+            menu.addMenuPresenter(mExpandedMenuPresenter);
+        }
     }
 
     private void ensureMenuView() {
