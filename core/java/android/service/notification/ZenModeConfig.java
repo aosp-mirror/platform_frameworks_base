@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,6 +38,7 @@ import java.util.Objects;
  * @hide
  */
 public class ZenModeConfig implements Parcelable {
+    private static String TAG = "ZenModeConfig";
 
     public static final String SLEEP_MODE_NIGHTS = "nights";
     public static final String SLEEP_MODE_WEEKNIGHTS = "weeknights";
@@ -65,6 +67,9 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_ATT_COMPONENT = "component";
     private static final String CONDITION_ATT_ID = "id";
 
+    private static final String EXIT_CONDITION_TAG = "exitCondition";
+    private static final String EXIT_CONDITION_ATT_ID = "id";
+
     public boolean allowCalls;
     public boolean allowMessages;
     public int allowFrom = SOURCE_ANYONE;
@@ -76,6 +81,7 @@ public class ZenModeConfig implements Parcelable {
     public int sleepEndMinute;
     public ComponentName[] conditionComponents;
     public Uri[] conditionIds;
+    public Uri exitConditionId;
 
     public ZenModeConfig() { }
 
@@ -100,6 +106,7 @@ public class ZenModeConfig implements Parcelable {
             source.readTypedArray(conditionIds, Uri.CREATOR);
         }
         allowFrom = source.readInt();
+        exitConditionId = source.readParcelable(null);
     }
 
     @Override
@@ -129,6 +136,7 @@ public class ZenModeConfig implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(allowFrom);
+        dest.writeParcelable(exitConditionId, 0);
     }
 
     @Override
@@ -144,6 +152,7 @@ public class ZenModeConfig implements Parcelable {
             .append(conditionComponents == null ? null : TextUtils.join(",", conditionComponents))
             .append(",conditionIds=")
             .append(conditionIds == null ? null : TextUtils.join(",", conditionIds))
+            .append(",exitConditionId=").append(exitConditionId)
             .append(']').toString();
     }
 
@@ -174,14 +183,16 @@ public class ZenModeConfig implements Parcelable {
                 && other.sleepEndHour == sleepEndHour
                 && other.sleepEndMinute == sleepEndMinute
                 && Objects.deepEquals(other.conditionComponents, conditionComponents)
-                && Objects.deepEquals(other.conditionIds, conditionIds);
+                && Objects.deepEquals(other.conditionIds, conditionIds)
+                && Objects.equals(other.exitConditionId, exitConditionId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(allowCalls, allowMessages, allowFrom, sleepMode,
                 sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
-                Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds));
+                Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
+                exitConditionId);
     }
 
     public boolean isValid() {
@@ -239,6 +250,8 @@ public class ZenModeConfig implements Parcelable {
                         conditionComponents.add(component);
                         conditionIds.add(conditionId);
                     }
+                } else if (EXIT_CONDITION_TAG.equals(tag)) {
+                    rt.exitConditionId = safeUri(parser, EXIT_CONDITION_ATT_ID);
                 }
             }
         }
@@ -274,6 +287,11 @@ public class ZenModeConfig implements Parcelable {
                 out.attribute(null, CONDITION_ATT_ID, conditionIds[i].toString());
                 out.endTag(null, CONDITION_TAG);
             }
+        }
+        if (exitConditionId != null) {
+            out.startTag(null, EXIT_CONDITION_TAG);
+            out.attribute(null, EXIT_CONDITION_ATT_ID, exitConditionId.toString());
+            out.endTag(null, EXIT_CONDITION_TAG);
         }
         out.endTag(null, ZEN_TAG);
     }
@@ -338,4 +356,33 @@ public class ZenModeConfig implements Parcelable {
             return new ZenModeConfig[size];
         }
     };
+
+    // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
+
+    private static final String COUNTDOWN_AUTHORITY = "android";
+    private static final String COUNTDOWN_PATH = "countdown";
+
+    public static Uri toCountdownConditionId(long time) {
+        return new Uri.Builder().scheme(Condition.SCHEME)
+                .authority(COUNTDOWN_AUTHORITY)
+                .appendPath(COUNTDOWN_PATH)
+                .appendPath(Long.toString(time))
+                .build();
+    }
+
+    public static long tryParseCountdownConditionId(Uri conditionId) {
+        if (!Condition.isValidId(conditionId, COUNTDOWN_AUTHORITY)) return 0;
+        if (conditionId.getPathSegments().size() != 2
+                || !COUNTDOWN_PATH.equals(conditionId.getPathSegments().get(0))) return 0;
+        try {
+            return Long.parseLong(conditionId.getPathSegments().get(1));
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error parsing countdown condition: " + conditionId, e);
+            return 0;
+        }
+    }
+
+    public static boolean isValidCountdownConditionId(Uri conditionId) {
+        return tryParseCountdownConditionId(conditionId) != 0;
+    }
 }

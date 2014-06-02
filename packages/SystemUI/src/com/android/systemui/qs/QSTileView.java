@@ -135,7 +135,7 @@ public class QSTileView extends ViewGroup {
     }
 
     private Drawable getTileBackground() {
-        final int[] attrs = new int[] { android.R.attr.selectableItemBackground};
+        final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
         ta.recycle();
