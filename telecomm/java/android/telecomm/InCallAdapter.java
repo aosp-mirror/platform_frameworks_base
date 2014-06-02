@@ -196,4 +196,32 @@ public final class InCallAdapter {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Instructs Telecomm to conference the specified calls together.
+     *
+     * @param callId The unique ID of the call.
+     * @param callIdToConference The unique ID of the call to conference with.
+     * @hide
+     */
+    void conferenceWith(String callId, String callIdToConference) {
+        try {
+            mAdapter.conferenceWith(callId, callIdToConference);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to split the specified call from any conference call with which it may be
+     * connected.
+     *
+     * @param callId The unique ID of the call.
+     * @hide
+     */
+    void splitFromConference(String callId) {
+        try {
+            mAdapter.splitFromConference(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
 }

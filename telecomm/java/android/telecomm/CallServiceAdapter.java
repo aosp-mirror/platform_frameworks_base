@@ -20,6 +20,8 @@ import android.os.RemoteException;
 
 import com.android.internal.telecomm.ICallServiceAdapter;
 
+import java.util.List;
+
 /**
  * Provides methods for ICallService implementations to interact with the system phone app.
  * TODO(santoscordon): Need final public-facing comments in this file.
@@ -169,4 +171,46 @@ public final class CallServiceAdapter {
         }
     }
 
+    /**
+     * Indicates that the specified call can conference with any of the specified list of calls.
+     *
+     * @param callId The unique ID of the call.
+     * @param conferenceCapableCallIds The unique IDs of the calls which can be conferenced.
+     * @hide
+     */
+    public void setCanConferenceWith(String callId, List<String> conferenceCapableCallIds) {
+        try {
+            mAdapter.setCanConferenceWith(callId, conferenceCapableCallIds);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Indicates whether or not the specified call is currently conferenced into the specified
+     * conference call.
+     *
+     * @param conferenceCallId The unique ID of the conference call.
+     * @param callId The unique ID of the call being conferenced.
+     * @hide
+     */
+    public void setIsConferenced(String conferenceCallId, String callId, boolean isConferenced) {
+        try {
+            mAdapter.setIsConferenced(conferenceCallId, callId, isConferenced);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Indicates that the call no longer exists. Can be used with either a call or a conference
+     * call.
+     *
+     * @param callId The unique ID of the call.
+     * @hide
+     */
+    public void removeCall(String callId) {
+        try {
+            mAdapter.removeCall(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
 }

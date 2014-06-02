@@ -47,4 +47,8 @@ oneway interface IInCallAdapter {
     void postDialContinue(String callId);
 
     void handoffCall(String callId);
+
+    void conferenceWith(String callId, String callIdToConference);
+
+    void splitFromConference(String callId);
 }

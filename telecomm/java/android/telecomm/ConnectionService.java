@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -246,6 +248,39 @@ public abstract class ConnectionService extends CallService {
     public final void onAudioStateChanged(String callId, CallAudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
         findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+    }
+
+    /** @hide */
+    @Override
+    public final void addToConference(String conferenceCallId, List<String> callIds) {
+        Log.d(this, "addToConference %s, %s", conferenceCallId, callIds);
+
+        List<Connection> connections = new LinkedList<>();
+        for (String id : callIds) {
+            Connection connection = findConnectionForAction(id, "addToConference");
+            if (connection == NULL_CONNECTION) {
+                Log.w(this, "Connection missing in conference request %s.", id);
+                return;
+            }
+            connections.add(connection);
+        }
+
+        // TODO(santoscordon): Find an existing conference call or create a new one. Then call
+        // conferenceWith on it.
+    }
+
+    /** @hide */
+    @Override
+    public final void splitFromConference(String conferenceCallId, String callId) {
+        Log.d(this, "splitFromConference(%s, %s)", conferenceCallId, callId);
+
+        Connection connection = findConnectionForAction(callId, "splitFromConference");
+        if (connection == NULL_CONNECTION) {
+            Log.w(this, "Connection missing in conference request %s.", callId);
+            return;
+        }
+
+        // TODO(santoscordon): Find existing conference call and invoke split(connection).
     }
 
     /**

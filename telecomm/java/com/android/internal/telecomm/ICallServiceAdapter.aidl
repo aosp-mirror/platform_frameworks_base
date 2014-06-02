@@ -45,4 +45,10 @@ oneway interface ICallServiceAdapter {
     void setOnHold(String callId);
 
     void setRequestingRingback(String callId, boolean ringing);
+
+    void setCanConferenceWith(String callId, in List<String> conferenceCapableCallIds);
+
+    void setIsConferenced(String conferenceCallId, String callId, boolean isConferenced);
+
+    void removeCall(String callId);
 }
