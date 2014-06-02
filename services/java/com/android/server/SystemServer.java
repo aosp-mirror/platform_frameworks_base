@@ -127,7 +127,7 @@ public final class SystemServer {
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
     private static final String WIFI_PASSPOINT_SERVICE_CLASS =
-            "com.android.server.wifi.passpoint.PasspointService";
+            "com.android.server.wifi.passpoint.WifiPasspointService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String HDMI_CEC_SERVICE_CLASS =
@@ -644,15 +644,15 @@ public final class SystemServer {
                 }
 
                 try {
-                    mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi Service", e);
-                }
-
-                try {
                     mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi PasspointService", e);
+                }
+
+                try {
+                    mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi Service", e);
                 }
 
                 try {
