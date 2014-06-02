@@ -111,6 +111,8 @@ public class WifiLinkLayerStats implements Parcelable {
     /** {@hide} */
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
+        sbuf.append(" WifiLinkLayerStats: ").append('\n');
+
         if (this.SSID != null) {
             sbuf.append(" SSID: ").append(this.SSID).append('\n');
         }

@@ -40,7 +40,7 @@ public class WifiInfo implements Parcelable {
      * of <code>DetailedState</code>.
      */
     private static final EnumMap<SupplicantState, DetailedState> stateMap =
-        new EnumMap<SupplicantState, DetailedState>(SupplicantState.class);
+            new EnumMap<SupplicantState, DetailedState>(SupplicantState.class);
 
     static {
         stateMap.put(SupplicantState.DISCONNECTED, DetailedState.DISCONNECTED);
@@ -62,19 +62,106 @@ public class WifiInfo implements Parcelable {
     private String mBSSID;
     private WifiSsid mWifiSsid;
     private int mNetworkId;
-    /** Received Signal Strength Indicator */
+    /**
+     * Received Signal Strength Indicator
+     */
     private int mRssi;
 
-    /** Link speed in Mbps */
+    /**
+     * Link speed in Mbps
+     */
     public static final String LINK_SPEED_UNITS = "Mbps";
     private int mLinkSpeed;
 
-    /** Frequency in MHz */
+    /**
+     * Frequency in MHz
+     */
     public static final String FREQUENCY_UNITS = "MHz";
     private int mFrequency;
 
     private InetAddress mIpAddress;
     private String mMacAddress;
+
+    /**
+     * @hide
+     */
+    public long txBad;
+    /**
+     * @hide
+     */
+    public long txRetries;
+    /**
+     * @hide
+     */
+    public long txSuccess;
+    /**
+     * @hide
+     */
+    public long rxSuccess;
+    /**
+     * @hide
+     */
+    public double txBadRate;
+    /**
+     * @hide
+     */
+    public double txRetriesRate;
+    /**
+     * @hide
+     */
+    public double txSuccessRate;
+    /**
+     * @hide
+     */
+    public double rxSuccessRate;
+
+    /**
+     * @hide
+     */
+    public int badRssiCount;
+
+    /**
+     * @hide
+     */
+    public int lowRssiCount;
+
+    /**
+     * @hide *
+     */
+    public int score;
+
+    /**
+     * @hide *
+     */
+    public void updatePacketRates(WifiLinkLayerStats stats) {
+        if (stats != null) {
+            long txgood = stats.txmpdu_be + stats.txmpdu_bk + stats.txmpdu_vi + stats.txmpdu_vo;
+            long txretries = stats.retries_be + stats.retries_bk
+                    + stats.retries_vi + stats.retries_vo;
+            long rxgood = stats.rxmpdu_be + stats.rxmpdu_bk + stats.rxmpdu_vi + stats.rxmpdu_vo;
+            long txbad = stats.lostmpdu_be + stats.lostmpdu_bk
+                    + stats.lostmpdu_vi + stats.lostmpdu_vo;
+
+            txBadRate = (txBadRate * 0.5)
+                + ((double) (txbad - txBad) * 0.5);
+            txSuccessRate = (txSuccessRate * 0.5)
+                + ((double) (txgood - txSuccess) * 0.5);
+            rxSuccessRate = (rxSuccessRate * 0.5)
+                + ((double) (rxgood - rxSuccess) * 0.5);
+            txRetriesRate = (txRetriesRate * 0.5)
+                + ((double) (txretries - txRetries) * 0.5);
+
+            txBad = txbad;
+            txSuccess = txgood;
+            rxSuccess = rxgood;
+            txRetries = txretries;
+        } else {
+            txBadRate = 0;
+            txSuccess = 0;
+            rxSuccess = 0;
+            txRetries = 0;
+        }
+    }
 
     /**
      * Flag indicating that AP has hinted that upstream connection is metered,
@@ -109,6 +196,17 @@ public class WifiInfo implements Parcelable {
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
+            txBad = source.txBad;
+            txRetries = source.txRetries;
+            txSuccess = source.txSuccess;
+            rxSuccess = source.rxSuccess;
+            txBadRate = source.txBadRate;
+            txRetriesRate = source.txRetriesRate;
+            txSuccessRate = source.txSuccessRate;
+            rxSuccessRate = source.rxSuccessRate;
+            score = source.score;
+            badRssiCount = source.badRssiCount;
+            lowRssiCount = source.lowRssiCount;
         }
     }
 
@@ -195,6 +293,22 @@ public class WifiInfo implements Parcelable {
     /** @hide */
     public void setFrequency(int frequency) {
         this.mFrequency = frequency;
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public boolean is24GHz() {
+        return mFrequency < 4000;
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public boolean is5GHz() {
+        return mFrequency > 4000;
     }
 
     /**
@@ -325,8 +439,8 @@ public class WifiInfo implements Parcelable {
             append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS).
             append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS).
             append(", Net ID: ").append(mNetworkId).
-            append(", Metered hint: ").append(mMeteredHint);
-
+            append(", Metered hint: ").append(mMeteredHint).
+            append(", score: ").append(Integer.toString(score));
         return sb.toString();
     }
 
@@ -356,6 +470,13 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
         dest.writeInt(mMeteredHint ? 1 : 0);
+        dest.writeInt(score);
+        dest.writeDouble(txSuccessRate);
+        dest.writeDouble(txRetriesRate);
+        dest.writeDouble(txBadRate);
+        dest.writeDouble(rxSuccessRate);
+        dest.writeInt(badRssiCount);
+        dest.writeInt(lowRssiCount);
         mSupplicantState.writeToParcel(dest, flags);
     }
 
@@ -379,6 +500,13 @@ public class WifiInfo implements Parcelable {
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();
                 info.mMeteredHint = in.readInt() != 0;
+                info.score = in.readInt();
+                info.txSuccessRate = in.readDouble();
+                info.txRetriesRate = in.readDouble();
+                info.txBadRate = in.readDouble();
+                info.rxSuccessRate = in.readDouble();
+                info.badRssiCount = in.readInt();
+                info.lowRssiCount = in.readInt();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 return info;
             }

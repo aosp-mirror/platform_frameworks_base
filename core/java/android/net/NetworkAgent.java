@@ -80,6 +80,11 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_NETWORK_PROPERTIES_CHANGED = BASE + 3;
 
+    /* centralize place where base network score, and network score scaling, will be
+     * stored, so as we can consistently compare apple and oranges, or wifi, ethernet and LTE
+     */
+    public static final int WIFI_BASE_SCORE = 60;
+
     /**
      * Sent by the NetworkAgent to ConnectivityService to pass the current
      * network score.
