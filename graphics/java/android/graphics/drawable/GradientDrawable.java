@@ -612,7 +612,9 @@ public class GradientDrawable extends Drawable {
             case LINE: {
                 RectF r = mRect;
                 float y = r.centerY();
-                canvas.drawLine(r.left, y, r.right, y, mStrokePaint);
+                if (haveStroke) {
+                    canvas.drawLine(r.left, y, r.right, y, mStrokePaint);
+                }
                 break;
             }
             case RING:
@@ -1431,7 +1433,7 @@ public class GradientDrawable extends Drawable {
         public int mChangingConfigurations;
         public int mShape = RECTANGLE;
         public int mGradient = LINEAR_GRADIENT;
-        public int mAngle;
+        public int mAngle = 0;
         public Orientation mOrientation;
         public ColorStateList mColorStateList;
         public ColorStateList mStrokeColorStateList;
@@ -1439,12 +1441,12 @@ public class GradientDrawable extends Drawable {
         public int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
         public float[] mPositions;
-        public int mStrokeWidth = -1;   // if >= 0 use stroking.
-        public float mStrokeDashWidth;
-        public float mStrokeDashGap;
-        public float mRadius;    // use this if mRadiusArray is null
-        public float[] mRadiusArray;
-        public Rect mPadding;
+        public int mStrokeWidth = -1; // if >= 0 use stroking.
+        public float mStrokeDashWidth = 0.0f;
+        public float mStrokeDashGap = 0.0f;
+        public float mRadius = 0.0f; // use this if mRadiusArray is null
+        public float[] mRadiusArray = null;
+        public Rect mPadding = null;
         public int mWidth = -1;
         public int mHeight = -1;
         public float mInnerRadiusRatio = DEFAULT_INNER_RADIUS_RATIO;
