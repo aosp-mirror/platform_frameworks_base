@@ -40,6 +40,7 @@ import java.util.concurrent.CountDownLatch;
  * Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context
  * .WIFI_SCANNING_SERVICE)}.
+ * @hide
  */
 public class WifiScanner {
 
@@ -72,16 +73,14 @@ public class WifiScanner {
     public static final int REASON_INVALID_LISTENER = -2;
     /** Invalid request */
     public static final int REASON_INVALID_REQUEST = -3;
-    /** Request conflicts with other scans that may be going on */
-    public static final int REASON_CONFLICTING_REQUEST = -4;
 
     /**
      * Generic action callback invocation interface
      *  @hide
      */
     public static interface ActionListener {
-        public void onSuccess(Object result);
-        public void onFailure(int reason, Object exception);
+        public void onSuccess();
+        public void onFailure(int reason, String description);
     }
 
     /**
@@ -193,58 +192,6 @@ public class WifiScanner {
 
     }
 
-    /** information element from beacon */
-    public static class InformationElement {
-        public int id;
-        public byte[] bytes;
-    }
-
-    /** scan result with information elements from beacons */
-    public static class FullScanResult implements Parcelable {
-        public ScanResult result;
-        public InformationElement informationElements[];
-
-        /** Implement the Parcelable interface {@hide} */
-        public int describeContents() {
-            return 0;
-        }
-
-        /** Implement the Parcelable interface {@hide} */
-        public void writeToParcel(Parcel dest, int flags) {
-            result.writeToParcel(dest, flags);
-            dest.writeInt(informationElements.length);
-            for (int i = 0; i < informationElements.length; i++) {
-                dest.writeInt(informationElements[i].id);
-                dest.writeInt(informationElements[i].bytes.length);
-                dest.writeByteArray(informationElements[i].bytes);
-            }
-        }
-
-        /** Implement the Parcelable interface {@hide} */
-        public static final Creator<FullScanResult> CREATOR =
-                new Creator<FullScanResult>() {
-                    public FullScanResult createFromParcel(Parcel in) {
-                        FullScanResult result = new FullScanResult();
-                        result.result = ScanResult.CREATOR.createFromParcel(in);
-                        int n = in.readInt();
-                        result.informationElements = new InformationElement[n];
-                        for (int i = 0; i < n; i++) {
-                            result.informationElements[i] = new InformationElement();
-                            result.informationElements[i].id = in.readInt();
-                            int len = in.readInt();
-                            result.informationElements[i].bytes = new byte[len];
-                            in.readByteArray(result.informationElements[i].bytes);
-                        }
-
-                        return result;
-                    }
-
-                    public FullScanResult[] newArray(int size) {
-                        return new FullScanResult[size];
-                    }
-                };
-    }
-
     /** @hide */
     public static class ParcelableScanResults implements Parcelable {
         public ScanResult mResults[];
@@ -305,7 +252,7 @@ public class WifiScanner {
         /**
          * reports full scan result for each access point found in scan
          */
-        public void onFullResult(FullScanResult fullScanResult);
+        public void onFullResult(ScanResult fullScanResult);
     }
 
     /** @hide */
@@ -336,13 +283,12 @@ public class WifiScanner {
     }
     /**
      * retrieves currently available scan results
-     * @param flush {@code true} means flush all results
-     * @param listener specifies which scan to cancel; must be same object as passed in {@link
-     *                 #startBackgroundScan}
      */
-    public void retrieveScanResults(boolean flush, ScanListener listener) {
+    public ScanResult[] getScanResults() {
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_GET_SCAN_RESULTS, 0, getListenerKey(listener));
+        Message reply = sAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
+        ScanResult[] results = (ScanResult[]) reply.obj;
+        return results;
     }
 
     /** specifies information about an access point of interest */
@@ -490,7 +436,7 @@ public class WifiScanner {
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
-    public static interface HotlistListener extends ActionListener {
+    public static interface HotspotListener extends ActionListener {
         /** indicates that access points were found by on going scans
          * @param results list of scan results, one for each access point visible currently
          */
@@ -550,10 +496,10 @@ public class WifiScanner {
      * @param hotspots access points of interest
      * @param apLostThreshold number of scans needed to indicate that AP is lost
      * @param listener object provided to report events on; this object must be unique and must
-     *                 also be provided on {@link #resetHotlist}
+     *                 also be provided on {@link #stopTrackingHotspots}
      */
-    public void setHotlist(HotspotInfo[] hotspots,
-            int apLostThreshold, HotlistListener listener) {
+    public void startTrackingHotspots(HotspotInfo[] hotspots,
+            int apLostThreshold, HotspotListener listener) {
         validateChannel();
         HotlistSettings settings = new HotlistSettings();
         settings.hotspotInfos = hotspots;
@@ -562,9 +508,9 @@ public class WifiScanner {
 
     /**
      * remove tracking of interesting access points
-     * @param listener same object provided in {@link #setHotlist}
+     * @param listener same object provided in {@link #startTrackingHotspots}
      */
-    public void resetHotlist(HotlistListener listener) {
+    public void stopTrackingHotspots(HotspotListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, removeListener(listener));
     }
@@ -769,10 +715,10 @@ public class WifiScanner {
             switch (msg.what) {
                     /* ActionListeners grouped together */
                 case CMD_OP_SUCCEEDED :
-                    ((ActionListener) listener).onSuccess(msg.obj);
+                    ((ActionListener) listener).onSuccess();
                     break;
                 case CMD_OP_FAILED :
-                    ((ActionListener) listener).onFailure(msg.arg1, msg.obj);
+                    ((ActionListener) listener).onFailure(msg.arg1, (String)msg.obj);
                     removeListener(msg.arg2);
                     break;
                 case CMD_SCAN_RESULT :
@@ -780,14 +726,14 @@ public class WifiScanner {
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_FULL_SCAN_RESULT :
-                    FullScanResult result = (FullScanResult) msg.obj;
+                    ScanResult result = (ScanResult) msg.obj;
                     ((ScanListener) listener).onFullResult(result);
                     return;
                 case CMD_PERIOD_CHANGED:
                     ((ScanListener) listener).onPeriodChanged(msg.arg1);
                     return;
                 case CMD_AP_FOUND:
-                    ((HotlistListener) listener).onFound(
+                    ((HotspotListener) listener).onFound(
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_WIFI_CHANGE_DETECTED:
