@@ -95,7 +95,6 @@ public class QSTileHost implements QSTile.Host {
         mTiles.add(new LocationTile(this));
         mTiles.add(new CastTile(this));
         mTiles.add(new HotspotTile(this));
-        mTiles.add(new BugreportTile(this));
 
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override

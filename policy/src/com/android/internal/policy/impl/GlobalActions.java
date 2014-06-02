@@ -35,6 +35,7 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,6 +52,7 @@ import android.service.dreams.IDreamManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -345,8 +347,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private Action getBugReportAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
-                R.string.global_action_bug_report) {
+        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_bugreport,
+                R.string.bugreport_title) {
 
             public void onPress() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -382,6 +384,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
             public boolean showBeforeProvisioning() {
                 return false;
+            }
+
+            @Override
+            public String getStatus() {
+                return mContext.getString(
+                        com.android.internal.R.string.bugreport_status,
+                        Build.VERSION.RELEASE,
+                        Build.ID);
             }
         };
     }
@@ -640,6 +650,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             return true;
         }
 
+        public String getStatus() {
+            return null;
+        }
+
         abstract public void onPress();
 
         public View create(
@@ -649,7 +663,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
 
-            v.findViewById(R.id.status).setVisibility(View.GONE);
+            TextView statusView = (TextView) v.findViewById(R.id.status);
+            final String status = getStatus();
+            if (!TextUtils.isEmpty(status)) {
+                statusView.setText(status);
+            } else {
+                statusView.setVisibility(View.GONE);
+            }
             if (mIcon != null) {
                 icon.setImageDrawable(mIcon);
                 icon.setScaleType(ScaleType.CENTER_CROP);
