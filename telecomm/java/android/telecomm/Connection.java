@@ -444,6 +444,11 @@ public abstract class Connection {
      */
     protected void onReject() {}
 
+    /**
+     * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
+     */
+    protected void onPostDialContinue(boolean proceed) {}
+
     private void setState(int state) {
         Log.d(this, "setState: %s", stateToString(state));
         onSetState(state);

@@ -59,4 +59,6 @@ oneway interface ICallService {
     void addToConference(String conferenceCallId, in List<String> callIds);
 
     void splitFromConference(String conferenceCallId, String callId);
+
+    void onPostDialContinue(String callId, boolean proceed);
 }

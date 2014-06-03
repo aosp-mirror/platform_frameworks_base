@@ -213,4 +213,11 @@ public final class CallServiceAdapter {
         } catch (RemoteException ignored) {
         }
     }
+
+    public void onPostDialWait(String callId, String remaining) {
+        try {
+            mAdapter.onPostDialWait(callId, remaining);
+        } catch (RemoteException ignored) {
+        }
+    }
 }
