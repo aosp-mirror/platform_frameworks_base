@@ -171,7 +171,9 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
 }
 
 void TypefaceImpl_unref(TypefaceImpl* face) {
-    face->fFontCollection->Unref();
+    if (face != NULL) {
+        face->fFontCollection->Unref();
+    }
     delete face;
 }
 
