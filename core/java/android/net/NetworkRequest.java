@@ -47,19 +47,19 @@ public class NetworkRequest implements Parcelable {
     public final int requestId;
 
     /**
-     * Set for legacy requests and the default.
+     * Set for legacy requests and the default.  Set to TYPE_NONE for none.
      * Causes CONNECTIVITY_ACTION broadcasts to be sent.
      * @hide
      */
-    public final boolean needsBroadcasts;
+    public final int legacyType;
 
     /**
      * @hide
      */
-    public NetworkRequest(NetworkCapabilities nc, boolean needsBroadcasts, int rId) {
+    public NetworkRequest(NetworkCapabilities nc, int legacyType, int rId) {
         requestId = rId;
         networkCapabilities = nc;
-        this.needsBroadcasts = needsBroadcasts;
+        this.legacyType = legacyType;
     }
 
     /**
@@ -68,7 +68,7 @@ public class NetworkRequest implements Parcelable {
     public NetworkRequest(NetworkRequest that) {
         networkCapabilities = new NetworkCapabilities(that.networkCapabilities);
         requestId = that.requestId;
-        needsBroadcasts = that.needsBroadcasts;
+        this.legacyType = that.legacyType;
     }
 
     // implement the Parcelable interface
@@ -77,16 +77,16 @@ public class NetworkRequest implements Parcelable {
     }
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(networkCapabilities, flags);
-        dest.writeInt(needsBroadcasts ? 1 : 0);
+        dest.writeInt(legacyType);
         dest.writeInt(requestId);
     }
     public static final Creator<NetworkRequest> CREATOR =
         new Creator<NetworkRequest>() {
             public NetworkRequest createFromParcel(Parcel in) {
                 NetworkCapabilities nc = (NetworkCapabilities)in.readParcelable(null);
-                boolean needsBroadcasts = (in.readInt() == 1);
+                int legacyType = in.readInt();
                 int requestId = in.readInt();
-                NetworkRequest result = new NetworkRequest(nc, needsBroadcasts, requestId);
+                NetworkRequest result = new NetworkRequest(nc, legacyType, requestId);
                 return result;
             }
             public NetworkRequest[] newArray(int size) {
@@ -95,14 +95,14 @@ public class NetworkRequest implements Parcelable {
         };
 
     public String toString() {
-        return "NetworkRequest [ id=" + requestId + ", needsBroadcasts=" + needsBroadcasts +
+        return "NetworkRequest [ id=" + requestId + ", legacyType=" + legacyType +
                 ", " + networkCapabilities.toString() + " ]";
     }
 
     public boolean equals(Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
-        return (that.needsBroadcasts == this.needsBroadcasts &&
+        return (that.legacyType == this.legacyType &&
                 that.requestId == this.requestId &&
                 ((that.networkCapabilities == null && this.networkCapabilities == null) ||
                  (that.networkCapabilities != null &&
@@ -110,7 +110,7 @@ public class NetworkRequest implements Parcelable {
     }
 
     public int hashCode() {
-        return requestId + (needsBroadcasts ? 1013 : 2026) +
+        return requestId + (legacyType * 1013) +
                 (networkCapabilities.hashCode() * 1051);
     }
 }

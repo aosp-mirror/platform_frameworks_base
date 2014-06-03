@@ -158,7 +158,7 @@ interface IConnectivityManager
             in NetworkCapabilities nc, int score);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, int timeoutSec, in IBinder binder, boolean legacy);
+            in Messenger messenger, int timeoutSec, in IBinder binder, int legacy);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation);
