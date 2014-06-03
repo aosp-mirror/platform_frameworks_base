@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
@@ -68,10 +67,10 @@ import static com.android.ide.common.rendering.api.SystemViewCookie.ACTION_BAR_O
 public class ActionBarLayout extends LinearLayout {
 
     // Store another reference to the context so that we don't have to cast it repeatedly.
-    @NonNull private final BridgeContext mBridgeContext;
-    @NonNull private final Context mThemedContext;
+    private final BridgeContext mBridgeContext;
+    private final Context mThemedContext;
 
-    @NonNull private final ActionBar mActionBar;
+    private final ActionBar mActionBar;
 
     // Data for Action Bar.
     @Nullable private final String mIcon;
@@ -82,17 +81,17 @@ public class ActionBarLayout extends LinearLayout {
     private final int mNavMode;
 
     // Helper fields.
-    @NonNull private final MenuBuilder mMenuBuilder;
+    private final MenuBuilder mMenuBuilder;
     private final int mPopupMaxWidth;
-    @NonNull private final RenderResources res;
+    private final RenderResources res;
     @Nullable private final ActionBarView mActionBarView;
     @Nullable private FrameLayout mContentRoot;
-    @NonNull private final ActionBarCallback mCallback;
+    private final ActionBarCallback mCallback;
 
     // A fake parent for measuring views.
     @Nullable private ViewGroup mMeasureParent;
 
-    public ActionBarLayout(@NonNull BridgeContext context, @NonNull SessionParams params) {
+    public ActionBarLayout(BridgeContext context, SessionParams params) {
 
         super(context);
         setOrientation(LinearLayout.HORIZONTAL);
@@ -245,7 +244,7 @@ public class ActionBarLayout extends LinearLayout {
     }
 
     @Nullable
-    private Drawable getDrawable(@NonNull String name, boolean isFramework) {
+    private Drawable getDrawable(String name, boolean isFramework) {
         ResourceValue value = res.findResValue(name, isFramework);
         value = res.resolveResValue(value);
         if (value != null) {
@@ -286,7 +285,6 @@ public class ActionBarLayout extends LinearLayout {
      * Returns a {@link LinearLayout} containing the menu list view to be embedded in a
      * {@link RelativeLayout}
      */
-    @NonNull
     private View createMenuView() {
         DisplayMetrics metrics = mBridgeContext.getMetrics();
         OverflowMenuAdapter adapter = new OverflowMenuAdapter(mMenuBuilder, mThemedContext);
@@ -343,7 +341,7 @@ public class ActionBarLayout extends LinearLayout {
     }
 
     // Copied from com.android.internal.view.menu.MenuPopHelper.measureContentWidth()
-    private int measureContentWidth(@NonNull ListAdapter adapter) {
+    private int measureContentWidth(ListAdapter adapter) {
         // Menus don't tend to be long, so this is more sane than it looks.
         int maxWidth = 0;
         View itemView = null;
@@ -377,7 +375,7 @@ public class ActionBarLayout extends LinearLayout {
         return maxWidth;
     }
 
-    private int getPixelValue(@NonNull String value, @NonNull DisplayMetrics metrics) {
+    private int getPixelValue(String value, DisplayMetrics metrics) {
         TypedValue typedValue = ResourceHelper.getValue(null, value, false /*requireUnit*/);
         return (int) typedValue.getDimension(metrics);
     }
