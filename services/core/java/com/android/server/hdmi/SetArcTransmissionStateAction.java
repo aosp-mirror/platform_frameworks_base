@@ -46,19 +46,10 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     SetArcTransmissionStateAction(HdmiControlService service, int sourceAddress, int avrAddress,
             boolean enabled) {
         super(service, sourceAddress);
-        verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
-        verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
         mEnabled = enabled;
-    }
-
-    // TODO: extract it as separate utility class.
-    private static void verifyAddressType(int logicalAddress, int deviceType) {
-        int actualDeviceType = HdmiCec.getTypeFromAddress(logicalAddress);
-        if (actualDeviceType != deviceType) {
-            throw new IllegalArgumentException("Device type missmatch:[Expected:" + deviceType
-                    + ", Actual:" + actualDeviceType);
-        }
     }
 
     @Override

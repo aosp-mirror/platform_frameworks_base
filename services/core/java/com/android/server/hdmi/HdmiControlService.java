@@ -118,8 +118,11 @@ public final class HdmiControlService extends SystemService {
     // TODO: it may need to hold lock if it's accessed from others.
     private boolean mArcStatusEnabled = false;
 
+    // Whether SystemAudioMode is "On" or not.
+    private boolean mSystemAudioMode;
+
     // Handler running on service thread. It's used to run a task in service thread.
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
     public HdmiControlService(Context context) {
         super(context);
@@ -158,6 +161,9 @@ public final class HdmiControlService extends SystemService {
         }
 
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
+
+        // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
+        // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
     }
 
     /**
@@ -211,33 +217,41 @@ public final class HdmiControlService extends SystemService {
      * @param action {@link FeatureAction} to remove
      */
     void removeAction(final FeatureAction action) {
-        runOnServiceThread(new Runnable() {
-            @Override
-            public void run() {
-                mActions.remove(action);
-            }
-        });
+        assertRunOnServiceThread();
+        mActions.remove(action);
     }
 
     // Remove all actions matched with the given Class type.
     private <T extends FeatureAction> void removeAction(final Class<T> clazz) {
-        runOnServiceThread(new Runnable() {
-            @Override
-            public void run() {
-                Iterator<FeatureAction> iter = mActions.iterator();
-                while (iter.hasNext()) {
-                    FeatureAction action = iter.next();
-                    if (action.getClass().equals(clazz)) {
-                        action.clear();
-                        mActions.remove(action);
-                    }
-                }
+        removeActionExcept(clazz, null);
+    }
+
+    // Remove all actions matched with the given Class type besides |exception|.
+    <T extends FeatureAction> void removeActionExcept(final Class<T> clazz,
+            final FeatureAction exception) {
+        assertRunOnServiceThread();
+        Iterator<FeatureAction> iter = mActions.iterator();
+        while (iter.hasNext()) {
+            FeatureAction action = iter.next();
+            if (action != exception && action.getClass().equals(clazz)) {
+                action.clear();
+                mActions.remove(action);
             }
-        });
+        }
     }
 
     private void runOnServiceThread(Runnable runnable) {
         mHandler.post(runnable);
+    }
+
+    void runOnServiceThreadAtFrontOfQueue(Runnable runnable) {
+        mHandler.postAtFrontOfQueue(runnable);
+    }
+
+    private void assertRunOnServiceThread() {
+        if (Looper.myLooper() != mHandler.getLooper()) {
+            throw new IllegalStateException("Should run on service thread.");
+        }
     }
 
     /**
@@ -306,8 +320,12 @@ public final class HdmiControlService extends SystemService {
             case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
                 handleReportPhysicalAddress(message);
                 return true;
-            // TODO: Add remaining system information query such as
-            // <Give Device Power Status> and <Request Active Source> handler.
+            case HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE:
+                handleSetSystemAudioMode(message);
+                return true;
+            case HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
+                handleSystemAudioModeStatus(message);
+                return true;
             default:
                 return dispatchMessageToAction(message);
         }
@@ -413,7 +431,7 @@ public final class HdmiControlService extends SystemService {
             sendCecCommand(
                     HdmiCecMessageBuilder.buildFeatureAbortCommand(message.getDestination(),
                             message.getSource(), HdmiCec.MESSAGE_GET_MENU_LANGUAGE,
-                            HdmiCecMessageBuilder.ABORT_UNRECOGNIZED_MODE));
+                            HdmiConstants.ABORT_UNRECOGNIZED_MODE));
             return;
         }
 
@@ -436,6 +454,33 @@ public final class HdmiControlService extends SystemService {
         }
         Slog.w(TAG, "Unsupported cec command:" + message);
         return false;
+    }
+
+    private void handleSetSystemAudioMode(HdmiCecMessage message) {
+        if (dispatchMessageToAction(message) || !isMessageForSystemAudio(message)) {
+            return;
+        }
+        SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
+                message.getDestination(), message.getSource(),
+                HdmiUtils.parseCommandParamSystemAudioStatus(message));
+        addAndStartAction(action);
+    }
+
+    private void handleSystemAudioModeStatus(HdmiCecMessage message) {
+        if (!isMessageForSystemAudio(message)) {
+            return;
+        }
+        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message));
+    }
+
+    private boolean isMessageForSystemAudio(HdmiCecMessage message) {
+        if (message.getSource() != HdmiCec.ADDR_AUDIO_SYSTEM
+                || message.getDestination() != HdmiCec.ADDR_TV
+                || getAvrDeviceInfo() == null) {
+            Slog.w(TAG, "Skip abnormal CecMessage: " + message);
+            return false;
+        }
+        return true;
     }
 
     // Record class that monitors the event of the caller of being killed. Used to clean up
@@ -626,5 +671,33 @@ public final class HdmiControlService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }
+    }
+
+    HdmiCecDeviceInfo getAvrDeviceInfo() {
+        return mCecController.getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+    }
+
+    void setSystemAudioMode(boolean newMode) {
+        assertRunOnServiceThread();
+        if (newMode != mSystemAudioMode) {
+            // TODO: Need to set the preference for SystemAudioMode.
+            // TODO: Need to handle the notification of changing the mode and
+            // to identify the notification should be handled in the service or TvSettings.
+            mSystemAudioMode = newMode;
+        }
+    }
+
+    boolean getSystemAudioMode() {
+        assertRunOnServiceThread();
+        return mSystemAudioMode;
+    }
+
+    void setAudioStatus(boolean mute, int volume) {
+        // TODO: Hook up with AudioManager.
+    }
+
+    boolean isInPresetInstallationMode() {
+        // TODO: Implement this.
+        return false;
     }
 }

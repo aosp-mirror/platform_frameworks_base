@@ -26,15 +26,6 @@ import java.util.Arrays;
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
  */
 public class HdmiCecMessageBuilder {
-    // TODO: move these values to HdmiCec.java once make it internal constant class.
-    // CEC's ABORT reason values.
-    static final int ABORT_UNRECOGNIZED_MODE = 0;
-    static final int ABORT_NOT_IN_CORRECT_MODE = 1;
-    static final int ABORT_CANNOT_PROVIDE_SOURCE = 2;
-    static final int ABORT_INVALID_OPERAND = 3;
-    static final int ABORT_REFUSED = 4;
-    static final int ABORT_UNABLE_TO_DETERMINE = 5;
-
     private static final int OSD_NAME_MAX_LENGTH = 13;
 
     private HdmiCecMessageBuilder() {}
@@ -288,6 +279,64 @@ public class HdmiCecMessageBuilder {
     static HdmiCecMessage buildGiveDevicePowerStatus(int src, int dest) {
         return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS);
     }
+
+    /**
+     * Build &lt;System Audio Mode Request&gt; command.
+     *
+     * @param src source address of command
+     * @param avr destination address of command, it should be AVR
+     * @param avrPhysicalAddress physical address of AVR
+     * @param enableSystemAudio whether to enable System Audio Mode or not
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSystemAudioModeRequest(int src, int avr, int avrPhysicalAddress,
+            boolean enableSystemAudio) {
+        if (enableSystemAudio) {
+            return buildCommand(src, avr, HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
+                    physicalAddressToParam(avrPhysicalAddress));
+        } else {
+            return buildCommand(src, avr, HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST);
+        }
+    }
+
+    /**
+     * Build &lt;Give Audio Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildGiveAudioStatus(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_AUDIO_STATUS);
+    }
+
+    /**
+     * Build &lt;User Control Pressed&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param uiCommand keycode that user pressed
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildUserControlPressed(int src, int dest, int uiCommand) {
+        byte[] params = new byte[] {
+                (byte) uiCommand
+        };
+        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_PRESSED, params);
+    }
+
+    /**
+     * Build &lt;User Control Released&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildUserControlReleased(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_RELEASED);
+    }
+
+    /***** Please ADD new buildXXX() methods above. ******/
 
     /**
      * Build a {@link HdmiCecMessage} without extra parameter.

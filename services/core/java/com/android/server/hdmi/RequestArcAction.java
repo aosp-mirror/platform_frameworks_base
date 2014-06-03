@@ -44,28 +44,15 @@ abstract class RequestArcAction extends FeatureAction {
      */
     RequestArcAction(HdmiControlService service, int sourceAddress, int avrAddress) {
         super(service, sourceAddress);
-        verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
-        verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
-    }
-
-    private static void verifyAddressType(int logicalAddress, int deviceType) {
-        int actualDeviceType = HdmiCec.getTypeFromAddress(logicalAddress);
-        if (actualDeviceType != deviceType) {
-            throw new IllegalArgumentException("Device type missmatch:[Expected:" + deviceType
-                    + ", Actual:" + actualDeviceType);
-        }
     }
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE) {
-            return false;
-        }
-
-        int src = cmd.getSource();
-        if (src != mAvrAddress) {
-            Slog.w(TAG, "Invalid source [Expected:" + mAvrAddress + ", Actual:" + src + "]");
+        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE
+                || !HdmiUtils.checkCommandSource(cmd, mAvrAddress, TAG)) {
             return false;
         }
         int opcode = cmd.getOpcode();
