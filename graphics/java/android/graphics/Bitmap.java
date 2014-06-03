@@ -194,6 +194,11 @@ public final class Bitmap implements Parcelable {
      * while {@link #getAllocationByteCount()} will reflect that of the initial
      * configuration.</p>
      *
+     * <p>Note: This may change this result of hasAlpha(). When converting to 565,
+     * the new bitmap will always be considered opaque. When converting from 565,
+     * the new bitmap will be considered non-opaque, and will respect the value
+     * set by setPremultiplied().</p>
+     *
      * <p>WARNING: This method should NOT be called on a bitmap currently used
      * by the view system. It does not make guarantees about how the underlying
      * pixel buffer is remapped to the new config, just that the allocation is
@@ -217,7 +222,8 @@ public final class Bitmap implements Parcelable {
             throw new IllegalStateException("native-backed bitmaps may not be reconfigured");
         }
 
-        nativeReconfigure(mNativeBitmap, width, height, config.nativeInt, mBuffer.length);
+        nativeReconfigure(mNativeBitmap, width, height, config.nativeInt, mBuffer.length,
+                mIsPremultiplied);
         mWidth = width;
         mHeight = height;
     }
@@ -1586,7 +1592,8 @@ public final class Bitmap implements Parcelable {
     private static native void nativeDestructor(long nativeBitmap);
     private static native boolean nativeRecycle(long nativeBitmap);
     private static native void nativeReconfigure(long nativeBitmap, int width, int height,
-                                                 int config, int allocSize);
+                                                 int config, int allocSize,
+                                                 boolean isPremultiplied);
 
     private static native boolean nativeCompress(long nativeBitmap, int format,
                                             int quality, OutputStream stream,

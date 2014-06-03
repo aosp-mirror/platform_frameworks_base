@@ -361,24 +361,50 @@ static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
 }
 
 static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
-        jint width, jint height, jint configHandle, jint allocSize) {
+        jint width, jint height, jint configHandle, jint allocSize,
+        jboolean requestPremul) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkBitmap::Config config = static_cast<SkBitmap::Config>(configHandle);
-    if (width * height * SkBitmap::ComputeBytesPerPixel(config) > allocSize) {
+    SkColorType colorType = SkBitmapConfigToColorType(config);
+
+    // ARGB_4444 is a deprecated format, convert automatically to 8888
+    if (colorType == kARGB_4444_SkColorType) {
+        colorType = kN32_SkColorType;
+    }
+
+    if (width * height * SkColorTypeBytesPerPixel(colorType) > allocSize) {
         // done in native as there's no way to get BytesPerPixel in Java
         doThrowIAE(env, "Bitmap not large enough to support new configuration");
         return;
     }
     SkPixelRef* ref = bitmap->pixelRef();
-    SkSafeRef(ref);
-    bitmap->setConfig(config, width, height);
+    ref->ref();
+    SkAlphaType alphaType;
+    if (bitmap->colorType() != kRGB_565_SkColorType
+            && bitmap->alphaType() == kOpaque_SkAlphaType) {
+        // If the original bitmap was set to opaque, keep that setting, unless it
+        // was 565, which is required to be opaque.
+        alphaType = kOpaque_SkAlphaType;
+    } else {
+        // Otherwise respect the premultiplied request.
+        alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
+    }
+    bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType));
+    // FIXME: Skia thinks of an SkPixelRef as having a constant SkImageInfo (except for
+    // its alphatype), so it would make more sense from Skia's perspective to create a
+    // new SkPixelRef. That said, libhwui uses the pointer to the SkPixelRef as a key
+    // for its cache, so it won't realize this is the same Java Bitmap.
+    SkImageInfo& info = const_cast<SkImageInfo&>(ref->info());
+    // Use the updated from the SkBitmap, which may have corrected an invalid alphatype.
+    // (e.g. 565 non-opaque)
+    info = bitmap->info();
     bitmap->setPixelRef(ref);
 
     // notifyPixelsChanged will increment the generation ID even though the actual pixel data
     // hasn't been touched. This signals the renderer that the bitmap (including width, height,
-    // and config) has changed.
+    // colortype and alphatype) has changed.
     ref->notifyPixelsChanged();
-    SkSafeUnref(ref);
+    ref->unref();
 }
 
 // These must match the int values in Bitmap.java
@@ -799,7 +825,7 @@ static JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copy },
     {   "nativeDestructor",         "(J)V", (void*)Bitmap_destructor },
     {   "nativeRecycle",            "(J)Z", (void*)Bitmap_recycle },
-    {   "nativeReconfigure",        "(JIIII)V", (void*)Bitmap_reconfigure },
+    {   "nativeReconfigure",        "(JIIIIZ)V", (void*)Bitmap_reconfigure },
     {   "nativeCompress",           "(JIILjava/io/OutputStream;[B)Z",
         (void*)Bitmap_compress },
     {   "nativeErase",              "(JI)V", (void*)Bitmap_erase },
