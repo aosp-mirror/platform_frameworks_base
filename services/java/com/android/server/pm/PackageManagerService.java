@@ -37,6 +37,7 @@ import com.android.internal.R;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.content.NativeLibraryHelper.ApkHandle;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -3800,7 +3801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
             PackageParser.Package pkg = scanPackageLI(file,
-                    flags|PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime, null);
+                    flags|PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime, null, null);
             // Don't mess around with apps in system partition.
             if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
                     mLastScanError == PackageManager.INSTALL_FAILED_INVALID_APK) {
@@ -3868,7 +3869,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  Returns null in case of errors and the error code is stored in mLastScanError
      */
     private PackageParser.Package scanPackageLI(File scanFile,
-            int parseFlags, int scanMode, long currentTime, UserHandle user) {
+            int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         String scanPath = scanFile.getPath();
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanPath);
@@ -3936,7 +3937,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
                     return null;
                 } else {
-                    // The current app on the system partion is better than
+                    // The current app on the system partition is better than
                     // what we have updated to on the data partition; switch
                     // back to the system partition version.
                     // At this point, its safely assumed that package installation for
@@ -4055,7 +4056,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         setApplicationInfoPaths(pkg, codePath, resPath);
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
-                | SCAN_UPDATE_SIGNATURE, currentTime, user);
+                | SCAN_UPDATE_SIGNATURE, currentTime, user, abiOverride);
 
         /*
          * If the system app should be overridden by a previously installed
@@ -4588,7 +4589,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
-            int parseFlags, int scanMode, long currentTime, UserHandle user) {
+            int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
         File scanFile = new File(pkg.mScanPath);
         if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
                 pkg.applicationInfo.publicSourceDir == null) {
@@ -5038,9 +5039,13 @@ public class PackageManagerService extends IPackageManager.Stub {
          *        only for non-system apps and system app upgrades.
          */
         if (pkg.applicationInfo.nativeLibraryDir != null) {
+            final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
             try {
                 File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                 final String dataPathString = dataPath.getCanonicalPath();
+
+                final String[] abiList = (abiOverride != null) ? new String[] { abiOverride } :
+                        Build.SUPPORTED_ABIS;
 
                 if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
                     /*
@@ -5054,8 +5059,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "removed obsolete native libraries for system package "
                                 + path);
                     }
-
-                    setInternalAppAbi(pkg, pkgSetting);
+                    if (abiOverride != null) {
+                        pkg.applicationInfo.cpuAbi = abiOverride;
+                    } else {
+                        setInternalAppAbi(pkg, pkgSetting);
+                    }
                 } else {
                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
                         /*
@@ -5068,7 +5076,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         try {
-                            int copyRet = copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir);
+                            int copyRet = copyNativeLibrariesForInternalApp(handle,
+                                    nativeLibraryDir, abiList);
                             if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                                 Slog.e(TAG, "Unable to copy native libraries");
                                 mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -5078,7 +5087,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // We've successfully copied native libraries across, so we make a
                             // note of what ABI we're using
                             if (copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                                pkg.applicationInfo.cpuAbi = Build.SUPPORTED_ABIS[copyRet];
+                                pkg.applicationInfo.cpuAbi = abiList[copyRet];
+                            } else if (abiOverride != null) {
+                                pkg.applicationInfo.cpuAbi = abiOverride;
                             } else {
                                 pkg.applicationInfo.cpuAbi = null;
                             }
@@ -5095,20 +5106,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // to clean this up but we'll need to change the interface between this service
                         // and IMediaContainerService (but doing so will spread this logic out, rather
                         // than centralizing it).
-                        final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
-                        final int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
+                        final int abi = NativeLibraryHelper.findSupportedAbi(handle, abiList);
                         if (abi >= 0) {
-                            pkg.applicationInfo.cpuAbi = Build.SUPPORTED_ABIS[abi];
+                            pkg.applicationInfo.cpuAbi = abiList[abi];
                         } else if (abi == PackageManager.NO_NATIVE_LIBRARIES) {
                             // Note that (non upgraded) system apps will not have any native
                             // libraries bundled in their APK, but we're guaranteed not to be
                             // such an app at this point.
-                            pkg.applicationInfo.cpuAbi = null;
+                            if (abiOverride != null) {
+                                pkg.applicationInfo.cpuAbi = abiOverride;
+                            } else {
+                                pkg.applicationInfo.cpuAbi = null;
+                            }
                         } else {
                             mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                             return null;
                         }
-                        handle.close();
                     }
 
                     if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
@@ -5125,8 +5138,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 }
+
+                pkgSetting.cpuAbiString = pkg.applicationInfo.cpuAbi;
             } catch (IOException ioe) {
                 Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
+            } finally {
+                handle.close();
             }
         }
         pkg.mScanPath = path;
@@ -5812,8 +5829,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static int copyNativeLibrariesForInternalApp(File scanFile, final File nativeLibraryDir)
-            throws IOException {
+    private static int copyNativeLibrariesForInternalApp(ApkHandle handle,
+            final File nativeLibraryDir, String[] abiList) throws IOException {
         if (!nativeLibraryDir.isDirectory()) {
             nativeLibraryDir.delete();
 
@@ -5835,21 +5852,16 @@ public class PackageManagerService extends IPackageManager.Stub {
          * If this is an internal application or our nativeLibraryPath points to
          * the app-lib directory, unpack the libraries if necessary.
          */
-        final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
-        try {
-            int abi = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_ABIS);
-            if (abi >= 0) {
-                int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
-                        nativeLibraryDir, Build.SUPPORTED_ABIS[abi]);
-                if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
-                    return copyRet;
-                }
+        int abi = NativeLibraryHelper.findSupportedAbi(handle, abiList);
+        if (abi >= 0) {
+            int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
+                    nativeLibraryDir, Build.SUPPORTED_ABIS[abi]);
+            if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
+                return copyRet;
             }
-
-            return abi;
-        } finally {
-            handle.close();
         }
+
+        return abi;
     }
 
     private void killApplication(String pkgName, int appId, String reason) {
@@ -7168,7 +7180,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         p = scanPackageLI(fullPath, flags,
                                 SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
-                                System.currentTimeMillis(), UserHandle.ALL);
+                                System.currentTimeMillis(), UserHandle.ALL, null);
                         if (p != null) {
                             /*
                              * TODO this seems dangerous as the package may have
@@ -7241,6 +7253,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        installPackageWithVerificationEncryptionAndAbiOverride(packageURI, observer, flags,
+                installerPackageName, verificationParams, encryptionParams, null);
+    }
+
+    @Override
+    public void installPackageWithVerificationEncryptionAndAbiOverride(Uri packageURI,
+            IPackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
+            String packageAbiOverride) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 null);
 
@@ -7275,7 +7296,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
-                verificationParams, encryptionParams, user);
+                verificationParams, encryptionParams, user,
+                packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -7975,11 +7997,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         private int mRet;
         private File mTempPackage;
         final ContainerEncryptionParams encryptionParams;
+        final String packageAbiOverride;
+        final String packageInstructionSetOverride;
 
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
                 String installerPackageName, VerificationParams verificationParams,
-                ContainerEncryptionParams encryptionParams, UserHandle user) {
+                ContainerEncryptionParams encryptionParams, UserHandle user,
+                String packageAbiOverride) {
             super(user);
             this.mPackageURI = packageURI;
             this.flags = flags;
@@ -7987,6 +8012,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
+            this.packageAbiOverride = packageAbiOverride;
+            this.packageInstructionSetOverride = (packageAbiOverride == null) ?
+                    packageAbiOverride : VMRuntime.getInstructionSet(packageAbiOverride);
         }
 
         @Override
@@ -8129,7 +8157,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Remote call to find out default install location
                         final String packageFilePath = packageFile.getAbsolutePath();
                         pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath, flags,
-                                lowThreshold);
+                                lowThreshold, packageAbiOverride);
 
                         /*
                          * If we have too little free space, try to free cache
@@ -8138,10 +8166,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (pkgLite.recommendedInstallLocation
                                 == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
                             final long size = mContainerService.calculateInstalledSize(
-                                    packageFilePath, isForwardLocked());
+                                    packageFilePath, isForwardLocked(), packageAbiOverride);
                             if (mInstaller.freeCache(size + lowThreshold) >= 0) {
                                 pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath,
-                                        flags, lowThreshold);
+                                        flags, lowThreshold, packageAbiOverride);
                             }
                             /*
                              * The cache free must have deleted the file we
@@ -8560,10 +8588,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ManifestDigest manifestDigest;
         final UserHandle user;
         final String instructionSet;
+        final String abiOverride;
 
         InstallArgs(Uri packageURI, IPackageInstallObserver observer, int flags,
                 String installerPackageName, ManifestDigest manifestDigest,
-                UserHandle user, String instructionSet) {
+                UserHandle user, String instructionSet, String abiOverride) {
             this.packageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
@@ -8571,6 +8600,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.manifestDigest = manifestDigest;
             this.user = user;
             this.instructionSet = instructionSet;
+            this.abiOverride = abiOverride;
         }
 
         abstract void createCopyFile();
@@ -8626,12 +8656,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         FileInstallArgs(InstallParams params) {
             super(params.getPackageUri(), params.observer, params.flags,
                     params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), null /* instruction set */);
+                    params.getUser(), params.packageInstructionSetOverride,
+                    params.packageAbiOverride);
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 String instructionSet) {
-            super(null, null, 0, null, null, null, instructionSet);
+            super(null, null, 0, null, null, null, instructionSet, null);
             File codeFile = new File(fullCodePath);
             installDir = codeFile.getParentFile();
             codeFileName = fullCodePath;
@@ -8640,7 +8671,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         FileInstallArgs(Uri packageURI, String pkgName, String dataDir, String instructionSet) {
-            super(packageURI, null, 0, null, null, null, instructionSet);
+            super(packageURI, null, 0, null, null, null, instructionSet, null);
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
@@ -8744,14 +8775,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
                 nativeLibraryFile.delete();
             }
+
+            final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codeFile);
+            final String[] abiList = (abiOverride != null) ?
+                    new String[] { abiOverride } : Build.SUPPORTED_ABIS;
             try {
-                int copyRet = copyNativeLibrariesForInternalApp(codeFile, nativeLibraryFile);
+                int copyRet = copyNativeLibrariesForInternalApp(handle, nativeLibraryFile, abiList);
                 if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                     return copyRet;
                 }
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            } finally {
+                handle.close();
             }
 
             return ret;
@@ -8966,14 +9003,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         AsecInstallArgs(InstallParams params) {
             super(params.getPackageUri(), params.observer, params.flags,
                     params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), null /* instruction set */);
+                    params.getUser(), params.packageInstructionSetOverride,
+                    params.packageAbiOverride);
         }
 
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 String instructionSet, boolean isExternal, boolean isForwardLocked) {
             super(null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
-                    null, null, null, instructionSet);
+                    null, null, null, instructionSet, null);
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
@@ -8985,7 +9023,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         AsecInstallArgs(String cid, String instructionSet, boolean isForwardLocked) {
             super(null, null, (isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
-                    null, null, null, instructionSet);
+                    null, null, null, instructionSet, null);
             this.cid = cid;
             setCachePath(PackageHelper.getSdDir(cid));
         }
@@ -8994,7 +9032,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 boolean isExternal, boolean isForwardLocked) {
             super(packageURI, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
-                    null, null, null, instructionSet);
+                    null, null, null, instructionSet, null);
             this.cid = cid;
         }
 
@@ -9006,7 +9044,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkExternalFreeStorage(packageURI, isFwdLocked());
+                return imcs.checkExternalFreeStorage(packageURI, isFwdLocked(), abiOverride);
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -9032,7 +9070,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 newCachePath = imcs.copyResourceToContainer(packageURI, cid, getEncryptKey(),
-                        RES_FILE_NAME, PUBLIC_RES_FILE_NAME, isExternal(), isFwdLocked());
+                        RES_FILE_NAME, PUBLIC_RES_FILE_NAME, isExternal(), isFwdLocked(),
+                        abiOverride);
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -9336,7 +9375,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private void installNewPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
@@ -9364,7 +9403,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode,
-                System.currentTimeMillis(), user);
+                System.currentTimeMillis(), user, abiOverride);
         if (newPackage == null) {
             Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -9391,7 +9430,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void replacePackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
 
         PackageParser.Package oldPackage;
         String pkgName = pkg.packageName;
@@ -9420,17 +9459,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, allUsers, perUserInstalled, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, res,
+                    abiOverride);
         } else {
             replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, allUsers, perUserInstalled, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, res,
+                    abiOverride);
         }
     }
 
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
         PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
@@ -9455,7 +9496,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Successfully deleted the old package. Now proceed with re-installation
             mLastScanError = PackageManager.INSTALL_SUCCEEDED;
             newPackage = scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_TIME,
-                    System.currentTimeMillis(), user);
+                    System.currentTimeMillis(), user, abiOverride);
             if (newPackage == null) {
                 Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
                 if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -9484,7 +9525,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Since we failed to install the new package we need to restore the old
             // package that we deleted.
-            if(deletedPkg) {
+            if (deletedPkg) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, reinstalling: " + deletedPackage);
                 File restoreFile = new File(deletedPackage.mPath);
                 // Parse old package
@@ -9495,7 +9536,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int oldScanMode = (oldOnSd ? 0 : SCAN_MONITOR) | SCAN_UPDATE_SIGNATURE
                         | SCAN_UPDATE_TIME;
                 if (scanPackageLI(restoreFile, oldParseFlags, oldScanMode,
-                        origUpdateTime, null) == null) {
+                        origUpdateTime, null, null) == null) {
                     Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade");
                     return;
                 }
@@ -9515,7 +9556,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
         PackageParser.Package newPackage = null;
@@ -9569,7 +9610,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Successfully disabled the old package. Now proceed with re-installation
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
-        newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user);
+        newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user, abiOverride);
         if (newPackage == null) {
             Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -9592,7 +9633,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 removeInstalledPackageLI(newPackage, true);
             }
             // Add back the old system package
-            scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user);
+            scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user, null);
             // Restore the old system information in Settings
             synchronized(mPackages) {
                 if (updatedSettings) {
@@ -9805,10 +9846,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,
-                    installerPackageName, res);
+                    installerPackageName, res, args.abiOverride);
         } else {
             installNewPackageLI(pkg, parseFlags, scanMode | SCAN_DELETE_DATA_ON_FAILURES, args.user,
-                    installerPackageName, res);
+                    installerPackageName, res, args.abiOverride);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
@@ -10225,7 +10266,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
         }
         PackageParser.Package newPkg = scanPackageLI(disabledPs.codePath,
-                parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
+                parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0, null, null);
 
         if (newPkg == null) {
             Slog.w(TAG, "Failed to restore system package:" + newPs.name
@@ -11908,7 +11949,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 doGc = true;
                 synchronized (mInstallLock) {
                     final PackageParser.Package pkg = scanPackageLI(new File(codePath), parseFlags,
-                            0, 0, null);
+                            0, 0, null, null);
                     // Scan the package
                     if (pkg != null) {
                         /*
