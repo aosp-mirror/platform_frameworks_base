@@ -322,6 +322,10 @@
     <!-- Distance between notifications and header when they are considered to be colliding. -->
     <dimen name="header_notifications_collide_distance">24dp</dimen>
 
+    <!-- Distance the user needs to drag vertically such that a swipe is accepted to unlock the
+         device. -->
+    <dimen name="unlock_move_distance">75dp</dimen>
+
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
 
