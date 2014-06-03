@@ -931,6 +931,14 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    /**
+     * Don't allow any more batching in to the current history event.  This
+     * is called when printing partial histories, so to ensure that the next
+     * history event will go in to a new batch after what was printed in the
+     * last partial history.
+     */
+    public abstract void commitCurrentHistoryBatchLocked();
+
     public abstract int getHistoryTotalSize();
 
     public abstract int getHistoryUsedSize();
@@ -3366,6 +3374,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         if (histStart >= 0) {
+            commitCurrentHistoryBatchLocked();
             pw.print(checkin ? "NEXT: " : "  NEXT: "); pw.println(lastTime+1);
         }
     }

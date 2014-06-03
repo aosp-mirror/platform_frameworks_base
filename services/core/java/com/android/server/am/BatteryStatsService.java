@@ -623,10 +623,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
-        pw.println("  --enable: enable an option: full-wake-history, no-auto-reset.");
-        pw.println("  --disable: disable an option: full-wake-history, no-auto-reset.");
-        pw.println("  -h: print this help text.");
         pw.println("  <package.name>: optional name of package to filter output by.");
+        pw.println("  -h: print this help text.");
+        pw.println("Battery stats (batterystats) commands:");
+        pw.println("  enable|disable <option>");
+        pw.println("    Enable or disable a running option.  Option state is not saved across boots.");
+        pw.println("    Options are:");
+        pw.println("      full-wake-history: include wake_lock_in battery history, full wake details.");
+        pw.println("      no-auto-reset: don't automatically reset stats when unplugged");
     }
 
     private int doEnableOrDisable(PrintWriter pw, int i, String[] args, boolean enable) {
@@ -702,14 +706,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         pw.println("Battery stats written.");
                         noOutput = true;
                     }
-                } else if ("--enable".equals(arg)) {
+                } else if ("--enable".equals(arg) || "enable".equals(arg)) {
                     i = doEnableOrDisable(pw, i, args, true);
                     if (i < 0) {
                         return;
                     }
                     pw.println("Enabled: " + args[i]);
                     return;
-                } else if ("--disable".equals(arg)) {
+                } else if ("--disable".equals(arg) || "disable".equals(arg)) {
                     i = doEnableOrDisable(pw, i, args, false);
                     if (i < 0) {
                         return;
