@@ -29,6 +29,7 @@ import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -72,8 +73,24 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             };
             mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+            send(MSG_SEND_SHARED_ELEMENT_DESTINATION, null);
+        }
+    }
+
+    private void sendSharedElementDestination() {
+        ViewGroup decor = getDecor();
+        if (!decor.isLayoutRequested()) {
             Bundle state = captureSharedElementState();
             mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
+        } else {
+            getDecor().getViewTreeObserver()
+                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                            return true;
+                        }
+                    });
         }
     }
 
@@ -104,6 +121,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 break;
             case MSG_CANCEL:
                 cancel();
+                break;
+            case MSG_SEND_SHARED_ELEMENT_DESTINATION:
+                sendSharedElementDestination();
                 break;
         }
     }
