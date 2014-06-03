@@ -345,7 +345,7 @@ public class DefaultContainerService extends IntentService {
         NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codePath);
         String[] abiList = Build.SUPPORTED_ABIS;
         if (abiOverride != null) {
-            abiList = new String[] { abiList };
+            abiList = new String[] { abiOverride };
         } else {
             try {
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
