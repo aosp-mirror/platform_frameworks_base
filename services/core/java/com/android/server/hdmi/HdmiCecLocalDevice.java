@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import com.android.server.hdmi.HdmiCecController.AllocateLogicalAddressCallback;
-
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 
@@ -27,84 +25,43 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
  */
 abstract class HdmiCecLocalDevice {
 
-    protected final HdmiCecController mController;
+    protected final HdmiControlService mService;
     protected final int mDeviceType;
-    protected final AddressAllocationCallback mAllocationCallback;
     protected int mAddress;
     protected int mPreferredAddress;
     protected HdmiCecDeviceInfo mDeviceInfo;
 
-    /**
-     * Callback interface to notify newly allocated logical address of the given
-     * local device.
-     */
-    interface AddressAllocationCallback {
-        /**
-         * Called when a logical address of the given device is allocated.
-         *
-         * @param deviceType original device type
-         * @param logicalAddress newly allocated logical address
-         */
-        void onAddressAllocated(int deviceType, int logicalAddress);
-    }
-
-    protected HdmiCecLocalDevice(HdmiCecController controller, int deviceType,
-            AddressAllocationCallback callback) {
-        mController = controller;
+    protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
+        mService = service;
         mDeviceType = deviceType;
-        mAllocationCallback = callback;
         mAddress = HdmiCec.ADDR_UNREGISTERED;
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
-    static HdmiCecLocalDevice create(HdmiCecController controller, int deviceType,
-            AddressAllocationCallback callback) {
+    static HdmiCecLocalDevice create(HdmiControlService service, int deviceType) {
         switch (deviceType) {
         case HdmiCec.DEVICE_TV:
-            return new HdmiCecLocalDeviceTv(controller, callback);
+            return new HdmiCecLocalDeviceTv(service);
         case HdmiCec.DEVICE_PLAYBACK:
-            return new HdmiCecLocalDevicePlayback(controller, callback);
+            return new HdmiCecLocalDevicePlayback(service);
         default:
             return null;
         }
     }
 
-    abstract void init();
+    void init() {
+        mPreferredAddress = HdmiCec.ADDR_UNREGISTERED;
+        // TODO: load preferred address from permanent storage.
+    }
 
     /**
-     * Called when a logical address of the local device is allocated.
-     * Note that internal variables are updated before it's called.
+     * Called once a logical address of the local device is allocated.
      */
     protected abstract void onAddressAllocated(int logicalAddress);
 
-    protected void allocateAddress(int type) {
-        mController.allocateLogicalAddress(type, mPreferredAddress,
-                new AllocateLogicalAddressCallback() {
-            @Override
-            public void onAllocated(int deviceType, int logicalAddress) {
-                mAddress = mPreferredAddress = logicalAddress;
-
-                // Create and set device info.
-                HdmiCecDeviceInfo deviceInfo = createDeviceInfo(mAddress, deviceType);
-                setDeviceInfo(deviceInfo);
-                mController.addDeviceInfo(deviceInfo);
-
-                mController.addLogicalAddress(logicalAddress);
-                onAddressAllocated(logicalAddress);
-                if (mAllocationCallback != null) {
-                    mAllocationCallback.onAddressAllocated(deviceType, logicalAddress);
-                }
-            }
-        });
-    }
-
-    private final HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
-        int vendorId = mController.getVendorId();
-        int physicalAddress = mController.getPhysicalAddress();
-        // TODO: get device name read from system configuration.
-        String displayName = HdmiCec.getDefaultDeviceName(logicalAddress);
-        return new HdmiCecDeviceInfo(logicalAddress,
-                physicalAddress, deviceType, vendorId, displayName);
+    final void handleAddressAllocated(int logicalAddress) {
+        mAddress = mPreferredAddress = logicalAddress;
+        onAddressAllocated(logicalAddress);
     }
 
     HdmiCecDeviceInfo getDeviceInfo() {
@@ -127,5 +84,9 @@ abstract class HdmiCecLocalDevice {
 
     void setPreferredAddress(int addr) {
         mPreferredAddress = addr;
+    }
+
+    int getPreferredAddress() {
+        return mPreferredAddress;
     }
 }

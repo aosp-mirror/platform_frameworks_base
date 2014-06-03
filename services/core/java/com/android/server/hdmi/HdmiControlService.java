@@ -30,12 +30,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
-import com.android.server.hdmi.HdmiCecLocalDevice.AddressAllocationCallback;
+import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -134,23 +135,9 @@ public final class HdmiControlService extends SystemService {
     public void onStart() {
         mIoThread.start();
         mCecController = HdmiCecController.create(this);
+
         if (mCecController != null) {
-            mCecController.initializeLocalDevices(mLocalDevices, new AddressAllocationCallback() {
-                private final SparseIntArray mAllocated = new SparseIntArray();
-
-                @Override
-                public void onAddressAllocated(int deviceType, int logicalAddress) {
-                    mAllocated.append(deviceType, logicalAddress);
-                    // TODO: get HdmiLCecLocalDevice and call onAddressAllocated here.
-
-                    // Once all logical allocation is done, launch device discovery
-                    // action if one of local device is TV.
-                    int tvAddress = mAllocated.get(HdmiCec.DEVICE_TV, -1);
-                    if (mLocalDevices.length == mAllocated.size() && tvAddress != -1) {
-                        launchDeviceDiscovery(tvAddress);
-                    }
-                }
-            });
+            initializeLocalDevices(mLocalDevices);
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
@@ -164,6 +151,46 @@ public final class HdmiControlService extends SystemService {
 
         // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
+    }
+
+    private void initializeLocalDevices(final int[] deviceTypes) {
+        // A container for [Logical Address, Local device info].
+        final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
+        final SparseIntArray finished = new SparseIntArray();
+        for (int type : deviceTypes) {
+            final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
+            localDevice.init();
+            mCecController.allocateLogicalAddress(type,
+                    localDevice.getPreferredAddress(), new AllocateAddressCallback() {
+                @Override
+                public void onAllocated(int deviceType, int logicalAddress) {
+                    if (logicalAddress == HdmiCec.ADDR_UNREGISTERED) {
+                        Slog.e(TAG, "Failed to allocate address:[device_type:" + deviceType + "]");
+                    } else {
+                        HdmiCecDeviceInfo deviceInfo = createDeviceInfo(logicalAddress, deviceType);
+                        localDevice.setDeviceInfo(deviceInfo);
+                        mCecController.addLocalDevice(deviceType, localDevice);
+                        mCecController.addLogicalAddress(logicalAddress);
+                        devices.append(logicalAddress, localDevice);
+                    }
+                    finished.append(deviceType, logicalAddress);
+
+                    // Once finish address allocation for all devices, notify
+                    // it to each device.
+                    if (deviceTypes.length == finished.size()) {
+                        notifyAddressAllocated(devices);
+                    }
+                }
+            });
+        }
+    }
+
+    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices) {
+        for (int i = 0; i < devices.size(); ++i) {
+            int address = devices.keyAt(i);
+            HdmiCecLocalDevice device = devices.valueAt(i);
+            device.onAddressAllocated(address);
+        }
     }
 
     /**
@@ -183,6 +210,20 @@ public final class HdmiControlService extends SystemService {
      */
     Looper getServiceLooper() {
         return mHandler.getLooper();
+    }
+
+    /**
+     * Returns physical address of the device.
+     */
+    int getPhysicalAddress() {
+        return mCecController.getPhysicalAddress();
+    }
+
+    /**
+     * Returns vendor id of CEC service.
+     */
+    int getVendorId() {
+        return mCecController.getVendorId();
     }
 
     /**
@@ -352,6 +393,45 @@ public final class HdmiControlService extends SystemService {
         mCecController.pollDevices(callback, retryCount);
     }
 
+
+    /**
+     * Launch device discovery sequence. It starts with clearing the existing device info list.
+     * Note that it assumes that logical address of all local devices is already allocated.
+     *
+     * @param sourceAddress a logical address of tv
+     */
+    void launchDeviceDiscovery(int sourceAddress) {
+        // At first, clear all existing device infos.
+        mCecController.clearDeviceInfoList();
+
+        // TODO: check whether TV is one of local devices.
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
+                new DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
+                        for (HdmiCecDeviceInfo info : deviceInfos) {
+                            mCecController.addDeviceInfo(info);
+                        }
+
+                        // Add device info of all local devices.
+                        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+                            mCecController.addDeviceInfo(device.getDeviceInfo());
+                        }
+
+                        // TODO: start hot-plug detection sequence here.
+                        // addAndStartAction(new HotplugDetectionAction());
+                    }
+                });
+        addAndStartAction(action);
+    }
+
+    private HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
+        // TODO: get device name read from system configuration.
+        String displayName = HdmiCec.getDefaultDeviceName(logicalAddress);
+        return new HdmiCecDeviceInfo(logicalAddress,
+                getPhysicalAddress(), deviceType, getVendorId(), displayName);
+    }
+
     private void handleReportPhysicalAddress(HdmiCecMessage message) {
         // At first, try to consume it.
         if (dispatchMessageToAction(message)) {
@@ -505,33 +585,6 @@ public final class HdmiControlService extends SystemService {
         mCecController.addDeviceInfo(info);
     }
 
-    // Launch device discovery sequence.
-    // It starts with clearing the existing device info list.
-    // Note that it assumes that logical address of all local devices is already allocated.
-    private void launchDeviceDiscovery(int sourceAddress) {
-        // At first, clear all existing device infos.
-        mCecController.clearDeviceInfoList();
-
-        // TODO: check whether TV is one of local devices.
-        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
-                new DeviceDiscoveryCallback() {
-                    @Override
-                    public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
-                        for (HdmiCecDeviceInfo info : deviceInfos) {
-                            mCecController.addDeviceInfo(info);
-                        }
-
-                        // Add device info of all local devices.
-                        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-                            mCecController.addDeviceInfo(device.getDeviceInfo());
-                        }
-
-                        // TODO: start hot-plug detection sequence here.
-                        // addAndStartAction(new HotplugDetectionAction());
-                    }
-                });
-        addAndStartAction(action);
-    }
 
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);

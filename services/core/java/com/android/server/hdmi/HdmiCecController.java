@@ -47,6 +47,21 @@ import java.util.List;
 final class HdmiCecController {
     private static final String TAG = "HdmiCecController";
 
+    /**
+     * Interface to report allocated logical address.
+     */
+    interface AllocateAddressCallback {
+        /**
+         * Called when a new logical address is allocated.
+         *
+         * @param deviceType requested device type to allocate logical address
+         * @param logicalAddress allocated logical address. If it is
+         *                       {@link HdmiCec#ADDR_UNREGISTERED}, it means that
+         *                       it failed to allocate logical address for the given device type
+         */
+        void onAllocated(int deviceType, int logicalAddress);
+    }
+
     private static final byte[] EMPTY_BODY = EmptyArray.BYTE;
 
     // A message to pass cec send command to IO looper.
@@ -116,45 +131,13 @@ final class HdmiCecController {
         mNativePtr = nativePtr;
     }
 
-    /**
-     * Perform initialization for each hosted device.
-     *
-     * @param deviceTypes array of device types
-     */
-    void initializeLocalDevices(int[] deviceTypes,
-            HdmiCecLocalDevice.AddressAllocationCallback callback) {
-        assertRunOnServiceThread();
-        for (int type : deviceTypes) {
-            HdmiCecLocalDevice device = HdmiCecLocalDevice.create(this, type, callback);
-            if (device == null) {
-                continue;
-            }
-            // TODO: Consider restoring the local device addresses from persistent storage
-            //       to allocate the same addresses again if possible.
-            device.setPreferredAddress(HdmiCec.ADDR_UNREGISTERED);
-            mLocalDevices.put(type, device);
-            device.init();
-        }
-    }
-
-    /**
-     * Interface to report allocated logical address.
-     */
-    interface AllocateLogicalAddressCallback {
-        /**
-         * Called when a new logical address is allocated.
-         *
-         * @param deviceType requested device type to allocate logical address
-         * @param logicalAddress allocated logical address. If it is
-         *                       {@link HdmiCec#ADDR_UNREGISTERED}, it means that
-         *                       it failed to allocate logical address for the given device type
-         */
-        void onAllocated(int deviceType, int logicalAddress);
+    void addLocalDevice(int deviceType, HdmiCecLocalDevice device) {
+        mLocalDevices.put(deviceType, device);
     }
 
     /**
      * Allocate a new logical address of the given device type. Allocated
-     * address will be reported through {@link AllocateLogicalAddressCallback}.
+     * address will be reported through {@link AllocateAddressCallback}.
      *
      * <p> Declared as package-private, accessed by {@link HdmiControlService} only.
      *
@@ -166,7 +149,7 @@ final class HdmiCecController {
      * @param callback callback interface to report allocated logical address to caller
      */
     void allocateLogicalAddress(final int deviceType, final int preferredAddress,
-            final AllocateLogicalAddressCallback callback) {
+            final AllocateAddressCallback callback) {
         assertRunOnServiceThread();
 
         runOnIoThread(new Runnable() {
@@ -178,7 +161,7 @@ final class HdmiCecController {
     }
 
     private void handleAllocateLogicalAddress(final int deviceType, int preferredAddress,
-            final AllocateLogicalAddressCallback callback) {
+            final AllocateAddressCallback callback) {
         assertRunOnIoThread();
         int startAddress = preferredAddress;
         // If preferred address is "unregistered", start address will be the smallest
