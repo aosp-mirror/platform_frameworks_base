@@ -41,6 +41,7 @@
 #include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
+#include <processgroup/processgroup.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
@@ -433,6 +434,14 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         ALOGE("Cannot continue without emulated storage");
         RuntimeAbort(env);
       }
+    }
+
+    if (!is_system_server) {
+        int rc = createProcessGroup(uid, getpid());
+        if (rc != 0) {
+            ALOGE("createProcessGroup(%d, %d) failed: %s", uid, pid, strerror(-rc));
+            RuntimeAbort(env);
+        }
     }
 
     SetGids(env, javaGids);

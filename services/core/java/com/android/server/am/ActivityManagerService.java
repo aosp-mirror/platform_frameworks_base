@@ -2236,6 +2236,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void start() {
+        Process.removeAllProcessGroups();
         mProcessCpuThread.start();
 
         mBatteryStatsService.publish(mContext);
@@ -2827,6 +2828,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // An application record is attached to a previous process,
             // clean it up now.
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
+            Process.killProcessGroup(app.info.uid, app.pid);
             handleAppDiedLocked(app, true, true);
         }
 
@@ -4069,6 +4071,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             stats.noteProcessDiedLocked(app.info.uid, pid);
         }
 
+        Process.killProcessGroup(app.info.uid, pid);
+
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
                 app.thread.asBinder() == thread.asBinder()) {
@@ -4307,7 +4311,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 // 0 == continue, -1 = kill process immediately
                 int res = mController.appEarlyNotResponding(app.processName, app.pid, annotation);
-                if (res < 0 && app.pid != MY_PID) Process.killProcess(app.pid);
+                if (res < 0 && app.pid != MY_PID) {
+                    Process.killProcess(app.pid);
+                    Process.killProcessGroup(app.info.uid, app.pid);
+                }
             } catch (RemoteException e) {
                 mController = null;
                 Watchdog.getInstance().setActivityController(null);
@@ -4413,6 +4420,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (res != 0) {
                     if (res < 0 && app.pid != MY_PID) {
                         Process.killProcess(app.pid);
+                        Process.killProcessGroup(app.info.uid, app.pid);
                     } else {
                         synchronized (this) {
                             mServices.scheduleServiceTimeoutLocked(app);
@@ -5122,6 +5130,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             killUnneededProcessLocked(app, reason);
+            Process.killProcessGroup(app.info.uid, app.pid);
             handleAppDiedLocked(app, true, allowRestart);
             removeLruProcessLocked(app);
 
@@ -5210,6 +5219,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
             if (pid > 0 && pid != MY_PID) {
                 Process.killProcessQuiet(pid);
+                //TODO: Process.killProcessGroup(app.info.uid, pid);
             } else {
                 try {
                     thread.scheduleExit();
@@ -7409,6 +7419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pr.processName, pr.setAdj, reason);
             pr.killedByAm = true;
             Process.killProcessQuiet(pr.pid);
+            Process.killProcessGroup(pr.info.uid, pr.pid);
         }
     }
 
@@ -10749,11 +10760,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     String name = r != null ? r.processName : null;
                     int pid = r != null ? r.pid : Binder.getCallingPid();
+                    int uid = r != null ? r.info.uid : Binder.getCallingUid();
                     if (!mController.appCrashed(name, pid,
                             shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
                         Slog.w(TAG, "Force-killing crashed app " + name
                                 + " at watcher's request");
                         Process.killProcess(pid);
+                        if (r != null) {
+                            Process.killProcessGroup(uid, pid);
+                        }
                         return;
                     }
                 } catch (RemoteException e) {
@@ -16587,6 +16602,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 app.processName, app.setAdj, "empty");
                         app.killedByAm = true;
                         Process.killProcessQuiet(app.pid);
+                        Process.killProcessGroup(app.info.uid, app.pid);
                     } else {
                         try {
                             app.thread.scheduleExit();
