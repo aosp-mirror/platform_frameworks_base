@@ -46,6 +46,9 @@
 #define LIB_SUFFIX ".so"
 #define LIB_SUFFIX_LEN (sizeof(LIB_SUFFIX) - 1)
 
+#define RS_BITCODE_SUFFIX ".bc"
+#define RS_BITCODE_SUFFIX_LEN (sizeof(RS_BITCODE_SUFFIX) -1)
+
 #define GDBSERVER "gdbserver"
 #define GDBSERVER_LEN (sizeof(GDBSERVER) - 1)
 
@@ -486,6 +489,42 @@ com_android_internal_content_NativeLibraryHelper_findSupportedAbi(JNIEnv *env, j
     return (jint) findSupportedAbi(env, apkHandle, javaCpuAbisToSearch);
 }
 
+enum bitcode_scan_result_t {
+  APK_SCAN_ERROR = -1,
+  NO_BITCODE_PRESENT = 0,
+  BITCODE_PRESENT = 1,
+};
+
+static jint
+com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *env, jclass clazz,
+        jlong apkHandle) {
+    ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
+    void* cookie = NULL;
+    if (!zipFile->startIteration(&cookie)) {
+        return APK_SCAN_ERROR;
+    }
+
+    char fileName[PATH_MAX];
+    ZipEntryRO next = NULL;
+    while ((next = zipFile->nextEntry(cookie)) != NULL) {
+        if (zipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
+            continue;
+        }
+
+        const size_t fileNameLen = strlen(fileName);
+        const char* lastSlash = strrchr(fileName, '/');
+        const char* baseName = (lastSlash == NULL) ? fileName : fileName + 1;
+        if (!strncmp(fileName + fileNameLen - RS_BITCODE_SUFFIX_LEN, RS_BITCODE_SUFFIX,
+                     RS_BITCODE_SUFFIX_LEN) && isFilenameSafe(baseName)) {
+            zipFile->endIteration(cookie);
+            return BITCODE_PRESENT;
+        }
+    }
+
+    zipFile->endIteration(cookie);
+    return NO_BITCODE_PRESENT;
+}
+
 static jlong
 com_android_internal_content_NativeLibraryHelper_openApk(JNIEnv *env, jclass, jstring apkPath)
 {
@@ -517,6 +556,8 @@ static JNINativeMethod gMethods[] = {
     {"nativeFindSupportedAbi",
             "(J[Ljava/lang/String;)I",
             (void *)com_android_internal_content_NativeLibraryHelper_findSupportedAbi},
+    {"hasRenderscriptBitcode", "(J)I",
+            (void *)com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode},
 };
 
 

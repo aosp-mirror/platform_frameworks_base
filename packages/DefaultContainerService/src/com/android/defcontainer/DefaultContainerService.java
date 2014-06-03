@@ -88,7 +88,7 @@ public class DefaultContainerService extends IntentService {
     private IMediaContainerService.Stub mBinder = new IMediaContainerService.Stub() {
         /**
          * Creates a new container and copies resource there.
-         * @param paackageURI the uri of resource to be copied. Can be either
+         * @param packageURI the uri of resource to be copied. Can be either
          * a content uri or a file uri
          * @param cid the id of the secure container that should
          * be used for creating a secure container into which the resource
@@ -342,9 +342,22 @@ public class DefaultContainerService extends IntentService {
         // The .apk file
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
-        String[] abiList = (abiOverride != null) ? new String[] { abiOverride }
-                : Build.SUPPORTED_ABIS;
         NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codePath);
+        String[] abiList = Build.SUPPORTED_ABIS;
+        if (abiOverride != null) {
+            abiList = new String[] { abiList };
+        } else {
+            try {
+                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
+                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                    abiList = Build.SUPPORTED_32_BIT_ABIS;
+                }
+            } catch (IOException ioe) {
+                Slog.w(TAG, "Problem determining ABI for: " + codeFile.getPath());
+                return null;
+            }
+        }
+
         final int abi = NativeLibraryHelper.findSupportedAbi(handle, abiList);
 
         // Calculate size of container needed to hold base APK.

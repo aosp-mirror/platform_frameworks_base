@@ -20,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Native libraries helper.
@@ -141,4 +142,18 @@ public class NativeLibraryHelper {
 
         return deletedFiles;
     }
+
+    // We don't care about the other return values for now.
+    private static final int BITCODE_PRESENT = 1;
+
+    public static boolean hasRenderscriptBitcode(ApkHandle handle) throws IOException {
+        final int returnVal = hasRenderscriptBitcode(handle.apkHandle);
+        if (returnVal < 0) {
+            throw new IOException("Error scanning APK, code: " + returnVal);
+        }
+
+        return (returnVal == BITCODE_PRESENT);
+    }
+
+    private static native int hasRenderscriptBitcode(long apkHandle);
 }
