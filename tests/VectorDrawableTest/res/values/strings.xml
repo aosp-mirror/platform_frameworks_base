@@ -15,4 +15,5 @@
 -->
 
 <resources>
+    <string name="twoLinePathData" >"M 0,0 v 100 M 0,0 h 100"</string>
 </resources>

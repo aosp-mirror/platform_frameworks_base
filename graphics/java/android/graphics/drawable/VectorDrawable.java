@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Stack;
 
 /**
  * This lets you create a drawable based on an XML vector graphic It can be
@@ -128,6 +129,8 @@ public class VectorDrawable extends Drawable {
     private static final int LINEJOIN_MITER = 0;
     private static final int LINEJOIN_ROUND = 1;
     private static final int LINEJOIN_BEVEL = 2;
+
+    private static final boolean DBG_VECTOR_DRAWABLE = false;
 
     private final VectorDrawableState mVectorState;
 
@@ -279,12 +282,17 @@ public class VectorDrawable extends Drawable {
         boolean noGroupTag = true;
         boolean noPathTag = true;
 
-        VGroup currentGroup = new VGroup();
+        // Use a stack to help to build the group tree.
+        // The top of the stack is always the current group.
+        final Stack<VGroup> groupStack = new Stack<VGroup>();
+        groupStack.push(pathRenderer.mRootGroup);
 
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 final String tagName = parser.getName();
+                final VGroup currentGroup = groupStack.peek();
+
                 if (SHAPE_PATH.equals(tagName)) {
                     final VPath path = new VPath();
                     path.inflate(res, attrs, theme);
@@ -297,18 +305,24 @@ public class VectorDrawable extends Drawable {
                     pathRenderer.parseViewport(res, attrs);
                     noViewportTag = false;
                 } else if (SHAPE_GROUP.equals(tagName)) {
-                    currentGroup = new VGroup();
-                    currentGroup.inflate(res, attrs, theme);
-                    pathRenderer.mGroupList.add(currentGroup);
+                    VGroup newChildGroup = new VGroup();
+                    newChildGroup.inflate(res, attrs, theme);
+                    currentGroup.mChildGroupList.add(newChildGroup);
+                    groupStack.push(newChildGroup);
                     noGroupTag = false;
                 }
+            } else if (eventType == XmlPullParser.END_TAG) {
+                final String tagName = parser.getName();
+                if (SHAPE_GROUP.equals(tagName)) {
+                    groupStack.pop();
+                }
             }
-
             eventType = parser.next();
         }
 
-        if (noGroupTag && !noPathTag) {
-            pathRenderer.mGroupList.add(currentGroup);
+        // Print the tree out for debug.
+        if (DBG_VECTOR_DRAWABLE) {
+            printGroupTree(pathRenderer.mRootGroup, 0);
         }
 
         if (noSizeTag || noViewportTag || noPathTag) {
@@ -338,6 +352,21 @@ public class VectorDrawable extends Drawable {
         return pathRenderer;
     }
 
+    private void printGroupTree(VGroup currentGroup, int level) {
+        String indent = "";
+        for (int i = 0 ; i < level ; i++) {
+            indent += "    ";
+        }
+        // Print the current node
+        Log.v(LOGTAG, indent + "current group is :" +  currentGroup.getName()
+                + " rotation is " + currentGroup.mRotate);
+        Log.v(LOGTAG, indent + "matrix is :" +  currentGroup.getLocalMatrix().toString());
+        // Then print all the children
+        for (int i = 0 ; i < currentGroup.mChildGroupList.size(); i++) {
+            printGroupTree(currentGroup.mChildGroupList.get(i), level + 1);
+        }
+    }
+
     private void setPathRenderer(VPathRenderer pathRenderer) {
         mVectorState.mVPathRenderer = pathRenderer;
     }
@@ -350,6 +379,7 @@ public class VectorDrawable extends Drawable {
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
                 mChangingConfigurations = copy.mChangingConfigurations;
+                // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
                 mPadding = new Rect(copy.mPadding);
             }
@@ -377,28 +407,42 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VPathRenderer {
+        /* Right now the internal data structure is organized as a tree.
+         * Each node can be a group node, or a path.
+         * A group node can have groups or paths as children, but a path node has
+         * no children.
+         * One example can be:
+         *                 Root Group
+         *                /    |     \
+         *           Group    Path    Group
+         *          /     \             |
+         *         Path   Path         Path
+         *
+         */
+        private final VGroup mRootGroup;
+
         private final Path mPath = new Path();
         private final Path mRenderPath = new Path();
-        private final Matrix mMatrix = new Matrix();
+        private static final Matrix IDENTITY_MATRIX = new Matrix();
 
         private Paint mStrokePaint;
         private Paint mFillPaint;
         private ColorFilter mColorFilter;
         private PathMeasure mPathMeasure;
 
-        final ArrayList<VGroup> mGroupList = new ArrayList<VGroup>();
+        private float mBaseWidth = 0;
+        private float mBaseHeight = 0;
+        private float mViewportWidth = 0;
+        private float mViewportHeight = 0;
 
-        float mBaseWidth = 0;
-        float mBaseHeight = 0;
-        float mViewportWidth = 0;
-        float mViewportHeight = 0;
+        private final Matrix mFinalPathMatrix = new Matrix();
 
         public VPathRenderer() {
+            mRootGroup = new VGroup();
         }
 
         public VPathRenderer(VPathRenderer copy) {
-            mGroupList.addAll(copy.mGroupList);
-
+            mRootGroup = copy.mRootGroup;
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
             mViewportWidth = copy.mViewportHeight;
@@ -406,33 +450,59 @@ public class VectorDrawable extends Drawable {
         }
 
         public boolean canApplyTheme() {
-            final ArrayList<VGroup> groups = mGroupList;
-            for (int i = groups.size() - 1; i >= 0; i--) {
-                final ArrayList<VPath> paths = groups.get(i).mVGList;
-                for (int j = paths.size() - 1; j >= 0; j--) {
-                    final VPath path = paths.get(j);
-                    if (path.canApplyTheme()) {
-                        return true;
-                    }
+            // If one of the paths can apply theme, then return true;
+            return recursiveCanApplyTheme(mRootGroup);
+        }
+
+        private boolean recursiveCanApplyTheme(VGroup currentGroup) {
+            // We can do a tree traverse here, if there is one path return true,
+            // then we return true for the whole tree.
+            final ArrayList<VPath> paths = currentGroup.mPathList;
+            for (int j = paths.size() - 1; j >= 0; j--) {
+                final VPath path = paths.get(j);
+                if (path.canApplyTheme()) {
+                    return true;
                 }
             }
 
+            final ArrayList<VGroup> childGroups = currentGroup.mChildGroupList;
+
+            for (int i = 0; i < childGroups.size(); i++) {
+                VGroup childGroup = childGroups.get(i);
+                if (childGroup.canApplyTheme()
+                        || recursiveCanApplyTheme(childGroup)) {
+                    return true;
+                }
+            }
             return false;
         }
 
         public void applyTheme(Theme t) {
-            final ArrayList<VGroup> groups = mGroupList;
-            for (int i = groups.size() - 1; i >= 0; i--) {
-                VGroup currentGroup = groups.get(i);
-                currentGroup.applyTheme(t);
-                final ArrayList<VPath> paths = currentGroup.mVGList;
-                for (int j = paths.size() - 1; j >= 0; j--) {
-                    final VPath path = paths.get(j);
-                    if (path.canApplyTheme()) {
-                        path.applyTheme(t);
-                    }
+            // Apply theme to every path of the tree.
+            recursiveApplyTheme(mRootGroup, t);
+        }
+
+        private void recursiveApplyTheme(VGroup currentGroup, Theme t) {
+            // We can do a tree traverse here, apply theme to all paths which
+            // can apply theme.
+            final ArrayList<VPath> paths = currentGroup.mPathList;
+            for (int j = paths.size() - 1; j >= 0; j--) {
+                final VPath path = paths.get(j);
+                if (path.canApplyTheme()) {
+                    path.applyTheme(t);
                 }
             }
+
+            final ArrayList<VGroup> childGroups = currentGroup.mChildGroupList;
+
+            for (int i = 0; i < childGroups.size(); i++) {
+                VGroup childGroup = childGroups.get(i);
+                if (childGroup.canApplyTheme()) {
+                    childGroup.applyTheme(t);
+                }
+                recursiveApplyTheme(childGroup, t);
+            }
+
         }
 
         public void setColorFilter(ColorFilter colorFilter) {
@@ -448,34 +518,35 @@ public class VectorDrawable extends Drawable {
 
         }
 
-        public void draw(Canvas canvas, int w, int h) {
-            if (mGroupList == null || mGroupList.size() == 0) {
-                Log.e(LOGTAG,"There is no group to draw");
-                return;
-            }
+        private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
+                Canvas canvas, int w, int h) {
+            // Calculate current group's matrix by preConcat the parent's and
+            // and the current one on the top of the stack.
+            // Basically the Mfinal = Mviewport * M0 * M1 * M2;
+            // Mi the local matrix at level i of the group tree.
+            currentGroup.mStackedMatrix.set(currentMatrix);
 
-            for (int i = 0; i < mGroupList.size(); i++) {
-                VGroup currentGroup = mGroupList.get(i);
-                if (currentGroup != null) {
-                    drawPath(currentGroup, canvas, w, h);
-                }
+            currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
+
+            drawPath(currentGroup, canvas, w, h);
+            // Draw the group tree in post order.
+            for (int i = 0 ; i < currentGroup.mChildGroupList.size(); i++) {
+                drawGroupTree(currentGroup.mChildGroupList.get(i),
+                        currentGroup.mStackedMatrix, canvas, w, h);
             }
+        }
+
+        public void draw(Canvas canvas, int w, int h) {
+            // Travese the tree in pre-order to draw.
+            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h);
         }
 
         private void drawPath(VGroup vGroup, Canvas canvas, int w, int h) {
             final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
-            mMatrix.reset();
-
-            // The order we apply is the same as the
-            // RenderNode.cpp::applyViewPropertyTransforms().
-            mMatrix.postTranslate(-vGroup.mPivotX, -vGroup.mPivotY);
-            mMatrix.postScale(vGroup.mScaleX, vGroup.mScaleY);
-            mMatrix.postRotate(vGroup.mRotate, 0, 0);
-            mMatrix.postTranslate(vGroup.mTranslateX + vGroup.mPivotX, vGroup.mTranslateY + vGroup.mPivotY);
-
-            mMatrix.postScale(scale, scale, mViewportWidth / 2f, mViewportHeight / 2f);
-            mMatrix.postTranslate(w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
+            mFinalPathMatrix.set(vGroup.mStackedMatrix);
+            mFinalPathMatrix.postScale(scale, scale, mViewportWidth / 2f, mViewportHeight / 2f);
+            mFinalPathMatrix.postTranslate(w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
 
             ArrayList<VPath> paths = vGroup.getPaths();
             for (int i = 0; i < paths.size(); i++) {
@@ -507,7 +578,7 @@ public class VectorDrawable extends Drawable {
 
                 mRenderPath.reset();
 
-                mRenderPath.addPath(path, mMatrix);
+                mRenderPath.addPath(path, mFinalPathMatrix);
 
                 if (vPath.mClip) {
                     canvas.clipPath(mRenderPath, Region.Op.REPLACE);
@@ -588,7 +659,8 @@ public class VectorDrawable extends Drawable {
 
     private static class VGroup {
         private final HashMap<String, VPath> mVGPathMap = new HashMap<String, VPath>();
-        private final ArrayList<VPath> mVGList = new ArrayList<VPath>();
+        private final ArrayList<VPath> mPathList = new ArrayList<VPath>();
+        private final ArrayList<VGroup> mChildGroupList = new ArrayList<VGroup>();
 
         private float mRotate = 0;
         private float mPivotX = 0;
@@ -597,14 +669,35 @@ public class VectorDrawable extends Drawable {
         private float mScaleY = 1;
         private float mTranslateX = 0;
         private float mTranslateY = 0;
+        private float mAlpha = 1;
+
+        // mLocalMatrix is parsed from the XML.
+        private final Matrix mLocalMatrix = new Matrix();
+        // mStackedMatrix is only used when drawing, it combines all the
+        // parents' local matrices with the current one.
+        private final Matrix mStackedMatrix = new Matrix();
 
         private int[] mThemeAttrs;
+
+        private String mName = null;
+
+        public String getName() {
+            return mName;
+        }
+
+        public Matrix getLocalMatrix() {
+            return mLocalMatrix;
+        }
 
         public void add(VPath path) {
             String id = path.getID();
             mVGPathMap.put(id, path);
-            mVGList.add(path);
+            mPathList.add(path);
          }
+
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
 
         public void applyTheme(Theme t) {
             if (mThemeAttrs == null) {
@@ -621,6 +714,11 @@ public class VectorDrawable extends Drawable {
             mScaleY = a.getFloat(R.styleable.VectorDrawableGroup_scaleY, mScaleY);
             mTranslateX = a.getFloat(R.styleable.VectorDrawableGroup_translateX, mTranslateX);
             mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
+            mAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mAlpha);
+            updateLocalMatrix();
+            if (a.hasValue(R.styleable.VectorDrawableGroup_name)) {
+                mName = a.getString(R.styleable.VectorDrawableGroup_name);
+            }
             a.recycle();
         }
 
@@ -660,7 +758,26 @@ public class VectorDrawable extends Drawable {
                 mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
             }
 
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_name] == 0) {
+                mName = a.getString(R.styleable.VectorDrawableGroup_name);
+            }
+
+            if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_alpha] == 0) {
+                mAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mAlpha);
+            }
+
+            updateLocalMatrix();
             a.recycle();
+        }
+
+        private void updateLocalMatrix() {
+            // The order we apply is the same as the
+            // RenderNode.cpp::applyViewPropertyTransforms().
+            mLocalMatrix.reset();
+            mLocalMatrix.postTranslate(-mPivotX, -mPivotY);
+            mLocalMatrix.postScale(mScaleX, mScaleY);
+            mLocalMatrix.postRotate(mRotate, 0, 0);
+            mLocalMatrix.postTranslate(mTranslateX + mPivotX, mTranslateY + mPivotY);
         }
 
         /**
@@ -668,7 +785,7 @@ public class VectorDrawable extends Drawable {
          * @return ordered list of paths
          */
         public ArrayList<VPath> getPaths() {
-            return mVGList;
+            return mPathList;
         }
 
     }
