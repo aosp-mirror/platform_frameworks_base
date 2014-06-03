@@ -17,18 +17,105 @@
 package android.media.tv;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 /**
  * This class is used to specify meta information of a TV input.
  */
 public final class TvInputInfo implements Parcelable {
+    private static final boolean DEBUG = false;
+    private static final String TAG = "TvInputInfo";
+
+    /**
+     * The name of the TV input service to provide to the setup activity and settings activity.
+     */
+    public static final String EXTRA_SERVICE_NAME = "serviceName";
+
+    private static final String XML_START_TAG_NAME = "tv-input";
+
     private final ResolveInfo mService;
     private final String mId;
+
+    // Attributes from XML meta data.
+    private String mSetupActivity;
+    private String mSettingsActivity;
+
+    /**
+     * Create a new instance of the TvInputInfo class,
+     * instantiating it from the given Context and ResolveInfo.
+     *
+     * @param service The ResolveInfo returned from the package manager about this TV input service.
+     * @hide */
+    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service)
+            throws XmlPullParserException, IOException {
+        ServiceInfo si = service.serviceInfo;
+        PackageManager pm = context.getPackageManager();
+        XmlResourceParser parser = null;
+        try {
+            parser = si.loadXmlMetaData(pm, TvInputService.SERVICE_META_DATA);
+            if (parser == null) {
+                throw new XmlPullParserException("No " + TvInputService.SERVICE_META_DATA
+                        + " meta-data for " + si.name);
+            }
+
+            Resources res = pm.getResourcesForApplication(si.applicationInfo);
+            AttributeSet attrs = Xml.asAttributeSet(parser);
+
+            int type;
+            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                    && type != XmlPullParser.START_TAG) {
+            }
+
+            String nodeName = parser.getName();
+            if (!XML_START_TAG_NAME.equals(nodeName)) {
+                throw new XmlPullParserException(
+                        "Meta-data does not start with tv-input-service tag in " + si.name);
+            }
+
+            TvInputInfo input = new TvInputInfo(context, service);
+            TypedArray sa = res.obtainAttributes(attrs,
+                    com.android.internal.R.styleable.TvInputService);
+            input.mSetupActivity = sa.getString(
+                    com.android.internal.R.styleable.TvInputService_setupActivity);
+            if (DEBUG) {
+                Log.d(TAG, "Setup activity loaded. [" + input.mSetupActivity + "] for " + si.name);
+            }
+            input.mSettingsActivity = sa.getString(
+                    com.android.internal.R.styleable.TvInputService_settingsActivity);
+            if (DEBUG) {
+                Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
+                        + si.name);
+            }
+            sa.recycle();
+
+            return input;
+        } catch (NameNotFoundException e) {
+            throw new XmlPullParserException("Unable to create context for: " + si.packageName);
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+        }
+    }
 
     /**
      * Constructor.
@@ -36,7 +123,7 @@ public final class TvInputInfo implements Parcelable {
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @hide
      */
-    public TvInputInfo(ResolveInfo service) {
+    private TvInputInfo(Context context, ResolveInfo service) {
         mService = service;
         ServiceInfo si = service.serviceInfo;
         mId = generateInputIdForComponentName(new ComponentName(si.packageName, si.name));
@@ -69,6 +156,32 @@ public final class TvInputInfo implements Parcelable {
      */
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
+    }
+
+    /**
+     * Returns an intent to start the setup activity for this TV input service.
+     */
+    public Intent getIntentForSetupActivity() {
+        if (!TextUtils.isEmpty(mSetupActivity)) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClassName(getPackageName(), mSetupActivity);
+            intent.putExtra(EXTRA_SERVICE_NAME, getServiceName());
+            return intent;
+        }
+        return null;
+    }
+
+    /**
+     * Returns an intent to start the settings activity for this TV input service.
+     */
+    public Intent getIntentForSettingsActivity() {
+        if (!TextUtils.isEmpty(mSettingsActivity)) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClassName(getPackageName(), mSettingsActivity);
+            intent.putExtra(EXTRA_SERVICE_NAME, getServiceName());
+            return intent;
+        }
+        return null;
     }
 
     /**
@@ -125,6 +238,8 @@ public final class TvInputInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
         mService.writeToParcel(dest, flags);
+        dest.writeString(mSetupActivity);
+        dest.writeString(mSettingsActivity);
     }
 
     /**
@@ -159,5 +274,7 @@ public final class TvInputInfo implements Parcelable {
     private TvInputInfo(Parcel in) {
         mId = in.readString();
         mService = ResolveInfo.CREATOR.createFromParcel(in);
+        mSetupActivity = in.readString();
+        mSettingsActivity = in.readString();
     }
 }
