@@ -70,4 +70,7 @@
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->
     <dimen name="eca_overlap">0dip</dimen>
+
+    <!-- The vertical margin between the date and the owner info. -->
+    <dimen name="date_owner_info_margin">4dp</dimen>
 </resources>

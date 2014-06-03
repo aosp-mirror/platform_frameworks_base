@@ -186,40 +186,14 @@ class KeyguardMessageArea extends TextView {
      */
     void update() {
         MutableInt icon = new MutableInt(0);
-        CharSequence status = concat(getOwnerInfo(), getCurrentMessage());
+        CharSequence status = getCurrentMessage();
         setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
         setText(status);
     }
 
-    private CharSequence concat(CharSequence... args) {
-        StringBuilder b = new StringBuilder();
-        if (!TextUtils.isEmpty(args[0])) {
-            b.append(args[0]);
-        }
-        for (int i = 1; i < args.length; i++) {
-            CharSequence text = args[i];
-            if (!TextUtils.isEmpty(text)) {
-                if (b.length() > 0) {
-                    b.append(mSeparator);
-                }
-                b.append(text);
-            }
-        }
-        return b.toString();
-    }
 
     CharSequence getCurrentMessage() {
         return mShowingMessage ? mMessage : null;
-    }
-
-    String getOwnerInfo() {
-        ContentResolver res = getContext().getContentResolver();
-        String info = null;
-        final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled();
-        if (ownerInfoEnabled && !mShowingMessage) {
-            info = mLockPatternUtils.getOwnerInfo(mLockPatternUtils.getCurrentUser());
-        }
-        return info;
     }
 
     private void hideMessage(int duration, boolean thenUpdate) {
