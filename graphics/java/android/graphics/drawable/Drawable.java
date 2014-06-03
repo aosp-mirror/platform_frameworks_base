@@ -209,7 +209,7 @@ public abstract class Drawable {
      *         stored bounds of this drawable.
      *
      * @see #copyBounds()
-     * @see #copyBounds(android.graphics.Rect) 
+     * @see #copyBounds(android.graphics.Rect)
      */
     public final Rect getBounds() {
         if (mBounds == ZERO_BOUNDS_RECT) {
@@ -328,8 +328,8 @@ public abstract class Drawable {
      * that want to support animated drawables.
      *
      * @param cb The client's Callback implementation.
-     * 
-     * @see #getCallback() 
+     *
+     * @see #getCallback()
      */
     public final void setCallback(Callback cb) {
         mCallback = new WeakReference<Callback>(cb);
@@ -338,10 +338,10 @@ public abstract class Drawable {
     /**
      * Return the current {@link Callback} implementation attached to this
      * Drawable.
-     * 
+     *
      * @return A {@link Callback} instance or null if no callback was set.
-     * 
-     * @see #setCallback(android.graphics.drawable.Drawable.Callback) 
+     *
+     * @see #setCallback(android.graphics.drawable.Drawable.Callback)
      */
     public Callback getCallback() {
         if (mCallback != null) {
@@ -349,15 +349,15 @@ public abstract class Drawable {
         }
         return null;
     }
-    
+
     /**
      * Use the current {@link Callback} implementation to have this Drawable
      * redrawn.  Does nothing if there is no Callback attached to the
      * Drawable.
      *
      * @see Callback#invalidateDrawable
-     * @see #getCallback() 
-     * @see #setCallback(android.graphics.drawable.Drawable.Callback) 
+     * @see #getCallback()
+     * @see #setCallback(android.graphics.drawable.Drawable.Callback)
      */
     public void invalidateSelf() {
         final Callback callback = getCallback();
@@ -931,7 +931,7 @@ public abstract class Drawable {
             Rects only to drop them on the floor.
         */
         Rect pad = new Rect();
-        
+
         // Special stuff for compatibility mode: if the target density is not
         // the same as the display density, but the resource -is- the same as
         // the display density, then don't scale it down to the target density.
@@ -1040,6 +1040,8 @@ public abstract class Drawable {
             drawable = new GradientDrawable();
         } else if (name.equals("vector")) {
             drawable = new VectorDrawable();
+        } else if (name.equals("animated-vector")) {
+            drawable = new AnimatedVectorDrawable();
         } else if (name.equals("scale")) {
             drawable = new ScaleDrawable();
         } else if (name.equals("clip")) {
@@ -1047,7 +1049,7 @@ public abstract class Drawable {
         } else if (name.equals("rotate")) {
             drawable = new RotateDrawable();
         } else if (name.equals("animated-rotate")) {
-            drawable = new AnimatedRotateDrawable();            
+            drawable = new AnimatedRotateDrawable();
         } else if (name.equals("animation-list")) {
             drawable = new AnimationDrawable();
         } else if (name.equals("inset")) {

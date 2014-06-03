@@ -4772,7 +4772,7 @@
     </declare-styleable>
 
     <!-- ========================== -->
-    <!--   Vector drawable class   -->
+    <!--   VectorDrawable class   -->
     <!-- ========================== -->
     <eat-comment />
 
@@ -4792,7 +4792,7 @@
         <attr name="height" />
     </declare-styleable>
 
-    <!-- Defines the group used in Vector Drawables. -->
+    <!-- Defines the group used in VectorDrawables. -->
     <declare-styleable name="VectorDrawableGroup">
         <!-- The Name of this group -->
         <attr name="name" />
@@ -4814,7 +4814,7 @@
         <attr name="alpha" />
     </declare-styleable>
 
-    <!-- Defines the path used in Vector Drawables. -->
+    <!-- Defines the path used in VectorDrawables. -->
     <declare-styleable name="VectorDrawablePath">
         <!-- The Name of this path -->
         <attr name="name" />
@@ -4852,6 +4852,25 @@
         </attr>
         <!-- sets the Miter limit for a stroked path -->
         <attr name="strokeMiterLimit" format="float"/>
+    </declare-styleable>
+
+    <!-- ========================== -->
+    <!--   AnimatedVectorDrawable class   -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <!-- Define the AnimatedVectorDrawable. -->
+    <declare-styleable name="AnimatedVectorDrawable">
+        <!-- The static vector drawable. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
+    <!-- Defines the target path or group used in the AnimatedVectorDrawable. -->
+    <declare-styleable name="AnimatedVectorDrawableTarget">
+        <!-- The name of this target path or group -->
+        <attr name="name" />
+        <!-- The animation for this target path or group -->
+        <attr name="animation" />
     </declare-styleable>
 
     <!-- ========================== -->

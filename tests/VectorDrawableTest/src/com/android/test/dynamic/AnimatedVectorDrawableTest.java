@@ -14,33 +14,29 @@
 
 package com.android.test.dynamic;
 
-import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class VectorDrawableAnimation extends Activity {
-    private static final String LOGCAT = "VectorDrawableAnimation";
+public class AnimatedVectorDrawableTest extends Activity {
+    private static final String LOGCAT = "VectorDrawableAnimationTest";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final Button button = new Button(this);
-        button.setBackgroundResource(R.drawable.animation_drawable_vector);
-
+        Button button = new Button(this);
+        button.setBackgroundResource(R.drawable.animation_vector_drawable01);
         button.setOnClickListener(new View.OnClickListener() {
                 @Override
             public void onClick(View v) {
-                AnimationDrawable frameAnimation = (AnimationDrawable) v.getBackground();
-                // Start the animation (looped playback by default).
+                AnimatedVectorDrawable frameAnimation = (AnimatedVectorDrawable) v.getBackground();
                 frameAnimation.start();
             }
         });
 
         setContentView(button);
     }
-
 }

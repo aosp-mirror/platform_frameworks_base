@@ -16,10 +16,14 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.InflateException;
+
+import com.android.internal.R;
 
 /**
  * An interpolator that can traverse a Path that extends from <code>Point</code>
@@ -81,18 +85,33 @@ public class PathInterpolator implements Interpolator {
     }
 
     public PathInterpolator(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.PathInterpolator);
-        if (!a.hasValue(com.android.internal.R.styleable.PathInterpolator_controlX1)) {
+        this(context.getResources(), context.getTheme(), attrs);
+    }
+
+    /** @hide */
+    public PathInterpolator(Resources res, Theme theme, AttributeSet attrs) {
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.PathInterpolator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.PathInterpolator);
+        }
+        parseInterpolatorFromTypeArray(a);
+
+        a.recycle();
+    }
+
+    private void parseInterpolatorFromTypeArray(TypedArray a) {
+        if (!a.hasValue(R.styleable.PathInterpolator_controlX1)) {
             throw new InflateException("pathInterpolator requires the controlX1 attribute");
-        } else if (!a.hasValue(com.android.internal.R.styleable.PathInterpolator_controlY1)) {
+        } else if (!a.hasValue(R.styleable.PathInterpolator_controlY1)) {
             throw new InflateException("pathInterpolator requires the controlY1 attribute");
         }
-        float x1 = a.getFloat(com.android.internal.R.styleable.PathInterpolator_controlX1, 0);
-        float y1 = a.getFloat(com.android.internal.R.styleable.PathInterpolator_controlY1, 0);
+        float x1 = a.getFloat(R.styleable.PathInterpolator_controlX1, 0);
+        float y1 = a.getFloat(R.styleable.PathInterpolator_controlY1, 0);
 
-        boolean hasX2 = a.hasValue(com.android.internal.R.styleable.PathInterpolator_controlX2);
-        boolean hasY2 = a.hasValue(com.android.internal.R.styleable.PathInterpolator_controlY2);
+        boolean hasX2 = a.hasValue(R.styleable.PathInterpolator_controlX2);
+        boolean hasY2 = a.hasValue(R.styleable.PathInterpolator_controlY2);
 
         if (hasX2 != hasY2) {
             throw new InflateException(
@@ -102,12 +121,10 @@ public class PathInterpolator implements Interpolator {
         if (!hasX2) {
             initQuad(x1, y1);
         } else {
-            float x2 = a.getFloat(com.android.internal.R.styleable.PathInterpolator_controlX2, 0);
-            float y2 = a.getFloat(com.android.internal.R.styleable.PathInterpolator_controlY2, 0);
+            float x2 = a.getFloat(R.styleable.PathInterpolator_controlX2, 0);
+            float y2 = a.getFloat(R.styleable.PathInterpolator_controlY2, 0);
             initCubic(x1, y1, x2, y2);
         }
-
-        a.recycle();
     }
 
     private void initQuad(float controlX, float controlY) {

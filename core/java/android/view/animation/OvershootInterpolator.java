@@ -17,9 +17,12 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import com.android.internal.R;
 import com.android.internal.view.animation.HasNativeInterpolator;
 import com.android.internal.view.animation.NativeInterpolatorFactory;
 import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
@@ -46,11 +49,20 @@ public class OvershootInterpolator implements Interpolator, NativeInterpolatorFa
     }
 
     public OvershootInterpolator(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.OvershootInterpolator);
+        this(context.getResources(), context.getTheme(), attrs);
+    }
+
+    /** @hide */
+    public OvershootInterpolator(Resources res, Theme theme, AttributeSet attrs) {
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.OvershootInterpolator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.OvershootInterpolator);
+        }
 
         mTension =
-                a.getFloat(com.android.internal.R.styleable.OvershootInterpolator_tension, 2.0f);
+                a.getFloat(R.styleable.OvershootInterpolator_tension, 2.0f);
 
         a.recycle();
     }
