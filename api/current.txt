@@ -15951,21 +15951,8 @@ package android.media.tv {
   }
 
   public final class TvInputManager {
-    method public void createSession(java.lang.String, android.media.tv.TvInputManager.SessionCallback, android.os.Handler);
     method public boolean getAvailability(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
-  }
-
-  public static final class TvInputManager.Session {
-    method public void release();
-    method public void setStreamVolume(float);
-    method public void tune(android.net.Uri);
-  }
-
-  public static abstract class TvInputManager.SessionCallback {
-    ctor public TvInputManager.SessionCallback();
-    method public void onSessionCreated(android.media.tv.TvInputManager.Session);
-    method public void onSessionReleased(android.media.tv.TvInputManager.Session);
   }
 
   public static abstract class TvInputManager.TvInputListener {
@@ -16002,16 +15989,24 @@ package android.media.tv {
     ctor public TvView(android.content.Context);
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
-    method public void bindTvInput(java.lang.String, android.media.tv.TvInputManager.SessionCallback);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
+    method public void reset();
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
-    method public void unbindTvInput();
+    method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
+    method public void tune(java.lang.String, android.net.Uri);
+    field public static final int ERROR_BUSY = 0; // 0x0
+    field public static final int ERROR_TV_INPUT_DISCONNECTED = 1; // 0x1
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {
     method public abstract boolean onUnhandledInputEvent(android.view.InputEvent);
+  }
+
+  public static abstract class TvView.TvInputListener {
+    ctor public TvView.TvInputListener();
+    method public void onError(java.lang.String, int);
   }
 
 }

@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -38,9 +39,21 @@ import android.view.ViewRootImpl;
  * View playing TV
  */
 public class TvView extends SurfaceView {
+    private static final String TAG = "TvView";
     // STOPSHIP: Turn debugging off.
     private static final boolean DEBUG = true;
-    private static final String TAG = "TvView";
+
+    /**
+     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the requested TV
+     * input is busy and unable to handle the request.
+     */
+    public static final int ERROR_BUSY = 0;
+
+    /**
+     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the underlying TV
+     * input has been disconnected.
+     */
+    public static final int ERROR_TV_INPUT_DISCONNECTED = 1;
 
     private final Handler mHandler = new Handler();
     private TvInputManager.Session mSession;
@@ -48,7 +61,8 @@ public class TvView extends SurfaceView {
     private boolean mOverlayViewCreated;
     private Rect mOverlayViewFrame;
     private final TvInputManager mTvInputManager;
-    private SessionCallback mSessionCallback;
+    private MySessionCallback mSessionCallback;
+    private TvInputListener mListener;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
@@ -113,44 +127,13 @@ public class TvView extends SurfaceView {
     }
 
     /**
-     * Binds a TV input to this view. {@link SessionCallback#onSessionCreated} will be
-     * called to send the result of this binding with {@link TvInputManager.Session}.
-     * If a TV input is already bound, the input will be unbound from this view and its session
-     * will be released.
+     * Sets a listener for events in this TvView.
      *
-     * @param inputId the id of TV input which will be bound to this view.
-     * @param callback called when TV input is bound. The callback sends
-     *        {@link TvInputManager.Session}
-     * @throws IllegalArgumentException if any of the arguments is {@code null}.
+     * @param listener The listener to be called with events. A value of {@code null} removes any
+     *         existing listener.
      */
-    public void bindTvInput(String inputId, SessionCallback callback) {
-        if (TextUtils.isEmpty(inputId)) {
-            throw new IllegalArgumentException("inputId cannot be null or an empty string");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
-        if (mSession != null) {
-            release();
-        }
-        // When bindTvInput is called multiple times before the callback is called,
-        // only the callback of the last bindTvInput call will be actually called back.
-        // The previous callbacks will be ignored. For the logic, mSessionCallback
-        // is newly assigned for every bindTvInput call and compared with
-        // MySessionCreateCallback.this.
-        mSessionCallback = new MySessionCallback(callback);
-        mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
-    }
-
-    /**
-     * Unbinds a TV input currently bound. Its corresponding {@link TvInputManager.Session}
-     * is released.
-     */
-    public void unbindTvInput() {
-        if (mSession != null) {
-            release();
-        }
-        mSessionCallback = null;
+    public void setTvInputListener(TvInputListener listener) {
+        mListener = listener;
     }
 
     /**
@@ -164,6 +147,50 @@ public class TvView extends SurfaceView {
             return;
         }
         mSession.setStreamVolume(volume);
+    }
+
+    /**
+     * Tunes to a given channel.
+     *
+     * @param inputId the id of TV input which will play the given channel.
+     * @param channelUri The URI of a channel.
+     */
+    public void tune(String inputId, Uri channelUri) {
+        if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
+        if (TextUtils.isEmpty(inputId)) {
+            throw new IllegalArgumentException("inputId cannot be null or an empty string");
+        }
+        if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
+            if (mSession != null) {
+                mSession.tune(channelUri);
+            } else {
+                // Session is not created yet. Replace the channel which will be set once the
+                // session is made.
+                mSessionCallback.mChannelUri = channelUri;
+            }
+        } else {
+            if (mSession != null) {
+                release();
+            }
+            // When createSession() is called multiple times before the callback is called,
+            // only the callback of the last createSession() call will be actually called back.
+            // The previous callbacks will be ignored. For the logic, mSessionCallback
+            // is newly assigned for every createSession request and compared with
+            // MySessionCreateCallback.this.
+            mSessionCallback = new MySessionCallback(inputId, channelUri);
+            mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+        }
+    }
+
+    /**
+     * Resets this TvView.
+     * <p>
+     * This method is primarily used to un-tune the current TvView.
+     */
+    public void reset() {
+        if (mSession != null) {
+            release();
+        }
     }
 
     /**
@@ -290,6 +317,7 @@ public class TvView extends SurfaceView {
         removeSessionOverlayView();
         mSession.release();
         mSession = null;
+        mSessionCallback = null;
     }
 
     private void setSessionSurface(Surface surface) {
@@ -339,6 +367,71 @@ public class TvView extends SurfaceView {
     }
 
     /**
+     * Interface used to receive various status updates on the {@link TvView}.
+     */
+    public abstract static class TvInputListener {
+
+        /**
+         * This is invoked when an error occurred while handling requested operation.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param errorCode The error code. For the details of error code, please see
+         *         {@link TvView}.
+         */
+        public void onError(String inputId, int errorCode) {
+        }
+
+        /**
+         * This is invoked when the view is tuned to a specific channel and starts decoding video
+         * stream from there. It is also called later when the video format is changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param width The width of the video.
+         * @param height The height of the video.
+         * @param interlaced {@code true} if the video is interlaced, {@code false} if the video is
+         *            progressive.
+         * @hide
+         */
+        public void onVideoStreamChanged(String inputId, int width, int height,
+                boolean interlaced) {
+        }
+
+        /**
+         * This is invoked when the view is tuned to a specific channel and starts decoding audio
+         * stream from there. It is also called later when the audio format is changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param channelCount The number of channels in the audio stream.
+         * @hide
+         */
+        public void onAudioStreamChanged(String inputId, int channelCount) {
+        }
+
+        /**
+         * This is invoked when the view is tuned to a specific channel and starts decoding data
+         * stream that includes subtitle information from the channel. It is also called later when
+         * the information disappears or appears.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param hasClosedCaption {@code true} if the stream contains closed caption, {@code false}
+         *            otherwise.
+         * @hide
+         */
+        public void onClosedCaptionStreamChanged(String inputId, boolean hasClosedCaption) {
+        }
+
+        /**
+         * This is invoked when a custom event from the bound TV input is sent to this view.
+         *
+         * @param eventType The type of the event.
+         * @param eventArgs Optional arguments of the event.
+         * @hide
+         */
+        public void onEvent(String inputId, String eventType, Bundle eventArgs) {
+        }
+    }
+
+    /**
      * Interface definition for a callback to be invoked when the unhandled input event is received.
      */
     public interface OnUnhandledInputEventListener {
@@ -356,10 +449,12 @@ public class TvView extends SurfaceView {
     }
 
     private class MySessionCallback extends SessionCallback {
-        final SessionCallback mExternalCallback;
+        final String mInputId;
+        Uri mChannelUri;
 
-        MySessionCallback(SessionCallback externalCallback) {
-            mExternalCallback = externalCallback;
+        MySessionCallback(String inputId, Uri channelUri) {
+            mInputId = inputId;
+            mChannelUri = channelUri;
         }
 
         @Override
@@ -380,17 +475,20 @@ public class TvView extends SurfaceView {
                     setSessionSurface(mSurface);
                 }
                 createSessionOverlayView();
-            }
-            if (mExternalCallback != null) {
-                mExternalCallback.onSessionCreated(session);
+                mSession.tune(mChannelUri);
+            } else {
+                if (mListener != null) {
+                    mListener.onError(mInputId, ERROR_BUSY);
+                }
             }
         }
 
         @Override
         public void onSessionReleased(Session session) {
             mSession = null;
-            if (mExternalCallback != null) {
-                mExternalCallback.onSessionReleased(session);
+            mSessionCallback = null;
+            if (mListener != null) {
+                mListener.onError(mInputId, ERROR_TV_INPUT_DISCONNECTED);
             }
         }
 
@@ -400,8 +498,8 @@ public class TvView extends SurfaceView {
             if (DEBUG) {
                 Log.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
             }
-            if (mExternalCallback != null) {
-                mExternalCallback.onVideoStreamChanged(session, width, height, interlaced);
+            if (mListener != null) {
+                mListener.onVideoStreamChanged(mInputId, width, height, interlaced);
             }
         }
 
@@ -410,8 +508,8 @@ public class TvView extends SurfaceView {
             if (DEBUG) {
                 Log.d(TAG, "onAudioStreamChanged(" + channelCount + ")");
             }
-            if (mExternalCallback != null) {
-                mExternalCallback.onAudioStreamChanged(session, channelCount);
+            if (mListener != null) {
+                mListener.onAudioStreamChanged(mInputId, channelCount);
             }
         }
 
@@ -420,16 +518,16 @@ public class TvView extends SurfaceView {
             if (DEBUG) {
                 Log.d(TAG, "onClosedCaptionStreamChanged(" + hasClosedCaption + ")");
             }
-            if (mExternalCallback != null) {
-                mExternalCallback.onClosedCaptionStreamChanged(session, hasClosedCaption);
+            if (mListener != null) {
+                mListener.onClosedCaptionStreamChanged(mInputId, hasClosedCaption);
             }
         }
 
         @Override
         public void onSessionEvent(TvInputManager.Session session, String eventType,
                 Bundle eventArgs) {
-            if (mExternalCallback != null) {
-                mExternalCallback.onSessionEvent(session, eventType, eventArgs);
+            if (mListener != null) {
+                mListener.onEvent(mInputId, eventType, eventArgs);
             }
         }
     }
