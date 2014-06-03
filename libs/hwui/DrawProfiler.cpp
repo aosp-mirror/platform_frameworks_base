@@ -109,7 +109,7 @@ void DrawProfiler::finishFrame() {
     mCurrentFrame = (mCurrentFrame + 1) % mDataSize;
 }
 
-void DrawProfiler::unionDirty(Rect* dirty) {
+void DrawProfiler::unionDirty(SkRect* dirty) {
     RETURN_IF_DISABLED();
     // Not worth worrying about minimizing the dirty region for debugging, so just
     // dirty the entire viewport.

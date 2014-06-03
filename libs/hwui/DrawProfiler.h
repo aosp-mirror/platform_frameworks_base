@@ -37,7 +37,7 @@ public:
     void markPlaybackEnd();
     void finishFrame();
 
-    void unionDirty(Rect* dirty);
+    void unionDirty(SkRect* dirty);
     void draw(OpenGLRenderer* canvas);
 
     void dumpData(int fd);

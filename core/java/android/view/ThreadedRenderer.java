@@ -54,8 +54,6 @@ import java.io.PrintWriter;
 public class ThreadedRenderer extends HardwareRenderer {
     private static final String LOGTAG = "ThreadedRenderer";
 
-    private static final Rect NULL_RECT = new Rect();
-
     // Keep in sync with DrawFrameTask.h SYNC_* flags
     // Nothing interesting to report
     private static final int SYNC_OK = 0x0;
@@ -228,7 +226,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
+    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
         attachInfo.mIgnoreDirtyState = true;
         long frameTimeNanos = mChoreographer.getFrameTimeNanos();
         attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
@@ -246,12 +244,8 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         attachInfo.mIgnoreDirtyState = false;
 
-        if (dirty == null) {
-            dirty = NULL_RECT;
-        }
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
-                recordDuration, view.getResources().getDisplayMetrics().density,
-                dirty.left, dirty.top, dirty.right, dirty.bottom);
+                recordDuration, view.getResources().getDisplayMetrics().density);
         if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
             attachInfo.mViewRootImpl.invalidate();
         }
@@ -393,8 +387,7 @@ public class ThreadedRenderer extends HardwareRenderer {
             float lightX, float lightY, float lightZ, float lightRadius);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy,
-            long frameTimeNanos, long recordDuration, float density,
-            int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
+            long frameTimeNanos, long recordDuration, float density);
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);
 

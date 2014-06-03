@@ -18,11 +18,14 @@
 
 #include <utils/Timers.h>
 
+#include "utils/Macros.h"
+
 namespace android {
 namespace uirenderer {
 
 class BaseRenderNodeAnimator;
 class AnimationListener;
+class DamageAccumulator;
 
 class AnimationHook {
 public:
@@ -31,21 +34,44 @@ protected:
     ~AnimationHook() {}
 };
 
-struct TreeInfo {
-    // The defaults here should be safe for everyone but DrawFrameTask to use as-is.
-    TreeInfo()
-        : frameTimeMs(0)
+// This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
+class TreeInfo {
+    PREVENT_COPY_AND_ASSIGN(TreeInfo);
+public:
+    enum TraversalMode {
+        // The full monty - sync, push, run animators, etc... Used by DrawFrameTask
+        // May only be used if both the UI thread and RT thread are blocked on the
+        // prepare
+        MODE_FULL,
+        // Run only what can be done safely on RT thread. Currently this only means
+        // animators, but potentially things like SurfaceTexture updates
+        // could be handled by this as well if there are no listeners
+        MODE_RT_ONLY,
+        // The subtree is being detached. Maybe. If the RenderNode is present
+        // in both the old and new display list's children then it will get a
+        // MODE_MAYBE_DETACHING followed shortly by a MODE_FULL.
+        // Push any pending display list changes in case it is detached,
+        // but don't evaluate animators and such as if it isn't detached as a
+        // MODE_FULL will follow shortly.
+        MODE_MAYBE_DETACHING,
+        // TODO: TRIM_MEMORY?
+    };
+
+    explicit TreeInfo(TraversalMode mode)
+        : mode(mode)
+        , frameTimeMs(0)
         , animationHook(NULL)
-        , prepareTextures(false)
-        , performStagingPush(true)
-        , evaluateAnimations(false)
+        , prepareTextures(mode == MODE_FULL)
+        , damageAccumulator(0)
     {}
 
+    const TraversalMode mode;
     nsecs_t frameTimeMs;
     AnimationHook* animationHook;
+    // TODO: Remove this? Currently this is used to signal to stop preparing
+    // textures if we run out of cache space.
     bool prepareTextures;
-    bool performStagingPush;
-    bool evaluateAnimations;
+    DamageAccumulator* damageAccumulator;
 
     struct Out {
         Out()

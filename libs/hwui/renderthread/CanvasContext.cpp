@@ -439,6 +439,7 @@ void CanvasContext::prepareTree(TreeInfo& info) {
     mRenderThread.removeFrameCallback(this);
 
     info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
+    info.damageAccumulator = &mDamageAccumulator;
     mRootRenderNode->prepareTree(info);
 
     int runningBehind = 0;
@@ -465,27 +466,30 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
-void CanvasContext::draw(Rect* dirty) {
+void CanvasContext::draw() {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
 
     profiler().markPlaybackStart();
 
+    SkRect dirty;
+    mDamageAccumulator.finish(&dirty);
+
     EGLint width, height;
     mGlobalContext->beginFrame(mEglSurface, &width, &height);
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
         mCanvas->setViewport(width, height);
-        dirty = NULL;
+        dirty.setEmpty();
     } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
-        dirty = NULL;
+        dirty.setEmpty();
     } else {
-        profiler().unionDirty(dirty);
+        profiler().unionDirty(&dirty);
     }
 
     status_t status;
-    if (dirty && !dirty->isEmpty()) {
-        status = mCanvas->prepareDirty(dirty->left, dirty->top,
-                dirty->right, dirty->bottom, mOpaque);
+    if (!dirty.isEmpty()) {
+        status = mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
+                dirty.fRight, dirty.fBottom, mOpaque);
     } else {
         status = mCanvas->prepare(mOpaque);
     }
@@ -516,14 +520,12 @@ void CanvasContext::doFrame() {
 
     profiler().startFrame();
 
-    TreeInfo info;
-    info.evaluateAnimations = true;
-    info.performStagingPush = false;
+    TreeInfo info(TreeInfo::MODE_RT_ONLY);
     info.prepareTextures = false;
 
     prepareTree(info);
     if (info.out.canDrawThisFrame) {
-        draw(NULL);
+        draw();
     }
 }
 
@@ -543,7 +545,7 @@ void CanvasContext::invokeFunctor(Functor* functor) {
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     requireGlContext();
-    TreeInfo info;
+    TreeInfo info(TreeInfo::MODE_FULL);
     layer->apply(info);
     return LayerRenderer::copyLayer(layer->backingLayer(), bitmap);
 }

@@ -180,8 +180,7 @@ void RenderProxy::setOpaque(bool opaque) {
 }
 
 int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
-        float density, int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom) {
-    mDrawFrameTask.setDirty(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+        float density) {
     mDrawFrameTask.setDensity(density);
     return mDrawFrameTask.drawFrame(frameTimeNanos, recordDurationNanos);
 }

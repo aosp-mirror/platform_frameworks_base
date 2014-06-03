@@ -70,7 +70,7 @@ public:
     ANDROID_API void setup(int width, int height, const Vector3& lightCenter, float lightRadius);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API int syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
-            float density, int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
+            float density);
     ANDROID_API void destroyCanvasAndSurface();
 
     ANDROID_API void invokeFunctor(Functor* functor, bool waitForCompletion);
