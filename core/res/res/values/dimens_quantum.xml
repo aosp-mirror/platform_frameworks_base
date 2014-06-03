@@ -21,10 +21,6 @@
     <dimen name="action_bar_default_padding_quantum">4dp</dimen>
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding_quantum">16dp</dimen>
-    <!-- Text size for action bar titles -->
-    <dimen name="action_bar_title_text_size_quantum">20sp</dimen>
-    <!-- Text size for action bar subtitles -->
-    <dimen name="action_bar_subtitle_text_size_quantum">16sp</dimen>
     <!-- Top margin for action bar subtitles -->
     <dimen name="action_bar_subtitle_top_margin_quantum">-3dp</dimen>
     <!-- Bottom margin for action bar subtitles -->
@@ -57,6 +53,6 @@
     <dimen name="floating_window_margin_right">16dp</dimen>
     <dimen name="floating_window_margin_bottom">32dp</dimen>
 
-    <!-- the amount of elevation for pressed button state-->
+    <!-- Amount of elevation for pressed button state -->
     <dimen name="button_pressed_z">2dp</dimen>
 </resources>
