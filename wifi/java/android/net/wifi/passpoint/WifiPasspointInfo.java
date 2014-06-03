@@ -197,27 +197,13 @@ public class WifiPasspointInfo implements Parcelable {
     }
 
     public static class CellularNetwork {
-        public byte[] rawData;
-
-        public int getMnc() {
-            // TODO
-            return 0;
-        }
-
-        public int getMcc() {
-            // TODO
-            return 0;
-        }
+        public String mcc;
+        public String mnc;
 
         @Override
         public String toString() {
-            if (rawData == null) return null;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < rawData.length; i++)
-                sb.append(String.format("%02X",  rawData[i]));
-            return sb.toString();
+            return mcc + "," + mnc;
         }
-
     }
 
     /** BSSID */
@@ -239,7 +225,7 @@ public class WifiPasspointInfo implements Parcelable {
     public List<NaiRealm> naiRealm;
 
     /** 3GPP cellular network */
-    public CellularNetwork cellularNetwork;
+    public List<CellularNetwork> cellularNetwork;
 
     /** fully qualified domain name (FQDN) */
     public List<String> domainName;
@@ -328,9 +314,11 @@ public class WifiPasspointInfo implements Parcelable {
                 sb.append("(").append(realm.toString()).append(")");
         }
 
-        if (cellularNetwork != null)
-            sb.append(" cellularNetwork: ").append("(")
-              .append(cellularNetwork.toString()).append(")");
+        if (cellularNetwork != null) {
+            sb.append(" cellularNetwork: ");
+            for (CellularNetwork plmn : cellularNetwork)
+                sb.append("(").append(plmn.toString()).append(")");
+        }
 
         if (domainName != null) {
             sb.append(" domainName: ");
@@ -404,8 +392,11 @@ public class WifiPasspointInfo implements Parcelable {
         if (cellularNetwork == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(cellularNetwork.rawData.length);
-            out.writeByteArray(cellularNetwork.rawData);
+            out.writeInt(cellularNetwork.size());
+            for (CellularNetwork plmn : cellularNetwork) {
+                out.writeString(plmn.mcc);
+                out.writeString(plmn.mnc);
+            }
         }
 
 
@@ -505,9 +496,13 @@ public class WifiPasspointInfo implements Parcelable {
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.cellularNetwork = new CellularNetwork();
-                        p.cellularNetwork.rawData = new byte[n];
-                        in.readByteArray(p.cellularNetwork.rawData);
+                        p.cellularNetwork = new ArrayList<CellularNetwork>();
+                        for (int i = 0; i < n; i++) {
+                            CellularNetwork plmn = new CellularNetwork();
+                            plmn.mcc = in.readString();
+                            plmn.mnc = in.readString();
+                            p.cellularNetwork.add(plmn);
+                        }
                     }
 
                     n = in.readInt();
