@@ -1486,6 +1486,11 @@ public class NotificationManagerService extends SystemService {
                         pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
                         user);
                 NotificationRecord r = new NotificationRecord(n);
+                NotificationRecord old = mNotificationsByKey.get(n.getKey());
+                if (old != null) {
+                    // Retain ranking information from previous record
+                    r.copyRankingInformation(old);
+                }
                 if (!mSignalExtractors.isEmpty()) {
                     for (NotificationSignalExtractor extractor : mSignalExtractors) {
                         try {
@@ -1514,15 +1519,6 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 synchronized (mNotificationList) {
-                    applyZenModeLocked(r);
-
-                    // Should this notification make noise, vibe, or use the LED?
-                    final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) &&
-                            !r.isIntercepted();
-                    if (DBG || r.isIntercepted()) Slog.v(TAG,
-                            "pkg=" + pkg + " canInterrupt=" + canInterrupt +
-                                    " intercept=" + r.isIntercepted());
-                    NotificationRecord old = null;
                     int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
                         mNotificationList.add(r);
@@ -1534,11 +1530,17 @@ public class NotificationManagerService extends SystemService {
                         // Make sure we don't lose the foreground service state.
                         notification.flags |=
                             old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
-                        // Retain ranking information from previous record
-                        r.copyRankingInformation(old);
                         mNotificationsByKey.remove(old.sbn.getKey());
                     }
                     mNotificationsByKey.put(n.getKey(), r);
+
+                    applyZenModeLocked(r);
+                    // Should this notification make noise, vibe, or use the LED?
+                    final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) &&
+                            !r.isIntercepted();
+                    if (DBG || r.isIntercepted()) Slog.v(TAG,
+                            "pkg=" + pkg + " canInterrupt=" + canInterrupt +
+                                    " intercept=" + r.isIntercepted());
 
                     Collections.sort(mNotificationList, mRankingComparator);
 
