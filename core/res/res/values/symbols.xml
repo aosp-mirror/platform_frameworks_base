@@ -287,6 +287,8 @@
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_windowIsRound" />
 
+  <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
+  <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
