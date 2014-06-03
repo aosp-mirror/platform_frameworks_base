@@ -42,6 +42,7 @@ public final class NotificationRecord {
     final StatusBarNotification sbn;
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
+    int score;
 
     // These members are used by NotificationSignalExtractors
     // to communicate with the ranking module.
@@ -53,9 +54,13 @@ public final class NotificationRecord {
     // InterceptedNotifications needs to know if this has been previously evaluated.
     private boolean mTouchedByZen;
 
-    NotificationRecord(StatusBarNotification sbn)
+    // Is this record an update of an old record?
+    public boolean isUpdate;
+
+    NotificationRecord(StatusBarNotification sbn, int score)
     {
         this.sbn = sbn;
+        this.score = score;
     }
 
     // copy any notes that the ranking system may have made before the update
