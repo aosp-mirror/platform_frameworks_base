@@ -3184,15 +3184,11 @@ public class AudioManager {
                 do {
                     newPorts.clear();
                     status = AudioSystem.listAudioPorts(newPorts, portGeneration);
-                    Log.i(TAG, "updateAudioPortCache AudioSystem.listAudioPorts() status: "+
-                                    status+" num ports: "+ newPorts.size() +" portGeneration: "+portGeneration[0]);
                     if (status != SUCCESS) {
                         return status;
                     }
                     newPatches.clear();
                     status = AudioSystem.listAudioPatches(newPatches, patchGeneration);
-                    Log.i(TAG, "updateAudioPortCache AudioSystem.listAudioPatches() status: "+
-                            status+" num patches: "+ newPatches.size() +" patchGeneration: "+patchGeneration[0]);
                     if (status != SUCCESS) {
                         return status;
                     }
@@ -3200,14 +3196,16 @@ public class AudioManager {
 
                 for (int i = 0; i < newPatches.size(); i++) {
                     for (int j = 0; j < newPatches.get(i).sources().length; j++) {
-                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sources()[j], newPorts);
+                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sources()[j],
+                                                                   newPorts);
                         if (portCfg == null) {
                             return ERROR;
                         }
                         newPatches.get(i).sources()[j] = portCfg;
                     }
                     for (int j = 0; j < newPatches.get(i).sinks().length; j++) {
-                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sinks()[j], newPorts);
+                        AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sinks()[j],
+                                                                   newPorts);
                         if (portCfg == null) {
                             return ERROR;
                         }
@@ -3238,8 +3236,6 @@ public class AudioManager {
             // compare handles because the port returned by JNI is not of the correct
             // subclass
             if (ports.get(k).handle().equals(port.handle())) {
-                Log.i(TAG, "updatePortConfig match found for port handle: "+
-                            port.handle().id()+" port: "+ k);
                 port = ports.get(k);
                 break;
             }
