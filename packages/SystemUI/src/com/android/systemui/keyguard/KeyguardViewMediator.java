@@ -117,7 +117,7 @@ import static com.android.keyguard.analytics.KeyguardAnalytics.SessionTypeAdapte
 public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     final static boolean DEBUG = false;
-    private static final boolean ENABLE_ANALYTICS = Build.IS_DEBUGGABLE;
+    private static final boolean ENABLE_ANALYTICS = false;
     private final static boolean DBG_WAKE = false;
 
     private final static String TAG = "KeyguardViewMediator";
