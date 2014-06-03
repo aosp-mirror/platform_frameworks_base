@@ -56,7 +56,7 @@ public abstract class PanelView extends FrameLayout {
     private float mExpandedHeight = 0;
     private boolean mJustPeeked;
     private boolean mClosing;
-    private boolean mTracking;
+    protected boolean mTracking;
     private boolean mTouchSlopExceeded;
     private int mTrackingPointer;
     protected int mTouchSlop;

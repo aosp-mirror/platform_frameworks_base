@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -32,7 +31,6 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
@@ -50,7 +48,8 @@ public class NotificationPanelView extends PanelView implements
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardPageSwipeHelper.Callback {
 
-    private static float EXPANSION_RUBBER_BAND_EXTRA_FACTOR = 0.6f;
+    private static final float EXPANSION_RUBBER_BAND_EXTRA_FACTOR = 0.6f;
+    private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
     private KeyguardPageSwipeHelper mPageSwiper;
     private StatusBarHeaderView mHeader;
@@ -94,7 +93,9 @@ public class NotificationPanelView extends PanelView implements
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
     private boolean mHeaderHidden;
+    private boolean mUnlockIconActive;
     private int mNotificationsHeaderCollideDistance;
+    private int mUnlockMoveDistance;
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInterpolator;
@@ -171,6 +172,7 @@ public class NotificationPanelView extends PanelView implements
         mQsPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_peek_height);
         mNotificationsHeaderCollideDistance =
                 getResources().getDimensionPixelSize(R.dimen.header_notifications_collide_distance);
+        mUnlockMoveDistance = getResources().getDimensionPixelOffset(R.dimen.unlock_move_distance);
         mClockPositionAlgorithm.loadDimens(getResources());
     }
 
@@ -289,6 +291,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void resetViews() {
         mBlockTouches = false;
+        mUnlockIconActive = false;
         mPageSwiper.reset();
         closeQs();
     }
@@ -723,6 +726,30 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setStackHeight(expandedHeight);
         updateKeyguardHeaderVisibility();
+        updateUnlockIcon();
+    }
+
+    private void updateUnlockIcon() {
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
+            boolean active = getMaxPanelHeight() - getExpandedHeight() > mUnlockMoveDistance;
+            if (active && !mUnlockIconActive && mTracking) {
+                mKeyguardBottomArea.getLockIcon().animate()
+                        .alpha(1f)
+                        .scaleY(LOCK_ICON_ACTIVE_SCALE)
+                        .scaleX(LOCK_ICON_ACTIVE_SCALE)
+                        .setInterpolator(mFastOutLinearInterpolator)
+                        .setDuration(150);
+            } else if (!active && mUnlockIconActive && mTracking) {
+                mKeyguardBottomArea.getLockIcon().animate()
+                        .alpha(KeyguardPageSwipeHelper.SWIPE_RESTING_ALPHA_AMOUNT)
+                        .scaleY(1f)
+                        .scaleX(1f)
+                        .setInterpolator(mFastOutLinearInterpolator)
+                        .setDuration(150);
+            }
+            mUnlockIconActive = active;
+        }
     }
 
     /**
@@ -803,6 +830,15 @@ public class NotificationPanelView extends PanelView implements
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             mPageSwiper.showAllIcons(true);
+        }
+        if (!expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
+            mKeyguardBottomArea.getLockIcon().animate()
+                    .alpha(0f)
+                    .scaleX(2f)
+                    .scaleY(2f)
+                    .setInterpolator(mFastOutLinearInterpolator)
+                    .setDuration(100);
         }
     }
 
