@@ -178,6 +178,15 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromAsset(AssetManager mgr, String path) {
+        if (sFallbackFonts != null) {
+            FontFamily fontFamily = new FontFamily();
+            if (fontFamily.addFontFromAsset(mgr, path)) {
+                FontFamily[] families = { fontFamily };
+                return createFromFamiliesWithDefault(families);
+            } else {
+                return null;
+            }
+        }
         return new Typeface(nativeCreateFromAsset(mgr, path));
     }
 
@@ -188,7 +197,7 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromFile(File path) {
-        return new Typeface(nativeCreateFromFile(path.getAbsolutePath()));
+        return createFromFile(path.getAbsolutePath());
     }
 
     /**
@@ -198,6 +207,15 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromFile(String path) {
+        if (sFallbackFonts != null) {
+            FontFamily fontFamily = new FontFamily();
+            if (fontFamily.addFont(path)) {
+                FontFamily[] families = { fontFamily };
+                return createFromFamiliesWithDefault(families);
+            } else {
+                return null;
+            }
+        }
         return new Typeface(nativeCreateFromFile(path));
     }
 
@@ -247,7 +265,7 @@ public class Typeface {
         // TODO: expand to handle attributes like lang and variant
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (String fontFile : family.fontFiles) {
-            fontFamily.addFont(new File(fontFile));
+            fontFamily.addFont(fontFile);
         }
         return fontFamily;
     }

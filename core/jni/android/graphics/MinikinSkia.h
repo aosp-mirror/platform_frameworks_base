@@ -18,6 +18,7 @@ namespace android {
 
 class MinikinFontSkia : public MinikinFont {
 public:
+    // Note: this takes ownership of the reference (will unref on dtor)
     explicit MinikinFontSkia(SkTypeface *typeface);
 
     ~MinikinFontSkia();
