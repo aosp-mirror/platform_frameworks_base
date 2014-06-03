@@ -234,9 +234,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   </tr>
 </table>
 
-<h3>
-  Related Resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/essentials/corequalityguidelines/visualdesign"
@@ -509,9 +507,7 @@ data-maxresults="6">
   </tr>
 </table>
 
-<h3>
-  Related Resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/essentials/corequalityguidelines/functionality"
@@ -670,9 +666,7 @@ data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
   </tr>
 </table>
 
-<h3>
-  Related Resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/essentials/core/performance" data-sortorder="-timestamp"
@@ -819,9 +813,7 @@ data-cardsizes="6x3" data-maxresults="6">
   </tr>
 </table>
 
-<h3>
-  Related Resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/essentials/core/play" data-sortorder="-timestamp"
