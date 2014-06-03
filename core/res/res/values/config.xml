@@ -1607,4 +1607,8 @@
         -->
     </string-array>
 
+<!-- Flag indicating apps will skip sending hold request before merge. In this case
+         IMS service implementation will do both.i.e.hold followed by merge. -->
+    <bool name="skipHoldBeforeMerge">true</bool>
+
 </resources>

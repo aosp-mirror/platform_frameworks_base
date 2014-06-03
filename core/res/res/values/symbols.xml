@@ -1904,4 +1904,5 @@
   <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
   <java-symbol type="attr" name="seekBarPreferenceStyle" />
 
+  <java-symbol type="bool" name="skipHoldBeforeMerge" />
 </resources>
