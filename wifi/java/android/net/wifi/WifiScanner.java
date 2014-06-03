@@ -680,6 +680,42 @@ public class WifiScanner {
         }
     }
 
+    /** @hide */
+    public static class OperationResult implements Parcelable {
+        public int reason;
+        public String description;
+
+        public OperationResult(int reason, String description) {
+            this.reason = reason;
+            this.description = description;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(reason);
+            dest.writeString(description);
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<OperationResult> CREATOR =
+                new Creator<OperationResult>() {
+                    public OperationResult createFromParcel(Parcel in) {
+                        int reason = in.readInt();
+                        String description = in.readString();
+                        return new OperationResult(reason, description);
+                    }
+
+                    public OperationResult[] newArray(int size) {
+                        return new OperationResult[size];
+                    }
+                };
+    }
+
     private static class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
@@ -717,9 +753,11 @@ public class WifiScanner {
                 case CMD_OP_SUCCEEDED :
                     ((ActionListener) listener).onSuccess();
                     break;
-                case CMD_OP_FAILED :
-                    ((ActionListener) listener).onFailure(msg.arg1, (String)msg.obj);
-                    removeListener(msg.arg2);
+                case CMD_OP_FAILED : {
+                        OperationResult result = (OperationResult)msg.obj;
+                        ((ActionListener) listener).onFailure(result.reason, result.description);
+                        removeListener(msg.arg2);
+                    }
                     break;
                 case CMD_SCAN_RESULT :
                     ((ScanListener) listener).onResults(
