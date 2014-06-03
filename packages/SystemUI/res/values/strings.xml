@@ -558,10 +558,8 @@
     <!-- Zen mode: Short title. [CHAR LIMIT=40] -->
     <string name="zen_mode_title">Do not disturb</string>
 
-    <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=12] -->
-    <plurals name="keyguard_more_overflow_text">
-        <item quantity="other">%d more</item>
-    </plurals>
+    <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
+    <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
 
     <!-- An explanation for the visual speed bump in the notifications, which will appear when you click on it. [CHAR LIMIT=50] -->
     <string name="speed_bump_explanation">Less urgent notifications below</string>
