@@ -22,7 +22,6 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
-import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 
 /**
@@ -32,6 +31,13 @@ import com.android.internal.backup.IBackupTransport;
  * @hide
  */
 public class BackupTransport {
+    public static final int TRANSPORT_OK = 0;
+    public static final int TRANSPORT_ERROR = 1;
+    public static final int TRANSPORT_NOT_INITIALIZED = 2;
+    public static final int TRANSPORT_PACKAGE_REJECTED = 3;
+    public static final int AGENT_ERROR = 4;
+    public static final int AGENT_UNKNOWN = 5;
+
     IBackupTransport mBinderImpl = new TransportImpl();
     /** @hide */
     public IBinder getBinder() {
@@ -99,22 +105,7 @@ public class BackupTransport {
     }
 
     // ------------------------------------------------------------------------------------
-    // Key/value incremental backup support interfaces
-
-    /**
-     * Verify that this is a suitable time for a backup pass.  This should return zero
-     * if a backup is reasonable right now, some positive value otherwise.  This method
-     * will be called outside of the {@link #performBackup}/{@link #finishBackup} pair.
-     *
-     * <p>If this is not a suitable time for a backup, the transport should return a
-     * backoff delay, in milliseconds, after which the Backup Manager should try again.
-     *
-     * @return Zero if this is a suitable time for a backup pass, or a positive time delay
-     *   in milliseconds to suggest deferring the backup pass for a while.
-     */
-    public long requestBackupTime() {
-        return 0;
-    }
+    // Device-level operations common to both key/value and full-data storage
 
     /**
      * Initialize the server side storage for this device, erasing all stored data.
@@ -126,7 +117,49 @@ public class BackupTransport {
      *   {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure).
      */
     public int initializeDevice() {
-        return BackupConstants.TRANSPORT_ERROR;
+        return BackupTransport.TRANSPORT_ERROR;
+    }
+
+    /**
+     * Erase the given application's data from the backup destination.  This clears
+     * out the given package's data from the current backup set, making it as though
+     * the app had never yet been backed up.  After this is called, {@link finishBackup}
+     * must be called to ensure that the operation is recorded successfully.
+     *
+     * @return the same error codes as {@link #performBackup}.
+     */
+    public int clearBackupData(PackageInfo packageInfo) {
+        return BackupTransport.TRANSPORT_ERROR;
+    }
+
+    /**
+     * Finish sending application data to the backup destination.  This must be
+     * called after {@link #performBackup}, {@link #performFullBackup}, or {@link clearBackupData}
+     * to ensure that all data is sent and the operation properly finalized.  Only when this
+     * method returns true can a backup be assumed to have succeeded.
+     *
+     * @return the same error codes as {@link #performBackup} or {@link #performFullBackup}.
+     */
+    public int finishBackup() {
+        return BackupTransport.TRANSPORT_ERROR;
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Key/value incremental backup support interfaces
+
+    /**
+     * Verify that this is a suitable time for a key/value backup pass.  This should return zero
+     * if a backup is reasonable right now, some positive value otherwise.  This method
+     * will be called outside of the {@link #performBackup}/{@link #finishBackup} pair.
+     *
+     * <p>If this is not a suitable time for a backup, the transport should return a
+     * backoff delay, in milliseconds, after which the Backup Manager should try again.
+     *
+     * @return Zero if this is a suitable time for a backup pass, or a positive time delay
+     *   in milliseconds to suggest deferring the backup pass for a while.
+     */
+    public long requestBackupTime() {
+        return 0;
     }
 
     /**
@@ -143,37 +176,13 @@ public class BackupTransport {
      *   must be erased prior to the storage of the data provided here.  The purpose of this
      *   is to provide a guarantee that no stale data exists in the restore set when the
      *   device begins providing incremental backups.
-     * @return one of {@link BackupConstants#TRANSPORT_OK} (OK so far),
-     *  {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure), or
-     *  {@link BackupConstants#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
+     * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
+     *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), or
+     *  {@link BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
      *  become lost due to inactivity purge or some other reason and needs re-initializing)
      */
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd) {
-        return BackupConstants.TRANSPORT_ERROR;
-    }
-
-    /**
-     * Erase the give application's data from the backup destination.  This clears
-     * out the given package's data from the current backup set, making it as though
-     * the app had never yet been backed up.  After this is called, {@link finishBackup}
-     * must be called to ensure that the operation is recorded successfully.
-     *
-     * @return the same error codes as {@link #performBackup}.
-     */
-    public int clearBackupData(PackageInfo packageInfo) {
-        return BackupConstants.TRANSPORT_ERROR;
-    }
-
-    /**
-     * Finish sending application data to the backup destination.  This must be
-     * called after {@link #performBackup} or {@link clearBackupData} to ensure that
-     * all data is sent.  Only when this method returns true can a backup be assumed
-     * to have succeeded.
-     *
-     * @return the same error codes as {@link #performBackup}.
-     */
-    public int finishBackup() {
-        return BackupConstants.TRANSPORT_ERROR;
+        return BackupTransport.TRANSPORT_ERROR;
     }
 
     // ------------------------------------------------------------------------------------
@@ -210,12 +219,12 @@ public class BackupTransport {
      *   or {@link #getCurrentRestoreSet}.
      * @param packages List of applications to restore (if data is available).
      *   Application data will be restored in the order given.
-     * @return One of {@link BackupConstants#TRANSPORT_OK} (OK so far, call
-     *   {@link #nextRestorePackage}) or {@link BackupConstants#TRANSPORT_ERROR}
+     * @return One of {@link BackupTransport#TRANSPORT_OK} (OK so far, call
+     *   {@link #nextRestorePackage}) or {@link BackupTransport#TRANSPORT_ERROR}
      *   (an error occurred, the restore should be aborted and rescheduled).
      */
     public int startRestore(long token, PackageInfo[] packages) {
-        return BackupConstants.TRANSPORT_ERROR;
+        return BackupTransport.TRANSPORT_ERROR;
     }
 
     /**
@@ -235,7 +244,7 @@ public class BackupTransport {
      * @return the same error codes as {@link #startRestore}.
      */
     public int getRestoreData(ParcelFileDescriptor outFd) {
-        return BackupConstants.TRANSPORT_ERROR;
+        return BackupTransport.TRANSPORT_ERROR;
     }
 
     /**
@@ -245,6 +254,78 @@ public class BackupTransport {
     public void finishRestore() {
         throw new UnsupportedOperationException(
                 "Transport finishRestore() not implemented");
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Full backup interfaces
+
+    /**
+     * Verify that this is a suitable time for a full-data backup pass.  This should return zero
+     * if a backup is reasonable right now, some positive value otherwise.  This method
+     * will be called outside of the {@link #performFullBackup}/{@link #finishBackup} pair.
+     *
+     * <p>If this is not a suitable time for a backup, the transport should return a
+     * backoff delay, in milliseconds, after which the Backup Manager should try again.
+     *
+     * @return Zero if this is a suitable time for a backup pass, or a positive time delay
+     *   in milliseconds to suggest deferring the backup pass for a while.
+     *
+     * @see #requestBackupTime()
+     */
+    public long requestFullBackupTime() {
+        return 0;
+    }
+
+    /**
+     * Begin the process of sending an application's full-data archive to the backend.
+     * The description of the package whose data will be delivered is provided, as well as
+     * the socket file descriptor on which the transport will receive the data itself.
+     *
+     * <p>If the package is not eligible for backup, the transport should return
+     * {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED}.  In this case the system will
+     * simply proceed with the next candidate if any, or finish the full backup operation
+     * if all apps have been processed.
+     *
+     * <p>After the transport returns {@link BackupTransport#TRANSPORT_OK} from this
+     * method, the OS will proceed to call {@link #sendBackupData()} one or more times
+     * to deliver the application's data as a streamed tarball.  The transport should not
+     * read() from the socket except as instructed to via the {@link #sendBackupData(int)}
+     * method.
+     *
+     * <p>After all data has been delivered to the transport, the system will call
+     * {@link #finishBackup()}.  At this point the transport should commit the data to
+     * its datastore, if appropriate, and close the socket that had been provided in
+     * {@link #performFullBackup(PackageInfo, ParcelFileDescriptor)}.
+     *
+     * @param targetPackage The package whose data is to follow.
+     * @param socket The socket file descriptor through which the data will be provided.
+     *    If the transport returns {@link #TRANSPORT_PACKAGE_REJECTED} here, it must still
+     *    close this file descriptor now; otherwise it should be cached for use during
+     *    succeeding calls to {@link #sendBackupData(int)}, and closed in response to
+     *    {@link #finishBackup()}.
+     * @return TRANSPORT_PACKAGE_REJECTED to indicate that the stated application is not
+     *    to be backed up; TRANSPORT_OK to indicate that the OS may proceed with delivering
+     *    backup data; TRANSPORT_ERROR to indicate a fatal error condition that precludes
+     *    performing a backup at this time.
+     */
+    public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) {
+        return BackupTransport.TRANSPORT_PACKAGE_REJECTED;
+    }
+
+    /**
+     * Tells the transport to read {@code numBytes} bytes of data from the socket file
+     * descriptor provided in the {@link #performFullBackup(PackageInfo, ParcelFileDescriptor)}
+     * call, and deliver those bytes to the datastore.
+     *
+     * @param numBytes The number of bytes of tarball data available to be read from the
+     *    socket.
+     * @return TRANSPORT_OK on successful processing of the data; TRANSPORT_ERROR to
+     *    indicate a fatal error situation.  If an error is returned, the system will
+     *    call finishBackup() and stop attempting backups until after a backoff and retry
+     *    interval.
+     */
+    public int sendBackupData(int numBytes) {
+        return BackupTransport.TRANSPORT_ERROR;
     }
 
     /**

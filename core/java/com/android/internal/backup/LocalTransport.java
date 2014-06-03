@@ -104,7 +104,7 @@ public class LocalTransport extends BackupTransport {
     public int initializeDevice() {
         if (DEBUG) Log.v(TAG, "wiping all data");
         deleteContents(mCurrentSetDir);
-        return BackupConstants.TRANSPORT_OK;
+        return BackupTransport.TRANSPORT_OK;
     }
 
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
@@ -166,7 +166,7 @@ public class LocalTransport extends BackupTransport {
                         entity.write(buf, 0, dataSize);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
-                        return BackupConstants.TRANSPORT_ERROR;
+                        return BackupTransport.TRANSPORT_ERROR;
                     } finally {
                         entity.close();
                     }
@@ -174,11 +174,11 @@ public class LocalTransport extends BackupTransport {
                     entityFile.delete();
                 }
             }
-            return BackupConstants.TRANSPORT_OK;
+            return BackupTransport.TRANSPORT_OK;
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
             Log.v(TAG, "Exception reading backup input:", e);
-            return BackupConstants.TRANSPORT_ERROR;
+            return BackupTransport.TRANSPORT_ERROR;
         }
     }
 
@@ -208,12 +208,12 @@ public class LocalTransport extends BackupTransport {
             }
             packageDir.delete();
         }
-        return BackupConstants.TRANSPORT_OK;
+        return BackupTransport.TRANSPORT_OK;
     }
 
     public int finishBackup() {
         if (DEBUG) Log.v(TAG, "finishBackup()");
-        return BackupConstants.TRANSPORT_OK;
+        return BackupTransport.TRANSPORT_OK;
     }
 
     // Restore handling
@@ -249,7 +249,7 @@ public class LocalTransport extends BackupTransport {
         mRestorePackage = -1;
         mRestoreToken = token;
         mRestoreDataDir = new File(mDataDir, Long.toString(token));
-        return BackupConstants.TRANSPORT_OK;
+        return BackupTransport.TRANSPORT_OK;
     }
 
     public String nextRestorePackage() {
@@ -281,7 +281,7 @@ public class LocalTransport extends BackupTransport {
         ArrayList<DecodedFilename> blobs = contentsByKey(packageDir);
         if (blobs == null) {  // nextRestorePackage() ensures the dir exists, so this is an error
             Log.e(TAG, "No keys for package: " + packageDir);
-            return BackupConstants.TRANSPORT_ERROR;
+            return BackupTransport.TRANSPORT_ERROR;
         }
 
         // We expect at least some data if the directory exists in the first place
@@ -302,10 +302,10 @@ public class LocalTransport extends BackupTransport {
                     in.close();
                 }
             }
-            return BackupConstants.TRANSPORT_OK;
+            return BackupTransport.TRANSPORT_OK;
         } catch (IOException e) {
             Log.e(TAG, "Unable to read backup records", e);
-            return BackupConstants.TRANSPORT_ERROR;
+            return BackupTransport.TRANSPORT_ERROR;
         }
     }
 
