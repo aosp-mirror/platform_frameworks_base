@@ -45,7 +45,7 @@ import java.util.List;
  */
 public final class TvContract {
     /** The authority for the TV provider. */
-    public static final String AUTHORITY = "com.android.tv";
+    public static final String AUTHORITY = "android.media.tv";
 
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
@@ -243,12 +243,10 @@ public final class TvContract {
                 + PATH_CHANNEL);
 
         /** The MIME type of a directory of TV channels. */
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/vnd.com.android.tv.channels";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/channel";
 
         /** The MIME type of a single TV channel. */
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/vnd.com.android.tv.channels";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
 
         /** A generic channel type. */
         public static final int TYPE_OTHER = 0x0;
@@ -319,11 +317,11 @@ public final class TvContract {
         /** A generic service type. */
         public static final int SERVICE_TYPE_OTHER = 0x0;
 
-        /** The service type for regular TV channels. */
-        public static final int SERVICE_TYPE_TV = 0x1;
+        /** The service type for regular TV channels that have both audio and video. */
+        public static final int SERVICE_TYPE_AUDIO_VIDEO = 0x1;
 
-        /** The service type for radio channels. */
-        public static final int SERVICE_TYPE_RADIO = 0x2;
+        /** The service type for radio channels that have audio only. */
+        public static final int SERVICE_TYPE_AUDIO = 0x2;
 
         /**
          * The name of the {@link TvInputService} subclass that provides this TV channel. This
@@ -363,7 +361,7 @@ public final class TvContract {
          * a radio-like channel. Use the same coding for {@code service_type} in the underlying
          * broadcast standard if it is defined there (e.g. ATSC A/53, ETSI EN 300 468 and ARIB
          * STD-B10). Otherwise use one of the followings: {@link #SERVICE_TYPE_OTHER},
-         * {@link #SERVICE_TYPE_TV}, {@link #SERVICE_TYPE_RADIO}
+         * {@link #SERVICE_TYPE_AUDIO_VIDEO}, {@link #SERVICE_TYPE_AUDIO}
          * </p><p>
          * This is a required field.
          * </p><p>
@@ -376,7 +374,7 @@ public final class TvContract {
          * The original network ID of this TV channel.
          * <p>
          * This is used to identify the originating delivery system, if applicable. Use the same
-         * coding for {@code origianal_network_id} in the underlying broadcast standard if it is
+         * coding for {@code original_network_id} in the underlying broadcast standard if it is
          * defined there (e.g. ETSI EN 300 468/TR 101 211 and ARIB STD-B10). If channels cannot be
          * globally identified by 2-tuple {{@link #COLUMN_TRANSPORT_STREAM_ID},
          * {@link #COLUMN_SERVICE_ID}}, one must carefully assign a value to this field to form a
@@ -496,17 +494,20 @@ public final class TvContract {
          * </p><p>
          * Type: INTEGER (boolean)
          * </p>
+         * @hide
          */
         public static final String COLUMN_LOCKED = "locked";
 
         /**
-         * Generic data used by individual TV input services.
+         * Internal data used by individual TV input services.
          * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
          * Type: BLOB
          * </p>
          */
-        public static final String COLUMN_DATA = "data";
-
+        public static final String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
 
         /**
          * The version number of this row entry used by TV input services.
@@ -532,12 +533,10 @@ public final class TvContract {
                 + PATH_PROGRAM);
 
         /** The MIME type of a directory of TV programs. */
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/vnd.com.android.tv.programs";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/program";
 
         /** The MIME type of a single TV program. */
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/vnd.com.android.tv.programs";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
 
         /**
          * The ID of the TV channel that contains this TV program.
@@ -578,44 +577,42 @@ public final class TvContract {
          * <p>
          * Use the same language appeared in the underlying broadcast standard, if applicable. (For
          * example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
-         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, use one of the
-         * following genres:
-         * <ul>
-         *     <li>Family/Kids</li>
-         *     <li>Sports</li>
-         *     <li>Shopping</li>
-         *     <li>Movies</li>
-         *     <li>Comedy</li>
-         *     <li>Travel</li>
-         *     <li>Drama</li>
-         *     <li>Education</li>
-         *     <li>Animal/Wildlife</li>
-         *     <li>News</li>
-         *     <li>Gaming</li>
-         *     <li>Others</li>
-         * </ul>
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty.
          * </p><p>
          * Type: TEXT
          * </p>
          */
-        public static final String COLUMN_GENRE = "genre";
+        public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
 
         /**
-         * The description of this TV program that is displayed to the user by default.
+         * The comma-separated canonical genre string of this TV program.
          * <p>
-         * The maximum length of this field is 256 characters.
+         * Canonical genres are defined in {@link Genres}. Use {@link Genres#encode Genres.encode()}
+         * to create a text that can be stored in this column. Use {@link Genres#decode
+         * Genres.decode()} to get the canonical genre strings from the text stored in this column.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         * @see Genres
+         */
+        public static final String COLUMN_CANONICAL_GENRE = "canonical_genre";
+
+        /**
+         * The short description of this TV program that is displayed to the user by default.
+         * <p>
+         * It is recommended to limit the length of the descriptions to 256 characters.
          * </p><p>
          * Type: TEXT
          * </p>
          */
-        public static final String COLUMN_DESCRIPTION = "description";
+        public static final String COLUMN_SHORT_DESCRIPTION = "short_description";
 
         /**
          * The detailed, lengthy description of this TV program that is displayed only when the user
          * wants to see more information.
          * <p>
-         * TV input services should leave this field empty if they have no additional
-         * details beyond {@link #COLUMN_DESCRIPTION}.
+         * TV input services should leave this field empty if they have no additional details beyond
+         * {@link #COLUMN_SHORT_DESCRIPTION}.
          * </p><p>
          * Type: TEXT
          * </p>
@@ -634,12 +631,15 @@ public final class TvContract {
         public static final String COLUMN_AUDIO_LANGUAGE = "audio_language";
 
         /**
-         * Generic data used by TV input services.
+         * Internal data used by individual TV input services.
          * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
          * Type: BLOB
          * </p>
          */
-        public static final String COLUMN_DATA = "data";
+        public static final String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
 
         /**
          * The version number of this row entry used by TV input services.
@@ -655,6 +655,72 @@ public final class TvContract {
         public static final String COLUMN_VERSION_NUMBER = "version_number";
 
         private Programs() {}
+
+        /** Canonical genres for TV programs. */
+        public static final class Genres {
+            /** The genre for Family/Kids. */
+            public static final String FAMILY_KIDS = "Family/Kids";
+
+            /** The genre for Sports. */
+            public static final String SPORTS = "Sports";
+
+            /** The genre for Shopping. */
+            public static final String SHOPPING = "Shopping";
+
+            /** The genre for Movies. */
+            public static final String MOVIES = "Movies";
+
+            /** The genre for Comedy. */
+            public static final String COMEDY = "Comedy";
+
+            /** The genre for Travel. */
+            public static final String TRAVEL = "Travel";
+
+            /** The genre for Drama. */
+            public static final String DRAMA = "Drama";
+
+            /** The genre for Education. */
+            public static final String EDUCATION = "Education";
+
+            /** The genre for Animal/Wildlife. */
+            public static final String ANIMAL_WILDLIFE = "Animal/Wildlife";
+
+            /** The genre for News. */
+            public static final String NEWS = "News";
+
+            /** The genre for Gaming. */
+            public static final String GAMING = "Gaming";
+
+            private Genres() {}
+
+            /**
+             * Encodes canonical genre strings to a text that can be put into the database.
+             *
+             * @param genres Canonical genre strings. Use the strings defined in this class.
+             * @return an encoded genre string that can be inserted into the
+             *         {@link #COLUMN_CANONICAL_GENRE} column.
+             */
+            public static String encode(String... genres) {
+                StringBuilder sb = new StringBuilder();
+                String separator = "";
+                for (String genre : genres) {
+                    sb.append(separator).append(genre);
+                    separator = ",";
+                }
+                return sb.toString();
+            }
+
+            /**
+             * Decodes the canonical genre strings from the text stored in the database.
+             *
+             * @param genres The encoded genre string retrieved from the
+             *            {@link #COLUMN_CANONICAL_GENRE} column.
+             * @return canonical genre strings.
+             */
+            public static String[] decode(String genres) {
+                return genres.split("\\s*,\\s*");
+            }
+        }
     }
 
     /**
@@ -670,12 +736,10 @@ public final class TvContract {
                 Uri.parse("content://" + AUTHORITY + "/watched_program");
 
         /** The MIME type of a directory of watched programs. */
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/vnd.com.android.tv.watched_programs";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/watched_program";
 
         /** The MIME type of a single item in this table. */
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/vnd.com.android.tv.watched_programs";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/watched_program";
 
         /**
          * The UTC time that the user started watching this TV program, in milliseconds since the

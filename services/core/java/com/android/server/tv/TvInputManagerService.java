@@ -1148,7 +1148,7 @@ public final class TvInputManagerService extends SystemService {
                     TvContract.Programs.COLUMN_TITLE,
                     TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS,
                     TvContract.Programs.COLUMN_END_TIME_UTC_MILLIS,
-                    TvContract.Programs.COLUMN_DESCRIPTION
+                    TvContract.Programs.COLUMN_SHORT_DESCRIPTION
             };
             String selection = TvContract.Programs.COLUMN_CHANNEL_ID + "=? AND "
                     + TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS + "<=? AND "
