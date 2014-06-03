@@ -170,56 +170,33 @@ public:
         TextLayoutEngine::getInstance().purgeCaches();
     }
 
-    static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
+    static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         bool result = canvas->getDevice()->accessBitmap(false).isOpaque();
         return result ? JNI_TRUE : JNI_FALSE;
     }
 
-    static jint getWidth(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
+    static jint getWidth(JNIEnv*, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         int width = canvas->getDevice()->accessBitmap(false).width();
         return static_cast<jint>(width);
     }
 
-    static jint getHeight(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
+    static jint getHeight(JNIEnv*, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         int height = canvas->getDevice()->accessBitmap(false).height();
         return static_cast<jint>(height);
     }
 
-    static jint saveAll(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        int result = GraphicsJNI::getNativeCanvas(env, jcanvas)->save();
-        return static_cast<jint>(result);
-    }
-
-    static jint save(JNIEnv* env, jobject jcanvas, jint flagsHandle) {
-        SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        int result = GraphicsJNI::getNativeCanvas(env, jcanvas)->save(flags);
-        return static_cast<jint>(result);
-    }
-
-    static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle, jobject bounds,
-                         jlong paintHandle, jint flags) {
+    static jint save(JNIEnv*, jobject, jlong canvasHandle, jint flagsHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
-        SkRect* bounds_ = NULL;
-        SkRect  storage;
-        if (bounds != NULL) {
-            GraphicsJNI::jrectf_to_rect(env, bounds, &storage);
-            bounds_ = &storage;
-        }
-        return canvas->saveLayer(bounds_, paint, static_cast<SkCanvas::SaveFlags>(flags));
+        SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+        return static_cast<jint>(canvas->save(flags));
     }
 
-    static jint saveLayer4F(JNIEnv* env, jobject, jlong canvasHandle,
-                           jfloat l, jfloat t, jfloat r, jfloat b,
-                           jlong paintHandle, jint flags) {
+    static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle,
+                          jfloat l, jfloat t, jfloat r, jfloat b,
+                          jlong paintHandle, jint flags) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
         SkRect bounds;
@@ -230,22 +207,8 @@ public:
     }
 
     static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle,
-                              jobject bounds, jint alpha, jint flags) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        SkRect* bounds_ = NULL;
-        SkRect  storage;
-        if (bounds != NULL) {
-            GraphicsJNI::jrectf_to_rect(env, bounds, &storage);
-            bounds_ = &storage;
-        }
-        int result = canvas->saveLayerAlpha(bounds_, alpha,
-                                      static_cast<SkCanvas::SaveFlags>(flags));
-        return static_cast<jint>(result);
-    }
-
-    static jint saveLayerAlpha4F(JNIEnv* env, jobject, jlong canvasHandle,
-                                jfloat l, jfloat t, jfloat r, jfloat b,
-                                jint alpha, jint flags) {
+                               jfloat l, jfloat t, jfloat r, jfloat b,
+                               jint alpha, jint flags) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRect  bounds;
         bounds.set(l, t, r, b);
@@ -254,9 +217,8 @@ public:
         return static_cast<jint>(result);
     }
 
-    static void restore(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
+    static void restore(JNIEnv* env, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
             doThrowISE(env, "Underflow in restore");
             return;
@@ -264,15 +226,14 @@ public:
         canvas->restore();
     }
 
-    static jint getSaveCount(JNIEnv* env, jobject jcanvas) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        int result = GraphicsJNI::getNativeCanvas(env, jcanvas)->getSaveCount();
-        return static_cast<jint>(result);
+    static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+        return static_cast<jint>(canvas->getSaveCount());
     }
 
-    static void restoreToCount(JNIEnv* env, jobject jcanvas, jint restoreCount) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
+    static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle,
+                               jint restoreCount) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
         if (restoreCount < 1) {
             doThrowIAE(env, "Underflow in restoreToCount");
             return;
@@ -280,24 +241,24 @@ public:
         canvas->restoreToCount(restoreCount);
     }
 
-    static void translate(JNIEnv* env, jobject jcanvas, jfloat dx, jfloat dy) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->translate(dx, dy);
+    static void translate(JNIEnv*, jobject, jlong canvasHandle,
+                          jfloat dx, jfloat dy) {
+        getNativeCanvas(canvasHandle)->translate(dx, dy);
     }
 
-    static void scale__FF(JNIEnv* env, jobject jcanvas, jfloat sx, jfloat sy) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->scale(sx, sy);
+    static void scale__FF(JNIEnv*, jobject, jlong canvasHandle,
+                          jfloat sx, jfloat sy) {
+        getNativeCanvas(canvasHandle)->scale(sx, sy);
     }
 
-    static void rotate__F(JNIEnv* env, jobject jcanvas, jfloat degrees) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->rotate(degrees);
+    static void rotate__F(JNIEnv*, jobject, jlong canvasHandle,
+                          jfloat degrees) {
+        getNativeCanvas(canvasHandle)->rotate(degrees);
     }
 
-    static void skew__FF(JNIEnv* env, jobject jcanvas, jfloat sx, jfloat sy) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        (void)GraphicsJNI::getNativeCanvas(env, jcanvas)->skew(sx, sy);
+    static void skew__FF(JNIEnv*, jobject, jlong canvasHandle,
+                         jfloat sx, jfloat sy) {
+        getNativeCanvas(canvasHandle)->skew(sx, sy);
     }
 
     static void concat(JNIEnv* env, jobject, jlong canvasHandle,
@@ -318,54 +279,14 @@ public:
         }
     }
 
-    static jboolean clipRect_FFFF(JNIEnv* env, jobject jcanvas, jfloat left,
-                                  jfloat top, jfloat right, jfloat bottom) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
+    static jboolean clipRect(JNIEnv*, jobject, jlong canvasHandle,
+                                  jfloat left, jfloat top, jfloat right,
+                                  jfloat bottom, jint op) {
         SkRect  r;
         r.set(left, top, right, bottom);
-        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        c->clipRect(r);
+        SkCanvas* c = getNativeCanvas(canvasHandle);
+        c->clipRect(r, static_cast<SkRegion::Op>(op));
         return hasNonEmptyClip(*c);
-    }
-
-    static jboolean clipRect_IIII(JNIEnv* env, jobject jcanvas, jint left,
-                                  jint top, jint right, jint bottom) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        SkRect  r;
-        r.set(SkIntToScalar(left), SkIntToScalar(top),
-              SkIntToScalar(right), SkIntToScalar(bottom));
-        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        c->clipRect(r);
-        return hasNonEmptyClip(*c);
-    }
-
-    static jboolean clipRect_RectF(JNIEnv* env, jobject jcanvas, jobject rectf) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        NPE_CHECK_RETURN_ZERO(env, rectf);
-        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        SkRect tmp;
-        c->clipRect(*GraphicsJNI::jrectf_to_rect(env, rectf, &tmp));
-        return hasNonEmptyClip(*c);
-    }
-
-    static jboolean clipRect_Rect(JNIEnv* env, jobject jcanvas, jobject rect) {
-        NPE_CHECK_RETURN_ZERO(env, jcanvas);
-        NPE_CHECK_RETURN_ZERO(env, rect);
-        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        SkRect tmp;
-        c->clipRect(*GraphicsJNI::jrect_to_rect(env, rect, &tmp));
-        return hasNonEmptyClip(*c);
-
-    }
-
-    static jboolean clipRect(JNIEnv* env, jobject, jlong canvasHandle,
-                             jfloat left, jfloat top, jfloat right, jfloat bottom,
-                             jint op) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        SkRect rect;
-        rect.set(left, top, right, bottom);
-        canvas->clipRect(rect, static_cast<SkRegion::Op>(op));
-        return hasNonEmptyClip(*canvas);
     }
 
     static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle,
@@ -388,15 +309,6 @@ public:
                               jlong filterHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         canvas->setDrawFilter(reinterpret_cast<SkDrawFilter*>(filterHandle));
-    }
-
-    static jboolean quickReject__RectF(JNIEnv* env, jobject, jlong canvasHandle,
-                                        jobject rect) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        SkRect rect_;
-        GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        bool result = canvas->quickReject(rect_);
-        return result ? JNI_TRUE : JNI_FALSE;
     }
 
     static jboolean quickReject__Path(JNIEnv* env, jobject, jlong canvasHandle,
@@ -448,15 +360,13 @@ public:
         canvas->drawPaint(*paint);
     }
 
-    static void doPoints(JNIEnv* env, jobject jcanvas, jfloatArray jptsArray,
-                         jint offset, jint count, jobject jpaint,
-                         jint modeHandle) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
+    static void doPoints(JNIEnv* env, jlong canvasHandle,
+                         jfloatArray jptsArray, jint offset, jint count,
+                         jlong paintHandle, jint modeHandle) {
         NPE_CHECK_RETURN_VOID(env, jptsArray);
-        NPE_CHECK_RETURN_VOID(env, jpaint);
         SkCanvas::PointMode mode = static_cast<SkCanvas::PointMode>(modeHandle);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        const SkPaint& paint = *GraphicsJNI::getNativePaint(env, jpaint);
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+        const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
 
         AutoJavaFloatArray autoPts(env, jptsArray);
         float* floats = autoPts.ptr();
@@ -476,29 +386,28 @@ public:
             pts[i].set(src[0], src[1]);
             src += 2;
         }
-        canvas->drawPoints(mode, count, pts, paint);
+        canvas->drawPoints(mode, count, pts, *paint);
     }
 
-    static void drawPoints(JNIEnv* env, jobject jcanvas, jfloatArray jptsArray,
-                           jint offset, jint count, jobject jpaint) {
-        doPoints(env, jcanvas, jptsArray, offset, count, jpaint,
+    static void drawPoints(JNIEnv* env, jobject, jlong canvasHandle,
+                           jfloatArray jptsArray, jint offset,
+                           jint count, jlong paintHandle) {
+        doPoints(env, canvasHandle, jptsArray, offset, count, paintHandle,
                  SkCanvas::kPoints_PointMode);
     }
 
-    static void drawLines(JNIEnv* env, jobject jcanvas, jfloatArray jptsArray,
-                           jint offset, jint count, jobject jpaint) {
-        doPoints(env, jcanvas, jptsArray, offset, count, jpaint,
+    static void drawLines(JNIEnv* env, jobject, jlong canvasHandle,
+                          jfloatArray jptsArray, jint offset, jint count,
+                          jlong paintHandle) {
+        doPoints(env, canvasHandle, jptsArray, offset, count, paintHandle,
                  SkCanvas::kLines_PointMode);
     }
 
-    static void drawPoint(JNIEnv* env, jobject jcanvas, jfloat x, jfloat y,
-                          jobject jpaint) {
-        NPE_CHECK_RETURN_VOID(env, jcanvas);
-        NPE_CHECK_RETURN_VOID(env, jpaint);
-        SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
-        const SkPaint& paint = *GraphicsJNI::getNativePaint(env, jpaint);
-
-        canvas->drawPoint(x, y, paint);
+    static void drawPoint(JNIEnv*, jobject, jlong canvasHandle, jfloat x, jfloat y,
+                          jlong paintHandle) {
+        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+        const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        canvas->drawPoint(x, y, *paint);
     }
 
     static void drawLine__FFFFPaint(JNIEnv* env, jobject, jlong canvasHandle,
@@ -507,15 +416,6 @@ public:
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         canvas->drawLine(startX, startY, stopX, stopY, *paint);
-    }
-
-    static void drawRect__RectFPaint(JNIEnv* env, jobject, jlong canvasHandle,
-                                     jobject rect, jlong paintHandle) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkRect rect_;
-        GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        canvas->drawRect(rect_, *paint);
     }
 
     static void drawRect__FFFFPaint(JNIEnv* env, jobject, jlong canvasHandle,
@@ -1153,33 +1053,21 @@ static JNINativeMethod gCanvasMethods[] = {
     {"initRaster", "(J)J", (void*) SkCanvasGlue::initRaster},
     {"initCanvas", "(J)J", (void*) SkCanvasGlue::initCanvas},
     {"native_setBitmap", "(JJZ)V", (void*) SkCanvasGlue::setBitmap},
-    {"isOpaque","()Z", (void*) SkCanvasGlue::isOpaque},
-    {"getWidth","()I", (void*) SkCanvasGlue::getWidth},
-    {"getHeight","()I", (void*) SkCanvasGlue::getHeight},
-    {"save","()I", (void*) SkCanvasGlue::saveAll},
-    {"save","(I)I", (void*) SkCanvasGlue::save},
-    {"native_saveLayer","(JLandroid/graphics/RectF;JI)I",
-        (void*) SkCanvasGlue::saveLayer},
-    {"native_saveLayer","(JFFFFJI)I", (void*) SkCanvasGlue::saveLayer4F},
-    {"native_saveLayerAlpha","(JLandroid/graphics/RectF;II)I",
-        (void*) SkCanvasGlue::saveLayerAlpha},
-    {"native_saveLayerAlpha","(JFFFFII)I",
-        (void*) SkCanvasGlue::saveLayerAlpha4F},
-    {"restore","()V", (void*) SkCanvasGlue::restore},
-    {"getSaveCount","()I", (void*) SkCanvasGlue::getSaveCount},
-    {"restoreToCount","(I)V", (void*) SkCanvasGlue::restoreToCount},
-    {"translate","(FF)V", (void*) SkCanvasGlue::translate},
-    {"scale","(FF)V", (void*) SkCanvasGlue::scale__FF},
-    {"rotate","(F)V", (void*) SkCanvasGlue::rotate__F},
-    {"skew","(FF)V", (void*) SkCanvasGlue::skew__FF},
+    {"native_isOpaque","(J)Z", (void*) SkCanvasGlue::isOpaque},
+    {"native_getWidth","(J)I", (void*) SkCanvasGlue::getWidth},
+    {"native_getHeight","(J)I", (void*) SkCanvasGlue::getHeight},
+    {"native_save","(JI)I", (void*) SkCanvasGlue::save},
+    {"native_saveLayer","(JFFFFJI)I", (void*) SkCanvasGlue::saveLayer},
+    {"native_saveLayerAlpha","(JFFFFII)I", (void*) SkCanvasGlue::saveLayerAlpha},
+    {"native_restore","(J)V", (void*) SkCanvasGlue::restore},
+    {"native_getSaveCount","(J)I", (void*) SkCanvasGlue::getSaveCount},
+    {"native_restoreToCount","(JI)V", (void*) SkCanvasGlue::restoreToCount},
+    {"native_translate","(JFF)V", (void*) SkCanvasGlue::translate},
+    {"native_scale","(JFF)V", (void*) SkCanvasGlue::scale__FF},
+    {"native_rotate","(JF)V", (void*) SkCanvasGlue::rotate__F},
+    {"native_skew","(JFF)V", (void*) SkCanvasGlue::skew__FF},
     {"native_concat","(JJ)V", (void*) SkCanvasGlue::concat},
     {"native_setMatrix","(JJ)V", (void*) SkCanvasGlue::setMatrix},
-    {"clipRect","(FFFF)Z", (void*) SkCanvasGlue::clipRect_FFFF},
-    {"clipRect","(IIII)Z", (void*) SkCanvasGlue::clipRect_IIII},
-    {"clipRect","(Landroid/graphics/RectF;)Z",
-        (void*) SkCanvasGlue::clipRect_RectF},
-    {"clipRect","(Landroid/graphics/Rect;)Z",
-        (void*) SkCanvasGlue::clipRect_Rect},
     {"native_clipRect","(JFFFFI)Z", (void*) SkCanvasGlue::clipRect},
     {"native_clipPath","(JJI)Z", (void*) SkCanvasGlue::clipPath},
     {"native_clipRegion","(JJI)Z", (void*) SkCanvasGlue::clipRegion},
@@ -1187,8 +1075,6 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_getClipBounds","(JLandroid/graphics/Rect;)Z",
         (void*) SkCanvasGlue::getClipBounds},
     {"native_getCTM", "(JJ)V", (void*)SkCanvasGlue::getCTM},
-    {"native_quickReject","(JLandroid/graphics/RectF;)Z",
-        (void*) SkCanvasGlue::quickReject__RectF},
     {"native_quickReject","(JJ)Z", (void*) SkCanvasGlue::quickReject__Path},
     {"native_quickReject","(JFFFF)Z", (void*)SkCanvasGlue::quickReject__FFFF},
     {"native_drawRGB","(JIII)V", (void*) SkCanvasGlue::drawRGB},
@@ -1196,15 +1082,10 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_drawColor","(JI)V", (void*) SkCanvasGlue::drawColor__I},
     {"native_drawColor","(JII)V", (void*) SkCanvasGlue::drawColor__II},
     {"native_drawPaint","(JJ)V", (void*) SkCanvasGlue::drawPaint},
-    {"drawPoint", "(FFLandroid/graphics/Paint;)V",
-    (void*) SkCanvasGlue::drawPoint},
-    {"drawPoints", "([FIILandroid/graphics/Paint;)V",
-        (void*) SkCanvasGlue::drawPoints},
-    {"drawLines", "([FIILandroid/graphics/Paint;)V",
-        (void*) SkCanvasGlue::drawLines},
+    {"native_drawPoint", "(JFFJ)V", (void*) SkCanvasGlue::drawPoint},
+    {"native_drawPoints", "(J[FIIJ)V", (void*) SkCanvasGlue::drawPoints},
+    {"native_drawLines", "(J[FIIJ)V", (void*) SkCanvasGlue::drawLines},
     {"native_drawLine","(JFFFFJ)V", (void*) SkCanvasGlue::drawLine__FFFFPaint},
-    {"native_drawRect","(JLandroid/graphics/RectF;J)V",
-        (void*) SkCanvasGlue::drawRect__RectFPaint},
     {"native_drawRect","(JFFFFJ)V", (void*) SkCanvasGlue::drawRect__FFFFPaint},
     {"native_drawOval","(JLandroid/graphics/RectF;J)V",
         (void*) SkCanvasGlue::drawOval},
