@@ -554,11 +554,11 @@ please see styles_device_defaults.xml.
         <item name="disabledColor">@color/bright_foreground_disabled_quantum_dark</item>
         <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
         <item name="headerUnselectedTextColor">?attr/textColorPrimary</item>
-        <item name="headerBackgroundColor">?attr/colorBackground</item>
+        <item name="headerBackgroundColor">@color/transparent</item>
         <item name="numbersTextColor">?attr/textColorSecondary</item>
-        <item name="numbersBackgroundColor">?attr/colorControlNormal</item>
+        <item name="numbersBackgroundColor">@color/transparent</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
-        <item name="amPmUnselectedBackgroundColor">?attr/colorControlNormal</item>
+        <item name="amPmUnselectedBackgroundColor">@color/transparent</item>
         <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
     </style>

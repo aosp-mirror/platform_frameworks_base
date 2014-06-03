@@ -2142,7 +2142,6 @@
   <public type="attr" name="slideEdge" />
   <public type="attr" name="actionBarTheme" />
   <public type="attr" name="textAppearanceListItemSecondary" />
-  <public type="attr" name="colorPrimaryLight" />
   <public type="attr" name="colorPrimary" />
   <public type="attr" name="colorPrimaryDark" />
   <public type="attr" name="colorAccent" />

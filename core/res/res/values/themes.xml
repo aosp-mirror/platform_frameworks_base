@@ -55,7 +55,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/legacy_primary_dark</item>
         <item name="colorPrimary">@color/legacy_primary</item>
-        <item name="colorPrimaryLight">@color/legacy_primary_light</item>
         <item name="colorControlActivated">@color/legacy_control_activated</item>
         <item name="colorControlNormal">@color/legacy_control_normal</item>
         <item name="colorControlHighlight">@color/legacy_button_pressed</item>
@@ -454,7 +453,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/legacy_light_primary_dark</item>
         <item name="colorPrimary">@color/legacy_light_primary</item>
-        <item name="colorPrimaryLight">@color/legacy_light_primary_light</item>
         <item name="colorControlActivated">@color/legacy_light_control_activated</item>
         <item name="colorControlNormal">@color/legacy_light_control_normal</item>
         <item name="colorControlHighlight">@color/legacy_light_button_pressed</item>
@@ -969,7 +967,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/holo_primary_dark</item>
         <item name="colorPrimary">@color/holo_primary</item>
-        <item name="colorPrimaryLight">@color/holo_primary_light</item>
         <item name="colorControlActivated">@color/holo_control_activated</item>
         <item name="colorControlNormal">@color/holo_control_normal</item>
         <item name="colorControlHighlight">@color/holo_button_pressed</item>
@@ -1310,7 +1307,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/holo_light_primary_dark</item>
         <item name="colorPrimary">@color/holo_light_primary</item>
-        <item name="colorPrimaryLight">@color/holo_light_primary_light</item>
         <item name="colorControlActivated">@color/holo_light_control_activated</item>
         <item name="colorControlNormal">@color/holo_light_control_normal</item>
         <item name="colorControlHighlight">@color/holo_light_button_pressed</item>

@@ -616,6 +616,9 @@ public class RippleDrawable extends LayerDrawable {
         final int restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
                 bounds.right, bounds.bottom, getMaskingPaint(mode));
 
+        // Ensure that DST_IN blends using the entire layer.
+        canvas.drawColor(Color.TRANSPARENT);
+
         mask.draw(canvas);
 
         return restoreToCount;

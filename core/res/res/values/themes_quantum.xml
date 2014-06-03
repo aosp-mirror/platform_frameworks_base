@@ -164,7 +164,7 @@ please see themes_device_defaults.xml.
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
-        <item name="navigationBarColor">?attr/colorPrimaryDark</item>
+        <item name="navigationBarColor">@color/black</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Dialog</item>
@@ -371,13 +371,12 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">atThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/quantum_blue_700</item>
-        <item name="colorPrimary">@color/quantum_blue_500</item>
-        <item name="colorPrimaryLight">@color/quantum_blue_100</item>
-        <item name="colorAccent">@color/quantum_teal_A200</item>
+        <item name="colorPrimaryDark">@color/quantum_blue_grey_900</item>
+        <item name="colorPrimary">@color/quantum_blue_grey_800</item>
+        <item name="colorAccent">@color/quantum_light_blue_A200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
-        <item name="colorControlActivated">?attr/colorPrimary</item>
+        <item name="colorControlActivated">?attr/colorAccent</item>
 
         <item name="colorControlHighlight">@color/ripple_quantum_dark</item>
         <item name="colorButtonNormal">@color/btn_default_quantum_dark</item>
@@ -508,7 +507,7 @@ please see themes_device_defaults.xml.
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
-        <item name="navigationBarColor">?attr/colorPrimaryDark</item>
+        <item name="navigationBarColor">@color/black</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Quantum.Light.Dialog</item>
@@ -714,13 +713,12 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">atThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/quantum_blue_700</item>
-        <item name="colorPrimary">@color/quantum_blue_500</item>
-        <item name="colorPrimaryLight">@color/quantum_blue_100</item>
-        <item name="colorAccent">@color/quantum_teal_A200</item>
+        <item name="colorPrimaryDark">@color/quantum_blue_grey_600</item>
+        <item name="colorPrimary">@color/quantum_blue_grey_400</item>
+        <item name="colorAccent">@color/quantum_light_blue_A200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
-        <item name="colorControlActivated">?attr/colorPrimary</item>
+        <item name="colorControlActivated">?attr/colorAccent</item>
 
         <item name="colorControlHighlight">@color/ripple_quantum_light</item>
         <item name="colorButtonNormal">@color/btn_default_quantum_light</item>
@@ -810,11 +808,10 @@ please see themes_device_defaults.xml.
         <item name="colorButtonNormal">@color/btn_default_quantum_dark</item>
     </style>
 
-    <!-- Theme overlay that replaces the activated control color (which by default
-         is identical to the action bar background color) with the normal control
-         color. -->
+    <!-- Theme overlay that replaces the normal control color, which by default is the same as the
+         secondary text color, with the primary text color. -->
     <style name="ThemeOverlay.Quantum.ActionBarWidget">
-        <item name="colorControlActivated">?attr/colorControlNormal</item>
+        <item name="colorControlNormal">?attr/textColorPrimary</item>
     </style>
 
     <!-- Variant of the quantum (dark) theme with no action bar. -->
