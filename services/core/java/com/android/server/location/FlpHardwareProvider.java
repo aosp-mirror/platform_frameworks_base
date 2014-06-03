@@ -96,7 +96,7 @@ public class FlpHardwareProvider {
                 Looper.myLooper());
     }
 
-    public boolean isSupported() {
+    public static boolean isSupported() {
         return nativeIsSupported();
     }
 

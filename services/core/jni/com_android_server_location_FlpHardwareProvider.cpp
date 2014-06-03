@@ -139,6 +139,8 @@ static int SetThreadEvent(ThreadEvent event) {
  * the HW module and obtaining the proper interfaces.
  */
 static void ClassInit(JNIEnv* env, jclass clazz) {
+  sFlpInterface = NULL;
+
   // get references to the Java provider methods
   sOnLocationReport = env->GetMethodID(
       clazz,
@@ -163,6 +165,38 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
   sOnGeofenceRemove = env->GetMethodID(clazz, "onGeofenceRemove", "(II)V");
   sOnGeofencePause = env->GetMethodID(clazz, "onGeofencePause", "(II)V");
   sOnGeofenceResume = env->GetMethodID(clazz, "onGeofenceResume", "(II)V");
+
+  // open the hardware module
+  const hw_module_t* module = NULL;
+  int err = hw_get_module(FUSED_LOCATION_HARDWARE_MODULE_ID, &module);
+  if (err != 0) {
+    ALOGE("Error hw_get_module '%s': %d", FUSED_LOCATION_HARDWARE_MODULE_ID, err);
+    return;
+  }
+
+  err = module->methods->open(
+      module,
+      FUSED_LOCATION_HARDWARE_MODULE_ID,
+      &sHardwareDevice);
+  if (err != 0) {
+    ALOGE("Error opening device '%s': %d", FUSED_LOCATION_HARDWARE_MODULE_ID, err);
+    return;
+  }
+
+  // acquire the interfaces pointers
+  flp_device_t* flp_device = reinterpret_cast<flp_device_t*>(sHardwareDevice);
+  sFlpInterface = flp_device->get_flp_interface(flp_device);
+
+  if (sFlpInterface != NULL) {
+    sFlpDiagnosticInterface = reinterpret_cast<const FlpDiagnosticInterface*>(
+        sFlpInterface->get_extension(FLP_DIAGNOSTIC_INTERFACE));
+
+    sFlpGeofencingInterface = reinterpret_cast<const FlpGeofencingInterface*>(
+        sFlpInterface->get_extension(FLP_GEOFENCING_INTERFACE));
+
+    sFlpDeviceContextInterface = reinterpret_cast<const FlpDeviceContextInterface*>(
+        sFlpInterface->get_extension(FLP_DEVICE_CONTEXT_INTERFACE));
+  }
 }
 
 /*
@@ -637,44 +671,6 @@ FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
  * the Flp interfaces are initialized properly.
  */
 static void Init(JNIEnv* env, jobject obj) {
-  if(sHardwareDevice != NULL) {
-    ALOGD("Hardware Device already opened.");
-    return;
-  }
-
-  const hw_module_t* module = NULL;
-  int err = hw_get_module(FUSED_LOCATION_HARDWARE_MODULE_ID, &module);
-  if(err != 0) {
-    ALOGE("Error hw_get_module '%s': %d", FUSED_LOCATION_HARDWARE_MODULE_ID, err);
-    return;
-  }
-
-  err = module->methods->open(
-        module,
-        FUSED_LOCATION_HARDWARE_MODULE_ID, &sHardwareDevice);
-  if(err != 0) {
-    ALOGE("Error opening device '%s': %d", FUSED_LOCATION_HARDWARE_MODULE_ID, err);
-    return;
-  }
-
-  sFlpInterface = NULL;
-  flp_device_t* flp_device = reinterpret_cast<flp_device_t*>(sHardwareDevice);
-  sFlpInterface = flp_device->get_flp_interface(flp_device);
-
-  if(sFlpInterface != NULL) {
-    sFlpDiagnosticInterface = reinterpret_cast<const FlpDiagnosticInterface*>(
-        sFlpInterface->get_extension(FLP_DIAGNOSTIC_INTERFACE)
-        );
-
-    sFlpGeofencingInterface = reinterpret_cast<const FlpGeofencingInterface*>(
-        sFlpInterface->get_extension(FLP_GEOFENCING_INTERFACE)
-        );
-
-    sFlpDeviceContextInterface = reinterpret_cast<const FlpDeviceContextInterface*>(
-        sFlpInterface->get_extension(FLP_DEVICE_CONTEXT_INTERFACE)
-        );
-  }
-
   if(sCallbacksObj == NULL) {
     sCallbacksObj = env->NewGlobalRef(obj);
   }
@@ -696,7 +692,10 @@ static void Init(JNIEnv* env, jobject obj) {
 }
 
 static jboolean IsSupported(JNIEnv* env, jclass clazz) {
-  return sFlpInterface != NULL;
+  if (sFlpInterface == NULL) {
+    return JNI_FALSE;
+  }
+  return JNI_TRUE;
 }
 
 static jint GetBatchSize(JNIEnv* env, jobject object) {
