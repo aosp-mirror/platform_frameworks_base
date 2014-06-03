@@ -235,9 +235,6 @@
     <!-- The amount of highlight to make on each task view. -->
     <dimen name="recents_task_view_highlight">1dp</dimen>
 
-    <!-- The amount of space a user has to scroll to dismiss any info panes. -->
-    <dimen name="recents_task_stack_scroll_dismiss_info_pane_distance">50dp</dimen>
-
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 

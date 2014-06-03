@@ -41,6 +41,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsPackageMonitor;
 import com.android.systemui.recents.RecentsTaskLoader;
+import com.android.systemui.recents.ReferenceCountedTrigger;
 import com.android.systemui.recents.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -62,10 +63,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onTaskRemoved(Task t);
     }
 
+    RecentsConfiguration mConfig;
+
     TaskStack mStack;
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackViewCallbacks mCb;
     ViewPool<TaskView, Task> mViewPool;
+    ArrayList<TaskViewTransform> mTaskTransforms = new ArrayList<TaskViewTransform>();
 
     // The various rects that define the stack view
     Rect mRect = new Rect();
@@ -83,11 +87,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     ObjectAnimator mScrollAnimator;
 
     // Optimizations
-    int mHwLayersRefCount;
+    ReferenceCountedTrigger mHwLayersTrigger;
     int mStackViewsAnimationDuration;
     boolean mStackViewsDirty = true;
     boolean mAwaitingFirstLayout = true;
     boolean mStartEnterAnimationRequestedAfterLayout;
+    ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
     Rect mTmpRect2 = new Rect();
@@ -95,12 +100,40 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
+        mConfig = RecentsConfiguration.getInstance();
         mStack = stack;
         mStack.setCallbacks(this);
         mScroller = new OverScroller(context);
         mTouchHandler = new TaskStackViewTouchHandler(context, this);
         mViewPool = new ViewPool<TaskView, Task>(context, this);
         mInflater = LayoutInflater.from(context);
+        mHwLayersTrigger = new ReferenceCountedTrigger(getContext(), new Runnable() {
+            @Override
+            public void run() {
+                // Enable hw layers on each of the children
+                int childCount = getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    TaskView tv = (TaskView) getChildAt(i);
+                    tv.enableHwLayers();
+                }
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                // Disable hw layers on each of the children
+                int childCount = getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    TaskView tv = (TaskView) getChildAt(i);
+                    tv.disableHwLayers();
+                }
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                new Throwable("Invalid hw layers ref count").printStackTrace();
+                Console.logError(getContext(), "Invalid HW layers ref count");
+            }
+        });
     }
 
     /** Sets the callbacks */
@@ -118,7 +151,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     "[TaskStackView|requestSynchronize]", "" + duration + "ms", Console.AnsiYellow);
         }
         if (!mStackViewsDirty) {
-            invalidate();
+            invalidate(mStackRect);
         }
         if (mAwaitingFirstLayout) {
             // Skip the animation if we are awaiting first layout
@@ -165,7 +198,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
         transform.scale = scale;
 
-        // Set the translation
+        // Set the y translation
         if (boundedT < 0f) {
             transform.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
                     numPeekCards) * peekHeight - scaleYOffset);
@@ -174,9 +207,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Set the z translation
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        int minZ = config.taskViewTranslationZMinPx;
-        int incZ = config.taskViewTranslationZIncrementPx;
+        int minZ = mConfig.taskViewTranslationZMinPx;
+        int incZ = mConfig.taskViewTranslationZIncrementPx;
         transform.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
 
         // Set the alphas
@@ -198,16 +230,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Gets the stack transforms of a list of tasks, and returns the visible range of tasks.
      */
-    private ArrayList<TaskViewTransform> getStackTransforms(ArrayList<Task> tasks,
-                                                            int stackScroll,
-                                                            int[] visibleRangeOut,
-                                                            boolean boundTranslationsToRect) {
+    private void updateStackTransforms(ArrayList<TaskViewTransform> taskTransforms,
+                                       ArrayList<Task> tasks,
+                                       int stackScroll,
+                                       int[] visibleRangeOut,
+                                       boolean boundTranslationsToRect) {
         // XXX: Optimization: Use binary search to find the visible range
 
-        ArrayList<TaskViewTransform> taskTransforms = new ArrayList<TaskViewTransform>();
         int taskCount = tasks.size();
         int firstVisibleIndex = -1;
         int lastVisibleIndex = -1;
+        taskTransforms.clear();
+        taskTransforms.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             TaskViewTransform transform = getStackTransform(i, stackScroll);
             taskTransforms.add(transform);
@@ -226,6 +260,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             visibleRangeOut[0] = firstVisibleIndex;
             visibleRangeOut[1] = lastVisibleIndex;
         }
+    }
+
+    /**
+     * Gets the stack transforms of a list of tasks, and returns the visible range of tasks. This
+     * call is less optimal than calling updateStackTransforms directly.
+     */
+    private ArrayList<TaskViewTransform> getStackTransforms(ArrayList<Task> tasks,
+                                                            int stackScroll,
+                                                            int[] visibleRangeOut,
+                                                            boolean boundTranslationsToRect) {
+        ArrayList<TaskViewTransform> taskTransforms = new ArrayList<TaskViewTransform>();
+        updateStackTransforms(taskTransforms, tasks, stackScroll, visibleRangeOut,
+                boundTranslationsToRect);
         return taskTransforms;
     }
 
@@ -245,14 +292,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int[] visibleRange = mTmpVisibleRange;
             int stackScroll = getStackScroll();
             ArrayList<Task> tasks = mStack.getTasks();
-            ArrayList<TaskViewTransform> taskTransforms = getStackTransforms(tasks, stackScroll,
-                    visibleRange, false);
+            updateStackTransforms(mTaskTransforms, tasks, stackScroll, visibleRange, false);
 
             // Update the visible state of all the tasks
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
                 Task task = tasks.get(i);
-                TaskViewTransform transform = taskTransforms.get(i);
+                TaskViewTransform transform = mTaskTransforms.get(i);
                 TaskView tv = getChildViewForTask(task);
 
                 if (transform.visible) {
@@ -281,10 +327,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 TaskView tv = (TaskView) getChildAt(i);
                 Task task = tv.getTask();
                 int taskIndex = mStack.indexOfTask(task);
-                if (taskIndex < 0 || !taskTransforms.get(taskIndex).visible) {
+                if (taskIndex < 0 || !mTaskTransforms.get(taskIndex).visible) {
                     mViewPool.returnViewToPool(tv);
                 } else {
-                    tv.updateViewPropertiesToTaskTransform(null, taskTransforms.get(taskIndex),
+                    tv.updateViewPropertiesToTaskTransform(null, mTaskTransforms.get(taskIndex),
                             mStackViewsAnimationDuration);
                 }
             }
@@ -361,7 +407,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mScrollAnimator = ObjectAnimator.ofInt(this, "stackScroll", curScroll, newScroll);
         mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
                 curScroll, 250));
-        mScrollAnimator.setInterpolator(RecentsConfiguration.getInstance().fastOutSlowInInterpolator);
+        mScrollAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -543,48 +589,31 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Enables the hw layers and increments the hw layer requirement ref count */
     void addHwLayersRefCount(String reason) {
         if (Console.Enabled) {
+            int refCount = mHwLayersTrigger.getCount();
             Console.log(Constants.Log.UI.HwLayers,
                     "[TaskStackView|addHwLayersRefCount] refCount: " +
-                            mHwLayersRefCount + "->" + (mHwLayersRefCount + 1) + " " + reason);
+                            refCount + "->" + (refCount + 1) + " " + reason);
         }
-        if (mHwLayersRefCount == 0) {
-            // Enable hw layers on each of the children
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                TaskView tv = (TaskView) getChildAt(i);
-                tv.enableHwLayers();
-            }
-        }
-        mHwLayersRefCount++;
+        mHwLayersTrigger.increment();
     }
 
     /** Decrements the hw layer requirement ref count and disables the hw layers when we don't
         need them anymore. */
     void decHwLayersRefCount(String reason) {
         if (Console.Enabled) {
+            int refCount = mHwLayersTrigger.getCount();
             Console.log(Constants.Log.UI.HwLayers,
                     "[TaskStackView|decHwLayersRefCount] refCount: " +
-                            mHwLayersRefCount + "->" + (mHwLayersRefCount - 1) + " " + reason);
+                            refCount + "->" + (refCount - 1) + " " + reason);
         }
-        mHwLayersRefCount--;
-        if (mHwLayersRefCount == 0) {
-            // Disable hw layers on each of the children
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                TaskView tv = (TaskView) getChildAt(i);
-                tv.disableHwLayers();
-            }
-        } else if (mHwLayersRefCount < 0) {
-            new Throwable("Invalid hw layers ref count").printStackTrace();
-            Console.logError(getContext(), "Invalid HW layers ref count");
-        }
+        mHwLayersTrigger.decrement();
     }
 
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             setStackScroll(mScroller.getCurrY());
-            invalidate();
+            invalidate(mStackRect);
 
             // If we just finished scrolling, then disable the hw layers
             if (mScroller.isFinished()) {
@@ -616,7 +645,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (Constants.DebugFlags.App.EnableTaskStackClipping) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
             TaskView tv = (TaskView) child;
             TaskView nextTv = null;
             TaskView tmpTv = null;
@@ -632,13 +660,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
 
                 // Clip against the next view (if we aren't animating its alpha)
-                if (nextTv != null && nextTv.getAlpha() == 1f) {
+                if (nextTv != null) {
                     Rect curRect = tv.getClippingRect(mTmpRect);
                     Rect nextRect = nextTv.getClippingRect(mTmpRect2);
                     // The hit rects are relative to the task view, which needs to be offset by
                     // the system bar height
-                    curRect.offset(0, config.systemInsets.top);
-                    nextRect.offset(0, config.systemInsets.top);
+                    curRect.offset(0, mConfig.systemInsets.top);
+                    nextRect.offset(0, mConfig.systemInsets.top);
                     // Compute the clip region
                     Region clipRegion = new Region();
                     clipRegion.op(curRect, Region.Op.UNION);
@@ -660,7 +688,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
 
         // Compute the stack rects
         mRect.set(0, 0, width, height);
@@ -668,8 +695,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackRect.left += insetLeft;
         mStackRect.bottom -= insetBottom;
 
-        int widthPadding = (int) (config.taskStackWidthPaddingPct * mStackRect.width());
-        int heightPadding = config.taskStackTopPaddingPx;
+        int widthPadding = (int) (mConfig.taskStackWidthPaddingPct * mStackRect.width());
+        int heightPadding = mConfig.taskStackTopPaddingPx;
         if (Constants.DebugFlags.App.EnableSearchLayout) {
             mStackRect.top += heightPadding;
             mStackRect.left += widthPadding;
@@ -707,10 +734,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Compute our stack/task rects
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
         Rect taskStackBounds = new Rect();
-        config.getTaskStackBounds(width, height, taskStackBounds);
-        computeRects(width, height, taskStackBounds.left, config.systemInsets.bottom);
+        mConfig.getTaskStackBounds(width, height, taskStackBounds);
+        computeRects(width, height, taskStackBounds.left, mConfig.systemInsets.bottom);
 
         // Debug logging
         if (Constants.Log.UI.MeasureAndLayout) {
@@ -768,47 +794,66 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         if (mAwaitingFirstLayout) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
-
-            // Update the focused task index to be the next item to the top task
-            if (config.launchedFromAltTab) {
-                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
-            }
-
-            // Prepare the first view for its enter animation
-            if (config.launchedWithThumbnailAnimation) {
-                TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
-                if (tv != null) {
-                    tv.prepareAnimateOnEnterRecents();
-                }
-            }
-
             // Mark that we have completely the first layout
             mAwaitingFirstLayout = false;
+
+            // Prepare the first view for its enter animation
+            int offsetTopAlign = -mTaskRect.top;
+            int offscreenY = mRect.bottom - (mTaskRect.top - mRect.top);
+            for (int i = childCount - 1; i >= 0; i--) {
+                TaskView tv = (TaskView) getChildAt(i);
+                tv.prepareAnimateEnterRecents((i == (getChildCount() - 1)), offsetTopAlign,
+                        offscreenY, mTaskRect);
+            }
 
             // If the enter animation started already and we haven't completed a layout yet, do the
             // enter animation now
             if (mStartEnterAnimationRequestedAfterLayout) {
-                startOnEnterAnimation();
+                startOnEnterAnimation(mStartEnterAnimationContext);
+                mStartEnterAnimationRequestedAfterLayout = false;
+                mStartEnterAnimationContext = null;
+            }
+
+            // Update the focused task index to be the next item to the top task
+            if (mConfig.launchedWithAltTab) {
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
             }
         }
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
-    public void startOnEnterAnimation() {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        if (!config.launchedWithThumbnailAnimation) return;
-
+    public void startOnEnterAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         // If we are still waiting to layout, then just defer until then
         if (mAwaitingFirstLayout) {
             mStartEnterAnimationRequestedAfterLayout = true;
+            mStartEnterAnimationContext = ctx;
             return;
         }
 
-        // Animate the task bar of the first task view
-        TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
-        if (tv != null) {
-            tv.animateOnEnterRecents();
+        // Animate all the task views into view
+        ctx.taskRect = mTaskRect;
+        ctx.stackRectSansPeek = mStackRectSansPeek;
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            TaskView tv = (TaskView) getChildAt(i);
+            TaskViewTransform transform = getStackTransform(mStack.indexOfTask(tv.getTask()),
+                    getStackScroll());
+            ctx.stackViewIndex = i;
+            ctx.stackViewCount = childCount;
+            ctx.isFrontMost = (i == (getChildCount() - 1));
+            ctx.transform = transform;
+            tv.animateOnEnterRecents(ctx);
+        }
+    }
+
+    /** Requests this task stacks to start it's exit-recents animation. */
+    public void startOnExitAnimation(ViewAnimation.TaskViewExitContext ctx) {
+        // Animate all the task views into view
+        ctx.offscreenTranslationY = mRect.bottom - (mTaskRect.top - mRect.top);
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TaskView tv = (TaskView) getChildAt(i);
+            tv.animateOnExitRecents(ctx);
         }
     }
 
@@ -871,8 +916,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         ArrayList<TaskViewTransform> curTaskTransforms,
                         ArrayList<Task> tasks, ArrayList<TaskViewTransform> taskTransforms,
                         HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut,
-                        ArrayList<TaskView> childrenToRemoveOut,
-                        RecentsConfiguration config) {
+                        ArrayList<TaskView> childrenToRemoveOut) {
         // Animate all of the existing views out of view (if they are not in the visible range in
         // the new stack) or to their final positions in the new stack
         int movement = 0;
@@ -902,7 +946,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             childViewTransformsOut.put(tv, new Pair(0, toTransform));
         }
         return Utilities.calculateTranslationAnimationDuration(movement,
-                config.filteringCurrentViewsMinAnimDuration);
+                mConfig.filteringCurrentViewsMinAnimDuration);
     }
 
     /**
@@ -911,8 +955,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     int getEnterTransformsForFilterAnimation(ArrayList<Task> tasks,
                          ArrayList<TaskViewTransform> taskTransforms,
-                         HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut,
-                         RecentsConfiguration config) {
+                         HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut) {
         int offset = 0;
         int movement = 0;
         int taskCount = tasks.size();
@@ -942,7 +985,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return Utilities.calculateTranslationAnimationDuration(movement,
-                config.filteringNewViewsMinAnimDuration);
+                mConfig.filteringNewViewsMinAnimDuration);
     }
 
     /** Orchestrates the animations of the current child views and any new views. */
@@ -950,22 +993,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                               ArrayList<TaskViewTransform> curTaskTransforms,
                               final ArrayList<Task> tasks,
                               final ArrayList<TaskViewTransform> taskTransforms) {
-        final RecentsConfiguration config = RecentsConfiguration.getInstance();
-
         // Calculate the transforms to animate out all the existing views if they are not in the
         // new visible range (or to their final positions in the stack if they are)
         final ArrayList<TaskView> childrenToRemove = new ArrayList<TaskView>();
         final HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransforms =
                 new HashMap<TaskView, Pair<Integer, TaskViewTransform>>();
         int duration = getExitTransformsForFilterAnimation(curTasks, curTaskTransforms, tasks,
-                taskTransforms, childViewTransforms, childrenToRemove, config);
+                taskTransforms, childViewTransforms, childrenToRemove);
 
         // If all the current views are in the visible range of the new stack, then don't wait for
         // views to animate out and animate all the new views into their place
         final boolean unifyNewViewAnimation = childrenToRemove.isEmpty();
         if (unifyNewViewAnimation) {
             int inDuration = getEnterTransformsForFilterAnimation(tasks, taskTransforms,
-                    childViewTransforms, config);
+                    childViewTransforms);
             duration = Math.max(duration, inDuration);
         }
 
@@ -989,7 +1030,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                     // For views that are not already visible, animate them in
                                     childViewTransforms.clear();
                                     int duration = getEnterTransformsForFilterAnimation(tasks,
-                                            taskTransforms, childViewTransforms, config);
+                                            taskTransforms, childViewTransforms);
                                     for (final TaskView tv : childViewTransforms.keySet()) {
                                         Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
                                         tv.animate().setStartDelay(t.first);
@@ -1127,7 +1168,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Enable hw layers on this view if hw layers are enabled on the stack
-        if (mHwLayersRefCount > 0) {
+        if (mHwLayersTrigger.getCount() > 0) {
             tv.enableHwLayers();
         }
     }
@@ -1196,7 +1237,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onComponentRemoved(Set<ComponentName> cns) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
@@ -1502,7 +1542,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                             mSv.mMinScroll, mSv.mMaxScroll,
                             0, overscrollRange);
                     // Invalidate to kick off computeScroll
-                    mSv.invalidate();
+                    mSv.invalidate(mSv.mStackRect);
                 } else if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance

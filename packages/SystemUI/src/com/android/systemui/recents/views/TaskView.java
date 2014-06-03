@@ -28,9 +28,11 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
+import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
@@ -45,9 +47,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         public void onTaskAppInfoClicked(TaskView tv);
         public void onTaskFocused(TaskView tv);
         public void onTaskDismissed(TaskView tv);
-
-        // public void onTaskViewReboundToTask(TaskView tv, Task t);
     }
+
+    RecentsConfiguration mConfig;
 
     int mDim;
     int mMaxDim;
@@ -59,10 +61,20 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     boolean mClipViewInStack;
     Point mLastTouchDown = new Point();
     Path mRoundedRectClipPath = new Path();
+    Rect mTmpRect = new Rect();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
     TaskViewCallbacks mCb;
+
+    // Optimizations
+    ValueAnimator.AnimatorUpdateListener mUpdateDimListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateDimOverlayFromScale();
+                }
+            };
 
 
     public TaskView(Context context) {
@@ -79,13 +91,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mConfig = RecentsConfiguration.getInstance();
         setWillNotDraw(false);
     }
 
     @Override
     protected void onFinishInflate() {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mMaxDim = config.taskStackMaxDim;
+        mMaxDim = mConfig.taskStackMaxDim;
 
         // By default, all views are clipped to other views in their stack
         mClipViewInStack = true;
@@ -104,8 +116,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         // Update the rounded rect clip path
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        float radius = config.taskViewRoundedCornerRadiusPx;
+        float radius = mConfig.taskViewRoundedCornerRadiusPx;
         mRoundedRectClipPath.reset();
         mRoundedRectClipPath.addRoundRect(new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight()),
                 radius, radius, Path.Direction.CW);
@@ -113,7 +124,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         // Update the outline
         Outline o = new Outline();
         o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight() -
-                config.taskViewShadowOutlineBottomInsetPx, radius);
+                mConfig.taskViewShadowOutlineBottomInsetPx, radius);
         setOutline(o);
     }
 
@@ -141,7 +152,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
                                              TaskViewTransform toTransform, int duration) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.Draw, "[TaskView|updateViewPropertiesToTaskTransform]",
+                    "duration: " + duration, Console.AnsiPurple);
+        }
 
         // Update the bar view
         mBarView.updateViewPropertiesToTaskTransform(animateFromTransform, toTransform, duration);
@@ -164,15 +178,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .scaleX(toTransform.scale)
                     .scaleY(toTransform.scale)
                     .alpha(toTransform.alpha)
+                    .setStartDelay(0)
                     .setDuration(duration)
-                    .setInterpolator(config.fastOutSlowInInterpolator)
-                    .withLayer()
-                    .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator animation) {
-                            updateDimOverlayFromScale();
-                        }
-                    })
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setUpdateListener(mUpdateDimListener)
                     .start();
         } else {
             setTranslationY(toTransform.translationY);
@@ -197,6 +206,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);
+        mDim = 0;
         invalidate();
     }
 
@@ -221,40 +231,103 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareAnimateOnEnterRecents() {
-        mBarView.setVisibility(View.INVISIBLE);
+    public void prepareAnimateEnterRecents(boolean isTaskViewFrontMost, int offsetY, int offscreenY,
+                                           Rect taskRect) {
+        if (mConfig.launchedFromAppWithScreenshot) {
+            if (isTaskViewFrontMost) {
+                // Hide the task view as we are going to animate the full screenshot into view
+                // and then replace it with this view once we are done
+                setVisibility(View.INVISIBLE);
+                // Also hide the front most task bar view so we can animate it in
+                mBarView.prepareAnimateEnterRecents();
+            } else {
+                // Top align the task views
+                setTranslationY(offsetY);
+                setScaleX(1f);
+                setScaleY(1f);
+            }
+
+        } else if (mConfig.launchedFromAppWithThumbnail) {
+            if (isTaskViewFrontMost) {
+                // Hide the front most task bar view so we can animate it in
+                mBarView.prepareAnimateEnterRecents();
+            }
+
+        } else if (mConfig.launchedFromHome) {
+            // Move the task view off screen (below) so we can animate it in
+            setTranslationY(offscreenY);
+            setScaleX(1f);
+            setScaleY(1f);
+        }
     }
 
     /** Animates this task view as it enters recents */
-    public void animateOnEnterRecents() {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mBarView.setVisibility(View.VISIBLE);
-        mBarView.setTranslationY(-mBarView.getMeasuredHeight());
-        mBarView.animate()
-                .translationY(0)
-                .setStartDelay(config.taskBarEnterAnimDelay)
-                .setInterpolator(config.fastOutSlowInInterpolator)
-                .setDuration(config.taskBarEnterAnimDuration)
+    public void animateOnEnterRecents(ViewAnimation.TaskViewEnterContext ctx) {
+        TaskViewTransform transform = ctx.transform;
+
+        if (mConfig.launchedFromAppWithScreenshot) {
+            if (ctx.isFrontMost) {
+                // Animate the full screenshot down first, before swapping with this task view
+                ctx.fullScreenshot.animateOnEnterRecents(ctx, new Runnable() {
+                    @Override
+                    public void run() {
+                        // Animate the task bar of the first task view
+                        mBarView.animateOnEnterRecents(0);
+                        setVisibility(View.VISIBLE);
+                    }
+                });
+            } else {
+                // Animate the tasks down behind the full screenshot
+                animate()
+                        .scaleX(transform.scale)
+                        .scaleY(transform.scale)
+                        .translationY(transform.translationY)
+                        .setStartDelay(0)
+                        .setInterpolator(mConfig.linearOutSlowInInterpolator)
+                        .setDuration(475)
+                        .withLayer()
+                        .start();
+            }
+
+        } else if (mConfig.launchedFromAppWithThumbnail) {
+            if (ctx.isFrontMost) {
+                // Animate the task bar of the first task view
+                mBarView.animateOnEnterRecents(-1);
+            }
+
+        } else if (mConfig.launchedFromHome) {
+            // Animate the tasks up
+            int frontIndex = (ctx.stackViewCount - ctx.stackViewIndex - 1);
+            int delay = mConfig.taskBarEnterAnimDelay +
+                    frontIndex * mConfig.taskViewEnterFromHomeDelay;
+            animate()
+                    .scaleX(transform.scale)
+                    .scaleY(transform.scale)
+                    .translationY(transform.translationY)
+                    .setStartDelay(delay)
+                    .setInterpolator(mConfig.quintOutInterpolator)
+                    .setDuration(mConfig.taskViewEnterFromHomeDuration)
+                    .withLayer()
+                    .start();
+        }
+    }
+
+    /** Animates this task view as it leaves recents */
+    public void animateOnExitRecents(ViewAnimation.TaskViewExitContext ctx) {
+        animate()
+                .translationY(ctx.offscreenTranslationY)
+                .setStartDelay(0)
+                .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                .setDuration(mConfig.taskViewEnterFromHomeDuration)
                 .withLayer()
+                .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
                 .start();
+        ctx.postAnimationTrigger.increment();
     }
 
     /** Animates this task view as it exits recents */
-    public void animateOnLeavingRecents(final Runnable r) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        mBarView.animate()
-            .translationY(-mBarView.getMeasuredHeight())
-            .setStartDelay(0)
-            .setInterpolator(config.fastOutLinearInInterpolator)
-            .setDuration(config.taskBarExitAnimDuration)
-            .withLayer()
-            .withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    post(r);
-                }
-            })
-            .start();
+    public void animateOnLaunchingTask(final Runnable r) {
+        mBarView.animateOnLaunchingTask(r);
     }
 
     /** Animates the deletion of this task view */
@@ -262,20 +335,24 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         // Disabling clipping with the stack while the view is animating away
         setClipViewInStack(false);
 
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        animate().translationX(config.taskViewRemoveAnimTranslationXPx)
+        animate().translationX(mConfig.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
             .setStartDelay(0)
-            .setInterpolator(config.fastOutSlowInInterpolator)
-            .setDuration(config.taskViewRemoveAnimDuration)
+            .setInterpolator(mConfig.fastOutSlowInInterpolator)
+            .setDuration(mConfig.taskViewRemoveAnimDuration)
             .withLayer()
             .withEndAction(new Runnable() {
                 @Override
                 public void run() {
-                    post(r);
+                    // We just throw this into a runnable because starting a view property
+                    // animation using layers can cause inconsisten results if we try and
+                    // update the layers while the animation is running.  In some cases,
+                    // the runnabled passed in may start an animation which also uses layers
+                    // so we defer all this by posting this.
+                    r.run();
 
                     // Re-enable clipping with the stack (we will reuse this view)
-                    setClipViewInStack(false);
+                    setClipViewInStack(true);
                 }
             })
             .start();
@@ -293,11 +370,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        mBarView.enableHwLayers();
     }
 
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, null);
+        mBarView.disableHwLayers();
     }
 
     /**
@@ -305,7 +384,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
      * view.
      */
     boolean shouldClipViewInStack() {
-        return mClipViewInStack;
+        return mClipViewInStack && (getVisibility() == View.VISIBLE);
     }
 
     /** Sets whether this view should be clipped, or clipped against. */
@@ -313,9 +392,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         if (clip != mClipViewInStack) {
             mClipViewInStack = clip;
             if (getParent() instanceof View) {
-                Rect r = new Rect();
-                getHitRect(r);
-                ((View) getParent()).invalidate(r);
+                getHitRect(mTmpRect);
+                ((View) getParent()).invalidate(mTmpRect);
             }
         }
     }
@@ -391,8 +469,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                RecentsConfiguration config = RecentsConfiguration.getInstance();
-                if (config.developerOptionsEnabled) {
+                if (mConfig.developerOptionsEnabled) {
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
                 }
             }

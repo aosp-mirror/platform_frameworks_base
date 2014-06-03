@@ -30,13 +30,20 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DisplayMetrics;
 import android.util.Pair;
+import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.Surface;
+import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,6 +61,8 @@ public class SystemServicesProxy {
     IPackageManager mIpm;
     UserManager mUm;
     SearchManager mSm;
+    WindowManager mWm;
+    Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
 
@@ -67,6 +76,8 @@ public class SystemServicesProxy {
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mIpm = AppGlobals.getPackageManager();
         mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
 
         // Resolve the assist intent
@@ -324,5 +335,14 @@ public class SystemServicesProxy {
 
         // Delete the app widget
         host.deleteAppWidgetId(appWidgetId);
+    }
+
+    /**
+     * Takes a screenshot of the current surface.
+     */
+    public Bitmap takeScreenshot() {
+        DisplayInfo di = new DisplayInfo();
+        mDisplay.getDisplayInfo(di);
+        return SurfaceControl.screenshot(di.getNaturalWidth(), di.getNaturalHeight());
     }
 }

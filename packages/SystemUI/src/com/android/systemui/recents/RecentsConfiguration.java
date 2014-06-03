@@ -37,27 +37,39 @@ public class RecentsConfiguration {
 
     DisplayMetrics mDisplayMetrics;
 
-    public Rect systemInsets = new Rect();
-    public Rect displayRect = new Rect();
-
-    boolean isLandscape;
-    boolean transposeRecentsLayoutWithOrientation;
-    int searchBarAppWidgetId = -1;
-
+    /** Animations */
     public float animationPxMovementPerSecond;
 
+    /** Interpolators */
     public Interpolator fastOutSlowInInterpolator;
     public Interpolator fastOutLinearInInterpolator;
     public Interpolator linearOutSlowInInterpolator;
+    public Interpolator quintOutInterpolator;
 
+    /** Filtering */
     public int filteringCurrentViewsMinAnimDuration;
     public int filteringNewViewsMinAnimDuration;
 
-    public int taskStackScrollDismissInfoPaneDistance;
-    public int taskStackMaxDim;
-    public float taskStackWidthPaddingPct;
-    public int taskStackTopPaddingPx;
+    /** Insets */
+    public Rect systemInsets = new Rect();
+    public Rect displayRect = new Rect();
 
+    /** Layout */
+    boolean isLandscape;
+    boolean transposeRecentsLayoutWithOrientation;
+
+    /** Search bar */
+    int searchBarAppWidgetId = -1;
+    public int searchBarSpaceHeightPx;
+
+    /** Task stack */
+    public int taskStackMaxDim;
+    public int taskStackTopPaddingPx;
+    public float taskStackWidthPaddingPct;
+
+    /** Task view animation and styles */
+    public int taskViewEnterFromHomeDuration;
+    public int taskViewEnterFromHomeDelay;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
@@ -66,23 +78,28 @@ public class RecentsConfiguration {
     public int taskViewRoundedCornerRadiusPx;
     public int taskViewHighlightPx;
 
-    public int searchBarSpaceHeightPx;
-
+    /** Task bar colors */
     public int taskBarViewDefaultBackgroundColor;
     public int taskBarViewDefaultTextColor;
     public int taskBarViewLightTextColor;
     public int taskBarViewDarkTextColor;
     public int taskBarViewHighlightColor;
 
+    /** Task bar animations */
     public int taskBarEnterAnimDuration;
     public int taskBarEnterAnimDelay;
     public int taskBarExitAnimDuration;
 
+    /** Nav bar scrim */
     public int navBarScrimEnterDuration;
 
-    public boolean launchedFromAltTab;
-    public boolean launchedWithThumbnailAnimation;
+    /** Launch states */
+    public boolean launchedWithAltTab;
+    public boolean launchedFromAppWithThumbnail;
+    public boolean launchedFromAppWithScreenshot;
+    public boolean launchedFromHome;
 
+    /** Dev options */
     public boolean developerOptionsEnabled;
 
     /** Private constructor */
@@ -108,33 +125,54 @@ public class RecentsConfiguration {
         DisplayMetrics dm = res.getDisplayMetrics();
         mDisplayMetrics = dm;
 
-        isLandscape = res.getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
-        transposeRecentsLayoutWithOrientation =
-                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout,
-                    "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
-                    Console.AnsiGreen);
-        }
-
-        displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
+        // Animations
         animationPxMovementPerSecond =
                 res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
+
+        // Interpolators
+        fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
+        fastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_linear_in);
+        linearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
+        quintOutInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.decelerate_quint);
+
+        // Filtering
         filteringCurrentViewsMinAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
         filteringNewViewsMinAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
 
-        taskStackScrollDismissInfoPaneDistance = res.getDimensionPixelSize(
-                R.dimen.recents_task_stack_scroll_dismiss_info_pane_distance);
-        taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
+        // Insets
+        displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
 
+        // Layout
+        isLandscape = res.getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        transposeRecentsLayoutWithOrientation =
+                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
+
+        // Search bar
+        searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
+
+        // Update the search widget id
+        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
+        searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
+
+        // Task stack
         TypedValue widthPaddingPctValue = new TypedValue();
         res.getValue(R.dimen.recents_stack_width_padding_percentage, widthPaddingPctValue, true);
         taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
+        taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 
+        // Task view animation and styles
+        taskViewEnterFromHomeDuration =
+                res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
+        taskViewEnterFromHomeDelay =
+                res.getInteger(R.integer.recents_animate_task_enter_from_home_delay);
         taskViewRemoveAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_remove_duration);
         taskViewRemoveAnimTranslationXPx =
@@ -148,8 +186,7 @@ public class RecentsConfiguration {
         taskViewShadowOutlineBottomInsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_shadow_outline_bottom_inset);
 
-        searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-
+        // Task bar colors
         taskBarViewDefaultBackgroundColor =
                 res.getColor(R.color.recents_task_bar_default_background_color);
         taskBarViewDefaultTextColor =
@@ -161,6 +198,7 @@ public class RecentsConfiguration {
         taskBarViewHighlightColor =
                 res.getColor(R.color.recents_task_bar_highlight_color);
 
+        // Task bar animations
         taskBarEnterAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
         taskBarEnterAnimDelay =
@@ -168,24 +206,20 @@ public class RecentsConfiguration {
         taskBarExitAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
 
+        // Nav bar scrim
         navBarScrimEnterDuration =
                 res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
-
-        fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                        com.android.internal.R.interpolator.fast_out_slow_in);
-        fastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
-        linearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.linear_out_slow_in);
 
         // Check if the developer options are enabled
         ContentResolver cr = context.getContentResolver();
         developerOptionsEnabled = Settings.Global.getInt(cr,
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
 
-        // Update the search widget id
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
-        searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout,
+                    "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
+                    Console.AnsiGreen);
+        }
     }
 
     /** Updates the system insets */
@@ -204,8 +238,10 @@ public class RecentsConfiguration {
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
     public void updateOnConfigurationChange() {
-        launchedFromAltTab = false;
-        launchedWithThumbnailAnimation = false;
+        launchedWithAltTab = false;
+        launchedFromAppWithThumbnail = false;
+        launchedFromAppWithScreenshot = false;
+        launchedFromHome = false;
     }
 
     /** Returns whether the search bar app widget exists. */
@@ -256,16 +292,5 @@ public class RecentsConfiguration {
             // In portrait, the search bar appears on the top
             searchBarSpaceBounds.set(0, 0, width, searchBarSpaceHeightPx);
         }
-    }
-
-    /** Converts from DPs to PXs */
-    public int pxFromDp(float size) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                size, mDisplayMetrics));
-    }
-    /** Converts from SPs to PXs */
-    public int pxFromSp(float size) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                size, mDisplayMetrics));
     }
 }

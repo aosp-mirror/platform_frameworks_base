@@ -2775,6 +2775,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      *
+     * Whether Recents is visible or not.
+     */
+    public static final int RECENT_APPS_VISIBLE = 0x00004000;
+
+    /**
+     * @hide
+     *
      * Makes system ui transparent.
      */
     public static final int SYSTEM_UI_TRANSPARENT = 0x00008000;
@@ -2782,7 +2789,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00007FFF;
+    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00003FFF;
 
     /**
      * These are the system UI flags that can be cleared by events outside

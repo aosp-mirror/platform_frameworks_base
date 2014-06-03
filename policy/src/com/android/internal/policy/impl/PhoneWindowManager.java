@@ -296,6 +296,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mLastInputMethodWindow = null;
     WindowState mLastInputMethodTargetWindow = null;
 
+    boolean mRecentsVisible;
     int mRecentAppsHeldModifiers;
     boolean mLanguageSwitchKeyPressed;
 
@@ -2632,6 +2633,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             });
+        } else if (mRecentsVisible) {
+            // Recents is started on top of Home, so when we launch home while recents is open, let
+            // it do its own animation and then finish itself
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+            hideRecentApps(false);
         } else {
             // no keyguard stuff to worry about, just launch home!
             try {
@@ -2723,6 +2729,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int adjustSystemUiVisibilityLw(int visibility) {
         mStatusBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
         mNavigationBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
+        mRecentsVisible = (visibility & View.RECENT_APPS_VISIBLE) > 0;
 
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.

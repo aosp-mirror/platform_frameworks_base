@@ -478,7 +478,7 @@ public class RecentsTaskLoader {
                 // Load the thumbnail (if possible and not the foremost task, from the cache)
                 if (!isForemostTask) {
                     task.thumbnail = mThumbnailCache.get(task.key);
-                    if (task.thumbnail != null) {
+                    if (task.thumbnail != null && !tasksToForceLoad.contains(task)) {
                         // Even though we get things from the cache, we should update them if
                         // they've changed in the bg
                         tasksToForceLoad.add(task);
@@ -489,6 +489,7 @@ public class RecentsTaskLoader {
                         Console.log(Constants.Log.App.TaskDataLoader,
                                 "[RecentsTaskLoader|loadingTaskThumbnail]");
                     }
+
                     task.thumbnail = ssp.getTaskThumbnail(task.key.id);
                     if (task.thumbnail != null) {
                         task.thumbnail.setHasAlpha(false);
@@ -511,20 +512,6 @@ public class RecentsTaskLoader {
                     "[RecentsTaskLoader|getAllTaskTopThumbnail]",
                     "" + (System.currentTimeMillis() - t1) + "ms");
         }
-
-        /*
-        // Get all the stacks
-        t1 = System.currentTimeMillis();
-        List<ActivityManager.StackInfo> stackInfos = ams.getAllStackInfos();
-        Console.log(Constants.Log.App.TimeSystemCalls, "[RecentsTaskLoader|getAllStackInfos]", "" + (System.currentTimeMillis() - t1) + "ms");
-        Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|stacks]", "" + tasks.size());
-        for (ActivityManager.StackInfo s : stackInfos) {
-            Console.log(Constants.Log.App.TaskDataLoader, "  [RecentsTaskLoader|stack]", s.toString());
-            if (stacks.containsKey(s.stackId)) {
-                stacks.get(s.stackId).setRect(s.bounds);
-            }
-        }
-        */
 
         // Start the task loader
         mLoader.start(context);

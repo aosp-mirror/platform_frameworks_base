@@ -55,8 +55,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskLaunching(boolean isTaskInStackBounds);
-        public void onEnterAnimationTriggered();
     }
+
+    RecentsConfiguration mConfig;
+    LayoutInflater mInflater;
 
     // The space partitioning root of this container
     SpaceNode mBSP;
@@ -67,10 +69,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     // Recents view callbacks
     RecentsViewCallbacks mCb;
 
-    LayoutInflater mInflater;
-
     public RecentsView(Context context) {
         super(context);
+        mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
         setWillNotDraw(false);
     }
@@ -160,18 +161,37 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Requests all task stacks to start their enter-recents animation */
-    public void startOnEnterAnimation() {
-        // Notify callbacks that we are starting the enter animation
-        mCb.onEnterAnimationTriggered();
-
+    public void startOnEnterAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child instanceof TaskStackView) {
                 TaskStackView stackView = (TaskStackView) child;
-                stackView.startOnEnterAnimation();
+                stackView.startOnEnterAnimation(ctx);
             }
         }
+    }
+
+    /** Requests all task stacks to start their exit-recents animation */
+    public void startOnExitAnimation(ViewAnimation.TaskViewExitContext ctx) {
+        // Handle the case when there are no views by incrementing and decrementing after all
+        // animations are started.
+        ctx.postAnimationTrigger.increment();
+
+        if (Constants.DebugFlags.App.EnableHomeTransition) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                if (child instanceof TaskStackView) {
+                    TaskStackView stackView = (TaskStackView) child;
+                    stackView.startOnExitAnimation(ctx);
+                }
+            }
+        }
+
+        // Handle the case when there are no views by incrementing and decrementing after all
+        // animations are started.
+        ctx.postAnimationTrigger.decrement();
     }
 
     /** Adds the search bar */
@@ -215,10 +235,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Get the search bar bounds and measure the search bar layout
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
         if (mSearchBar != null) {
             Rect searchBarSpaceBounds = new Rect();
-            config.getSearchBarBounds(width, height - config.systemInsets.top, searchBarSpaceBounds);
+            mConfig.getSearchBarBounds(width, height - mConfig.systemInsets.top, searchBarSpaceBounds);
             mSearchBar.measure(
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.height(), MeasureSpec.EXACTLY));
@@ -229,9 +248,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // In addition, we give it the full height, not including the top inset or search bar space,
         // since we want the tasks to render under the navigation buttons in portrait.
         Rect taskStackBounds = new Rect();
-        config.getTaskStackBounds(width, height, taskStackBounds);
-        int childWidth = width - config.systemInsets.right;
-        int childHeight = taskStackBounds.height() - config.systemInsets.top;
+        mConfig.getTaskStackBounds(width, height, taskStackBounds);
+        int childWidth = width - mConfig.systemInsets.right;
+        int childHeight = taskStackBounds.height() - mConfig.systemInsets.top;
 
         // Measure each TaskStackView
         int childCount = getChildCount();
@@ -259,23 +278,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Get the search bar bounds so that we lay it out
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
         if (mSearchBar != null) {
             Rect searchBarSpaceBounds = new Rect();
-            config.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(), searchBarSpaceBounds);
-            mSearchBar.layout(config.systemInsets.left + searchBarSpaceBounds.left,
-                    config.systemInsets.top + searchBarSpaceBounds.top,
-                    config.systemInsets.left + mSearchBar.getMeasuredWidth(),
-                    config.systemInsets.top + mSearchBar.getMeasuredHeight());
+            mConfig.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(), searchBarSpaceBounds);
+            mSearchBar.layout(mConfig.systemInsets.left + searchBarSpaceBounds.left,
+                    mConfig.systemInsets.top + searchBarSpaceBounds.top,
+                    mConfig.systemInsets.left + mSearchBar.getMeasuredWidth(),
+                    mConfig.systemInsets.top + mSearchBar.getMeasuredHeight());
         }
 
         // We offset the stack view by the left inset (if any), but lay it out under the search bar.
         // In addition, we offset our stack views by the top inset and search bar height, but not
         // the bottom insets because we want it to render under the navigation buttons.
         Rect taskStackBounds = new Rect();
-        config.getTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(), taskStackBounds);
-        left += config.systemInsets.left;
-        top += config.systemInsets.top + taskStackBounds.top;
+        mConfig.getTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(), taskStackBounds);
+        left += mConfig.systemInsets.left;
+        top += mConfig.systemInsets.top + taskStackBounds.top;
 
         // Layout each child
         // XXX: Based on the space node for that task view
@@ -324,8 +342,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Update the configuration with the latest system insets and trigger a relayout
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        config.updateSystemInsets(insets.getSystemWindowInsets());
+        mConfig.updateSystemInsets(insets.getSystemWindowInsets());
         requestLayout();
 
         return insets.consumeSystemWindowInsets(false, false, false, true);
@@ -365,6 +382,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
+                if (Console.Enabled) {
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                            Constants.Log.App.TimeRecentsLaunchKey, "preStartActivity");
+                }
+
                 TaskViewTransform transform;
                 View sourceView = tv;
                 int offsetX = 0;
@@ -374,11 +396,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     // If there is no actual task view, then use the stack view as the source view
                     // and then offset to the expected transform rect, but bound this to just
                     // outside the display rect (to ensure we don't animate from too far away)
-                    RecentsConfiguration config = RecentsConfiguration.getInstance();
                     sourceView = stackView;
                     transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
                     offsetX = transform.rect.left;
-                    offsetY = Math.min(transform.rect.top, config.displayRect.height());
+                    offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
                 } else {
                     transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
                 }
@@ -426,19 +447,23 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     onTaskRemoved(task);
                 }
 
-                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                        Constants.Log.App.TimeRecentsLaunchKey, "startActivity");
+                if (Console.Enabled) {
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                            Constants.Log.App.TimeRecentsLaunchKey, "startActivity");
+                }
             }
         };
 
-        Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                Constants.Log.App.TimeRecentsLaunchKey, "onTaskLaunched");
+        if (Console.Enabled) {
+            Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                    Constants.Log.App.TimeRecentsLaunchKey, "onTaskLaunched");
+        }
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null) {
             post(launchRunnable);
         } else {
-            tv.animateOnLeavingRecents(launchRunnable);
+            tv.animateOnLaunchingTask(launchRunnable);
         }
     }
 
