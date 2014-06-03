@@ -637,10 +637,12 @@ public abstract class PanelView extends FrameLayout {
         if (mHintAnimationRunning) {
             return true;
         }
-        if (x < mEdgeTapAreaWidth) {
+        if (x < mEdgeTapAreaWidth
+                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
             onEdgeClicked(false /* right */);
             return true;
-        } else if (x > getWidth() - mEdgeTapAreaWidth) {
+        } else if (x > getWidth() - mEdgeTapAreaWidth
+                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
             onEdgeClicked(true /* right */);
             return true;
         } else {
@@ -654,7 +656,7 @@ public abstract class PanelView extends FrameLayout {
                 startUnlockHintAnimation();
                 return true;
             case StatusBarState.SHADE_LOCKED:
-                // TODO: Go to Keyguard again.
+                mStatusBar.goToKeyguard();
                 return true;
             case StatusBarState.SHADE:
                 collapse();
