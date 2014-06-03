@@ -441,8 +441,11 @@ public class RippleDrawable extends LayerDrawable {
         final int count = mAnimatingRipplesCount;
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
-            ripples[i].cancel();
+            // Calling cancel may remove the ripple from the animating ripple
+            // array, so cache the reference before nulling it out.
+            final Ripple ripple = ripples[i];
             ripples[i] = null;
+            ripple.cancel();
         }
 
         mAnimatingRipplesCount = 0;
