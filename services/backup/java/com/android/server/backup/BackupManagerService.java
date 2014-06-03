@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupTransport;
 import android.app.backup.FullBackup;
 import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
@@ -82,7 +83,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StringBuilderPrinter;
 
-import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
 import com.android.server.AppWidgetBackupBridge;
@@ -2098,7 +2098,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
 
             mAgentBinder = null;
-            mStatus = BackupConstants.TRANSPORT_OK;
+            mStatus = BackupTransport.TRANSPORT_OK;
 
             // Sanity check: if the queue is empty we have no work to do.
             if (mOriginalQueue.isEmpty()) {
@@ -2121,14 +2121,14 @@ public class BackupManagerService extends IBackupManager.Stub {
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transportName);
 
                 // If we haven't stored package manager metadata yet, we must init the transport.
-                if (mStatus == BackupConstants.TRANSPORT_OK && pmState.length() <= 0) {
+                if (mStatus == BackupTransport.TRANSPORT_OK && pmState.length() <= 0) {
                     Slog.i(TAG, "Initializing (wiping) backup state and transport storage");
                     addBackupTrace("initializing transport " + transportName);
                     resetBackupState(mStateDir);  // Just to make sure.
                     mStatus = mTransport.initializeDevice();
 
                     addBackupTrace("transport.initializeDevice() == " + mStatus);
-                    if (mStatus == BackupConstants.TRANSPORT_OK) {
+                    if (mStatus == BackupTransport.TRANSPORT_OK) {
                         EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     } else {
                         EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
@@ -2141,7 +2141,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // directly and use a synthetic BackupRequest.  We always run this pass
                 // because it's cheap and this way we guarantee that we don't get out of
                 // step even if we're selecting among various transports at run time.
-                if (mStatus == BackupConstants.TRANSPORT_OK) {
+                if (mStatus == BackupTransport.TRANSPORT_OK) {
                     PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
                             mPackageManager, allAgentPackages());
                     mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
@@ -2149,7 +2149,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     addBackupTrace("PMBA invoke: " + mStatus);
                 }
 
-                if (mStatus == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                     // The backend reports that our dataset has been wiped.  Note this in
                     // the event log; the no-success code below will reset the backup
                     // state as well.
@@ -2158,13 +2158,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Slog.e(TAG, "Error in backup thread", e);
                 addBackupTrace("Exception in backup thread: " + e);
-                mStatus = BackupConstants.TRANSPORT_ERROR;
+                mStatus = BackupTransport.TRANSPORT_ERROR;
             } finally {
                 // If we've succeeded so far, invokeAgentForBackup() will have run the PM
                 // metadata and its completion/timeout callback will continue the state
                 // machine chain.  If it failed that won't happen; we handle that now.
                 addBackupTrace("exiting prelim: " + mStatus);
-                if (mStatus != BackupConstants.TRANSPORT_OK) {
+                if (mStatus != BackupTransport.TRANSPORT_OK) {
                     // if things went wrong at this point, we need to
                     // restage everything and try again later.
                     resetBackupState(mStateDir);  // Just to make sure.
@@ -2176,7 +2176,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         // Transport has been initialized and the PM metadata submitted successfully
         // if that was warranted.  Now we process the single next thing in the queue.
         void invokeNextAgent() {
-            mStatus = BackupConstants.TRANSPORT_OK;
+            mStatus = BackupTransport.TRANSPORT_OK;
             addBackupTrace("invoke q=" + mQueue.size());
 
             // Sanity check that we have work to do.  If not, skip to the end where
@@ -2236,39 +2236,39 @@ public class BackupManagerService extends IBackupManager.Stub {
                         // done here as long as we're successful so far.
                     } else {
                         // Timeout waiting for the agent
-                        mStatus = BackupConstants.AGENT_ERROR;
+                        mStatus = BackupTransport.AGENT_ERROR;
                     }
                 } catch (SecurityException ex) {
                     // Try for the next one.
                     Slog.d(TAG, "error in bind/backup", ex);
-                    mStatus = BackupConstants.AGENT_ERROR;
+                    mStatus = BackupTransport.AGENT_ERROR;
                             addBackupTrace("agent SE");
                 }
             } catch (NameNotFoundException e) {
                 Slog.d(TAG, "Package does not exist; skipping");
                 addBackupTrace("no such package");
-                mStatus = BackupConstants.AGENT_UNKNOWN;
+                mStatus = BackupTransport.AGENT_UNKNOWN;
             } finally {
                 mWakelock.setWorkSource(null);
 
                 // If there was an agent error, no timeout/completion handling will occur.
                 // That means we need to direct to the next state ourselves.
-                if (mStatus != BackupConstants.TRANSPORT_OK) {
+                if (mStatus != BackupTransport.TRANSPORT_OK) {
                     BackupState nextState = BackupState.RUNNING_QUEUE;
                     mAgentBinder = null;
 
                     // An agent-level failure means we reenqueue this one agent for
                     // a later retry, but otherwise proceed normally.
-                    if (mStatus == BackupConstants.AGENT_ERROR) {
+                    if (mStatus == BackupTransport.AGENT_ERROR) {
                         if (MORE_DEBUG) Slog.i(TAG, "Agent failure for " + request.packageName
                                 + " - restaging");
                         dataChangedImpl(request.packageName);
-                        mStatus = BackupConstants.TRANSPORT_OK;
+                        mStatus = BackupTransport.TRANSPORT_OK;
                         if (mQueue.isEmpty()) nextState = BackupState.FINAL;
-                    } else if (mStatus == BackupConstants.AGENT_UNKNOWN) {
+                    } else if (mStatus == BackupTransport.AGENT_UNKNOWN) {
                         // Failed lookup of the app, so we couldn't bring up an agent, but
                         // we're otherwise fine.  Just drop it and go on to the next as usual.
-                        mStatus = BackupConstants.TRANSPORT_OK;
+                        mStatus = BackupTransport.TRANSPORT_OK;
                     } else {
                         // Transport-level failure means we reenqueue everything
                         revertAndEndBackup();
@@ -2297,7 +2297,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // If everything actually went through and this is the first time we've
             // done a backup, we can now record what the current backup dataset token
             // is.
-            if ((mCurrentToken == 0) && (mStatus == BackupConstants.TRANSPORT_OK)) {
+            if ((mCurrentToken == 0) && (mStatus == BackupTransport.TRANSPORT_OK)) {
                 addBackupTrace("success; recording token");
                 try {
                     mCurrentToken = mTransport.getCurrentRestoreSet();
@@ -2314,7 +2314,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // state machine sequence and the wakelock is refcounted.
             synchronized (mQueueLock) {
                 mBackupRunning = false;
-                if (mStatus == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                     // Make sure we back up everything and perform the one-time init
                     clearMetadata();
                     if (DEBUG) Slog.d(TAG, "Server requires init; rerunning");
@@ -2395,7 +2395,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName,
                         e.toString());
                 agentErrorCleanup();
-                return BackupConstants.AGENT_ERROR;
+                return BackupTransport.AGENT_ERROR;
             }
 
             // At this point the agent is off and running.  The next thing to happen will
@@ -2403,7 +2403,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // for transport, or a timeout.  Either way the next phase will happen in
             // response to the TimeoutHandler interface callbacks.
             addBackupTrace("invoke success");
-            return BackupConstants.TRANSPORT_OK;
+            return BackupTransport.TRANSPORT_OK;
         }
 
         public void failAgent(IBackupAgent agent, String message) {
@@ -2484,11 +2484,11 @@ public class BackupManagerService extends IBackupManager.Stub {
             addBackupTrace("operation complete");
 
             ParcelFileDescriptor backupData = null;
-            mStatus = BackupConstants.TRANSPORT_OK;
+            mStatus = BackupTransport.TRANSPORT_OK;
             try {
                 int size = (int) mBackupDataName.length();
                 if (size > 0) {
-                    if (mStatus == BackupConstants.TRANSPORT_OK) {
+                    if (mStatus == BackupTransport.TRANSPORT_OK) {
                         backupData = ParcelFileDescriptor.open(mBackupDataName,
                                 ParcelFileDescriptor.MODE_READ_ONLY);
                         addBackupTrace("sending data to transport");
@@ -2501,7 +2501,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     // renaming *all* the output state files (see below) until that happens.
 
                     addBackupTrace("data delivered: " + mStatus);
-                    if (mStatus == BackupConstants.TRANSPORT_OK) {
+                    if (mStatus == BackupTransport.TRANSPORT_OK) {
                         addBackupTrace("finishing op on transport");
                         mStatus = mTransport.finishBackup();
                         addBackupTrace("finished: " + mStatus);
@@ -2514,7 +2514,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // After successful transport, delete the now-stale data
                 // and juggle the files so that next time we supply the agent
                 // with the new state file it just created.
-                if (mStatus == BackupConstants.TRANSPORT_OK) {
+                if (mStatus == BackupTransport.TRANSPORT_OK) {
                     mBackupDataName.delete();
                     mNewStateName.renameTo(mSavedStateName);
                     EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
@@ -2525,7 +2525,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Slog.e(TAG, "Transport error backing up " + pkgName, e);
                 EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
-                mStatus = BackupConstants.TRANSPORT_ERROR;
+                mStatus = BackupTransport.TRANSPORT_ERROR;
             } finally {
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
             }
@@ -2533,7 +2533,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // If we encountered an error here it's a transport-level failure.  That
             // means we need to halt everything and reschedule everything for next time.
             final BackupState nextState;
-            if (mStatus != BackupConstants.TRANSPORT_OK) {
+            if (mStatus != BackupTransport.TRANSPORT_OK) {
                 revertAndEndBackup();
                 nextState = BackupState.FINAL;
             } else {
@@ -4847,7 +4847,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
 
             // Assume error until we successfully init everything
-            mStatus = BackupConstants.TRANSPORT_ERROR;
+            mStatus = BackupTransport.TRANSPORT_ERROR;
 
             try {
                 // TODO: Log this before getAvailableRestoreSets, somehow
@@ -4902,7 +4902,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 return;
             }
 
-            mStatus = BackupConstants.TRANSPORT_OK;
+            mStatus = BackupTransport.TRANSPORT_OK;
             executeNextState(RestoreState.DOWNLOAD_DATA);
         }
 
@@ -4917,7 +4917,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             try {
                 mStatus = mTransport.startRestore(mToken,
                         mRestorePackages.toArray(new PackageInfo[0]));
-                if (mStatus != BackupConstants.TRANSPORT_OK) {
+                if (mStatus != BackupTransport.TRANSPORT_OK) {
                     Slog.e(TAG, "Error starting restore operation");
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     executeNextState(RestoreState.FINAL);
@@ -4926,7 +4926,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error communicating with transport for restore");
                 EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                mStatus = BackupConstants.TRANSPORT_ERROR;
+                mStatus = BackupTransport.TRANSPORT_ERROR;
                 executeNextState(RestoreState.FINAL);
                 return;
             }
@@ -4941,14 +4941,14 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (packageName == null) {
                     Slog.e(TAG, "Error getting first restore package");
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                    mStatus = BackupConstants.TRANSPORT_ERROR;
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
                     executeNextState(RestoreState.FINAL);
                     return;
                 } else if (packageName.equals("")) {
                     Slog.i(TAG, "No restore data available");
                     int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
                     EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, 0, millis);
-                    mStatus = BackupConstants.TRANSPORT_OK;
+                    mStatus = BackupTransport.TRANSPORT_OK;
                     executeNextState(RestoreState.FINAL);
                     return;
                 } else if (!packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
@@ -4979,7 +4979,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     Slog.e(TAG, "No restore metadata available, so not restoring settings");
                     EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, PACKAGE_MANAGER_SENTINEL,
                     "Package manager restore metadata missing");
-                    mStatus = BackupConstants.TRANSPORT_ERROR;
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
                     mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
                     executeNextState(RestoreState.FINAL);
                     return;
@@ -4987,7 +4987,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error communicating with transport for restore");
                 EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                mStatus = BackupConstants.TRANSPORT_ERROR;
+                mStatus = BackupTransport.TRANSPORT_ERROR;
                 mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
                 executeNextState(RestoreState.FINAL);
                 return;
@@ -5118,7 +5118,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to fetch restore data from transport");
-                mStatus = BackupConstants.TRANSPORT_ERROR;
+                mStatus = BackupTransport.TRANSPORT_ERROR;
                 executeNextState(RestoreState.FINAL);
             }
         }
@@ -5206,7 +5206,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     Slog.e(TAG, "SElinux restorecon failed for " + downloadFile);
                 }
 
-                if (mTransport.getRestoreData(stage) != BackupConstants.TRANSPORT_OK) {
+                if (mTransport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
                     // Transport-level failure, so we wind everything up and
                     // terminate the restore operation.
                     Slog.e(TAG, "Error getting restore data for " + packageName);
@@ -5450,12 +5450,12 @@ public class BackupManagerService extends IBackupManager.Stub {
                     long startRealtime = SystemClock.elapsedRealtime();
                     int status = transport.initializeDevice();
 
-                    if (status == BackupConstants.TRANSPORT_OK) {
+                    if (status == BackupTransport.TRANSPORT_OK) {
                         status = transport.finishBackup();
                     }
 
                     // Okay, the wipe really happened.  Clean up our local bookkeeping.
-                    if (status == BackupConstants.TRANSPORT_OK) {
+                    if (status == BackupTransport.TRANSPORT_OK) {
                         Slog.i(TAG, "Device init successful");
                         int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                         EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
