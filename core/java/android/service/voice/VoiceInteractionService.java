@@ -17,7 +17,6 @@
 package android.service.voice;
 
 import android.annotation.SdkConstant;
-import android.app.Instrumentation;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -65,6 +64,9 @@ public class VoiceInteractionService extends Service {
 
     IVoiceInteractionManagerService mSystemService;
 
+    private DspInfo mDspInfo;
+    private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
+
     public void startSession(Bundle args) {
         try {
             mSystemService.startSession(mInterface, args);
@@ -77,6 +79,8 @@ public class VoiceInteractionService extends Service {
         super.onCreate();
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
+        // TODO(sansid): Read mDspInfo from the SoundTriggerModel API.
     }
 
     @Override
@@ -85,5 +89,23 @@ public class VoiceInteractionService extends Service {
             return mInterface.asBinder();
         }
         return null;
+    }
+
+    /**
+     * Indicates if always-on hotword detection is available for the given keyphrase and locale
+     * on this system.
+     * Availability implies that the hardware on this system is capable of listening for
+     * the given keyphrase or not.
+     * @param keyphrase The keyphrase whose availability is being checked.
+     * @param locale The locale for which the availability is being checked.
+     * @return Indicates if always-on hotword detection is available for the given keyphrase.
+     * TODO(sansid): Unhide this.
+     * @hide
+     */
+    public final boolean isAlwaysOnHotwordAvailable(String keyphrase, String locale) {
+        // The available keyphrases is a combination of DSP availability and
+        // the keyphrases that have an enrollment application for them.
+        return mDspInfo != null
+                && mKeyphraseEnrollmentInfo.isKeyphraseEnrollmentSupported(keyphrase, locale);
     }
 }

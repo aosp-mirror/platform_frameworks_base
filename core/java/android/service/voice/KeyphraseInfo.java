@@ -2,7 +2,10 @@ package android.service.voice;
 
 import android.util.ArraySet;
 
-/** @hide */
+/**
+ * A Voice Keyphrase.
+ * @hide
+ */
 public class KeyphraseInfo {
     public final int id;
     public final String keyphrase;
