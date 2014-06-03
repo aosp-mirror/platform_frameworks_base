@@ -3103,7 +3103,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         break;
                     }
                     Integer score = (Integer) msg.obj;
-                    updateNetworkScore(nai, score);
+                    if (score != null) updateNetworkScore(nai, score.intValue());
                     break;
                 }
                 case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
@@ -5915,9 +5915,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void updateNetworkScore(NetworkAgentInfo nai, Integer scoreInteger) {
-        int score = scoreInteger.intValue();
-        // TODO
+    private void updateNetworkScore(NetworkAgentInfo nai, int score) {
+        if (DBG) log("updateNetworkScore for " + nai.name() + " to " + score);
+
+        nai.currentScore = score;
+
+        // TODO - This will not do the right thing if this network is lowering
+        // its score and has requests that can be served by other
+        // currently-active networks, or if the network is increasing its
+        // score and other networks have requests that can be better served
+        // by this network.
+        //
+        // Really we want to see if any of our requests migrate to other
+        // active/lingered networks and if any other requests migrate to us (depending
+        // on increasing/decreasing currentScore.  That's a bit of work and probably our
+        // score checking/network allocation code needs to be modularized so we can understand
+        // (see handleConnectionValided for an example).
+        //
+        // As a first order approx, lets just advertise the new score to factories.  If
+        // somebody can beat it they will nominate a network and our normal net replacement
+        // code will fire.
+        for (int i = 0; i < nai.networkRequests.size(); i++) {
+            NetworkRequest nr = nai.networkRequests.valueAt(i);
+            sendUpdatedScoreToFactories(nr, score);
+        }
     }
 
     // notify only this one new request of the current state
