@@ -3419,9 +3419,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private Drawable loadImageURI(Uri uri) {
         try {
-            final Context context = getContext();
-            return Drawable.createFromStreamThemed(
-                    context.getContentResolver().openInputStream(uri), null, context.getTheme());
+            return Drawable.createFromStream(
+                    getContext().getContentResolver().openInputStream(uri), null);
         } catch (Exception e) {
             Log.w(TAG, "Unable to open content: " + uri);
         }
