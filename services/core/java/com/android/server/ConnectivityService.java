@@ -2843,7 +2843,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private int getRestoreDefaultNetworkDelay(int networkType) {
+    @Override
+    public int getRestoreDefaultNetworkDelay(int networkType) {
         String restoreDefaultNetworkDelayStr = SystemProperties.get(
                 NETWORK_RESTORE_DELAY_PROP_NAME);
         if(restoreDefaultNetworkDelayStr != null &&
@@ -3137,6 +3138,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } catch (Exception e) {
                 loge("Exception removing network: " + e);
             }
+            // TODO - if we move the logic to the network agent (have them disconnect
+            // because they lost all their requests or because their score isn't good)
+            // then they would disconnect organically, report their new state and then
+            // disconnect the channel.
+            if (nai.networkInfo.isConnected()) {
+                nai.networkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED,
+                        null, null);
+            }
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
@@ -3203,7 +3212,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         if (bestNetwork != null) {
             if (VDBG) log("using " + bestNetwork.name());
-            bestNetwork.networkRequests.put(nri.request.requestId, nri.request);
+            bestNetwork.addRequest(nri.request);
             notifyNetworkCallback(bestNetwork, nri);
             score = bestNetwork.currentScore;
         }
@@ -3211,7 +3220,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (msg.what == EVENT_REGISTER_NETWORK_REQUEST) {
             if (DBG) log("sending new NetworkRequest to factories");
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-                nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, nri.request);
+                nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score,
+                        0, nri.request);
             }
         }
     }
@@ -5279,7 +5289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
-            Messenger messenger, int timeoutSec, IBinder binder) {
+            Messenger messenger, int timeoutSec, IBinder binder, boolean legacy) {
         if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
                 == false) {
             enforceConnectivityInternalPermission();
@@ -5291,7 +5301,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             throw new IllegalArgumentException("Bad timeout specified");
         }
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities), false, nextNetworkRequestId());
+                networkCapabilities), legacy, nextNetworkRequestId());
         if (DBG) log("requestNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.REQUEST);
@@ -5392,7 +5402,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(), nextNetId(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
             new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler);
-
+        if (VDBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
     }
 
@@ -5439,7 +5449,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mClat.stopClat();
             }
             // If the link requires clat to be running, then start the daemon now.
-            if (newLp != null && na.networkInfo.isConnected()) {
+            if (na.networkInfo.isConnected()) {
                 mClat.startClat(na);
             } else {
                 mClat.stopClat();
@@ -5658,7 +5668,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         if (VDBG) log("   accepting network in place of null");
                     }
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
-                    newNetwork.networkRequests.put(nri.request.requestId, nri.request);
+                    newNetwork.addRequest(nri.request);
                     keep = true;
                     // TODO - this could get expensive if we have alot of requests for this
                     // network.  Think about if there is a way to reduce this.  Push
@@ -5810,15 +5820,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType) {
         if (VDBG) log("notifyType " + notifyType + " for " + networkAgent.name());
-        boolean needsBroadcasts = false;
         for (int i = 0; i < networkAgent.networkRequests.size(); i++) {
             NetworkRequest nr = networkAgent.networkRequests.valueAt(i);
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
             if (VDBG) log(" sending notification for " + nr);
-            if (nr.needsBroadcasts) needsBroadcasts = true;
             callCallbackForRequest(nri, networkAgent, notifyType);
         }
-        if (needsBroadcasts) {
+        if (networkAgent.needsBroadcasts) {
             if (notifyType == ConnectivityManager.CALLBACK_AVAILABLE) {
                 sendConnectedBroadcastDelayed(networkAgent.networkInfo,
                         getConnectivityChangeDelay());
