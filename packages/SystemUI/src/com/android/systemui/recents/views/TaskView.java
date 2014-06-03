@@ -234,7 +234,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.setTranslationY(-mBarView.getMeasuredHeight());
         mBarView.animate()
                 .translationY(0)
-                .setStartDelay(200)
+                .setStartDelay(config.taskBarEnterAnimDelay)
                 .setInterpolator(config.fastOutSlowInInterpolator)
                 .setDuration(config.taskBarEnterAnimDuration)
                 .withLayer()
