@@ -52,7 +52,7 @@ public class InterceptedNotifications {
         for (int i = 0; i < n; i++) {
             final StatusBarNotification sbn = mIntercepted.valueAt(i);
             mReleased.add(sbn.getKey());
-            mBar.addNotificationInternal(sbn, null);
+            mBar.displayNotification(sbn, null);
         }
         mIntercepted.clear();
         updateSyntheticNotification();
@@ -71,16 +71,17 @@ public class InterceptedNotifications {
     public void retryIntercepts(Ranking ranking) {
         if (ranking == null) return;
 
-        boolean changed = false;
         final int N = mIntercepted.size();
+        final ArraySet<String> removed = new ArraySet<String>(N);
         for (int i = 0; i < N; i++) {
             final StatusBarNotification sbn = mIntercepted.valueAt(i);
             if (!tryIntercept(sbn, ranking)) {
-                changed = true;
-                mBar.addNotificationInternal(sbn, ranking);
+                removed.add(sbn.getKey());
+                mBar.displayNotification(sbn, ranking);
             }
         }
-        if (changed) {
+        if (!removed.isEmpty()) {
+            mIntercepted.removeAll(removed);
             updateSyntheticNotification();
         }
     }
@@ -94,12 +95,6 @@ public class InterceptedNotifications {
 
     public boolean isSyntheticEntry(Entry ent) {
         return ent.key.equals(mSynKey);
-    }
-
-    public void update(StatusBarNotification notification) {
-        if (mIntercepted.containsKey(notification.getKey())) {
-            mIntercepted.put(notification.getKey(), notification);
-        }
     }
 
     private boolean shouldDisplayIntercepted() {
@@ -129,7 +124,7 @@ public class InterceptedNotifications {
                 mBar.getCurrentUserHandle());
         if (mSynKey == null) {
             mSynKey = sbn.getKey();
-            mBar.addNotificationInternal(sbn, null);
+            mBar.displayNotification(sbn, null);
         } else {
            mBar.updateNotificationInternal(sbn, null);
         }

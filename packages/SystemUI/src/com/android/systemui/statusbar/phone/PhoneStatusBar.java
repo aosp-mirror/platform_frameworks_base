@@ -1059,14 +1059,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void addNotificationInternal(StatusBarNotification notification, Ranking ranking) {
-        if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
-        Entry shadeEntry = createNotificationViews(notification);
-        if (shadeEntry == null) {
-            return;
-        }
+        if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
         if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification, ranking)) {
             // Forward the ranking so we can sort the new notification.
             mNotificationData.updateRanking(ranking);
+            return;
+        }
+        mIntercepted.remove(notification.getKey());
+        displayNotification(notification, ranking);
+    }
+
+    public void displayNotification(StatusBarNotification notification,
+            Ranking ranking) {
+        Entry shadeEntry = createNotificationViews(notification);
+        if (shadeEntry == null) {
             return;
         }
         if (mUseHeadsUp && shouldInterrupt(notification)) {
@@ -1124,7 +1130,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void updateNotificationInternal(StatusBarNotification notification, Ranking ranking) {
         super.updateNotificationInternal(notification, ranking);
-        mIntercepted.update(notification);
+        // if we're here, then the notification is already in the shade
+        mIntercepted.remove(notification.getKey());
     }
 
     @Override
