@@ -908,7 +908,7 @@ public abstract class Drawable {
             InputStream is, String srcName) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
         try {
-            return createFromResourceStream(res, value, is, srcName);
+            return createFromResourceStream(res, value, is, srcName, null);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }

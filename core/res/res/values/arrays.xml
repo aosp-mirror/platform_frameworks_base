@@ -473,8 +473,6 @@
        <item>@drawable/scrubber_track_qntm_alpha</item>
        <item>@drawable/spinner_qntm_am_alpha</item>
        <item>@drawable/switch_track_qntm_alpha</item>
-       <item>@drawable/tab_indicator_normal_qntm_alpha</item>
-       <item>@drawable/tab_indicator_selected_qntm_alpha</item>
        <item>@drawable/text_cursor_qntm_alpha</item>
        <item>@drawable/textfield_activated_qntm_alpha</item>
        <item>@drawable/textfield_default_qntm_alpha</item>
