@@ -17,6 +17,8 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -29,7 +31,7 @@ import java.util.Set;
  * A class to encapsulate a collection of attributes describing information about an audio
  * player or recorder.
  */
-public final class AudioAttributes {
+public final class AudioAttributes implements Parcelable {
     private final static String TAG = "AudioAttributes";
 
     /**
@@ -192,6 +194,7 @@ public final class AudioAttributes {
     }
 
     /**
+     * @hide
      * Return the set of tags.
      * @return a read-only set of all tags stored as strings.
      */
@@ -324,6 +327,7 @@ public final class AudioAttributes {
         }
 
         /**
+         * @hide
          * Add a custom tag stored as a string
          * @param tag
          * @return the same Builder instance.
@@ -409,6 +413,49 @@ public final class AudioAttributes {
                 + " flags=0x" + Integer.toHexString(mFlags)
                 + " tags=" + mTags);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mUsage);
+        dest.writeInt(mContentType);
+        dest.writeInt(mFlags);
+        String[] tagsArray = new String[mTags.size()];
+        mTags.toArray(tagsArray);
+        dest.writeStringArray(tagsArray);
+    }
+
+    private AudioAttributes(Parcel in) {
+        mUsage = in.readInt();
+        mContentType = in.readInt();
+        mFlags = in.readInt();
+        mTags = new HashSet<String>();
+        String[] tagsArray = in.readStringArray();
+        for (int i = tagsArray.length - 1 ; i >= 0 ; i--) {
+            mTags.add(tagsArray[i]);
+        }
+    }
+
+    /** @hide */
+    public static final Parcelable.Creator<AudioAttributes> CREATOR
+            = new Parcelable.Creator<AudioAttributes>() {
+        /**
+         * Rebuilds an AudioAttributes previously stored with writeToParcel().
+         * @param p Parcel object to read the AudioAttributes from
+         * @return a new AudioAttributes created from the data in the parcel
+         */
+        public AudioAttributes createFromParcel(Parcel p) {
+            return new AudioAttributes(p);
+        }
+        public AudioAttributes[] newArray(int size) {
+            return new AudioAttributes[size];
+        }
+    };
+
 
     /** @hide */
     @IntDef({

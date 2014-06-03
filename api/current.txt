@@ -13801,11 +13801,12 @@ package android.media {
     method public void stop();
   }
 
-  public final class AudioAttributes {
+  public final class AudioAttributes implements android.os.Parcelable {
+    method public int describeContents();
     method public int getContentType();
     method public int getFlags();
-    method public java.util.Set<java.lang.String> getTags();
     method public int getUsage();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_TYPE_MOVIE = 3; // 0x3
     field public static final int CONTENT_TYPE_MUSIC = 2; // 0x2
     field public static final int CONTENT_TYPE_SONIFICATION = 4; // 0x4
@@ -13832,7 +13833,6 @@ package android.media {
   public static class AudioAttributes.Builder {
     ctor public AudioAttributes.Builder();
     ctor public AudioAttributes.Builder(android.media.AudioAttributes);
-    method public android.media.AudioAttributes.Builder addTag(java.lang.String);
     method public android.media.AudioAttributes build();
     method public android.media.AudioAttributes.Builder setContentType(int);
     method public android.media.AudioAttributes.Builder setFlags(int);
