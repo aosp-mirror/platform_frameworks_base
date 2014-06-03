@@ -31,6 +31,8 @@
 #include <utils/RefBase.h>
 #include <cutils/properties.h>
 
+#include <string.h>
+
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
@@ -175,7 +177,7 @@ static void DngCreator_nativeClassInit(JNIEnv* env, jclass clazz) {
 }
 
 static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPtr,
-        jobject resultsPtr) {
+        jobject resultsPtr, jstring formattedCaptureTime) {
     ALOGV("%s:", __FUNCTION__);
     CameraMetadata characteristics;
     CameraMetadata results;
@@ -205,7 +207,6 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
     OpcodeListBuilder::CfaLayout opcodeCfaLayout = OpcodeListBuilder::CFA_RGGB;
 
     // TODO: Greensplit.
-    // TODO: UniqueCameraModel
     // TODO: Add remaining non-essential tags
     {
         // Set orientation
@@ -349,6 +350,176 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
         uint16_t cfaLayout = 1;
         BAIL_IF_INVALID(writer->addEntry(TAG_CFALAYOUT, 1, &cfaLayout, TIFF_IFD_0),
                 env, TAG_CFALAYOUT);
+    }
+
+    {
+        // image description
+        uint8_t imageDescription = '\0'; // empty
+        BAIL_IF_INVALID(writer->addEntry(TAG_IMAGEDESCRIPTION, 1, &imageDescription, TIFF_IFD_0),
+                env, TAG_IMAGEDESCRIPTION);
+    }
+
+    {
+        // make
+        char manufacturer[PROPERTY_VALUE_MAX];
+
+        // Use "" to represent unknown make as suggested in TIFF/EP spec.
+        property_get("ro.product.manufacturer", manufacturer, "");
+        uint32_t count = static_cast<uint32_t>(strlen(manufacturer)) + 1;
+
+        BAIL_IF_INVALID(writer->addEntry(TAG_MAKE, count, reinterpret_cast<uint8_t*>(manufacturer),
+                TIFF_IFD_0), env, TAG_MAKE);
+    }
+
+    {
+        // model
+        char model[PROPERTY_VALUE_MAX];
+
+        // Use "" to represent unknown model as suggested in TIFF/EP spec.
+        property_get("ro.product.model", model, "");
+        uint32_t count = static_cast<uint32_t>(strlen(model)) + 1;
+
+        BAIL_IF_INVALID(writer->addEntry(TAG_MODEL, count, reinterpret_cast<uint8_t*>(model),
+                TIFF_IFD_0), env, TAG_MODEL);
+    }
+
+    {
+        // x resolution
+        uint32_t xres[] = { 72, 1 }; // default 72 ppi
+        BAIL_IF_INVALID(writer->addEntry(TAG_XRESOLUTION, 1, xres, TIFF_IFD_0),
+                env, TAG_XRESOLUTION);
+
+        // y resolution
+        uint32_t yres[] = { 72, 1 }; // default 72 ppi
+        BAIL_IF_INVALID(writer->addEntry(TAG_YRESOLUTION, 1, yres, TIFF_IFD_0),
+                env, TAG_YRESOLUTION);
+
+        uint16_t unit = 2; // inches
+        BAIL_IF_INVALID(writer->addEntry(TAG_RESOLUTIONUNIT, 1, &unit, TIFF_IFD_0),
+                env, TAG_RESOLUTIONUNIT);
+    }
+
+    {
+        // software
+        char software[PROPERTY_VALUE_MAX];
+        property_get("ro.build.fingerprint", software, "");
+        uint32_t count = static_cast<uint32_t>(strlen(software)) + 1;
+        BAIL_IF_INVALID(writer->addEntry(TAG_SOFTWARE, count, reinterpret_cast<uint8_t*>(software),
+                TIFF_IFD_0), env, TAG_SOFTWARE);
+    }
+
+    {
+        // datetime
+        const size_t DATETIME_COUNT = 20;
+        const char* captureTime = env->GetStringUTFChars(formattedCaptureTime, NULL);
+
+        size_t len = strlen(captureTime) + 1;
+        if (len != DATETIME_COUNT) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "Timestamp string length is not required 20 characters");
+            return;
+        }
+
+        BAIL_IF_INVALID(writer->addEntry(TAG_DATETIME, DATETIME_COUNT,
+                reinterpret_cast<const uint8_t*>(captureTime), TIFF_IFD_0), env, TAG_DATETIMEORIGINAL);
+
+        // datetime original
+        BAIL_IF_INVALID(writer->addEntry(TAG_DATETIMEORIGINAL, DATETIME_COUNT,
+                reinterpret_cast<const uint8_t*>(captureTime), TIFF_IFD_0), env, TAG_DATETIMEORIGINAL);
+        env->ReleaseStringUTFChars(formattedCaptureTime, captureTime);
+    }
+
+    {
+        // TIFF/EP standard id
+        uint8_t standardId[] = { 1, 0, 0, 0 };
+        BAIL_IF_INVALID(writer->addEntry(TAG_TIFFEPSTANDARDID, 4, standardId,
+                TIFF_IFD_0), env, TAG_TIFFEPSTANDARDID);
+    }
+
+    {
+        // copyright
+        uint8_t copyright = '\0'; // empty
+        BAIL_IF_INVALID(writer->addEntry(TAG_COPYRIGHT, 1, &copyright,
+                TIFF_IFD_0), env, TAG_COPYRIGHT);
+    }
+
+    {
+        // exposure time
+        camera_metadata_entry entry =
+            results.find(ANDROID_SENSOR_EXPOSURE_TIME);
+        BAIL_IF_EMPTY(entry, env, TAG_EXPOSURETIME);
+
+        int64_t exposureTime = *(entry.data.i64);
+
+        if (exposureTime < 0) {
+            // Should be unreachable
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "Negative exposure time in metadata");
+            return;
+        }
+
+        // Ensure exposure time doesn't overflow (for exposures > 4s)
+        uint32_t denominator = 1000000000;
+        while (exposureTime > UINT32_MAX) {
+            exposureTime >>= 1;
+            denominator >>= 1;
+            if (denominator == 0) {
+                // Should be unreachable
+                jniThrowException(env, "java/lang/IllegalArgumentException",
+                        "Exposure time too long");
+                return;
+            }
+        }
+
+        uint32_t exposure[] = { static_cast<uint32_t>(exposureTime), denominator };
+        BAIL_IF_INVALID(writer->addEntry(TAG_EXPOSURETIME, 1, exposure,
+                TIFF_IFD_0), env, TAG_EXPOSURETIME);
+
+    }
+
+    {
+        // ISO speed ratings
+        camera_metadata_entry entry =
+            results.find(ANDROID_SENSOR_SENSITIVITY);
+        BAIL_IF_EMPTY(entry, env, TAG_ISOSPEEDRATINGS);
+
+        int32_t tempIso = *(entry.data.i32);
+        if (tempIso < 0) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                                    "Negative ISO value");
+            return;
+        }
+
+        if (tempIso > UINT16_MAX) {
+            ALOGW("%s: ISO value overflows UINT16_MAX, clamping to max", __FUNCTION__);
+            tempIso = UINT16_MAX;
+        }
+
+        uint16_t iso = static_cast<uint16_t>(tempIso);
+        BAIL_IF_INVALID(writer->addEntry(TAG_ISOSPEEDRATINGS, 1, &iso,
+                TIFF_IFD_0), env, TAG_ISOSPEEDRATINGS);
+    }
+
+    {
+        // focal length
+        camera_metadata_entry entry =
+            results.find(ANDROID_LENS_FOCAL_LENGTH);
+        BAIL_IF_EMPTY(entry, env, TAG_FOCALLENGTH);
+
+        uint32_t focalLength[] = { static_cast<uint32_t>(*(entry.data.f) * 100), 100 };
+        BAIL_IF_INVALID(writer->addEntry(TAG_FOCALLENGTH, 1, focalLength,
+                TIFF_IFD_0), env, TAG_FOCALLENGTH);
+    }
+
+    {
+        // f number
+        camera_metadata_entry entry =
+            results.find(ANDROID_LENS_APERTURE);
+        BAIL_IF_EMPTY(entry, env, TAG_FNUMBER);
+
+        uint32_t fnum[] = { static_cast<uint32_t>(*(entry.data.f) * 100), 100 };
+        BAIL_IF_INVALID(writer->addEntry(TAG_FNUMBER, 1, fnum,
+                TIFF_IFD_0), env, TAG_FNUMBER);
     }
 
     {
@@ -751,7 +922,8 @@ static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject
 static JNINativeMethod gDngCreatorMethods[] = {
     {"nativeClassInit",        "()V", (void*) DngCreator_nativeClassInit},
     {"nativeInit", "(Landroid/hardware/camera2/impl/CameraMetadataNative;"
-            "Landroid/hardware/camera2/impl/CameraMetadataNative;)V", (void*) DngCreator_init},
+            "Landroid/hardware/camera2/impl/CameraMetadataNative;Ljava/lang/String;)V",
+            (void*) DngCreator_init},
     {"nativeDestroy",           "()V",      (void*) DngCreator_destroy},
     {"nativeSetOrientation",    "(I)V",     (void*) DngCreator_nativeSetOrientation},
     {"nativeSetThumbnailBitmap","(Landroid/graphics/Bitmap;)V",
