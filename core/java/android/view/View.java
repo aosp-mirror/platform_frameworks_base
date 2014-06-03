@@ -16191,6 +16191,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Set this view's optical insets.
+     *
+     * <p>This method should be treated similarly to setMeasuredDimension and not as a general
+     * property. Views that compute their own optical insets should call it as part of measurement.
+     * This method does not request layout. If you are setting optical insets outside of
+     * measure/layout itself you will want to call requestLayout() yourself.
+     * </p>
+     * @hide
+     */
+    public void setOpticalInsets(Insets insets) {
+        mLayoutInsets = insets;
+    }
+
+    /**
      * Changes the selection state of this view. A view can be selected or not.
      * Note that selection is not the same as focus. Views are typically
      * selected in the context of an AdapterView like ListView or GridView;
