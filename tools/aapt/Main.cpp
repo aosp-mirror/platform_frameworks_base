@@ -104,11 +104,6 @@ void usage(void)
         "            en\n"
         "            port,en\n"
         "            port,land,en_US\n"
-        "       If you put the special locale, zz_ZZ on the list, it will perform\n"
-        "       pseudolocalization on the default locale, modifying all of the\n"
-        "       strings so you can look for strings that missed the\n"
-        "       internationalization process.  For example:\n"
-        "            port,land,zz_ZZ\n"
         "   -d  one or more device assets to include, separated by commas\n"
         "   -f  force overwrite of existing files\n"
         "   -g  specify a pixel tolerance to force images to grayscale, default 0\n"
@@ -138,6 +133,8 @@ void usage(void)
         "   --debug-mode\n"
         "       inserts android:debuggable=\"true\" in to the application node of the\n"
         "       manifest, making the application debuggable even on production devices.\n"
+        "   --pseudo-localize\n"
+        "       generate resources for pseudo-locales (en-XA and ar-XB).\n"
         "   --min-sdk-version\n"
         "       inserts android:minSdkVersion in to manifest.  If the version is 7 or\n"
         "       higher, the default encoding for resources will be in UTF-8.\n"
@@ -614,6 +611,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     gUserIgnoreAssets = argv[0];
+                } else if (strcmp(cp, "-pseudo-localize") == 0) {
+                    bundle.setPseudolocalize(PSEUDO_ACCENTED | PSEUDO_BIDI);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
