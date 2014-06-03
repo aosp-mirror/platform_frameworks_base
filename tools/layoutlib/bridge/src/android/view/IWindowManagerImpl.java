@@ -428,11 +428,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
-        return false;
-    }
-
-    @Override
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;
