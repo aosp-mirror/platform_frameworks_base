@@ -22,6 +22,25 @@
     <application
         android:hardwareAccelerated="true"
         android:label="vector" >
+
+         <activity
+            android:name="VectorDrawablePerformance"
+            android:label="Vector Performance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name="VectorDrawableAnimation"
+            android:label="VectorTestAnimation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="VectorDrawableTest"
             android:label="Vector Icon" >
@@ -41,19 +60,7 @@
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-
-         <activity
-            android:name="VectorDrawablePerformance"
-            android:label="Vector Performance" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="com.android.test.dynamic.TEST" />
-            </intent-filter>
-
-        </activity>
-
-         <activity
+        <activity
             android:name="VectorDrawableDupPerf"
             android:label="Vector Performance of clones" >
             <intent-filter>
