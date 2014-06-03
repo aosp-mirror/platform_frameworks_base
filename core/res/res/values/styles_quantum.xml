@@ -590,7 +590,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ProgressBar" parent="Widget.ProgressBar">
-        <item name="indeterminateDrawable">@drawable/progress_medium_holo</item>
+        <item name="indeterminateDrawable">@drawable/progress_medium_quantum</item>
     </style>
 
     <style name="Widget.Quantum.ProgressBar.Inverse"/>
@@ -603,14 +603,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ProgressBar.Small" parent="Widget.ProgressBar.Small">
-        <item name="indeterminateDrawable">@drawable/progress_small_holo</item>
+        <item name="indeterminateDrawable">@drawable/progress_small_quantum</item>
     </style>
 
     <style name="Widget.Quantum.ProgressBar.Small.Inverse"/>
     <style name="Widget.Quantum.ProgressBar.Small.Title"/>
 
     <style name="Widget.Quantum.ProgressBar.Large" parent="Widget.ProgressBar.Large">
-        <item name="indeterminateDrawable">@drawable/progress_large_holo</item>
+        <item name="indeterminateDrawable">@drawable/progress_large_quantum</item>
     </style>
 
     <style name="Widget.Quantum.ProgressBar.Large.Inverse"/>
