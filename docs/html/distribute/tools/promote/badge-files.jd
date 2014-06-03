@@ -21,9 +21,10 @@ two Google Play badges.</p>
 
        <a href="{@docRoot}downloads/brand/v2/english_get.ai">English (English)</a><br/>
 
+       <a href="{@docRoot}downloads/brand/af_generic_rgb_wo.ai">Afrikaans (Afrikaans)</a><br/>
+
        <a href="{@docRoot}downloads/brand/v2/amharic_get.ai">ኣማርኛ (Amharic)</a><br/>
 
-       <a href="{@docRoot}downloads/brand/af_generic_rgb_wo.ai">Afrikaans (Afrikaans)</a><br/>
 <!--
        <a href="{@docRoot}downloads/brand/ar_generic_rgb_wo.ai">العربية (Arabic)</a><br/>
 -->
@@ -286,6 +287,3 @@ Guidelines</a>.
 <p>To quickly create a badge that links to your apps on Google Play,
 use the <a
 href="{@docRoot}distribute/tools/promote/badges.html">Googe Play badge generator</a>.</p>
-    
-    
-    
