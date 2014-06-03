@@ -242,7 +242,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetd_client \
 	libsoundtrigger \
 	libminikin \
-	libstlport
+	libstlport \
+	libprocessgroup \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

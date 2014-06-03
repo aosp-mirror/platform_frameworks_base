@@ -1085,4 +1085,18 @@ public class Process {
          */
         public boolean usingWrapper;
     }
+
+    /**
+     * Kill all processes in a process group started for the given
+     * pid.
+     * @hide
+     */
+    public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+     * Remove all process groups.  Expected to be called when ActivityManager
+     * is restarted.
+     * @hide
+     */
+    public static final native void removeAllProcessGroups();
 }
