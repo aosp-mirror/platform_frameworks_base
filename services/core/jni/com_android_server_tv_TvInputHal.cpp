@@ -316,7 +316,7 @@ static JNINativeMethod gTvInputHalMethods[] = {
             (void*) nativeOpen },
     { "nativeSetSurface", "(JIILandroid/view/Surface;)I",
             (void*) nativeSetSurface },
-    { "nativeGetStreamConfigs", "(JII)[Landroid/tv/TvStreamConfig;",
+    { "nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
             (void*) nativeGetStreamConfigs },
     { "nativeClose", "(J)V",
             (void*) nativeClose },
@@ -346,10 +346,10 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
             gTvInputHalClassInfo.streamConfigsChanged, clazz,
             "streamConfigsChangedFromNative", "(I)V");
 
-    FIND_CLASS(gTvStreamConfigClassInfo.clazz, "android/tv/TvStreamConfig");
+    FIND_CLASS(gTvStreamConfigClassInfo.clazz, "android/media/tv/TvStreamConfig");
     gTvStreamConfigClassInfo.clazz = jclass(env->NewGlobalRef(gTvStreamConfigClassInfo.clazz));
 
-    FIND_CLASS(gTvStreamConfigBuilderClassInfo.clazz, "android/tv/TvStreamConfig$Builder");
+    FIND_CLASS(gTvStreamConfigBuilderClassInfo.clazz, "android/media/tv/TvStreamConfig$Builder");
     gTvStreamConfigBuilderClassInfo.clazz =
             jclass(env->NewGlobalRef(gTvStreamConfigBuilderClassInfo.clazz));
 
@@ -360,27 +360,27 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.streamId,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "streamId", "(I)Landroid/tv/TvStreamConfig$Builder;");
+            "streamId", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.type,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "type", "(I)Landroid/tv/TvStreamConfig$Builder;");
+            "type", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.maxWidth,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "maxWidth", "(I)Landroid/tv/TvStreamConfig$Builder;");
+            "maxWidth", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.maxHeight,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "maxHeight", "(I)Landroid/tv/TvStreamConfig$Builder;");
+            "maxHeight", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.generation,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "generation", "(I)Landroid/tv/TvStreamConfig$Builder;");
+            "generation", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.build,
             gTvStreamConfigBuilderClassInfo.clazz,
-            "build", "()Landroid/tv/TvStreamConfig;");
+            "build", "()Landroid/media/tv/TvStreamConfig;");
 
     return 0;
 }

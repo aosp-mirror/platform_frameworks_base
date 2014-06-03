@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.media.tv.ITvInputHardware;
+import android.media.tv.ITvInputHardwareCallback;
+import android.media.tv.ITvInputClient;
+import android.media.tv.TvInputHardwareInfo;
+import android.media.tv.TvInputInfo;
 import android.net.Uri;
-import android.tv.ITvInputHardware;
-import android.tv.ITvInputHardwareCallback;
-import android.tv.ITvInputClient;
-import android.tv.TvInputHardwareInfo;
-import android.tv.TvInputInfo;
 import android.view.Surface;
 
 /**

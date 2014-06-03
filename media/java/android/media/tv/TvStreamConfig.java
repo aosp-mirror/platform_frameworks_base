@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.os.Parcel;
 import android.os.Parcelable;

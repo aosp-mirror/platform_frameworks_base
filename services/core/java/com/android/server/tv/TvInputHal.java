@@ -16,10 +16,10 @@
 
 package com.android.server.tv;
 
+import android.media.tv.TvInputHardwareInfo;
+import android.media.tv.TvStreamConfig;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.tv.TvInputHardwareInfo;
-import android.tv.TvStreamConfig;
 import android.view.Surface;
 
 /**

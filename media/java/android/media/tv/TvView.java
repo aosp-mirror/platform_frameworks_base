@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.tv.TvInputManager.Session;
+import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
+import android.media.tv.TvInputManager.SessionCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.tv.TvInputManager.Session;
-import android.tv.TvInputManager.Session.FinishedInputEventCallback;
-import android.tv.TvInputManager.SessionCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputEvent;

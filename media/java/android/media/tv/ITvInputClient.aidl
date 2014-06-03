@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.tv;
+package android.media.tv;
 
 import android.content.ComponentName;
+import android.media.tv.ITvInputSession;
 import android.os.Bundle;
-import android.tv.ITvInputSession;
 import android.view.InputChannel;
 
 /**
