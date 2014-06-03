@@ -119,6 +119,19 @@ interface ISms {
             in PendingIntent sentIntent, in PendingIntent deliveryIntent);
 
     /**
+     * Inject an SMS PDU into the android platform.
+     *
+     * @param pdu is the byte array of pdu to be injected into android application framework
+     * @param format is the format of SMS pdu (android.telephony.SmsMessage.FORMAT_3GPP or
+     * android.telephony.SmsMessage.FORMAT_3GPP2)
+     * @param receivedIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is successfully received by the
+     *  android application framework. This intent is broadcasted at
+     *  the same time an SMS received from radio is acknowledged back.
+     */
+    void injectSmsPdu(in byte[] pdu, String format, in PendingIntent receivedIntent);
+
+    /**
      * Send a multi-part text based SMS.
      *
      * @param destinationAddress the address to send the message to
