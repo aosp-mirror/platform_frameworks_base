@@ -308,114 +308,6 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * Opens a logical channel to the ICC card.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHO command.
-     *
-     * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @return The logical channel id which is set to -1 on error.
-     */
-    int iccOpenLogicalChannel(String AID);
-
-    /**
-     * Closes a previously opened logical channel to the ICC card.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHC command.
-     *
-     * @param channel is the channel id to be closed as retruned by a
-     *            successful iccOpenLogicalChannel.
-     * @return true if the channel was closed successfully.
-     */
-    boolean iccCloseLogicalChannel(int channel);
-
-    /**
-     * Transmit an APDU to the ICC card over a logical channel.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CGLA command.
-     *
-     * @param channel is the channel id to be closed as retruned by a
-     *            successful iccOpenLogicalChannel.
-     * @param cla Class of the APDU command.
-     * @param instruction Instruction of the APDU command.
-     * @param p1 P1 value of the APDU command.
-     * @param p2 P2 value of the APDU command.
-     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
-     *            is sent to the SIM.
-     * @param data Data to be sent with the APDU.
-     * @return The APDU response from the ICC card with the status appended at
-     *            the end. If an error occurs, an empty string is returned.
-     */
-    String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
-            int p1, int p2, int p3, String data);
-
-    /**
-     * Send ENVELOPE to the SIM and returns the response.
-     *
-     * @param contents  String containing SAT/USAT response in hexadecimal
-     *                  format starting with command tag. See TS 102 223 for
-     *                  details.
-     * @return The APDU response from the ICC card, with the last 4 bytes
-     *         being the status word. If the command fails, returns an empty
-     *         string.
-     */
-    String sendEnvelopeWithStatus(String content);
-
-    /**
-     * Read one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @param itemID the ID of the item to read.
-     * @return the NV item as a String, or null on any failure.
-     */
-    String nvReadItem(int itemID);
-
-    /**
-     * Write one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @param itemID the ID of the item to read.
-     * @param itemValue the value to write, as a String.
-     * @return true on success; false on any failure.
-     */
-    boolean nvWriteItem(int itemID, String itemValue);
-
-    /**
-     * Update the CDMA Preferred Roaming List (PRL) in the radio NV storage.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @param preferredRoamingList byte array containing the new PRL.
-     * @return true on success; false on any failure.
-     */
-    boolean nvWriteCdmaPrl(in byte[] preferredRoamingList);
-
-    /**
-     * Perform the specified type of NV config reset. The radio will be taken offline
-     * and the device must be rebooted after the operation. Used for device
-     * configuration by some CDMA operators.
-     *
-     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
-     * @return true on success; false on any failure.
-     */
-    boolean nvResetConfig(int resetType);
-
-    /*
-     * Get the preferred network type.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @return the preferred network type, defined in RILConstants.java.
-     */
-    int getPreferredNetworkType();
-
-    /**
-     * Set the preferred network type.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @param networkType the preferred network type, defined in RILConstants.java.
-     * @return true on success; false on any failure.
-     */
-    boolean setPreferredNetworkType(int networkType);
-
-    /**
      * User enable/disable Mobile Data.
      *
      * @param enable true to turn on, else false
@@ -429,3 +321,4 @@ interface ITelephony {
      */
     boolean getDataEnabled();
 }
+
