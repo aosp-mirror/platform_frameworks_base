@@ -560,7 +560,7 @@ public final class BridgeContext extends Context {
         StyleResourceValue customStyleValues = null;
         if (customStyle != null) {
             ResourceValue item = mRenderResources.findResValue(customStyle,
-                    false /*forceFrameworkOnly*/);
+                    isPlatformFile /*forceFrameworkOnly*/);
 
             // resolve it in case it links to something else
             item = mRenderResources.resolveResValue(item);
