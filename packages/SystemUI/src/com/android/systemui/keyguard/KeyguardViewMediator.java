@@ -906,6 +906,7 @@ public class KeyguardViewMediator extends SystemUI {
         if (mLockPatternUtils.checkVoldPassword()) {
             if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
             // Without this, settings is not enabled until the lock screen first appears
+            mShowing = false;
             hideLocked();
             return;
         }
@@ -1219,9 +1220,17 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "handleHide");
             try {
 
-                // Don't actually hide the Keyguard at the moment, wait for window manager until
-                // it tells us it's safe to do so with startKeyguardExitAnimation.
-                mWM.keyguardGoingAway();
+                if (mShowing) {
+
+                    // Don't actually hide the Keyguard at the moment, wait for window manager until
+                    // it tells us it's safe to do so with startKeyguardExitAnimation.
+                    mWM.keyguardGoingAway();
+                } else {
+
+                    // Don't try to rely on WindowManager - if Keyguard wasn't showing, window
+                    // manager won't start the exit animation.
+                    handleStartKeyguardExitAnimation(0, 0);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error while calling WindowManager", e);
             }
