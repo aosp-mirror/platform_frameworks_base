@@ -27,5 +27,7 @@ import android.os.Bundle;
 oneway interface ITvInputSessionCallback {
     void onSessionCreated(ITvInputSession session);
     void onSessionEvent(in String name, in Bundle args);
-    void onVideoSizeChanged(int width, int height);
+    void onVideoStreamChanged(int width, int height, boolean interlaced);
+    void onAudioStreamChanged(int channelCount);
+    void onClosedCaptionStreamChanged(boolean hasClosedCaption);
 }
