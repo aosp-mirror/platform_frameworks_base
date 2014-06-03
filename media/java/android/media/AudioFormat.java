@@ -16,6 +16,11 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * The AudioFormat class is used to access a number of audio format and
  * channel configuration constants. They are for instance used
@@ -161,5 +166,152 @@ public class AudioFormat {
     {
         throw new UnsupportedOperationException("There is no valid usage of this constructor");
     }
+
+    /**
+     * Private constructor with an ignored argument to differentiate from the removed default ctor
+     * @param ignoredArgument
+     */
+    private AudioFormat(int ignoredArgument) {
+    }
+
+    /** @hide */
+    public final static int AUDIO_FORMAT_HAS_PROPERTY_NONE = 0x0;
+    /** @hide */
+    public final static int AUDIO_FORMAT_HAS_PROPERTY_ENCODING = 0x1 << 0;
+    /** @hide */
+    public final static int AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE = 0x1 << 1;
+    /** @hide */
+    public final static int AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK = 0x1 << 2;
+
+    private int mEncoding;
+    private int mSampleRate;
+    private int mChannelMask;
+    private int mPropertySetMask;
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     * Builder class for {@link AudioFormat} objects.
+     */
+    public static class Builder {
+        private int mEncoding = ENCODING_DEFAULT;
+        private int mSampleRate = 0;
+        private int mChannelMask = CHANNEL_INVALID;
+        private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
+
+        /**
+         * Constructs a new Builder with the defaults.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Constructs a new Builder from a given {@link AudioFormat}.
+         * @param af the {@link AudioFormat} object whose data will be reused in the new Builder.
+         */
+        public Builder(AudioFormat af) {
+            mEncoding = af.mEncoding;
+            mSampleRate = af.mSampleRate;
+            mChannelMask = af.mChannelMask;
+            mPropertySetMask = af.mPropertySetMask;
+        }
+
+        /**
+         * Combines all of the format characteristics that have been set and return a new
+         * {@link AudioFormat} object.
+         * @return a new {@link AudioFormat} object
+         */
+        public AudioFormat build() {
+            AudioFormat af = new AudioFormat(1980/*ignored*/);
+            af.mEncoding = mEncoding;
+            af.mSampleRate = mSampleRate;
+            af.mChannelMask = mChannelMask;
+            af.mPropertySetMask = mPropertySetMask;
+            return af;
+        }
+
+        /**
+         * Sets the data encoding format.
+         * @param encoding one of {@link AudioFormat#ENCODING_DEFAULT},
+         *     {@link AudioFormat#ENCODING_PCM_8BIT},
+         *     {@link AudioFormat#ENCODING_PCM_16BIT},
+         *     {@link AudioFormat#ENCODING_PCM_FLOAT}.
+         * @return the same Builder instance.
+         * @throws java.lang.IllegalArgumentException
+         */
+        public Builder setEncoding(@Encoding int encoding) throws IllegalArgumentException {
+            switch (encoding) {
+                case ENCODING_DEFAULT:
+                    mEncoding = ENCODING_PCM_16BIT;
+                    break;
+                case ENCODING_PCM_8BIT:
+                case ENCODING_PCM_16BIT:
+                case ENCODING_PCM_FLOAT:
+                    mEncoding = encoding;
+                    break;
+                case ENCODING_INVALID:
+                default:
+                    throw new IllegalArgumentException("Invalid encoding " + encoding);
+            }
+            mPropertySetMask |= AUDIO_FORMAT_HAS_PROPERTY_ENCODING;
+            return this;
+        }
+
+        /**
+         * Sets the channel mask.
+         * @param channelMask describes the configuration of the audio channels.
+         *    <p>For output, the mask should be a combination of
+         *    {@link AudioFormat#CHANNEL_OUT_FRONT_LEFT},
+         *    {@link AudioFormat#CHANNEL_OUT_FRONT_CENTER},
+         *    {@link AudioFormat#CHANNEL_OUT_FRONT_RIGHT},
+         *    {@link AudioFormat#CHANNEL_OUT_SIDE_LEFT},
+         *    {@link AudioFormat#CHANNEL_OUT_SIDE_RIGHT},
+         *    {@link AudioFormat#CHANNEL_OUT_BACK_LEFT},
+         *    {@link AudioFormat#CHANNEL_OUT_BACK_RIGHT}.
+         *    <p>for input, the mask should be {@link AudioFormat#CHANNEL_IN_MONO} or
+         *    {@link AudioFormat#CHANNEL_IN_STEREO}.  {@link AudioFormat#CHANNEL_IN_MONO} is
+         *    guaranteed to work on all devices.
+         * @return the same Builder instance.
+         */
+        public Builder setChannelMask(int channelMask) {
+            // only validated when used, with input or output context
+            mChannelMask = channelMask;
+            mPropertySetMask |= AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK;
+            return this;
+        }
+
+        /**
+         * Sets the sample rate.
+         * @param sampleRate the sample rate expressed in Hz
+         * @return the same Builder instance.
+         * @throws java.lang.IllegalArgumentException
+         */
+        public Builder setSampleRate(int sampleRate) throws IllegalArgumentException {
+            if ((sampleRate <= 0) || (sampleRate > 192000)) {
+                throw new IllegalArgumentException("Invalid sample rate " + sampleRate);
+            }
+            mSampleRate = sampleRate;
+            mPropertySetMask |= AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE;
+            return this;
+        }
+    }
+
+    @Override
+    public String toString () {
+        return new String("AudioFormat:"
+                + " props=" + mPropertySetMask
+                + " enc=" + mEncoding
+                + " chan=0x" + Integer.toHexString(mChannelMask)
+                + " rate=" + mSampleRate);
+    }
+
+    /** @hide */
+    @IntDef({
+        ENCODING_DEFAULT,
+        ENCODING_PCM_8BIT,
+        ENCODING_PCM_16BIT,
+        ENCODING_PCM_FLOAT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Encoding {}
 
 }
