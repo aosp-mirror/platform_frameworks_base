@@ -38,7 +38,6 @@ import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
-import static android.net.ConnectivityServiceProtocol.NetworkFactoryProtocol;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
@@ -80,6 +79,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkFactory;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
@@ -2995,6 +2995,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     updateNetworkInfo(nai, info);
                     break;
                 }
+                case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_NETWORK_SCORE_CHANGED from unknown NetworkAgent");
+                        break;
+                    }
+                    Integer score = (Integer) msg.obj;
+                    updateNetworkScore(nai, score);
+                    break;
+                }
                 case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     handleConnectionValidated(nai);
@@ -3099,7 +3109,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
                     if (nri.isRequest == false) continue;
                     NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
-                    ac.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK,
+                    ac.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK,
                             (nai != null ? nai.currentScore : 0), 0, nri.request);
                 }
             } else {
@@ -3220,7 +3230,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (msg.what == EVENT_REGISTER_NETWORK_REQUEST) {
             if (DBG) log("sending new NetworkRequest to factories");
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-                nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score,
+                nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
                         0, nri.request);
             }
         }
@@ -3243,7 +3253,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             if (nri.isRequest) {
                 for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-                    nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_CANCEL_REQUEST, nri.request);
+                    nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST,
+                            nri.request);
                 }
 
                 if (affectedNetwork != null) {
@@ -5565,7 +5576,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
         if (VDBG) log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
         for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-            nfi.asyncChannel.sendMessage(NetworkFactoryProtocol.CMD_REQUEST_NETWORK, score, 0, networkRequest);
+            nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score, 0,
+                    networkRequest);
         }
     }
 
@@ -5800,6 +5812,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 state == NetworkInfo.State.SUSPENDED) {
             networkAgent.asyncChannel.disconnect();
         }
+    }
+
+    private void updateNetworkScore(NetworkAgentInfo nai, Integer scoreInteger) {
+        int score = scoreInteger.intValue();
+        // TODO
     }
 
     // notify only this one new request of the current state

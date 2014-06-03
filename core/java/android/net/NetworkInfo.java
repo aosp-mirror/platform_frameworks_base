@@ -198,7 +198,10 @@ public class NetworkInfo implements Parcelable {
         }
     }
 
-    void setSubtype(int subtype, String subtypeName) {
+    /**
+     * @hide
+     */
+    public void setSubtype(int subtype, String subtypeName) {
         synchronized (this) {
             mSubtype = subtype;
             mSubtypeName = subtypeName;
