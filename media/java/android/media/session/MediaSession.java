@@ -277,6 +277,7 @@ public final class MediaSession {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
         mVolumeProvider = volumeProvider;
+        volumeProvider.setSession(this);
 
         try {
             mBinder.configureVolumeHandling(VOLUME_TYPE_REMOTE, volumeProvider.getVolumeControl(),
@@ -519,6 +520,24 @@ public final class MediaSession {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
+        }
+    }
+
+    /**
+     * Notify the system that the remove volume changed.
+     *
+     * @param provider The provider that is handling volume changes.
+     * @hide
+     */
+    void notifyRemoteVolumeChanged(RemoteVolumeProvider provider) {
+        if (provider == null || provider != mVolumeProvider) {
+            Log.w(TAG, "Received update from stale volume provider");
+            return;
+        }
+        try {
+            mBinder.setCurrentVolume(provider.onGetCurrentVolume());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in notifyVolumeChanged", e);
         }
     }
 
@@ -963,27 +982,26 @@ public final class MediaSession {
         @Override
         public void onRouteStateChange(int state) throws RemoteException {
             // TODO
-
         }
 
-        /*
-         * (non-Javadoc)
-         * @see android.media.session.ISessionCallback#onAdjustVolumeBy(int)
-         */
         @Override
         public void onAdjustVolumeBy(int delta) throws RemoteException {
-            // TODO(epastern): Auto-generated method stub
-
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                if (session.mVolumeProvider != null) {
+                    session.mVolumeProvider.onAdjustVolumeBy(delta);
+                }
+            }
         }
 
-        /*
-         * (non-Javadoc)
-         * @see android.media.session.ISessionCallback#onSetVolumeTo(int)
-         */
         @Override
         public void onSetVolumeTo(int value) throws RemoteException {
-            // TODO(epastern): Auto-generated method stub
-
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                if (session.mVolumeProvider != null) {
+                    session.mVolumeProvider.onSetVolumeTo(value);
+                }
+            }
         }
 
     }
