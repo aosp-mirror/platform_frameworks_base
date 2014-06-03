@@ -16,8 +16,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-subdir-Iaidl-files) \
-                   $(call all-proto-files-under,src)
+LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-subdir-Iaidl-files)
 
 LOCAL_MODULE := Keyguard
 
@@ -26,9 +25,6 @@ LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
