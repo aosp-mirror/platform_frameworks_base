@@ -91,10 +91,10 @@ please see styles_device_defaults.xml.
     <!-- Text styles -->
 
     <style name="TextAppearance.Quantum">
-        <item name="textColor">?textColorPrimary</item>
-        <item name="textColorHint">?textColorHint</item>
-        <item name="textColorHighlight">?textColorHighlight</item>
-        <item name="textColorLink">?textColorLink</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textColorHint">?attr/textColorHint</item>
+        <item name="textColorHighlight">?attr/textColorHighlight</item>
+        <item name="textColorLink">?attr/textColorLink</item>
         <item name="textSize">@dimen/text_size_body_1_quantum</item>
         <item name="fontFamily">@string/font_family_body_1_quantum</item>
         <item name="elegantTextHeight">true</item>
@@ -103,74 +103,94 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Quantum.Display4">
         <item name="textSize">@dimen/text_size_display_4_quantum</item>
         <item name="fontFamily">@string/font_family_display_4_quantum</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Display3">
         <item name="textSize">@dimen/text_size_display_3_quantum</item>
         <item name="fontFamily">@string/font_family_display_3_quantum</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Display2">
         <item name="textSize">@dimen/text_size_display_2_quantum</item>
         <item name="fontFamily">@string/font_family_display_2_quantum</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Display1">
         <item name="textSize">@dimen/text_size_display_1_quantum</item>
         <item name="fontFamily">@string/font_family_display_1_quantum</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Headline">
         <item name="textSize">@dimen/text_size_headline_quantum</item>
         <item name="fontFamily">@string/font_family_headline_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Title">
         <item name="textSize">@dimen/text_size_title_quantum</item>
         <item name="fontFamily">@string/font_family_title_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Title.Inverse">
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Quantum.Subhead">
         <item name="textSize">@dimen/text_size_subhead_quantum</item>
         <item name="fontFamily">@string/font_family_subhead_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Subhead.Inverse">
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Quantum.Body2">
         <item name="textSize">@dimen/text_size_body_2_quantum</item>
         <item name="fontFamily">@string/font_family_body_2_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Body1">
         <item name="textSize">@dimen/text_size_body_1_quantum</item>
         <item name="fontFamily">@string/font_family_body_1_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Caption">
         <item name="textSize">@dimen/text_size_caption_quantum</item>
         <item name="fontFamily">@string/font_family_caption_quantum</item>
-        <item name="textColor">?textColorSecondary</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Quantum.Menu">
         <item name="textSize">@dimen/text_size_menu_quantum</item>
         <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textColor">?textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Quantum.Menu.Inverse">
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Quantum.Button">
         <item name="textSize">@dimen/text_size_button_quantum</item>
         <item name="fontFamily">@string/font_family_button_quantum</item>
         <item name="textAllCaps">true</item>
-        <item name="textColor">?textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <!-- Deprecated text styles -->
@@ -218,9 +238,7 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Quantum.SearchResult">
-    </style>
-
+    <style name="TextAppearance.Quantum.SearchResult" />
     <style name="TextAppearance.Quantum.SearchResult.Title" parent="TextAppearance.Quantum.Title" />
     <style name="TextAppearance.Quantum.SearchResult.Subtitle" parent="TextAppearance.Quantum.Subhead" />
 
@@ -232,116 +250,55 @@ please see styles_device_defaults.xml.
         <item name="textColorHint">?attr/textColorHintInverse</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.Switch">
-        <item name="textSize">14sp</item>
-    </style>
+    <style name="TextAppearance.Quantum.Widget.Switch" parent="TextAppearance.Quantum.Button" />
 
     <style name="TextAppearance.Quantum.Widget.PopupMenu"/>
+    <style name="TextAppearance.Quantum.Widget.PopupMenu.Large" parent="TextAppearance.Quantum.Menu" />
+    <style name="TextAppearance.Quantum.Widget.PopupMenu.Small" parent="TextAppearance.Quantum.Menu" />
 
-    <style name="TextAppearance.Quantum.Widget.PopupMenu.Large">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.PopupMenu.Small">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.DropDownHint">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>>
-    </style>
+    <style name="TextAppearance.Quantum.Widget.DropDownHint" parent="TextAppearance.Quantum.Menu" />
 
     <style name="TextAppearance.Quantum.Widget.IconMenu.Item" parent="TextAppearance.Quantum.Small">
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
-    <!-- This style is for smaller screens; values-xlarge defines a version
-         for larger screens. -->
-    <style name="TextAppearance.Quantum.Widget.TabWidget">
-        <item name="textSize">14sp</item>
-        <item name="textStyle">normal</item>
-        <item name="textColor">@color/tab_indicator_text</item>
-    </style>
+    <style name="TextAppearance.Quantum.Widget.TabWidget" parent="TextAppearance.Quantum.Button" />
 
     <style name="TextAppearance.Quantum.Widget.TextView">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
         <item name="textColorHint">?attr/textColorHint</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.TextView.PopupMenu">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.TextView.SpinnerItem"/>
+    <style name="TextAppearance.Quantum.Widget.TextView.PopupMenu" parent="TextAppearance.Quantum.Menu" />
+    <style name="TextAppearance.Quantum.Widget.TextView.SpinnerItem" />
 
     <style name="TextAppearance.Quantum.Widget.DropDownItem">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
     </style>
 
     <style name="TextAppearance.Quantum.Widget.ActionMode"/>
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Title" parent="TextAppearance.Quantum.Title" />
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Quantum.Title.Inverse" />
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Subhead" />
+    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Subhead.Inverse" />
 
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Title" parent="TextAppearance.Quantum.Medium">
-        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
-    </style>
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Title" parent="TextAppearance.Quantum.Title" />
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Quantum.Title.Inverse" />
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle" parent="TextAppearance.Quantum.Subhead" />
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Quantum.Subhead.Inverse" />
 
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
-        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Small">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
-    </style>
-
-    <!-- Text styles with no light versions -->
-
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Title" parent="TextAppearance.Quantum.Medium">
-        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Quantum.Medium.Inverse">
-        <item name="textSize">@dimen/action_bar_title_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle" parent="TextAppearance.Quantum.Small">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="textSize">@dimen/action_bar_subtitle_text_size_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Small">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>>
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Menu">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu.Inverse" parent="TextAppearance.Quantum.Small.Inverse">
-        <item name="fontFamily">@string/font_family_menu_quantum</item>
-        <item name="textSize">@dimen/text_size_menu_quantum</item>>
+    <style name="TextAppearance.Quantum.Widget.ActionBar.Menu.Inverse" parent="TextAppearance.Quantum.Menu.Inverse">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Quantum.WindowTitle">
-        <item name="textColor">?attr/textColorPrimary</item>
-        <item name="fontFamily">@string/font_family_headline_quantum</item>
-        <item name="textSize">@dimen/text_size_headline_quantum</item>
-    </style>
-
-    <style name="TextAppearance.Quantum.DialogWindowTitle">
-        <item name="fontFamily">@string/font_family_headline_quantum</item>
-        <item name="textSize">@dimen/text_size_headline_quantum</item>
-        <item name="textColor">?attr/textColorPrimary</item>
-    </style>
+    <style name="TextAppearance.Quantum.WindowTitle" parent="TextAppearance.Quantum.Headline" />
+    <style name="TextAppearance.Quantum.DialogWindowTitle" parent="TextAppearance.Quantum.Headline" />
 
     <style name="TextAppearance.Quantum.CalendarViewWeekDayView" parent="TextAppearance.Quantum.Small">
         <item name="textStyle">bold</item>
