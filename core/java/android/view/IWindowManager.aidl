@@ -215,12 +215,6 @@ interface IWindowManager
     oneway void statusBarVisibilityChanged(int visibility);
 
     /**
-     * Block until the given window has been drawn to the screen.
-     * Returns true if really waiting, false if the window does not exist.
-     */
-    boolean waitForWindowDrawn(IBinder token, in IRemoteCallback callback);
-
-    /**
      * Device has a software navigation bar (separate from the status bar).
      */
     boolean hasNavigationBar();

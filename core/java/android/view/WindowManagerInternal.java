@@ -17,6 +17,7 @@
 package android.view;
 
 import android.hardware.display.DisplayManagerInternal;
+import android.os.IRemoteCallback;
 
 /**
  * Window manager local system service interface.
@@ -30,4 +31,9 @@ public abstract class WindowManagerInternal {
      * within a surface transaction at a later time.
      */
     public abstract void requestTraversalFromDisplayManager();
+    /**
+     * Invalidate all visible windows. Then report back on the callback once all windows have
+     * redrawn.
+     */
+    public abstract void waitForAllWindowsDrawn(IRemoteCallback callback, long timeout);
 }
