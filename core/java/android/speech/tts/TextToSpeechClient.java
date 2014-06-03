@@ -793,15 +793,14 @@ public class TextToSpeechClient {
             return mService != null && mEstablished;
         }
 
-        boolean runAction(Action action) {
+        <T> ActionResult<T> runAction(Action<T> action) {
             synchronized (mLock) {
                 try {
-                    action.run(mService);
-                    return true;
+                    return new ActionResult<T>(true, action.run(mService));
                 } catch (Exception ex) {
                     Log.e(TAG, action.getName() + " failed", ex);
                     disconnect();
-                    return false;
+                    return new ActionResult<T>(false);
                 }
             }
         }
@@ -821,7 +820,7 @@ public class TextToSpeechClient {
         }
     }
 
-    private abstract class Action {
+    private abstract class Action<T> {
         private final String mName;
 
         public Action(String name) {
@@ -829,7 +828,21 @@ public class TextToSpeechClient {
         }
 
         public String getName() {return mName;}
-        abstract void run(ITextToSpeechService service) throws RemoteException;
+        abstract T run(ITextToSpeechService service) throws RemoteException;
+    }
+
+    private class ActionResult<T> {
+        boolean mSuccess;
+        T mResult;
+
+        ActionResult(boolean success) {
+            mSuccess = success;
+        }
+
+        ActionResult(boolean success, T result) {
+            mSuccess = success;
+            mResult = result;
+        }
     }
 
     private IBinder getCallerIdentity() {
@@ -839,18 +852,17 @@ public class TextToSpeechClient {
         return null;
     }
 
-    private boolean runAction(Action action) {
+    private <T> ActionResult<T> runAction(Action<T> action) {
         synchronized (mLock) {
             if (mServiceConnection == null) {
                 Log.w(TAG, action.getName() + " failed: not bound to TTS engine");
-                return false;
+                return new ActionResult<T>(false);
             }
             if (!mServiceConnection.isEstablished()) {
                 Log.w(TAG, action.getName() + " failed: not fully bound to TTS engine");
-                return false;
+                return new ActionResult<T>(false);
             }
-            mServiceConnection.runAction(action);
-            return true;
+            return mServiceConnection.runAction(action);
         }
     }
 
@@ -861,13 +873,14 @@ public class TextToSpeechClient {
      * other utterances in the queue.
      */
     public void stop() {
-        runAction(new Action(ACTION_STOP_NAME) {
+        runAction(new Action<Void>(ACTION_STOP_NAME) {
             @Override
-            public void run(ITextToSpeechService service) throws RemoteException {
+            public Void run(ITextToSpeechService service) throws RemoteException {
                if (service.stop(getCallerIdentity()) != Status.SUCCESS) {
                    Log.e(TAG, "Stop failed");
                }
                mCallbacks.clear();
+               return null;
             }
         });
     }
@@ -915,9 +928,9 @@ public class TextToSpeechClient {
             final UtteranceId utteranceId,
             final RequestConfig config,
             final RequestCallbacks callbacks) {
-        runAction(new Action(ACTION_QUEUE_SPEAK_NAME) {
+        runAction(new Action<Void>(ACTION_QUEUE_SPEAK_NAME) {
             @Override
-            public void run(ITextToSpeechService service) throws RemoteException {
+            public Void run(ITextToSpeechService service) throws RemoteException {
                 RequestCallbacks c = mDefaultRequestCallbacks;
                 if (callbacks != null) {
                     c = callbacks;
@@ -925,7 +938,7 @@ public class TextToSpeechClient {
                 int addCallbackStatus = addCallback(utteranceId, c);
                 if (addCallbackStatus != Status.SUCCESS) {
                     c.onSynthesisFailure(utteranceId, Status.ERROR_INVALID_REQUEST);
-                    return;
+                    return null;
                 }
 
                 int queueResult = service.speakV2(
@@ -934,6 +947,7 @@ public class TextToSpeechClient {
                 if (queueResult != Status.SUCCESS) {
                     removeCallbackAndErr(utteranceId.toUniqueString(), queueResult);
                 }
+                return null;
             }
         });
     }
@@ -984,9 +998,9 @@ public class TextToSpeechClient {
             final UtteranceId utteranceId,
             final File outputFile, final RequestConfig config,
             final RequestCallbacks callbacks) {
-        runAction(new Action(ACTION_QUEUE_SYNTHESIZE_TO_FILE) {
+        runAction(new Action<Void>(ACTION_QUEUE_SYNTHESIZE_TO_FILE) {
             @Override
-            public void run(ITextToSpeechService service) throws RemoteException {
+            public Void run(ITextToSpeechService service) throws RemoteException {
                 RequestCallbacks c = mDefaultRequestCallbacks;
                 if (callbacks != null) {
                     c = callbacks;
@@ -994,7 +1008,7 @@ public class TextToSpeechClient {
                 int addCallbackStatus = addCallback(utteranceId, c);
                 if (addCallbackStatus != Status.SUCCESS) {
                     c.onSynthesisFailure(utteranceId, Status.ERROR_INVALID_REQUEST);
-                    return;
+                    return null;
                 }
 
                 ParcelFileDescriptor fileDescriptor = null;
@@ -1002,7 +1016,7 @@ public class TextToSpeechClient {
                     if (outputFile.exists() && !outputFile.canWrite()) {
                         Log.e(TAG, "No permissions to write to " + outputFile);
                         removeCallbackAndErr(utteranceId.toUniqueString(), Status.ERROR_OUTPUT);
-                        return;
+                        return null;
                     }
                     fileDescriptor = ParcelFileDescriptor.open(outputFile,
                             ParcelFileDescriptor.MODE_WRITE_ONLY |
@@ -1023,6 +1037,7 @@ public class TextToSpeechClient {
                     Log.e(TAG, "Closing file " + outputFile + " failed", e);
                     removeCallbackAndErr(utteranceId.toUniqueString(), Status.ERROR_OUTPUT);
                 }
+                return null;
             }
         });
     }
@@ -1050,9 +1065,9 @@ public class TextToSpeechClient {
      */
     public void queueSilence(final long durationInMs, final UtteranceId utteranceId,
             final RequestCallbacks callbacks) {
-        runAction(new Action(ACTION_QUEUE_SILENCE_NAME) {
+        runAction(new Action<Void>(ACTION_QUEUE_SILENCE_NAME) {
             @Override
-            public void run(ITextToSpeechService service) throws RemoteException {
+            public Void run(ITextToSpeechService service) throws RemoteException {
                 RequestCallbacks c = mDefaultRequestCallbacks;
                 if (callbacks != null) {
                     c = callbacks;
@@ -1068,6 +1083,7 @@ public class TextToSpeechClient {
                 if (queueResult != Status.SUCCESS) {
                     removeCallbackAndErr(utteranceId.toUniqueString(), queueResult);
                 }
+                return null;
             }
         });
     }
@@ -1091,9 +1107,9 @@ public class TextToSpeechClient {
      */
     public void queueAudio(final Uri audioUrl, final UtteranceId utteranceId,
             final RequestConfig config, final RequestCallbacks callbacks) {
-        runAction(new Action(ACTION_QUEUE_AUDIO_NAME) {
+        runAction(new Action<Void>(ACTION_QUEUE_AUDIO_NAME) {
             @Override
-            public void run(ITextToSpeechService service) throws RemoteException {
+            public Void run(ITextToSpeechService service) throws RemoteException {
                 RequestCallbacks c = mDefaultRequestCallbacks;
                 if (callbacks != null) {
                     c = callbacks;
@@ -1109,9 +1125,34 @@ public class TextToSpeechClient {
                 if (queueResult != Status.SUCCESS) {
                     removeCallbackAndErr(utteranceId.toUniqueString(), queueResult);
                 }
+                return null;
             }
         });
     }
+
+    private static final String ACTION_IS_SPEAKING_NAME = "isSpeaking";
+
+    /**
+     * Checks whether the TTS engine is busy speaking. Note that a speech item is
+     * considered complete once it's audio data has been sent to the audio mixer, or
+     * written to a file. There might be a finite lag between this point, and when
+     * the audio hardware completes playback.
+     *
+     * @return {@code true} if the TTS engine is speaking.
+     */
+    public boolean isSpeaking() {
+        ActionResult<Boolean> result = runAction(new Action<Boolean>(ACTION_IS_SPEAKING_NAME) {
+            @Override
+            public Boolean run(ITextToSpeechService service) throws RemoteException {
+                return service.isSpeaking();
+            }
+        });
+        if (!result.mSuccess) {
+            return false; // We can't really say, return false
+        }
+        return result.mResult;
+    }
+
 
     class InternalHandler extends Handler {
         final static int WHAT_ENGINE_STATUS_CHANGED = 1;

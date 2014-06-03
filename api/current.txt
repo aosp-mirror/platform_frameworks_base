@@ -26751,6 +26751,7 @@ package android.speech.tts {
     method public void disconnect();
     method public android.speech.tts.TextToSpeechClient.EngineStatus getEngineStatus();
     method public boolean isConnected();
+    method public boolean isSpeaking();
     method public void queueAudio(android.net.Uri, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void queueSilence(long, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.TextToSpeechClient.RequestCallbacks);
     method public void queueSpeak(java.lang.String, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
