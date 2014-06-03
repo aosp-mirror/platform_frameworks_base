@@ -963,17 +963,15 @@
         <eat-comment />
 
         <!-- The primary branding color for the app. By default, this is the color applied to the
-             action bar background and framework controls (via colorControlActivated). -->
+             action bar background. -->
         <attr name="colorPrimary" format="color" />
 
         <!-- Dark variant of the primary branding color. By default, this is the color applied to
              the status bar (via statusBarColor) and navigation bar (via navigationBarColor). -->
         <attr name="colorPrimaryDark" format="color" />
 
-        <!-- Light variant of the primary branding color. TODO: Not used? -->
-        <attr name="colorPrimaryLight" format="color" />
-
-        <!-- Bright complement to the primary branding color. TODO: Not used? -->
+        <!-- Bright complement to the primary branding color. By default, this is the color applied
+             to framework controls (via colorControlActivated). -->
         <attr name="colorAccent" format="color" />
 
         <!-- The color applied to framework controls in their normal state. -->
@@ -982,7 +980,7 @@
         <!-- The color applied to framework controls in their activated (ex. checked) state. -->
         <attr name="colorControlActivated" format="color" />
 
-        <!-- The color applied to framework control highlights (ex. ripples, selection). -->
+        <!-- The color applied to framework control highlights (ex. ripples, list selectors). -->
         <attr name="colorControlHighlight" format="color" />
 
         <!-- The color applied to framework buttons in their normal state. -->
@@ -6692,7 +6690,7 @@
 
     <!-- Used as a filter array on the theme to pull out only the EdgeEffect-relevant bits. -->
     <declare-styleable name="EdgeEffect">
-        <attr name="colorPrimaryLight" />
+        <attr name="colorPrimary" />
     </declare-styleable>
 
     <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes an

@@ -15,25 +15,20 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorControlActivated">
+    android:tint="?attr/colorControlActivated"
+    android:tintMode="src_over">
     <item>
         <selector>
-            <item android:state_window_focused="false">
-                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-                    android:tint="?attr/colorControlNormal" />
-            </item>
             <item android:state_enabled="false">
                 <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-                    android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:state_focused="false" android:state_activated="false">
-                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
-                    android:tint="?attr/colorControlNormal" />
+                    android:tint="?attr/colorControlNormal"
+                    android:alpha="?attr/disabledAlpha" />
             </item>
             <item>
-                <nine-patch android:src="@drawable/textfield_activated_qntm_alpha"
+                <nine-patch android:src="@drawable/textfield_default_qntm_alpha"
                     android:tint="?attr/colorControlNormal" />
             </item>
         </selector>
     </item>
+    <item android:id="@+id/mask" android:drawable="@drawable/textfield_activated_qntm_alpha" />
 </ripple>

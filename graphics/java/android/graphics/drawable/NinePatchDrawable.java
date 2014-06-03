@@ -23,10 +23,12 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
@@ -236,7 +238,6 @@ public class NinePatchDrawable extends Drawable {
 
         final boolean needsMirroring = needsMirroring();
         if (needsMirroring) {
-            canvas.save();
             // Mirror the 9patch
             canvas.translate(bounds.right - bounds.left, 0);
             canvas.scale(-1.0f, 1.0f);
@@ -252,10 +253,6 @@ public class NinePatchDrawable extends Drawable {
         }
 
         mNinePatch.draw(canvas, bounds, mPaint);
-
-        if (needsMirroring) {
-            canvas.restore();
-        }
 
         if (clearColorFilter) {
             mPaint.setColorFilter(null);
