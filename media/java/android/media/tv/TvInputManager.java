@@ -390,6 +390,7 @@ public final class TvInputManager {
      * @param listener a listener used to monitor status of the given TV input.
      * @param handler a {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
+     * @hide
      */
     public void registerListener(String inputId, TvInputListener listener, Handler handler) {
         if (inputId == null) {
@@ -422,6 +423,7 @@ public final class TvInputManager {
      * @param inputId the id of the TV input.
      * @param listener the existing listener to remove for the given TV input.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
+     * @hide
      */
     public void unregisterListener(String inputId, final TvInputListener listener) {
         if (inputId == null) {
@@ -562,13 +564,13 @@ public final class TvInputManager {
         }
 
         /**
-         * Sets the relative volume of this session to handle a change of audio focus.
+         * Sets the relative stream volume of this session to handle a change of audio focus.
          *
          * @param volume A volume value between 0.0f to 1.0f.
          * @throws IllegalArgumentException if the volume value is out of range.
          * @throws IllegalStateException if the session has been already released.
          */
-        public void setVolume(float volume) {
+        public void setStreamVolume(float volume) {
             if (mToken == null) {
                 throw new IllegalStateException("the session has been already released");
             }

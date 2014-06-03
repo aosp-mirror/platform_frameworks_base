@@ -154,6 +154,19 @@ public class TvView extends SurfaceView {
     }
 
     /**
+     * Sets the relative stream volume of this session to handle a change of audio focus.
+     *
+     * @param volume A volume value between 0.0f to 1.0f.
+     */
+    public void setStreamVolume(float volume) {
+        if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
+        if (mSession == null) {
+            return;
+        }
+        mSession.setStreamVolume(volume);
+    }
+
+    /**
      * Dispatches an unhandled input event to the next receiver.
      * <p>
      * Except system keys, TvView always consumes input events in the normal flow. This is called
