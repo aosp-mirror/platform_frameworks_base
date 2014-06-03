@@ -22,7 +22,6 @@
 #include "SkDevice.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
-#include "SkImageRef_GlobalPool.h"
 #include "SkPorterDuff.h"
 #include "SkShader.h"
 #include "SkTemplates.h"
@@ -161,8 +160,6 @@ public:
     }
 
     static void freeCaches(JNIEnv* env, jobject) {
-        // these are called in no particular order
-        SkImageRef_GlobalPool::SetRAMUsed(0);
         SkGraphics::PurgeFontCache();
     }
 

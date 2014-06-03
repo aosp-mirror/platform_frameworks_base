@@ -29,7 +29,6 @@
 
 #include <SkGraphics.h>
 #include <SkImageDecoder.h>
-#include <SkImageRef_GlobalPool.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -248,11 +247,6 @@ AndroidRuntime::AndroidRuntime(char* argBlockStart, const size_t argBlockLength)
     // this sets our preference for 16bit images during decode
     // in case the src is opaque and 24bit
     SkImageDecoder::SetDeviceConfig(SkBitmap::kRGB_565_Config);
-    // This cache is shared between browser native images, and java "purgeable"
-    // bitmaps. This globalpool is for images that do not either use the java
-    // heap, or are not backed by ashmem. See BitmapFactory.cpp for the key
-    // java call site.
-    SkImageRef_GlobalPool::SetRAMBudget(512 * 1024);
     // There is also a global font cache, but its budget is specified in code
     // see SkFontHost_android.cpp
 
