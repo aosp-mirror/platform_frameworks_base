@@ -113,8 +113,8 @@ public class BackupTransport {
      * this is called, {@link #finishBackup} will be called to ensure the request
      * is sent and received successfully.
      *
-     * @return One of {@link BackupConstants#TRANSPORT_OK} (OK so far) or
-     *   {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure).
+     * @return One of {@link BackupTransport#TRANSPORT_OK} (OK so far) or
+     *   {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure).
      */
     public int initializeDevice() {
         return BackupTransport.TRANSPORT_ERROR;
