@@ -43,7 +43,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        HardwareRenderer.sUseRenderThread = true;
         setContentView(R.layout.activity_main);
         ListView lv = (ListView) findViewById(android.R.id.list);
         lv.setDrawSelectorOnTop(true);
