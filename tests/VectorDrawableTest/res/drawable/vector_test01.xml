@@ -28,7 +28,8 @@ limitations under the License.
             android:name="002b"
             android:pathData="M100,200c0,-100 150,-100 150,0s150,100 150,0t-200,299"
             android:stroke="#FF0000FF"
-            android:strokeWidth="4" />
+            android:strokeWidth="4"
+            android:fill="#00000000" />
     </group>
 
 </vector>

@@ -61,6 +61,8 @@ public class VectorDrawable01 extends Activity {
             button.setWidth(200);
             button.setBackgroundResource(icon[i]);
             container.addView(button);
+            VectorDrawable vd = (VectorDrawable) button.getBackground();
+            vd.setAlpha((i + 1) * (0xFF / (icon.length + 1)));
         }
 
         setContentView(container);

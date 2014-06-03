@@ -27,6 +27,7 @@
         <path
             android:name="pie1"
             android:pathData="M300,70 a230,230 0 1,0 1,0 z"
+            android:fill="#00000000"
             android:stroke="#FF00FF00"
             android:strokeWidth="70"
             android:trimPathEnd=".75"

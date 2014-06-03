@@ -25,10 +25,12 @@
     <group>
         <path android:pathData="M 569.374 461.472L 569.374 160.658L 160.658 160.658L 160.658 461.472L 569.374 461.472z"
               android:name="path2451"
+              android:fill="#00000000"
               android:stroke="#FF000000"
               android:strokeWidth="30.65500000000000"/>
         <path android:pathData="M 365.015 311.066"
               android:name="path2453"
+              android:fill="#00000000"
               android:stroke="#FF000000"
               android:strokeWidth="30.655000000000001"/>
         <path android:pathData="M 164.46 164.49L 340.78 343.158C 353.849 356.328 377.63 356.172 390.423 343.278L 566.622 165.928"
@@ -38,10 +40,12 @@
               android:strokeWidth="30.655000000000001"/>
         <path android:pathData="M 170.515 451.566L 305.61 313.46"
               android:name="path2457"
+              android:fill="#00000000"
               android:stroke="#000000"
               android:strokeWidth="30.655000000000001"/>
         <path android:pathData="M 557.968 449.974L 426.515 315.375"
               android:name="path2459"
+              android:fill="#00000000"
               android:stroke="#000000"
               android:strokeWidth="30.655000000000001"/>
     </group>
