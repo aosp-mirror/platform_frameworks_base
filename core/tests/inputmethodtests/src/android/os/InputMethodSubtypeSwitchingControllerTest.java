@@ -172,7 +172,8 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         final ImeSubtypeListItem japaneseIme_ja_JP = enabledItems.get(5);
         final ImeSubtypeListItem switchUnawareJapaneseIme_ja_JP = enabledItems.get(6);
 
-        final ControllerImpl controller = new ControllerImpl(enabledItems);
+        final ControllerImpl controller = ControllerImpl.createFrom(
+                null /* currentInstance */, enabledItems);
 
         // switching-aware loop
         assertRotationOrder(controller, false /* onlyCurrentIme */,
@@ -214,9 +215,8 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 disabledSubtypeUnawareIme, null);
     }
 
-    // This test is disabled until DynamicRotationList is enabled.
     @SmallTest
-    public void DISABLED_testControllerImplWithUserAction() throws Exception {
+    public void testControllerImplWithUserAction() throws Exception {
         final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
         final ImeSubtypeListItem latinIme_en_US = enabledItems.get(0);
         final ImeSubtypeListItem latinIme_fr = enabledItems.get(1);
@@ -226,7 +226,8 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         final ImeSubtypeListItem japaneseIme_ja_JP = enabledItems.get(5);
         final ImeSubtypeListItem switchUnawareJapaneseIme_ja_JP = enabledItems.get(6);
 
-        final ControllerImpl controller = new ControllerImpl(enabledItems);
+        final ControllerImpl controller = ControllerImpl.createFrom(
+                null /* currentInstance */, enabledItems);
 
         // === switching-aware loop ===
         assertRotationOrder(controller, false /* onlyCurrentIme */,
@@ -272,5 +273,26 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 subtypeUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
                 switchUnawareJapaneseIme_ja_JP, null);
+
+        // Rotation order should be preserved when created with the same subtype list.
+        final List<ImeSubtypeListItem> sameEnabledItems = createEnabledImeSubtypes();
+        final ControllerImpl newController = ControllerImpl.createFrom(controller,
+                sameEnabledItems);
+        assertRotationOrder(newController, false /* onlyCurrentIme */,
+                japaneseIme_ja_JP, latinIme_fr, latinIme_en_US);
+        assertRotationOrder(newController, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi, subtypeUnawareIme,
+                switchUnawareJapaneseIme_ja_JP);
+
+        // Rotation order should be initialized when created with a different subtype list.
+        final List<ImeSubtypeListItem> differentEnabledItems = Arrays.asList(
+                latinIme_en_US, latinIme_fr, switchingUnawarelatinIme_en_UK,
+                switchUnawareJapaneseIme_ja_JP);
+        final ControllerImpl anotherController = ControllerImpl.createFrom(controller,
+                differentEnabledItems);
+        assertRotationOrder(anotherController, false /* onlyCurrentIme */,
+                latinIme_en_US, latinIme_fr);
+        assertRotationOrder(anotherController, false /* onlyCurrentIme */,
+                switchingUnawarelatinIme_en_UK, switchUnawareJapaneseIme_ja_JP);
     }
 }

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -116,6 +117,24 @@ public class InputMethodSubtypeSwitchingController {
                     + " mIsSystemLocale=" + mIsSystemLocale
                     + " mIsSystemLanguage=" + mIsSystemLanguage
                     + "}";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (o instanceof ImeSubtypeListItem) {
+                final ImeSubtypeListItem that = (ImeSubtypeListItem)o;
+                if (!Objects.equals(this.mImi, that.mImi)) {
+                    return false;
+                }
+                if (this.mSubtypeId != that.mSubtypeId) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
     }
 
@@ -276,7 +295,7 @@ public class InputMethodSubtypeSwitchingController {
         private final List<ImeSubtypeListItem> mImeSubtypeList;
         private final int[] mUsageHistoryOfSubtypeListItemIndex;
 
-        public DynamicRotationList(final List<ImeSubtypeListItem> imeSubtypeListItems) {
+        private DynamicRotationList(final List<ImeSubtypeListItem> imeSubtypeListItems) {
             mImeSubtypeList = imeSubtypeListItems;
             mUsageHistoryOfSubtypeListItemIndex = new int[mImeSubtypeList.size()];
             final int N = mImeSubtypeList.size();
@@ -347,15 +366,53 @@ public class InputMethodSubtypeSwitchingController {
 
     @VisibleForTesting
     public static class ControllerImpl {
-        // TODO: Switch to DynamicRotationList for smarter rotation.
-        private final StaticRotationList mSwitchingAwareSubtypeList;
-        private final StaticRotationList mSwitchingUnawareSubtypeList;
+        private final DynamicRotationList mSwitchingAwareRotationList;
+        private final StaticRotationList mSwitchingUnawareRotationList;
 
-        public ControllerImpl(final List<ImeSubtypeListItem> sortedItems) {
-            mSwitchingAwareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
-                    true /* supportsSwitchingToNextInputMethod */));
-            mSwitchingUnawareSubtypeList = new StaticRotationList(filterImeSubtypeList(sortedItems,
-                    false /* supportsSwitchingToNextInputMethod */));
+        public static ControllerImpl createFrom(final ControllerImpl currentInstance,
+                final List<ImeSubtypeListItem> sortedEnabledItems) {
+            DynamicRotationList switchingAwareRotationList = null;
+            {
+                final List<ImeSubtypeListItem> switchingAwareImeSubtypes =
+                        filterImeSubtypeList(sortedEnabledItems,
+                                true /* supportsSwitchingToNextInputMethod */);
+                if (currentInstance != null &&
+                        currentInstance.mSwitchingAwareRotationList != null &&
+                        Objects.equals(currentInstance.mSwitchingAwareRotationList.mImeSubtypeList,
+                                switchingAwareImeSubtypes)) {
+                    // Can reuse the current instance.
+                    switchingAwareRotationList = currentInstance.mSwitchingAwareRotationList;
+                }
+                if (switchingAwareRotationList == null) {
+                    switchingAwareRotationList = new DynamicRotationList(switchingAwareImeSubtypes);
+                }
+            }
+
+            StaticRotationList switchingUnawareRotationList = null;
+            {
+                final List<ImeSubtypeListItem> switchingUnawareImeSubtypes = filterImeSubtypeList(
+                        sortedEnabledItems, false /* supportsSwitchingToNextInputMethod */);
+                if (currentInstance != null &&
+                        currentInstance.mSwitchingUnawareRotationList != null &&
+                        Objects.equals(
+                                currentInstance.mSwitchingUnawareRotationList.mImeSubtypeList,
+                                switchingUnawareImeSubtypes)) {
+                    // Can reuse the current instance.
+                    switchingUnawareRotationList = currentInstance.mSwitchingUnawareRotationList;
+                }
+                if (switchingUnawareRotationList == null) {
+                    switchingUnawareRotationList =
+                            new StaticRotationList(switchingUnawareImeSubtypes);
+                }
+            }
+
+            return new ControllerImpl(switchingAwareRotationList, switchingUnawareRotationList);
+        }
+
+        private ControllerImpl(final DynamicRotationList switchingAwareRotationList,
+                final StaticRotationList switchingUnawareRotationList) {
+            mSwitchingAwareRotationList = switchingAwareRotationList;
+            mSwitchingUnawareRotationList = switchingUnawareRotationList;
         }
 
         public ImeSubtypeListItem getNextInputMethod(boolean onlyCurrentIme, InputMethodInfo imi,
@@ -364,10 +421,10 @@ public class InputMethodSubtypeSwitchingController {
                 return null;
             }
             if (imi.supportsSwitchingToNextInputMethod()) {
-                return mSwitchingAwareSubtypeList.getNextInputMethodLocked(onlyCurrentIme, imi,
+                return mSwitchingAwareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
                         subtype);
             } else {
-                return mSwitchingUnawareSubtypeList.getNextInputMethodLocked(onlyCurrentIme, imi,
+                return mSwitchingUnawareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
                         subtype);
             }
         }
@@ -376,10 +433,9 @@ public class InputMethodSubtypeSwitchingController {
             if (imi == null) {
                 return;
             }
-            // TODO: Enable the following code when DynamicRotationList is enabled.
-            // if (imi.supportsSwitchingToNextInputMethod()) {
-            //     mSwitchingAwareSubtypeList.onUserAction(imi, subtype);
-            // }
+            if (imi.supportsSwitchingToNextInputMethod()) {
+                mSwitchingAwareRotationList.onUserAction(imi, subtype);
+            }
         }
 
         private static List<ImeSubtypeListItem> filterImeSubtypeList(
@@ -424,7 +480,8 @@ public class InputMethodSubtypeSwitchingController {
 
     public void resetCircularListLocked(Context context) {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
-        mController = new ControllerImpl(mSubtypeList.getSortedInputMethodAndSubtypeList());
+        mController = ControllerImpl.createFrom(mController,
+                mSubtypeList.getSortedInputMethodAndSubtypeList());
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
