@@ -293,7 +293,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                             ": <item> tag requires a 'drawable' attribute or child tag" +
                             " defining a drawable");
                 }
-                dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+                dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
             
             mAnimationState.addFrame(dr, duration);

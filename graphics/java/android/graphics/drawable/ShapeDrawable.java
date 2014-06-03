@@ -291,41 +291,10 @@ public class ShapeDrawable extends Drawable {
         return mShapeState.mAlpha;
     }
 
-    /**
-     * Specifies a tint for this drawable.
-     * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
-     *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
-     */
-    public void setTint(ColorStateList tint) {
-        if (mShapeState.mTint != tint) {
+    @Override
+    public void setTint(ColorStateList tint, Mode tintMode) {
+        if (mShapeState.mTint != tint || mShapeState.mTintMode != tintMode) {
             mShapeState.mTint = tint;
-            updateTintFilter();
-            invalidateSelf();
-        }
-    }
-
-    /**
-     * Returns the tint color for this drawable.
-     *
-     * @return Color state list to use for tinting this drawable, or null if
-     *         none set
-     */
-    public ColorStateList getTint() {
-        return mShapeState.mTint;
-    }
-
-    /**
-     * Specifies the blending mode used to apply tint.
-     *
-     * @param tintMode A Porter-Duff blending mode
-     * @hide Pending finalization of supported Modes
-     */
-    public void setTintMode(Mode tintMode) {
-        if (mShapeState.mTintMode != tintMode) {
             mShapeState.mTintMode = tintMode;
             updateTintFilter();
             invalidateSelf();
@@ -348,16 +317,6 @@ public class ShapeDrawable extends Drawable {
         } else {
             mTintFilter = null;
         }
-    }
-
-    /**
-     * Returns the blending mode used to apply tint.
-     *
-     * @return The Porter-Duff blending mode used to apply tint.
-     * @hide Pending finalization of supported Modes
-     */
-    public Mode getTintMode() {
-        return mShapeState.mTintMode;
     }
 
     @Override

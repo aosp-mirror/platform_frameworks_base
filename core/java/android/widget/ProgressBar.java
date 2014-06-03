@@ -357,9 +357,8 @@ public class ProgressBar extends View {
                     Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
             shapeDrawable.getPaint().setShader(bitmapShader);
 
-            // Ensure the color filter and tint are propagated.
-            shapeDrawable.setTint(bitmap.getTint());
-            shapeDrawable.setTintMode(bitmap.getTintMode());
+            // Ensure the tint and filter are propagated in the correct order.
+            shapeDrawable.setTint(bitmap.getTint(), bitmap.getTintMode());
             shapeDrawable.setColorFilter(bitmap.getColorFilter());
 
             return clip ? new ClipDrawable(

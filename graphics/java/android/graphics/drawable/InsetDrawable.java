@@ -111,7 +111,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
                         + ": <inset> tag requires a 'drawable' attribute or "
                         + "child tag defining a drawable");
             }
-            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         if (dr == null) {

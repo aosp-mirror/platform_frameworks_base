@@ -134,7 +134,7 @@ public class LevelListDrawable extends DrawableContainer {
                                     + ": <item> tag requires a 'drawable' attribute or "
                                     + "child tag defining a drawable");
                 }
-                dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+                dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
             mLevelListState.addLevel(low, high, dr);

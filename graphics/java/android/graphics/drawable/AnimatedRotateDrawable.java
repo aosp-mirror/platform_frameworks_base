@@ -260,7 +260,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
                 continue;
             }
 
-            if ((drawable = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme)) == null) {
+            if ((drawable = Drawable.createFromXmlInner(r, parser, attrs, theme)) == null) {
                 Log.w("drawable", "Bad element under <animated-rotate>: "
                         + parser .getName());
             }

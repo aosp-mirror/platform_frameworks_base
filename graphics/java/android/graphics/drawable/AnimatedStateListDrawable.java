@@ -301,7 +301,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
                                 + ": <item> tag requires a 'drawable' attribute or "
                                 + "child tag defining a drawable");
             }
-            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         final AnimationDrawable anim;
@@ -355,7 +355,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
                                 + ": <item> tag requires a 'drawable' attribute or "
                                 + "child tag defining a drawable");
             }
-            dr = Drawable.createFromXmlInnerThemed(r, parser, attrs, theme);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         return mState.addStateSet(states, dr, keyframeId);
