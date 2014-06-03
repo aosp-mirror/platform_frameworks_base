@@ -22,6 +22,10 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <EGL/egl_cache.h>
+
 #include <utils/StrongPointer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
@@ -329,6 +333,18 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
 #endif
 
 // ----------------------------------------------------------------------------
+// Shaders
+// ----------------------------------------------------------------------------
+
+static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
+        jstring diskCachePath) {
+
+    const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
+    egl_cache_t::get()->setCacheFilename(cacheArray);
+    env->ReleaseStringUTFChars(diskCachePath, cacheArray);
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -361,6 +377,8 @@ static JNINativeMethod gMethods[] = {
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
 #endif
+    { "setupShadersDiskCache", "(Ljava/lang/String;)V",
+                (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {

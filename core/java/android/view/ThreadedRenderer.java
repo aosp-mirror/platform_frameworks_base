@@ -331,6 +331,14 @@ public class ThreadedRenderer extends HardwareRenderer {
         }
     }
 
+    static void startTrimMemory(int level) {
+        // TODO
+    }
+
+    static void endTrimMemory() {
+        // TODO
+    }
+
     private static class AtlasInitializer {
         static AtlasInitializer sInstance = new AtlasInitializer();
 
@@ -366,6 +374,8 @@ public class ThreadedRenderer extends HardwareRenderer {
             }
         }
     }
+
+    static native void setupShadersDiskCache(String cacheFile);
 
     private static native void nSetAtlas(GraphicBuffer buffer, long[] map);
 

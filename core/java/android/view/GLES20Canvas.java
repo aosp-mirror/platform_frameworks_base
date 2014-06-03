@@ -75,22 +75,10 @@ class GLES20Canvas extends HardwareCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Creates a canvas to render directly on screen.
-     */
-    GLES20Canvas(boolean translucent) {
-        this(false, translucent);
-    }
-    
-    protected GLES20Canvas(boolean record, boolean translucent) {
-        mOpaque = !translucent;
-
-        if (record) {
-            mRenderer = nCreateDisplayListRenderer();
-        } else {
-            mRenderer = nCreateRenderer();
-        }
-
+    // TODO: Merge with GLES20RecordingCanvas
+    protected GLES20Canvas() {
+        mOpaque = false;
+        mRenderer = nCreateDisplayListRenderer();
         setupFinalizer();
     }
 
@@ -102,7 +90,6 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private static native long nCreateRenderer();
     private static native long nCreateDisplayListRenderer();
     private static native void nResetDisplayListRenderer(long renderer);
     private static native void nDestroyRenderer(long renderer);
@@ -129,36 +116,6 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native void nSetProperty(String name, String value);
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Hardware layers
-    ///////////////////////////////////////////////////////////////////////////
-
-    @Override
-    void pushLayerUpdate(HardwareLayer layer) {
-        nPushLayerUpdate(mRenderer, layer.getLayer());
-    }
-
-    @Override
-    void cancelLayerUpdate(HardwareLayer layer) {
-        nCancelLayerUpdate(mRenderer, layer.getLayer());
-    }
-
-    @Override
-    void flushLayerUpdates() {
-        nFlushLayerUpdates(mRenderer);
-    }
-
-    @Override
-    void clearLayerUpdates() {
-        nClearLayerUpdates(mRenderer);
-    }
-
-    static native boolean nCopyLayer(long layerId, long bitmap);
-    private static native void nClearLayerUpdates(long renderer);
-    private static native void nFlushLayerUpdates(long renderer);
-    private static native void nPushLayerUpdate(long renderer, long layer);
-    private static native void nCancelLayerUpdate(long renderer, long layer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
@@ -234,20 +191,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nFinish(long renderer);
 
-    /**
-     * Returns the size of the stencil buffer required by the underlying
-     * implementation.
-     * 
-     * @return The minimum number of bits the stencil buffer must. Always >= 0.
-     * 
-     * @hide
-     */
-    public static int getStencilSize() {
-        return nGetStencilSize();
-    }
-
-    private static native int nGetStencilSize();
-
     ///////////////////////////////////////////////////////////////////////////
     // Functor
     ///////////////////////////////////////////////////////////////////////////
@@ -283,49 +226,6 @@ class GLES20Canvas extends HardwareCanvas {
      * @see #flushCaches(int) 
      */
     static final int FLUSH_CACHES_FULL = 2;
-
-    /**
-     * Flush caches to reclaim as much memory as possible. The amount of memory
-     * to reclaim is indicate by the level parameter.
-     * 
-     * The level can be one of {@link #FLUSH_CACHES_MODERATE} or
-     * {@link #FLUSH_CACHES_FULL}.
-     * 
-     * @param level Hint about the amount of memory to reclaim
-     */
-    static void flushCaches(int level) {
-        nFlushCaches(level);
-    }
-
-    private static native void nFlushCaches(int level);
-
-    /**
-     * Release all resources associated with the underlying caches. This should
-     * only be called after a full flushCaches().
-     * 
-     * @hide
-     */
-    static void terminateCaches() {
-        nTerminateCaches();
-    }
-
-    private static native void nTerminateCaches();
-
-    static boolean initCaches() {
-        return nInitCaches();
-    }
-
-    private static native boolean nInitCaches();
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Atlas
-    ///////////////////////////////////////////////////////////////////////////
-
-    static void initAtlas(GraphicBuffer buffer, long[] map) {
-        nInitAtlas(buffer, map, map.length);
-    }
-
-    private static native void nInitAtlas(GraphicBuffer buffer, long[] map, int count);
 
     ///////////////////////////////////////////////////////////////////////////
     // Display list
@@ -898,12 +798,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nDrawPath(long renderer, long path, long paint);
     private static native void nDrawRects(long renderer, long region, long paint);
-
-    void drawRects(float[] rects, int count, Paint paint) {
-        nDrawRects(mRenderer, rects, count, paint.mNativePaint);
-    }
-
-    private static native void nDrawRects(long renderer, float[] rects, int count, long paint);
 
     @Override
     public void drawPicture(Picture picture) {

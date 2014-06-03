@@ -171,9 +171,6 @@ public abstract class HardwareRenderer {
      */
     public static boolean sSystemRendererDisabled = false;
 
-    /** @hide */
-    public static boolean sUseRenderThread = true;
-
     private boolean mEnabled;
     private boolean mRequested = true;
 
@@ -309,7 +306,7 @@ public abstract class HardwareRenderer {
      * @hide
      */
     public static void setupDiskCache(File cacheDir) {
-        GLRenderer.setupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
+        ThreadedRenderer.setupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
     }
 
     /**
@@ -469,11 +466,7 @@ public abstract class HardwareRenderer {
     static HardwareRenderer create(boolean translucent) {
         HardwareRenderer renderer = null;
         if (GLES20Canvas.isAvailable()) {
-            if (sUseRenderThread) {
-                renderer = new ThreadedRenderer(translucent);
-            } else {
-                renderer = new GLRenderer(translucent);
-            }
+            renderer = new ThreadedRenderer(translucent);
         }
         return renderer;
     }
@@ -500,7 +493,7 @@ public abstract class HardwareRenderer {
      *              see {@link android.content.ComponentCallbacks}
      */
     static void startTrimMemory(int level) {
-        GLRenderer.startTrimMemory(level);
+        ThreadedRenderer.startTrimMemory(level);
     }
 
     /**
@@ -508,7 +501,7 @@ public abstract class HardwareRenderer {
      * cleanup special resources used by the memory trimming process.
      */
     static void endTrimMemory() {
-        GLRenderer.endTrimMemory();
+        ThreadedRenderer.endTrimMemory();
     }
 
     /**

@@ -43,21 +43,6 @@ using namespace uirenderer;
 
 #ifdef USE_OPENGL_RENDERER
 
-static jlong android_view_HardwareLayer_createTextureLayer(JNIEnv* env, jobject clazz) {
-    Layer* layer = LayerRenderer::createTextureLayer();
-    if (!layer) return 0;
-
-    return reinterpret_cast<jlong>( new DeferredLayerUpdater(layer) );
-}
-
-static jlong android_view_HardwareLayer_createRenderLayer(JNIEnv* env, jobject clazz,
-        jint width, jint height) {
-    Layer* layer = LayerRenderer::createRenderLayer(width, height);
-    if (!layer) return 0;
-
-    return reinterpret_cast<jlong>( new DeferredLayerUpdater(layer) );
-}
-
 static void android_view_HardwareLayer_onTextureDestroyed(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
@@ -140,8 +125,6 @@ const char* const kClassPathName = "android/view/HardwareLayer";
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
 
-    { "nCreateTextureLayer",     "()J",        (void*) android_view_HardwareLayer_createTextureLayer },
-    { "nCreateRenderLayer",      "(II)J",      (void*) android_view_HardwareLayer_createRenderLayer },
     { "nOnTextureDestroyed",     "(J)V",       (void*) android_view_HardwareLayer_onTextureDestroyed },
 
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },

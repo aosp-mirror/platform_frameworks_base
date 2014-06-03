@@ -13593,12 +13593,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
 
-            // The layer is not valid if the underlying GPU resources cannot be allocated
-            mHardwareLayer.flushChanges();
-            if (!mHardwareLayer.isValid()) {
-                return null;
-            }
-
             mHardwareLayer.setLayerPaint(mLayerPaint);
             RenderNode displayList = mHardwareLayer.startRecording();
             updateDisplayListIfDirty(displayList, true);
