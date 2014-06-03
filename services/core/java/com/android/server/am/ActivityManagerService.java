@@ -2978,6 +2978,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             buf.append("}");
+            if (requiredAbi != null) {
+                buf.append(" abi=");
+                buf.append(requiredAbi);
+            }
             Slog.i(TAG, buf.toString());
             app.setPid(startResult.pid);
             app.usingWrapper = startResult.usingWrapper;
