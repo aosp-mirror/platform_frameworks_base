@@ -62,7 +62,7 @@ interface IAudioService {
 
     boolean isStreamMute(int streamType);
 
-    void setMasterMute(boolean state, int flags, IBinder cb);
+    void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb);
 
     boolean isMasterMute();
 

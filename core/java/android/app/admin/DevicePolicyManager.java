@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.RestrictionsManager;
+import android.media.AudioService;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -2405,5 +2406,38 @@ public class DevicePolicyManager {
                 Log.w(TAG, "Failed to set permission provider on device policy service");
             }
         }
+    }
+
+    /**
+     * Called by profile or device owners to set the master volume mute on or off.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param on {@code true} to mute master volume, {@code false} to turn mute off.
+     */
+    public void setMasterVolumeMuted(ComponentName admin, boolean on) {
+        if (mService != null) {
+            try {
+                mService.setMasterVolumeMuted(admin, on);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to setMasterMute on device policy service");
+            }
+        }
+    }
+
+    /**
+     * Called by profile or device owners to check whether the master volume mute is on or off.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return {@code true} if master volume is muted, {@code false} if it's not.
+     */
+    public boolean isMasterVolumeMuted(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.isMasterVolumeMuted(admin);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get isMasterMute on device policy service");
+            }
+        }
+        return false;
     }
 }
