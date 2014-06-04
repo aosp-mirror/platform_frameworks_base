@@ -437,7 +437,7 @@ public class ExpandHelper implements Gefingerpoken {
                 break;
         }
         mLastMotionY = ev.getRawY();
-        return true;
+        return mResizedView != null;
     }
 
     /**
