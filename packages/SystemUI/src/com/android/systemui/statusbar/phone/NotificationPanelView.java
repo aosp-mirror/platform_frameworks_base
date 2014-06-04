@@ -227,7 +227,6 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         requestScrollerTopPaddingUpdate(animateClock);
-        mAnimateNextTopPaddingChange = false;
     }
 
     private void startClockAnimation(int y) {
@@ -591,6 +590,7 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.updateTopPadding(mQsExpansionHeight,
                 mScrollView.getScrollY(),
                 mAnimateNextTopPaddingChange || animate);
+        mAnimateNextTopPaddingChange = false;
     }
 
     private void trackMovement(MotionEvent event) {
