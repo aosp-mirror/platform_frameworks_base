@@ -242,21 +242,27 @@ public class Canvas {
      *
      * @return true if the device that the current layer draws into is opaque
      */
-    public native boolean isOpaque();
+    public boolean isOpaque() {
+        return native_isOpaque(mNativeCanvasWrapper);
+    }
 
     /**
      * Returns the width of the current drawing layer
      *
      * @return the width of the current drawing layer
      */
-    public native int getWidth();
+    public int getWidth() {
+        return native_getWidth(mNativeCanvasWrapper);
+    }
 
     /**
      * Returns the height of the current drawing layer
      *
      * @return the height of the current drawing layer
      */
-    public native int getHeight();
+    public int getHeight() {
+        return native_getHeight(mNativeCanvasWrapper);
+    }
 
     /**
      * <p>Returns the target density of the canvas.  The default density is
@@ -343,7 +349,9 @@ public class Canvas {
      *
      * @return The value to pass to restoreToCount() to balance this save()
      */
-    public native int save();
+    public int save() {
+        return native_save(mNativeCanvasWrapper, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+    }
     
     /**
      * Based on saveFlags, can save the current matrix and clip onto a private
@@ -356,7 +364,9 @@ public class Canvas {
      *                  to save/restore
      * @return The value to pass to restoreToCount() to balance this save()
      */
-    public native int save(int saveFlags);
+    public int save(int saveFlags) {
+        return native_save(mNativeCanvasWrapper, saveFlags);
+    }
 
     /**
      * This behaves the same as save(), but in addition it allocates an
@@ -375,7 +385,8 @@ public class Canvas {
      * @return       value to pass to restoreToCount() to balance this save()
      */
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
-        return native_saveLayer(mNativeCanvasWrapper, bounds,
+        return native_saveLayer(mNativeCanvasWrapper,
+                bounds.left, bounds.top, bounds.right, bounds.bottom,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
     }
@@ -422,7 +433,9 @@ public class Canvas {
      */
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
         alpha = Math.min(255, Math.max(0, alpha));
-        return native_saveLayerAlpha(mNativeCanvasWrapper, bounds, alpha, saveFlags);
+        return native_saveLayerAlpha(mNativeCanvasWrapper,
+                bounds.left, bounds.top, bounds.right, bounds.bottom,
+                alpha, saveFlags);
     }
 
     /**
@@ -453,13 +466,17 @@ public class Canvas {
      * modifications to the matrix/clip state since the last save call. It is
      * an error to call restore() more times than save() was called.
      */
-    public native void restore();
+    public void restore() {
+        native_restore(mNativeCanvasWrapper);
+    }
 
     /**
      * Returns the number of matrix/clip states on the Canvas' private stack.
      * This will equal # save() calls - # restore() calls.
      */
-    public native int getSaveCount();
+    public int getSaveCount() {
+        return native_getSaveCount(mNativeCanvasWrapper);
+    }
 
     /**
      * Efficient way to pop any calls to save() that happened after the save
@@ -474,7 +491,9 @@ public class Canvas {
      *
      * @param saveCount The save level to restore to.
      */
-    public native void restoreToCount(int saveCount);
+    public void restoreToCount(int saveCount) {
+        native_restoreToCount(mNativeCanvasWrapper, saveCount);
+    }
 
     /**
      * Preconcat the current matrix with the specified translation
@@ -482,7 +501,9 @@ public class Canvas {
      * @param dx The distance to translate in X
      * @param dy The distance to translate in Y
     */
-    public native void translate(float dx, float dy);
+    public void translate(float dx, float dy) {
+        native_translate(mNativeCanvasWrapper, dx, dy);
+    }
 
     /**
      * Preconcat the current matrix with the specified scale.
@@ -490,7 +511,9 @@ public class Canvas {
      * @param sx The amount to scale in X
      * @param sy The amount to scale in Y
      */
-    public native void scale(float sx, float sy);
+    public void scale(float sx, float sy) {
+        native_scale(mNativeCanvasWrapper, sx, sy);
+    }
 
     /**
      * Preconcat the current matrix with the specified scale.
@@ -511,7 +534,9 @@ public class Canvas {
      *
      * @param degrees The amount to rotate, in degrees
      */
-    public native void rotate(float degrees);
+    public void rotate(float degrees) {
+        native_rotate(mNativeCanvasWrapper, degrees);
+    }
 
     /**
      * Preconcat the current matrix with the specified rotation.
@@ -532,7 +557,9 @@ public class Canvas {
      * @param sx The amount to skew in X
      * @param sy The amount to skew in Y
      */
-    public native void skew(float sx, float sy);
+    public void skew(float sx, float sy) {
+        native_skew(mNativeCanvasWrapper, sx, sy);
+    }
 
     /**
      * Preconcat the current matrix with the specified matrix. If the specified
@@ -615,8 +642,11 @@ public class Canvas {
      * @param rect The rectangle to intersect with the current clip.
      * @return true if the resulting clip is non-empty
      */
-    public native boolean clipRect(RectF rect);
-    
+    public boolean clipRect(RectF rect) {
+        return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.INTERSECT.nativeInt);
+    }
+
     /**
      * Intersect the current clip with the specified rectangle, which is
      * expressed in local coordinates.
@@ -624,7 +654,10 @@ public class Canvas {
      * @param rect The rectangle to intersect with the current clip.
      * @return true if the resulting clip is non-empty
      */
-    public native boolean clipRect(Rect rect);
+    public boolean clipRect(Rect rect) {
+        return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.INTERSECT.nativeInt);
+    }
     
     /**
      * Modify the current clip with the specified rectangle, which is
@@ -658,7 +691,10 @@ public class Canvas {
      *               clip
      * @return       true if the resulting clip is non-empty
      */
-    public native boolean clipRect(float left, float top, float right, float bottom);
+    public boolean clipRect(float left, float top, float right, float bottom) {
+        return native_clipRect(mNativeCanvasWrapper, left, top, right, bottom,
+                Region.Op.INTERSECT.nativeInt);
+    }
 
     /**
      * Intersect the current clip with the specified rectangle, which is
@@ -673,7 +709,10 @@ public class Canvas {
      *               clip
      * @return       true if the resulting clip is non-empty
      */
-    public native boolean clipRect(int left, int top, int right, int bottom);
+    public boolean clipRect(int left, int top, int right, int bottom) {
+        return native_clipRect(mNativeCanvasWrapper, left, top, right, bottom,
+                Region.Op.INTERSECT.nativeInt);
+    }
 
     /**
         * Modify the current clip with the specified path.
@@ -780,7 +819,8 @@ public class Canvas {
      *              does not intersect with the canvas' clip
      */
     public boolean quickReject(RectF rect, EdgeType type) {
-        return native_quickReject(mNativeCanvasWrapper, rect);
+        return native_quickReject(mNativeCanvasWrapper,
+                rect.left, rect.top, rect.right, rect.bottom);
     }
 
     /**
@@ -925,7 +965,9 @@ public class Canvas {
      *                 "points" that are drawn is really (count >> 1).
      * @param paint    The paint used to draw the points
      */
-    public native void drawPoints(float[] pts, int offset, int count, Paint paint);
+    public void drawPoints(float[] pts, int offset, int count, Paint paint) {
+        native_drawPoints(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
+    }
 
     /**
      * Helper for drawPoints() that assumes you want to draw the entire array
@@ -937,7 +979,9 @@ public class Canvas {
     /**
      * Helper for drawPoints() for drawing a single point.
      */
-    public native void drawPoint(float x, float y, Paint paint);
+    public void drawPoint(float x, float y, Paint paint) {
+        native_drawPoint(mNativeCanvasWrapper, x, y, paint.mNativePaint);
+    }
 
     /**
      * Draw a line segment with the specified start and stop x,y coordinates,
@@ -970,7 +1014,9 @@ public class Canvas {
      *                 (count >> 2).
      * @param paint    The paint used to draw the points
      */
-    public native void drawLines(float[] pts, int offset, int count, Paint paint);
+    public void drawLines(float[] pts, int offset, int count, Paint paint) {
+        native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
+    }
 
     public void drawLines(float[] pts, Paint paint) {
         drawLines(pts, 0, pts.length, paint);
@@ -984,7 +1030,8 @@ public class Canvas {
      * @param paint The paint used to draw the rect
      */
     public void drawRect(RectF rect, Paint paint) {
-        native_drawRect(mNativeCanvasWrapper, rect, paint.mNativePaint);
+        native_drawRect(mNativeCanvasWrapper,
+                rect.left, rect.top, rect.right, rect.bottom, paint.mNativePaint);
     }
 
     /**
@@ -1764,21 +1811,30 @@ public class Canvas {
     private static native void native_setBitmap(long canvasHandle,
                                                 long bitmapHandle,
                                                 boolean copyState);
-    private static native int native_saveLayer(long nativeCanvas,
-                                               RectF bounds,
-                                               long nativePaint,
-                                               int layerFlags);
+    private static native boolean native_isOpaque(long canvasHandle);
+    private static native int native_getWidth(long canvasHandle);
+    private static native int native_getHeight(long canvasHandle);
+
+    private static native int native_save(long canvasHandle, int saveFlags);
     private static native int native_saveLayer(long nativeCanvas, float l,
                                                float t, float r, float b,
                                                long nativePaint,
                                                int layerFlags);
-    private static native int native_saveLayerAlpha(long nativeCanvas,
-                                                    RectF bounds, int alpha,
-                                                    int layerFlags);
     private static native int native_saveLayerAlpha(long nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags);
+    private static native void native_restore(long canvasHandle);
+    private static native void native_restoreToCount(long canvasHandle,
+                                                     int saveCount);
+    private static native int native_getSaveCount(long canvasHandle);
 
+    private static native void native_translate(long canvasHandle,
+                                                float dx, float dy);
+    private static native void native_scale(long canvasHandle,
+                                            float sx, float sy);
+    private static native void native_rotate(long canvasHandle, float degrees);
+    private static native void native_skew(long canvasHandle,
+                                           float sx, float sy);
     private static native void native_concat(long nativeCanvas,
                                              long nativeMatrix);
     private static native void native_setMatrix(long nativeCanvas,
@@ -1800,8 +1856,6 @@ public class Canvas {
     private static native void native_getCTM(long nativeCanvas,
                                              long nativeMatrix);
     private static native boolean native_quickReject(long nativeCanvas,
-                                                     RectF rect);
-    private static native boolean native_quickReject(long nativeCanvas,
                                                      long nativePath);
     private static native boolean native_quickReject(long nativeCanvas,
                                                      float left, float top,
@@ -1815,11 +1869,17 @@ public class Canvas {
                                                 int mode);
     private static native void native_drawPaint(long nativeCanvas,
                                                 long nativePaint);
+    private static native void native_drawPoint(long canvasHandle, float x, float y,
+                                                long paintHandle);
+    private static native void native_drawPoints(long canvasHandle, float[] pts,
+                                                 int offset, int count,
+                                                 long paintHandle);
     private static native void native_drawLine(long nativeCanvas, float startX,
                                                float startY, float stopX,
                                                float stopY, long nativePaint);
-    private static native void native_drawRect(long nativeCanvas, RectF rect,
-                                               long nativePaint);
+    private static native void native_drawLines(long canvasHandle, float[] pts,
+                                                int offset, int count,
+                                                long paintHandle);
     private static native void native_drawRect(long nativeCanvas, float left,
                                                float top, float right,
                                                float bottom,
