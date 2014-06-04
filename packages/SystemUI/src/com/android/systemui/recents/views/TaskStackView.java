@@ -430,6 +430,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return getScrollAmountOutOfBounds(getStackScroll()) != 0;
     }
 
+    /** Returns whether the task view is in the stack bounds or not */
+    boolean isTaskInStackBounds(TaskView tv) {
+        Rect r = new Rect();
+        tv.getHitRect(r);
+        return r.bottom <= mRect.bottom;
+    }
+
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax) {
         // Compute the min and max scroll values

@@ -26,11 +26,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -67,6 +70,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     FrameLayout mContainerView;
     RecentsView mRecentsView;
     View mEmptyView;
+    View mNavBarScrimView;
 
     AppWidgetHost mAppWidgetHost;
     AppWidgetProviderInfo mSearchAppWidgetInfo;
@@ -99,7 +103,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     dismissRecentsIfVisible();
                 }
             } else if (action.equals(RecentsService.ACTION_START_ENTER_ANIMATION)) {
-                // Try and start the enter animation
+                // Try and start the enter animation (or restart it on configuration changed)
                 mRecentsView.startOnEnterAnimation();
             }
         }
@@ -128,6 +132,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (!stacks.isEmpty()) {
             mRecentsView.setBSP(root);
         }
+
+        // Hide the scrim by default when we enter recents
+        mNavBarScrimView.setVisibility(View.INVISIBLE);
 
         // Add the default no-recents layout
         if (stacks.size() == 1 && stacks.get(0).getTaskCount() == 0) {
@@ -269,10 +276,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Create the empty view
         LayoutInflater inflater = LayoutInflater.from(this);
         mEmptyView = inflater.inflate(R.layout.recents_empty, mContainerView, false);
+        mNavBarScrimView = inflater.inflate(R.layout.recents_nav_bar_scrim, mContainerView, false);
 
         mContainerView = new FrameLayout(this);
         mContainerView.addView(mRecentsView);
         mContainerView.addView(mEmptyView);
+        mContainerView.addView(mNavBarScrimView);
         setContentView(mContainerView);
 
         // Update the recent tasks
@@ -282,6 +291,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         bindSearchBarAppWidget();
         // Add the search bar layout
         addSearchBarAppWidgetView();
+
+        // Update if we are getting a configuration change
+        if (savedInstanceState != null) {
+            onConfigurationChange();
+        }
+    }
+
+    void onConfigurationChange() {
+        // Try and start the enter animation (or restart it on configuration changed)
+        mRecentsView.startOnEnterAnimation();
     }
 
     @Override
@@ -433,8 +452,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onBackPressed() {
-        boolean interceptedByInfoPanelClose = false;
-
         // Unfilter any stacks
         if (!mRecentsView.unfilterFilteredStacks()) {
             super.onBackPressed();
@@ -442,8 +459,35 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
-    public void onTaskLaunching() {
+    public void onEnterAnimationTriggered() {
+        // Fade in the scrim
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (config.hasNavBarScrim()) {
+            mNavBarScrimView.setVisibility(View.VISIBLE);
+            mNavBarScrimView.setAlpha(0f);
+            mNavBarScrimView.animate().alpha(1f)
+                    .setStartDelay(config.taskBarEnterAnimDelay)
+                    .setDuration(config.navBarScrimEnterDuration)
+                    .setInterpolator(config.fastOutSlowInInterpolator)
+                    .withLayer()
+                    .start();
+        }
+    }
+
+    @Override
+    public void onTaskLaunching(boolean isTaskInStackBounds) {
         mTaskLaunched = true;
+
+        // Fade out the scrim
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (!isTaskInStackBounds && config.hasNavBarScrim()) {
+            mNavBarScrimView.animate().alpha(0f)
+                    .setStartDelay(0)
+                    .setDuration(config.taskBarExitAnimDuration)
+                    .setInterpolator(config.fastOutSlowInInterpolator)
+                    .withLayer()
+                    .start();
+        }
     }
 
     @Override

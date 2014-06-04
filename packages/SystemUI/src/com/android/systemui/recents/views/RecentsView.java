@@ -54,7 +54,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
-        public void onTaskLaunching();
+        public void onTaskLaunching(boolean isTaskInStackBounds);
+        public void onEnterAnimationTriggered();
     }
 
     // The space partitioning root of this container
@@ -160,6 +161,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Requests all task stacks to start their enter-recents animation */
     public void startOnEnterAnimation() {
+        // Notify callbacks that we are starting the enter animation
+        mCb.onEnterAnimationTriggered();
+
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -351,7 +355,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                                final TaskStack stack, final Task task) {
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
-            mCb.onTaskLaunching();
+            boolean isTaskInStackBounds = false;
+            if (stackView != null && tv != null) {
+                isTaskInStackBounds = stackView.isTaskInStackBounds(tv);
+            }
+            mCb.onTaskLaunching(isTaskInStackBounds);
         }
 
         final Runnable launchRunnable = new Runnable() {
