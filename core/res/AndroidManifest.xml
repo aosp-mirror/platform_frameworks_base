@@ -2611,7 +2611,8 @@
 
     <!-- Must be required by an {@link
          android.service.trust.TrustAgentService},
-         to ensure that only the system can bind to it. -->
+         to ensure that only the system can bind to it.
+         @hide -->
     <permission android:name="android.permission.BIND_TRUST_AGENT"
                 android:protectionLevel="signature"
                 android:label="@string/permlab_bind_trust_agent_service"
