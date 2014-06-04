@@ -1238,7 +1238,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ZenModeConfig getZenModeConfig() {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("INotificationManager.getZenModeConfig");
             return mZenModeHelper.getConfig();
         }
 

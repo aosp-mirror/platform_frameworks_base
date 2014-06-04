@@ -156,12 +156,14 @@ public class QSPanel extends ViewGroup {
         AnimatorListener listener = null;
         if (show) {
             if (mDetailRecord != null) return;
-            final View detail = r.tile.createDetailView(mContext, mDetail);
-            if (detail == null) return;
+            if (r.detailView == null) {
+                r.detailView = r.tile.createDetailView(mContext, mDetail);
+            }
+            if (r.detailView == null) return;
             mDetailRecord = r;
             mDetail.removeAllViews();
             mDetail.bringToFront();
-            mDetail.addView(detail);
+            mDetail.addView(r.detailView);
         } else {
             if (mDetailRecord == null) return;
             listener = mTeardownDetailWhenDone;
@@ -273,6 +275,7 @@ public class QSPanel extends ViewGroup {
     private static final class TileRecord {
         QSTile<?> tile;
         QSTileView tileView;
+        View detailView;
         int row;
         int col;
     }

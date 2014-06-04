@@ -25,6 +25,7 @@ import android.os.ServiceManager;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
+import android.service.notification.ZenModeConfig;
 import android.util.Slog;
 
 import com.android.systemui.qs.GlobalSetting;
@@ -35,10 +36,12 @@ import java.util.LinkedHashMap;
 /** Platform implementation of the zen mode controller. **/
 public class ZenModeControllerImpl implements ZenModeController {
     private static final String TAG = "ZenModeControllerImpl";
+    private static final boolean DEBUG = false;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Context mContext;
-    private final GlobalSetting mSetting;
+    private final GlobalSetting mModeSetting;
+    private final GlobalSetting mConfigSetting;
     private final INotificationManager mNoMan;
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
 
@@ -46,13 +49,20 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         mContext = context;
-        mSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
+        mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
             @Override
             protected void handleValueChanged(int value) {
                 fireZenChanged(value != 0);
             }
         };
-        mSetting.setListening(true);
+        mConfigSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE_CONFIG_ETAG) {
+            @Override
+            protected void handleValueChanged(int value) {
+                fireExitConditionChanged();
+            }
+        };
+        mModeSetting.setListening(true);
+        mConfigSetting.setListening(true);
         mNoMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
@@ -69,12 +79,12 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     @Override
     public boolean isZen() {
-        return mSetting.getValue() != 0;
+        return mModeSetting.getValue() != 0;
     }
 
     @Override
     public void setZen(boolean zen) {
-        mSetting.setValue(zen ? 1 : 0);
+        mModeSetting.setValue(zen ? 1 : 0);
     }
 
     @Override
@@ -91,12 +101,25 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     @Override
-    public void select(Condition condition) {
+    public void setExitConditionId(Uri exitConditionId) {
         try {
-            mNoMan.setZenModeCondition(condition == null ? null : condition.id);
+            mNoMan.setZenModeCondition(exitConditionId);
         } catch (RemoteException e) {
             // noop
         }
+    }
+
+    @Override
+    public Uri getExitConditionId() {
+        try {
+            final ZenModeConfig config = mNoMan.getZenModeConfig();
+            if (config != null) {
+                return config.exitConditionId;
+            }
+        } catch (RemoteException e) {
+            // noop
+        }
+        return null;
     }
 
     private void fireZenChanged(boolean zen) {
@@ -108,6 +131,14 @@ public class ZenModeControllerImpl implements ZenModeController {
     private void fireConditionsChanged(Condition[] conditions) {
         for (Callback cb : mCallbacks) {
             cb.onConditionsChanged(conditions);
+        }
+    }
+
+    private void fireExitConditionChanged() {
+        final Uri exitConditionId = getExitConditionId();
+        if (DEBUG) Slog.d(TAG, "exitConditionId changed: " + exitConditionId);
+        for (Callback cb : mCallbacks) {
+            cb.onExitConditionChanged(exitConditionId);
         }
     }
 
@@ -124,8 +155,8 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final IConditionListener mListener = new IConditionListener.Stub() {
         @Override
         public void onConditionsReceived(Condition[] conditions) {
-            Slog.d(TAG, "onConditionsReceived " + (conditions == null ? 0 : conditions.length)
-                    + " mRequesting=" + mRequesting); 
+            if (DEBUG) Slog.d(TAG, "onConditionsReceived "
+                    + (conditions == null ? 0 : conditions.length) + " mRequesting=" + mRequesting);
             if (!mRequesting) return;
             updateConditions(conditions);
         }
