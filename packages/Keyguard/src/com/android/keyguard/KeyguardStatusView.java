@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -41,6 +42,7 @@ public class KeyguardStatusView extends GridLayout {
     private TextView mAlarmStatusView;
     private TextClock mDateView;
     private TextClock mClockView;
+    private TextView mOwnerInfo;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -54,6 +56,7 @@ public class KeyguardStatusView extends GridLayout {
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
                 refresh();
+                updateOwnerInfo();
             }
         }
 
@@ -83,6 +86,7 @@ public class KeyguardStatusView extends GridLayout {
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
         if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
+        mOwnerInfo.setSelected(enabled);
     }
 
     @Override
@@ -91,10 +95,12 @@ public class KeyguardStatusView extends GridLayout {
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
         mClockView = (TextClock) findViewById(R.id.clock_view);
+        mOwnerInfo = (TextView) findViewById(R.id.owner_info);
         mLockPatternUtils = new LockPatternUtils(getContext());
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setEnableMarquee(screenOn);
         refresh();
+        updateOwnerInfo();
 
         // Disable elegant text height because our fancy colon makes the ymin value huge for no
         // reason.
@@ -124,6 +130,16 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    private void updateOwnerInfo() {
+        String ownerInfo = getOwnerInfo();
+        if (!TextUtils.isEmpty(ownerInfo)) {
+            mOwnerInfo.setVisibility(View.VISIBLE);
+            mOwnerInfo.setText(ownerInfo);
+        } else {
+            mOwnerInfo.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -138,6 +154,16 @@ public class KeyguardStatusView extends GridLayout {
 
     public int getAppWidgetId() {
         return LockPatternUtils.ID_DEFAULT_STATUS_WIDGET;
+    }
+
+    private String getOwnerInfo() {
+        ContentResolver res = getContext().getContentResolver();
+        String info = null;
+        final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled();
+        if (ownerInfoEnabled) {
+            info = mLockPatternUtils.getOwnerInfo(mLockPatternUtils.getCurrentUser());
+        }
+        return info;
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.

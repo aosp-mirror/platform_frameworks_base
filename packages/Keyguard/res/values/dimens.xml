@@ -163,4 +163,7 @@
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>
+
+    <!-- The vertical margin between the date and the owner info. -->
+    <dimen name="date_owner_info_margin">2dp</dimen>
 </resources>
