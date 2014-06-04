@@ -17,8 +17,14 @@
 package com.android.layoutlib.bridge.impl;
 
 import com.android.ide.common.rendering.api.ViewInfo;
+import com.android.ide.common.rendering.api.ViewType;
 
+/**
+ * ViewInfo for views added by the platform.
+ */
 public class SystemViewInfo extends ViewInfo {
+
+    private ViewType mViewType;
 
     public SystemViewInfo(String name, Object cookie, int left, int top,
             int right, int bottom) {
@@ -32,7 +38,14 @@ public class SystemViewInfo extends ViewInfo {
     }
 
     @Override
-    public boolean isSystemView() {
-        return true;
+    public ViewType getViewType() {
+        if (mViewType != null) {
+            return mViewType;
+        }
+        return ViewType.SYSTEM_UNKNOWN;
+    }
+
+    public void setViewType(ViewType type) {
+        mViewType = type;
     }
 }
