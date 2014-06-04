@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -49,8 +48,7 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
 
     @Override
     public View createDetailView(Context context, ViewGroup root) {
-        final Context themedContext = new ContextThemeWrapper(mContext, R.style.QSAccentTheme);
-        final View v = LayoutInflater.from(themedContext).inflate(R.layout.qs_detail, root, false);
+        final View v = LayoutInflater.from(context).inflate(R.layout.qs_detail, root, false);
         final TextView title = (TextView) v.findViewById(android.R.id.title);
         title.setText(R.string.quick_settings_notifications_label);
         final View close = v.findViewById(android.R.id.button1);
