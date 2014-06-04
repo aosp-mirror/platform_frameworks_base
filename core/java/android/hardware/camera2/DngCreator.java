@@ -121,6 +121,7 @@ public final class DngCreator implements AutoCloseable {
      *                      <li>{@link android.media.ExifInterface#ORIENTATION_ROTATE_270}</li>
      *                    </ul>
      * @return this {@link #DngCreator} object.
+     * @hide
      */
     public DngCreator setOrientation(int orientation) {
 
@@ -147,6 +148,7 @@ public final class DngCreator implements AutoCloseable {
      *
      * @param pixels a {@link android.graphics.Bitmap} of pixel data.
      * @return this {@link #DngCreator} object.
+     * @hide
      */
     public DngCreator setThumbnail(Bitmap pixels) {
         if (pixels == null) {
@@ -180,6 +182,7 @@ public final class DngCreator implements AutoCloseable {
      * @param pixels an {@link android.media.Image} object with the format
      *               {@link android.graphics.ImageFormat#YUV_420_888}.
      * @return this {@link #DngCreator} object.
+     * @hide
      */
     public DngCreator setThumbnail(Image pixels) {
         if (pixels == null) {
@@ -216,6 +219,7 @@ public final class DngCreator implements AutoCloseable {
      *
      * @throws java.lang.IllegalArgumentException if the given location object doesn't
      *          contain enough information to set location metadata.
+     * @hide
      */
     public DngCreator setLocation(Location location) {
         /*TODO*/
@@ -231,6 +235,7 @@ public final class DngCreator implements AutoCloseable {
      *
      * @param description the user description string.
      * @return this {@link #DngCreator} object.
+     * @hide
      */
     public DngCreator setDescription(String description) {
         /*TODO*/
@@ -263,6 +268,7 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      * @throws java.lang.IllegalArgumentException if the size passed in does not match the
+     * @hide
      */
     public void writeInputStream(OutputStream dngOutput, Size size, InputStream pixels, long offset)
             throws IOException {
@@ -297,6 +303,7 @@ public final class DngCreator implements AutoCloseable {
      * @throws IOException if an error was encountered in the input or output stream.
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
+     * @hide
      */
     public void writeByteBuffer(OutputStream dngOutput, Size size, ByteBuffer pixels, long offset)
             throws IOException {
