@@ -10127,13 +10127,13 @@ package android.graphics {
     field public android.graphics.Bitmap inBitmap;
     field public int inDensity;
     field public boolean inDither;
-    field public boolean inInputShareable;
+    field public deprecated boolean inInputShareable;
     field public boolean inJustDecodeBounds;
     field public boolean inMutable;
     field public boolean inPreferQualityOverSpeed;
     field public android.graphics.Bitmap.Config inPreferredConfig;
     field public boolean inPremultiplied;
-    field public boolean inPurgeable;
+    field public deprecated boolean inPurgeable;
     field public int inSampleSize;
     field public boolean inScaled;
     field public int inScreenDensity;
