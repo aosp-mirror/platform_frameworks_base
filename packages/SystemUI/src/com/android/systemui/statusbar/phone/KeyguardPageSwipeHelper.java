@@ -40,8 +40,8 @@ import java.util.ArrayList;
 public class KeyguardPageSwipeHelper {
 
     private static final float SWIPE_MAX_ICON_SCALE_AMOUNT = 2.0f;
-    private static final float SWIPE_RESTING_ALPHA_AMOUNT = 0.7f;
-    private static final long HINT_PHASE1_DURATION = 250;
+    public static final float SWIPE_RESTING_ALPHA_AMOUNT = 0.5f;
+    public static final long HINT_PHASE1_DURATION = 250;
     private static final long HINT_PHASE2_DURATION = 450;
 
     private final Context mContext;
