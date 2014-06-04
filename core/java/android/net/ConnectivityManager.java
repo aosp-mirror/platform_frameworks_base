@@ -870,6 +870,26 @@ public class ConnectivityManager {
         return 1;
     }
 
+    /**
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability from the given
+     * NetworkCapabilities object if it lists any capabilities that are
+     * typically provided by retricted networks.
+     * @hide
+     */
+    public static void maybeMarkCapabilitiesRestricted(NetworkCapabilities nc) {
+        for (Integer capability: nc.getNetworkCapabilities()) {
+            switch (capability.intValue()) {
+                case NetworkCapabilities.NET_CAPABILITY_CBS:
+                case NetworkCapabilities.NET_CAPABILITY_DUN:
+                case NetworkCapabilities.NET_CAPABILITY_FOTA:
+                case NetworkCapabilities.NET_CAPABILITY_IA:
+                case NetworkCapabilities.NET_CAPABILITY_IMS:
+                    nc.removeNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+                    break;
+            }
+        }
+    }
+
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
         if (networkType == TYPE_MOBILE) {
             int cap = -1;
@@ -893,12 +913,14 @@ public class ConnectivityManager {
             NetworkCapabilities netCap = new NetworkCapabilities();
             netCap.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
             netCap.addNetworkCapability(cap);
+            maybeMarkCapabilitiesRestricted(netCap);
             return netCap;
         } else if (networkType == TYPE_WIFI) {
             if ("p2p".equals(feature)) {
                 NetworkCapabilities netCap = new NetworkCapabilities();
                 netCap.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
                 netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
+                maybeMarkCapabilitiesRestricted(netCap);
                 return netCap;
             }
         }
