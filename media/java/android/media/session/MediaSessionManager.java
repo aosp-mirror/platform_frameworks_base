@@ -142,6 +142,50 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Add a listener to be notified when the list of active sessions
+     * changes.This requires the
+     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
+     * the calling app. You may also retrieve this list if your app is an
+     * enabled notification listener using the
+     * {@link NotificationListenerService} APIs, in which case you must pass the
+     * {@link ComponentName} of your enabled listener.
+     *
+     * @param sessionListener The listener to add.
+     * @param notificationListener The enabled notification listener component.
+     *            May be null.
+     * @param userId The userId to listen for changes on.
+     * @hide
+     */
+    public void addActiveSessionsListener(SessionListener sessionListener,
+            ComponentName notificationListener, int userId) {
+        if (sessionListener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+        try {
+            mService.addSessionsListener(sessionListener.mStub, notificationListener, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in addActiveSessionsListener.", e);
+        }
+    }
+
+    /**
+     * Stop receiving active sessions updates on the specified listener.
+     *
+     * @param listener The listener to remove.
+     * @hide
+     */
+    public void removeActiveSessionsListener(SessionListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+        try {
+            mService.removeSessionsListener(listener.mStub);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in removeActiveSessionsListener.", e);
+        }
+    }
+
+    /**
      * Send a media key event. The receiver will be selected automatically.
      *
      * @param keyEvent The KeyEvent to send.
@@ -183,5 +227,36 @@ public final class MediaSessionManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send adjust volume.", e);
         }
+    }
+
+    /**
+     * Listens for changes to the list of active sessions. This can be added
+     * using {@link #addActiveSessionsListener}.
+     *
+     * @hide
+     */
+    public static abstract class SessionListener {
+        /**
+         * Called when the list of active sessions has changed. This can be due
+         * to a session being added or removed or the order of sessions
+         * changing.
+         *
+         * @param controllers The updated list of controllers for the user that
+         *            changed.
+         */
+        public abstract void onActiveSessionsChanged(List<MediaController> controllers);
+
+        private final IActiveSessionsListener.Stub mStub = new IActiveSessionsListener.Stub() {
+            @Override
+            public void onActiveSessionsChanged(List<MediaSessionToken> tokens)
+                    throws RemoteException {
+                ArrayList<MediaController> controllers = new ArrayList<MediaController>();
+                int size = tokens.size();
+                for (int i = 0; i < size; i++) {
+                    controllers.add(MediaController.fromToken(tokens.get(i)));
+                }
+                SessionListener.this.onActiveSessionsChanged(controllers);
+            }
+        };
     }
 }

@@ -31,7 +31,7 @@ public final class MediaSessionToken implements Parcelable {
     /**
      * @hide
      */
-    MediaSessionToken(ISessionController binder) {
+    public MediaSessionToken(ISessionController binder) {
         mBinder = binder;
     }
 
