@@ -30,6 +30,27 @@ class MinikinUtils {
 public:
     static void SetLayoutProperties(Layout* layout, SkPaint* paint, int flags,
         TypefaceImpl* face);
+    static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
+
+    // f is a functor of type void f(SkTypeface *, size_t start, size_t end);
+    template <typename F>
+    static void forFontRun(const Layout& layout, F& f) {
+        SkTypeface* lastFace = NULL;
+        size_t start = 0;
+        size_t nGlyphs = layout.nGlyphs();
+        for (size_t i = 0; i < nGlyphs; i++) {
+            MinikinFontSkia* mfs = static_cast<MinikinFontSkia*>(layout.getFont(i));
+            SkTypeface* skFace = mfs->GetSkTypeface();
+            if (i > 0 && skFace != lastFace) {
+                f(lastFace, start, i);
+                start = i;
+            }
+            lastFace = skFace;
+        }
+        if (nGlyphs > start) {
+            f(lastFace, start, nGlyphs);
+        }
+    }
 };
 
 }  // namespace android

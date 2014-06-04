@@ -760,32 +760,45 @@ public:
     }
 
 #ifdef USE_MINIKIN
-    static void drawGlyphsToSkia(SkCanvas* canvas, SkPaint* paint, Layout* layout, float x, float y) {
-        size_t nGlyphs = layout->nGlyphs();
-        uint16_t *glyphs = new uint16_t[nGlyphs];
-        SkPoint *pos = new SkPoint[nGlyphs];
-        SkTypeface *lastFace = NULL;
-        SkTypeface *skFace = NULL;
-        size_t start = 0;
+    class DrawTextFunctor {
+    public:
+        DrawTextFunctor(const Layout& layout, SkCanvas* canvas, jfloat x, jfloat y, SkPaint* paint,
+                    uint16_t* glyphs, SkPoint* pos)
+                : layout(layout), canvas(canvas), x(x), y(y), paint(paint), glyphs(glyphs),
+                    pos(pos) { }
 
-        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        for (size_t i = 0; i < nGlyphs; i++) {
-            MinikinFontSkia *mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
-            skFace = mfs->GetSkTypeface();
-            glyphs[i] = layout->getGlyphId(i);
-            pos[i].fX = x + layout->getX(i);
-            pos[i].fY = y + layout->getY(i);
-            if (i > 0 && skFace != lastFace) {
-                paint->setTypeface(lastFace);
-                canvas->drawPosText(glyphs + start, (i - start) << 1, pos + start, *paint);
-                start = i;
+        void operator()(SkTypeface* t, size_t start, size_t end) {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[i].fX = x + layout.getX(i);
+                pos[i].fY = y + layout.getY(i);
             }
-            lastFace = skFace;
+            paint->setTypeface(t);
+            canvas->drawPosText(glyphs + start, (end - start) << 1, pos + start, *paint);
         }
-        if (skFace != NULL) {
-            paint->setTypeface(skFace);
-            canvas->drawPosText(glyphs + start, (nGlyphs - start) << 1, pos + start, *paint);
-        }
+    private:
+        const Layout& layout;
+        SkCanvas* canvas;
+        jfloat x;
+        jfloat y;
+        SkPaint* paint;
+        uint16_t* glyphs;
+        SkPoint* pos;
+    };
+
+    static void drawGlyphsToSkia(SkCanvas* canvas, SkPaint* paint, const Layout& layout, float x, float y) {
+        size_t nGlyphs = layout.nGlyphs();
+        uint16_t* glyphs = new uint16_t[nGlyphs];
+        SkPoint* pos = new SkPoint[nGlyphs];
+
+        x += MinikinUtils::xOffsetForTextAlign(paint, layout);
+        SkPaint::Align align = paint->getTextAlign();
+        paint->setTextAlign(SkPaint::kLeft_Align);
+        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        DrawTextFunctor f(layout, canvas, x, y, paint, glyphs, pos);
+        MinikinUtils::forFontRun(layout, f);
+        doDrawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
+        paint->setTextAlign(align);
         delete[] glyphs;
         delete[] pos;
     }
@@ -807,7 +820,7 @@ public:
         Layout layout;
         MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
         layout.doLayout(textArray + start, count);
-        drawGlyphsToSkia(canvas, paint, &layout, x, y);
+        drawGlyphsToSkia(canvas, paint, layout, x, y);
 #else
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
                 textArray, start, count, contextCount, flags);

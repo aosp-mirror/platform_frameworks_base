@@ -17,6 +17,7 @@
 #include "SkPaint.h"
 #include "minikin/Layout.h"
 #include "TypefaceImpl.h"
+#include "MinikinSkia.h"
 
 #include "MinikinUtils.h"
 
@@ -40,6 +41,20 @@ void MinikinUtils::SetLayoutProperties(Layout* layout, SkPaint* paint, int flags
     const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
     off += snprintf(css + off, sizeof(css) - off, " -minikin-variant: %s;", varstr);
     layout->setProperties(css);
+}
+
+float MinikinUtils::xOffsetForTextAlign(SkPaint* paint, const Layout& layout) {
+    switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            return layout.getAdvance() * -0.5f;
+            break;
+        case SkPaint::kRight_Align:
+            return -layout.getAdvance();
+            break;
+        default:
+            break;
+    }
+    return 0;
 }
 
 }
