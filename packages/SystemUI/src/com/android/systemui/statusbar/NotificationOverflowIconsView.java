@@ -18,15 +18,13 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.IconMerger;
 
@@ -37,6 +35,8 @@ public class NotificationOverflowIconsView extends IconMerger {
 
     private TextView mMoreText;
     private int mTintColor;
+    private int mIconSize;
+    private NotificationColorUtil mNotificationColorUtil = new NotificationColorUtil();
 
     public NotificationOverflowIconsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,6 +46,8 @@ public class NotificationOverflowIconsView extends IconMerger {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mTintColor = getResources().getColor(R.color.keyguard_overflow_content_color);
+        mIconSize = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_icon_size);
     }
 
     public void setMoreText(TextView moreText) {
@@ -56,14 +58,24 @@ public class NotificationOverflowIconsView extends IconMerger {
         StatusBarIconView v = new StatusBarIconView(getContext(), "",
                 notification.notification.getNotification());
         v.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        v.setColorFilter(mTintColor, PorterDuff.Mode.MULTIPLY);
-        addView(v);
+        addView(v, mIconSize, mIconSize);
         v.set(notification.icon.getStatusBarIcon());
+        applyColor(notification.notification.getNotification(), v);
         updateMoreText();
     }
 
+    private void applyColor(Notification notification, StatusBarIconView view) {
+        if (notification.color != Notification.COLOR_DEFAULT) {
+            if (mNotificationColorUtil.isGrayscale(view.getDrawable())) {
+                view.setColorFilter(mTintColor, PorterDuff.Mode.MULTIPLY);
+            }
+        } else {
+            view.setColorFilter(notification.color, PorterDuff.Mode.SRC_ATOP);
+        }
+    }
+
     private void updateMoreText() {
-        mMoreText.setText(getResources().getQuantityString(
-                R.plurals.keyguard_more_overflow_text, getChildCount(), getChildCount()));
+        mMoreText.setText(
+                getResources().getString(R.string.keyguard_more_overflow_text, getChildCount()));
     }
 }
