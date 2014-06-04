@@ -2278,9 +2278,10 @@
 
   <public type="style" name="ThemeOverlay" />
   <public type="style" name="ThemeOverlay.Quantum" />
+  <public type="style" name="ThemeOverlay.Quantum.ActionBar" />
   <public type="style" name="ThemeOverlay.Quantum.Light" />
   <public type="style" name="ThemeOverlay.Quantum.Dark" />
-  <public type="style" name="ThemeOverlay.Quantum.ActionBarWidget" />
+  <public type="style" name="ThemeOverlay.Quantum.Dark.ActionBar" />
 
   <public type="style" name="Widget.Quantum" />
   <public type="style" name="Widget.Quantum.ActionBar" />

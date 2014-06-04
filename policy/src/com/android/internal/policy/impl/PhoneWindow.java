@@ -46,6 +46,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -1159,22 +1160,41 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     protected boolean initializePanelMenu(final PanelFeatureState st) {
         Context context = getContext();
 
-        // If we have an action bar, initialize the menu with a context themed for it.
+        // If we have an action bar, initialize the menu with the right theme. 
         if ((st.featureId == FEATURE_OPTIONS_PANEL || st.featureId == FEATURE_ACTION_BAR) &&
                 mDecorContentParent != null) {
-            TypedValue outValue = new TypedValue();
-            Resources.Theme currentTheme = context.getTheme();
-            currentTheme.resolveAttribute(com.android.internal.R.attr.actionBarWidgetTheme,
-                    outValue, true);
-            final int targetThemeRes = outValue.resourceId;
+            // TODO: We should pull the theme directly from the ActionBar.
+            final TypedValue outValue = new TypedValue();
+            final Theme baseTheme = context.getTheme();
+            baseTheme.resolveAttribute(com.android.internal.R.attr.actionBarTheme, outValue, true);
 
-            if (targetThemeRes != 0 && context.getThemeResId() != targetThemeRes) {
-                context = new ContextThemeWrapper(context, targetThemeRes);
+            Theme widgetTheme = null;
+            if (outValue.resourceId != 0) {
+                widgetTheme = context.getResources().newTheme();
+                widgetTheme.setTo(baseTheme);
+                widgetTheme.applyStyle(outValue.resourceId, true);
+                widgetTheme.resolveAttribute(
+                        com.android.internal.R.attr.actionBarWidgetTheme, outValue, true);
+            } else {
+                baseTheme.resolveAttribute(
+                        com.android.internal.R.attr.actionBarWidgetTheme, outValue, true);
+            }
+
+            if (outValue.resourceId != 0) {
+                if (widgetTheme == null) {
+                    widgetTheme = context.getResources().newTheme();
+                    widgetTheme.setTo(baseTheme);
+                }
+                widgetTheme.applyStyle(outValue.resourceId, true);
+            }
+
+            if (widgetTheme != null) {
+                context = new ContextThemeWrapper(context, 0);
+                context.getTheme().setTo(widgetTheme);
             }
         }
 
         final MenuBuilder menu = new MenuBuilder(context);
-
         menu.setCallback(this);
         st.setMenu(menu);
 
