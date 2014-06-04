@@ -609,6 +609,35 @@ include the action bar on devices running Android 2.1 or higher."
             </li>
         </ul>
       </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/volley/index.html"
+             description="How to perform fast, scalable UI operations over the network using Volley"
+             >Transmitting Network Data Using Volley</a>
+        </div>
+        <ul>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/simple.html">
+                Sending a Simple Request
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/requestqueue.html">
+                Setting Up a RequestQueue
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/request.html">
+                Making a Standard Request
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/request-custom.html">
+                Implementing a Custom Request
+                </a>
+            </li>
+        </ul>
+      </li>
 
     </ul>
   </li>
