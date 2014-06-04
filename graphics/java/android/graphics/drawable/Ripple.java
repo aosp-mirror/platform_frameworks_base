@@ -408,6 +408,7 @@ class Ripple {
                 outerFadeOutAnim.setDuration(outerDuration);
                 outerFadeOutAnim.setInterpolator(LINEAR_INTERPOLATOR);
                 outerFadeOutAnim.setStartDelay(outerInflection);
+                outerFadeOutAnim.setStartValue(inflectionOpacity);
                 outerFadeOutAnim.addListener(mAnimationListener);
 
                 mPendingAnimations.add(outerFadeOutAnim);
