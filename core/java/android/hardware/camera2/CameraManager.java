@@ -228,8 +228,8 @@ public final class CameraManager {
 
                 ICameraDeviceUser cameraUser;
 
-                android.hardware.camera2.impl.CameraDevice deviceImpl =
-                        new android.hardware.camera2.impl.CameraDevice(
+                android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
+                        new android.hardware.camera2.impl.CameraDeviceImpl(
                                 cameraId,
                                 listener,
                                 handler,

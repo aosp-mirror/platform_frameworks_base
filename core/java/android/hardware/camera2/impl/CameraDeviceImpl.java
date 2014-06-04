@@ -21,7 +21,6 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -48,7 +47,7 @@ import java.util.TreeSet;
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
-public class CameraDevice implements android.hardware.camera2.CameraDevice {
+public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     private final String TAG;
     private final boolean DEBUG;
@@ -67,6 +66,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private boolean mIdle = true;
 
+    /** map request IDs to listener/request data */
     private final SparseArray<CaptureListenerHolder> mCaptureListenerMap =
             new SparseArray<CaptureListenerHolder>();
 
@@ -99,11 +99,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnOpened = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onOpened(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onOpened(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onOpened(CameraDevice.this);
+                    sessionListener.onOpened(CameraDeviceImpl.this);
                 }
             }
         }
@@ -112,11 +112,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnUnconfigured = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onUnconfigured(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onUnconfigured(CameraDevice.this);
+                    sessionListener.onUnconfigured(CameraDeviceImpl.this);
                 }
             }
         }
@@ -125,11 +125,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnActive = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onActive(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onActive(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onActive(CameraDevice.this);
+                    sessionListener.onActive(CameraDeviceImpl.this);
                 }
             }
         }
@@ -138,11 +138,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnBusy = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onBusy(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onBusy(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onBusy(CameraDevice.this);
+                    sessionListener.onBusy(CameraDeviceImpl.this);
                 }
             }
         }
@@ -151,10 +151,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnClosed = new Runnable() {
         @Override
         public void run() {
-            mDeviceListener.onClosed(CameraDevice.this);
+            mDeviceListener.onClosed(CameraDeviceImpl.this);
             StateListener sessionListener = mSessionStateListener;
             if (sessionListener != null) {
-                sessionListener.onClosed(CameraDevice.this);
+                sessionListener.onClosed(CameraDeviceImpl.this);
             }
         }
     };
@@ -162,11 +162,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnIdle = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onIdle(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onIdle(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onIdle(CameraDevice.this);
+                    sessionListener.onIdle(CameraDeviceImpl.this);
                 }
             }
         }
@@ -175,17 +175,17 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnDisconnected = new Runnable() {
         @Override
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onDisconnected(CameraDevice.this);
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceListener.onDisconnected(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
-                    sessionListener.onDisconnected(CameraDevice.this);
+                    sessionListener.onDisconnected(CameraDeviceImpl.this);
                 }
             }
         }
     };
 
-    public CameraDevice(String cameraId, StateListener listener, Handler handler,
+    public CameraDeviceImpl(String cameraId, StateListener listener, Handler handler,
                         CameraCharacteristics characteristics) {
         if (cameraId == null || listener == null || handler == null) {
             throw new IllegalArgumentException("Null argument given");
@@ -416,7 +416,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 Runnable resultDispatch = new Runnable() {
                     @Override
                     public void run() {
-                        if (!CameraDevice.this.isClosed()) {
+                        if (!CameraDeviceImpl.this.isClosed()) {
                             if (DEBUG) {
                                 Log.d(TAG, String.format(
                                         "early trigger sequence complete for request %d",
@@ -427,7 +427,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                                 throw new AssertionError(lastFrameNumber + " cannot be cast to int");
                             }
                             holder.getListener().onCaptureSequenceCompleted(
-                                    CameraDevice.this,
+                                    CameraDeviceImpl.this,
                                     requestId,
                                     lastFrameNumber);
                         }
@@ -769,7 +769,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                     Runnable resultDispatch = new Runnable() {
                         @Override
                         public void run() {
-                            if (!CameraDevice.this.isClosed()){
+                            if (!CameraDeviceImpl.this.isClosed()){
                                 if (DEBUG) {
                                     Log.d(TAG, String.format(
                                             "fire sequence complete for request %d",
@@ -783,7 +783,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                                             + " cannot be cast to int");
                                 }
                                 holder.getListener().onCaptureSequenceCompleted(
-                                    CameraDevice.this,
+                                    CameraDeviceImpl.this,
                                     requestId,
                                     lastFrameNumber);
                             }
@@ -847,14 +847,14 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                         r = new Runnable() {
                             @Override
                             public void run() {
-                                if (!CameraDevice.this.isClosed()) {
-                                    mDeviceListener.onError(CameraDevice.this, errorCode);
+                                if (!CameraDeviceImpl.this.isClosed()) {
+                                    mDeviceListener.onError(CameraDeviceImpl.this, errorCode);
                                 }
                             }
                         };
                         break;
                 }
-                CameraDevice.this.mDeviceHandler.post(r);
+                CameraDeviceImpl.this.mDeviceHandler.post(r);
             }
 
             // Fire onCaptureSequenceCompleted
@@ -874,10 +874,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 Log.d(TAG, "Camera now idle");
             }
             synchronized (mLock) {
-                if (!CameraDevice.this.mIdle) {
-                    CameraDevice.this.mDeviceHandler.post(mCallOnIdle);
+                if (!CameraDeviceImpl.this.mIdle) {
+                    CameraDeviceImpl.this.mDeviceHandler.post(mCallOnIdle);
                 }
-                CameraDevice.this.mIdle = true;
+                CameraDeviceImpl.this.mIdle = true;
             }
         }
 
@@ -891,7 +891,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
             // Get the listener for this frame ID, if there is one
             synchronized (mLock) {
-                holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
+                holder = CameraDeviceImpl.this.mCaptureListenerMap.get(requestId);
             }
 
             if (holder == null) {
@@ -905,9 +905,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 new Runnable() {
                     @Override
                     public void run() {
-                        if (!CameraDevice.this.isClosed()) {
+                        if (!CameraDeviceImpl.this.isClosed()) {
                             holder.getListener().onCaptureStarted(
-                                CameraDevice.this,
+                                CameraDeviceImpl.this,
                                 holder.getRequest(resultExtras.getSubsequenceId()),
                                 timestamp);
                         }
@@ -932,7 +932,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
             final CaptureListenerHolder holder;
             synchronized (mLock) {
-                holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
+                holder = CameraDeviceImpl.this.mCaptureListenerMap.get(requestId);
             }
 
             Boolean quirkPartial = result.get(CaptureResult.QUIRKS_PARTIAL_RESULT);
@@ -976,9 +976,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 resultDispatch = new Runnable() {
                     @Override
                     public void run() {
-                        if (!CameraDevice.this.isClosed()){
+                        if (!CameraDeviceImpl.this.isClosed()){
                             holder.getListener().onCapturePartial(
-                                CameraDevice.this,
+                                CameraDeviceImpl.this,
                                 request,
                                 resultAsCapture);
                         }
@@ -992,9 +992,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 resultDispatch = new Runnable() {
                     @Override
                     public void run() {
-                        if (!CameraDevice.this.isClosed()){
+                        if (!CameraDeviceImpl.this.isClosed()){
                             holder.getListener().onCaptureCompleted(
-                                CameraDevice.this,
+                                CameraDeviceImpl.this,
                                 request,
                                 resultAsCapture);
                         }

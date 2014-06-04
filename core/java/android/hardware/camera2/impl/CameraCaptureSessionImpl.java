@@ -19,6 +19,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.dispatch.ArgumentReplacingDispatcher;
 import android.hardware.camera2.dispatch.BroadcastDispatcher;
 import android.hardware.camera2.dispatch.Dispatchable;
 import android.hardware.camera2.dispatch.DuckTypingDispatcher;
@@ -34,7 +35,7 @@ import android.view.Surface;
 import java.util.Arrays;
 import java.util.List;
 
-import static android.hardware.camera2.impl.CameraDevice.checkHandler;
+import static android.hardware.camera2.impl.CameraDeviceImpl.checkHandler;
 import static com.android.internal.util.Preconditions.*;
 
 public class CameraCaptureSessionImpl extends CameraCaptureSession {
@@ -52,7 +53,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private final Handler mStateHandler;
 
     /** Internal camera device; used to translate calls into existing deprecated API */
-    private final android.hardware.camera2.impl.CameraDevice mDeviceImpl;
+    private final android.hardware.camera2.impl.CameraDeviceImpl mDeviceImpl;
     /** Internal handler; used for all incoming events to preserve total order */
     private final Handler mDeviceHandler;
 
@@ -82,7 +83,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      */
     CameraCaptureSessionImpl(List<Surface> outputs,
             CameraCaptureSession.StateListener listener, Handler stateHandler,
-            android.hardware.camera2.impl.CameraDevice deviceImpl,
+            android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
         if (outputs == null || outputs.isEmpty()) {
             throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
@@ -325,6 +326,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         /*
          * Split the calls from the device listener into local listener and the following chain:
+         * - replace the first CameraDevice arg with a CameraCaptureSession
          * - duck type from device listener to session listener
          * - then forward the call to a handler
          * - then finally invoke the destination method on the session listener object
@@ -340,12 +342,15 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 new InvokeDispatcher<>(localListener);
         HandlerDispatcher<CaptureListener> handlerPassthrough =
                 new HandlerDispatcher<>(userListenerSink, handler);
-        DuckTypingDispatcher<CameraDevice.CaptureListener, CaptureListener> duckToSessionCaptureListener
+        DuckTypingDispatcher<CameraDevice.CaptureListener, CaptureListener> duckToSession
                 = new DuckTypingDispatcher<>(handlerPassthrough, CaptureListener.class);
+        ArgumentReplacingDispatcher<CameraDevice.CaptureListener, CameraCaptureSessionImpl>
+            replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
+                    /*argumentIndex*/0, this);
 
         BroadcastDispatcher<CameraDevice.CaptureListener> broadcaster =
                 new BroadcastDispatcher<CameraDevice.CaptureListener>(
-                        duckToSessionCaptureListener,
+                        replaceDeviceWithSession,
                         localSink);
 
         return new ListenerProxies.DeviceCaptureListenerProxy(broadcaster);
