@@ -188,8 +188,10 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ລະບົບ Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"​ສ່ວນ​ໂຕ"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <!-- no translation found for user_owner_label (6465364741001216388) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (3022906847647343112) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ບໍລິການທີ່ເຮັດໃຫ້ທ່ານເສຍເງິນ"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ເຮັດສິ່ງທີ່ທ່ານຕ້ອງເສຍຄ່າໃຊ້ຈ່າຍ."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ຂໍ້ຄວາມຂອງທ່ານ"</string>
@@ -1695,7 +1697,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">

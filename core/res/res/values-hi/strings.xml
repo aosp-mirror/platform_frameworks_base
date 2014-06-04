@@ -188,8 +188,10 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"व्यक्तिगत"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"कार्यालय"</string>
+    <!-- no translation found for user_owner_label (6465364741001216388) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (3022906847647343112) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"वे सेवाएं जिन पर आप खर्चा करते हैं"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ऐसे कार्य करें जिससे आपका धन खर्च हो सकता है."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"आपके संदेश"</string>
