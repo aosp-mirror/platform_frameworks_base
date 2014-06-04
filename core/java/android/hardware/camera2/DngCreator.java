@@ -22,12 +22,16 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.media.Image;
+import android.os.SystemClock;
 import android.util.Size;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * The {@link DngCreator} class provides functions to write raw pixel data as a DNG file.
@@ -55,6 +59,7 @@ import java.nio.ByteBuffer;
  */
 public final class DngCreator implements AutoCloseable {
 
+    private static final String TAG = "DngCreator";
     /**
      * Create a new DNG object.
      *
@@ -75,7 +80,25 @@ public final class DngCreator implements AutoCloseable {
         if (characteristics == null || metadata == null) {
             throw new NullPointerException("Null argument to DngCreator constructor");
         }
-        nativeInit(characteristics.getNativeCopy(), metadata.getNativeCopy());
+
+        // Find current time
+        long currentTime = System.currentTimeMillis();
+
+        // Find boot time
+        long bootTimeMillis = currentTime - SystemClock.elapsedRealtime();
+
+        // Find capture time (nanos since boot)
+        Long timestamp = metadata.get(CaptureResult.SENSOR_TIMESTAMP);
+        long captureTime = currentTime;
+        if (timestamp != null) {
+            captureTime = timestamp / 1000000 + bootTimeMillis;
+        }
+
+        // Format for metadata
+        String formattedCaptureTime = sDateTimeStampFormat.format(captureTime);
+
+        nativeInit(characteristics.getNativeCopy(), metadata.getNativeCopy(),
+                formattedCaptureTime);
     }
 
     /**
@@ -329,6 +352,13 @@ public final class DngCreator implements AutoCloseable {
         }
     }
 
+    private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd kk:mm:ss";
+    private static final DateFormat sDateTimeStampFormat =
+            new SimpleDateFormat(TIFF_DATETIME_FORMAT);
+
+    static {
+        sDateTimeStampFormat.setTimeZone(TimeZone.getDefault());
+    }
     /**
      * This field is used by native code, do not access or modify.
      */
@@ -337,7 +367,8 @@ public final class DngCreator implements AutoCloseable {
     private static native void nativeClassInit();
 
     private synchronized native void nativeInit(CameraMetadataNative nativeCharacteristics,
-                                                CameraMetadataNative nativeResult);
+                                                CameraMetadataNative nativeResult,
+                                                String captureTime);
 
     private synchronized native void nativeDestroy();
 
