@@ -328,6 +328,58 @@ public class BackupTransport {
         return BackupTransport.TRANSPORT_ERROR;
     }
 
+    // ------------------------------------------------------------------------------------
+    // Full restore interfaces
+
+    /**
+     * Ask the transport to set up to perform a full data restore of the given packages.
+     *
+     * @param token A backup token as returned by {@link #getAvailableRestoreSets}
+     *    or {@link #getCurrentRestoreSet}.
+     * @param targetPackage The names of the packages whose data is being requested.
+     * @return TRANSPORT_OK to indicate that the OS may proceed with requesting
+     *    restore data; TRANSPORT_ERROR to indicate a fatal error condition that precludes
+     *    performing any restore at this time.
+     */
+    public int prepareFullRestore(long token, String[] targetPackages) {
+        return BackupTransport.TRANSPORT_OK;
+    }
+
+    /**
+     * Ask the transport what package's full data will be restored next.  When all apps'
+     * data has been delivered, the transport should return {@code null} here.
+     * @return The package name of the next application whose data will be restored, or
+     *    {@code null} if all available package has been delivered.
+     */
+    public String getNextFullRestorePackage() {
+        return null;
+    }
+
+    /**
+     * Ask the transport to provide data for the "current" package being restored.  The
+     * transport then writes some data to the socket supplied to this call, and returns
+     * the number of bytes written.  The system will then read that many bytes and
+     * stream them to the application's agent for restore, then will call this method again
+     * to receive the next chunk of the archive.  This sequence will be repeated until the
+     * transport returns zero indicating that all of the package's data has been delivered
+     * (or returns a negative value indicating some sort of hard error condition at the
+     * transport level).
+     *
+     * <p>After this method returns zero, the system will then call
+     * {@link #getNextFullRestorePackage()} to begin the restore process for the next
+     * application, and the sequence begins again.
+     *
+     * @param socket The file descriptor that the transport will use for delivering the
+     *    streamed archive.
+     * @return 0 when no more data for the current package is available.  A positive value
+     *    indicates the presence of that much data to be delivered to the app.  A negative
+     *    return value is treated as equivalent to {@link BackupTransport#TRANSPORT_ERROR},
+     *    indicating a fatal error condition that precludes further restore operations
+     *    on the current dataset.
+     */
+    public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
+        return 0;
+    }
     /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
@@ -410,6 +462,21 @@ public class BackupTransport {
         @Override
         public void finishRestore() throws RemoteException {
             BackupTransport.this.finishRestore();
+        }
+
+        @Override
+        public long requestFullBackupTime() throws RemoteException {
+            return BackupTransport.this.requestFullBackupTime();
+        }
+
+        @Override
+        public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) throws RemoteException {
+            return BackupTransport.this.performFullBackup(targetPackage, socket);
+        }
+
+        @Override
+        public int sendBackupData(int numBytes) throws RemoteException {
+            return BackupTransport.this.sendBackupData(numBytes);
         }
     }
 }

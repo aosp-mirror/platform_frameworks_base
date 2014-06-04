@@ -23,6 +23,7 @@ import android.app.backup.IRestoreSession;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public final class Bmgr {
@@ -102,6 +103,11 @@ public final class Bmgr {
             return;
         }
 
+        if ("fullbackup".equals(op)) {
+            doFullTransportBackup();
+            return;
+        }
+
         System.err.println("Unknown command");
         showUsage();
     }
@@ -162,6 +168,21 @@ public final class Bmgr {
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doFullTransportBackup() {
+        System.out.println("Performing full transport backup");
+
+        String pkg;
+        while ((pkg = nextArg()) != null) {
+            System.out.println("    Package " + pkg + " ...");
+            try {
+                mBmgr.fullTransportBackup(new String[] { pkg });
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+            }
         }
     }
 

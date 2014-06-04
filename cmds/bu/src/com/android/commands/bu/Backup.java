@@ -69,6 +69,7 @@ public final class Backup {
         boolean doEverything = false;
         boolean doWidgets = false;
         boolean allIncludesSystem = true;
+        boolean doCompress = true;
 
         String arg;
         while ((arg = nextArg()) != null) {
@@ -95,6 +96,10 @@ public final class Backup {
                     doWidgets = false;
                 } else if ("-all".equals(arg)) {
                     doEverything = true;
+                } else if ("-compress".equals(arg)) {
+                    doCompress = true;
+                } else if ("-nocompress".equals(arg)) {
+                    doCompress = false;
                 } else {
                     Log.w(TAG, "Unknown backup flag " + arg);
                     continue;
@@ -119,7 +124,7 @@ public final class Backup {
             fd = ParcelFileDescriptor.adoptFd(socketFd);
             String[] packArray = new String[packages.size()];
             mBackupManager.fullBackup(fd, saveApks, saveObbs, saveShared, doWidgets,
-                    doEverything, allIncludesSystem, packages.toArray(packArray));
+                    doEverything, allIncludesSystem, doCompress, packages.toArray(packArray));
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for backup");
         } finally {

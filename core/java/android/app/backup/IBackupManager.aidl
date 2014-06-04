@@ -168,7 +168,15 @@ interface IBackupManager {
      */
     void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps, boolean allIncludesSystem,
-            in String[] packageNames);
+            boolean doCompress, in String[] packageNames);
+
+    /**
+     * Perform a full-dataset backup of the given applications via the currently active
+     * transport.
+     *
+     * @param packageNames The package names of the apps whose data are to be backed up.
+     */
+    void fullTransportBackup(in String[] packageNames);
 
     /**
      * Restore device content from the data stream passed through the given socket.  The
