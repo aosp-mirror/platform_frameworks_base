@@ -128,6 +128,8 @@ public final class BatteryService extends Binder {
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
 
+    private boolean mBatteryLevelLow;
+
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
 
@@ -222,12 +224,28 @@ public final class BatteryService extends Binder {
     }
 
     /**
-     * Returns true if battery level is below the first warning threshold.
+     * Returns whether we currently consider the battery level to be low.
      */
-    public boolean isBatteryLow() {
+    public boolean getBatteryLevelLow() {
         synchronized (mLock) {
-            return mBatteryProps.batteryPresent && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel;
+            return mBatteryLevelLow;
         }
+    }
+
+    public boolean isBatteryLowLocked() {
+        final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
+        final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
+
+        /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
+         * - is just un-plugged (previously was plugged) and battery level is
+         *   less than or equal to WARNING, or
+         * - is not plugged and battery level falls to WARNING boundary
+         *   (becomes <= mLowBatteryWarningLevel).
+         */
+        return !plugged
+                && mBatteryProps.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel
+                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
     }
 
     /**
@@ -382,19 +400,7 @@ public final class BatteryService extends Binder {
                 logOutlier = true;
             }
 
-            final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
-            final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
-
-            /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
-             * - is just un-plugged (previously was plugged) and battery level is
-             *   less than or equal to WARNING, or
-             * - is not plugged and battery level falls to WARNING boundary
-             *   (becomes <= mLowBatteryWarningLevel).
-             */
-            final boolean sendBatteryLow = !plugged
-                    && mBatteryProps.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-                    && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel
-                    && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
+            mBatteryLevelLow = isBatteryLowLocked();
 
             sendIntentLocked();
 
@@ -422,7 +428,7 @@ public final class BatteryService extends Binder {
                 });
             }
 
-            if (sendBatteryLow) {
+            if (mBatteryLevelLow) {
                 mSentLowBatteryBroadcast = true;
                 mHandler.post(new Runnable() {
                     @Override

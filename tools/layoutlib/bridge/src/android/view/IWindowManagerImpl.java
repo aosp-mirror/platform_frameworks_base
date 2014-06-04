@@ -195,8 +195,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public IWindowSession openSession(IInputMethodClient arg0, IInputContext arg1)
-            throws RemoteException {
+    public IWindowSession openSession(IWindowSessionCallback argn1, IInputMethodClient arg0,
+            IInputContext arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -273,6 +273,11 @@ public class IWindowManagerImpl implements IWindowManager {
     public void setAnimationScales(float[] arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public float getCurrentAnimatorScale() throws RemoteException {
+        return 0;
     }
 
     @Override
