@@ -105,6 +105,7 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.InterceptedNotifications;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
@@ -122,7 +123,6 @@ import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
@@ -253,10 +253,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     View mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
-    KeyguardIndicationTextView mKeyguardIndicationTextView;
+    KeyguardIndicationController mKeyguardIndicationController;
 
-    // TODO: Fetch phrase from search/hotword provider.
-    String mKeyguardHotwordPhrase = "";
     int mKeyguardMaxNotificationCount;
     View mDateTimeView;
 
@@ -496,13 +494,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private final Runnable mResetIndicationRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
-        }
-    };
-
     @Override
     public void setZenMode(int mode) {
         super.setZenMode(mode);
@@ -674,8 +665,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
         mKeyguardBottomArea.setActivityStarter(this);
-        mKeyguardIndicationTextView = (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
-                R.id.keyguard_indication_text);
+        mKeyguardIndicationController = new KeyguardIndicationController(mContext,
+                (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
+                        R.id.keyguard_indication_text));
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
         mDateTimeView = mHeader.findViewById(R.id.datetime);
@@ -2866,12 +2858,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateKeyguardState() {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardStatusView.setVisibility(View.VISIBLE);
-            mKeyguardIndicationTextView.setVisibility(View.VISIBLE);
-            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+            mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
-            mKeyguardIndicationTextView.setVisibility(View.GONE);
+            mKeyguardIndicationController.setVisible(false);
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
@@ -2958,7 +2949,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onActivated(View view) {
         userActivity();
-        mKeyguardIndicationTextView.switchIndication(R.string.notification_tap_again);
+        mKeyguardIndicationController.showTransientIndication(R.string.notification_tap_again);
         mStackScroller.setActivatedChild(view);
     }
 
@@ -2973,7 +2964,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onActivationReset(View view) {
         if (view == mStackScroller.getActivatedChild()) {
-            mKeyguardIndicationTextView.switchIndication(mKeyguardHotwordPhrase);
+            mKeyguardIndicationController.hideTransientIndication();
             mStackScroller.setActivatedChild(null);
         }
     }
@@ -2982,24 +2973,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onUnlockHintStarted() {
-        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
-        mKeyguardIndicationTextView.switchIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
     }
 
     public void onHintFinished() {
-
         // Delay the reset a bit so the user can read the text.
-        mStatusBarView.postDelayed(mResetIndicationRunnable, HINT_RESET_DELAY_MS);
+        mKeyguardIndicationController.hideTransientIndicationDelayed(HINT_RESET_DELAY_MS);
     }
 
     public void onCameraHintStarted() {
-        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
-        mKeyguardIndicationTextView.switchIndication(R.string.camera_hint);
+        mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
     }
 
     public void onPhoneHintStarted() {
-        mStatusBarView.removeCallbacks(mResetIndicationRunnable);
-        mKeyguardIndicationTextView.switchIndication(R.string.phone_hint);
+        mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
     public void onTrackingStopped(boolean expand) {
