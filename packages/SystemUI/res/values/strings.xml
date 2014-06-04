@@ -572,6 +572,12 @@
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
+    <!-- Shows when people have clicked at the left edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
+    <string name="phone_hint">Swipe right for phone</string>
+
+    <!-- Shows when people have clicked at the right edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
+    <string name="camera_hint">Swipe left for camera</string>
+
     <string name="bugreport_tile_extended" translatable="false">%s\n%s (%s)</string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->

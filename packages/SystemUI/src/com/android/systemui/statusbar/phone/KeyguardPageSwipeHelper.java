@@ -28,6 +28,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -40,6 +41,9 @@ public class KeyguardPageSwipeHelper {
 
     private static final float SWIPE_MAX_ICON_SCALE_AMOUNT = 2.0f;
     private static final float SWIPE_RESTING_ALPHA_AMOUNT = 0.7f;
+    private static final long HINT_PHASE1_DURATION = 250;
+    private static final long HINT_PHASE2_DURATION = 450;
+
     private final Context mContext;
 
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -54,11 +58,13 @@ public class KeyguardPageSwipeHelper {
     private int mTouchSlop;
     private int mMinTranslationAmount;
     private int mMinFlingVelocity;
+    private int mHintDistance;
     private PowerManager mPowerManager;
     private final View mLeftIcon;
     private final View mCenterIcon;
     private final View mRightIcon;
     private Interpolator mFastOutSlowIn;
+    private Interpolator mBounceInterpolator;
     private Animator mSwipeAnimator;
     private boolean mCallbackCalled;
 
@@ -81,9 +87,12 @@ public class KeyguardPageSwipeHelper {
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mMinTranslationAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_min_swipe_amount);
+        mHintDistance =
+                mContext.getResources().getDimensionPixelSize(R.dimen.hint_move_distance_sideways);
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.4f);
         mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
+        mBounceInterpolator = new BounceInterpolator();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -168,6 +177,83 @@ public class KeyguardPageSwipeHelper {
         return false;
     }
 
+    public void startHintAnimation(boolean right, Runnable onFinishedListener) {
+        startHintAnimationPhase1(right, onFinishedListener);
+    }
+
+    /**
+     * Phase 1: Move everything sidewards.
+     */
+    private void startHintAnimationPhase1(boolean right, final Runnable onFinishedListener) {
+        float target = right ? -mHintDistance : mHintDistance;
+        startHintTranslationAnimations(target, HINT_PHASE1_DURATION, mFastOutSlowIn);
+        ValueAnimator animator = ValueAnimator.ofFloat(mTranslation, target);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mTranslation = (float) animation.getAnimatedValue();
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mCancelled) {
+                    mSwipeAnimator = null;
+                    onFinishedListener.run();
+                } else {
+                    startUnlockHintAnimationPhase2(onFinishedListener);
+                }
+            }
+        });
+        animator.setInterpolator(mFastOutSlowIn);
+        animator.setDuration(HINT_PHASE1_DURATION);
+        animator.start();
+        mSwipeAnimator = animator;
+    }
+
+    /**
+     * Phase 2: Move back.
+     */
+    private void startUnlockHintAnimationPhase2(final Runnable onFinishedListener) {
+        startHintTranslationAnimations(0f /* target */, HINT_PHASE2_DURATION, mBounceInterpolator);
+        ValueAnimator animator = ValueAnimator.ofFloat(mTranslation, 0f);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mTranslation = (float) animation.getAnimatedValue();
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSwipeAnimator = null;
+                onFinishedListener.run();
+            }
+        });
+        animator.setInterpolator(mBounceInterpolator);
+        animator.setDuration(HINT_PHASE2_DURATION);
+        animator.start();
+        mSwipeAnimator = animator;
+    }
+
+    private void startHintTranslationAnimations(float target, long duration,
+            Interpolator interpolator) {
+        ArrayList<View> targetViews = mCallback.getTranslationViews();
+        for (View targetView : targetViews) {
+            targetView.animate()
+                    .setDuration(duration)
+                    .setInterpolator(interpolator)
+                    .translationX(target);
+        }
+    }
+
     private void onUserActivity(long when) {
         mPowerManager.userActivity(when, false);
     }
@@ -180,7 +266,6 @@ public class KeyguardPageSwipeHelper {
         View targetView = mTranslation > 0 ? mLeftIcon : mRightIcon;
         targetView.animate().cancel();
         if (mSwipeAnimator != null) {
-            mSwipeAnimator.removeAllListeners();
             mSwipeAnimator.cancel();
             hideInactiveIcons(true);
         }
@@ -218,11 +303,18 @@ public class KeyguardPageSwipeHelper {
             }
         });
         animator.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 mSwipeAnimator = null;
                 mSwipingInProgress = false;
-                if (!snapBack && !mCallbackCalled) {
+                if (!snapBack && !mCallbackCalled && !mCancelled) {
 
                     // ensure that the callback is called eventually
                     mCallback.onAnimationToSideStarted(mTranslation < 0);

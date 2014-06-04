@@ -322,6 +322,13 @@
     <!-- Distance between notifications and header when they are considered to be colliding. -->
     <dimen name="header_notifications_collide_distance">24dp</dimen>
 
-    <!-- Move distance for the hint animations on the lockscreen (unlock, phone, camera)-->
+    <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
+
+    <!-- Move distance for the other hint animations on the lockscreen (phone, camera)-->
+    <dimen name="hint_move_distance_sideways">60dp</dimen>
+
+    <!-- The width of the region on the left/right edge of the screen for performing the camera/
+         phone hints. -->
+    <dimen name="edge_tap_area_width">48dp</dimen>
 </resources>
