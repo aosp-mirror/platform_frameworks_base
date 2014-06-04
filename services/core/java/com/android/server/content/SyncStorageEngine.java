@@ -925,10 +925,7 @@ public class SyncStorageEngine extends Handler {
                             period,
                             flextime);
                 } else {
-                    toUpdate = new PeriodicSync(info.service,
-                            extras,
-                            period,
-                            flextime);
+                    return;
                 }
                 AuthorityInfo authority =
                         getOrCreateAuthorityLocked(info, -1, false);
@@ -1246,7 +1243,6 @@ public class SyncStorageEngine extends Handler {
                     authorityInfo.ident,
                     authorityInfo.target.account,
                     authorityInfo.target.provider,
-                    authorityInfo.target.service,
                     activeSyncContext.mStartTime);
             getCurrentSyncs(authorityInfo.target.userId).add(syncInfo);
         }
@@ -1262,8 +1258,7 @@ public class SyncStorageEngine extends Handler {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "removeActiveSync: account=" + syncInfo.account
                         + " user=" + userId
-                        + " auth=" + syncInfo.authority
-                        + " service=" + syncInfo.service);
+                        + " auth=" + syncInfo.authority);
             }
             getCurrentSyncs(userId).remove(syncInfo);
         }
@@ -2109,12 +2104,8 @@ public class SyncStorageEngine extends Handler {
                         extras,
                         period, flextime);
         } else {
-            periodicSync =
-                    new PeriodicSync(
-                            authorityInfo.target.service,
-                            extras,
-                            period,
-                            flextime);
+            Log.e(TAG, "Unknown target.");
+            return null;
         }
         authorityInfo.periodicSyncs.add(periodicSync);
         return periodicSync;
@@ -2700,7 +2691,10 @@ public class SyncStorageEngine extends Handler {
             if (authorityInfo.target.target_provider) {
                 req.setSyncAdapter(authorityInfo.target.account, authorityInfo.target.provider);
             } else {
-                req.setSyncAdapter(authorityInfo.target.service);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Unknown target, skipping sync request.");
+                }
+                return;
             }
             ContentResolver.requestSync(req.build());
         }

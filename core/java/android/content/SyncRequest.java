@@ -27,22 +27,10 @@ public class SyncRequest implements Parcelable {
     private final Account mAccountToSync;
     /** Authority string that corresponds to a ContentProvider. */
     private final String mAuthority;
-    /** {@link SyncService} identifier. */
-    private final ComponentName mComponentInfo;
     /** Bundle containing user info as well as sync settings. */
     private final Bundle mExtras;
     /** Don't allow this sync request on metered networks. */
     private final boolean mDisallowMetered;
-    /**
-     * Anticipated upload size in bytes.
-     * TODO: Not yet used - we put this information into the bundle for simplicity.
-     */
-    private final long mTxBytes;
-    /**
-     * Anticipated download size in bytes.
-     * TODO: Not yet used - we put this information into the bundle.
-     */
-    private final long mRxBytes;
     /**
      * Amount of time before {@link #mSyncRunTimeSecs} from which the sync may optionally be
      * started.
@@ -75,25 +63,12 @@ public class SyncRequest implements Parcelable {
 
     /**
      * {@hide}
-     * @return true if this sync uses an account/authority pair, or false if
-     *         this is an anonymous sync bound to an @link AnonymousSyncService.
-     */
-    public boolean hasAuthority() {
-        return mIsAuthority;
-    }
-
-    /**
-     * {@hide}
      *
      * @return account object for this sync.
      * @throws IllegalArgumentException if this function is called for a request that targets a
      * sync service.
      */
     public Account getAccount() {
-        if (!hasAuthority()) {
-            throw new IllegalArgumentException("Cannot getAccount() for a sync that targets a sync"
-                    + "service.");
-        }
         return mAccountToSync;
     }
 
@@ -105,26 +80,7 @@ public class SyncRequest implements Parcelable {
      * sync service.
      */
     public String getProvider() {
-        if (!hasAuthority()) {
-            throw new IllegalArgumentException("Cannot getProvider() for a sync that targets a"
-                    + "sync service.");
-        }
         return mAuthority;
-    }
-
-    /**
-     * {@hide}
-     * Throws a runtime IllegalArgumentException if this function is called for a
-     * SyncRequest that is bound to an account/provider.
-     *
-     * @return ComponentName for the service that this sync will bind to.
-     */
-    public ComponentName getService() {
-        if (hasAuthority()) {
-            throw new IllegalArgumentException(
-                    "Cannot getAnonymousService() for a sync that has specified a provider.");
-        }
-        return mComponentInfo;
     }
 
     /**
@@ -175,16 +131,10 @@ public class SyncRequest implements Parcelable {
         parcel.writeLong(mSyncRunTimeSecs);
         parcel.writeInt((mIsPeriodic ? 1 : 0));
         parcel.writeInt((mDisallowMetered ? 1 : 0));
-        parcel.writeLong(mTxBytes);
-        parcel.writeLong(mRxBytes);
         parcel.writeInt((mIsAuthority ? 1 : 0));
         parcel.writeInt((mIsExpedited? 1 : 0));
-        if (mIsAuthority) {
-            parcel.writeParcelable(mAccountToSync, flags);
-            parcel.writeString(mAuthority);
-        } else {
-            parcel.writeParcelable(mComponentInfo, flags);
-        }
+        parcel.writeParcelable(mAccountToSync, flags);
+        parcel.writeString(mAuthority);
     }
 
     private SyncRequest(Parcel in) {
@@ -193,19 +143,10 @@ public class SyncRequest implements Parcelable {
         mSyncRunTimeSecs = in.readLong();
         mIsPeriodic = (in.readInt() != 0);
         mDisallowMetered = (in.readInt() != 0);
-        mTxBytes = in.readLong();
-        mRxBytes = in.readLong();
         mIsAuthority = (in.readInt() != 0);
         mIsExpedited = (in.readInt() != 0);
-        if (mIsAuthority) {
-            mComponentInfo = null;
-            mAccountToSync = in.readParcelable(null);
-            mAuthority = in.readString();
-        } else {
-            mComponentInfo = in.readParcelable(null);
-            mAccountToSync = null;
-            mAuthority = null;
-        }
+        mAccountToSync = in.readParcelable(null);
+        mAuthority = in.readString();
     }
 
     /** {@hide} Protected ctor to instantiate anonymous SyncRequest. */
@@ -214,7 +155,6 @@ public class SyncRequest implements Parcelable {
         mSyncRunTimeSecs = b.mSyncRunTimeSecs;
         mAccountToSync = b.mAccount;
         mAuthority = b.mAuthority;
-        mComponentInfo = b.mComponentName;
         mIsPeriodic = (b.mSyncType == Builder.SYNC_TYPE_PERIODIC);
         mIsAuthority = (b.mSyncTarget == Builder.SYNC_TARGET_ADAPTER);
         mIsExpedited = b.mExpedited;
@@ -223,8 +163,6 @@ public class SyncRequest implements Parcelable {
         // TODO: pass the configuration extras through separately.
         mExtras.putAll(b.mSyncConfigExtras);
         mDisallowMetered = b.mDisallowMetered;
-        mTxBytes = b.mTxBytes;
-        mRxBytes = b.mRxBytes;
     }
 
     /**
@@ -240,8 +178,6 @@ public class SyncRequest implements Parcelable {
         private static final int SYNC_TYPE_ONCE = 2;
         /** Unknown sync target. */
         private static final int SYNC_TARGET_UNKNOWN = 0;
-        /** Specify that this is an anonymous sync. */
-        private static final int SYNC_TARGET_SERVICE = 1;
         /** Specify that this is a sync with a provider. */
         private static final int SYNC_TARGET_ADAPTER = 2;
         /**
@@ -275,7 +211,7 @@ public class SyncRequest implements Parcelable {
          * Whether this builder is building a periodic sync, or a one-time sync.
          */
         private int mSyncType = SYNC_TYPE_UNKNOWN;
-        /** Whether this will go to a sync adapter or to a sync service. */
+        /** Whether this will go to a sync adapter. */
         private int mSyncTarget = SYNC_TARGET_UNKNOWN;
         /** Whether this is a user-activated sync. */
         private boolean mIsManual;
@@ -297,12 +233,6 @@ public class SyncRequest implements Parcelable {
         /** This sync will run in preference to other non-expedited syncs. */
         private boolean mExpedited;
 
-        /**
-         * The {@link SyncService} component that
-         * contains the sync logic if this is a provider-less sync, otherwise
-         * null.
-         */
-        private ComponentName mComponentName;
         /**
          * The Account object that together with an Authority name define the SyncAdapter (if
          * this sync is bound to a provider), otherwise null.
@@ -336,7 +266,7 @@ public class SyncRequest implements Parcelable {
 
         /**
          * Build a periodic sync. Either this or syncOnce() <b>must</b> be called for this builder.
-         * Syncs are identified by target {@link SyncService}/{@link android.provider} and by the
+         * Syncs are identified by target {@link android.provider} and by the
          * contents of the extras bundle.
          * You cannot reuse the same builder for one-time syncs after having specified a periodic
          * sync (by calling this function). If you do, an <code>IllegalArgumentException</code>
@@ -395,23 +325,10 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Developer can provide insight into their payload size; optional. -1 specifies unknown,
-         * so that you are not restricted to defining both fields.
-         *
-         * @param rxBytes Bytes expected to be downloaded.
-         * @param txBytes Bytes expected to be uploaded.
-         */
-        public Builder setTransferSize(long rxBytes, long txBytes) {
-            mRxBytes = rxBytes;
-            mTxBytes = txBytes;
-            return this;
-        }
-
-        /**
          * Will throw an <code>IllegalArgumentException</code> if called and
          * {@link #setIgnoreSettings(boolean ignoreSettings)} has already been called.
          * @param disallow true to allow this transfer on metered networks. Default false.
-         * 
+         *
          */
         public Builder setDisallowMetered(boolean disallow) {
             if (mIgnoreSettings && disallow) {
@@ -423,10 +340,9 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Specify an authority and account for this transfer. Cannot be used with
-         * {@link #setSyncAdapter(ComponentName cname)}.
+         * Specify an authority and account for this transfer.
          *
-         * @param authority
+         * @param authority A String identifying the content provider to be synced.
          * @param account Account to sync. Can be null unless this is a periodic
          *            sync, for which verification by the ContentResolver will
          *            fail. If a sync is performed without an account, the
@@ -441,25 +357,6 @@ public class SyncRequest implements Parcelable {
             mSyncTarget = SYNC_TARGET_ADAPTER;
             mAccount = account;
             mAuthority = authority;
-            mComponentName = null;
-            return this;
-        }
-
-        /**
-         * Specify the {@link SyncService} component for this sync. This is not validated until
-         * sync time so providing an incorrect component name here will not fail. Cannot be used
-         * with {@link #setSyncAdapter(Account account, String authority)}.
-         *
-         * @param cname ComponentName to identify your Anonymous service
-         */
-        public Builder setSyncAdapter(ComponentName cname) {
-            if (mSyncTarget != SYNC_TARGET_UNKNOWN) {
-                throw new IllegalArgumentException("Sync target has already been defined.");
-            }
-            mSyncTarget = SYNC_TARGET_SERVICE;
-            mComponentName = cname;
-            mAccount = null;
-            mAuthority = null;
             return this;
         }
 
@@ -630,25 +527,17 @@ public class SyncRequest implements Parcelable {
             mSyncConfigExtras.putInt(ContentResolver.SYNC_EXTRAS_PRIORITY, mPriority);
             if (mSyncType == SYNC_TYPE_PERIODIC) {
                 // If this is a periodic sync ensure than invalid extras were not set.
-                if (ContentResolver.invalidPeriodicExtras(mCustomExtras) || 
+                if (ContentResolver.invalidPeriodicExtras(mCustomExtras) ||
                         ContentResolver.invalidPeriodicExtras(mSyncConfigExtras)) {
                     throw new IllegalArgumentException("Illegal extras were set");
-                }
-            } else if (mSyncType == SYNC_TYPE_UNKNOWN) {
-                throw new IllegalArgumentException("Must call either syncOnce() or syncPeriodic()");
-            }
-            if (mSyncTarget == SYNC_TARGET_SERVICE) {
-                if (mSyncConfigExtras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
-                    throw new IllegalArgumentException("Cannot specify an initialisation sync"
-                            + " that targets a service.");
                 }
             }
             // Ensure that a target for the sync has been set.
             if (mSyncTarget == SYNC_TARGET_UNKNOWN) {
-                throw new IllegalArgumentException("Must specify an adapter with one of"
-                    + "setSyncAdapter(ComponentName) or setSyncAdapter(Account, String");
+                throw new IllegalArgumentException("Must specify an adapter with" +
+                        " setSyncAdapter(Account, String");
             }
             return new SyncRequest(this);
         }
-    }   
+    }
 }
