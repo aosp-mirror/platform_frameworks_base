@@ -280,6 +280,7 @@ public class ShareActionProvider extends ActionProvider {
             final String action = shareIntent.getAction();
             if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
                         Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
             }
         }
@@ -303,6 +304,7 @@ public class ShareActionProvider extends ActionProvider {
                 if (Intent.ACTION_SEND.equals(action) ||
                         Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                     launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
                             Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
                 }
                 mContext.startActivity(launchIntent);

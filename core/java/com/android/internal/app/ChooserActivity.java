@@ -38,6 +38,7 @@ public class ChooserActivity extends ResolverActivity {
             if (Intent.ACTION_SEND.equals(action) ||
                     Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 target.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
                         Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
             }
         }
@@ -61,6 +62,7 @@ public class ChooserActivity extends ResolverActivity {
                 if (Intent.ACTION_SEND.equals(action) ||
                         Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                     in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
                             Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
                 }
                 initialIntents[i] = in;
