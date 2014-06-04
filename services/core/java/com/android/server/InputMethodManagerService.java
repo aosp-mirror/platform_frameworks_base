@@ -961,6 +961,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
+
+    /**
+     * Returns true iff the caller is identified to be the current input method with the token.
+     * @param token The window token given to the input method when it was started.
+     * @return true if and only if non-null valid token is specified.
+     */
+    private boolean calledWithValidToken(IBinder token) {
+        if (token == null || mCurToken != token) {
+            return false;
+        }
+        return true;
+    }
+
     private boolean bindCurrentInputMethodService(
             Intent service, ServiceConnection conn, int flags) {
         if (service == null || conn == null) {
@@ -1432,11 +1445,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
-            if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring setInputMethod of uid " + uid + " token: " + token);
+            if (!calledWithValidToken(token)) {
+                Slog.e(TAG, "Ignoring updateStatusIcon due to an invalid token. uid:" + uid
+                        + " token:" + token);
                 return;
             }
-
             synchronized (mMethodMap) {
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
@@ -1527,9 +1540,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (token == null || mCurToken != token) {
-                int uid = Binder.getCallingUid();
-                Slog.w(TAG, "Ignoring setImeWindowStatus of uid " + uid + " token: " + token);
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring setImeWindowStatus due to an invalid token. uid:" + uid
+                        + " token:" + token);
                 return;
             }
             synchronized (mMethodMap) {
@@ -2305,11 +2319,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (token == null || mCurToken != token) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Ignoring setCursorAnchorMonitorMode from uid "
-                            + Binder.getCallingUid() + " token: " + token);
-                }
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring setCursorAnchorMonitorMode due to an invalid token. uid:"
+                        + uid + " token:" + token);
                 return;
             }
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIO(
@@ -2352,9 +2365,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (token == null || mCurToken != token) {
-                if (DEBUG) Slog.w(TAG, "Ignoring hideInputMethod of uid "
-                        + Binder.getCallingUid() + " token: " + token);
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring hideInputMethod due to an invalid token. uid:"
+                        + uid + " token:" + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -2372,9 +2386,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring showMySoftInput of uid "
-                        + Binder.getCallingUid() + " token: " + token);
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring showMySoftInput due to an invalid token. uid:"
+                        + uid + " token:" + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();
