@@ -3055,6 +3055,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     /**
+     * Goes back to the keyguard after hanging around in {@link StatusBarState#SHADE_LOCKED}.
+     */
+    public void goToKeyguard() {
+        if (mState == StatusBarState.SHADE_LOCKED) {
+            setBarState(StatusBarState.KEYGUARD);
+            updateKeyguardState();
+        }
+    }
+
+    /**
      * @return a ViewGroup that spans the entire panel which contains the quick settings
      */
     public ViewGroup getQuickSettingsOverlayParent() {
