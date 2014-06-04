@@ -54,6 +54,12 @@ class QuantumProgressDrawable extends Drawable implements Animatable {
     private static final TimeInterpolator END_CURVE_INTERPOLATOR = new EndCurveInterpolator();
     private static final TimeInterpolator START_CURVE_INTERPOLATOR = new StartCurveInterpolator();
 
+    /** The duration of a single progress spin in milliseconds. */
+    private static final int ANIMATION_DURATION = 1000 * 80 / 60;
+
+    /** The number of points in the progress "star". */
+    private static final int NUM_POINTS = 5;
+
     /** The list of animators operating on this drawable. */
     private final ArrayList<Animator> mAnimators = new ArrayList<Animator>();
 
@@ -61,6 +67,9 @@ class QuantumProgressDrawable extends Drawable implements Animatable {
     private final Ring mRing;
 
     private QuantumProgressState mState;
+
+    /** Canvas rotation in degrees. */
+    private float mRotation;
 
     private boolean mMutated;
 
@@ -187,7 +196,11 @@ class QuantumProgressDrawable extends Drawable implements Animatable {
 
     @Override
     public void draw(Canvas c) {
-        mRing.draw(c, getBounds());
+        final Rect bounds = getBounds();
+        final int saveCount = c.save();
+        c.rotate(mRotation, bounds.exactCenterX(), bounds.exactCenterY());
+        mRing.draw(c, bounds);
+        c.restoreToCount(saveCount);
     }
 
     @Override
@@ -208,6 +221,15 @@ class QuantumProgressDrawable extends Drawable implements Animatable {
     @Override
     public ColorFilter getColorFilter() {
         return mRing.getColorFilter();
+    }
+
+    private void setRotation(float rotation) {
+        mRotation = rotation;
+        invalidateSelf();
+    }
+
+    private float getRotation() {
+        return mRotation;
     }
 
     @Override
@@ -256,26 +278,33 @@ class QuantumProgressDrawable extends Drawable implements Animatable {
         final Ring ring = mRing;
 
         final ObjectAnimator endTrim = ObjectAnimator.ofFloat(ring, "endTrim", 0, 0.75f);
-        endTrim.setDuration(1000 * 80 / 60);
+        endTrim.setDuration(ANIMATION_DURATION);
         endTrim.setInterpolator(START_CURVE_INTERPOLATOR);
         endTrim.setRepeatCount(ObjectAnimator.INFINITE);
         endTrim.setRepeatMode(ObjectAnimator.RESTART);
 
         final ObjectAnimator startTrim = ObjectAnimator.ofFloat(ring, "startTrim", 0.0f, 0.75f);
-        startTrim.setDuration(1000 * 80 / 60);
+        startTrim.setDuration(ANIMATION_DURATION);
         startTrim.setInterpolator(END_CURVE_INTERPOLATOR);
         startTrim.setRepeatCount(ObjectAnimator.INFINITE);
         startTrim.setRepeatMode(ObjectAnimator.RESTART);
 
         final ObjectAnimator rotation = ObjectAnimator.ofFloat(ring, "rotation", 0.0f, 0.25f);
-        rotation.setDuration(1000 * 80 / 60);
+        rotation.setDuration(ANIMATION_DURATION);
         rotation.setInterpolator(LINEAR_INTERPOLATOR);
         rotation.setRepeatCount(ObjectAnimator.INFINITE);
         rotation.setRepeatMode(ObjectAnimator.RESTART);
 
+        final ObjectAnimator groupRotation = ObjectAnimator.ofFloat(this, "rotation", 0.0f, 360.0f);
+        groupRotation.setDuration(NUM_POINTS * ANIMATION_DURATION);
+        groupRotation.setInterpolator(LINEAR_INTERPOLATOR);
+        groupRotation.setRepeatCount(ObjectAnimator.INFINITE);
+        groupRotation.setRepeatMode(ObjectAnimator.RESTART);
+
         mAnimators.add(endTrim);
         mAnimators.add(startTrim);
         mAnimators.add(rotation);
+        mAnimators.add(groupRotation);
     }
 
     private final Callback mCallback = new Callback() {

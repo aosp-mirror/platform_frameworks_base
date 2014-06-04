@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.util.MathUtils;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
@@ -37,12 +38,15 @@ import java.util.ArrayList;
  */
 class Ripple {
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
+    private static final TimeInterpolator DECEL_INTERPOLATOR = new DecelerateInterpolator(4);
 
     private static final float GLOBAL_SPEED = 1.0f;
-    private static final float WAVE_TOUCH_DOWN_ACCELERATION = 512.0f * GLOBAL_SPEED;
-    private static final float WAVE_TOUCH_UP_ACCELERATION = 1024.0f * GLOBAL_SPEED;
-    private static final float WAVE_OPACITY_DECAY_VELOCITY = 1.6f / GLOBAL_SPEED;
+    private static final float WAVE_TOUCH_DOWN_ACCELERATION = 1024.0f * GLOBAL_SPEED;
+    private static final float WAVE_TOUCH_UP_ACCELERATION = 3096.0f * GLOBAL_SPEED;
+    private static final float WAVE_OPACITY_DECAY_VELOCITY = 1.9f / GLOBAL_SPEED;
     private static final float WAVE_OUTER_OPACITY_VELOCITY = 1.2f * GLOBAL_SPEED;
+
+    private static final long RIPPLE_ENTER_DELAY = 100;
 
     // Hardware animators.
     private final ArrayList<RenderNodeAnimator> mRunningAnimations = new ArrayList<>();
@@ -287,14 +291,19 @@ class Ripple {
         radius.setAutoCancel(true);
         radius.setDuration(radiusDuration);
         radius.setInterpolator(LINEAR_INTERPOLATOR);
+        radius.setStartDelay(RIPPLE_ENTER_DELAY);
 
         final ObjectAnimator cX = ObjectAnimator.ofFloat(this, "xGravity", 1);
         cX.setAutoCancel(true);
         cX.setDuration(radiusDuration);
+        cX.setInterpolator(LINEAR_INTERPOLATOR);
+        cX.setStartDelay(RIPPLE_ENTER_DELAY);
 
         final ObjectAnimator cY = ObjectAnimator.ofFloat(this, "yGravity", 1);
         cY.setAutoCancel(true);
         cY.setDuration(radiusDuration);
+        cY.setInterpolator(LINEAR_INTERPOLATOR);
+        cY.setStartDelay(RIPPLE_ENTER_DELAY);
 
         final ObjectAnimator outer = ObjectAnimator.ofFloat(this, "outerOpacity", 0, 1);
         outer.setAutoCancel(true);
@@ -377,15 +386,15 @@ class Ripple {
 
         final RenderNodeAnimator radiusAnim = new RenderNodeAnimator(mPropRadius, mOuterRadius);
         radiusAnim.setDuration(radiusDuration);
-        radiusAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        radiusAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final RenderNodeAnimator xAnim = new RenderNodeAnimator(mPropX, mOuterX);
         xAnim.setDuration(radiusDuration);
-        xAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        xAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final RenderNodeAnimator yAnim = new RenderNodeAnimator(mPropY, mOuterY);
         yAnim.setDuration(radiusDuration);
-        yAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        yAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final RenderNodeAnimator opacityAnim = new RenderNodeAnimator(mPropPaint,
                 RenderNodeAnimator.PAINT_ALPHA, 0);
@@ -439,17 +448,17 @@ class Ripple {
         final ObjectAnimator radiusAnim = ObjectAnimator.ofFloat(this, "radiusGravity", 1);
         radiusAnim.setAutoCancel(true);
         radiusAnim.setDuration(radiusDuration);
-        radiusAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        radiusAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final ObjectAnimator xAnim = ObjectAnimator.ofFloat(this, "xGravity", 1);
         xAnim.setAutoCancel(true);
         xAnim.setDuration(radiusDuration);
-        xAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        xAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final ObjectAnimator yAnim = ObjectAnimator.ofFloat(this, "yGravity", 1);
         yAnim.setAutoCancel(true);
         yAnim.setDuration(radiusDuration);
-        yAnim.setInterpolator(LINEAR_INTERPOLATOR);
+        yAnim.setInterpolator(DECEL_INTERPOLATOR);
 
         final ObjectAnimator opacityAnim = ObjectAnimator.ofFloat(this, "opacity", 0);
         opacityAnim.setAutoCancel(true);
