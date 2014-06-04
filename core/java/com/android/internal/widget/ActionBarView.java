@@ -755,6 +755,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         mNavItemSelectedListener = l;
         if (mSpinner != null) {
             mSpinner.setAdapter(adapter);
+            mSpinner.setOnItemSelectedListener(l);
         }
     }
 
