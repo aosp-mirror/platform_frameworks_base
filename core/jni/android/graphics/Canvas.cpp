@@ -19,11 +19,14 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "SkCanvas.h"
+#include "SkClipStack.h"
 #include "SkDevice.h"
+#include "SkDeque.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkPorterDuff.h"
 #include "SkShader.h"
+#include "SkTArray.h"
 #include "SkTemplates.h"
 
 #ifdef USE_MINIKIN
@@ -43,25 +46,6 @@
 
 namespace android {
 
-// Holds an SkCanvas reference plus additional native data.
-class NativeCanvasWrapper {
-public:
-    NativeCanvasWrapper(SkCanvas* canvas)
-        : mCanvas(canvas) { }
-
-    SkCanvas* getCanvas() const {
-        return mCanvas.get();
-    }
-
-    void setCanvas(SkCanvas* canvas) {
-        SkASSERT(canvas);
-        mCanvas.reset(canvas);
-    }
-
-private:
-    SkAutoTUnref<SkCanvas> mCanvas;
-};
-
 class ClipCopier : public SkCanvas::ClipVisitor {
 public:
     ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
@@ -80,6 +64,155 @@ private:
     SkCanvas* m_dstCanvas;
 };
 
+// Holds an SkCanvas reference plus additional native data.
+class NativeCanvasWrapper {
+private:
+    struct SaveRec {
+        int                 saveCount;
+        SkCanvas::SaveFlags saveFlags;
+    };
+
+public:
+    NativeCanvasWrapper(SkCanvas* canvas)
+        : mCanvas(canvas)
+        , mSaveStack(NULL) {
+        SkASSERT(canvas);
+    }
+
+    ~NativeCanvasWrapper() {
+        delete mSaveStack;
+    }
+
+    SkCanvas* getCanvas() const {
+        return mCanvas.get();
+    }
+
+    void setCanvas(SkCanvas* canvas) {
+        SkASSERT(canvas);
+        mCanvas.reset(canvas);
+
+        delete mSaveStack;
+        mSaveStack = NULL;
+    }
+
+    int save(SkCanvas::SaveFlags flags) {
+        int count = mCanvas->save();
+        recordPartialSave(flags);
+        return count;
+    }
+
+    int saveLayer(const SkRect* bounds, const SkPaint* paint,
+                            SkCanvas::SaveFlags flags) {
+        int count = mCanvas->saveLayer(bounds, paint,
+                static_cast<SkCanvas::SaveFlags>(flags | SkCanvas::kMatrixClip_SaveFlag));
+        recordPartialSave(flags);
+        return count;
+    }
+
+    int saveLayerAlpha(const SkRect* bounds, U8CPU alpha,
+                       SkCanvas::SaveFlags flags) {
+        int count = mCanvas->saveLayerAlpha(bounds, alpha,
+                static_cast<SkCanvas::SaveFlags>(flags | SkCanvas::kMatrixClip_SaveFlag));
+        recordPartialSave(flags);
+        return count;
+    }
+
+    void restore() {
+        const SaveRec* rec = (NULL == mSaveStack)
+                ? NULL
+                : static_cast<SaveRec*>(mSaveStack->back());
+        int currentSaveCount = mCanvas->getSaveCount() - 1;
+        SkASSERT(NULL == rec || currentSaveCount >= rec->saveCount);
+
+        if (NULL == rec || rec->saveCount != currentSaveCount) {
+            // Fast path - no record for this frame.
+            mCanvas->restore();
+            return;
+        }
+
+        bool preserveMatrix = !(rec->saveFlags & SkCanvas::kMatrix_SaveFlag);
+        bool preserveClip   = !(rec->saveFlags & SkCanvas::kClip_SaveFlag);
+
+        SkMatrix savedMatrix;
+        if (preserveMatrix) {
+            savedMatrix = mCanvas->getTotalMatrix();
+        }
+
+        SkTArray<SkClipStack::Element> savedClips;
+        if (preserveClip) {
+            saveClipsForFrame(savedClips, currentSaveCount);
+        }
+
+        mCanvas->restore();
+
+        if (preserveMatrix) {
+            mCanvas->setMatrix(savedMatrix);
+        }
+
+        if (preserveClip && !savedClips.empty()) {
+            applyClips(savedClips);
+        }
+
+        mSaveStack->pop_back();
+    }
+
+private:
+    void recordPartialSave(SkCanvas::SaveFlags flags) {
+        // A partial save is a save operation which doesn't capture the full canvas state.
+        // (either kMatrix_SaveFlags or kClip_SaveFlag is missing).
+
+        // Mask-out non canvas state bits.
+        flags = static_cast<SkCanvas::SaveFlags>(flags & SkCanvas::kMatrixClip_SaveFlag);
+
+        if (SkCanvas::kMatrixClip_SaveFlag == flags) {
+            // not a partial save.
+            return;
+        }
+
+        if (NULL == mSaveStack) {
+            mSaveStack = new SkDeque(sizeof(struct SaveRec), 8);
+        }
+
+        SaveRec* rec = static_cast<SaveRec*>(mSaveStack->push_back());
+        // Store the save counter in the SkClipStack domain.
+        // (0-based, equal to the number of save ops on the stack).
+        rec->saveCount = mCanvas->getSaveCount() - 1;
+        rec->saveFlags = flags;
+    }
+
+    void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips,
+                           int frameSaveCount) {
+        SkClipStack::Iter clipIterator(*mCanvas->getClipStack(),
+                                       SkClipStack::Iter::kTop_IterStart);
+        while (const SkClipStack::Element* elem = clipIterator.next()) {
+            if (elem->getSaveCount() < frameSaveCount) {
+                // done with the current frame.
+                break;
+            }
+            SkASSERT(elem->getSaveCount() == frameSaveCount);
+            clips.push_back(*elem);
+        }
+    }
+
+    void applyClips(const SkTArray<SkClipStack::Element>& clips) {
+        ClipCopier clipCopier(mCanvas);
+
+        // The clip stack stores clips in device space.
+        SkMatrix origMatrix = mCanvas->getTotalMatrix();
+        mCanvas->resetMatrix();
+
+        // We pushed the clips in reverse order.
+        for (int i = clips.count() - 1; i >= 0; --i) {
+            clips[i].replay(&clipCopier);
+        }
+
+        mCanvas->setMatrix(origMatrix);
+    }
+
+    SkAutoTUnref<SkCanvas> mCanvas;
+    SkDeque* mSaveStack; // lazily allocated, tracks partial saves.
+};
+
 // Returns true if the SkCanvas's clip is non-empty.
 static jboolean hasNonEmptyClip(const SkCanvas& canvas) {
     bool emptyClip = canvas.isClipEmpty();
@@ -88,11 +221,15 @@ static jboolean hasNonEmptyClip(const SkCanvas& canvas) {
 
 class SkCanvasGlue {
 public:
+    // Get the native wrapper for a given handle.
+    static inline NativeCanvasWrapper* getNativeWrapper(jlong nativeHandle) {
+        SkASSERT(nativeHandle);
+        return reinterpret_cast<NativeCanvasWrapper*>(nativeHandle);
+    }
 
     // Get the SkCanvas for a given native handle.
     static inline SkCanvas* getNativeCanvas(jlong nativeHandle) {
-        SkASSERT(nativeHandle);
-        NativeCanvasWrapper* wrapper = reinterpret_cast<NativeCanvasWrapper*>(nativeHandle);
+        NativeCanvasWrapper* wrapper = getNativeWrapper(nativeHandle);
         SkCanvas* canvas = wrapper->getCanvas();
         SkASSERT(canvas);
 
@@ -186,56 +323,56 @@ public:
     }
 
     static jint save(JNIEnv*, jobject, jlong canvasHandle, jint flagsHandle) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+        NativeCanvasWrapper* wrapper = getNativeWrapper(canvasHandle);
         SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
-        return static_cast<jint>(canvas->save(flags));
+        return static_cast<jint>(wrapper->save(flags));
     }
 
     static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle,
                           jfloat l, jfloat t, jfloat r, jfloat b,
-                          jlong paintHandle, jint flags) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+                          jlong paintHandle, jint flagsHandle) {
+        NativeCanvasWrapper* wrapper = getNativeWrapper(canvasHandle);
         SkPaint* paint  = reinterpret_cast<SkPaint*>(paintHandle);
+        SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
         SkRect bounds;
         bounds.set(l, t, r, b);
-        int result = canvas->saveLayer(&bounds, paint,
-                                      static_cast<SkCanvas::SaveFlags>(flags));
-        return static_cast<jint>(result);
+        return static_cast<jint>(wrapper->saveLayer(&bounds, paint, flags));
     }
 
     static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle,
                                jfloat l, jfloat t, jfloat r, jfloat b,
-                               jint alpha, jint flags) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+                               jint alpha, jint flagsHandle) {
+        NativeCanvasWrapper* wrapper = getNativeWrapper(canvasHandle);
+        SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
         SkRect  bounds;
         bounds.set(l, t, r, b);
-        int result = canvas->saveLayerAlpha(&bounds, alpha,
-                                      static_cast<SkCanvas::SaveFlags>(flags));
-        return static_cast<jint>(result);
+        return static_cast<jint>(wrapper->saveLayerAlpha(&bounds, alpha, flags));
     }
 
     static void restore(JNIEnv* env, jobject, jlong canvasHandle) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
+        NativeCanvasWrapper* wrapper = getNativeWrapper(canvasHandle);
+        if (wrapper->getCanvas()->getSaveCount() <= 1) {  // cannot restore anymore
             doThrowISE(env, "Underflow in restore");
             return;
         }
-        canvas->restore();
+        wrapper->restore();
     }
 
     static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
-        return static_cast<jint>(canvas->getSaveCount());
+        return static_cast<jint>(getNativeCanvas(canvasHandle)->getSaveCount());
     }
 
     static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle,
                                jint restoreCount) {
-        SkCanvas* canvas = getNativeCanvas(canvasHandle);
+        NativeCanvasWrapper* wrapper = getNativeWrapper(canvasHandle);
         if (restoreCount < 1) {
             doThrowIAE(env, "Underflow in restoreToCount");
             return;
         }
-        canvas->restoreToCount(restoreCount);
+
+        while (wrapper->getCanvas()->getSaveCount() > restoreCount) {
+            wrapper->restore();
+        }
     }
 
     static void translate(JNIEnv*, jobject, jlong canvasHandle,
