@@ -85,7 +85,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
                     mContext.getString(R.string.accessibility_desc_on));
         } else {
             if (state.icon == null) state.iconId = R.drawable.ic_qs_location_11;
-            state.label = mContext.getString(R.string.quick_settings_location_off_label);
+            state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,
                     mContext.getString(R.string.accessibility_desc_off));
