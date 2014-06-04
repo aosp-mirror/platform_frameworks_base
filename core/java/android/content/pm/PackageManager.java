@@ -494,7 +494,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the package being installed contains native code, but none that is
-     * compatible with the the device's CPU_ABI.
+     * compatible with the device's CPU_ABI.
      * @hide
      */
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
@@ -3262,7 +3262,7 @@ public abstract class PackageManager {
 
 
     /**
-     * Return the the enabled setting for a package component (activity,
+     * Return the enabled setting for a package component (activity,
      * receiver, service, provider).  This returns the last value set by
      * {@link #setComponentEnabledSetting(ComponentName, int, int)}; in most
      * cases this value will be {@link #COMPONENT_ENABLED_STATE_DEFAULT} since
@@ -3300,14 +3300,14 @@ public abstract class PackageManager {
             int newState, int flags);
 
     /**
-     * Return the the enabled setting for an application.  This returns
+     * Return the enabled setting for an application. This returns
      * the last value set by
      * {@link #setApplicationEnabledSetting(String, int, int)}; in most
      * cases this value will be {@link #COMPONENT_ENABLED_STATE_DEFAULT} since
      * the value originally specified in the manifest has not been modified.
      *
-     * @param packageName The component to retrieve.
-     * @return Returns the current enabled state for the component.  May
+     * @param packageName The package name of the application to retrieve.
+     * @return Returns the current enabled state for the application.  May
      * be one of {@link #COMPONENT_ENABLED_STATE_ENABLED},
      * {@link #COMPONENT_ENABLED_STATE_DISABLED}, or
      * {@link #COMPONENT_ENABLED_STATE_DEFAULT}.  The last one means the
