@@ -88,15 +88,39 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called at the beginning of the playback of a channel and later when the size of
-         * the video has been changed.
+         * This is called at the beginning of the playback of a channel and later when the format of
+         * the video stream has been changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param width the width of the video
-         * @param height the height of the video
+         * @param width The width of the video.
+         * @param height The height of the video.
+         * @param interlaced whether the video is interlaced mode or planer mode.
          * @hide
          */
-        public void onVideoSizeChanged(Session session, int width, int height) {
+        public void onVideoStreamChanged(Session session, int width, int height,
+                boolean interlaced) {
+        }
+
+        /**
+         * This is called at the beginning of the playback of a channel and later when the format of
+         * the audio stream has been changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param channelCount The number of channels in the audio stream.
+         * @hide
+         */
+        public void onAudioStreamChanged(Session session, int channelCount) {
+        }
+
+        /**
+         * This is called at the beginning of the playback of a channel and later when the closed
+         * caption stream has been changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param hasClosedCaption Whether the stream has closed caption or not.
+         * @hide
+         */
+        public void onClosedCaptionStreamChanged(Session session, boolean hasClosedCaption) {
         }
 
         /**
@@ -141,11 +165,30 @@ public final class TvInputManager {
             });
         }
 
-        public void postVideoSizeChanged(final int width, final int height) {
+        public void postVideoStreamChanged(final int width, final int height,
+                final boolean interlaced) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onVideoSizeChanged(mSession, width, height);
+                    mSessionCallback.onVideoStreamChanged(mSession, width, height, interlaced);
+                }
+            });
+        }
+
+        public void postAudioStreamChanged(final int channelCount) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAudioStreamChanged(mSession, channelCount);
+                }
+            });
+        }
+
+        public void postClosedCaptionStreamChanged(final boolean hasClosedCaption) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onClosedCaptionStreamChanged(mSession, hasClosedCaption);
                 }
             });
         }
@@ -238,14 +281,38 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onVideoSizeChanged(int width, int height, int seq) {
+            public void onVideoStreamChanged(int width, int height, boolean interlaced, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postVideoSizeChanged(width, height);
+                    record.postVideoStreamChanged(width, height, interlaced);
+                }
+            }
+
+            @Override
+            public void onAudioStreamChanged(int channelCount, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAudioStreamChanged(channelCount);
+                }
+            }
+
+            @Override
+            public void onClosedCaptionStreamChanged(boolean hasClosedCaption, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postClosedCaptionStreamChanged(hasClosedCaption);
                 }
             }
 

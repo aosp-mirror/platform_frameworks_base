@@ -382,12 +382,33 @@ public class TvView extends SurfaceView {
         }
 
         @Override
-        public void onVideoSizeChanged(Session session, int width, int height) {
+        public void onVideoStreamChanged(Session session, int width, int height,
+                boolean interlaced) {
             if (DEBUG) {
                 Log.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
             }
             if (mExternalCallback != null) {
-                mExternalCallback.onVideoSizeChanged(session, width, height);
+                mExternalCallback.onVideoStreamChanged(session, width, height, interlaced);
+            }
+        }
+
+        @Override
+        public void onAudioStreamChanged(Session session, int channelCount) {
+            if (DEBUG) {
+                Log.d(TAG, "onAudioStreamChanged(" + channelCount + ")");
+            }
+            if (mExternalCallback != null) {
+                mExternalCallback.onAudioStreamChanged(session, channelCount);
+            }
+        }
+
+        @Override
+        public void onClosedCaptionStreamChanged(Session session, boolean hasClosedCaption) {
+            if (DEBUG) {
+                Log.d(TAG, "onClosedCaptionStreamChanged(" + hasClosedCaption + ")");
+            }
+            if (mExternalCallback != null) {
+                mExternalCallback.onClosedCaptionStreamChanged(session, hasClosedCaption);
             }
         }
 

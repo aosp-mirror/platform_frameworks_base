@@ -223,22 +223,66 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the change on the size of the video. This is expected to be called at the
-         * beginning of the playback and later when the size has been changed.
+         * Sends the change on the format of the video stream. This is expected to be called at the
+         * beginning of the playback and later when the format has been changed.
          *
          * @param width The width of the video.
          * @param height The height of the video.
+         * @param interlaced Whether the video is interlaced mode or planer mode.
          * @hide
          */
-        public void dispatchVideoSizeChanged(final int width, final int height) {
+        public void dispatchVideoStreamChanged(final int width, final int height,
+                final boolean interlaced) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "dispatchVideoSizeChanged");
-                        mSessionCallback.onVideoSizeChanged(width, height);
+                        mSessionCallback.onVideoStreamChanged(width, height, interlaced);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in dispatchVideoSizeChanged");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the change on the format of the audio stream. This is expected to be called at the
+         * beginning of the playback and later when the format has been changed.
+         *
+         * @param channelNumber The number of channels in the audio stream.
+         * @hide
+         */
+        public void dispatchAudioStreamChanged(final int channelNumber) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchAudioStreamChanged");
+                        mSessionCallback.onAudioStreamChanged(channelNumber);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchAudioStreamChanged");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the change on the closed caption stream. This is expected to be called at the
+         * beginning of the playback and later when the stream has been changed.
+         *
+         * @param hasClosedCaption Whether the stream has closed caption or not.
+         * @hide
+         */
+        public void dispatchClosedCaptionStreamChanged(final boolean hasClosedCaption) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchClosedCaptionStreamChanged");
+                        mSessionCallback.onClosedCaptionStreamChanged(hasClosedCaption);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchClosedCaptionStreamChanged");
                     }
                 }
             });

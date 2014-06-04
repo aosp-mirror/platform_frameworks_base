@@ -31,5 +31,7 @@ oneway interface ITvInputClient {
     void onAvailabilityChanged(in String inputId, boolean isAvailable);
     void onSessionReleased(int seq);
     void onSessionEvent(in String name, in Bundle args, int seq);
-    void onVideoSizeChanged(int width, int height, int seq);
+    void onVideoStreamChanged(int width, int height, boolean interlaced, int seq);
+    void onAudioStreamChanged(int channelCount, int seq);
+    void onClosedCaptionStreamChanged(boolean hasClosedCaption, int seq);
 }
