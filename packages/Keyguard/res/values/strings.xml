@@ -59,8 +59,8 @@
     <string name="keyguard_charged">Charged</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
-         is not fully charged, show the current charge %.  -->
-    <string name="keyguard_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
+         is not fully charged, say that it's charging.  -->
+    <string name="keyguard_plugged_in">Charging</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
