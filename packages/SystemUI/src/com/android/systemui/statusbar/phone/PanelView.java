@@ -162,7 +162,7 @@ public abstract class PanelView extends FrameLayout {
                     if (mHeightAnimator != null) {
                         mHeightAnimator.cancel(); // end any outstanding animations
                     }
-                    mTouchSlopExceeded = true;
+                    mTouchSlopExceeded = (mHeightAnimator != null && !mHintAnimationRunning);
                     onTrackingStarted();
                 }
                 if (mExpandedHeight == 0) {
@@ -219,7 +219,8 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 mTrackingPointer = -1;
                 trackMovement(event);
-                if (mTracking && mTouchSlopExceeded) {
+                if ((mTracking && mTouchSlopExceeded)
+                        || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     float vel = getCurrentVelocity();
                     boolean expand = flingExpands(vel);
                     onTrackingStopped(expand);
