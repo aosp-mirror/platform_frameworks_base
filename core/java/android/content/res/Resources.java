@@ -2239,9 +2239,7 @@ public class Resources {
         }
 
         // First, check whether we have a cached version of this drawable
-        // that's valid for the specified theme. This may apply a theme to a
-        // cached drawable that has themeable attributes but was not previously
-        // themed.
+        // that was inflated against the specified theme.
         if (!mPreloading) {
             final Drawable cachedDrawable = getCachedDrawable(caches, key, theme);
             if (cachedDrawable != null) {
@@ -2267,8 +2265,8 @@ public class Resources {
             dr = loadDrawableForCookie(value, id, theme);
         }
 
-        // If we were able to obtain a drawable, attempt to place it in the
-        // appropriate cache (e.g. no theme, themed, themeable).
+        // If we were able to obtain a drawable, store it in the appropriate
+        // cache (either preload or themed).
         if (dr != null) {
             dr.setChangingConfigurations(value.changingConfigurations);
             cacheDrawable(value, theme, isColorDrawable, caches, key, dr);
@@ -2376,7 +2374,7 @@ public class Resources {
             ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
             long key, Theme theme) {
         synchronized (mAccessLock) {
-            final int themeKey = theme != null ? theme.mThemeResId : 0;
+            final String themeKey = theme != null ? theme.mKey : "";
             final LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
             if (themedCache != null) {
                 final Drawable themedDrawable = getCachedDrawableLocked(themedCache, key);
