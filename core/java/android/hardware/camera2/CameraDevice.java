@@ -244,6 +244,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes(Class)
      * @deprecated Use {@link #createCaptureSession} instead
      */
+    @Deprecated
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
 
     /**
@@ -432,6 +433,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException;
 
@@ -470,13 +472,15 @@ public interface CameraDevice extends AutoCloseable {
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests target Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
-     * is not null, and the calling thread has no looper.
+     * is not null, and the calling thread has no looper. Or if no requests were
+     * passed in.
      *
      * @see #capture
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
@@ -536,6 +540,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #flush
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
@@ -586,7 +591,8 @@ public interface CameraDevice extends AutoCloseable {
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
-     * is not null, and the calling thread has no looper.
+     * is not null, and the calling thread has no looper. Or if no requests were
+     * passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -595,6 +601,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #flush
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
@@ -620,6 +627,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see StateListener#onIdle
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public void stopRepeating() throws CameraAccessException;
 
     /**
@@ -657,6 +665,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #configureOutputs
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public void flush() throws CameraAccessException;
 
     /**
@@ -691,6 +700,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      * @deprecated Use {@link CameraCaptureSession} instead
      */
+    @Deprecated
     public static abstract class CaptureListener {
 
         /**
@@ -1042,6 +1052,7 @@ public interface CameraDevice extends AutoCloseable {
          * @param camera the camera device has that become unconfigured
          * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
+        @Deprecated
         public void onUnconfigured(CameraDevice camera) {
             // Default empty implementation
         }
@@ -1072,6 +1083,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#setRepeatingRequest
          * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
+        @Deprecated
         public void onActive(CameraDevice camera) {
             // Default empty implementation
         }
@@ -1106,6 +1118,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#flush
          * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
+        @Deprecated
         public void onBusy(CameraDevice camera) {
             // Default empty implementation
         }
@@ -1154,6 +1167,7 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#flush
          * @deprecated Use {@link CameraCaptureSession.StateListener} instead.
          */
+        @Deprecated
         public void onIdle(CameraDevice camera) {
             // Default empty implementation
         }

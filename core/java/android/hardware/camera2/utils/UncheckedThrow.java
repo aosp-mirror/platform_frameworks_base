@@ -33,8 +33,20 @@ public class UncheckedThrow {
         UncheckedThrow.<RuntimeException>throwAnyImpl(e);
     }
 
+    /**
+     * Throw any kind of throwable without needing it to be checked
+     * @param e any instance of a Throwable
+     */
+    public static void throwAnyException(Throwable e) {
+        /**
+         *  Abuse type erasure by making the compiler think we are throwing RuntimeException,
+         *  which is unchecked, but then inserting any exception in there.
+         */
+        UncheckedThrow.<RuntimeException>throwAnyImpl(e);
+    }
+
     @SuppressWarnings("unchecked")
-    private static<T extends Exception> void throwAnyImpl(Exception e) throws T {
+    private static<T extends Throwable> void throwAnyImpl(Throwable e) throws T {
         throw (T) e;
     }
 }

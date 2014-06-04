@@ -62,6 +62,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
     private final StateListener mDeviceListener;
+    private volatile StateListener mSessionStateListener;
     private final Handler mDeviceHandler;
 
     private boolean mIdle = true;
@@ -90,6 +91,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
      */
     private final FrameNumberTracker mFrameNumberTracker = new FrameNumberTracker();
 
+    private CameraCaptureSessionImpl mCurrentSession;
+
     // Runnables for all state transitions, except error, which needs the
     // error code argument
 
@@ -98,6 +101,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onOpened(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onOpened(CameraDevice.this);
+                }
             }
         }
     };
@@ -107,6 +114,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onUnconfigured(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onUnconfigured(CameraDevice.this);
+                }
             }
         }
     };
@@ -116,6 +127,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onActive(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onActive(CameraDevice.this);
+                }
             }
         }
     };
@@ -125,6 +140,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onBusy(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onBusy(CameraDevice.this);
+                }
             }
         }
     };
@@ -133,6 +152,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             mDeviceListener.onClosed(CameraDevice.this);
+            StateListener sessionListener = mSessionStateListener;
+            if (sessionListener != null) {
+                sessionListener.onClosed(CameraDevice.this);
+            }
         }
     };
 
@@ -141,6 +164,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onIdle(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onIdle(CameraDevice.this);
+                }
             }
         }
     };
@@ -150,6 +177,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public void run() {
             if (!CameraDevice.this.isClosed()) {
                 mDeviceListener.onDisconnected(CameraDevice.this);
+                StateListener sessionListener = mSessionStateListener;
+                if (sessionListener != null) {
+                    sessionListener.onDisconnected(CameraDevice.this);
+                }
             }
         }
     };
@@ -170,7 +201,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             tag = tag.substring(0, MAX_TAG_LEN);
         }
         TAG = tag;
-
         DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     }
 
@@ -263,7 +293,43 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     public void createCaptureSession(List<Surface> outputs,
             CameraCaptureSession.StateListener listener, Handler handler)
             throws CameraAccessException {
-        // TODO
+        synchronized (mLock) {
+            if (DEBUG) {
+                Log.d(TAG, "createCaptureSession");
+            }
+
+            checkIfCameraClosed();
+
+            // TODO: we must be in UNCONFIGURED mode to begin with, or using another session
+
+            // TODO: dont block for this
+            boolean configureSuccess = true;
+            CameraAccessException pendingException = null;
+            try {
+                configureOutputs(outputs); // and then block until IDLE
+            } catch (CameraAccessException e) {
+                configureSuccess = false;
+                pendingException = e;
+            }
+
+            // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
+            CameraCaptureSessionImpl newSession =
+                    new CameraCaptureSessionImpl(outputs, listener, handler, this, mDeviceHandler,
+                            configureSuccess);
+
+            if (mCurrentSession != null) {
+                mCurrentSession.replaceSessionClose(newSession);
+            }
+
+            // TODO: wait until current session closes, then create the new session
+            mCurrentSession = newSession;
+
+            if (pendingException != null) {
+                throw pendingException;
+            }
+
+            mSessionStateListener = mCurrentSession.getDeviceStateListener();
+        }
     }
 
     @Override
@@ -275,7 +341,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             CameraMetadataNative templatedRequest = new CameraMetadataNative();
 
             try {
-                mRemoteDevice.createDefaultRequest(templateType, /* out */templatedRequest);
+                mRemoteDevice.createDefaultRequest(templateType, /*out*/templatedRequest);
             } catch (CameraRuntimeException e) {
                 throw e.asChecked();
             } catch (RemoteException e) {
@@ -304,10 +370,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
-        // TODO: remove this. Throw IAE if the request is null or empty. Need to update API doc.
-        if (requests.isEmpty()) {
-            Log.w(TAG, "Capture burst request list is empty, do nothing!");
-            return -1;
+        if (requests == null || requests.isEmpty()) {
+            throw new IllegalArgumentException("At least one request must be given");
         }
         return submitCaptureRequest(requests, listener, handler, /*streaming*/false);
     }
@@ -454,10 +518,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
-        // TODO: remove this. Throw IAE if the request is null or empty. Need to update API doc.
-        if (requests.isEmpty()) {
-            Log.w(TAG, "Set Repeating burst request list is empty, do nothing!");
-            return -1;
+        if (requests == null || requests.isEmpty()) {
+            throw new IllegalArgumentException("At least one request must be given");
         }
         return submitCaptureRequest(requests, listener, handler, /*streaming*/true);
     }
@@ -951,10 +1013,14 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     /**
-     * Default handler management. If handler is null, get the current thread's
-     * Looper to create a Handler with. If no looper exists, throw exception.
+     * Default handler management.
+     *
+     * <p>
+     * If handler is null, get the current thread's
+     * Looper to create a Handler with. If no looper exists, throw {@code IllegalArgumentException}.
+     * </p>
      */
-    private Handler checkHandler(Handler handler) {
+    static Handler checkHandler(Handler handler) {
         if (handler == null) {
             Looper looper = Looper.myLooper();
             if (looper == null) {
