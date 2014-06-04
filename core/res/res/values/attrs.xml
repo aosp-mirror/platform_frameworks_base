@@ -6344,6 +6344,12 @@
         <attr name="aspect" format="string" />
         <!-- Color to use when drawing LockPatternView paths. -->
         <attr name="pathColor" format="color|reference" />
+        <!-- The regular pattern color -->
+        <attr name="regularColor" format="color|reference" />
+        <!-- The error color -->
+        <attr name="errorColor" format="color|reference" />
+        <!-- The success color -->
+        <attr name="successColor" format="color|reference"/>
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that

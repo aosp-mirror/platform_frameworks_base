@@ -22,17 +22,18 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -110,14 +111,11 @@ public class LockPatternView extends View {
     private float mSquareWidth;
     private float mSquareHeight;
 
-    private Bitmap mBitmapBtnDefault;
-    private Bitmap mBitmapBtnTouched;
-    private Bitmap mBitmapCircleDefault;
-    private Bitmap mBitmapCircleGreen;
-    private Bitmap mBitmapCircleRed;
-
-    private Bitmap mBitmapArrowGreenUp;
-    private Bitmap mBitmapArrowRedUp;
+    private final Bitmap mBitmapBtnDefault;
+    private final Bitmap mBitmapBtnTouched;
+    private final Bitmap mBitmapCircleDefault;
+    private final Bitmap mBitmapCircleAlpha;
+    private final Bitmap mBitmapArrowAlphaUp;
 
     private final Path mCurrentPath = new Path();
     private final Rect mInvalidate = new Rect();
@@ -129,6 +127,10 @@ public class LockPatternView extends View {
     private int mAspect;
     private final Matrix mArrowMatrix = new Matrix();
     private final Matrix mCircleMatrix = new Matrix();
+    private final PorterDuffColorFilter mRegularColorFilter;
+    private final PorterDuffColorFilter mErrorColorFilter;
+    private final PorterDuffColorFilter mSuccessColorFilter;
+
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -266,17 +268,22 @@ public class LockPatternView extends View {
 
         setClickable(true);
 
+
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
 
-        int defaultColor = Color.WHITE;
-        TypedValue outValue = new TypedValue();
-        if (context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, outValue, true)) {
-            defaultColor = context.getResources().getColor(outValue.resourceId);
-        }
+        int regularColor = getResources().getColor(R.color.lock_pattern_view_regular_color);
+        int errorColor = getResources().getColor(R.color.lock_pattern_view_error_color);
+        int successColor = getResources().getColor(R.color.lock_pattern_view_success_color);
+        regularColor = a.getColor(R.styleable.LockPatternView_regularColor, regularColor);
+        errorColor = a.getColor(R.styleable.LockPatternView_errorColor, errorColor);
+        successColor = a.getColor(R.styleable.LockPatternView_successColor, successColor);
+        mRegularColorFilter = new PorterDuffColorFilter(regularColor, PorterDuff.Mode.SRC_ATOP);
+        mErrorColorFilter = new PorterDuffColorFilter(errorColor, PorterDuff.Mode.SRC_ATOP);
+        mSuccessColorFilter = new PorterDuffColorFilter(successColor, PorterDuff.Mode.SRC_ATOP);
 
-        final int color = a.getColor(R.styleable.LockPatternView_pathColor, defaultColor);
-        mPathPaint.setColor(color);
+        int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, regularColor);
+        mPathPaint.setColor(pathColor);
 
         mPathPaint.setAlpha(mStrokeAlpha);
         mPathPaint.setStyle(Paint.Style.STROKE);
@@ -284,25 +291,26 @@ public class LockPatternView extends View {
         mPathPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // lot's of bitmaps!
-        // TODO: those bitmaps are hardcoded to the Holo Theme which should not be the case!
-        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default_holo);
-        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched_holo);
-        mBitmapCircleDefault = getBitmapFor(R.drawable.indicator_code_lock_point_area_default_holo);
-        mBitmapCircleGreen = getBitmapFor(R.drawable.indicator_code_lock_point_area_green_holo);
-        mBitmapCircleRed = getBitmapFor(R.drawable.indicator_code_lock_point_area_red_holo);
-
-        mBitmapArrowGreenUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_green_up);
-        mBitmapArrowRedUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_red_up);
+        // TODO: those bitmaps are hardcoded to the Quantum Theme which should not be the case!
+        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default_qntm_alpha);
+        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched_qntm_alpha);
+        mBitmapCircleDefault = getBitmapFor(
+                R.drawable.indicator_code_lock_point_area_default_qntm_alpha);
+        mBitmapCircleAlpha = getBitmapFor(R.drawable.indicator_code_lock_point_area_qntm_alpha);
+        mBitmapArrowAlphaUp = getBitmapFor(
+                R.drawable.indicator_code_lock_drag_direction_up_qntm_alpha);
 
         // bitmaps have the size of the largest bitmap in this group
         final Bitmap bitmaps[] = { mBitmapBtnDefault, mBitmapBtnTouched, mBitmapCircleDefault,
-                mBitmapCircleGreen, mBitmapCircleRed };
+                mBitmapCircleAlpha};
 
         for (Bitmap bitmap : bitmaps) {
             mBitmapWidth = Math.max(mBitmapWidth, bitmap.getWidth());
             mBitmapHeight = Math.max(mBitmapHeight, bitmap.getHeight());
         }
 
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
         mPaint.setFilterBitmap(true);
 
         mCellStates = new CellState[3][3];
@@ -963,7 +971,12 @@ public class LockPatternView extends View {
     }
 
     private void drawArrow(Canvas canvas, float leftX, float topY, Cell start, Cell end) {
-        boolean green = mPatternDisplayMode != DisplayMode.Wrong;
+        if (mPatternInProgress) {
+            mPaint.setColorFilter(mRegularColorFilter);
+        } else {
+            boolean success = mPatternDisplayMode != DisplayMode.Wrong;
+            mPaint.setColorFilter(success ? mSuccessColorFilter : mErrorColorFilter);
+        }
 
         final int endRow = end.row;
         final int startRow = start.row;
@@ -977,7 +990,6 @@ public class LockPatternView extends View {
         // compute transform to place arrow bitmaps at correct angle inside circle.
         // This assumes that the arrow image is drawn at 12:00 with it's top edge
         // coincident with the circle bitmap's top edge.
-        Bitmap arrow = green ? mBitmapArrowGreenUp : mBitmapArrowRedUp;
         final int cellWidth = mBitmapWidth;
         final int cellHeight = mBitmapHeight;
 
@@ -994,8 +1006,8 @@ public class LockPatternView extends View {
         mArrowMatrix.preScale(sx, sy);
         mArrowMatrix.preTranslate(-mBitmapWidth/2, -mBitmapHeight/2);
         mArrowMatrix.preRotate(angle, cellWidth / 2.0f, cellHeight / 2.0f);  // rotate about cell center
-        mArrowMatrix.preTranslate((cellWidth - arrow.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
-        canvas.drawBitmap(arrow, mArrowMatrix, mPaint);
+        mArrowMatrix.preTranslate((cellWidth - mBitmapArrowAlphaUp.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
+        canvas.drawBitmap(mBitmapArrowAlphaUp, mArrowMatrix, mPaint);
     }
 
     /**
@@ -1008,24 +1020,28 @@ public class LockPatternView extends View {
             boolean partOfPattern) {
         Bitmap outerCircle;
         Bitmap innerCircle;
-
+        ColorFilter outerFilter;
         if (!partOfPattern || mInStealthMode) {
             // unselected circle
             outerCircle = mBitmapCircleDefault;
             innerCircle = mBitmapBtnDefault;
+            outerFilter = mRegularColorFilter;
         } else if (mPatternInProgress) {
             // user is in middle of drawing a pattern
-            outerCircle = mBitmapCircleGreen;
+            outerCircle = mBitmapCircleAlpha;
             innerCircle = mBitmapBtnTouched;
+            outerFilter = mRegularColorFilter;
         } else if (mPatternDisplayMode == DisplayMode.Wrong) {
             // the pattern is wrong
-            outerCircle = mBitmapCircleRed;
+            outerCircle = mBitmapCircleAlpha;
             innerCircle = mBitmapBtnDefault;
+            outerFilter = mErrorColorFilter;
         } else if (mPatternDisplayMode == DisplayMode.Correct ||
                 mPatternDisplayMode == DisplayMode.Animate) {
             // the pattern is correct
-            outerCircle = mBitmapCircleGreen;
+            outerCircle = mBitmapCircleAlpha;
             innerCircle = mBitmapBtnDefault;
+            outerFilter = mSuccessColorFilter;
         } else {
             throw new IllegalStateException("unknown display mode " + mPatternDisplayMode);
         }
@@ -1048,7 +1064,9 @@ public class LockPatternView extends View {
         mCircleMatrix.preScale(sx * scale, sy * scale);
         mCircleMatrix.preTranslate(-mBitmapWidth/2, -mBitmapHeight/2);
 
+        mPaint.setColorFilter(outerFilter);
         canvas.drawBitmap(outerCircle, mCircleMatrix, mPaint);
+        mPaint.setColorFilter(mRegularColorFilter);
         canvas.drawBitmap(innerCircle, mCircleMatrix, mPaint);
     }
 
