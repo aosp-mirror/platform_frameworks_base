@@ -1339,7 +1339,8 @@ public class Toolbar extends ViewGroup {
                 return getPaddingTop();
 
             case Gravity.BOTTOM:
-                return getPaddingBottom() - child.getMeasuredHeight() - lp.bottomMargin;
+                return getHeight() - getPaddingBottom() -
+                        child.getMeasuredHeight() - lp.bottomMargin;
 
             default:
             case Gravity.CENTER_VERTICAL:

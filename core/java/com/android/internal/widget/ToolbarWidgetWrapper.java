@@ -397,8 +397,19 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     }
 
     @Override
-    public void setEmbeddedTabView(View tabView) {
+    public void setEmbeddedTabView(ScrollingTabContainerView tabView) {
+        if (mTabView != null && mTabView.getParent() == mToolbar) {
+            mToolbar.removeView(mTabView);
+        }
         mTabView = tabView;
+        if (tabView != null && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
+            mToolbar.addView(mTabView, 0);
+            Toolbar.LayoutParams lp = (Toolbar.LayoutParams) mTabView.getLayoutParams();
+            lp.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            lp.gravity = Gravity.START | Gravity.BOTTOM;
+            tabView.setAllowCollapse(true);
+        }
     }
 
     @Override
@@ -436,6 +447,11 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                         mToolbar.removeView(mSpinner);
                     }
                     break;
+                case ActionBar.NAVIGATION_MODE_TABS:
+                    if (mTabView != null && mTabView.getParent() == mToolbar) {
+                        mToolbar.removeView(mTabView);
+                    }
+                    break;
             }
 
             mNavigationMode = mode;
@@ -448,7 +464,14 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                     mToolbar.addView(mSpinner, 0);
                     break;
                 case ActionBar.NAVIGATION_MODE_TABS:
-                    throw new IllegalStateException("Tabs not supported in this configuration");
+                    if (mTabView != null) {
+                        mToolbar.addView(mTabView, 0);
+                        Toolbar.LayoutParams lp = (Toolbar.LayoutParams) mTabView.getLayoutParams();
+                        lp.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        lp.gravity = Gravity.START | Gravity.BOTTOM;
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("Invalid navigation mode " + mode);
             }
