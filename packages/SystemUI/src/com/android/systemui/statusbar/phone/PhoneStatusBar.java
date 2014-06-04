@@ -2894,9 +2894,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void updateStackScrollerState() {
         if (mStackScroller == null) return;
-        mStackScroller.setDimmed(mState == StatusBarState.KEYGUARD, false /* animate */);
-        mStackScroller.setVisibility(!mShowLockscreenNotifications && mState == StatusBarState.KEYGUARD
+        boolean onKeyguard = mState == StatusBarState.KEYGUARD;
+        mStackScroller.setDimmed(onKeyguard, false /* animate */);
+        mStackScroller.setVisibility(!mShowLockscreenNotifications && onKeyguard
                 ? View.INVISIBLE : View.VISIBLE);
+        mStackScroller.setScrollingEnabled(!onKeyguard);
+        mStackScroller.setExpandingEnabled(!onKeyguard);
     }
 
     public void userActivity() {
@@ -3030,6 +3033,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onThresholdReached() {
         mStackScroller.setDimmed(false /* dimmed */, true /* animate */);
+    }
+
+    @Override
+    public void onTouchSlopExceeded() {
+        mStackScroller.removeLongPressCallback();
     }
 
     /**

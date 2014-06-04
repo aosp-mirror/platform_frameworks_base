@@ -40,7 +40,6 @@ public class StatusBarWindowView extends FrameLayout {
     public static final String TAG = "StatusBarWindowView";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
 
-    private ExpandHelper mExpandHelper;
     private DragDownHelper mDragDownHelper;
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
@@ -73,12 +72,6 @@ public class StatusBarWindowView extends FrameLayout {
         mStackScrollLayout = (NotificationStackScrollLayout) findViewById(
                 R.id.notification_stack_scroller);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
-        mExpandHelper = new ExpandHelper(getContext(), mStackScrollLayout,
-                minHeight, maxHeight);
-        mExpandHelper.setEventSource(this);
-        mExpandHelper.setScrollAdapter(mStackScrollLayout);
         mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
 
         // We really need to be able to animate while window animations are going on
@@ -114,12 +107,6 @@ public class StatusBarWindowView extends FrameLayout {
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
-                && (mService.getBarState() == StatusBarState.SHADE
-                        || (mService.getBarState() == StatusBarState.SHADE_LOCKED
-                                && !mService.isBouncerShowing()))) {
-            intercept = mExpandHelper.onInterceptTouchEvent(ev);
-        } else if (mNotificationPanel.isFullyExpanded()
-                && mStackScrollLayout.getVisibility() == View.VISIBLE
                 && mService.getBarState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
@@ -139,10 +126,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean handled = false;
-        if (mNotificationPanel.isFullyExpanded()
-                && mService.getBarState() != StatusBarState.KEYGUARD) {
-            handled = mExpandHelper.onTouchEvent(ev);
-        } else if (mService.getBarState() == StatusBarState.KEYGUARD) {
+        if (mService.getBarState() == StatusBarState.KEYGUARD) {
             handled = mDragDownHelper.onTouchEvent(ev);
         }
         if (!handled) {
@@ -168,8 +152,8 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     public void cancelExpandHelper() {
-        if (mExpandHelper != null) {
-            mExpandHelper.cancel();
+        if (mStackScrollLayout != null) {
+            mStackScrollLayout.cancelExpandHelper();
         }
     }
 }

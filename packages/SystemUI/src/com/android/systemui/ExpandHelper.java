@@ -42,6 +42,7 @@ public class ExpandHelper implements Gefingerpoken {
         boolean canChildBeExpanded(View v);
         void setUserExpandedChild(View v, boolean userExpanded);
         void setUserLockedChild(View v, boolean userLocked);
+        void expansionStateChanged(boolean isExpanding);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -77,7 +78,6 @@ public class ExpandHelper implements Gefingerpoken {
     private boolean mWatchingForPull;
     private boolean mHasPopped;
     private View mEventSource;
-    private View mCurrView;
     private float mOldHeight;
     private float mNaturalHeight;
     private float mInitialTouchFocusY;
@@ -86,8 +86,7 @@ public class ExpandHelper implements Gefingerpoken {
     private float mLastFocusY;
     private float mLastSpanY;
     private int mTouchSlop;
-    private int mLastMotionY;
-    private float mPopLimit;
+    private float mLastMotionY;
     private int mPopDuration;
     private float mPullGestureMinXSpan;
     private Callback mCallback;
@@ -95,10 +94,14 @@ public class ExpandHelper implements Gefingerpoken {
     private ViewScaler mScaler;
     private ObjectAnimator mScaleAnimation;
     private Vibrator mVibrator;
+    private boolean mEnabled = true;
+    private ExpandableView mResizedView;
+    private float mCurrentHeight;
 
     private int mSmallSize;
     private int mLargeSize;
     private float mMaximumStretch;
+    private boolean mOnlyMovements;
 
     private int mGravity;
 
@@ -109,17 +112,14 @@ public class ExpandHelper implements Gefingerpoken {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             if (DEBUG_SCALE) Log.v(TAG, "onscalebegin()");
-            float focusX = detector.getFocusX();
-            float focusY = detector.getFocusY();
 
-            final ExpandableView underFocus = findView(focusX, focusY);
-            startExpanding(underFocus, STRETCH);
+            startExpanding(mResizedView, STRETCH);
             return mExpanding;
         }
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (DEBUG_SCALE) Log.v(TAG, "onscale() on " + mCurrView);
+            if (DEBUG_SCALE) Log.v(TAG, "onscale() on " + mResizedView);
             return true;
         }
 
@@ -138,6 +138,7 @@ public class ExpandHelper implements Gefingerpoken {
         public void setHeight(float h) {
             if (DEBUG_SCALE) Log.v(TAG, "SetHeight: setting to " + h);
             mView.setActualHeight((int) h);
+            mCurrentHeight = h;
         }
         public float getHeight() {
             return mView.getActualHeight();
@@ -165,7 +166,6 @@ public class ExpandHelper implements Gefingerpoken {
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mScaleAnimation.setDuration(EXPAND_DURATION);
-        mPopLimit = mContext.getResources().getDimension(R.dimen.blinds_pop_threshold);
         mPopDuration = mContext.getResources().getInteger(R.integer.blinds_pop_duration_ms);
         mPullGestureMinXSpan = mContext.getResources().getDimension(R.dimen.pull_span_min);
 
@@ -188,7 +188,6 @@ public class ExpandHelper implements Gefingerpoken {
         float target = hand + mOldHeight;
         float newHeight = clamp(target);
         mScaler.setHeight(newHeight);
-
         mLastFocusY = mSGD.getFocusY();
         mLastSpanY = mSGD.getCurrentSpan();
     }
@@ -252,6 +251,9 @@ public class ExpandHelper implements Gefingerpoken {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            return false;
+        }
         final int action = ev.getAction();
         if (DEBUG_SCALE) Log.d(TAG, "intercept: act=" + MotionEvent.actionToString(action) +
                          " expanding=" + mExpanding +
@@ -270,38 +272,34 @@ public class ExpandHelper implements Gefingerpoken {
         if (DEBUG_SCALE) Log.d(TAG, "set initial span: " + mInitialTouchSpan);
 
         if (mExpanding) {
+            mLastMotionY = ev.getRawY();
             return true;
         } else {
             if ((action == MotionEvent.ACTION_MOVE) && 0 != (mExpansionStyle & BLINDS)) {
                 // we've begun Venetian blinds style expansion
                 return true;
             }
-            final float xspan = mSGD.getCurrentSpanX();
-            if ((action == MotionEvent.ACTION_MOVE &&
-                    xspan > mPullGestureMinXSpan &&
-                    xspan > mSGD.getCurrentSpanY())) {
-                // detect a vertical pulling gesture with fingers somewhat separated
-                if (DEBUG_SCALE) Log.v(TAG, "got pull gesture (xspan=" + xspan + "px)");
-
-                final ExpandableView underFocus = findView(x, y);
-                startExpanding(underFocus, PULL);
-                return true;
-            }
-            if (mScrollAdapter != null && !mScrollAdapter.isScrolledToTop()) {
-                return false;
-            }
-            // Now look for other gestures
             switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE: {
+                final float xspan = mSGD.getCurrentSpanX();
+                if (xspan > mPullGestureMinXSpan &&
+                        xspan > mSGD.getCurrentSpanY() && !mExpanding) {
+                    // detect a vertical pulling gesture with fingers somewhat separated
+                    if (DEBUG_SCALE) Log.v(TAG, "got pull gesture (xspan=" + xspan + "px)");
+                    startExpanding(mResizedView, PULL);
+                    mWatchingForPull = false;
+                }
                 if (mWatchingForPull) {
-                    final int yDiff = y - mLastMotionY;
+                    final float yDiff = ev.getRawY() - mInitialTouchY;
                     if (yDiff > mTouchSlop) {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
-                        mLastMotionY = y;
-                        final ExpandableView underFocus = findView(x, y);
-                        if (startExpanding(underFocus, BLINDS)) {
-                            mInitialTouchY = mLastMotionY;
-                            mHasPopped = false;
+                        mWatchingForPull = false;
+                        if (mResizedView != null && !isFullyExpanded(mResizedView)) {
+                            if (startExpanding(mResizedView, BLINDS)) {
+                                mLastMotionY = ev.getRawY();
+                                mInitialTouchY = ev.getRawY();
+                                mHasPopped = false;
+                            }
                         }
                     }
                 }
@@ -310,8 +308,10 @@ public class ExpandHelper implements Gefingerpoken {
 
             case MotionEvent.ACTION_DOWN:
                 mWatchingForPull = mScrollAdapter != null &&
-                        isInside(mScrollAdapter.getHostView(), x, y);
-                mLastMotionY = y;
+                        isInside(mScrollAdapter.getHostView(), x, y)
+                        && mScrollAdapter.isScrolledToTop();
+                mResizedView = findView(x, y);
+                mInitialTouchY = ev.getY();
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -321,12 +321,28 @@ public class ExpandHelper implements Gefingerpoken {
                 clearView();
                 break;
             }
+            mLastMotionY = ev.getRawY();
             return mExpanding;
         }
     }
 
+    public void setEnabled(boolean enable) {
+        mEnabled = enable;
+    }
+
+    private boolean isEnabled() {
+        return mEnabled;
+    }
+
+    private boolean isFullyExpanded(ExpandableView underFocus) {
+        return underFocus.getIntrinsicHeight() == underFocus.getMaxHeight();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            return false;
+        }
         final int action = ev.getActionMasked();
         if (DEBUG_SCALE) Log.d(TAG, "touch: act=" + MotionEvent.actionToString(action) +
                 " expanding=" + mExpanding +
@@ -335,47 +351,71 @@ public class ExpandHelper implements Gefingerpoken {
                 (0 != (mExpansionStyle & STRETCH) ? " (stretch)" : ""));
 
         mSGD.onTouchEvent(ev);
+        final int x = (int) mSGD.getFocusX();
+        final int y = (int) mSGD.getFocusY();
 
+        if (mOnlyMovements) {
+            mLastMotionY = ev.getRawY();
+            return false;
+        }
         switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mWatchingForPull = mScrollAdapter != null &&
+                        isInside(mScrollAdapter.getHostView(), x, y);
+                mResizedView = findView(x, y);
+                mInitialTouchY = ev.getY();
+                break;
             case MotionEvent.ACTION_MOVE: {
-                if (0 != (mExpansionStyle & BLINDS)) {
-                    final float rawHeight = ev.getY() - mInitialTouchY + mOldHeight;
+                if (mWatchingForPull) {
+                    final float yDiff = ev.getRawY() - mInitialTouchY;
+                    if (yDiff > mTouchSlop) {
+                        if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
+                        mWatchingForPull = false;
+                        if (mResizedView != null && !isFullyExpanded(mResizedView)) {
+                            if (startExpanding(mResizedView, BLINDS)) {
+                                mInitialTouchY = ev.getRawY();
+                                mLastMotionY = ev.getRawY();
+                                mHasPopped = false;
+                            }
+                        }
+                    }
+                }
+                if (mExpanding && 0 != (mExpansionStyle & BLINDS)) {
+                    final float rawHeight = ev.getRawY() - mLastMotionY + mCurrentHeight;
                     final float newHeight = clamp(rawHeight);
-                    final boolean wasClosed = (mOldHeight == mSmallSize);
                     boolean isFinished = false;
+                    boolean expanded = false;
                     if (rawHeight > mNaturalHeight) {
                         isFinished = true;
+                        expanded = true;
                     }
                     if (rawHeight < mSmallSize) {
                         isFinished = true;
+                        expanded = false;
                     }
 
-                    final float pull = Math.abs(ev.getY() - mInitialTouchY);
-                    if (mHasPopped || pull > mPopLimit) {
-                        if (!mHasPopped) {
-                            vibrate(mPopDuration);
-                            mHasPopped = true;
-                        }
+                    if (!mHasPopped) {
+                        vibrate(mPopDuration);
+                        mHasPopped = true;
                     }
 
-                    if (mHasPopped) {
-                        mScaler.setHeight(newHeight);
-                    }
-
-                    final int x = (int) mSGD.getFocusX();
-                    final int y = (int) mSGD.getFocusY();
-                    ExpandableView underFocus = findView(x, y);
-                    if (isFinished && underFocus != null && underFocus != mCurrView) {
-                        finishExpanding(false); // @@@ needed?
-                        startExpanding(underFocus, BLINDS);
-                        mInitialTouchY = y;
-                        mHasPopped = false;
+                    mScaler.setHeight(newHeight);
+                    mLastMotionY = ev.getRawY();
+                    if (isFinished) {
+                        mCallback.setUserExpandedChild(mResizedView, expanded);
+                        mCallback.expansionStateChanged(false);
+                        return false;
+                    } else {
+                        mCallback.expansionStateChanged(true);
                     }
                     return true;
                 }
 
                 if (mExpanding) {
+
+                    // Gestural expansion is running
                     updateExpansion();
+                    mLastMotionY = ev.getRawY();
                     return true;
                 }
 
@@ -396,6 +436,7 @@ public class ExpandHelper implements Gefingerpoken {
                 clearView();
                 break;
         }
+        mLastMotionY = ev.getRawY();
         return true;
     }
 
@@ -407,15 +448,16 @@ public class ExpandHelper implements Gefingerpoken {
             return false;
         }
         mExpansionStyle = expandType;
-        if (mExpanding && v == mCurrView) {
+        if (mExpanding && v == mResizedView) {
             return true;
         }
         mExpanding = true;
+        mCallback.expansionStateChanged(true);
         if (DEBUG) Log.d(TAG, "scale type " + expandType + " beginning on view: " + v);
         mCallback.setUserLockedChild(v, true);
-        setView(v);
-        mScaler.setView((ExpandableView) v);
+        mScaler.setView(v);
         mOldHeight = mScaler.getHeight();
+        mCurrentHeight = mOldHeight;
         if (mCallback.canChildBeExpanded(v)) {
             if (DEBUG) Log.d(TAG, "working on an expandable child");
             mNaturalHeight = mScaler.getNaturalHeight(mLargeSize);
@@ -425,14 +467,13 @@ public class ExpandHelper implements Gefingerpoken {
         }
         if (DEBUG) Log.d(TAG, "got mOldHeight: " + mOldHeight +
                     " mNaturalHeight: " + mNaturalHeight);
-        v.getParent().requestDisallowInterceptTouchEvent(true);
         return true;
     }
 
     private void finishExpanding(boolean force) {
         if (!mExpanding) return;
 
-        if (DEBUG) Log.d(TAG, "scale in finishing on view: " + mCurrView);
+        if (DEBUG) Log.d(TAG, "scale in finishing on view: " + mResizedView);
 
         float currentHeight = mScaler.getHeight();
         float targetHeight = mSmallSize;
@@ -446,11 +487,12 @@ public class ExpandHelper implements Gefingerpoken {
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        mCallback.setUserExpandedChild(mCurrView, targetHeight == mNaturalHeight);
+        mCallback.setUserExpandedChild(mResizedView, targetHeight == mNaturalHeight);
+        mCallback.expansionStateChanged(false);
         if (targetHeight != currentHeight) {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();
-            final View scaledView = mCurrView;
+            final View scaledView = mResizedView;
             mScaleAnimation.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -460,7 +502,7 @@ public class ExpandHelper implements Gefingerpoken {
             });
             mScaleAnimation.start();
         } else {
-            mCallback.setUserLockedChild(mCurrView, false);
+            mCallback.setUserLockedChild(mResizedView, false);
         }
 
         mExpanding = false;
@@ -470,16 +512,11 @@ public class ExpandHelper implements Gefingerpoken {
         if (DEBUG) Log.d(TAG, "currentHeight is: " + currentHeight);
         if (DEBUG) Log.d(TAG, "mSmallSize is: " + mSmallSize);
         if (DEBUG) Log.d(TAG, "targetHeight is: " + targetHeight);
-        if (DEBUG) Log.d(TAG, "scale was finished on view: " + mCurrView);
+        if (DEBUG) Log.d(TAG, "scale was finished on view: " + mResizedView);
     }
 
     private void clearView() {
-        mCurrView = null;
-
-    }
-
-    private void setView(View v) {
-        mCurrView = v;
+        mResizedView = null;
     }
 
     /**
@@ -491,6 +528,18 @@ public class ExpandHelper implements Gefingerpoken {
 
         // reset the gesture detector
         mSGD = new ScaleGestureDetector(mContext, mScaleGestureListener);
+    }
+
+    /**
+     * Change the expansion mode to only observe movements and don't perform any resizing.
+     * This is needed when the expanding is finished and the scroller kicks in,
+     * performing an overscroll motion. We only want to shrink it again when we are not
+     * overscrolled.
+     *
+     * @param onlyMovements Should only movements be observed?
+     */
+    public void onlyObserveMovements(boolean onlyMovements) {
+        mOnlyMovements = onlyMovements;
     }
 
     /**

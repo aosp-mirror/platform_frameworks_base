@@ -30,7 +30,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.OverScroller;
-
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
@@ -51,13 +50,15 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
-    private static final float RUBBER_BAND_FACTOR = 0.35f;
+    private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
+    private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
 
     /**
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
 
+    private ExpandHelper mExpandHelper;
     private SwipeHelper mSwipeHelper;
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
@@ -73,6 +74,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mMaxOverScroll;
     private boolean mIsBeingDragged;
     private int mLastMotionY;
+    private int mDownX;
     private int mActivePointerId;
 
     private int mSidePaddings;
@@ -128,6 +130,38 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mChildrenUpdateRequested;
     private SpeedBumpView mSpeedBumpView;
     private boolean mIsExpansionChanging;
+    private boolean mExpandingNotification;
+    private boolean mExpandedInThisMotion;
+    private boolean mScrollingEnabled;
+
+    /**
+     * Was the scroller scrolled to the top when the down motion was observed?
+     */
+    private boolean mScrolledToTopOnFirstDown;
+
+    /**
+     * The minimal amount of over scroll which is needed in order to switch to the quick settings
+     * when over scrolling on a expanded card.
+     */
+    private float mMinTopOverScrollToEscape;
+    private int mIntrinsicPadding;
+    private int mNotificationTopPadding;
+    private int mMinStackHeight;
+    private boolean mDontReportNextOverScroll;
+
+    /**
+     * The maximum scrollPosition which we are allowed to reach when a notification was expanded.
+     * This is needed to avoid scrolling too far after the notification was collapsed in the same
+     * motion.
+     */
+    private int mMaxScrollAfterExpand;
+
+    /**
+     * Should in this touch motion only be scrolling allowed? It's true when the scroller was
+     * animating.
+     */
+    private boolean mOnlyScrollingInThisMotion;
+
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -207,6 +241,17 @@ public class NotificationStackScrollLayout extends ViewGroup
         mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         updatePadding(false);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        mExpandHelper = new ExpandHelper(getContext(), this,
+                minHeight, maxHeight);
+        mExpandHelper.setEventSource(this);
+        mExpandHelper.setScrollAdapter(this);
+        mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
+                R.dimen.min_top_overscroll_to_qs);
+        mNotificationTopPadding = getResources().getDimensionPixelSize(
+                R.dimen.notifications_top_padding);
+        mMinStackHeight = getResources().getDimensionPixelSize(R.dimen.collapsed_stack_height);
     }
 
     private void updatePadding(boolean dimmed) {
@@ -343,7 +388,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mTopPadding;
     }
 
-    public void setTopPadding(int topPadding, boolean animate) {
+    private void setTopPadding(int topPadding, boolean animate) {
         if (mTopPadding != topPadding) {
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
@@ -511,6 +556,29 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (v instanceof ExpandableNotificationRow) {
             ((ExpandableNotificationRow) v).setUserLocked(userLocked);
         }
+        removeLongPressCallback();
+        requestDisallowInterceptTouchEvent(true);
+    }
+
+    @Override
+    public void expansionStateChanged(boolean isExpanding) {
+        mExpandingNotification = isExpanding;
+        if (!mExpandedInThisMotion) {
+            mMaxScrollAfterExpand = mOwnScrollY;
+            mExpandedInThisMotion = true;
+        }
+    }
+
+    public void setScrollingEnabled(boolean enable) {
+        mScrollingEnabled = enable;
+    }
+
+    public void setExpandingEnabled(boolean enable) {
+        mExpandHelper.setEnabled(enable);
+    }
+
+    private boolean isScrollingEnabled() {
+        return mScrollingEnabled;
     }
 
     public View getChildContentView(View v) {
@@ -548,18 +616,44 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isEnabled()) {
             return false;
         }
+        boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
+                || ev.getActionMasked()== MotionEvent.ACTION_UP;
+        boolean expandWantsIt = false;
+        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
+            if (isCancelOrUp) {
+                mExpandHelper.onlyObserveMovements(false);
+            }
+            boolean wasExpandingBefore = mExpandingNotification;
+            expandWantsIt = mExpandHelper.onTouchEvent(ev);
+            if (mExpandedInThisMotion && !mExpandingNotification && wasExpandingBefore) {
+                dispatchDownEventToScroller(ev);
+            }
+        }
         boolean scrollerWantsIt = false;
-        if (!mSwipingInProgress) {
+        if (!mSwipingInProgress && !mExpandingNotification) {
             scrollerWantsIt = onScrollTouch(ev);
         }
         boolean horizontalSwipeWantsIt = false;
-        if (!mIsBeingDragged) {
+        if (!mIsBeingDragged
+                && !mExpandingNotification
+                && !mExpandedInThisMotion
+                && !mOnlyScrollingInThisMotion) {
             horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
         }
-        return horizontalSwipeWantsIt || scrollerWantsIt || super.onTouchEvent(ev);
+        return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
+    }
+
+    private void dispatchDownEventToScroller(MotionEvent ev) {
+        MotionEvent downEvent = MotionEvent.obtain(ev);
+        downEvent.setAction(MotionEvent.ACTION_DOWN);
+        onScrollTouch(downEvent);
+        downEvent.recycle();
     }
 
     private boolean onScrollTouch(MotionEvent ev) {
+        if (!isScrollingEnabled()) {
+            return false;
+        }
         initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
@@ -583,6 +677,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // Remember where the motion event started
                 mLastMotionY = (int) ev.getY();
+                mDownX = (int) ev.getX();
                 mActivePointerId = ev.getPointerId(0);
                 break;
             }
@@ -594,8 +689,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
 
                 final int y = (int) ev.getY(activePointerIndex);
+                final int x = (int) ev.getX(activePointerIndex);
                 int deltaY = mLastMotionY - y;
-                if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
+                final int xDiff = Math.abs(x - mDownX);
+                final int yDiff = Math.abs(deltaY);
+                if (!mIsBeingDragged && yDiff > mTouchSlop && yDiff > xDiff) {
                     setIsBeingDragged(true);
                     if (deltaY > 0) {
                         deltaY -= mTouchSlop;
@@ -606,7 +704,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     mLastMotionY = y;
-                    final int range = getScrollRange();
+                    int range = getScrollRange();
+                    if (mExpandedInThisMotion) {
+                        range = Math.min(range, mMaxScrollAfterExpand);
+                    }
 
                     float scrollAmount;
                     if (deltaY < 0) {
@@ -631,19 +732,28 @@ public class NotificationStackScrollLayout extends ViewGroup
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0) {
-                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                            fling(-initialVelocity);
-                        } else {
-                            if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
-                                    getScrollRange())) {
-                                postInvalidateOnAnimation();
+                    if (shouldOverScrollFling(initialVelocity)) {
+                        onOverScrollFling(true, initialVelocity);
+                    } else {
+                        if (getChildCount() > 0) {
+                            if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                                float currentOverScrollTop = getCurrentOverScrollAmount(true);
+                                if (currentOverScrollTop == 0.0f || initialVelocity > 0) {
+                                    fling(-initialVelocity);
+                                } else {
+                                    onOverScrollFling(false, initialVelocity);
+                                }
+                            } else {
+                                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                                        getScrollRange())) {
+                                    postInvalidateOnAnimation();
+                                }
                             }
                         }
-                    }
 
-                    mActivePointerId = INVALID_POINTER;
-                    endDrag();
+                        mActivePointerId = INVALID_POINTER;
+                        endDrag();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -658,15 +768,25 @@ public class NotificationStackScrollLayout extends ViewGroup
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
                 mLastMotionY = (int) ev.getY(index);
+                mDownX = (int) ev.getX(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
             }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
                 mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
+                mDownX = (int) ev.getX(ev.findPointerIndex(mActivePointerId));
                 break;
         }
         return true;
+    }
+
+    private void onOverScrollFling(boolean open, int initialVelocity) {
+        if (mOverscrollTopChangedListener != null) {
+            mOverscrollTopChangedListener.flingTopOverscroll(initialVelocity, open);
+        }
+        mDontReportNextOverScroll = true;
+        setOverScrollAmount(0.0f, true, false);
     }
 
     /**
@@ -689,11 +809,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
         float newScrollY = mOwnScrollY + scrollAmount;
         if (newScrollY > range) {
-            float currentBottomPixels = getCurrentOverScrolledPixels(false);
-            // We overScroll on the top
-            setOverScrolledPixels(currentBottomPixels + newScrollY - range,
-                    false /* onTop */,
-                    false /* animate */);
+            if (!mExpandedInThisMotion) {
+                float currentBottomPixels = getCurrentOverScrolledPixels(false);
+                // We overScroll on the top
+                setOverScrolledPixels(currentBottomPixels + newScrollY - range,
+                        false /* onTop */,
+                        false /* animate */);
+            }
             mOwnScrollY = range;
             scrollAmount = 0.0f;
         }
@@ -834,7 +956,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param animate Should an animation be performed.
      */
     public void setOverScrolledPixels(float numPixels, boolean onTop, boolean animate) {
-        setOverScrollAmount(numPixels * RUBBER_BAND_FACTOR, onTop, animate, true);
+        setOverScrollAmount(numPixels * getRubberBandFactor(), onTop, animate, true);
     }
 
     /**
@@ -870,17 +992,21 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (animate) {
             mStateAnimator.animateOverScrollToAmount(amount, onTop);
         } else {
-            setOverScrolledPixels(amount / RUBBER_BAND_FACTOR, onTop);
+            setOverScrolledPixels(amount / getRubberBandFactor(), onTop);
             mAmbientState.setOverScrollAmount(amount, onTop);
-            requestChildrenUpdate();
             if (onTop) {
-                float scrollAmount = mOwnScrollY < 0 ? -mOwnScrollY : 0;
-                notifyOverscrollTopListener(scrollAmount + amount);
+                notifyOverscrollTopListener(amount);
             }
+            requestChildrenUpdate();
         }
     }
 
     private void notifyOverscrollTopListener(float amount) {
+        mExpandHelper.onlyObserveMovements(amount > 1.0f);
+        if (mDontReportNextOverScroll) {
+            mDontReportNextOverScroll = false;
+            return;
+        }
         if (mOverscrollTopChangedListener != null) {
             mOverscrollTopChangedListener.onOverscrollTopChanged(amount);
         }
@@ -928,7 +1054,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 updateChildren();
                 float overScrollTop = getCurrentOverScrollAmount(true);
                 if (mOwnScrollY < 0) {
-                    notifyOverscrollTopListener(-mOwnScrollY + overScrollTop);
+                    notifyOverscrollTopListener(-mOwnScrollY);
                 } else {
                     notifyOverscrollTopListener(overScrollTop);
                 }
@@ -950,6 +1076,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 onTop = true;
                 newAmount = -mOwnScrollY;
                 mOwnScrollY = 0;
+                mDontReportNextOverScroll = true;
             } else {
                 onTop = false;
                 newAmount = mOwnScrollY - scrollRange;
@@ -1085,13 +1212,14 @@ public class NotificationStackScrollLayout extends ViewGroup
             float bottomAmount = getCurrentOverScrollAmount(false);
             if (velocityY < 0 && topAmount > 0) {
                 mOwnScrollY -= (int) topAmount;
+                mDontReportNextOverScroll = true;
                 setOverScrollAmount(0, true, false);
-                mMaxOverScroll = Math.abs(velocityY) / 1000f * RUBBER_BAND_FACTOR
+                mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor()
                         * mOverflingDistance + topAmount;
             } else if (velocityY > 0 && bottomAmount > 0) {
                 mOwnScrollY += bottomAmount;
                 setOverScrollAmount(0, false, false);
-                mMaxOverScroll = Math.abs(velocityY) / 1000f * RUBBER_BAND_FACTOR
+                mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor()
                         * mOverflingDistance + bottomAmount;
             } else {
                 // it will be set once we reach the boundary
@@ -1102,6 +1230,44 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             postInvalidateOnAnimation();
         }
+    }
+
+    /**
+     * @return Whether a fling performed on the top overscroll edge lead to the expanded
+     * overScroll view (i.e QS).
+     */
+    private boolean shouldOverScrollFling(int initialVelocity) {
+        float topOverScroll = getCurrentOverScrollAmount(true);
+        return mScrolledToTopOnFirstDown
+                && !mExpandedInThisMotion
+                && topOverScroll > mMinTopOverScrollToEscape
+                && initialVelocity > 0;
+    }
+
+    public void updateTopPadding(float qsHeight, int scrollY, boolean animate) {
+        float start = qsHeight - scrollY + mNotificationTopPadding;
+        float stackHeight = getHeight() - start;
+        if (stackHeight <= mMinStackHeight) {
+            float overflow = mMinStackHeight - stackHeight;
+            stackHeight = mMinStackHeight;
+            start = getHeight() - stackHeight;
+            setTranslationY(overflow);
+        } else {
+            setTranslationY(0);
+        }
+        setTopPadding(clampPadding((int) start), animate);
+    }
+
+    private int clampPadding(int desiredPadding) {
+        return Math.max(desiredPadding, mIntrinsicPadding);
+    }
+
+    private float getRubberBandFactor() {
+        return mExpandedInThisMotion
+                ? RUBBER_BAND_FACTOR_AFTER_EXPAND
+                : (mScrolledToTopOnFirstDown
+                    ? 1.0f
+                    : RUBBER_BAND_FACTOR_NORMAL);
     }
 
     private void endDrag() {
@@ -1119,16 +1285,30 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        initDownStates(ev);
+        boolean expandWantsIt = false;
+        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
+            expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
+        }
         boolean scrollWantsIt = false;
-        if (!mSwipingInProgress) {
+        if (!mSwipingInProgress && !mExpandingNotification) {
             scrollWantsIt = onInterceptTouchEventScroll(ev);
         }
         boolean swipeWantsIt = false;
-        if (!mIsBeingDragged) {
+        if (!mIsBeingDragged
+                && !mExpandingNotification
+                && !mExpandedInThisMotion
+                && !mOnlyScrollingInThisMotion) {
             swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
         }
-        return swipeWantsIt || scrollWantsIt ||
-                super.onInterceptTouchEvent(ev);
+        return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
+    }
+
+    private void initDownStates(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mExpandedInThisMotion = false;
+            mOnlyScrollingInThisMotion = !mScroller.isFinished();
+        }
     }
 
     @Override
@@ -1350,6 +1530,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
+        if (!isScrollingEnabled()) {
+            return false;
+        }
         /*
          * This method JUST determines whether we want to intercept the motion.
          * If we return true, onMotionEvent will be called and we do the actual
@@ -1364,13 +1547,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int action = ev.getAction();
         if ((action == MotionEvent.ACTION_MOVE) && (mIsBeingDragged)) {
             return true;
-        }
-
-        /*
-         * Don't try to intercept touch if we can't scroll anyway.
-         */
-        if (mOwnScrollY == 0 && getScrollRange() == 0) {
-            return false;
         }
 
         switch (action & MotionEvent.ACTION_MASK) {
@@ -1398,10 +1574,13 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
 
                 final int y = (int) ev.getY(pointerIndex);
+                final int x = (int) ev.getX(pointerIndex);
                 final int yDiff = Math.abs(y - mLastMotionY);
-                if (yDiff > mTouchSlop) {
+                final int xDiff = Math.abs(x - mDownX);
+                if (yDiff > mTouchSlop && yDiff > xDiff) {
                     setIsBeingDragged(true);
                     mLastMotionY = y;
+                    mDownX = x;
                     initVelocityTrackerIfNotExists();
                     mVelocityTracker.addMovement(ev);
                 }
@@ -1421,7 +1600,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                  * ACTION_DOWN always refers to pointer index 0.
                  */
                 mLastMotionY = y;
+                mDownX = (int) ev.getX();
                 mActivePointerId = ev.getPointerId(0);
+                mScrolledToTopOnFirstDown = isScrolledToTop();
 
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
@@ -1468,7 +1649,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mIsBeingDragged = isDragged;
         if (isDragged) {
             requestDisallowInterceptTouchEvent(true);
-            mSwipeHelper.removeLongPressCallback();
+            removeLongPressCallback();
         }
     }
 
@@ -1476,8 +1657,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (!hasWindowFocus) {
-            mSwipeHelper.removeLongPressCallback();
+            removeLongPressCallback();
         }
+    }
+
+    public void removeLongPressCallback() {
+        mSwipeHelper.removeLongPressCallback();
     }
 
     @Override
@@ -1608,6 +1793,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateSpeedBump(true);
     }
 
+    public void cancelExpandHelper() {
+        mExpandHelper.cancel();
+    }
+
+    public void setIntrinsicPadding(int intrinsicPadding) {
+        mIntrinsicPadding = intrinsicPadding;
+    }
+
     /**
      * @return the y position of the first notification
      */
@@ -1627,6 +1820,15 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public interface OnOverscrollTopChangedListener {
         public void onOverscrollTopChanged(float amount);
+
+        /**
+         * Notify a listener that the scroller wants to escape from the scrolling motion and
+         * start a fling animation to the expanded or collapsed overscroll view (e.g expand the QS)
+         *
+         * @param velocity The velocity that the Scroller had when over flinging
+         * @param open Should the fling open or close the overscroll view.
+         */
+        public void flingTopOverscroll(float velocity, boolean open);
     }
 
     static class AnimationEvent {

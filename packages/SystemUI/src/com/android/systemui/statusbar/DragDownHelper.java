@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -87,6 +86,7 @@ public class DragDownHelper implements Gefingerpoken {
                     captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
                     mInitialTouchX = x;
+                    mOnDragDownListener.onTouchSlopExceeded();
                     return true;
                 }
                 break;
@@ -202,5 +202,6 @@ public class DragDownHelper implements Gefingerpoken {
         void onDraggedDown(View startingChild);
         void onDragDownReset();
         void onThresholdReached();
+        void onTouchSlopExceeded();
     }
 }
