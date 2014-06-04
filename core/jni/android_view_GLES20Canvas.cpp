@@ -632,6 +632,7 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 // Text
 // ----------------------------------------------------------------------------
 
+// TODO: this is moving to MinikinUtils, remove with USE_MINIKIN ifdef
 static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -647,43 +648,51 @@ static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
 }
 
 #ifdef USE_MINIKIN
+
+class RenderTextFunctor {
+public:
+    RenderTextFunctor(const Layout& layout, OpenGLRenderer* renderer, jfloat x, jfloat y,
+                SkPaint* paint, uint16_t* glyphs, float* pos, float totalAdvance,
+                uirenderer::Rect& bounds)
+            : layout(layout), renderer(renderer), x(x), y(y), paint(paint), glyphs(glyphs),
+            pos(pos), totalAdvance(totalAdvance), bounds(bounds) { }
+    void operator()(SkTypeface* t, size_t start, size_t end) {
+        for (size_t i = start; i < end; i++) {
+            glyphs[i] = layout.getGlyphId(i);
+            pos[2 * i] = layout.getX(i);
+            pos[2 * i + 1] = layout.getY(i);
+        }
+        paint->setTypeface(t);
+        size_t glyphsCount = end - start;
+        int bytesCount = glyphsCount * sizeof(jchar);
+        renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
+            x, y, pos + 2 * start, paint, totalAdvance, bounds);
+    }
+private:
+    const Layout& layout;
+    OpenGLRenderer* renderer;
+    jfloat x;
+    jfloat y;
+    SkPaint* paint;
+    uint16_t* glyphs;
+    float* pos;
+    float totalAdvance;
+    uirenderer::Rect& bounds;
+};
+
 static void renderTextLayout(OpenGLRenderer* renderer, Layout* layout,
     jfloat x, jfloat y, SkPaint* paint) {
     size_t nGlyphs = layout->nGlyphs();
     float* pos = new float[nGlyphs * 2];
     uint16_t* glyphs = new uint16_t[nGlyphs];
-    SkTypeface* lastFace = 0;
-    SkTypeface* skFace = 0;
-    size_t start = 0;
     MinikinRect b;
     layout->getBounds(&b);
     android::uirenderer::Rect bounds(b.mLeft, b.mTop, b.mRight, b.mBottom);
     bounds.translate(x, y);
     float totalAdvance = layout->getAdvance();
 
-    for (size_t i = 0; i < nGlyphs; i++) {
-        MinikinFontSkia* mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
-        skFace = mfs->GetSkTypeface();
-        glyphs[i] = layout->getGlyphId(i);
-        pos[2 * i] = layout->getX(i);
-        pos[2 * i + 1] = layout->getY(i);
-        if (i > 0 && skFace != lastFace) {
-            paint->setTypeface(lastFace);
-            size_t glyphsCount = i - start;
-            int bytesCount = glyphsCount * sizeof(jchar);
-            renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
-                x, y, pos + 2 * start, paint, totalAdvance, bounds);
-            start = i;
-        }
-        lastFace = skFace;
-    }
-    if (skFace != NULL) {
-        paint->setTypeface(skFace);
-        size_t glyphsCount = nGlyphs - start;
-        int bytesCount = glyphsCount * sizeof(jchar);
-        renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
-            x, y, pos + 2 * start, paint, totalAdvance, bounds);
-    }
+    RenderTextFunctor f(*layout, renderer, x, y, paint, glyphs, pos, totalAdvance, bounds);
+    MinikinUtils::forFontRun(*layout, f);
     delete[] glyphs;
     delete[] pos;
 }

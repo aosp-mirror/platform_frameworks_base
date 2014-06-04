@@ -822,26 +822,83 @@ public:
         return result;
     }
 
-    static void getTextPath(JNIEnv* env, SkPaint* paint, const jchar* text, jint count,
-                            jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
+#ifdef USE_MINIKIN
+    class GetTextFunctor {
+    public:
+        GetTextFunctor(const Layout& layout, SkPath* path, jfloat x, jfloat y, SkPaint* paint,
+                    uint16_t* glyphs, SkPoint* pos)
+                : layout(layout), path(path), x(x), y(y), paint(paint), glyphs(glyphs), pos(pos) {
+        }
+
+        void operator()(SkTypeface* t, size_t start, size_t end) {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[i].fX = x + layout.getX(i);
+                pos[i].fY = y + layout.getY(i);
+            }
+            paint->setTypeface(t);
+            if (start == 0) {
+                paint->getPosTextPath(glyphs + start, (end - start) << 1, pos + start, path);
+            } else {
+                paint->getPosTextPath(glyphs + start, (end - start) << 1, pos + start, &tmpPath);
+                path->addPath(tmpPath);
+            }
+        }
+    private:
+        const Layout& layout;
+        SkPath* path;
+        jfloat x;
+        jfloat y;
+        SkPaint* paint;
+        uint16_t* glyphs;
+        SkPoint* pos;
+        SkPath tmpPath;
+    };
+#endif
+
+    static void getTextPath(JNIEnv* env, SkPaint* paint, TypefaceImpl* typeface, const jchar* text,
+            jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
+#ifdef USE_MINIKIN
+        Layout layout;
+        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(text, count);
+        size_t nGlyphs = layout.nGlyphs();
+        uint16_t* glyphs = new uint16_t[nGlyphs];
+        SkPoint* pos = new SkPoint[nGlyphs];
+
+        x += MinikinUtils::xOffsetForTextAlign(paint, layout);
+        SkPaint::Align align = paint->getTextAlign();
+        paint->setTextAlign(SkPaint::kLeft_Align);
+        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        GetTextFunctor f(layout, path, x, y, paint, glyphs, pos);
+        MinikinUtils::forFontRun(layout, f);
+        paint->setTextAlign(align);
+        delete[] glyphs;
+        delete[] pos;
+#else
         TextLayout::getTextPath(paint, text, count, bidiFlags, x, y, path);
+#endif
     }
 
-    static void getTextPath___C(JNIEnv* env, jobject clazz, jlong paintHandle, jint bidiFlags,
+    static void getTextPath___C(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle, jint bidiFlags,
             jcharArray text, jint index, jint count, jfloat x, jfloat y, jlong pathHandle) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        getTextPath(env, paint, textArray + index, count, bidiFlags, x, y, path);
+        getTextPath(env, paint, typeface, textArray + index, count, bidiFlags, x, y, path);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
     }
 
-    static void getTextPath__String(JNIEnv* env, jobject clazz, jlong paintHandle, jint bidiFlags,
+    static void getTextPath__String(JNIEnv* env, jobject clazz, jlong paintHandle,
+            jlong typefaceHandle, jint bidiFlags,
             jstring text, jint start, jint end, jfloat x, jfloat y, jlong pathHandle) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        getTextPath(env, paint, textArray + start, end - start, bidiFlags, x, y, path);
+        getTextPath(env, paint, typeface, textArray + start, end - start, bidiFlags, x, y, path);
         env->ReleaseStringChars(text, textArray);
     }
 
@@ -1035,8 +1092,8 @@ static JNINativeMethod methods[] = {
     {"native_getTextRunCursor", "(J[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(JLjava/lang/String;IIIII)I",
         (void*) SkPaintGlue::getTextRunCursor__String},
-    {"native_getTextPath","(JI[CIIFFJ)V", (void*) SkPaintGlue::getTextPath___C},
-    {"native_getTextPath","(JILjava/lang/String;IIFFJ)V", (void*) SkPaintGlue::getTextPath__String},
+    {"native_getTextPath","(JJI[CIIFFJ)V", (void*) SkPaintGlue::getTextPath___C},
+    {"native_getTextPath","(JJILjava/lang/String;IIFFJ)V", (void*) SkPaintGlue::getTextPath__String},
     {"nativeGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
