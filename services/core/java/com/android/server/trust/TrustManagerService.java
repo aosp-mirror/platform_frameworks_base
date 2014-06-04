@@ -50,6 +50,7 @@ import android.os.UserManager;
 import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
@@ -81,6 +82,7 @@ public class TrustManagerService extends SystemService {
 
     private static final Intent TRUST_AGENT_INTENT =
             new Intent(TrustAgentService.SERVICE_INTERFACE);
+    private static final String PERMISSION_PROVIDE_AGENT = Manifest.permission.PROVIDE_TRUST_AGENT;
 
     private static final int MSG_REGISTER_LISTENER = 1;
     private static final int MSG_UNREGISTER_LISTENER = 2;
@@ -182,6 +184,15 @@ public class TrustManagerService extends SystemService {
                     PackageManager.GET_META_DATA, userInfo.id);
             for (ResolveInfo resolveInfo : resolveInfos) {
                 if (resolveInfo.serviceInfo == null) continue;
+
+                String packageName = resolveInfo.serviceInfo.packageName;
+                if (pm.checkPermission(PERMISSION_PROVIDE_AGENT, packageName)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    Log.w(TAG, "Skipping agent because package " + packageName
+                            + " does not have permission " + PERMISSION_PROVIDE_AGENT + ".");
+                    continue;
+                }
+
                 ComponentName name = getComponentName(resolveInfo);
                 if (!enabledAgents.contains(name)) continue;
 
