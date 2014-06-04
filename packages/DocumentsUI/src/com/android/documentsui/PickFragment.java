@@ -77,13 +77,15 @@ public class PickFragment extends Fragment {
     public void setPickTarget(DocumentInfo pickTarget, CharSequence displayName) {
         mPickTarget = pickTarget;
 
-        if (mPickTarget != null) {
-            mContainer.setVisibility(View.VISIBLE);
-            final Locale locale = getResources().getConfiguration().locale;
-            final String raw = getString(R.string.menu_select).toUpperCase(locale);
-            mPick.setText(TextUtils.expandTemplate(raw, displayName));
-        } else {
-            mContainer.setVisibility(View.GONE);
+        if (mContainer != null) {
+            if (mPickTarget != null) {
+                mContainer.setVisibility(View.VISIBLE);
+                final Locale locale = getResources().getConfiguration().locale;
+                final String raw = getString(R.string.menu_select).toUpperCase(locale);
+                mPick.setText(TextUtils.expandTemplate(raw, displayName));
+            } else {
+                mContainer.setVisibility(View.GONE);
+            }
         }
     }
 }

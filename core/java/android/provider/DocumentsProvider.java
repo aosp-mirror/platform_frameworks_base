@@ -20,10 +20,14 @@ import static android.provider.DocumentsContract.EXTRA_THUMBNAIL_SIZE;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_RENAME_DOCUMENT;
+import static android.provider.DocumentsContract.buildDocumentUri;
+import static android.provider.DocumentsContract.buildDocumentUriMaybeUsingTree;
+import static android.provider.DocumentsContract.buildTreeDocumentUri;
 import static android.provider.DocumentsContract.getDocumentId;
 import static android.provider.DocumentsContract.getRootId;
 import static android.provider.DocumentsContract.getSearchDocumentsQuery;
-import static android.provider.DocumentsContract.isViaUri;
+import static android.provider.DocumentsContract.getTreeDocumentId;
+import static android.provider.DocumentsContract.isTreeUri;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -117,6 +121,7 @@ import java.util.Objects;
  * </p>
  *
  * @see Intent#ACTION_OPEN_DOCUMENT
+ * @see Intent#ACTION_OPEN_DOCUMENT_TREE
  * @see Intent#ACTION_CREATE_DOCUMENT
  */
 public abstract class DocumentsProvider extends ContentProvider {
@@ -128,8 +133,8 @@ public abstract class DocumentsProvider extends ContentProvider {
     private static final int MATCH_SEARCH = 4;
     private static final int MATCH_DOCUMENT = 5;
     private static final int MATCH_CHILDREN = 6;
-    private static final int MATCH_DOCUMENT_VIA = 7;
-    private static final int MATCH_CHILDREN_VIA = 8;
+    private static final int MATCH_DOCUMENT_TREE = 7;
+    private static final int MATCH_CHILDREN_TREE = 8;
 
     private String mAuthority;
 
@@ -149,8 +154,8 @@ public abstract class DocumentsProvider extends ContentProvider {
         mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
         mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
         mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
-        mMatcher.addURI(mAuthority, "via/*/document/*", MATCH_DOCUMENT_VIA);
-        mMatcher.addURI(mAuthority, "via/*/document/*/children", MATCH_CHILDREN_VIA);
+        mMatcher.addURI(mAuthority, "tree/*/document/*", MATCH_DOCUMENT_TREE);
+        mMatcher.addURI(mAuthority, "tree/*/document/*/children", MATCH_CHILDREN_TREE);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -169,23 +174,24 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Test if a document is descendant (child, grandchild, etc) from the given
-     * parent. Providers must override this to support directory selection. You
-     * should avoid making network requests to keep this request fast.
+     * parent. For example, providers must implement this to support
+     * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}. You should avoid making network
+     * requests to keep this request fast.
      *
      * @param parentDocumentId parent to verify against.
      * @param documentId child to verify.
      * @return if given document is a descendant of the given parent.
-     * @see DocumentsContract.Root#FLAG_SUPPORTS_DIR_SELECTION
+     * @see DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD
      */
     public boolean isChildDocument(String parentDocumentId, String documentId) {
         return false;
     }
 
     /** {@hide} */
-    private void enforceVia(Uri documentUri) {
-        if (DocumentsContract.isViaUri(documentUri)) {
-            final String parent = DocumentsContract.getViaDocumentId(documentUri);
-            final String child = DocumentsContract.getDocumentId(documentUri);
+    private void enforceTree(Uri documentUri) {
+        if (isTreeUri(documentUri)) {
+            final String parent = getTreeDocumentId(documentUri);
+            final String child = getDocumentId(documentUri);
             if (Objects.equals(parent, child)) {
                 return;
             }
@@ -479,12 +485,12 @@ public abstract class DocumentsProvider extends ContentProvider {
                     return querySearchDocuments(
                             getRootId(uri), getSearchDocumentsQuery(uri), projection);
                 case MATCH_DOCUMENT:
-                case MATCH_DOCUMENT_VIA:
-                    enforceVia(uri);
+                case MATCH_DOCUMENT_TREE:
+                    enforceTree(uri);
                     return queryDocument(getDocumentId(uri), projection);
                 case MATCH_CHILDREN:
-                case MATCH_CHILDREN_VIA:
-                    enforceVia(uri);
+                case MATCH_CHILDREN_TREE:
+                    enforceTree(uri);
                     if (DocumentsContract.isManageMode(uri)) {
                         return queryChildDocumentsForManage(
                                 getDocumentId(uri), projection, sortOrder);
@@ -512,8 +518,8 @@ public abstract class DocumentsProvider extends ContentProvider {
                 case MATCH_ROOT:
                     return DocumentsContract.Root.MIME_TYPE_ITEM;
                 case MATCH_DOCUMENT:
-                case MATCH_DOCUMENT_VIA:
-                    enforceVia(uri);
+                case MATCH_DOCUMENT_TREE:
+                    enforceTree(uri);
                     return getDocumentType(getDocumentId(uri));
                 default:
                     return null;
@@ -530,21 +536,20 @@ public abstract class DocumentsProvider extends ContentProvider {
      * call the superclass. If the superclass returns {@code null}, the subclass
      * may implement custom behavior.
      * <p>
-     * This is typically used to resolve a "via" URI into a concrete document
+     * This is typically used to resolve a subtree URI into a concrete document
      * reference, issuing a narrower single-document URI permission grant along
      * the way.
      *
-     * @see DocumentsContract#buildDocumentViaUri(Uri, String)
+     * @see DocumentsContract#buildDocumentUriUsingTree(Uri, String)
      */
     @Override
     public Uri canonicalize(Uri uri) {
         final Context context = getContext();
         switch (mMatcher.match(uri)) {
-            case MATCH_DOCUMENT_VIA:
-                enforceVia(uri);
+            case MATCH_DOCUMENT_TREE:
+                enforceTree(uri);
 
-                final Uri narrowUri = DocumentsContract.buildDocumentUri(uri.getAuthority(),
-                        DocumentsContract.getDocumentId(uri));
+                final Uri narrowUri = buildDocumentUri(uri.getAuthority(), getDocumentId(uri));
 
                 // Caller may only have prefix grant, so extend them a grant to
                 // the narrow URI.
@@ -628,7 +633,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             throw new SecurityException(
                     "Requested authority " + authority + " doesn't match provider " + mAuthority);
         }
-        enforceVia(documentUri);
+        enforceTree(documentUri);
 
         final Bundle out = new Bundle();
         try {
@@ -641,8 +646,8 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                 // No need to issue new grants here, since caller either has
                 // manage permission or a prefix grant. We might generate a
-                // "via" style URI if that's how they called us.
-                final Uri newDocumentUri = DocumentsContract.buildDocumentMaybeViaUri(documentUri,
+                // tree style URI if that's how they called us.
+                final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
                         newDocumentId);
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
 
@@ -653,12 +658,12 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final String newDocumentId = renameDocument(documentId, displayName);
 
                 if (newDocumentId != null) {
-                    final Uri newDocumentUri = DocumentsContract.buildDocumentMaybeViaUri(
-                            documentUri, newDocumentId);
+                    final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
+                            newDocumentId);
 
                     // If caller came in with a narrow grant, issue them a
                     // narrow grant for the newly renamed document.
-                    if (!isViaUri(newDocumentUri)) {
+                    if (!isTreeUri(newDocumentUri)) {
                         final int modeFlags = getCallingOrSelfUriPermissionModeFlags(context,
                                 documentUri);
                         context.grantUriPermission(getCallingPackage(), newDocumentUri, modeFlags);
@@ -694,8 +699,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      */
     public final void revokeDocumentPermission(String documentId) {
         final Context context = getContext();
-        context.revokeUriPermission(DocumentsContract.buildDocumentUri(mAuthority, documentId), ~0);
-        context.revokeUriPermission(DocumentsContract.buildViaUri(mAuthority, documentId), ~0);
+        context.revokeUriPermission(buildDocumentUri(mAuthority, documentId), ~0);
+        context.revokeUriPermission(buildTreeDocumentUri(mAuthority, documentId), ~0);
     }
 
     /**
@@ -705,7 +710,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      */
     @Override
     public final ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         return openDocument(getDocumentId(uri), mode, null);
     }
 
@@ -717,7 +722,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     @Override
     public final ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         return openDocument(getDocumentId(uri), mode, signal);
     }
 
@@ -730,7 +735,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     @SuppressWarnings("resource")
     public final AssetFileDescriptor openAssetFile(Uri uri, String mode)
             throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         final ParcelFileDescriptor fd = openDocument(getDocumentId(uri), mode, null);
         return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
     }
@@ -744,7 +749,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     @SuppressWarnings("resource")
     public final AssetFileDescriptor openAssetFile(Uri uri, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         final ParcelFileDescriptor fd = openDocument(getDocumentId(uri), mode, signal);
         return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
     }
@@ -757,7 +762,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     @Override
     public final AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
             throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         if (opts != null && opts.containsKey(EXTRA_THUMBNAIL_SIZE)) {
             final Point sizeHint = opts.getParcelable(EXTRA_THUMBNAIL_SIZE);
             return openDocumentThumbnail(getDocumentId(uri), sizeHint, null);
@@ -775,7 +780,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     public final AssetFileDescriptor openTypedAssetFile(
             Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
-        enforceVia(uri);
+        enforceTree(uri);
         if (opts != null && opts.containsKey(EXTRA_THUMBNAIL_SIZE)) {
             final Point sizeHint = opts.getParcelable(EXTRA_THUMBNAIL_SIZE);
             return openDocumentThumbnail(getDocumentId(uri), sizeHint, signal);

@@ -24,7 +24,7 @@ import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_OPEN;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_PICK_DIRECTORY;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 
@@ -203,7 +203,7 @@ public class DocumentsActivity extends Activity {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
-        } else if (mState.action == ACTION_PICK_DIRECTORY) {
+        } else if (mState.action == ACTION_OPEN_TREE) {
             PickFragment.show(getFragmentManager());
         }
 
@@ -213,7 +213,7 @@ public class DocumentsActivity extends Activity {
             moreApps.setPackage(null);
             RootsFragment.show(getFragmentManager(), moreApps);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_CREATE
-                || mState.action == ACTION_PICK_DIRECTORY) {
+                || mState.action == ACTION_OPEN_TREE) {
             RootsFragment.show(getFragmentManager(), null);
         }
 
@@ -240,8 +240,8 @@ public class DocumentsActivity extends Activity {
             mState.action = ACTION_CREATE;
         } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
             mState.action = ACTION_GET_CONTENT;
-        } else if (Intent.ACTION_PICK_DIRECTORY.equals(action)) {
-            mState.action = ACTION_PICK_DIRECTORY;
+        } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
+            mState.action = ACTION_OPEN_TREE;
         } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
             mState.action = ACTION_MANAGE;
         }
@@ -441,7 +441,7 @@ public class DocumentsActivity extends Activity {
             actionBar.setIcon(new ColorDrawable());
 
             if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT
-                    || mState.action == ACTION_PICK_DIRECTORY) {
+                    || mState.action == ACTION_OPEN_TREE) {
                 actionBar.setTitle(R.string.title_open);
             } else if (mState.action == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
@@ -583,7 +583,7 @@ public class DocumentsActivity extends Activity {
         sortSize.setVisible(mState.showSize);
 
         final boolean searchVisible;
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_PICK_DIRECTORY) {
+        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
             createDir.setVisible(cwd != null && cwd.isCreateSupported());
             searchVisible = false;
 
@@ -828,7 +828,7 @@ public class DocumentsActivity extends Activity {
 
         if (cwd == null) {
             // No directory means recents
-            if (mState.action == ACTION_CREATE || mState.action == ACTION_PICK_DIRECTORY) {
+            if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
                 RecentsCreateFragment.show(fm);
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
@@ -857,7 +857,7 @@ public class DocumentsActivity extends Activity {
             }
         }
 
-        if (mState.action == ACTION_PICK_DIRECTORY) {
+        if (mState.action == ACTION_OPEN_TREE) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
                 final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
@@ -1021,7 +1021,7 @@ public class DocumentsActivity extends Activity {
     }
 
     public void onPickRequested(DocumentInfo pickTarget) {
-        final Uri viaUri = DocumentsContract.buildViaUri(pickTarget.authority,
+        final Uri viaUri = DocumentsContract.buildTreeDocumentUri(pickTarget.authority,
                 pickTarget.documentId);
         new PickFinishTask(viaUri).executeOnExecutor(getCurrentExecutor());
     }
@@ -1031,7 +1031,7 @@ public class DocumentsActivity extends Activity {
         final ContentValues values = new ContentValues();
 
         final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_PICK_DIRECTORY) {
+        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
             // Remember stack for last create
             values.clear();
             values.put(RecentColumns.KEY, mState.stack.buildKey());
@@ -1064,7 +1064,7 @@ public class DocumentsActivity extends Activity {
 
         if (mState.action == ACTION_GET_CONTENT) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        } else if (mState.action == ACTION_PICK_DIRECTORY) {
+        } else if (mState.action == ACTION_OPEN_TREE) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
@@ -1202,7 +1202,7 @@ public class DocumentsActivity extends Activity {
         public static final int ACTION_OPEN = 1;
         public static final int ACTION_CREATE = 2;
         public static final int ACTION_GET_CONTENT = 3;
-        public static final int ACTION_PICK_DIRECTORY = 4;
+        public static final int ACTION_OPEN_TREE = 4;
         public static final int ACTION_MANAGE = 5;
 
         public static final int MODE_UNKNOWN = 0;

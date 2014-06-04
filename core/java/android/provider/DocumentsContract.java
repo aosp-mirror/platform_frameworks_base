@@ -60,7 +60,8 @@ import java.util.List;
  * <p>
  * All client apps must hold a valid URI permission grant to access documents,
  * typically issued when a user makes a selection through
- * {@link Intent#ACTION_OPEN_DOCUMENT} or {@link Intent#ACTION_CREATE_DOCUMENT}.
+ * {@link Intent#ACTION_OPEN_DOCUMENT}, {@link Intent#ACTION_CREATE_DOCUMENT},
+ * or {@link Intent#ACTION_OPEN_DOCUMENT_TREE}.
  *
  * @see DocumentsProvider
  */
@@ -73,8 +74,8 @@ public final class DocumentsContract {
     // content://com.example/root/sdcard/search/?query=pony
     // content://com.example/document/12/
     // content://com.example/document/12/children/
-    // content://com.example/via/12/document/24/
-    // content://com.example/via/12/document/24/children/
+    // content://com.example/tree/12/document/24/
+    // content://com.example/tree/12/document/24/children/
 
     private DocumentsContract() {
     }
@@ -441,12 +442,13 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_SEARCH = 1 << 3;
 
         /**
-         * Flag indicating that this root supports directory selection.
+         * Flag indicating that this root supports testing parent child
+         * relationships.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsProvider#isChildDocument(String, String)
          */
-        public static final int FLAG_SUPPORTS_DIR_SELECTION = 1 << 4;
+        public static final int FLAG_SUPPORTS_IS_CHILD = 1 << 4;
 
         /**
          * Flag indicating that this root is currently empty. This may be used
@@ -518,7 +520,7 @@ public final class DocumentsContract {
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
-    private static final String PATH_VIA = "via";
+    private static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";
     private static final String PARAM_MANAGE = "manage";
@@ -564,17 +566,17 @@ public final class DocumentsContract {
      * Build URI representing access to descendant documents of the given
      * {@link Document#COLUMN_DOCUMENT_ID}.
      *
-     * @see #getViaDocumentId(Uri)
+     * @see #getTreeDocumentId(Uri)
      */
-    public static Uri buildViaUri(String authority, String documentId) {
+    public static Uri buildTreeDocumentUri(String authority, String documentId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
-                .appendPath(PATH_VIA).appendPath(documentId).build();
+                .appendPath(PATH_TREE).appendPath(documentId).build();
     }
 
     /**
-     * Build URI representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
-     * document provider. When queried, a provider will return a single row with
-     * columns defined by {@link Document}.
+     * Build URI representing the target {@link Document#COLUMN_DOCUMENT_ID} in
+     * a document provider. When queried, a provider will return a single row
+     * with columns defined by {@link Document}.
      *
      * @see DocumentsProvider#queryDocument(String, String[])
      * @see #getDocumentId(Uri)
@@ -585,42 +587,46 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build URI representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
-     * document provider. Instead of directly accessing the target document,
-     * gain access via another document. The target document must be a
-     * descendant (child, grandchild, etc) of the via document.
+     * Build URI representing the target {@link Document#COLUMN_DOCUMENT_ID} in
+     * a document provider. When queried, a provider will return a single row
+     * with columns defined by {@link Document}.
+     * <p>
+     * However, instead of directly accessing the target document, the returned
+     * URI will leverage access granted through a subtree URI, typically
+     * returned by {@link Intent#ACTION_OPEN_DOCUMENT_TREE}. The target document
+     * must be a descendant (child, grandchild, etc) of the subtree.
      * <p>
      * This is typically used to access documents under a user-selected
-     * directory, since it doesn't require the user to separately confirm each
-     * new document access.
+     * directory tree, since it doesn't require the user to separately confirm
+     * each new document access.
      *
-     * @param viaUri a related document (directory) that the caller is
-     *            leveraging to gain access to the target document. The target
-     *            document must be a descendant of this directory.
+     * @param treeUri the subtree to leverage to gain access to the target
+     *            document. The target directory must be a descendant of this
+     *            subtree.
      * @param documentId the target document, which the caller may not have
      *            direct access to.
-     * @see Intent#ACTION_PICK_DIRECTORY
+     * @see Intent#ACTION_OPEN_DOCUMENT_TREE
      * @see DocumentsProvider#isChildDocument(String, String)
      * @see #buildDocumentUri(String, String)
      */
-    public static Uri buildDocumentViaUri(Uri viaUri, String documentId) {
+    public static Uri buildDocumentUriUsingTree(Uri treeUri, String documentId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(viaUri.getAuthority()).appendPath(PATH_VIA)
-                .appendPath(getViaDocumentId(viaUri)).appendPath(PATH_DOCUMENT)
+                .authority(treeUri.getAuthority()).appendPath(PATH_TREE)
+                .appendPath(getTreeDocumentId(treeUri)).appendPath(PATH_DOCUMENT)
                 .appendPath(documentId).build();
     }
 
     /** {@hide} */
-    public static Uri buildDocumentMaybeViaUri(Uri baseUri, String documentId) {
-        if (isViaUri(baseUri)) {
-            return buildDocumentViaUri(baseUri, documentId);
+    public static Uri buildDocumentUriMaybeUsingTree(Uri baseUri, String documentId) {
+        if (isTreeUri(baseUri)) {
+            return buildDocumentUriUsingTree(baseUri, documentId);
         } else {
             return buildDocumentUri(baseUri.getAuthority(), documentId);
         }
     }
 
     /**
-     * Build URI representing the children of the given directory in a document
+     * Build URI representing the children of the target directory in a document
      * provider. When queried, a provider will return zero or more rows with
      * columns defined by {@link Document}.
      *
@@ -637,28 +643,33 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build URI representing the children of the given directory in a document
-     * provider. Instead of directly accessing the target document, gain access
-     * via another document. The target document must be a descendant (child,
-     * grandchild, etc) of the via document.
+     * Build URI representing the children of the target directory in a document
+     * provider. When queried, a provider will return zero or more rows with
+     * columns defined by {@link Document}.
+     * <p>
+     * However, instead of directly accessing the target directory, the returned
+     * URI will leverage access granted through a subtree URI, typically
+     * returned by {@link Intent#ACTION_OPEN_DOCUMENT_TREE}. The target
+     * directory must be a descendant (child, grandchild, etc) of the subtree.
      * <p>
      * This is typically used to access documents under a user-selected
-     * directory, since it doesn't require the user to separately confirm each
-     * new document access.
+     * directory tree, since it doesn't require the user to separately confirm
+     * each new document access.
      *
-     * @param viaUri a related document (directory) that the caller is
-     *            leveraging to gain access to the target document. The target
-     *            document must be a descendant of this directory.
-     * @param parentDocumentId the target document, which the caller may not
-     *            have direct access to.
-     * @see Intent#ACTION_PICK_DIRECTORY
+     * @param treeUri the subtree to leverage to gain access to the target
+     *            document. The target directory must be a descendant of this
+     *            subtree.
+     * @param parentDocumentId the document to return children for, which the
+     *            caller may not have direct access to, and which must be a
+     *            directory with MIME type of {@link Document#MIME_TYPE_DIR}.
+     * @see Intent#ACTION_OPEN_DOCUMENT_TREE
      * @see DocumentsProvider#isChildDocument(String, String)
      * @see #buildChildDocumentsUri(String, String)
      */
-    public static Uri buildChildDocumentsViaUri(Uri viaUri, String parentDocumentId) {
+    public static Uri buildChildDocumentsUriUsingTree(Uri treeUri, String parentDocumentId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(viaUri.getAuthority()).appendPath(PATH_VIA)
-                .appendPath(getViaDocumentId(viaUri)).appendPath(PATH_DOCUMENT)
+                .authority(treeUri.getAuthority()).appendPath(PATH_TREE)
+                .appendPath(getTreeDocumentId(treeUri)).appendPath(PATH_DOCUMENT)
                 .appendPath(parentDocumentId).appendPath(PATH_CHILDREN).build();
     }
 
@@ -683,21 +694,24 @@ public final class DocumentsContract {
      * {@link DocumentsProvider}.
      *
      * @see #buildDocumentUri(String, String)
-     * @see #buildDocumentViaUri(Uri, String)
+     * @see #buildDocumentUriUsingTree(Uri, String)
      */
     public static boolean isDocumentUri(Context context, Uri uri) {
         final List<String> paths = uri.getPathSegments();
-        if (paths.size() >= 2
-                && (PATH_DOCUMENT.equals(paths.get(0)) || PATH_VIA.equals(paths.get(0)))) {
+        if (paths.size() == 2 && PATH_DOCUMENT.equals(paths.get(0))) {
+            return isDocumentsProvider(context, uri.getAuthority());
+        }
+        if (paths.size() == 4 && PATH_TREE.equals(paths.get(0))
+                && PATH_DOCUMENT.equals(paths.get(2))) {
             return isDocumentsProvider(context, uri.getAuthority());
         }
         return false;
     }
 
     /** {@hide} */
-    public static boolean isViaUri(Uri uri) {
+    public static boolean isTreeUri(Uri uri) {
         final List<String> paths = uri.getPathSegments();
-        return (paths.size() >= 2 && PATH_VIA.equals(paths.get(0)));
+        return (paths.size() >= 2 && PATH_TREE.equals(paths.get(0)));
     }
 
     private static boolean isDocumentsProvider(Context context, String authority) {
@@ -733,7 +747,7 @@ public final class DocumentsContract {
         if (paths.size() >= 2 && PATH_DOCUMENT.equals(paths.get(0))) {
             return paths.get(1);
         }
-        if (paths.size() >= 4 && PATH_VIA.equals(paths.get(0))
+        if (paths.size() >= 4 && PATH_TREE.equals(paths.get(0))
                 && PATH_DOCUMENT.equals(paths.get(2))) {
             return paths.get(3);
         }
@@ -742,12 +756,10 @@ public final class DocumentsContract {
 
     /**
      * Extract the via {@link Document#COLUMN_DOCUMENT_ID} from the given URI.
-     *
-     * @see #isViaUri(Uri)
      */
-    public static String getViaDocumentId(Uri documentUri) {
+    public static String getTreeDocumentId(Uri documentUri) {
         final List<String> paths = documentUri.getPathSegments();
-        if (paths.size() >= 2 && PATH_VIA.equals(paths.get(0))) {
+        if (paths.size() >= 2 && PATH_TREE.equals(paths.get(0))) {
             return paths.get(1);
         }
         throw new IllegalArgumentException("Invalid URI: " + documentUri);
