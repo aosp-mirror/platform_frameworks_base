@@ -23,7 +23,7 @@
 
 namespace android {
 
-void MinikinUtils::SetLayoutProperties(Layout* layout, SkPaint* paint, int flags,
+void MinikinUtils::SetLayoutProperties(Layout* layout, const SkPaint* paint, int flags,
     TypefaceImpl* typeface) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);

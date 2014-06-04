@@ -985,34 +985,48 @@ public:
         return count;
     }
 
-    static void doTextBounds(JNIEnv* env, const jchar* text, int count,
-                             jobject bounds, const SkPaint& paint, jint bidiFlags) {
+    static void doTextBounds(JNIEnv* env, const jchar* text, int count, jobject bounds,
+            const SkPaint& paint, TypefaceImpl* typeface, jint bidiFlags) {
         SkRect  r;
         SkIRect ir;
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        MinikinUtils::SetLayoutProperties(&layout, &paint, bidiFlags, typeface);
+        layout.doLayout(text, count);
+        MinikinRect rect;
+        layout.getBounds(&rect);
+        r.fLeft = rect.mLeft;
+        r.fTop = rect.mTop;
+        r.fRight = rect.mRight;
+        r.fBottom = rect.mBottom;
+#else
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
                 text, 0, count, count, bidiFlags);
         if (value == NULL) {
             return;
         }
         paint.measureText(value->getGlyphs(), value->getGlyphsCount() << 1, &r);
+#endif
         r.roundOut(&ir);
         GraphicsJNI::irect_to_jrect(ir, env, bounds);
     }
 
-    static void getStringBounds(JNIEnv* env, jobject, jlong paintHandle,
+    static void getStringBounds(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle,
                                 jstring text, jint start, jint end, jint bidiFlags, jobject bounds) {
         const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);;
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        doTextBounds(env, textArray + start, end - start, bounds, *paint, bidiFlags);
+        doTextBounds(env, textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
         env->ReleaseStringChars(text, textArray);
     }
 
-    static void getCharArrayBounds(JNIEnv* env, jobject, jlong paintHandle,
+    static void getCharArrayBounds(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle,
                         jcharArray text, jint index, jint count, jint bidiFlags, jobject bounds) {
         const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        doTextBounds(env, textArray + index, count, bounds, *paint, bidiFlags);
+        doTextBounds(env, textArray + index, count, bounds, *paint, typeface, bidiFlags);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
                                       JNI_ABORT);
     }
@@ -1094,9 +1108,9 @@ static JNINativeMethod methods[] = {
         (void*) SkPaintGlue::getTextRunCursor__String},
     {"native_getTextPath","(JJI[CIIFFJ)V", (void*) SkPaintGlue::getTextPath___C},
     {"native_getTextPath","(JJILjava/lang/String;IIFFJ)V", (void*) SkPaintGlue::getTextPath__String},
-    {"nativeGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
+    {"nativeGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
                                         (void*) SkPaintGlue::getStringBounds },
-    {"nativeGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
+    {"nativeGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
                                     (void*) SkPaintGlue::getCharArrayBounds },
     {"native_setShadowLayer", "(JFFFI)V", (void*)SkPaintGlue::setShadowLayer},
     {"native_hasShadowLayer", "(J)Z", (void*)SkPaintGlue::hasShadowLayer}

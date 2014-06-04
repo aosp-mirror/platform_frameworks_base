@@ -28,7 +28,7 @@ namespace android {
 
 class MinikinUtils {
 public:
-    static void SetLayoutProperties(Layout* layout, SkPaint* paint, int flags,
+    static void SetLayoutProperties(Layout* layout, const SkPaint* paint, int flags,
         TypefaceImpl* face);
     static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
 
