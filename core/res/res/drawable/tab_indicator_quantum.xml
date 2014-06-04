@@ -15,29 +15,9 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true" android:state_pressed="true">
-        <nine-patch android:src="@drawable/tab_indicator_selected_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_selected="true" android:state_focused="true">
-        <nine-patch android:src="@drawable/tab_indicator_selected_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
     <item android:state_selected="true">
-        <nine-patch android:src="@drawable/tab_indicator_selected_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-
-    <item android:state_pressed="true">
-        <nine-patch android:src="@drawable/tab_indicator_normal_qntm_alpha"
+        <nine-patch android:src="@drawable/tab_indicator_qntm_alpha"
             android:tint="?attr/colorControlActivated" />
     </item>
-    <item android:state_focused="true">
-        <nine-patch android:src="@drawable/tab_indicator_normal_qntm_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/tab_indicator_normal_qntm_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
+    <item android:drawable="@color/transparent" />
 </selector>
