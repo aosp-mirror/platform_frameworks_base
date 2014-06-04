@@ -17,11 +17,14 @@
 package android.content.res;
 
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 
+import java.text.Format;
+import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -1305,5 +1308,241 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     private static int getScreenLayoutNoDirection(int screenLayout) {
         return screenLayout&~SCREENLAYOUT_LAYOUTDIR_MASK;
+    }
+
+    /**
+     *
+     * @hide
+     */
+    public static String localeToResourceQualifier(Locale locale) {
+        StringBuilder sb = new StringBuilder();
+        boolean l = (locale.getLanguage().length() != 0);
+        boolean c = (locale.getCountry().length() != 0);
+        boolean s = (locale.getScript().length() != 0);
+        boolean v = (locale.getVariant().length() != 0);
+
+        if (l) {
+            sb.append(locale.getLanguage());
+            if (c) {
+                sb.append("-r").append(locale.getCountry());
+                if (s) {
+                    sb.append("-s").append(locale.getScript());
+                    if (v) {
+                        sb.append("-v").append(locale.getVariant());
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+
+    /**
+     * Returns a string representation of the configuration that can be parsed
+     * by build tools (like AAPT).
+     *
+     *
+     *
+     * @hide
+     */
+    public static String resourceQualifierString(Configuration config) {
+        ArrayList<String> parts = new ArrayList<String>();
+
+        if (config.mcc != 0) {
+            parts.add(config.mcc + "mcc");
+            if (config.mnc != 0) {
+                parts.add(config.mnc + "mnc");
+            }
+        }
+
+        if (!config.locale.getLanguage().isEmpty()) {
+            parts.add(localeToResourceQualifier(config.locale));
+        }
+
+        switch (config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK) {
+            case Configuration.SCREENLAYOUT_LAYOUTDIR_LTR:
+                parts.add("ldltr");
+                break;
+            case Configuration.SCREENLAYOUT_LAYOUTDIR_RTL:
+                parts.add("ldrtl");
+                break;
+            default:
+                break;
+        }
+
+        if (config.smallestScreenWidthDp != 0) {
+            parts.add("sw" + config.smallestScreenWidthDp + "dp");
+        }
+
+        if (config.screenWidthDp != 0) {
+            parts.add("w" + config.screenWidthDp + "dp");
+        }
+
+        if (config.screenHeightDp != 0) {
+            parts.add("h" + config.screenHeightDp + "dp");
+        }
+
+        switch (config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) {
+            case Configuration.SCREENLAYOUT_SIZE_SMALL:
+                parts.add("small");
+                break;
+            case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+                parts.add("normal");
+                break;
+            case Configuration.SCREENLAYOUT_SIZE_LARGE:
+                parts.add("large");
+                break;
+            case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+                parts.add("xlarge");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.screenLayout & Configuration.SCREENLAYOUT_LONG_MASK) {
+            case Configuration.SCREENLAYOUT_LONG_YES:
+                parts.add("long");
+                break;
+            case Configuration.SCREENLAYOUT_LONG_NO:
+                parts.add("notlong");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                parts.add("land");
+                break;
+            case Configuration.ORIENTATION_PORTRAIT:
+                parts.add("port");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.uiMode & Configuration.UI_MODE_TYPE_MASK) {
+            case Configuration.UI_MODE_TYPE_APPLIANCE:
+                parts.add("appliance");
+                break;
+            case Configuration.UI_MODE_TYPE_DESK:
+                parts.add("desk");
+                break;
+            case Configuration.UI_MODE_TYPE_TELEVISION:
+                parts.add("television");
+                break;
+            case Configuration.UI_MODE_TYPE_CAR:
+                parts.add("car");
+                break;
+            case Configuration.UI_MODE_TYPE_WATCH:
+                parts.add("watch");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                parts.add("night");
+                break;
+            case Configuration.UI_MODE_NIGHT_NO:
+                parts.add("notnight");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.densityDpi) {
+            case 0:
+                break;
+            case 120:
+                parts.add("ldpi");
+                break;
+            case 160:
+                parts.add("mdpi");
+                break;
+            case 213:
+                parts.add("tvdpi");
+                break;
+            case 240:
+                parts.add("hdpi");
+                break;
+            case 320:
+                parts.add("xhdpi");
+                break;
+            default:
+                parts.add(config.densityDpi + "dpi");
+                break;
+        }
+
+        switch (config.touchscreen) {
+            case Configuration.TOUCHSCREEN_NOTOUCH:
+                parts.add("notouch");
+                break;
+            case Configuration.TOUCHSCREEN_FINGER:
+                parts.add("finger");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.keyboardHidden) {
+            case Configuration.KEYBOARDHIDDEN_NO:
+                parts.add("keysexposed");
+                break;
+            case Configuration.KEYBOARDHIDDEN_YES:
+                parts.add("keyshidden");
+                break;
+            case Configuration.KEYBOARDHIDDEN_SOFT:
+                parts.add("keyssoft");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.keyboard) {
+            case Configuration.KEYBOARD_NOKEYS:
+                parts.add("nokeys");
+                break;
+            case Configuration.KEYBOARD_QWERTY:
+                parts.add("qwerty");
+                break;
+            case Configuration.KEYBOARD_12KEY:
+                parts.add("12key");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.navigationHidden) {
+            case Configuration.NAVIGATIONHIDDEN_NO:
+                parts.add("navexposed");
+                break;
+            case Configuration.NAVIGATIONHIDDEN_YES:
+                parts.add("navhidden");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.navigation) {
+            case Configuration.NAVIGATION_NONAV:
+                parts.add("nonav");
+                break;
+            case Configuration.NAVIGATION_DPAD:
+                parts.add("dpad");
+                break;
+            case Configuration.NAVIGATION_TRACKBALL:
+                parts.add("trackball");
+                break;
+            case Configuration.NAVIGATION_WHEEL:
+                parts.add("wheel");
+                break;
+            default:
+                break;
+        }
+
+        parts.add("v" + Build.VERSION.SDK_INT);
+        return TextUtils.join("-", parts);
     }
 }

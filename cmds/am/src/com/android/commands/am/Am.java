@@ -32,6 +32,7 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -45,6 +46,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.view.IWindowManager;
+import android.view.View;
+
 import com.android.internal.os.BaseCommand;
 
 import dalvik.system.VMRuntime;
@@ -123,6 +126,7 @@ public class Am extends BaseCommand {
                 "       am stack info <STACK_ID>\n" +
                 "       am lock-task <TASK_ID>\n" +
                 "       am lock-task stop\n" +
+                "       am get-config\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -229,6 +233,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am lock-task: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
                 "\n" +
+                "am get-config: retrieve the configuration and any recent configurations\n" +
+                "  of the device\n" +
+                "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
@@ -323,6 +330,8 @@ public class Am extends BaseCommand {
             runStack();
         } else if (op.equals("lock-task")) {
             runLockTask();
+        } else if (op.equals("get-config")) {
+            runGetConfig();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -909,8 +918,7 @@ public class Am extends BaseCommand {
             }
         }
 
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId,
-                abi)) {
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId, abi)) {
             throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 
@@ -1696,6 +1704,25 @@ public class Am extends BaseCommand {
             }
             System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
                     "in lockTaskMode");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runGetConfig() throws Exception {
+        try {
+            Configuration config = mAm.getConfiguration();
+            if (config == null) {
+                System.err.println("Activity manager has no configuration");
+                return;
+            }
+
+            System.out.println("config: " + Configuration.resourceQualifierString(config));
+            System.out.print("abi: " + Build.CPU_ABI);
+            if (!Build.CPU_ABI2.isEmpty()) {
+                System.out.print("," + Build.CPU_ABI2);
+            }
+            System.out.println();
+
         } catch (RemoteException e) {
         }
     }
