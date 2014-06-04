@@ -6130,10 +6130,12 @@
     <!-- Use <code>trust-agent</code> as the root tag of the XML resource that
          describes an {@link android.service.trust.TrustAgentService}, which is
          referenced from its {@link android.service.trust.TrustAgentService#TRUST_AGENT_META_DATA}
-         meta-data entry.  Described here are the attributes that can be included in that tag. -->
+         meta-data entry.  Described here are the attributes that can be included in that tag.
+         @hide -->
     <declare-styleable name="TrustAgent">
         <!-- Component name of an activity that allows the user to modify
-             the settings for this trust agent. -->
+             the settings for this trust agent.
+             @hide -->
         <attr name="settingsActivity" />
     </declare-styleable>
 

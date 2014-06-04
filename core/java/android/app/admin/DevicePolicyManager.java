@@ -34,7 +34,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -1307,7 +1306,7 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS = 1 << 3;
 
     /**
-     * Ignore {@link TrustAgentService} state on secure keyguard screens
+     * Ignore trust agent state on secure keyguard screens
      * (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
