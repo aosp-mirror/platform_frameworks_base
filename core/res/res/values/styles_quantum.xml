@@ -97,7 +97,6 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLink</item>
         <item name="textSize">@dimen/text_size_body_1_quantum</item>
         <item name="fontFamily">@string/font_family_body_1_quantum</item>
-        <item name="elegantTextHeight">true</item>
     </style>
 
     <style name="TextAppearance.Quantum.Display4">
