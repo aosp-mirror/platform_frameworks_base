@@ -46,7 +46,7 @@
     <drawable name="notification_item_background_color_pressed">#ff454545</drawable>
 
     <!-- Tint color for the content on the notification overflow card. -->
-    <color name="keyguard_overflow_content_color">#ff666666</color>
+    <color name="keyguard_overflow_content_color">#ff686868</color>
 
     <!-- The color of the red speed bump dot -->
     <color name="speed_bump_dot_red">#ffd50000</color>

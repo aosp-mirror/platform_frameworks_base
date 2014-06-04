@@ -32,20 +32,20 @@
         />
     <TextView
         android:id="@+id/more_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="18dp"
         android:layout_gravity="center_vertical"
-        android:gravity="center_horizontal"
-        android:textColor="@color/keyguard_overflow_content_color"
-        android:textAllCaps="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@drawable/keyguard_overflow_number_background"
+        android:gravity="center"
+        android:textColor="#ff686868"
+        android:textStyle="bold"
+        android:textSize="14dp"
         />
     <com.android.systemui.statusbar.NotificationOverflowIconsView
         android:id="@+id/overflow_icons_view"
-        android:layout_gravity="end|center_vertical"
-        android:gravity="end"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="64dp"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         />
