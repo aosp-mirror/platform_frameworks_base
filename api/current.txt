@@ -16017,6 +16017,14 @@ package android.net {
     field public int serverAddress;
   }
 
+  public class IpPrefix implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.net.InetAddress getAddress();
+    method public int getPrefixLength();
+    method public byte[] getRawAddress();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class LinkAddress implements android.os.Parcelable {
     method public int describeContents();
     method public java.net.InetAddress getAddress();
@@ -16028,8 +16036,6 @@ package android.net {
   }
 
   public class LinkProperties implements android.os.Parcelable {
-    ctor public LinkProperties();
-    ctor public LinkProperties(android.net.LinkProperties);
     method public int describeContents();
     method public java.util.List<java.net.InetAddress> getDnsServers();
     method public java.lang.String getDomains();
@@ -16237,12 +16243,8 @@ package android.net {
   }
 
   public class RouteInfo implements android.os.Parcelable {
-    ctor public RouteInfo(android.net.LinkAddress, java.net.InetAddress, java.lang.String);
-    ctor public RouteInfo(android.net.LinkAddress, java.net.InetAddress);
-    ctor public RouteInfo(java.net.InetAddress);
-    ctor public RouteInfo(android.net.LinkAddress);
     method public int describeContents();
-    method public android.net.LinkAddress getDestination();
+    method public android.net.IpPrefix getDestination();
     method public java.net.InetAddress getGateway();
     method public java.lang.String getInterface();
     method public boolean isDefaultRoute();
