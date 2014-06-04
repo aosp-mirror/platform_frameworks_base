@@ -446,6 +446,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
+    boolean mPendingMetaAction;
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -2088,6 +2089,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // Cancel any pending meta actions if we see any other keys being pressed between the down
+        // of the meta key and its corresponding up.
+        if (mPendingMetaAction && keyCode != KeyEvent.KEYCODE_META_LEFT) {
+            mPendingMetaAction = false;
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -2282,6 +2289,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF);
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_META_LEFT) {
+            if (down) {
+                mPendingMetaAction = true;
+            } else if (mPendingMetaAction) {
+                mPendingMetaAction = false;
+                launchAssistAction();
+            }
+            return -1;
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
@@ -2388,6 +2403,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
+            return -1;
+        }
+
+        // Reserve all the META modifier combos for system behavior
+        if ((metaState & KeyEvent.META_META_LEFT_ON) != 0) {
             return -1;
         }
 
