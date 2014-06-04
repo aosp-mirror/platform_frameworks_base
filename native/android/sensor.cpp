@@ -171,3 +171,8 @@ const char* ASensor_getStringType(ASensor const* sensor)
 {
     return static_cast<Sensor const*>(sensor)->getStringType().string();
 }
+
+int ASensor_getReportingMode(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->getReportingMode();
+}

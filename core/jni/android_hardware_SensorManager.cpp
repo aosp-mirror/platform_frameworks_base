@@ -52,7 +52,7 @@ struct SensorOffsets
     jfieldID    stringType;
     jfieldID    requiredPermission;
     jfieldID    maxDelay;
-    jfieldID    isWakeUpSensor;
+    jfieldID    flags;
 } gSensorOffsets;
 
 
@@ -81,7 +81,7 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
                                                         "Ljava/lang/String;");
     sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
-    sensorOffsets.isWakeUpSensor = _env->GetFieldID(sensorClass, "mWakeUpSensor",  "Z");
+    sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
 }
 
 static jint
@@ -117,7 +117,7 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     env->SetObjectField(sensor, sensorOffsets.requiredPermission,
                         requiredPermission);
     env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
-    env->SetBooleanField(sensor, sensorOffsets.isWakeUpSensor, list->isWakeUpSensor());
+    env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
     next++;
     return size_t(next) < count ? next : 0;
 }
