@@ -3045,7 +3045,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached) {
         // we've already done the status bar
-        if (win == mStatusBar || win == mNavigationBar) {
+        if ((win == mStatusBar && !doesForceHide(attrs)) || win == mNavigationBar) {
             return;
         }
         final boolean isDefaultDisplay = win.isDefaultDisplay();
@@ -3323,7 +3323,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             = mOverscanScreenTop + mOverscanScreenHeight;
                 } else if (canHideNavigationBar()
                         && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                        && (attrs.type == TYPE_TOAST
+                        && (attrs.type == TYPE_STATUS_BAR
+                            || attrs.type == TYPE_TOAST
                             || (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW))) {
                     // Asking for layout as if the nav bar is hidden, lets the
