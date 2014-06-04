@@ -1535,14 +1535,15 @@ public class NotificationManagerService extends SystemService {
         }
         checkCallerIsSystemOrSameApp(pkg);
         final boolean isSystemNotification = isUidSystem(callingUid) || ("android".equals(pkg));
+        final boolean isNotificationFromListener = mListeners.isListenerPackage(pkg);
 
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
         final UserHandle user = new UserHandle(userId);
 
         // Limit the number of notifications that any given package except the android
-        // package can enqueue.  Prevents DOS attacks and deals with leaks.
-        if (!isSystemNotification) {
+        // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
+        if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationList) {
                 int count = 0;
                 final int N = mNotificationList.size();
@@ -2726,6 +2727,21 @@ public class NotificationManagerService extends SystemService {
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
             }
+        }
+
+        private boolean isListenerPackage(String packageName) {
+            if (packageName == null) {
+                return false;
+            }
+            // TODO: clean up locking object later
+            synchronized (mNotificationList) {
+                for (final ManagedServiceInfo serviceInfo : mServices) {
+                    if (packageName.equals(serviceInfo.component.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
