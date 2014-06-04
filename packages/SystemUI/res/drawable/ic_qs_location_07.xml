@@ -24,7 +24,5 @@ Copyright (C) 2014 The Android Open Source Project
 
     <path
         android:pathData="M12,9c-2.51,0,-4.55,2.04,-4.55,4.55       C7.45,16.96,12,22,12,22s4.55,-5.04,4.55,-8.45C16.55,11.04,14.51,9,12,9z M12,15.18c-0.9,0,-1.63,-0.73,-1.63,-1.62       s0.73,-1.62,1.63,-1.62c0.9,0,1.62,0.73,1.62,1.62S12.9,15.18,12,15.18z"
-        android:strokeWidth="0.65"
-        android:fill="#00000000"
-        android:stroke="#CCCCCC"/>
+        android:fill="#4DFFFFFF"/>
 </vector>
