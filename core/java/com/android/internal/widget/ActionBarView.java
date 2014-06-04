@@ -349,10 +349,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         return mIncludeTabs;
     }
 
-    public void setEmbeddedTabView(View view) {
-        setEmbeddedTabView((ScrollingTabContainerView) view);
-    }
-
+    @Override
     public void setEmbeddedTabView(ScrollingTabContainerView tabs) {
         if (mTabScrollView != null) {
             removeView(mTabScrollView);

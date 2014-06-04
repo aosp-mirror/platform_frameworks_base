@@ -281,6 +281,9 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setNavigationMode(@NavigationMode int mode) {
+        if (mode == ActionBar.NAVIGATION_MODE_TABS) {
+            throw new IllegalArgumentException("Tabs not supported in this configuration");
+        }
         mDecorToolbar.setNavigationMode(mode);
     }
 
