@@ -784,13 +784,25 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected void onTrackingStarted() {
+        super.onTrackingStarted();
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
+            mPageSwiper.animateHideLeftRightIcon();
+        }
+    }
+
+    @Override
     protected void onTrackingStopped(boolean expand) {
         super.onTrackingStopped(expand);
         mOverExpansion = 0.0f;
         mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */,
                 true /* animate */);
+        if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
+            mPageSwiper.showAllIcons(true);
+        }
     }
-
 
     @Override
     public void onHeightChanged(ExpandableView view) {
