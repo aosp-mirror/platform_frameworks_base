@@ -18,6 +18,8 @@ package com.android.systemui.qs;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -29,6 +31,7 @@ import com.android.systemui.qs.QSTile.SignalState;
 public final class SignalTileView extends QSTileView {
     private static final long DEFAULT_DURATION = new ValueAnimator().getDuration();
     private static final long SHORT_DURATION = DEFAULT_DURATION / 3;
+    private static final ColorFilter FILTER = new LightingColorFilter(0xffffffff, 0xff283034);
 
     private FrameLayout mIconFrame;
     private ImageView mSignal;
@@ -41,10 +44,12 @@ public final class SignalTileView extends QSTileView {
 
         mIn = new ImageView(context);
         mIn.setImageResource(R.drawable.ic_qs_signal_in);
+        mIn.setColorFilter(FILTER);
         addView(mIn);
 
         mOut = new ImageView(context);
         mOut.setImageResource(R.drawable.ic_qs_signal_out);
+        mOut.setColorFilter(FILTER);
         addView(mOut);
     }
 
@@ -88,10 +93,12 @@ public final class SignalTileView extends QSTileView {
         final SignalState s = (SignalState) state;
         mSignal.setImageDrawable(null);  // force refresh
         mSignal.setImageResource(s.iconId);
+        mSignal.setColorFilter(FILTER);
         if (s.overlayIconId > 0) {
             mOverlay.setVisibility(VISIBLE);
             mOverlay.setImageDrawable(null);  // force refresh
             mOverlay.setImageResource(s.overlayIconId);
+            mOverlay.setColorFilter(FILTER);
         } else {
             mOverlay.setVisibility(GONE);
         }
