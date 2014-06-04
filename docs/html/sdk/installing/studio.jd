@@ -395,7 +395,9 @@ screen that offers several ways to get started:</p>
     <p class="note"><strong>Note:</strong> If you previously developed your Android project
     with Eclipse, you should first use the new export feature in the ADT plugin to prepare
     your project with the new Gradle build system. For more information, read
-    <a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a>.</p>
+    <a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a> and
+    <a href="{@docRoot}sdk/installing/studio-build.html">Building Your Project with
+    Gradle</a>.</p>
   </li>
 </ul>
 
