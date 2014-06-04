@@ -1754,31 +1754,34 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (DBG) log("requestRouteToHostAddress on invalid network: " + networkType);
             return false;
         }
-        NetworkStateTracker tracker = mNetTrackers[networkType];
-        DetailedState netState = DetailedState.DISCONNECTED;
-        if (tracker != null) {
-            netState = tracker.getNetworkInfo().getDetailedState();
+
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        if (nai == null) {
+            if (mLegacyTypeTracker.isTypeSupported(networkType) == false) {
+                if (DBG) log("requestRouteToHostAddress on unsupported network: " + networkType);
+            } else {
+                if (DBG) log("requestRouteToHostAddress on down network: " + networkType);
+            }
+            return false;
         }
 
+        DetailedState netState = nai.networkInfo.getDetailedState();
+
         if ((netState != DetailedState.CONNECTED &&
-                netState != DetailedState.CAPTIVE_PORTAL_CHECK) ||
-                tracker.isTeardownRequested()) {
+                netState != DetailedState.CAPTIVE_PORTAL_CHECK)) {
             if (VDBG) {
                 log("requestRouteToHostAddress on down network "
                         + "(" + networkType + ") - dropped"
-                        + " tracker=" + tracker
-                        + " netState=" + netState
-                        + " isTeardownRequested="
-                            + ((tracker != null) ? tracker.isTeardownRequested() : "tracker:null"));
+                        + " netState=" + netState);
             }
             return false;
         }
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
-            LinkProperties lp = tracker.getLinkProperties();
+            LinkProperties lp = nai.linkProperties;
             boolean ok = modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt,
-                    tracker.getNetwork().netId, uid);
+                    nai.network.netId, uid);
             if (DBG) log("requestRouteToHostAddress ok=" + ok);
             return ok;
         } finally {
@@ -3316,6 +3319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (bestNetwork != null) {
             if (VDBG) log("using " + bestNetwork.name());
             bestNetwork.addRequest(nri.request);
+            mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             int legacyType = nri.request.legacyType;
             if (legacyType != TYPE_NONE) {
                 mLegacyTypeTracker.add(legacyType, bestNetwork);
