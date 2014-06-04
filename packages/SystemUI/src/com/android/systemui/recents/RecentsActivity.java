@@ -454,7 +454,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onBackPressed() {
         // Unfilter any stacks
         if (!mRecentsView.unfilterFilteredStacks()) {
-            super.onBackPressed();
+            if (!mRecentsView.launchFirstTask()) {
+                super.onBackPressed();
+            }
         }
     }
 
