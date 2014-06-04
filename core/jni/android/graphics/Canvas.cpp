@@ -818,8 +818,8 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
-        layout.doLayout(textArray + start, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, flags, typeface);
+        layout.doLayout(textArray, start, count, contextCount, css);
         drawGlyphsToSkia(canvas, paint, layout, x, y);
 #else
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
