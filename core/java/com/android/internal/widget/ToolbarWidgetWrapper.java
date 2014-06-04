@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -77,6 +78,8 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     private Window.Callback mWindowCallback;
     private boolean mMenuPrepared;
     private ActionMenuPresenter mActionMenuPresenter;
+
+    private int mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
 
     public ToolbarWidgetWrapper(Toolbar toolbar) {
         mToolbar = toolbar;
@@ -420,23 +423,51 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     @Override
     public int getNavigationMode() {
-        return 0;
+        return mNavigationMode;
     }
 
     @Override
     public void setNavigationMode(int mode) {
-        if (mode != ActionBar.NAVIGATION_MODE_STANDARD) {
-            throw new IllegalArgumentException(
-                    "Navigation modes not supported in this configuration");
+        final int oldMode = mNavigationMode;
+        if (mode != oldMode) {
+            switch (oldMode) {
+                case ActionBar.NAVIGATION_MODE_LIST:
+                    if (mSpinner != null && mSpinner.getParent() == mToolbar) {
+                        mToolbar.removeView(mSpinner);
+                    }
+                    break;
+            }
+
+            mNavigationMode = mode;
+
+            switch (mode) {
+                case ActionBar.NAVIGATION_MODE_STANDARD:
+                    break;
+                case ActionBar.NAVIGATION_MODE_LIST:
+                    ensureSpinner();
+                    mToolbar.addView(mSpinner, 0);
+                    break;
+                case ActionBar.NAVIGATION_MODE_TABS:
+                    throw new IllegalStateException("Tabs not supported in this configuration");
+                default:
+                    throw new IllegalArgumentException("Invalid navigation mode " + mode);
+            }
+        }
+    }
+
+    private void ensureSpinner() {
+        if (mSpinner == null) {
+            mSpinner = new Spinner(getContext());
+            Toolbar.LayoutParams lp = new Toolbar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL);
+            mSpinner.setLayoutParams(lp);
         }
     }
 
     @Override
     public void setDropdownParams(SpinnerAdapter adapter,
             AdapterView.OnItemSelectedListener listener) {
-        if (mSpinner == null) {
-            mSpinner = new Spinner(getContext());
-        }
+        ensureSpinner();
         mSpinner.setAdapter(adapter);
         mSpinner.setOnItemSelectedListener(listener);
     }
