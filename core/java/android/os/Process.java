@@ -156,6 +156,12 @@ public class Process {
     public static final int LAST_ISOLATED_UID = 99999;
 
     /**
+     * Defines the gid shared by all applications running under the same profile.
+     * @hide
+     */
+    public static final int SHARED_USER_GID = 9997;
+
+    /**
      * First gid for applications to share resources. Used when forward-locking
      * is enabled but all UserHandles need to be able to read the resources.
      * @hide
