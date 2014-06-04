@@ -37,8 +37,10 @@ import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
 import com.android.ide.common.rendering.api.ViewInfo;
+import com.android.ide.common.rendering.api.ViewType;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.view.menu.ActionMenuItemView;
+import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.BridgeMenuItemImpl;
 import com.android.internal.view.menu.IconMenuItemView;
 import com.android.internal.view.menu.ListMenuItemView;
@@ -83,6 +85,7 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewParent;
 import android.view.WindowManagerGlobal_Delegate;
 import android.widget.AbsListView;
 import android.widget.AbsSpinner;
@@ -1473,16 +1476,49 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         ViewInfo result;
         if (isContentFrame) {
+            // The view is part of the layout added by the user. Hence,
+            // the ViewCookie may be obtained only through the Context.
             result = new ViewInfo(view.getClass().getName(),
-                    getViewKey(view),
+                    getContext().getViewKey(view),
                     view.getLeft(), view.getTop() + offset, view.getRight(),
                     view.getBottom() + offset, view, view.getLayoutParams());
-
         } else {
-            result = new SystemViewInfo(view.getClass().getName(),
+            // We are part of the system decor.
+            SystemViewInfo r = new SystemViewInfo(view.getClass().getName(),
                     getViewKey(view),
                     view.getLeft(), view.getTop(), view.getRight(),
                     view.getBottom(), view, view.getLayoutParams());
+            result = r;
+            // We currently mark three kinds of views:
+            // 1. Menus in the Action Bar
+            // 2. Menus in the Overflow popup.
+            // 3. The overflow popup button.
+            if (view instanceof ListMenuItemView) {
+                // Mark 2.
+                // All menus in the popup are of type ListMenuItemView.
+                r.setViewType(ViewType.ACTION_BAR_OVERFLOW_MENU);
+            } else {
+                // Mark 3.
+                ViewGroup.LayoutParams lp = view.getLayoutParams();
+                if (lp instanceof ActionMenuView.LayoutParams &&
+                        ((ActionMenuView.LayoutParams) lp).isOverflowButton) {
+                    r.setViewType(ViewType.ACTION_BAR_OVERFLOW);
+                } else {
+                    // Mark 1.
+                    // A view is a menu in the Action Bar is it is not the overflow button and of
+                    // its parent is of type ActionMenuView. We can also check if the view is
+                    // instanceof ActionMenuItemView but that will fail for menus using
+                    // actionProviderClass.
+                    ViewParent parent = view.getParent();
+                    while (parent != mViewRoot && parent instanceof ViewGroup) {
+                        if (parent instanceof ActionMenuView) {
+                            r.setViewType(ViewType.ACTION_BAR_MENU);
+                            break;
+                        }
+                        parent = parent.getParent();
+                    }
+                }
+            }
         }
 
         if (setExtendedInfo) {
@@ -1501,7 +1537,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         return result;
     }
 
-    /**
+    /* (non-Javadoc)
      * The cookie for menu items are stored in menu item and not in the map from View stored in
      * BridgeContext.
      */
