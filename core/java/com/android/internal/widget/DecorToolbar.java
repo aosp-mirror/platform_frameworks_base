@@ -71,7 +71,7 @@ public interface DecorToolbar {
 
     int getDisplayOptions();
     void setDisplayOptions(int opts);
-    void setEmbeddedTabView(View tabView);
+    void setEmbeddedTabView(ScrollingTabContainerView tabView);
     boolean hasEmbeddedTabs();
     boolean isTitleTruncated();
     void setCollapsible(boolean collapsible);
