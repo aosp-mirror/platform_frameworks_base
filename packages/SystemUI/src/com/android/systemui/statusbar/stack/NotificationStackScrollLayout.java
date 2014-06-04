@@ -162,7 +162,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * animating.
      */
     private boolean mOnlyScrollingInThisMotion;
-
+    private boolean mTouchEnabled = true;
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -1809,6 +1809,18 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public float getNotificationsTopY() {
         return mTopPadding + getTranslationY();
+    }
+
+    public void setTouchEnabled(boolean touchEnabled) {
+        mTouchEnabled = touchEnabled;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!mTouchEnabled) {
+            return false;
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     /**
