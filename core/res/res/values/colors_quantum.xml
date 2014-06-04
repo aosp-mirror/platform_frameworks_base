@@ -19,10 +19,8 @@
     <color name="background_quantum_dark">#ff212121</color>
     <color name="background_quantum_light">#fffafafa</color>
 
-    <!-- Black 27% -->
-    <color name="ripple_quantum_light">#45000000</color>
-    <!-- White 19% -->
-    <color name="ripple_quantum_dark">#30ffffff</color>
+    <color name="ripple_quantum_light">#20444444</color>
+    <color name="ripple_quantum_dark">#20ffffff</color>
 
     <color name="button_quantum_dark">#ff5a595b</color>
     <color name="button_quantum_light">#ffd6d7d7</color>

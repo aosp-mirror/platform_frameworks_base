@@ -95,6 +95,9 @@ public class RippleDrawable extends LayerDrawable {
 
     private final RippleState mState;
 
+    /** The masking layer, e.g. the layer with id R.id.mask. */
+    private Drawable mMask;
+
     /** The current hotspot. May be actively animating or pending entry. */
     private Ripple mHotspot;
 
@@ -261,21 +264,14 @@ public class RippleDrawable extends LayerDrawable {
         super.inflate(r, parser, attrs, theme);
 
         setTargetDensity(r.getDisplayMetrics());
-
-        // Find the mask
-        final int N = getNumberOfLayers();
-        for (int i = 0; i < N; i++) {
-            if (mLayerState.mChildren[i].mId == R.id.mask) {
-                mState.mMask = mLayerState.mChildren[i].mDrawable;
-            }
-        }
+        initializeFromState();
     }
 
     @Override
     public boolean setDrawableByLayerId(int id, Drawable drawable) {
         if (super.setDrawableByLayerId(id, drawable)) {
             if (id == R.id.mask) {
-                mState.mMask = drawable;
+                mMask = drawable;
             }
 
             return true;
@@ -361,6 +357,8 @@ public class RippleDrawable extends LayerDrawable {
         } finally {
             a.recycle();
         }
+
+        initializeFromState();
     }
 
     @Override
@@ -527,7 +525,7 @@ public class RippleDrawable extends LayerDrawable {
 
     private int drawContentLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
         final int count = mLayerState.mNum;
-        if (count == 0 || (mState.mMask != null && count == 1)) {
+        if (count == 0 || (mMask != null && count == 1)) {
             return -1;
         }
 
@@ -611,7 +609,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private int drawMaskingLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        final Drawable mask = mState.mMask;
+        final Drawable mask = mMask;
         if (mask == null) {
             return -1;
         }
@@ -667,7 +665,6 @@ public class RippleDrawable extends LayerDrawable {
         int[] mTouchThemeAttrs;
         ColorStateList mTint = null;
         PorterDuffXfermode mTintXfermode = SRC_ATOP;
-        Drawable mMask;
         int mMaxRadius = RADIUS_AUTO;
         boolean mPinned = false;
 
@@ -763,8 +760,6 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         mState = ns;
-        mState.mMask = findDrawableByLayerId(R.id.mask);
-
         mLayerState = ns;
 
         if (ns.mNum > 0) {
@@ -774,5 +769,12 @@ public class RippleDrawable extends LayerDrawable {
         if (needsTheme) {
             applyTheme(theme);
         }
+
+        initializeFromState();
+    }
+
+    private void initializeFromState() {
+        // Initialize from constant state.
+        mMask = findDrawableByLayerId(R.id.mask);
     }
 }
