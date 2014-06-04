@@ -2174,7 +2174,7 @@ public class Paint {
         if (bounds == null) {
             throw new NullPointerException("need bounds Rect");
         }
-        nativeGetStringBounds(mNativePaint, text, start, end, mBidiFlags, bounds);
+        nativeGetStringBounds(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, bounds);
     }
     
     /**
@@ -2194,7 +2194,8 @@ public class Paint {
         if (bounds == null) {
             throw new NullPointerException("need bounds Rect");
         }
-        nativeGetCharArrayBounds(mNativePaint, text, index, count, mBidiFlags, bounds);
+        nativeGetCharArrayBounds(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags,
+            bounds);
     }
     
     @Override
@@ -2265,9 +2266,9 @@ public class Paint {
             int bidiFlags, char[] text, int index, int count, float x, float y, long path);
     private static native void native_getTextPath(long native_object, long native_typeface,
             int bidiFlags, String text, int start, int end, float x, float y, long path);
-    private static native void nativeGetStringBounds(long nativePaint,
+    private static native void nativeGetStringBounds(long nativePaint, long native_typeface,
                                 String text, int start, int end, int bidiFlags, Rect bounds);
-    private static native void nativeGetCharArrayBounds(long nativePaint,
+    private static native void nativeGetCharArrayBounds(long nativePaint, long native_typeface,
                                 char[] text, int index, int count, int bidiFlags, Rect bounds);
     private static native void finalizer(long nativePaint);
 
