@@ -6751,7 +6751,6 @@ package android.content {
     method public final android.os.Bundle call(android.net.Uri, java.lang.String, java.lang.String, android.os.Bundle);
     method public deprecated void cancelSync(android.net.Uri);
     method public static void cancelSync(android.accounts.Account, java.lang.String);
-    method public static void cancelSync(android.content.ComponentName);
     method public static void cancelSync(android.content.SyncRequest);
     method public final android.net.Uri canonicalize(android.net.Uri);
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
@@ -6761,18 +6760,14 @@ package android.content {
     method public static boolean getMasterSyncAutomatically();
     method public java.util.List<android.content.UriPermission> getOutgoingPersistedUriPermissions();
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
-    method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.content.ComponentName);
     method public java.util.List<android.content.UriPermission> getPersistedUriPermissions();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String);
     method public static android.content.SyncAdapterType[] getSyncAdapterTypes();
     method public static boolean getSyncAutomatically(android.accounts.Account, java.lang.String);
     method public final java.lang.String getType(android.net.Uri);
     method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
-    method public static boolean isServiceActive(android.content.ComponentName);
     method public static boolean isSyncActive(android.accounts.Account, java.lang.String);
-    method public static boolean isSyncActive(android.content.ComponentName);
     method public static boolean isSyncPending(android.accounts.Account, java.lang.String);
-    method public static boolean isSyncPending(android.content.ComponentName);
     method public void notifyChange(android.net.Uri, android.database.ContentObserver);
     method public void notifyChange(android.net.Uri, android.database.ContentObserver, boolean);
     method public final android.content.res.AssetFileDescriptor openAssetFileDescriptor(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
@@ -6794,7 +6789,6 @@ package android.content {
     method public static void requestSync(android.content.SyncRequest);
     method public static void setIsSyncable(android.accounts.Account, java.lang.String, int);
     method public static void setMasterSyncAutomatically(boolean);
-    method public static void setServiceActive(android.content.ComponentName, boolean);
     method public static void setSyncAutomatically(android.accounts.Account, java.lang.String, boolean);
     method public deprecated void startSync(android.net.Uri, android.os.Bundle);
     method public void takePersistableUriPermission(android.net.Uri, int);
@@ -7762,9 +7756,7 @@ package android.content {
     field public final android.accounts.Account account;
     field public final java.lang.String authority;
     field public final android.os.Bundle extras;
-    field public final boolean isService;
     field public final long period;
-    field public final android.content.ComponentName service;
   }
 
   public class ReceiverCallNotAllowedException extends android.util.AndroidRuntimeException {
@@ -7880,7 +7872,6 @@ package android.content {
     method public void writeToParcel(android.os.Parcel, int);
     field public final android.accounts.Account account;
     field public final java.lang.String authority;
-    field public final android.content.ComponentName service;
     field public final long startTime;
   }
 
@@ -7903,8 +7894,6 @@ package android.content {
     method public android.content.SyncRequest.Builder setNoRetry(boolean);
     method public android.content.SyncRequest.Builder setPriority(int);
     method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, java.lang.String);
-    method public android.content.SyncRequest.Builder setSyncAdapter(android.content.ComponentName);
-    method public android.content.SyncRequest.Builder setTransferSize(long, long);
     method public android.content.SyncRequest.Builder syncOnce();
     method public android.content.SyncRequest.Builder syncPeriodic(long, long);
   }
@@ -7930,13 +7919,6 @@ package android.content {
     field public final boolean syncAlreadyInProgress;
     field public boolean tooManyDeletions;
     field public boolean tooManyRetries;
-  }
-
-  public abstract class SyncService extends android.app.Service {
-    ctor public SyncService();
-    method public android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onPerformSync(android.os.Bundle, android.content.SyncResult);
-    method protected boolean parallelSyncsEnabled();
   }
 
   public class SyncStats implements android.os.Parcelable {

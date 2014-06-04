@@ -121,19 +121,6 @@ interface IContentService {
      */
     void setIsSyncable(in Account account, String providerName, int syncable);
 
-    /**
-     * Corresponds roughly to setIsSyncable(String account, String provider) for syncs that bind
-     * to a SyncService.
-     */
-    void setServiceActive(in ComponentName cname, boolean active);
-
-    /**
-     * Corresponds roughly to getIsSyncable(String account, String provider) for syncs that bind
-     * to a SyncService.
-     * @return 0 if this SyncService is not enabled, 1 if enabled, <0 if unknown.
-     */
-    boolean isServiceActive(in ComponentName cname);
-
     void setMasterSyncAutomatically(boolean flag);
 
     boolean getMasterSyncAutomatically();

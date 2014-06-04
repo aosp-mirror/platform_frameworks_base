@@ -365,15 +365,8 @@ public final class ContentService extends IContentService.Stub {
                         Manifest.permission.WRITE_SYNC_SETTINGS,
                         "no permission to write the sync settings");
                 SyncStorageEngine.EndPoint info;
-                if (!request.hasAuthority()) {
-                    // Extra permissions checking for sync service.
-                    verifySignatureForPackage(callerUid,
-                            request.getService().getPackageName(), "sync");
-                    info = new SyncStorageEngine.EndPoint(request.getService(), userId);
-                } else {
-                    info = new SyncStorageEngine.EndPoint(
-                            request.getAccount(), request.getProvider(), userId);
-                }
+                info = new SyncStorageEngine.EndPoint(
+                        request.getAccount(), request.getProvider(), userId);
                 if (runAtTime < 60) {
                     Slog.w(TAG, "Requested poll frequency of " + runAtTime
                             + " seconds being rounded up to 60 seconds.");
@@ -385,17 +378,10 @@ public final class ContentService extends IContentService.Stub {
             } else {
                 long beforeRuntimeMillis = (flextime) * 1000;
                 long runtimeMillis = runAtTime * 1000;
-                if (request.hasAuthority()) {
                 syncManager.scheduleSync(
                         request.getAccount(), userId, callerUid, request.getProvider(), extras,
                         beforeRuntimeMillis, runtimeMillis,
                         false /* onlyThoseWithUnknownSyncableState */);
-                } else {
-                    syncManager.scheduleSync(
-                            request.getService(), userId, callerUid, extras,
-                            beforeRuntimeMillis,
-                            runtimeMillis); // Empty function.
-                }
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -442,22 +428,14 @@ public final class ContentService extends IContentService.Stub {
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return;
         int userId = UserHandle.getCallingUserId();
-        int callerUid = Binder.getCallingUid();
 
         long identityToken = clearCallingIdentity();
         try {
             SyncStorageEngine.EndPoint info;
             Bundle extras = new Bundle(request.getBundle());
-            if (request.hasAuthority()) {
-                Account account = request.getAccount();
-                String provider = request.getProvider();
-                info = new SyncStorageEngine.EndPoint(account, provider, userId);
-            } else {
-                // Only allowed to manipulate syncs for a service which you own.
-                ComponentName service = request.getService();
-                verifySignatureForPackage(callerUid, service.getPackageName(), "cancel");
-                info = new SyncStorageEngine.EndPoint(service, userId);
-            }
+            Account account = request.getAccount();
+            String provider = request.getProvider();
+            info = new SyncStorageEngine.EndPoint(account, provider, userId);
             if (request.isPeriodic()) {
                 // Remove periodic sync.
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
@@ -599,20 +577,11 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
 
-        int callerUid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
-            if (cname == null) {
-                return getSyncManager().getSyncStorageEngine().getPeriodicSyncs(
-                        new SyncStorageEngine.EndPoint(account, providerName, userId));
-            } else if (account == null && providerName == null) {
-                verifySignatureForPackage(callerUid, cname.getPackageName(), "getPeriodicSyncs");
-                return getSyncManager().getSyncStorageEngine().getPeriodicSyncs(
-                        new SyncStorageEngine.EndPoint(cname, userId));
-            } else {
-                throw new IllegalArgumentException("Invalid authority specified");
-            }
+            return getSyncManager().getSyncStorageEngine().getPeriodicSyncs(
+                    new SyncStorageEngine.EndPoint(account, providerName, userId));
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -654,45 +623,6 @@ public final class ContentService extends IContentService.Stub {
         } finally {
             restoreCallingIdentity(identityToken);
         }
-    }
-
-    public void setServiceActive(ComponentName cname, boolean active) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
-                "no permission to write the sync settings");
-        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(),
-                "setServiceActive");
-
-        int userId = UserHandle.getCallingUserId();
-        long identityToken = clearCallingIdentity();
-        try {
-            SyncManager syncManager = getSyncManager();
-            if (syncManager != null) {
-                syncManager.getSyncStorageEngine().setIsTargetServiceActive(
-                        cname, userId, active);
-            }
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
-    }
-
-    public boolean isServiceActive(ComponentName cname) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
-                "no permission to read the sync settings");
-        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(),
-                "isServiceActive");
-
-        int userId = UserHandle.getCallingUserId();
-        long identityToken = clearCallingIdentity();
-        try {
-            SyncManager syncManager = getSyncManager();
-            if (syncManager != null) {
-                return syncManager.getSyncStorageEngine()
-                        .getIsTargetServiceActive(cname, userId);
-            }
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
-        return false;
     }
 
     @Override
@@ -741,18 +671,11 @@ public final class ContentService extends IContentService.Stub {
             if (syncManager == null) {
                 return false;
             }
-            if (cname == null) {
-                return syncManager.getSyncStorageEngine().isSyncActive(
-                        new SyncStorageEngine.EndPoint(account, authority, userId));
-            } else if (account == null && authority == null) {
-                verifySignatureForPackage(callingUid, cname.getPackageName(), "isSyncActive");
-                return syncManager.getSyncStorageEngine().isSyncActive(
-                        new SyncStorageEngine.EndPoint(cname, userId));
-            }
+            return syncManager.getSyncStorageEngine().isSyncActive(
+                    new SyncStorageEngine.EndPoint(account, authority, userId));
         } finally {
             restoreCallingIdentity(identityToken);
         }
-        return false;
     }
 
     public List<SyncInfo> getCurrentSyncs() {
@@ -784,11 +707,8 @@ public final class ContentService extends IContentService.Stub {
                 return null;
             }
             SyncStorageEngine.EndPoint info;
-            if (cname == null) {
+            if (!(account == null || authority == null)) {
                 info = new SyncStorageEngine.EndPoint(account, authority, userId);
-            } else if (account == null && authority == null) {
-                verifySignatureForPackage(callerUid, cname.getPackageName(), "getSyncStatus");
-                info = new SyncStorageEngine.EndPoint(cname, userId);
             } else {
                 throw new IllegalArgumentException("Must call sync status with valid authority");
             }
@@ -810,11 +730,8 @@ public final class ContentService extends IContentService.Stub {
 
         try {
             SyncStorageEngine.EndPoint info;
-            if (cname == null) {
+            if (!(account == null || authority == null)) {
                 info = new SyncStorageEngine.EndPoint(account, authority, userId);
-            } else if (account == null && authority == null) {
-                verifySignatureForPackage(callerUid, cname.getPackageName(), "isSyncPending");
-                info = new SyncStorageEngine.EndPoint(cname, userId);
             } else {
                 throw new IllegalArgumentException("Invalid authority specified");
             }
@@ -852,30 +769,6 @@ public final class ContentService extends IContentService.Stub {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
-    }
-
-    /**
-     * Helper to verify that the provided package name shares the same cert as the caller.
-     * @param callerUid uid of the calling process.
-     * @param packageName package to verify against package of calling application.
-     * @param tag a tag to use when throwing an exception if the signatures don't
-     * match. Cannot be null.
-     * @return true if the calling application and the provided package are signed with the same
-     * certificate.
-     */
-    private boolean verifySignatureForPackage(int callerUid, String packageName, String tag) {
-        PackageManager pm = mContext.getPackageManager();
-        try {
-            int serviceUid = pm.getApplicationInfo(packageName, 0).uid;
-            if (pm.checkSignatures(callerUid, serviceUid) == PackageManager.SIGNATURE_MATCH) {
-                return true;
-            } else {
-                throw new SecurityException(tag + ": Caller certificate does not match that for - "
-                        + packageName);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException(tag + ": " + packageName + " package not found.");
-        }
     }
 
     /**
