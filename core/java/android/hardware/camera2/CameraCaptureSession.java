@@ -54,7 +54,7 @@ import java.util.List;
 public abstract class CameraCaptureSession implements AutoCloseable {
 
     /**
-     * Get the camera device that this session is created for
+     * Get the camera device that this session is created for.
      */
     public abstract CameraDevice getDevice();
 
@@ -90,8 +90,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException if the request targets Surfaces that are not configured as
      *                                  outputs for this session. Or if the handler is null, the
      *                                  listener is not null, and the calling thread has no looper.
@@ -99,6 +100,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
+     * @see #abortCaptures
      */
     public abstract int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException;
@@ -132,8 +134,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests target Surfaces not currently configured as
      *                                  outputs. Or if the handler is null, the listener is not
      *                                  null, and the calling thread has no looper.
@@ -141,6 +144,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #capture
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
+     * @see #abortCaptures
      */
     public abstract int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
@@ -188,11 +192,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference Surfaces that are not currently
      *                                  configured as outputs. Or if the handler is null, the
      *                                  listener is not null, and the calling thread has no looper.
+     *                                  Or if no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -246,11 +252,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference Surfaces not currently configured
      *                                  as outputs. Or if the handler is null, the listener is not
-     *                                  null, and the calling thread has no looper.
+     *                                  null, and the calling thread has no looper. Or if no
+     *                                  requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -274,8 +282,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
@@ -308,8 +317,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
-     * @throws IllegalStateException if this session is no longer active, either because a new
-     *                               session has been created or the camera device has been closed.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
@@ -320,8 +330,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     /**
      * Close this capture session asynchronously.
      *
-     * <p>Closing a session frees up the target output Surfaces of the session for reuse with either a
-     * new session, or to other APIs that can draw to Surfaces.</p>
+     * <p>Closing a session frees up the target output Surfaces of the session for reuse with either
+     * a new session, or to other APIs that can draw to Surfaces.</p>
      *
      * <p>Note that creating a new capture session with {@link CameraDevice#createCaptureSession}
      * will close any existing capture session automatically, and call the older session listener's
@@ -334,6 +344,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * However, any in-progress capture requests submitted to the session will be completed as
      * normal; once all captures have completed and the session has been torn down,
      * {@link StateListener#onClosed} will be called.</p>
+     *
+     * <p>Closing a session is idempotent; closing more than once has no effect.</p>
      */
     @Override
     public abstract void close();
