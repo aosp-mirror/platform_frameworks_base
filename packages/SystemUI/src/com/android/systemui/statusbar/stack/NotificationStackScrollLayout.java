@@ -108,6 +108,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
     private boolean mAnimationsEnabled;
+    private boolean mChangePositionInProgress;
 
     /**
      * The raw amount of the overScroll on the top, which is not rubber-banded.
@@ -1318,7 +1319,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onViewRemoved(View child) {
         super.onViewRemoved(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
-        if (mChildrenChangingPositions.contains(child)) {
+        if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
         }
@@ -1413,7 +1414,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param child The view to be added.
      */
     public void generateAddAnimation(View child) {
-        if (mIsExpanded && mAnimationsEnabled && !mChildrenChangingPositions.contains(child)) {
+        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
             mNeedsAnimation = true;
@@ -1428,10 +1429,14 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void changeViewPosition(View child, int newIndex) {
         if (child != null && child.getParent() == this) {
-            mChildrenChangingPositions.add(child);
+            mChangePositionInProgress = true;
             removeView(child);
             addView(child, newIndex);
-            mNeedsAnimation = true;
+            mChangePositionInProgress = false;
+            if (mIsExpanded && mAnimationsEnabled) {
+                mChildrenChangingPositions.add(child);
+                mNeedsAnimation = true;
+            }
         }
     }
 
