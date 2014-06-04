@@ -1442,15 +1442,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void updateStatusIcon(IBinder token, String packageName, int iconId) {
-        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
-            if (!calledWithValidToken(token)) {
-                Slog.e(TAG, "Ignoring updateStatusIcon due to an invalid token. uid:" + uid
-                        + " token:" + token);
-                return;
-            }
             synchronized (mMethodMap) {
+                if (!calledWithValidToken(token)) {
+                    final int uid = Binder.getCallingUid();
+                    Slog.e(TAG, "Ignoring updateStatusIcon due to an invalid token. uid:" + uid
+                            + " token:" + token);
+                    return;
+                }
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
                     if (mStatusBar != null) {
@@ -2202,6 +2202,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring switchToNextInputMethod due to an invalid token. uid:" + uid
+                        + " token:" + token);
+                return false;
+            }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
                     onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
@@ -2219,6 +2225,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring shouldOfferSwitchingToNextInputMethod due to an invalid "
+                        + "token. uid:" + uid + " token:" + token);
+                return false;
+            }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
                     false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
