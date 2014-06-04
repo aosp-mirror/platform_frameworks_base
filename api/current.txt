@@ -12600,14 +12600,7 @@ package android.hardware.camera2 {
   public final class DngCreator implements java.lang.AutoCloseable {
     ctor public DngCreator(android.hardware.camera2.CameraCharacteristics, android.hardware.camera2.CaptureResult);
     method public void close();
-    method public android.hardware.camera2.DngCreator setDescription(java.lang.String);
-    method public android.hardware.camera2.DngCreator setLocation(android.location.Location);
-    method public android.hardware.camera2.DngCreator setOrientation(int);
-    method public android.hardware.camera2.DngCreator setThumbnail(android.graphics.Bitmap);
-    method public android.hardware.camera2.DngCreator setThumbnail(android.media.Image);
-    method public void writeByteBuffer(java.io.OutputStream, android.util.Size, java.nio.ByteBuffer, long) throws java.io.IOException;
     method public void writeImage(java.io.OutputStream, android.media.Image) throws java.io.IOException;
-    method public void writeInputStream(java.io.OutputStream, android.util.Size, java.io.InputStream, long) throws java.io.IOException;
   }
 
   public final class TotalCaptureResult extends android.hardware.camera2.CaptureResult {
