@@ -1199,6 +1199,7 @@ please see styles_device_defaults.xml.
         <item name="android:buttonGravity">top</item>
         <item name="android:navigationButtonStyle">@android:style/Widget.Toolbar.Button.Navigation</item>
         <item name="android:collapseIcon">?android:attr/homeAsUpIndicator</item>
+        <item name="android:contentInsetStart">16dp</item>
     </style>
 
     <style name="Widget.Toolbar.Button.Navigation" parent="@android:style/Widget">
