@@ -3774,6 +3774,11 @@
     <!-- Description of an application permission that lets it listen to trust state changes. -->
     <string name="permdesc_trust_listener">Allows an application to listen for changes in trust state.</string>
 
+    <!-- Title of an application permission that lets it provide a trust agent. -->
+    <string name="permlab_provide_trust_agent">Provide a trust agent.</string>
+    <!-- Description of an application permission that lets it provide a trust agent. -->
+    <string name="permdesc_provide_trust_agent">Allows an application to provide a trust agent.</string>
+
     <!-- Title of an application permission that lets it bind to a trust agent service. -->
     <string name="permlab_bind_trust_agent_service">Bind to a trust agent service</string>
     <!-- Description of an application permission that lets it bind to a trust agent service. -->

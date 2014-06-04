@@ -33,6 +33,8 @@ import android.util.Slog;
  * A service that notifies the system about whether it believes the environment of the device
  * to be trusted.
  *
+ * <p>Trust agents may only be provided by the platform.</p>
+ *
  * <p>To extend this class, you must declare the service in your manifest file with
  * the {@link android.Manifest.permission#BIND_TRUST_AGENT} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
