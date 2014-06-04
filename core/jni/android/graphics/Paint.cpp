@@ -520,8 +520,8 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray + index, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(textArray, index, count, textLength, css);
         result = layout.getAdvance();
 #else
         TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
@@ -554,8 +554,8 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray + start, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(textArray, start, count, textLength, css);
         width = layout.getAdvance();
 #else
         TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
@@ -582,8 +582,8 @@ public:
 #ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray, textLength);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(textArray, 0, textLength, textLength, css);
         width = layout.getAdvance();
 #else
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
@@ -617,8 +617,8 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(text, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(text, 0, count, count, css);
         layout.getAdvances(widthsArray);
 #else
         TextLayout::getTextRunAdvances(paint, text, 0, count, count,
@@ -715,8 +715,8 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
-        layout.doLayout(text + start, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, flags, typeface);
+        layout.doLayout(text, start, count, contextCount, css);
         layout.getAdvances(advancesArray);
         totalAdvance = layout.getAdvance();
 #else
@@ -860,8 +860,8 @@ public:
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(text, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(text, 0, count, count, css);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
         SkPoint* pos = new SkPoint[nGlyphs];
@@ -992,8 +992,8 @@ public:
 
 #ifdef USE_MINIKIN
         Layout layout;
-        MinikinUtils::SetLayoutProperties(&layout, &paint, bidiFlags, typeface);
-        layout.doLayout(text, count);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
+        layout.doLayout(text, 0, count, count, css);
         MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
