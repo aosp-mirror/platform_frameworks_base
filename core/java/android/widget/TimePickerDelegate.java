@@ -140,13 +140,12 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         mSelectMinutes = res.getString(R.string.select_minutes);
 
         mHeaderSelectedColor = a.getColor(R.styleable.TimePicker_headerSelectedTextColor,
-                android.R.color.holo_blue_light);
+                R.color.timepicker_default_selector_color_quantum);
 
-        mHeaderUnSelectedColor = getUnselectedColor(
-                R.color.timepicker_default_text_color_holo_light);
+        mHeaderUnSelectedColor = getUnselectedColor(R.color.timepicker_default_text_color_quantum);
         if (mHeaderUnSelectedColor == -1) {
             mHeaderUnSelectedColor = a.getColor(R.styleable.TimePicker_headerUnselectedTextColor,
-                    R.color.timepicker_default_text_color_holo_light);
+                    R.color.timepicker_default_text_color_quantum);
         }
 
         final int headerBackgroundColor = a.getColor(
@@ -296,7 +295,7 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         TypedArray a = mContext.obtainStyledAttributes(TEXT_APPEARANCE_TIME_LABEL_ATTR);
         final int textAppearanceResId = a.getResourceId(0, 0);
         tempView.setTextAppearance(mContext, (textAppearanceResId != 0) ?
-                textAppearanceResId : R.style.TextAppearance_Holo_TimePicker_TimeLabel);
+                textAppearanceResId : R.style.TextAppearance_Quantum_TimePicker_TimeLabel);
         a.recycle();
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);

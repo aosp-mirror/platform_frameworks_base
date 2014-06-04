@@ -151,4 +151,15 @@
     <color name="quantum_brown_300">#ffa1887f</color>
     <color name="quantum_brown_500">#ff795548</color>
     <color name="quantum_brown_700">#ff5d4037</color>
+
+    <!-- Time picker defaults when no theme is set -->
+    <eat-comment />
+
+    <color name="timepicker_default_background_quantum">@color/primary_text_default_quantum_light</color>
+    <color name="timepicker_default_text_color_quantum">@color/black</color>
+    <color name="timepicker_default_disabled_color_quantum">@color/bright_foreground_disabled_quantum_dark</color>
+    <color name="timepicker_default_ampm_selected_background_color_quantum">@color/quantum_light_blue_A200</color>
+    <color name="timepicker_default_ampm_unselected_background_color_quantum">@color/transparent</color>
+    <color name="timepicker_default_selector_color_quantum">@color/quantum_light_blue_A200</color>
+    <color name="timepicker_default_numbers_background_color_quantum">@color/transparent</color>
 </resources>

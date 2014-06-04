@@ -1858,10 +1858,6 @@
   <java-symbol type="string" name="timepicker_numbers_radius_multiplier_normal" />
   <java-symbol type="string" name="timepicker_transition_mid_radius_multiplier" />
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
-  <java-symbol type="color" name="timepicker_default_text_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_disabled_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_holo_light" />
   <java-symbol type="array" name="config_clockTickVibePattern" />
 
   <!-- From various Quantum changes -->
@@ -1873,5 +1869,12 @@
   <java-symbol type="id" name="icon_frame" />
   <java-symbol type="style" name="Animation.VolumePanel" />
   <java-symbol type="transition" name="no_transition" />
+  <java-symbol type="color" name="timepicker_default_text_color_quantum" />
+  <java-symbol type="color" name="timepicker_default_disabled_color_quantum" />
+  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_quantum" />
+  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_quantum" />
+  <java-symbol type="color" name="timepicker_default_selector_color_quantum" />
+  <java-symbol type="color" name="timepicker_default_numbers_background_color_quantum" />
+  <java-symbol type="style" name="TextAppearance.Quantum.TimePicker.TimeLabel" />
 
 </resources>

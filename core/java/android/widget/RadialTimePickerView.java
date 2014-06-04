@@ -42,6 +42,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
 import com.android.internal.R;
 
 import java.text.DateFormatSymbols;
@@ -82,13 +83,13 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     private static final int ALPHA_TRANSPARENT = 0;
 
     // Alpha level of color for selector.
-    private static final int ALPHA_SELECTOR = 51;
+    private static final int ALPHA_SELECTOR = 255; // was 51
 
     // Alpha level of color for selected circle.
     private static final int ALPHA_AMPM_SELECTED = ALPHA_SELECTOR;
 
     // Alpha level of color for pressed circle.
-    private static final int ALPHA_AMPM_PRESSED = 175;
+    private static final int ALPHA_AMPM_PRESSED = 255; // was 175
 
     private static final float COSINE_30_DEGREES = ((float) Math.sqrt(3)) * 0.5f;
     private static final float SINE_30_DEGREES = 0.5f;
@@ -112,8 +113,15 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     private final String[] mAmPmText = new String[2];
 
     private final Paint[] mPaint = new Paint[2];
+    private final int[] mColor = new int[2];
+    private final IntHolder[] mAlpha = new IntHolder[2];
+
     private final Paint mPaintCenter = new Paint();
+
     private final Paint[][] mPaintSelector = new Paint[2][3];
+    private final int[][] mColorSelector = new int[2][3];
+    private final IntHolder[][] mAlphaSelector = new IntHolder[2][3];
+
     private final Paint mPaintAmPmText = new Paint();
     private final Paint[] mPaintAmPmCircle = new Paint[2];
 
@@ -309,65 +317,80 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         final Resources res = getResources();
 
         mAmPmUnselectedColor = a.getColor(R.styleable.TimePicker_amPmUnselectedBackgroundColor,
-                res.getColor(
-                        R.color.timepicker_default_ampm_unselected_background_color_holo_light));
+                res.getColor(R.color.timepicker_default_ampm_unselected_background_color_quantum));
 
         mAmPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
-                res.getColor(R.color.timepicker_default_ampm_selected_background_color_holo_light));
+                res.getColor(R.color.timepicker_default_ampm_selected_background_color_quantum));
 
         mAmPmTextColor = a.getColor(R.styleable.TimePicker_amPmTextColor,
-                res.getColor(R.color.timepicker_default_text_color_holo_light));
-
-        final int numbersTextColor = a.getColor(R.styleable.TimePicker_numbersTextColor,
-                res.getColor(R.color.timepicker_default_text_color_holo_light));
+                res.getColor(R.color.timepicker_default_text_color_quantum));
 
         mTypeface = Typeface.create("sans-serif", Typeface.NORMAL);
 
+        // Initialize all alpha values to opaque.
+        for (int i = 0; i < mAlpha.length; i++) {
+            mAlpha[i] = new IntHolder(ALPHA_OPAQUE);
+        }
+        for (int i = 0; i < mAlphaSelector.length; i++) {
+            for (int j = 0; j < mAlphaSelector[i].length; j++) {
+                mAlphaSelector[i][j] = new IntHolder(ALPHA_OPAQUE);
+            }
+        }
+
+        final int numbersTextColor = a.getColor(R.styleable.TimePicker_numbersTextColor,
+                res.getColor(R.color.timepicker_default_text_color_quantum));
+
         mPaint[HOURS] = new Paint();
-        mPaint[HOURS].setColor(numbersTextColor);
         mPaint[HOURS].setAntiAlias(true);
         mPaint[HOURS].setTextAlign(Paint.Align.CENTER);
+        mColor[HOURS] = numbersTextColor;
 
         mPaint[MINUTES] = new Paint();
-        mPaint[MINUTES].setColor(numbersTextColor);
         mPaint[MINUTES].setAntiAlias(true);
         mPaint[MINUTES].setTextAlign(Paint.Align.CENTER);
+        mColor[MINUTES] = numbersTextColor;
 
         mPaintCenter.setColor(numbersTextColor);
         mPaintCenter.setAntiAlias(true);
         mPaintCenter.setTextAlign(Paint.Align.CENTER);
 
         mPaintSelector[HOURS][SELECTOR_CIRCLE] = new Paint();
-        mPaintSelector[HOURS][SELECTOR_CIRCLE].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[HOURS][SELECTOR_CIRCLE].setAntiAlias(true);
+        mColorSelector[HOURS][SELECTOR_CIRCLE] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintSelector[HOURS][SELECTOR_DOT] = new Paint();
-        mPaintSelector[HOURS][SELECTOR_DOT].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[HOURS][SELECTOR_DOT].setAntiAlias(true);
+        mColorSelector[HOURS][SELECTOR_DOT] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintSelector[HOURS][SELECTOR_LINE] = new Paint();
-        mPaintSelector[HOURS][SELECTOR_LINE].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[HOURS][SELECTOR_LINE].setAntiAlias(true);
         mPaintSelector[HOURS][SELECTOR_LINE].setStrokeWidth(2);
+        mColorSelector[HOURS][SELECTOR_LINE] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintSelector[MINUTES][SELECTOR_CIRCLE] = new Paint();
-        mPaintSelector[MINUTES][SELECTOR_CIRCLE].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[MINUTES][SELECTOR_CIRCLE].setAntiAlias(true);
+        mColorSelector[MINUTES][SELECTOR_CIRCLE] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintSelector[MINUTES][SELECTOR_DOT] = new Paint();
-        mPaintSelector[MINUTES][SELECTOR_DOT].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[MINUTES][SELECTOR_DOT].setAntiAlias(true);
+        mColorSelector[MINUTES][SELECTOR_DOT] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintSelector[MINUTES][SELECTOR_LINE] = new Paint();
-        mPaintSelector[MINUTES][SELECTOR_LINE].setColor(
-                a.getColor(R.styleable.TimePicker_numbersSelectorColor, R.color.holo_blue_light));
         mPaintSelector[MINUTES][SELECTOR_LINE].setAntiAlias(true);
         mPaintSelector[MINUTES][SELECTOR_LINE].setStrokeWidth(2);
+        mColorSelector[MINUTES][SELECTOR_LINE] = a.getColor(
+                R.styleable.TimePicker_numbersSelectorColor,
+                R.color.timepicker_default_selector_color_quantum);
 
         mPaintAmPmText.setColor(mAmPmTextColor);
         mPaintAmPmText.setTypeface(mTypeface);
@@ -379,13 +402,12 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mPaintAmPmCircle[PM] = new Paint();
         mPaintAmPmCircle[PM].setAntiAlias(true);
 
-        mPaintBackground.setColor(
-                a.getColor(R.styleable.TimePicker_numbersBackgroundColor, Color.WHITE));
+        mPaintBackground.setColor(a.getColor(R.styleable.TimePicker_numbersBackgroundColor,
+                res.getColor(R.color.timepicker_default_numbers_background_color_quantum)));
         mPaintBackground.setAntiAlias(true);
 
-        final int disabledColor = a.getColor(R.styleable.TimePicker_disabledColor,
-                res.getColor(R.color.timepicker_default_disabled_color_holo_light));
-        mPaintDisabled.setColor(disabledColor);
+        mPaintDisabled.setColor(a.getColor(R.styleable.TimePicker_disabledColor,
+                res.getColor(R.color.timepicker_default_disabled_color_quantum)));
         mPaintDisabled.setAntiAlias(true);
 
         if (DEBUG) {
@@ -414,6 +436,8 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
         mSelectionRadiusMultiplier = Float.parseFloat(
                 res.getString(R.string.timepicker_selection_radius_multiplier));
+
+        a.recycle();
 
         setOnTouchListener(this);
 
@@ -622,21 +646,21 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mAmPmCircleRadiusMultiplier = Float.parseFloat(
                 res.getString(R.string.timepicker_ampm_circle_radius_multiplier));
 
-        mPaint[HOURS].setAlpha(mShowHours ? ALPHA_OPAQUE : ALPHA_TRANSPARENT);
-        mPaint[MINUTES].setAlpha(mShowHours ? ALPHA_TRANSPARENT : ALPHA_OPAQUE);
+        mAlpha[HOURS].setValue(mShowHours ? ALPHA_OPAQUE : ALPHA_TRANSPARENT);
+        mAlpha[MINUTES].setValue(mShowHours ? ALPHA_TRANSPARENT : ALPHA_OPAQUE);
 
-        mPaintSelector[HOURS][SELECTOR_CIRCLE].setAlpha(
-                mShowHours ?ALPHA_SELECTOR : ALPHA_TRANSPARENT);
-        mPaintSelector[HOURS][SELECTOR_DOT].setAlpha(
+        mAlphaSelector[HOURS][SELECTOR_CIRCLE].setValue(
+                mShowHours ? ALPHA_SELECTOR : ALPHA_TRANSPARENT);
+        mAlphaSelector[HOURS][SELECTOR_DOT].setValue(
                 mShowHours ? ALPHA_OPAQUE : ALPHA_TRANSPARENT);
-        mPaintSelector[HOURS][SELECTOR_LINE].setAlpha(
+        mAlphaSelector[HOURS][SELECTOR_LINE].setValue(
                 mShowHours ? ALPHA_SELECTOR : ALPHA_TRANSPARENT);
 
-        mPaintSelector[MINUTES][SELECTOR_CIRCLE].setAlpha(
+        mAlphaSelector[MINUTES][SELECTOR_CIRCLE].setValue(
                 mShowHours ? ALPHA_TRANSPARENT : ALPHA_SELECTOR);
-        mPaintSelector[MINUTES][SELECTOR_DOT].setAlpha(
+        mAlphaSelector[MINUTES][SELECTOR_DOT].setValue(
                 mShowHours ? ALPHA_TRANSPARENT : ALPHA_OPAQUE);
-        mPaintSelector[MINUTES][SELECTOR_LINE].setAlpha(
+        mAlphaSelector[MINUTES][SELECTOR_LINE].setValue(
                 mShowHours ? ALPHA_TRANSPARENT : ALPHA_SELECTOR);
     }
 
@@ -704,20 +728,23 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         calculateGridSizesMinutes();
 
         drawCircleBackground(canvas);
+        drawSelector(canvas);
 
         drawTextElements(canvas, mTextSize[HOURS], mTypeface, mOuterTextHours,
-                mTextGridWidths[HOURS], mTextGridHeights[HOURS], mPaint[HOURS]);
+                mTextGridWidths[HOURS], mTextGridHeights[HOURS], mPaint[HOURS],
+                mColor[HOURS], mAlpha[HOURS].getValue());
 
         if (mIs24HourMode && mInnerTextHours != null) {
             drawTextElements(canvas, mInnerTextSize, mTypeface, mInnerTextHours,
-                    mInnerTextGridWidths, mInnerTextGridHeights, mPaint[HOURS]);
+                    mInnerTextGridWidths, mInnerTextGridHeights, mPaint[HOURS],
+                    mColor[HOURS], mAlpha[HOURS].getValue());
         }
 
         drawTextElements(canvas, mTextSize[MINUTES], mTypeface, mOuterTextMinutes,
-                mTextGridWidths[MINUTES], mTextGridHeights[MINUTES], mPaint[MINUTES]);
+                mTextGridWidths[MINUTES], mTextGridHeights[MINUTES], mPaint[MINUTES],
+                mColor[MINUTES], mAlpha[MINUTES].getValue());
 
         drawCenter(canvas);
-        drawSelector(canvas);
         if (!mIs24HourMode) {
             drawAmPm(canvas);
         }
@@ -772,12 +799,12 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
         // Draw the two circles
         mPaintAmPmCircle[AM].setColor(amColor);
-        mPaintAmPmCircle[AM].setAlpha(amAlpha);
+        mPaintAmPmCircle[AM].setAlpha(getMultipliedAlpha(amColor, amAlpha));
         canvas.drawCircle(isLayoutRtl ? mRightIndicatorXCenter : mLeftIndicatorXCenter,
                 mAmPmYCenter, mAmPmCircleRadius, mPaintAmPmCircle[AM]);
 
         mPaintAmPmCircle[PM].setColor(pmColor);
-        mPaintAmPmCircle[PM].setAlpha(pmAlpha);
+        mPaintAmPmCircle[PM].setAlpha(getMultipliedAlpha(pmColor, pmAlpha));
         canvas.drawCircle(isLayoutRtl ? mLeftIndicatorXCenter : mRightIndicatorXCenter,
                 mAmPmYCenter, mAmPmCircleRadius, mPaintAmPmCircle[PM]);
 
@@ -792,6 +819,10 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
                 textYCenter, mPaintAmPmText);
     }
 
+    private int getMultipliedAlpha(int argb, int alpha) {
+        return (int) (Color.alpha(argb) * (alpha / 255.0) + 0.5);
+    }
+
     private void drawSelector(Canvas canvas, int index) {
         // Calculate the current radius at which to place the selection circle.
         mLineLength[index] = (int) (mCircleRadius[index]
@@ -802,15 +833,27 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         int pointX = mXCenter + (int) (mLineLength[index] * Math.sin(selectionRadians));
         int pointY = mYCenter - (int) (mLineLength[index] * Math.cos(selectionRadians));
 
+        int color;
+        int alpha;
+        Paint paint;
+
         // Draw the selection circle
-        canvas.drawCircle(pointX, pointY, mSelectionRadius[index],
-                mPaintSelector[index % 2][SELECTOR_CIRCLE]);
+        color = mColorSelector[index % 2][SELECTOR_CIRCLE];
+        alpha = mAlphaSelector[index % 2][SELECTOR_CIRCLE].getValue();
+        paint = mPaintSelector[index % 2][SELECTOR_CIRCLE];
+        paint.setColor(color);
+        paint.setAlpha(getMultipliedAlpha(color, alpha));
+        canvas.drawCircle(pointX, pointY, mSelectionRadius[index], paint);
 
         // Draw the dot if needed
         if (mSelectionDegrees[index] % 30 != 0) {
             // We're not on a direct tick
-            canvas.drawCircle(pointX, pointY, (mSelectionRadius[index] * 2 / 7),
-                    mPaintSelector[index % 2][SELECTOR_DOT]);
+            color = mColorSelector[index % 2][SELECTOR_DOT];
+            alpha = mAlphaSelector[index % 2][SELECTOR_DOT].getValue();
+            paint = mPaintSelector[index % 2][SELECTOR_DOT];
+            paint.setColor(color);
+            paint.setAlpha(getMultipliedAlpha(color, alpha));
+            canvas.drawCircle(pointX, pointY, (mSelectionRadius[index] * 2 / 7), paint);
         } else {
             // We're not drawing the dot, so shorten the line to only go as far as the edge of the
             // selection circle
@@ -820,8 +863,12 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         }
 
         // Draw the line
-        canvas.drawLine(mXCenter, mYCenter, pointX, pointY,
-                mPaintSelector[index % 2][SELECTOR_LINE]);
+        color = mColorSelector[index % 2][SELECTOR_LINE];
+        alpha = mAlphaSelector[index % 2][SELECTOR_LINE].getValue();
+        paint = mPaintSelector[index % 2][SELECTOR_LINE];
+        paint.setColor(color);
+        paint.setAlpha(getMultipliedAlpha(color, alpha));
+        canvas.drawLine(mXCenter, mYCenter, pointX, pointY, paint);
     }
 
     private void drawDebug(Canvas canvas) {
@@ -948,9 +995,11 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
      * Draw the 12 text values at the positions specified by the textGrid parameters.
      */
     private void drawTextElements(Canvas canvas, float textSize, Typeface typeface, String[] texts,
-            float[] textGridWidths, float[] textGridHeights, Paint paint) {
+            float[] textGridWidths, float[] textGridHeights, Paint paint, int color, int alpha) {
         paint.setTextSize(textSize);
         paint.setTypeface(typeface);
+        paint.setColor(color);
+        paint.setAlpha(getMultipliedAlpha(color, alpha));
         canvas.drawText(texts[0], textGridWidths[3], textGridHeights[0], paint);
         canvas.drawText(texts[1], textGridWidths[4], textGridHeights[1], paint);
         canvas.drawText(texts[2], textGridWidths[5], textGridHeights[2], paint);
@@ -1023,17 +1072,17 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         return animator;
     }
 
-    private static ObjectAnimator getFadeOutAnimator(Object target, int startAlpha, int endAlpha,
+    private static ObjectAnimator getFadeOutAnimator(IntHolder target, int startAlpha, int endAlpha,
                 InvalidateUpdateListener updateListener) {
         int duration = 500;
-        ObjectAnimator animator = ObjectAnimator.ofInt(target, "alpha", startAlpha, endAlpha);
+        ObjectAnimator animator = ObjectAnimator.ofInt(target, "value", startAlpha, endAlpha);
         animator.setDuration(duration);
         animator.addUpdateListener(updateListener);
 
         return animator;
     }
 
-    private static ObjectAnimator getFadeInAnimator(Object target, int startAlpha, int endAlpha,
+    private static ObjectAnimator getFadeInAnimator(IntHolder target, int startAlpha, int endAlpha,
                 InvalidateUpdateListener updateListener) {
         Keyframe kf0, kf1, kf2;
         int duration = 500;
@@ -1048,7 +1097,7 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         kf0 = Keyframe.ofInt(0f, startAlpha);
         kf1 = Keyframe.ofInt(delayPoint, startAlpha);
         kf2 = Keyframe.ofInt(1f, endAlpha);
-        PropertyValuesHolder fadeIn = PropertyValuesHolder.ofKeyframe("alpha", kf0, kf1, kf2);
+        PropertyValuesHolder fadeIn = PropertyValuesHolder.ofKeyframe("value", kf0, kf1, kf2);
 
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
                 target, fadeIn).setDuration(totalDuration);
@@ -1068,25 +1117,25 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
             mHoursToMinutesAnims.add(getRadiusDisappearAnimator(this,
                     "animationRadiusMultiplierHours", mInvalidateUpdateListener,
                     mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier));
-            mHoursToMinutesAnims.add(getFadeOutAnimator(mPaint[HOURS],
+            mHoursToMinutesAnims.add(getFadeOutAnimator(mAlpha[HOURS],
                     ALPHA_OPAQUE, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeOutAnimator(mPaintSelector[HOURS][SELECTOR_CIRCLE],
+            mHoursToMinutesAnims.add(getFadeOutAnimator(mAlphaSelector[HOURS][SELECTOR_CIRCLE],
                     ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeOutAnimator(mPaintSelector[HOURS][SELECTOR_DOT],
+            mHoursToMinutesAnims.add(getFadeOutAnimator(mAlphaSelector[HOURS][SELECTOR_DOT],
                     ALPHA_OPAQUE, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeOutAnimator(mPaintSelector[HOURS][SELECTOR_LINE],
+            mHoursToMinutesAnims.add(getFadeOutAnimator(mAlphaSelector[HOURS][SELECTOR_LINE],
                     ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
 
             mHoursToMinutesAnims.add(getRadiusReappearAnimator(this,
                     "animationRadiusMultiplierMinutes", mInvalidateUpdateListener,
                     mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier));
-            mHoursToMinutesAnims.add(getFadeInAnimator(mPaint[MINUTES],
+            mHoursToMinutesAnims.add(getFadeInAnimator(mAlpha[MINUTES],
                     ALPHA_TRANSPARENT, ALPHA_OPAQUE, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeInAnimator(mPaintSelector[MINUTES][SELECTOR_CIRCLE],
+            mHoursToMinutesAnims.add(getFadeInAnimator(mAlphaSelector[MINUTES][SELECTOR_CIRCLE],
                     ALPHA_TRANSPARENT, ALPHA_SELECTOR, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeInAnimator(mPaintSelector[MINUTES][SELECTOR_DOT],
+            mHoursToMinutesAnims.add(getFadeInAnimator(mAlphaSelector[MINUTES][SELECTOR_DOT],
                     ALPHA_TRANSPARENT, ALPHA_OPAQUE, mInvalidateUpdateListener));
-            mHoursToMinutesAnims.add(getFadeInAnimator(mPaintSelector[MINUTES][SELECTOR_LINE],
+            mHoursToMinutesAnims.add(getFadeInAnimator(mAlphaSelector[MINUTES][SELECTOR_LINE],
                     ALPHA_TRANSPARENT, ALPHA_SELECTOR, mInvalidateUpdateListener));
         }
 
@@ -1103,25 +1152,25 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
             mMinuteToHoursAnims.add(getRadiusDisappearAnimator(this,
                     "animationRadiusMultiplierMinutes", mInvalidateUpdateListener,
                     mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier));
-            mMinuteToHoursAnims.add(getFadeOutAnimator(mPaint[MINUTES],
+            mMinuteToHoursAnims.add(getFadeOutAnimator(mAlpha[MINUTES],
                     ALPHA_OPAQUE, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeOutAnimator(mPaintSelector[MINUTES][SELECTOR_CIRCLE],
+            mMinuteToHoursAnims.add(getFadeOutAnimator(mAlphaSelector[MINUTES][SELECTOR_CIRCLE],
                     ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeOutAnimator(mPaintSelector[MINUTES][SELECTOR_DOT],
+            mMinuteToHoursAnims.add(getFadeOutAnimator(mAlphaSelector[MINUTES][SELECTOR_DOT],
                     ALPHA_OPAQUE, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeOutAnimator(mPaintSelector[MINUTES][SELECTOR_LINE],
+            mMinuteToHoursAnims.add(getFadeOutAnimator(mAlphaSelector[MINUTES][SELECTOR_LINE],
                     ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener));
 
             mMinuteToHoursAnims.add(getRadiusReappearAnimator(this,
                     "animationRadiusMultiplierHours", mInvalidateUpdateListener,
                     mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier));
-            mMinuteToHoursAnims.add(getFadeInAnimator(mPaint[HOURS],
+            mMinuteToHoursAnims.add(getFadeInAnimator(mAlpha[HOURS],
                     ALPHA_TRANSPARENT, ALPHA_OPAQUE, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeInAnimator(mPaintSelector[HOURS][SELECTOR_CIRCLE],
+            mMinuteToHoursAnims.add(getFadeInAnimator(mAlphaSelector[HOURS][SELECTOR_CIRCLE],
                     ALPHA_TRANSPARENT, ALPHA_SELECTOR, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeInAnimator(mPaintSelector[HOURS][SELECTOR_DOT],
+            mMinuteToHoursAnims.add(getFadeInAnimator(mAlphaSelector[HOURS][SELECTOR_DOT],
                     ALPHA_TRANSPARENT, ALPHA_OPAQUE, mInvalidateUpdateListener));
-            mMinuteToHoursAnims.add(getFadeInAnimator(mPaintSelector[HOURS][SELECTOR_LINE],
+            mMinuteToHoursAnims.add(getFadeInAnimator(mAlphaSelector[HOURS][SELECTOR_LINE],
                     ALPHA_TRANSPARENT, ALPHA_SELECTOR, mInvalidateUpdateListener));
         }
 
@@ -1392,5 +1441,21 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     public void setInputEnabled(boolean inputEnabled) {
         mInputEnabled = inputEnabled;
         invalidate();
+    }
+
+    private static class IntHolder {
+        private int mValue;
+
+        public IntHolder(int value) {
+            mValue = value;
+        }
+
+        public void setValue(int value) {
+            mValue = value;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
     }
 }
