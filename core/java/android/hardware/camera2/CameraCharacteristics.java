@@ -810,6 +810,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL devices:</p>
      * <ul>
      * <li>MANUAL_SENSOR</li>
+     * <li>MANUAL_POST_PROCESSING</li>
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
      * devices, but the app. should query this field to be sure.</p>
@@ -1033,8 +1034,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (i.e. format, width, height, output/input stream).</p>
      * <p>The configurations are listed as <code>(format, width, height, input?)</code>
      * tuples.</p>
-     * <p>All camera devices will support sensor maximum resolution (defined by
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}) for the JPEG format.</p>
      * <p>For a given use case, the actual maximum supported resolution
      * may be lower than what is listed here, depending on the destination
      * Surface for the image data. For example, for recording video,
