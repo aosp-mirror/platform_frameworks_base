@@ -475,7 +475,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             interpolator, null);
 
             // And the forgot pattern button
-            if (mForgotPatternButton.getVisibility() == View.VISIBLE) {
+            if (mForgotPatternButton != null
+                    && mForgotPatternButton.getVisibility() == View.VISIBLE) {
                 mAppearAnimationUtils.createAnimation(mForgotPatternButton, delay, duration,
                         startTranslationY, interpolator, null);
             }
