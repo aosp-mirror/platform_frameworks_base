@@ -99,7 +99,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             signalContentDescription = r.getString(R.string.accessibility_no_wifi);
         } else {
             state.iconId = R.drawable.ic_qs_wifi_no_network;
-            state.label = r.getString(R.string.quick_settings_wifi_off_label);
+            state.label = r.getString(R.string.quick_settings_wifi_label);
             signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         }
         state.contentDescription = mContext.getString(

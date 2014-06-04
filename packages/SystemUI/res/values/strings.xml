@@ -471,13 +471,13 @@
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_unlocked_label">Auto Rotate</string>
+    <string name="quick_settings_rotation_unlocked_label">Auto-rotate</string>
     <!-- QuickSettings: Rotation Locked [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_label">Rotation Locked</string>
+    <string name="quick_settings_rotation_locked_label">Rotation locked</string>
     <!-- QuickSettings: Locked to Portrait [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_portrait_label">Locked to Portrait</string>
+    <string name="quick_settings_rotation_locked_portrait_label">Portrait</string>
     <!-- QuickSettings: Locked to Landscape [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_landscape_label">Locked to Landscape</string>
+    <string name="quick_settings_rotation_locked_landscape_label">Landscape</string>
     <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
     <string name="quick_settings_ime_label">Input Method</string>
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
@@ -505,7 +505,7 @@
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
     <!-- QuickSettings: Remote display [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_remote_display_no_connection_label">Cast Screen</string>
+    <string name="quick_settings_remote_display_no_connection_label">Cast screen</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->

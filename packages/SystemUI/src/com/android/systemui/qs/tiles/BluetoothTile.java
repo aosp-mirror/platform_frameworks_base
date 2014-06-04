@@ -94,7 +94,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
             }
         } else {
             state.iconId = R.drawable.ic_qs_bluetooth_off;
-            state.label = mContext.getString(R.string.quick_settings_bluetooth_off_label);
+            state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             stateContentDescription = mContext.getString(R.string.accessibility_desc_off);
         }
         state.contentDescription = mContext.getString(
