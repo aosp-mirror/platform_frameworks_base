@@ -77,9 +77,15 @@ public class LinkProperties implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     */
     public LinkProperties() {
     }
 
+    /**
+     * @hide
+     */
     public LinkProperties(LinkProperties source) {
         if (source != null) {
             mIfaceName = source.getInterfaceName();
@@ -267,7 +273,7 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Returns all the {@link LinkAddress} for DNS servers on this link.
+     * Returns all the {@link InetAddress} for DNS servers on this link.
      *
      * @return An umodifiable {@link List} of {@link InetAddress} for DNS servers on
      *         this link.
@@ -477,12 +483,12 @@ public class LinkProperties implements Parcelable {
 
         String domainName = "Domains: " + mDomains;
 
-        String mtu = "MTU: " + mMtu;
+        String mtu = " MTU: " + mMtu;
 
         String routes = " Routes: [";
         for (RouteInfo route : mRoutes) routes += route.toString() + ",";
         routes += "] ";
-        String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
+        String proxy = (mHttpProxy == null ? "" : " HttpProxy: " + mHttpProxy.toString() + " ");
 
         String stacked = "";
         if (mStackedLinks.values().size() > 0) {
