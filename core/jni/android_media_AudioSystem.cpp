@@ -613,8 +613,12 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
                 goto exit;
             }
         }
-        //TODO: replace popcount by audio utils function mask to count
-        int numValues = popcount(nAudioPortConfig->gain.channel_mask);
+        int numValues;
+        if (useInMask) {
+            numValues = audio_channel_count_from_in_mask(nAudioPortConfig->gain.channel_mask);
+        } else {
+            numValues = audio_channel_count_from_out_mask(nAudioPortConfig->gain.channel_mask);
+        }
         jGainValues = env->NewIntArray(numValues);
         if (jGainValues == NULL) {
             ALOGV("convertAudioPortConfigFromNative could not create gain values %d", numValues);
