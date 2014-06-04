@@ -215,8 +215,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Anclaje a red"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificaciones"</string>
-    <!-- no translation found for recents_empty_message (7883614615463619450) -->
-    <skip />
+    <string name="recents_empty_message" msgid="7883614615463619450">"No hay aplicaciones recientes."</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Información de la aplicación"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"buscar"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Es posible que la red\nesté supervisada."</string>
