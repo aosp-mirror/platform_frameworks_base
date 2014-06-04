@@ -564,6 +564,7 @@ public class NotificationPanelView extends PanelView implements
                 ? View.INVISIBLE
                 : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
+        mNotificationStackScroller.setTouchEnabled(!mQsExpanded);
     }
 
     private void setQsExpansion(float height) {
