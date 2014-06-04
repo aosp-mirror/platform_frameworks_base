@@ -669,6 +669,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         int flags = 0;
         boolean isCheckin = false;
         boolean noOutput = false;
+        boolean writeData = false;
         long historyStart = -1;
         int reqUid = -1;
         if (args != null) {
@@ -687,6 +688,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         return;
                     }
                     historyStart = Long.parseLong(args[i]);
+                    writeData = true;
                 } else if ("-c".equals(arg)) {
                     isCheckin = true;
                     flags |= BatteryStats.DUMP_INCLUDE_HISTORY;
@@ -749,10 +751,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
                 mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
+                if (writeData) {
+                    mStats.writeAsyncLocked();
+                }
             }
         } else {
             synchronized (mStats) {
                 mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
+                if (writeData) {
+                    mStats.writeAsyncLocked();
+                }
             }
         }
     }
