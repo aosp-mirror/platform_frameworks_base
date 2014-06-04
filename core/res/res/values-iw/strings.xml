@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר לאפליקציה לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"מאפשר לאפליקציה להקליט אודיו באמצעות המיקרופון. אישור זה מתיר לאפליקציה להקליט אודיו בכל עת ללא אישורך."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"‏תקשורת SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏מאפשרת ליישום לשלוח פקודות ל-SIM. זוהי הרשאה מסוכנת מאוד."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"מאפשר לאפליקציה לצלם תמונות וסרטונים באמצעות המצלמה. אישור זה מאפשר לאפליקציה להשתמש במצלמה בכל עת ללא אישורך."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"השבת את נורית מצב השידור כשהמצלמה בשימוש"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"מאפשר לאפליקציה לשלוט במגן המקלדת."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"חיפוש שינויים במצב אמון."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"מאפשר לאפליקציה לחפש שינויים במצב אמון."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"איגוד אל שירות סוכן אמון"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"מאפשר לאפליקציה לאגוד אל שירות סוכן אמון."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"אינטראקציה עם מערכת שחזור ועדכונים"</string>

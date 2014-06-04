@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Επιτρέπει στην εφαρμογή την τροποποίηση καθολικών ρυθμίσεων ήχου, όπως η ένταση και ποιο ηχείο χρησιμοποιείται για έξοδο."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"εγγραφή ήχου"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Επιτρέπει στην εφαρμογή την εγγραφή ήχου με το μικρόφωνο. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να εγγράφει ήχο ανά πάσα στιγμή χωρίς την έγκρισή σας."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"επικοινωνία με κάρτα sim"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Επιτρέπει στην εφαρμογή την αποστολή εντολών στην κάρτα SIM. Αυτό είναι εξαιρετικά επικίνδυνο."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"λήψη φωτογραφιών και βίντεο"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Επιτρέπει στην εφαρμογή τη λήψη φωτογραφιών και βίντεο με τη φωτογραφική μηχανή. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να χρησιμοποιεί τη φωτογραφική μηχανή ανά πάσα στιγμή χωρίς την έγκρισή σας."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"απενεργοποίηση ένδειξης LED μετάδοσης όταν χρησιμοποιείται η φωτογραφική μηχανή"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Επιτρέπει σε μια εφαρμογή τον έλεγχο του κλειδώματος πληκτρολογίου."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Αντίληψη αλλαγών καταστάσεων εμπιστοσύνης."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Επιτρέπει σε μια εφαρμογή να αντιλαμβάνεται τις αλλαγές στην κατάσταση εμπιστοσύνης."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Σύνδεση σε υπηρεσία trust agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Αλληλεπίδραση με το σύστημα ενημέρωσης και ανάκτησης"</string>

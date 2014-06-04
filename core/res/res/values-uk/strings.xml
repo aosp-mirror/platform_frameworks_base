@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис-ти аудіо"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Дозволяє програмі записувати звук за допомогою мікрофона. Такий дозвіл дає програмі змогу будь-коли записувати звук без вашого підтвердження."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"комунікація із SIM-картою"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дозволяє програмі надсилати команди на SIM-карту. Це дуже небезпечно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"фотограф. та знімати відео"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Дозволяє програмі фотографувати та знімати відео за допомогою камери. Такий дозвіл дає програмі змогу будь-коли використовувати камеру без вашого підтвердження."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"вимикати світлодіодний індикатор передавання, коли використовується камера"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Дозволяє програмі керувати клавіатурою."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Відстежувати зміни в стані довіри."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Дозволяє додатку відстежувати зміни в стані довіри."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Прив’язуватися до служби довірчих агентів"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозволяє додатку прив’язуватися до служби довірчих агентів."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаємодіяти з оновленнями системи та системою відновлення."</string>

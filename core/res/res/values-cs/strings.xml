@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikaci zaznamenat zvuk pomocí mikrofonu. Toto oprávnění umožňuje aplikaci kdykoliv zaznamenat zvuk bez vašeho svolení."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikace s kartou SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Umožňuje aplikaci odesílat příkazy na kartu SIM. Toto oprávnění je velmi nebezpečné."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto oprávnění umožňuje aplikaci používat fotoaparát kdykoliv i bez vašeho svolení."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"vypnutí indikátoru LED přenosu při použití fotoaparátu"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Umožňuje aplikaci ovládat zámek obrazovky."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Naslouchat změnám stavu důvěryhodnosti"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Umožňuje aplikaci naslouchat změnám ve stavu důvěryhodnosti."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Vázat se na službu zástupce důvěryhodnosti"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Umožňuje aplikaci vázat se na službu zástupce důvěryhodnosti."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakce se systémem aktualizací a obnovení"</string>
