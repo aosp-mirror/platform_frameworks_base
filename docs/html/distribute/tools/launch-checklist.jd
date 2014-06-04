@@ -85,9 +85,7 @@ src="{@docRoot}distribute/images/launch-checklist.jpg"></div>
   Play.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/understanding"
@@ -110,9 +108,7 @@ data-maxresults="6">
   repeated violations, termination of your developer account.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/policies" data-sortorder=
@@ -154,9 +150,7 @@ data-maxresults="6">
   should exhibit.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/quality" data-sortorder=
@@ -212,9 +206,7 @@ data-maxresults="6">
   no changes are required in your app binary.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/rating" data-sortorder=
@@ -280,9 +272,7 @@ data-maxresults="6">
   Checklist</a> for key steps and considerations in the localization process.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/country" data-sortorder=
@@ -335,9 +325,7 @@ data-maxresults="6">
   on your code when building your release-ready APK.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/size" data-sortorder=
@@ -387,9 +375,7 @@ data-maxresults="6">
   <a href="{@docRoot}about/dashboards/index.html">Device Dashboard</a> charts.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/platform" data-sortorder=
@@ -450,9 +436,7 @@ data-maxresults="6">
   set up a Google Wallet Merchant Account</a> before you can publish.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/price" data-sortorder=
@@ -485,9 +469,7 @@ data-maxresults="6">
   complete and test your implementation before creating your release-ready APK.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/purchasemethod"
@@ -517,9 +499,7 @@ data-maxresults="6">
   available currencies through the Developer Console.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/setprice" data-sortorder=
@@ -599,9 +579,7 @@ data-maxresults="6">
   listing.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/localization"
@@ -659,9 +637,7 @@ data-maxresults="6">
   publishing date.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/graphics" data-sortorder=
@@ -701,7 +677,7 @@ data-maxresults="6">
   Developer Console. If necessary, you can replace an APK with a more recent
   version before publishing.
 </p>
-<!--<h3>Related resources</h3>
+<!--<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/toolsreference/launchchecklist/build"
@@ -815,9 +791,7 @@ See how you can facilitate testing with Google Play.</td>
   elsewhere.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/productdetails"
@@ -853,9 +827,7 @@ data-maxresults="6">
   available.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/badges" data-sortorder=
@@ -959,9 +931,7 @@ data-maxresults="6">
   linking from your promotional campaigns.
 </p>
 
-<h3>
-  Related resources
-</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13" data-query=
 "collection:distribute/toolsreference/launchchecklist/finalchecks"
@@ -1063,7 +1033,7 @@ data-maxresults="6">
 </ul>
 </ul>
 
-<h3>Related resources</h3>
+<h3 class="rel-resources clearfloat">Related resources</h3>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/toolsreference/launchchecklist/afterlaunch"
