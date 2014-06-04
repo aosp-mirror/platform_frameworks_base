@@ -30,6 +30,7 @@
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <SkImageInfo.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPorterDuff.h>
@@ -376,6 +377,8 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
 static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jintArray colors, jint offset, jint stride,
         jfloat left, jfloat top, jint width, jint height, jboolean hasAlpha, jlong paintPtr) {
+    // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
+    // correct the alphaType to kOpaque_SkAlphaType.
     const SkImageInfo info = SkImageInfo::Make(width, height,
                                hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
                                kPremul_SkAlphaType);
@@ -385,7 +388,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         return;
     }
 
-    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap, true)) {
+    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap)) {
         delete bitmap;
         return;
     }

@@ -24,6 +24,7 @@
 #include "SkDeque.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
+#include <SkImageInfo.h>
 #include "SkPorterDuff.h"
 #include "SkShader.h"
 #include "SkTArray.h"
@@ -699,6 +700,8 @@ public:
                                 jboolean hasAlpha, jlong paintHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
+        // correct the alphaType to kOpaque_SkAlphaType.
         SkImageInfo info = SkImageInfo::Make(width, height,
                                hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
                                kPremul_SkAlphaType);
@@ -708,7 +711,7 @@ public:
         }
 
         if (!GraphicsJNI::SetPixels(env, jcolors, offset, stride,
-                0, 0, width, height, bitmap, true)) {
+                0, 0, width, height, bitmap)) {
             return;
         }
 

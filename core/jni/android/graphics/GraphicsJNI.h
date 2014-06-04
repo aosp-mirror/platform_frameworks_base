@@ -90,10 +90,11 @@ public:
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
+        Whether to use premultiplied pixels is determined by dstBitmap's alphaType.
     */
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
-            const SkBitmap& dstBitmap, bool isPremultiplied);
+            const SkBitmap& dstBitmap);
 
     static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
 };
