@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1">
         <SeekBar
-                style="?android:attr/seekBarStyle"
                 android:id="@+id/seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
