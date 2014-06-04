@@ -16,20 +16,22 @@
 
 <!-- Colors specific to Quantum themes. -->
 <resources>
-    <color name="background_quantum_dark">#ff414042</color>
-    <color name="background_quantum_light">#fff1f2f2</color>
+    <color name="background_quantum_dark">#ff212121</color>
+    <color name="background_quantum_light">#fffafafa</color>
 
+    <!-- Black 27% -->
+    <color name="ripple_quantum_light">#45000000</color>
+    <!-- White 19% -->
     <color name="ripple_quantum_dark">#30ffffff</color>
-    <color name="ripple_quantum_light">#30000000</color>
 
     <color name="button_quantum_dark">#ff5a595b</color>
     <color name="button_quantum_light">#ffd6d7d7</color>
 
     <color name="bright_foreground_quantum_dark">@color/white</color>
     <color name="bright_foreground_quantum_light">@color/black</color>
-    <!-- TODO: This is 50% alpha black -->
+    <!-- Black 50% -->
     <color name="bright_foreground_disabled_quantum_dark">#80000000</color>
-    <!-- TODO: This is 50% alpha white -->
+    <!-- White 50% -->
     <color name="bright_foreground_disabled_quantum_light">#80ffffff</color>
     <color name="bright_foreground_inverse_quantum_dark">@color/bright_foreground_quantum_light</color>
     <color name="bright_foreground_inverse_quantum_light">@color/bright_foreground_quantum_dark</color>
@@ -41,10 +43,27 @@
 
     <color name="hint_foreground_quantum_dark">@color/bright_foreground_disabled_quantum_dark</color>
     <color name="hint_foreground_quantum_light">@color/bright_foreground_disabled_quantum_light</color>
-    <!-- TODO: This is 40% alpha teal_A200 -->
-    <color name="highlighted_text_quantum_dark">#660097a7</color>
-    <!-- TODO: This is 40% alpha teal_A200 -->
-    <color name="highlighted_text_quantum_light">#660097a7</color>
+    <!-- TODO: This is 40% alpha on the default accent color. -->
+    <color name="highlighted_text_quantum_dark">#6640c4ff</color>
+    <!-- TODO: This is 40% alpha on the default accent color. -->
+    <color name="highlighted_text_quantum_light">#6640c4ff</color>
+
+    <!-- Text & foreground colors -->
+    <eat-comment />
+
+    <!-- Black 87% -->
+    <color name="primary_text_default_quantum_light">#de000000</color>
+    <!-- Black 54% -->
+    <color name="secondary_text_quantum_light">#8a000000</color>
+    <!-- Black 54% (TODO: same as secondary?) -->
+    <color name="tertiary_text_quantum_light">#8a000000</color>
+
+    <!-- White 87% -->
+    <color name="primary_text_default_quantum_dark">#deffffff</color>
+    <!-- White 38% -->
+    <color name="secondary_text_quantum_dark">#61ffffff</color>
+    <!-- White 38% (TODO: same as secondary?) -->
+    <color name="tertiary_text_quantum_dark">#61ffffff</color>
 
     <!-- Primary & accent colors -->
     <eat-comment />
@@ -62,6 +81,8 @@
     <color name="quantum_blue_700">#ff3367d6</color>
     <color name="quantum_blue_A200">#ff448aff</color>
     <color name="quantum_blue_A400">#ff2979ff</color>
+
+    <color name="quantum_light_blue_A200">#ff40c4ff</color>
 
     <color name="quantum_teal_100">#ffb2ebf2</color>
     <color name="quantum_teal_300">#ff4dd0e1</color>
@@ -112,27 +133,22 @@
     <color name="quantum_grey_100">#fff5f5f5</color>
     <color name="quantum_grey_300">#ffeeeeee</color>
     <color name="quantum_grey_500">#ffa3a3a3</color>
+    <color name="quantum_grey_600">#ff757575</color>
     <color name="quantum_grey_700">#ff717171</color>
+    <color name="quantum_grey_900">#ff212121</color>
 
     <color name="quantum_blue_grey_50">#ffeceff1</color>
     <color name="quantum_blue_grey_100">#ffcfd8dc</color>
     <color name="quantum_blue_grey_300">#ff90a4ae</color>
+    <color name="quantum_blue_grey_400">#ff78909c</color>
     <color name="quantum_blue_grey_500">#ff607d8b</color>
+    <color name="quantum_blue_grey_600">#ff546e7a</color>
     <color name="quantum_blue_grey_700">#ff455a64</color>
+    <color name="quantum_blue_grey_800">#ff37474f</color>
+    <color name="quantum_blue_grey_900">#ff263238</color>
 
     <color name="quantum_brown_100">#ffd7ccc8</color>
     <color name="quantum_brown_300">#ffa1887f</color>
     <color name="quantum_brown_500">#ff795548</color>
     <color name="quantum_brown_700">#ff5d4037</color>
-
-    <!-- Text & foreground colors -->
-    <eat-comment />
-
-    <color name="primary_text_default_quantum_light">#de000000</color>
-    <color name="secondary_text_quantum_light">#8a000000</color>
-    <color name="tertiary_text_quantum_light">#4d000000</color>
-
-    <color name="primary_text_default_quantum_dark">#deffffff</color>
-    <color name="secondary_text_quantum_dark">#8affffff</color>
-    <color name="tertiary_text_quantum_dark">#4dffffff</color>
 </resources>

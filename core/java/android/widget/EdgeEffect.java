@@ -122,7 +122,7 @@ public class EdgeEffect {
         final TypedArray a = context.obtainStyledAttributes(
                 com.android.internal.R.styleable.EdgeEffect);
         final int themeColor = a.getColor(
-                com.android.internal.R.styleable.EdgeEffect_colorPrimaryLight, 0xff666666);
+                com.android.internal.R.styleable.EdgeEffect_colorPrimary, 0xff666666);
         a.recycle();
         mPaint.setColor((themeColor & 0xffffff) | 0x33000000);
         mPaint.setStyle(Paint.Style.FILL);
