@@ -4028,12 +4028,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int scrollY = mScrollY;
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int leftPadding = mListPadding.left + mGlowPaddingLeft;
-                final int rightPadding = mListPadding.right + mGlowPaddingRight;
-                final int width = getWidth() - leftPadding - rightPadding;
+                final int width = getWidth();
 
                 int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess);
-                canvas.translate(leftPadding, edgeY);
+                canvas.translate(0, edgeY);
                 mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidate(0, 0, getWidth(),
@@ -4043,12 +4041,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int leftPadding = mListPadding.left + mGlowPaddingLeft;
-                final int rightPadding = mListPadding.right + mGlowPaddingRight;
-                final int width = getWidth() - leftPadding - rightPadding;
+                final int width = getWidth();
                 final int height = getHeight();
 
-                int edgeX = -width + leftPadding;
+                int edgeX = -width;
                 int edgeY = Math.max(height, scrollY + mLastPositionDistanceGuess);
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);

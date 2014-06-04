@@ -312,8 +312,7 @@ public class EdgeEffect {
         final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
         float translateX = mBounds.width() * displacement / 2;
 
-        canvas.clipRect(Float.MIN_VALUE, mBounds.top,
-                Float.MAX_VALUE, Float.MAX_VALUE);
+        canvas.clipRect(mBounds);
         canvas.translate(translateX, 0);
         canvas.drawArc(mArcRect, 45, 90, true, mPaint);
         canvas.restoreToCount(count);
