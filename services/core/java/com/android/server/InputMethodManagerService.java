@@ -2085,8 +2085,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (subtype != null) {
-                setInputMethodWithSubtypeId(token, id, InputMethodUtils.getSubtypeIdFromHashCode(
-                        mMethodMap.get(id), subtype.hashCode()));
+                setInputMethodWithSubtypeIdLocked(token, id,
+                        InputMethodUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
+                                subtype.hashCode()));
             } else {
                 setInputMethod(token, id);
             }
@@ -2173,7 +2174,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second
                             + ", from: " + mCurMethodId + ", " + subtypeId);
                 }
-                setInputMethodWithSubtypeId(token, targetLastImiId, subtypeId);
+                setInputMethodWithSubtypeIdLocked(token, targetLastImiId, subtypeId);
                 return true;
             } else {
                 return false;
@@ -2192,7 +2193,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (nextSubtype == null) {
                 return false;
             }
-            setInputMethodWithSubtypeId(token, nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
+            setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
+                    nextSubtype.mSubtypeId);
             return true;
         }
     }
@@ -2317,26 +2319,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
-            if (token == null) {
-                if (mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    throw new SecurityException(
-                            "Using null token requires permission "
-                            + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-                }
-            } else if (mCurToken != token) {
-                Slog.w(TAG, "Ignoring setInputMethod of uid " + Binder.getCallingUid()
-                        + " token: " + token);
-                return;
-            }
+            setInputMethodWithSubtypeIdLocked(token, id, subtypeId);
+        }
+    }
 
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setInputMethodLocked(id, subtypeId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+    private void setInputMethodWithSubtypeIdLocked(IBinder token, String id, int subtypeId) {
+        if (token == null) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Using null token requires permission "
+                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
             }
+        } else if (mCurToken != token) {
+            Slog.w(TAG, "Ignoring setInputMethod of uid " + Binder.getCallingUid()
+                    + " token: " + token);
+            return;
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setInputMethodLocked(id, subtypeId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
