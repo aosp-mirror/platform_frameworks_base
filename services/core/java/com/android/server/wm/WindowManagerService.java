@@ -407,8 +407,11 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Windows that clients are waiting to have drawn.
      */
-    ArrayList<Pair<WindowState, IRemoteCallback>> mWaitingForDrawn
-            = new ArrayList<Pair<WindowState, IRemoteCallback>>();
+    ArrayList<WindowState> mWaitingForDrawn = new ArrayList<WindowState>();
+    /**
+     * And the callback to make when they've all been drawn.
+     */
+    IRemoteCallback mWaitingForDrawnCallback;
 
     /**
      * Windows that have called relayout() while we were running animations,
@@ -814,6 +817,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAnimator = new WindowAnimator(this);
 
+        LocalServices.addService(WindowManagerInternal.class, new LocalService());
         initPolicy();
 
         // Add ourself to the Watchdog monitors.
@@ -828,7 +832,6 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.closeTransaction();
         }
 
-        LocalServices.addService(WindowManagerInternal.class, new LocalService());
         showCircularDisplayMaskIfNeeded();
     }
 
@@ -7176,6 +7179,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         public static final int SHOW_DISPLAY_MASK = 33;
+        public static final int ALL_WINDOWS_DRAWN = 34;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7552,17 +7556,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case WAITING_FOR_DRAWN_TIMEOUT: {
-                    Pair<WindowState, IRemoteCallback> pair;
+                    IRemoteCallback callback = null;
                     synchronized (mWindowMap) {
-                        pair = (Pair<WindowState, IRemoteCallback>)msg.obj;
-                        Slog.w(TAG, "Timeout waiting for drawn: " + pair.first);
-                        if (!mWaitingForDrawn.remove(pair)) {
-                            return;
-                        }
+                        Slog.w(TAG, "Timeout waiting for drawn: undrawn=" + mWaitingForDrawn);
+                        mWaitingForDrawn.clear();
+                        callback = mWaitingForDrawnCallback;
+                        mWaitingForDrawnCallback = null;
                     }
-                    try {
-                        pair.second.sendResult(null);
-                    } catch (RemoteException e) {
+                    if (callback != null) {
+                        try {
+                            callback.sendResult(null);
+                        } catch (RemoteException e) {
+                        }
                     }
                     break;
                 }
@@ -7620,6 +7625,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     } catch (RemoteException e) {
                     }
                     break;
+                case ALL_WINDOWS_DRAWN: {
+                    IRemoteCallback callback;
+                    synchronized (mWindowMap) {
+                        callback = mWaitingForDrawnCallback;
+                        mWaitingForDrawnCallback = null;
+                    }
+                    if (callback != null) {
+                        try {
+                            callback.sendResult(null);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");
@@ -9558,53 +9576,30 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void checkDrawnWindowsLocked() {
-        if (mWaitingForDrawn.size() > 0) {
-            for (int j=mWaitingForDrawn.size()-1; j>=0; j--) {
-                Pair<WindowState, IRemoteCallback> pair = mWaitingForDrawn.get(j);
-                WindowState win = pair.first;
-                //Slog.i(TAG, "Waiting for drawn " + win + ": removed="
-                //        + win.mRemoved + " visible=" + win.isVisibleLw()
-                //        + " shown=" + win.mSurfaceShown);
-                if (win.mRemoved) {
-                    // Window has been removed; no draw will now happen, so stop waiting.
-                    Slog.w(TAG, "Aborted waiting for drawn: " + pair.first);
-                    try {
-                        pair.second.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                    mWaitingForDrawn.remove(pair);
-                    mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
-                } else if (win.mWinAnimator.mSurfaceShown) {
-                    // Window is now drawn (and shown).
-                    try {
-                        pair.second.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                    mWaitingForDrawn.remove(pair);
-                    mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
-                }
+        if (mWaitingForDrawn.isEmpty() || mWaitingForDrawnCallback == null) {
+            return;
+        }
+        for (int j = mWaitingForDrawn.size() - 1; j >= 0; j--) {
+            WindowState win = mWaitingForDrawn.get(j);
+            if (DEBUG_SCREEN_ON) Slog.i(TAG, "Waiting for drawn " + win +
+                    ": removed=" + win.mRemoved + " visible=" + win.isVisibleLw() +
+                    " mHasSurface=" + win.mHasSurface +
+                    " drawState=" + win.mWinAnimator.mDrawState);
+            if (win.mRemoved || !win.mHasSurface) {
+                // Window has been removed; no draw will now happen, so stop waiting.
+                if (DEBUG_SCREEN_ON) Slog.w(TAG, "Aborted waiting for drawn: " + win);
+                mWaitingForDrawn.remove(win);
+            } else if (win.hasDrawnLw()) {
+                // Window is now drawn (and shown).
+                if (DEBUG_SCREEN_ON) Slog.d(TAG, "Window drawn win=" + win);
+                mWaitingForDrawn.remove(win);
             }
         }
-    }
-
-    @Override
-    public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
-        if (token != null && callback != null) {
-            synchronized (mWindowMap) {
-                WindowState win = windowForClientLocked(null, token, true);
-                if (win != null) {
-                    Pair<WindowState, IRemoteCallback> pair =
-                            new Pair<WindowState, IRemoteCallback>(win, callback);
-                    Message m = mH.obtainMessage(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
-                    mH.sendMessageDelayed(m, 2000);
-                    mWaitingForDrawn.add(pair);
-                    checkDrawnWindowsLocked();
-                    return true;
-                }
-                Slog.i(TAG, "waitForWindowDrawn: win null");
-            }
+        if (mWaitingForDrawn.isEmpty()) {
+            if (DEBUG_SCREEN_ON) Slog.d(TAG, "All windows drawn!");
+            mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
+            mH.sendEmptyMessage(H.ALL_WINDOWS_DRAWN);
         }
-        return false;
     }
 
     void setHoldScreenLocked(final Session newHoldScreen) {
@@ -10552,9 +10547,8 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.println();
             pw.println("  Clients waiting for these windows to be drawn:");
             for (int i=mWaitingForDrawn.size()-1; i>=0; i--) {
-                Pair<WindowState, IRemoteCallback> pair = mWaitingForDrawn.get(i);
-                pw.print("  Waiting #"); pw.print(i); pw.print(' '); pw.print(pair.first);
-                        pw.print(": "); pw.println(pair.second);
+                WindowState win = mWaitingForDrawn.get(i);
+                pw.print("  Waiting #"); pw.print(i); pw.print(' '); pw.print(win);
             }
         }
         pw.println();
@@ -11064,7 +11058,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mAccessibilityController.setMagnificationCallbacksLocked(callbacks);
                 if (!mAccessibilityController.hasCallbacksLocked()) {
-                     mAccessibilityController = null;
+                    mAccessibilityController = null;
                 }
             }
         }
@@ -11078,7 +11072,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mAccessibilityController.setWindowsForAccessibilityCallback(callback);
                 if (!mAccessibilityController.hasCallbacksLocked()) {
-                     mAccessibilityController = null;
+                    mAccessibilityController = null;
                 }
             }
         }
@@ -11114,6 +11108,26 @@ public class WindowManagerService extends IWindowManager.Stub
                     outBounds.setEmpty();
                 }
             }
+        }
+
+        public void waitForAllWindowsDrawn(IRemoteCallback callback, long timeout) {
+            synchronized (mWindowMap) {
+                mWaitingForDrawnCallback = callback;
+                final WindowList windows = getDefaultWindowListLocked();
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    final WindowState win = windows.get(winNdx);
+                    if (win.mHasSurface) {
+                        win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                        // Force add to mResizingWindows.
+                        win.mLastContentInsets.set(-1, -1, -1, -1);
+                        mWaitingForDrawn.add(win);
+                    }
+                }
+                requestTraversalLocked();
+                mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
+                mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, timeout);
+            }
+            checkDrawnWindowsLocked();
         }
     }
 }
