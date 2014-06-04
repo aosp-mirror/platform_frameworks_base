@@ -872,22 +872,36 @@ public class ConnectivityManager {
 
     /**
      * Removes the NET_CAPABILITY_NOT_RESTRICTED capability from the given
-     * NetworkCapabilities object if it lists any capabilities that are
-     * typically provided by retricted networks.
+     * NetworkCapabilities object if all the capabilities it provides are
+     * typically provided by restricted networks.
+     *
+     * TODO: consider:
+     * - Moving to NetworkCapabilities
+     * - Renaming it to guessRestrictedCapability and make it set the
+     *   restricted capability bit in addition to clearing it.
      * @hide
      */
     public static void maybeMarkCapabilitiesRestricted(NetworkCapabilities nc) {
-        for (Integer capability: nc.getNetworkCapabilities()) {
+        for (Integer capability : nc.getNetworkCapabilities()) {
             switch (capability.intValue()) {
                 case NetworkCapabilities.NET_CAPABILITY_CBS:
                 case NetworkCapabilities.NET_CAPABILITY_DUN:
+                case NetworkCapabilities.NET_CAPABILITY_EIMS:
                 case NetworkCapabilities.NET_CAPABILITY_FOTA:
                 case NetworkCapabilities.NET_CAPABILITY_IA:
                 case NetworkCapabilities.NET_CAPABILITY_IMS:
-                    nc.removeNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-                    break;
+                case NetworkCapabilities.NET_CAPABILITY_RCS:
+                case NetworkCapabilities.NET_CAPABILITY_XCAP:
+                    continue;
+                default:
+                    // At least one capability usually provided by unrestricted
+                    // networks. Conclude that this network is unrestricted.
+                    return;
             }
         }
+        // All the capabilities are typically provided by restricted networks.
+        // Conclude that this network is restricted.
+        nc.removeNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
     }
 
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
