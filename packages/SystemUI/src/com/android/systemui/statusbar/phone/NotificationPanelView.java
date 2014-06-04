@@ -243,8 +243,8 @@ public class NotificationPanelView extends PanelView implements
                     mClockAnimator.removeAllListeners();
                     mClockAnimator.cancel();
                 }
-                mClockAnimator =
-                        ObjectAnimator.ofFloat(mKeyguardStatusView, View.Y, mClockAnimationTarget);
+                mClockAnimator = ObjectAnimator
+                        .ofFloat(mKeyguardStatusView, View.Y, mClockAnimationTarget);
                 mClockAnimator.setInterpolator(mFastOutSlowInInterpolator);
                 mClockAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 mClockAnimator.addListener(new AnimatorListenerAdapter() {
@@ -551,9 +551,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setExpanded(expandVisually, mStackScrollerOverscrolling);
         mNotificationStackScroller.setEnabled(!mQsExpanded);
         mQsPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-        mQsContainer.setVisibility(mKeyguardShowing && !mQsExpanded
-                ? View.INVISIBLE
-                : View.VISIBLE);
+        mQsContainer.setVisibility(mKeyguardShowing && !mQsExpanded ? View.INVISIBLE : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
     }
 
@@ -731,8 +729,20 @@ public class NotificationPanelView extends PanelView implements
     private void updateKeyguardHeaderVisibility() {
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
-            boolean hidden = mNotificationStackScroller.getNotificationsTopY()
-                    <= mHeader.getBottom() + mNotificationsHeaderCollideDistance;
+            boolean hidden;
+            if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+                
+                // When on Keyguard, we hide the header as soon as the top card of the notification
+                // stack scroller is close enough (collision distance) to the bottom of the header.
+                hidden = mNotificationStackScroller.getNotificationsTopY()
+                        <= mHeader.getBottom() + mNotificationsHeaderCollideDistance;
+            } else {
+
+                // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
+                // soon as we start translating the stack.
+                hidden = mNotificationStackScroller.getTranslationY() < 0;
+            }
+
             if (hidden && !mHeaderHidden) {
                 mHeader.animate()
                         .alpha(0f)
