@@ -4109,6 +4109,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If the key would be handled globally, just return the result, don't worry about special
         // key processing.
         if (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
+            if (isWakeKey) {
+                mPowerManager.wakeUp(event.getEventTime());
+            }
             return result;
         }
 
