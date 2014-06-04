@@ -2663,6 +2663,13 @@
                 android:label="@string/permlab_provide_trust_agent"
                 android:description="@string/permdesc_provide_trust_agent" />
 
+    <!-- Allows an application to launch the trust agent settings activity.
+        @hide -->
+    <permission android:name="android.permission.LAUNCH_TRUST_AGENT_SETTINGS"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_launch_trust_agent_settings"
+        android:description="@string/permdesc_launch_trust_agent_settings" />
+
     <!-- Must be required by an {@link
          android.service.trust.TrustAgentService},
          to ensure that only the system can bind to it. -->
