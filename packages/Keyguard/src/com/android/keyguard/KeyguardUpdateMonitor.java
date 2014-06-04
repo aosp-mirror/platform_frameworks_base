@@ -418,7 +418,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    /* package */ static class BatteryStatus {
+    public static class BatteryStatus {
         public final int status;
         public final int level;
         public final int plugged;
