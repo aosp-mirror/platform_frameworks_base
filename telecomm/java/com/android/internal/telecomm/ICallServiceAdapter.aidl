@@ -17,6 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.telecomm.CallInfo;
+import android.telecomm.ConnectionRequest;
 
 /**
  * Internal remote callback interface for call services.
@@ -32,7 +33,7 @@ oneway interface ICallServiceAdapter {
 
     void handleSuccessfulOutgoingCall(String callId);
 
-    void handleFailedOutgoingCall(String callId, String errorMessage);
+    void handleFailedOutgoingCall(in ConnectionRequest request, int errorCode, String errorMessage);
 
     void setActive(String callId);
 

@@ -84,12 +84,16 @@ public final class CallServiceAdapter {
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call failed.
      *
-     * @param callId The ID of the outgoing call.
-     * @param errorMessage The error associated with the failed call attempt.
+     * @param request The originating request for a connection.
+     * @param errorCode The error code associated with the failed call attempt.
+     * @param errorMsg The error message associated with the failed call attempt.
      */
-    public void handleFailedOutgoingCall(String callId, String errorMessage) {
+    public void handleFailedOutgoingCall(
+            ConnectionRequest request,
+            int errorCode,
+            String errorMsg) {
         try {
-            mAdapter.handleFailedOutgoingCall(callId, errorMessage);
+            mAdapter.handleFailedOutgoingCall(request, errorCode, errorMsg);
         } catch (RemoteException e) {
         }
     }

@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.DisconnectCause;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -115,9 +116,8 @@ public abstract class ConnectionService extends CallService {
                     }
 
                     @Override
-                    public void onError(Uri handle, String reason) {
-                        Log.w(this, "Error in onFindSubscriptions " + callInfo.getHandle()
-                                + " error: " + reason);
+                    public void onError(Uri handle, int code, String msg) {
+                        Log.w(this, "Error in onFindSubscriptions %s %d %s", handle, code, msg);
                         getAdapter().setIsCompatibleWith(callInfo.getId(), false);
                     }
                 }
@@ -129,6 +129,7 @@ public abstract class ConnectionService extends CallService {
         Log.d(this, "call %s", callInfo);
         onCreateConnections(
                 new ConnectionRequest(
+                        callInfo.getId(),
                         callInfo.getHandle(),
                         callInfo.getExtras()),
                 new Response<ConnectionRequest, Connection>() {
@@ -137,7 +138,8 @@ public abstract class ConnectionService extends CallService {
                         if (result.length != 1) {
                             Log.d(this, "adapter handleFailedOutgoingCall %s", callInfo);
                             getAdapter().handleFailedOutgoingCall(
-                                    callInfo.getId(),
+                                    request,
+                                    DisconnectCause.ERROR_UNSPECIFIED,
                                     "Created " + result.length + " Connections, expected 1");
                             for (Connection c : result) {
                                 c.abort();
@@ -150,8 +152,8 @@ public abstract class ConnectionService extends CallService {
                     }
 
                     @Override
-                    public void onError(ConnectionRequest request, String reason) {
-                        getAdapter().handleFailedOutgoingCall(callInfo.getId(), reason);
+                    public void onError(ConnectionRequest request, int code, String msg) {
+                        getAdapter().handleFailedOutgoingCall(request, code, msg);
                     }
                 }
         );
@@ -168,6 +170,7 @@ public abstract class ConnectionService extends CallService {
         Log.d(this, "setIncomingCallId %s %s", callId, extras);
         onCreateIncomingConnection(
                 new ConnectionRequest(
+                        callId,
                         null,  // TODO: Can we obtain this from "extras"?
                         extras),
                 new Response<ConnectionRequest, Connection>() {
@@ -176,7 +179,8 @@ public abstract class ConnectionService extends CallService {
                         if (result.length != 1) {
                             Log.d(this, "adapter handleFailedOutgoingCall %s", callId);
                             getAdapter().handleFailedOutgoingCall(
-                                    callId,
+                                    request,
+                                    DisconnectCause.ERROR_UNSPECIFIED,
                                     "Created " + result.length + " Connections, expected 1");
                             for (Connection c : result) {
                                 c.abort();
@@ -195,8 +199,9 @@ public abstract class ConnectionService extends CallService {
                     }
 
                     @Override
-                    public void onError(ConnectionRequest request, String reason) {
-                        Log.d(this, "adapter failed setIncomingCallId %s %s", request, reason);
+                    public void onError(ConnectionRequest request, int code, String msg) {
+                        Log.d(this, "adapter failed setIncomingCallId %s %d %s",
+                                request, code, msg);
                     }
                 }
         );

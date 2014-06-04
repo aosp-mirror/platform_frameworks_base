@@ -33,7 +33,8 @@ public interface Response<IN, OUT> {
      * Indicates the inability to provide results.
      *
      * @param request The original request.
-     * @param reason The reason for the failure.
+     * @param code An integer code indicating the reason for failure.
+     * @param msg A message explaining the reason for failure.
      */
-    void onError(IN request, String reason);
+    void onError(IN request, int code, String msg);
 }
