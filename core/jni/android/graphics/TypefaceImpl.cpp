@@ -134,18 +134,19 @@ static TypefaceImpl* createFromSkTypeface(SkTypeface* typeface) {
     return result;
 }
 
+// Delete when removing USE_MINIKIN ifdef
 TypefaceImpl* TypefaceImpl_createFromName(const char* name, SkTypeface::Style style) {
-    // TODO: should create a font collection with all styles corresponding to
-    // the name
     SkTypeface* face = SkTypeface::CreateFromName(name, style);
     return createFromSkTypeface(face);
 }
 
+// Delete when removing USE_MINIKIN ifdef
 TypefaceImpl* TypefaceImpl_createFromFile(const char* filename) {
     SkTypeface* face = SkTypeface::CreateFromFile(filename);
     return createFromSkTypeface(face);
 }
 
+// Delete when removing USE_MINIKIN ifdef
 TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
     SkStream* stream = new AssetStreamAdaptor(asset,
                                               AssetStreamAdaptor::kYes_OwnAsset,
@@ -158,7 +159,6 @@ TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
 }
 
 TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
-    ALOGD("createFromFamilies size=%d", size);
     std::vector<FontFamily *>familyVec;
     for (size_t i = 0; i < size; i++) {
         FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
@@ -166,7 +166,18 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
     }
     TypefaceImpl* result = new TypefaceImpl;
     result->fFontCollection = new FontCollection(familyVec);
-    result->fStyle = FontStyle();  // TODO: improve
+    if (size == 0) {
+        ALOGW("createFromFamilies creating empty collection");
+        result->fStyle = FontStyle();
+    } else {
+        const FontStyle defaultStyle;
+        FontFamily* firstFamily = reinterpret_cast<FontFamily*>(families[0]);
+        MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle);
+        SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
+        // TODO: probably better to query more precise style from family, will be important
+        // when we open up API to access 100..900 weights
+        result->fStyle = styleFromSkiaStyle(skTypeface->style());
+    }
     return result;
 }
 
