@@ -155,6 +155,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * motion.
      */
     private int mMaxScrollAfterExpand;
+    private OnLongClickListener mLongClickListener;
 
     /**
      * Should in this touch motion only be scrolling allowed? It's true when the scroller was
@@ -228,6 +229,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        mSwipeHelper.setLongPressListener(mLongClickListener);
 
         mSidePaddings = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_side_padding);
@@ -459,6 +461,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setLongPressListener(View.OnLongClickListener listener) {
         mSwipeHelper.setLongPressListener(listener);
+        mLongClickListener = listener;
     }
 
     public void onChildDismissed(View v) {
