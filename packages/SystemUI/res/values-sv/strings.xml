@@ -187,10 +187,14 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> enheter)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth av"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Ljusstyrka"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotera automatiskt"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotationen har låsts"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Låst i stående läge"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Låst i liggande läge"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (7305323031808150099) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (6359205706154282377) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_portrait_label (5102691921442135053) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_landscape_label (8553157770061178719) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Inmatningsmetod"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Plats"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Plats har inaktiverats"</string>
@@ -204,7 +208,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ej ansluten"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Inget nätverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi av"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Överför skärmen"</string>
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (7482103121002965053) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Invertera färger"</string>
@@ -213,8 +218,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internetdelning"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Trådlös surfzon"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Aviseringar"</string>
-    <!-- no translation found for recents_empty_message (7883614615463619450) -->
-    <skip />
+    <string name="recents_empty_message" msgid="7883614615463619450">"Inga aktiva appar"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Appinformation"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"sök"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Nätverket kan\nvara övervakat"</string>
@@ -233,6 +237,10 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tryck igen för att öppna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Dra uppåt om du vill låsa upp"</string>
+    <!-- no translation found for phone_hint (3101468054914424646) -->
+    <skip />
+    <!-- no translation found for camera_hint (5241441720959174226) -->
+    <skip />
     <string name="zen_mode_forever" msgid="7420011936770086993">"Tills du inaktiverar detta"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"I en minut"</item>
