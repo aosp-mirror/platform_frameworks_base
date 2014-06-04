@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 
@@ -70,12 +71,16 @@ public class NotificationData {
     }
 
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    private Ranking mRanking;
+    private RankingMap mRanking;
     private final Comparator<Entry> mRankingComparator = new Comparator<Entry>() {
         @Override
         public int compare(Entry a, Entry b) {
             if (mRanking != null) {
-                return mRanking.getRank(a.key) - mRanking.getRank(b.key);
+                Ranking aRanking = mRanking.getRanking(a.key);
+                Ranking bRanking = mRanking.getRanking(b.key);
+                int aRank = aRanking != null ? aRanking.getRank() : -1;
+                int bRank = bRanking != null ? bRanking.getRank() : -1;
+                return aRank - bRank;
             }
 
             final StatusBarNotification na = a.notification;
@@ -108,12 +113,12 @@ public class NotificationData {
         return null;
     }
 
-    public void add(Entry entry, Ranking ranking) {
+    public void add(Entry entry, RankingMap ranking) {
         mEntries.add(entry);
         updateRankingAndSort(ranking);
     }
 
-    public Entry remove(String key, Ranking ranking) {
+    public Entry remove(String key, RankingMap ranking) {
         Entry e = findByKey(key);
         if (e == null) {
             return null;
@@ -123,7 +128,7 @@ public class NotificationData {
         return e;
     }
 
-    public void updateRanking(Ranking ranking) {
+    public void updateRanking(RankingMap ranking) {
         updateRankingAndSort(ranking);
     }
 
@@ -137,12 +142,13 @@ public class NotificationData {
                 }
             }
         } else {
-            return mRanking.isAmbient(key);
+            Ranking ranking = mRanking.getRanking(key);
+            return ranking != null && ranking.isAmbient();
         }
         return false;
     }
 
-    private void updateRankingAndSort(Ranking ranking) {
+    private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRanking = ranking;
         }

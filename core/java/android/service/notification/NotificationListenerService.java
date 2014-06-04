@@ -29,6 +29,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public abstract class NotificationListenerService extends Service {
             + "[" + getClass().getSimpleName() + "]";
 
     private INotificationListenerWrapper mWrapper = null;
-    private Ranking mRanking;
+    private RankingMap mRankingMap;
 
     private INotificationManager mNoMan;
 
@@ -75,7 +76,22 @@ public abstract class NotificationListenerService extends Service {
      *            object as well as its identifying information (tag and id) and source
      *            (package name).
      */
-    public abstract void onNotificationPosted(StatusBarNotification sbn);
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        // optional
+    }
+
+    /**
+     * Implement this method to learn about new notifications as they are posted by apps.
+     *
+     * @param sbn A data structure encapsulating the original {@link android.app.Notification}
+     *            object as well as its identifying information (tag and id) and source
+     *            (package name).
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications, including the newly posted one.
+     */
+    public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
+        onNotificationPosted(sbn);
+    }
 
     /**
      * Implement this method to learn when notifications are removed.
@@ -94,7 +110,33 @@ public abstract class NotificationListenerService extends Service {
      *            and source (package name) used to post the {@link android.app.Notification} that
      *            was just removed.
      */
-    public abstract void onNotificationRemoved(StatusBarNotification sbn);
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        // optional
+    }
+
+    /**
+     * Implement this method to learn when notifications are removed.
+     * <P>
+     * This might occur because the user has dismissed the notification using system UI (or another
+     * notification listener) or because the app has withdrawn the notification.
+     * <P>
+     * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
+     * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
+     * fields such as {@link android.app.Notification#contentView} and
+     * {@link android.app.Notification#largeIcon}. However, all other fields on
+     * {@link StatusBarNotification}, sufficient to match this call with a prior call to
+     * {@link #onNotificationPosted(StatusBarNotification)}, will be intact.
+     *
+     * @param sbn A data structure encapsulating at least the original information (tag and id)
+     *            and source (package name) used to post the {@link android.app.Notification} that
+     *            was just removed.
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
+     *
+     */
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
+        onNotificationRemoved(sbn);
+    }
 
     /**
      * Implement this method to learn about when the listener is enabled and connected to
@@ -107,10 +149,11 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to be notified when the notification ranking changes.
-     * <P>
-     * Call {@link #getCurrentRanking()} to retrieve the new ranking.
+     *
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
      */
-    public void onNotificationRankingUpdate() {
+    public void onNotificationRankingUpdate(RankingMap rankingMap) {
         // optional
     }
 
@@ -241,16 +284,19 @@ public abstract class NotificationListenerService extends Service {
      *
      * <p>
      * The returned object represents the current ranking snapshot and only
-     * applies for currently active notifications. Hence you must retrieve a
-     * new Ranking after each notification event such as
-     * {@link #onNotificationPosted(StatusBarNotification)},
-     * {@link #onNotificationRemoved(StatusBarNotification)}, etc.
+     * applies for currently active notifications.
+     * <p>
+     * Generally you should use the RankingMap that is passed with events such
+     * as {@link #onNotificationPosted(StatusBarNotification, RankingMap)},
+     * {@link #onNotificationRemoved(StatusBarNotification, RankingMap)}, and
+     * so on. This method should only be used when needing access outside of
+     * such events, for example to retrieve the RankingMap right after
+     * initialization.
      *
-     * @return A {@link NotificationListenerService.Ranking} object providing
-     *     access to ranking information
+     * @return A {@link RankingMap} object providing access to ranking information
      */
-    public Ranking getCurrentRanking() {
-        return mRanking;
+    public RankingMap getCurrentRanking() {
+        return mRankingMap;
     }
 
     @Override
@@ -313,7 +359,7 @@ public abstract class NotificationListenerService extends Service {
             synchronized (mWrapper) {
                 applyUpdate(update);
                 try {
-                    NotificationListenerService.this.onNotificationPosted(sbn);
+                    NotificationListenerService.this.onNotificationPosted(sbn, mRankingMap);
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onNotificationPosted", t);
                 }
@@ -326,7 +372,7 @@ public abstract class NotificationListenerService extends Service {
             synchronized (mWrapper) {
                 applyUpdate(update);
                 try {
-                    NotificationListenerService.this.onNotificationRemoved(sbn);
+                    NotificationListenerService.this.onNotificationRemoved(sbn, mRankingMap);
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onNotificationRemoved", t);
                 }
@@ -351,7 +397,7 @@ public abstract class NotificationListenerService extends Service {
             synchronized (mWrapper) {
                 applyUpdate(update);
                 try {
-                    NotificationListenerService.this.onNotificationRankingUpdate();
+                    NotificationListenerService.this.onNotificationRankingUpdate(mRankingMap);
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onNotificationRankingUpdate", t);
                 }
@@ -360,7 +406,65 @@ public abstract class NotificationListenerService extends Service {
     }
 
     private void applyUpdate(NotificationRankingUpdate update) {
-        mRanking = new Ranking(update);
+        mRankingMap = new RankingMap(update);
+    }
+
+    /**
+     * Provides access to ranking information on a currently active
+     * notification.
+     *
+     * <p>
+     * Note that this object is not updated on notification events (such as
+     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)},
+     * {@link #onNotificationRemoved(StatusBarNotification)}, etc.). Make sure
+     * to retrieve a new Ranking from the current {@link RankingMap} whenever
+     * a notification event occurs.
+     */
+    public static class Ranking {
+        private final String mKey;
+        private final int mRank;
+        private final boolean mIsAmbient;
+        private final boolean mIsInterceptedByDnd;
+
+        private Ranking(String key, int rank, boolean isAmbient, boolean isInterceptedByDnd) {
+            mKey = key;
+            mRank = rank;
+            mIsAmbient = isAmbient;
+            mIsInterceptedByDnd = isInterceptedByDnd;
+        }
+
+        /**
+         * Returns the key of the notification this Ranking applies to.
+         */
+        public String getKey() {
+            return mKey;
+        }
+
+        /**
+         * Returns the rank of the notification.
+         *
+         * @return the rank of the notification, that is the 0-based index in
+         *     the list of active notifications.
+         */
+        public int getRank() {
+            return mRank;
+        }
+
+        /**
+         * Returns whether the notification is an ambient notification, that is
+         * a notification that doesn't require the user's immediate attention.
+         */
+        public boolean isAmbient() {
+            return mIsAmbient;
+        }
+
+        /**
+         * Returns whether the notification was intercepted by
+         * &quot;Do not disturb&quot;.
+         */
+        public boolean isInterceptedByDoNotDisturb() {
+            return mIsInterceptedByDnd;
+        }
     }
 
     /**
@@ -371,11 +475,14 @@ public abstract class NotificationListenerService extends Service {
      * Note that this object represents a ranking snapshot that only applies to
      * notifications active at the time of retrieval.
      */
-    public static class Ranking implements Parcelable {
+    public static class RankingMap implements Parcelable {
         private final NotificationRankingUpdate mRankingUpdate;
+        private final ArrayMap<String, Ranking> mRankingCache;
+        private boolean mRankingCacheInitialized;
 
-        private Ranking(NotificationRankingUpdate rankingUpdate) {
+        private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
+            mRankingCache = new ArrayMap<>(rankingUpdate.getOrderedKeys().length);
         }
 
         /**
@@ -389,56 +496,37 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns the rank of the notification with the given key, that is the
-         * index of <code>key</code> in the array of keys returned by
-         * {@link #getOrderedKeys()}.
+         * Returns the Ranking for the notification with the given key.
          *
-         * @return The rank of the notification with the given key; -1 when the
-         *      given key is unknown.
+         * @return the Ranking of the notification with the given key;
+         *     <code>null</code> when the key is unknown.
          */
-        public int getRank(String key) {
-            // TODO: Optimize.
+        public Ranking getRanking(String key) {
+            synchronized (mRankingCache) {
+                if (!mRankingCacheInitialized) {
+                    initializeRankingCache();
+                    mRankingCacheInitialized = true;
+                }
+            }
+            return mRankingCache.get(key);
+        }
+
+        private void initializeRankingCache() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            for (int i = 0; i < orderedKeys.length; i++) {
-                if (orderedKeys[i].equals(key)) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        /**
-         * Returns whether the notification with the given key was intercepted
-         * by &quot;Do not disturb&quot;.
-         */
-        public boolean isInterceptedByDoNotDisturb(String key) {
-            // TODO: Optimize.
-            for (String interceptedKey : mRankingUpdate.getDndInterceptedKeys()) {
-                if (interceptedKey.equals(key)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * Returns whether the notification with the given key is an ambient
-         * notification, that is a notification that doesn't require the user's
-         * immediate attention.
-         */
-        public boolean isAmbient(String key) {
-            // TODO: Optimize.
             int firstAmbientIndex = mRankingUpdate.getFirstAmbientIndex();
-            if (firstAmbientIndex < 0) {
-                return false;
-            }
-            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            for (int i = firstAmbientIndex; i < orderedKeys.length; i++) {
-                if (orderedKeys[i].equals(key)) {
-                    return true;
+            for (int i = 0; i < orderedKeys.length; i++) {
+                String key = orderedKeys[i];
+                boolean isAmbient = firstAmbientIndex > -1 && firstAmbientIndex <= i;
+                boolean isInterceptedByDnd = false;
+                // TODO: Optimize.
+                for (String s : mRankingUpdate.getDndInterceptedKeys()) {
+                    if (s.equals(key)) {
+                        isInterceptedByDnd = true;
+                        break;
+                    }
                 }
+                mRankingCache.put(key, new Ranking(key, i, isAmbient, isInterceptedByDnd));
             }
-            return false;
         }
 
         // ----------- Parcelable
@@ -453,16 +541,16 @@ public abstract class NotificationListenerService extends Service {
             dest.writeParcelable(mRankingUpdate, flags);
         }
 
-        public static final Creator<Ranking> CREATOR = new Creator<Ranking>() {
+        public static final Creator<RankingMap> CREATOR = new Creator<RankingMap>() {
             @Override
-            public Ranking createFromParcel(Parcel source) {
+            public RankingMap createFromParcel(Parcel source) {
                 NotificationRankingUpdate rankingUpdate = source.readParcelable(null);
-                return new Ranking(rankingUpdate);
+                return new RankingMap(rankingUpdate);
             }
 
             @Override
-            public Ranking[] newArray(int size) {
-                return new Ranking[size];
+            public RankingMap[] newArray(int size) {
+                return new RankingMap[size];
             }
         };
     }

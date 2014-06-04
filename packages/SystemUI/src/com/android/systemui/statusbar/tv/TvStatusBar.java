@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.tv;
 
 import android.os.IBinder;
-import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -51,11 +51,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void addNotificationInternal(StatusBarNotification notification, Ranking ranking) {
+    public void addNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
     }
 
     @Override
-    protected void updateRankingInternal(Ranking ranking) {
+    protected void updateRankingInternal(RankingMap ranking) {
     }
 
     @Override
@@ -63,7 +63,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void removeNotificationInternal(String key, Ranking ranking) {
+    public void removeNotificationInternal(String key, RankingMap ranking) {
     }
 
     @Override

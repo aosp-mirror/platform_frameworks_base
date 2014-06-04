@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Process;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -58,17 +59,18 @@ public class InterceptedNotifications {
         updateSyntheticNotification();
     }
 
-    public boolean tryIntercept(StatusBarNotification notification, Ranking ranking) {
-        if (ranking == null) return false;
+    public boolean tryIntercept(StatusBarNotification notification, RankingMap rankingMap) {
+        if (rankingMap == null) return false;
         if (shouldDisplayIntercepted()) return false;
         if (mReleased.contains(notification.getKey())) return false;
-        if (!ranking.isInterceptedByDoNotDisturb(notification.getKey())) return false;
+        Ranking ranking = rankingMap.getRanking(notification.getKey());
+        if (!ranking.isInterceptedByDoNotDisturb()) return false;
         mIntercepted.put(notification.getKey(), notification);
         updateSyntheticNotification();
         return true;
     }
 
-    public void retryIntercepts(Ranking ranking) {
+    public void retryIntercepts(RankingMap ranking) {
         if (ranking == null) return;
 
         final int N = mIntercepted.size();
