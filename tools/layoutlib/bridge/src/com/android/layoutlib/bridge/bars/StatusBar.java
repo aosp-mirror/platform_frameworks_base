@@ -32,13 +32,13 @@ import android.widget.TextView;
 public class StatusBar extends CustomBar {
 
     public StatusBar(Context context, Density density, int direction, boolean RtlEnabled,
-            int simulatePlatformVersion) throws XmlPullParserException {
+            int simulatedPlatformVersion) throws XmlPullParserException {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
         super(context, density, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml");
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
-        setBackgroundColor(Config.getStatusBarColor(simulatePlatformVersion));
+        setBackgroundColor(Config.getStatusBarColor(simulatedPlatformVersion));
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
