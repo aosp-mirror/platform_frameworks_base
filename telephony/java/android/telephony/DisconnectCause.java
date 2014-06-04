@@ -97,11 +97,62 @@ public class DisconnectCause {
     public static final int CDMA_ACCESS_BLOCKED            = 35;
     /** Unknown error or not specified */
     public static final int ERROR_UNSPECIFIED              = 36;
+    /**
+     * Only emergency numbers are allowed, but we tried to dial
+     * a non-emergency number.
+     */
+    // TODO: This should be the same as NOT_EMERGENCY
+    public static final int EMERGENCY_ONLY                 = 37;
+    /**
+     * The supplied CALL Intent didn't contain a valid phone number.
+     */
+    public static final int NO_PHONE_NUMBER_SUPPLIED       = 38;
+    /**
+     * Our initial phone number was actually an MMI sequence.
+     */
+    public static final int DIALED_MMI                     = 39;
+    /**
+     * We tried to call a voicemail: URI but the device has no
+     * voicemail number configured.
+     */
+    public static final int VOICEMAIL_NUMBER_MISSING       = 40;
+    /**
+     * This status indicates that InCallScreen should display the
+     * CDMA-specific "call lost" dialog.  (If an outgoing call fails,
+     * and the CDMA "auto-retry" feature is enabled, *and* the retried
+     * call fails too, we display this specific dialog.)
+     *
+     * TODO: this is currently unused, since the "call lost" dialog
+     * needs to be triggered by a *disconnect* event, rather than when
+     * the InCallScreen first comes to the foreground.  For now we use
+     * the needToShowCallLostDialog field for this (see below.)
+     */
+    public static final int CDMA_CALL_LOST                 = 41;
+    /**
+     * This status indicates that the call was placed successfully,
+     * but additionally, the InCallScreen needs to display the
+     * "Exiting ECM" dialog.
+     *
+     * (Details: "Emergency callback mode" is a CDMA-specific concept
+     * where the phone disallows data connections over the cell
+     * network for some period of time after you make an emergency
+     * call.  If the phone is in ECM and you dial a non-emergency
+     * number, that automatically *cancels* ECM, but we additionally
+     * need to warn the user that ECM has been canceled (see bug
+     * 4207607.))
+     *
+     * TODO: Rethink where the best place to put this is. It is not a notification
+     * of a failure of the connection -- it is an additional message that accompanies
+     * a successful connection giving the user important information about what happened.
+     *
+     * {@hide}
+     */
+    public static final int EXITED_ECM                     = 42;
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = ERROR_UNSPECIFIED;
+    public static final int MAXIMUM_VALID_VALUE = EXITED_ECM;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -181,6 +232,18 @@ public class DisconnectCause {
             return "CDMA_NOT_EMERGENCY";
         case CDMA_ACCESS_BLOCKED:
             return "CDMA_ACCESS_BLOCKED";
+        case EMERGENCY_ONLY:
+            return "EMERGENCY_ONLY";
+        case NO_PHONE_NUMBER_SUPPLIED:
+            return "NO_PHONE_NUMBER_SUPPLIED";
+        case DIALED_MMI:
+            return "DIALED_MMI";
+        case VOICEMAIL_NUMBER_MISSING:
+            return "VOICEMAIL_NUMBER_MISSING";
+        case CDMA_CALL_LOST:
+            return "CDMA_CALL_LOST";
+        case EXITED_ECM:
+            return "EXITED_ECM";
         case ERROR_UNSPECIFIED:
             return "ERROR_UNSPECIFIED";
         default:

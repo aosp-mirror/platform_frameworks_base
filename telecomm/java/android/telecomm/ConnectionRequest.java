@@ -18,22 +18,36 @@ package android.telecomm;
 
 import android.os.Bundle;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Simple data container encapsulating a request to some entity to
  * create a new {@link Connection}.
  */
-public final class ConnectionRequest {
+public final class ConnectionRequest implements Parcelable {
 
     // TODO: Token to limit recursive invocations
     // TODO: Consider upgrading "mHandle" to ordered list of handles, indicating a set of phone
     //         numbers that would satisfy the client's needs, in order of preference
+    private final String mCallId;
     private final Uri mHandle;
     private final Bundle mExtras;
 
     public ConnectionRequest(Uri handle, Bundle extras) {
-        mHandle = handle; mExtras = extras;
+        this(null, handle, extras);
     }
+
+    public ConnectionRequest(String callId, Uri handle, Bundle extras) {
+        mCallId = callId;
+        mHandle = handle;
+        mExtras = extras;
+    }
+
+    /**
+     * An identifier for this call.
+     */
+    public String getCallId() { return mCallId; }
 
     /**
      * The handle (e.g., phone number) to which the {@link Connection} is to connect.
@@ -54,4 +68,40 @@ public final class ConnectionRequest {
                         : ConnectionService.toLogSafePhoneNumber(mHandle.toString()),
                 mExtras == null ? "" : mExtras);
     }
-}
+
+    /**
+     * Responsible for creating CallInfo objects for deserialized Parcels.
+     */
+    public static final Parcelable.Creator<ConnectionRequest> CREATOR =
+            new Parcelable.Creator<ConnectionRequest> () {
+                @Override
+                public ConnectionRequest createFromParcel(Parcel source) {
+                    String callId = source.readString();
+                    Uri handle = (Uri) source.readParcelable(getClass().getClassLoader());
+                    Bundle extras = (Bundle) source.readParcelable(getClass().getClassLoader());
+                    return new ConnectionRequest(callId, handle, extras);
+                }
+
+                @Override
+                public ConnectionRequest[] newArray(int size) {
+                    return new ConnectionRequest[size];
+                }
+            };
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Writes CallInfo object into a serializeable Parcel.
+     */
+    @Override
+    public void writeToParcel(Parcel destination, int flags) {
+        destination.writeString(mCallId);
+        destination.writeParcelable(mHandle, 0);
+        destination.writeParcelable(mExtras, 0);
+    }}
