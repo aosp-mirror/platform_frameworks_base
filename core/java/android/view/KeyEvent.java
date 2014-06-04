@@ -1716,6 +1716,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_MENU:
             case KeyEvent.KEYCODE_SLEEP:
             case KeyEvent.KEYCODE_WAKEUP:
+            case KeyEvent.KEYCODE_PAIRING:
                 return true;
         }
         return false;
