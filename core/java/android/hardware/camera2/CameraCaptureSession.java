@@ -370,6 +370,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * <p>If the camera device configuration fails, then {@link #onConfigureFailed} will
          * be invoked instead of this callback.</p>
          *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
         public abstract void onConfigured(CameraCaptureSession session);
 
@@ -383,6 +384,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * callback is invoked will throw an IllegalStateException. Any capture requests submitted
          * to the session prior to this callback will be discarded and will not produce any
          * callbacks on their listeners.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
         public abstract void onConfigureFailed(CameraCaptureSession session);
 
@@ -395,6 +398,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>Otherwise, this callback will be invoked any time the session finishes processing
          * all of its active capture requests, and no repeating request or burst is set up.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          *
          */
         public void onReady(CameraCaptureSession session) {
@@ -410,6 +415,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>If the session runs out of capture requests to process and calls {@link #onReady},
          * then this callback will be invoked again once new requests are submitted for capture.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
         public void onActive(CameraCaptureSession session) {
             // default empty implementation
@@ -426,6 +433,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * any repeating requests or bursts are stopped (as if {@link #stopRepeating()} was called).
          * However, any in-progress capture requests submitted to the session will be completed
          * as normal.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
         public void onClosed(CameraCaptureSession session) {
             // default empty implementation
@@ -478,13 +487,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera the CameraDevice sending the callback
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request the request for the capture that just begun
          * @param timestamp the timestamp at start of capture, in nanoseconds.
          *
          * @see android.media.MediaActionSound
          */
-        public void onCaptureStarted(CameraDevice camera,
+        public void onCaptureStarted(CameraCaptureSession session,
                 CaptureRequest request, long timestamp) {
             // default empty implementation
         }
@@ -502,7 +511,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera The CameraDevice sending the callback.
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request The request that was given to the CameraDevice
          * @param result The partial output metadata from the capture, which
          * includes a subset of the CaptureResult fields.
@@ -514,7 +523,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @hide
          */
-        public void onCapturePartial(CameraDevice camera,
+        public void onCapturePartial(CameraCaptureSession session,
                 CaptureRequest request, CaptureResult result) {
             // default empty implementation
         }
@@ -545,7 +554,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera The CameraDevice sending the callback.
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request The request that was given to the CameraDevice
          * @param partialResult The partial output metadata from the capture, which
          * includes a subset of the {@link TotalCaptureResult} fields.
@@ -555,7 +564,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureProgressed(CameraDevice camera,
+        public void onCaptureProgressed(CameraCaptureSession session,
                 CaptureRequest request, CaptureResult partialResult) {
             // default empty implementation
         }
@@ -573,7 +582,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera The CameraDevice sending the callback.
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request The request that was given to the CameraDevice
          * @param result The total output metadata from the capture, including the
          * final capture parameters and the state of the camera system during
@@ -584,7 +593,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureCompleted(CameraDevice camera,
+        public void onCaptureCompleted(CameraCaptureSession session,
                 CaptureRequest request, TotalCaptureResult result) {
             // default empty implementation
         }
@@ -600,8 +609,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera
-         *            The CameraDevice sending the callback.
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
          * @param request
          *            The request that was given to the CameraDevice
          * @param failure
@@ -613,7 +622,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureFailed(CameraDevice camera,
+        public void onCaptureFailed(CameraCaptureSession session,
                 CaptureRequest request, CaptureFailure failure) {
             // default empty implementation
         }
@@ -629,8 +638,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation does nothing.</p>
          *
-         * @param camera
-         *            The CameraDevice sending the callback.
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
          * @param sequenceId
          *            A sequence ID returned by the {@link #capture} family of functions.
          * @param frameNumber
@@ -643,7 +652,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see CaptureFailure#getSequenceId()
          * @see #onCaptureSequenceAborted
          */
-        public void onCaptureSequenceCompleted(CameraDevice camera,
+        public void onCaptureSequenceCompleted(CameraCaptureSession session,
                 int sequenceId, long frameNumber) {
             // default empty implementation
         }
@@ -661,8 +670,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>The default implementation does nothing.</p>
          *
-         * @param camera
-         *            The CameraDevice sending the callback.
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
          * @param sequenceId
          *            A sequence ID returned by the {@link #capture} family of functions.
          *
@@ -672,7 +681,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see CaptureFailure#getSequenceId()
          * @see #onCaptureSequenceCompleted
          */
-        public void onCaptureSequenceAborted(CameraDevice camera,
+        public void onCaptureSequenceAborted(CameraCaptureSession session,
                 int sequenceId) {
             // default empty implementation
         }

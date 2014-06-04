@@ -24,7 +24,7 @@ import android.view.Surface;
 import java.util.List;
 
 /**
- * <p>The CameraDevice class is an interface to a single camera connected to an
+ * <p>The CameraDevice class is a representation of a single camera connected to an
  * Android device, allowing for fine-grain control of image capture and
  * post-processing at high frame rates.</p>
  *
@@ -46,7 +46,7 @@ import java.util.List;
  * @see CameraManager#openCamera
  * @see android.Manifest.permission#CAMERA
  */
-public interface CameraDevice extends AutoCloseable {
+public abstract class CameraDevice implements AutoCloseable {
 
     /**
      * Create a request suitable for a camera preview window. Specifically, this
@@ -127,7 +127,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see CameraManager#getCameraCharacteristics
      * @see CameraManager#getCameraIdList
      */
-    public String getId();
+    public abstract String getId();
 
     /**
      * <p>Set up a new output set of Surfaces for the camera device.</p>
@@ -245,7 +245,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link #createCaptureSession} instead
      */
     @Deprecated
-    public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
+    public abstract void configureOutputs(List<Surface> outputs) throws CameraAccessException;
 
     /**
      * <p>Create a new camera capture session by providing the target output set of Surfaces to the
@@ -358,7 +358,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes(int)
      * @see StreamConfigurationMap#getOutputSizes(Class)
      */
-    public void createCaptureSession(List<Surface> outputs,
+    public abstract void createCaptureSession(List<Surface> outputs,
             CameraCaptureSession.StateListener listener, Handler handler)
             throws CameraAccessException;
 
@@ -387,7 +387,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #TEMPLATE_VIDEO_SNAPSHOT
      * @see #TEMPLATE_MANUAL
      */
-    public CaptureRequest.Builder createCaptureRequest(int templateType)
+    public abstract CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException;
 
     /**
@@ -434,7 +434,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
+    public abstract int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException;
 
     /**
@@ -481,7 +481,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public abstract int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -541,7 +541,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+    public abstract int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -602,7 +602,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -628,7 +628,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public void stopRepeating() throws CameraAccessException;
+    public abstract void stopRepeating() throws CameraAccessException;
 
     /**
      * Flush all captures currently pending and in-progress as fast as
@@ -666,7 +666,7 @@ public interface CameraDevice extends AutoCloseable {
      * @deprecated Use {@link CameraCaptureSession} instead
      */
     @Deprecated
-    public void flush() throws CameraAccessException;
+    public abstract void flush() throws CameraAccessException;
 
     /**
      * Close the connection to this camera device as quickly as possible.
@@ -684,7 +684,7 @@ public interface CameraDevice extends AutoCloseable {
      *
      */
     @Override
-    public void close();
+    public abstract void close();
 
     /**
      * <p>A listener for tracking the progress of a {@link CaptureRequest}
@@ -1230,4 +1230,10 @@ public interface CameraDevice extends AutoCloseable {
          */
         public abstract void onError(CameraDevice camera, int error); // Must implement
     }
+
+    /**
+     * To be inherited by android.hardware.camera2.* code only.
+     * @hide
+     */
+    public CameraDevice() {}
 }

@@ -12115,12 +12115,12 @@ package android.hardware.camera2 {
 
   public static abstract class CameraCaptureSession.CaptureListener {
     ctor public CameraCaptureSession.CaptureListener();
-    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult);
-    method public void onCaptureFailed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureFailure);
-    method public void onCaptureProgressed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
-    method public void onCaptureSequenceAborted(android.hardware.camera2.CameraDevice, int);
-    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraDevice, int, long);
-    method public void onCaptureStarted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, long);
+    method public void onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult);
+    method public void onCaptureFailed(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureFailure);
+    method public void onCaptureProgressed(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureSequenceAborted(android.hardware.camera2.CameraCaptureSession, int);
+    method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraCaptureSession, int, long);
+    method public void onCaptureStarted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, long);
   }
 
   public static abstract class CameraCaptureSession.StateListener {
@@ -12207,7 +12207,7 @@ package android.hardware.camera2 {
     method public final int hashCode();
   }
 
-  public abstract interface CameraDevice implements java.lang.AutoCloseable {
+  public abstract class CameraDevice implements java.lang.AutoCloseable {
     method public abstract deprecated int capture(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract deprecated int captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void close();
