@@ -21,6 +21,8 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.content.res.AssetManager;
+
 import java.awt.Font;
 import java.io.File;
 import java.util.ArrayList;
@@ -47,7 +49,6 @@ public class FontFamily_Delegate {
     private static final String FONT_SUFFIX_BOLDITALIC = "BoldItalic.ttf";
     private static final String FONT_SUFFIX_BOLD = "Bold.ttf";
     private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
-    private static final String FONT_SUBSTRING_COMPACT = "UI";
 
     /**
      * A class associating {@link Font} with its metadata.
@@ -56,11 +57,6 @@ public class FontFamily_Delegate {
         Font mFont;
         /** Regular, Bold, Italic, or BoldItalic. */
         int mStyle;
-        /**
-         * The variant of the Font - compact or elegant.
-         * @see Paint#setElegantTextHeight(boolean)
-         */
-        boolean mIsCompact;
     }
 
     // ---- delegate manager ----
@@ -75,6 +71,14 @@ public class FontFamily_Delegate {
 
     // ---- delegate data ----
     private List<FontInfo> mFonts = new ArrayList<FontInfo>();
+    /**
+     * The variant of the Font Family - compact or elegant.
+     * 0 is unspecified, 1 is compact and 2 is elegant. This needs to be kept in sync with values in
+     * android.graphics.FontFamily
+     *
+     * @see Paint#setElegantTextHeight(boolean)
+     */
+    private FontVariant mVariant;
     // Path of fonts that haven't been created since sFontLoader hasn't been initialized.
     private List<String> mPath = new ArrayList<String>();
 
@@ -93,37 +97,22 @@ public class FontFamily_Delegate {
         sPostInitDelegate.clear();
     }
 
-    public Font getFont(int style, boolean isCompact) {
+    public Font getFont(int style) {
         FontInfo plainFont = null;
-        FontInfo styledFont = null;  // Font matching the style but not isCompact
         for (FontInfo font : mFonts) {
             if (font.mStyle == style) {
-                if (font.mIsCompact == isCompact) {
-                    return font.mFont;
-                }
-                styledFont = font;
+                return font.mFont;
             }
-            if (font.mStyle == Font.PLAIN) {
-                if (plainFont == null) {
-                    plainFont = font;
-                    continue;
-                }
-                if (font.mIsCompact == isCompact) {
-                    // Override the previous selection of plain font since we've found a better one.
-                    plainFont = font;
-                }
+            if (font.mStyle == Font.PLAIN && plainFont == null) {
+                plainFont = font;
             }
-        }
-        if (styledFont != null) {
-            return styledFont.mFont;
         }
 
         // No font with the mentioned style is found. Try to derive one.
         if (plainFont != null && style > 0 && style < 4) {
-            styledFont = new FontInfo();
+            FontInfo styledFont = new FontInfo();
             styledFont.mFont = plainFont.mFont.deriveFont(style);
             styledFont.mStyle = style;
-            styledFont.mIsCompact = plainFont.mIsCompact;
             // Add the font to the list of fonts so that we don't have to derive it the next time.
             mFonts.add(styledFont);
             return styledFont.mFont;
@@ -131,11 +120,20 @@ public class FontFamily_Delegate {
         return null;
     }
 
+    public FontVariant getVariant() {
+        return mVariant;
+    }
+
+
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nCreateFamily() {
+    /*package*/ static long nCreateFamily(String lang, int variant) {
+        // TODO: support lang. This is required for japanese locale.
         FontFamily_Delegate delegate = new FontFamily_Delegate();
+        // variant can be 0, 1 or 2.
+        assert variant < 3;
+        delegate.mVariant = FontVariant.values()[variant];
         if (sFontLocation != null) {
             delegate.init();
         } else {
@@ -161,6 +159,13 @@ public class FontFamily_Delegate {
             }
             return delegate.addFont(path);
         }
+        return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "FontFamily.addFontFromAsset is not supported.", null /*throwable*/, null /*data*/);
         return false;
     }
 
@@ -195,13 +200,6 @@ public class FontFamily_Delegate {
             style = Font.ITALIC;
         }
         fontInfo.mStyle = style;
-
-        // Names of compact fonts end with UI-<style>.ttf. For example, NotoNakshUI-Regular.ttf.
-        // This should go away when this info is passed on by nAddFont().
-        int hyphenIndex = fontName.lastIndexOf('-');
-        fontInfo.mIsCompact = hyphenIndex > 0 &&
-                fontName.substring(0, hyphenIndex).endsWith(FONT_SUBSTRING_COMPACT);
-
     }
 
     private static Font loadFont(String path) {
@@ -214,7 +212,7 @@ public class FontFamily_Delegate {
             } catch (Exception e) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
                         String.format("Unable to load font %1$s", relativePath),
-                        null /*throwable*/, null /*data*/);
+                        e /*throwable*/, null /*data*/);
             }
         } else {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -223,5 +221,13 @@ public class FontFamily_Delegate {
         }
 
         return null;
+    }
+
+
+    // ---- Public helper class ----
+
+    public enum FontVariant {
+        // The order needs to be kept in sync with android.graphics.FontFamily.
+        NONE, COMPACT, ELEGANT
     }
 }

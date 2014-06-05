@@ -22,6 +22,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.AssetManager;
+import android.graphics.FontFamily_Delegate.FontVariant;
 
 import java.awt.Font;
 import java.io.File;
@@ -69,17 +70,28 @@ public final class Typeface_Delegate {
         return sManager.getDelegate(nativeTypeface);
     }
 
-    public List<Font> getFonts(boolean compact) {
+    public List<Font> getFonts(FontVariant variant) {
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
+        // If we are unable to find fonts matching the variant, we return the fonts from the
+        // other variant since we always want to draw something, rather than nothing.
+        // TODO: check this behaviour with platform.
+        List<Font> otherVariantFonts = new ArrayList<Font>();
         for (FontFamily_Delegate ffd : mFontFamilies) {
             if (ffd != null) {
-                Font font = ffd.getFont(mStyle, compact);
+                Font font = ffd.getFont(mStyle);
                 if (font != null) {
-                    fonts.add(font);
+                    if (ffd.getVariant() == variant || ffd.getVariant() == FontVariant.NONE) {
+                        fonts.add(font);
+                    } else {
+                        otherVariantFonts.add(font);
+                    }
                 }
             }
         }
-        return fonts;
+        if (fonts.size() > 0) {
+            return fonts;
+        }
+        return otherVariantFonts;
     }
 
     // ---- native methods ----
