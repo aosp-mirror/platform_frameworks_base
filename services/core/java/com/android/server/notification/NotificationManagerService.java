@@ -163,6 +163,7 @@ public class NotificationManagerService extends SystemService {
     private long[] mDefaultVibrationPattern;
 
     private long[] mFallbackVibrationPattern;
+    private boolean mUseAttentionLight;
     boolean mSystemReady;
 
     private boolean mDisableNotificationAlerts;
@@ -796,6 +797,8 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
+
+        mUseAttentionLight = resources.getBoolean(R.bool.config_useAttentionLight);
 
         // Don't start allowing notifications until the setup wizard has run once.
         // After that, including subsequent boots, init with notifications turned on.
@@ -1742,7 +1745,9 @@ public class NotificationManagerService extends SystemService {
         if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && canInterrupt) {
             mLights.add(record.getKey());
             updateLightsLocked();
-            mAttentionLight.pulse();
+            if (mUseAttentionLight) {
+                mAttentionLight.pulse();
+            }
         } else if (wasShowLights) {
             updateLightsLocked();
         }
