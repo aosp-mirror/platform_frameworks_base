@@ -181,6 +181,10 @@ public class StatusBarKeyguardViewManager {
         reset();
     }
 
+    public boolean isOccluded() {
+        return mOccluded;
+    }
+
     /**
      * Hides the keyguard view
      */
