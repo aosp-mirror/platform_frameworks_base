@@ -690,16 +690,45 @@ public class UserManager {
         }
     }
 
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a drawable to use as a small
+     * icon to include in a view to distinguish it from the original icon.
+     *
+     * @param user The target user.
+     * @return the drawable or null if no drawable is required.
+     * @hide
+     */
+    public Drawable getBadgeForUser(UserHandle user) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return Resources.getSystem().getDrawable(
+                    com.android.internal.R.drawable.ic_corp_badge);
+        }
+        return null;
+    }
+
     private int getBadgeResIdForUser(int userHandle) {
         // Return the framework-provided badge.
-        List<UserInfo> userProfiles = getProfiles(getUserHandle());
-        for (UserInfo user : userProfiles) {
-            if (user.id == userHandle
-                    && user.isManagedProfile()) {
-                return com.android.internal.R.drawable.ic_corp_badge;
-            }
+        UserInfo userInfo = getUserIfProfile(userHandle);
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return com.android.internal.R.drawable.ic_corp_icon_badge;
         }
         return 0;
+    }
+
+    /**
+     * @return UserInfo for userHandle if it exists and is a profile of the current
+     *         user or null.
+     */
+    private UserInfo getUserIfProfile(int userHandle) {
+        List<UserInfo> userProfiles = getProfiles(getUserHandle());
+        for (UserInfo user : userProfiles) {
+            if (user.id == userHandle) {
+                return user;
+            }
+        }
+        return null;
     }
 
     private Drawable getMergedDrawable(Drawable icon, Drawable badge) {

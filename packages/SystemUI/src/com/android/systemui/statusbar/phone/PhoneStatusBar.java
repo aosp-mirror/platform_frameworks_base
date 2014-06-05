@@ -1185,7 +1185,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             Entry ent = mNotificationData.get(i);
             if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
 
-            // TODO How do we want to badge notifcations from profiles.
             if (!notificationIsForCurrentProfiles(ent.notification)) continue;
 
             final int vis = ent.notification.getNotification().visibility;
