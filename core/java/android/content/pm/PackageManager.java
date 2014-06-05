@@ -1402,7 +1402,7 @@ public abstract class PackageManager {
      * The device supports managed profiles for enterprise users.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_MANAGEDPROFILES = "android.software.managedprofiles";
+    public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_profiles";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
@@ -1601,7 +1601,7 @@ public abstract class PackageManager {
      * <p>
      * Throws {@link NameNotFoundException} if a package with the given name
      * cannot be found on the system.
-     * 
+     *
      * @param packageName The name of the package to inspect.
      * @return Returns either a fully-qualified Intent that can be used to launch
      *         the main Leanback activity in the package, or null if the package
@@ -1615,7 +1615,7 @@ public abstract class PackageManager {
      * <p>
      * Throws {@link NameNotFoundException} if a package with the given name
      * cannot be found on the system.
-     * 
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an int array of the assigned gids, or null if there are
