@@ -46,8 +46,10 @@ bool MinikinFontSkia::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
 static void MinikinFontSkia_SetSkiaPaint(SkTypeface* typeface, SkPaint* skPaint, const MinikinPaint& paint) {
     skPaint->setTypeface(typeface);
     skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-    // TODO: set more paint parameters from Minikin
     skPaint->setTextSize(paint.size);
+    skPaint->setTextScaleX(paint.scaleX);
+    skPaint->setTextSkewX(paint.skewX);
+    MinikinFontSkia::unpackPaintFlags(skPaint, paint.paintFlags);
 }
 
 float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
@@ -94,6 +96,23 @@ SkTypeface *MinikinFontSkia::GetSkTypeface() {
 
 int32_t MinikinFontSkia::GetUniqueId() const {
     return mTypeface->uniqueID();
+}
+
+uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
+    uint32_t flags = paint->getFlags();
+    SkPaint::Hinting hinting = paint->getHinting();
+    // select only flags that might affect text layout
+    flags &= (SkPaint::kAntiAlias_Flag | SkPaint::kFakeBoldText_Flag | SkPaint::kLinearText_Flag |
+            SkPaint::kSubpixelText_Flag | SkPaint::kDevKernText_Flag |
+            SkPaint::kEmbeddedBitmapText_Flag | SkPaint::kAutoHinting_Flag |
+            SkPaint::kVerticalText_Flag);
+    flags |= (hinting << 16);
+    return flags;
+}
+
+void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
+    paint->setFlags(paintFlags & SkPaint::kAllFlags);
+    paint->setHinting(static_cast<SkPaint::Hinting>(paintFlags >> 16));
 }
 
 }
