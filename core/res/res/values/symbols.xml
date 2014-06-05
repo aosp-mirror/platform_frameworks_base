@@ -1017,8 +1017,14 @@
   <java-symbol type="drawable" name="text_edit_side_paste_window" />
   <java-symbol type="drawable" name="text_edit_paste_window" />
   <java-symbol type="drawable" name="btn_check_off" />
-  <java-symbol type="drawable" name="btn_code_lock_default_holo" />
-  <java-symbol type="drawable" name="btn_code_lock_touched_holo" />
+  <java-symbol type="drawable" name="btn_code_lock_default_qntm_alpha" />
+  <java-symbol type="drawable" name="btn_code_lock_touched_qntm_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_point_area_default_qntm_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_point_area_qntm_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_up_qntm_alpha" />
+  <java-symbol type="color" name="lock_pattern_view_regular_color" />
+  <java-symbol type="color" name="lock_pattern_view_success_color" />
+  <java-symbol type="color" name="lock_pattern_view_error_color" />
   <java-symbol type="drawable" name="clock_dial" />
   <java-symbol type="drawable" name="clock_hand_hour" />
   <java-symbol type="drawable" name="clock_hand_minute" />
@@ -1062,11 +1068,6 @@
   <java-symbol type="drawable" name="ic_print" />
   <java-symbol type="drawable" name="ic_print_error" />
   <java-symbol type="drawable" name="ic_grayedout_printer" />
-  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_green_up" />
-  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_red_up" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_default_holo" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_green_holo" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_red_holo" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_left_green" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_right_red" />
   <java-symbol type="drawable" name="jog_dial_arrow_short_left_and_right" />
