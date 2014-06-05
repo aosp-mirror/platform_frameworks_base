@@ -18,12 +18,25 @@
 
     <viewport android:viewportHeight="25" android:viewportWidth="25" />
 
-
     <path
-        android:name="adb"
-        android:pathData="m3,3l8,0l0,11l11,0l0,8l-19,0z"
+        android:name="L-card"
+
+        android:pathData="
+        m4,2
+        a2,2,0,0,0,-2,2 l0,17
+        a2,2,0,0,0,2,2  l17,0
+        a2,2,0,0,0,2,-2 l0,-17
+        a2,2,0,0,0,-2,-2
+        z
+
+        M7,2 l3,0 l0,13 l13,0 l0,3 l-16,0
+
+        M15,2 l3,0 l0,5 l5,0 l0,3 l-8,0
+
+        z"
         android:fill="#FFFFFFFF"
         />
+
 
 </vector>
 
