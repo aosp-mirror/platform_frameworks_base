@@ -134,6 +134,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
     static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
+    static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -3074,12 +3075,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 } break;
                 case CONTAINER_CALLBACK_VISIBILITY: {
                     final ActivityContainer container = (ActivityContainer) msg.obj;
-                    try {
-                        // We only send this message if mCallback is non-null.
-                        container.mCallback.setVisible(container.asBinder(), msg.arg1 == 1);
-                    } catch (RemoteException e) {
+                    final IActivityContainerCallback callback = container.mCallback;
+                    if (callback != null) {
+                        try {
+                            callback.setVisible(container.asBinder(), msg.arg1 == 1);
+                        } catch (RemoteException e) {
+                        }
                     }
-                }
+                } break;
                 case LOCK_TASK_START_MSG: {
                     // When lock task starts, we disable the status bars.
                     try {
@@ -3091,8 +3094,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
-                    break;
-                }
+                } break;
                 case LOCK_TASK_END_MSG: {
                     // When lock task ends, we enable the status bars.
                     try {
@@ -3104,8 +3106,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
-                    break;
-                }
+                } break;
+                case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
+                    final ActivityContainer container = (ActivityContainer) msg.obj;
+                    final IActivityContainerCallback callback = container.mCallback;
+                    if (callback != null) {
+                        try {
+                            callback.onAllActivitiesComplete(container.asBinder());
+                        } catch (RemoteException e) {
+                        }
+                    }
+                } break;
             }
         }
     }
@@ -3308,6 +3319,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // You can always start a new task on a regular ActivityStack.
         boolean isEligibleForNewTasks() {
             return true;
+        }
+
+        void onTaskListEmpty() {
+            mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 
         @Override
