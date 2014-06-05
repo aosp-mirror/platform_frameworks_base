@@ -12833,6 +12833,12 @@ package android.hardware.camera2 {
 
 package android.hardware.camera2.params {
 
+  public final class BlackLevelPattern {
+    method public void copyTo(int[], int);
+    method public int getOffsetForIndex(int, int);
+    field public static final int COUNT = 4; // 0x4
+  }
+
   public final class ColorSpaceTransform {
     ctor public ColorSpaceTransform(android.util.Rational[]);
     ctor public ColorSpaceTransform(int[]);

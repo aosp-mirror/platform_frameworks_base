@@ -1680,14 +1680,17 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This tag specifies the zero light value for each of the CFA mosaic
      * channels in the camera sensor.  The maximal value output by the
      * sensor is represented by the value in {@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}.</p>
-     * <p>The values are given in row-column scan order, with the first value
-     * corresponding to the element of the CFA in row=0, column=0.</p>
+     * <p>The values are given in the same order as channels listed for the CFA
+     * layout tag (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
+     * nth value given corresponds to the black level offset for the nth
+     * color channel listed in the CFA.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
      */
-    public static final Key<int[]> SENSOR_BLACK_LEVEL_PATTERN =
-            new Key<int[]>("android.sensor.blackLevelPattern", int[].class);
+    public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN =
+            new Key<android.hardware.camera2.params.BlackLevelPattern>("android.sensor.blackLevelPattern", android.hardware.camera2.params.BlackLevelPattern.class);
 
     /**
      * <p>Maximum sensitivity that is implemented

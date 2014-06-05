@@ -27,6 +27,7 @@ import android.hardware.camera2.marshal.MarshalQueryable;
 import android.hardware.camera2.marshal.MarshalRegistry;
 import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
 import android.hardware.camera2.marshal.impl.MarshalQueryableMeteringRectangle;
@@ -1013,6 +1014,7 @@ public class CameraMetadataNative implements Parcelable {
                 new MarshalQueryableStreamConfiguration(),
                 new MarshalQueryableStreamConfigurationDuration(),
                 new MarshalQueryableRggbChannelVector(),
+                new MarshalQueryableBlackLevelPattern(),
 
                 // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
                 new MarshalQueryableParcelable(),
