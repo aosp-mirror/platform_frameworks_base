@@ -1402,7 +1402,7 @@ public abstract class PackageManager {
      * The device supports managed profiles for enterprise users.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_MANAGEDPROFILES = "android.software.managedprofiles";
+    public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_profiles";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
