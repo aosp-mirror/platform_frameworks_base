@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
 import java.util.LinkedList;
@@ -39,7 +40,6 @@ import java.util.List;
  */
 public class ConnectivityController extends StateController {
     private static final String TAG = "TaskManager.Connectivity";
-    private static final boolean DEBUG = true;
 
     private final List<TaskStatus> mTrackedTasks = new LinkedList<TaskStatus>();
     private final BroadcastReceiver mConnectivityChangedReceiver =
@@ -54,13 +54,13 @@ public class ConnectivityController extends StateController {
 
     public static synchronized ConnectivityController get(TaskManagerService taskManager) {
         if (mSingleton == null) {
-            mSingleton = new ConnectivityController(taskManager);
+            mSingleton = new ConnectivityController(taskManager, taskManager.getContext());
         }
         return mSingleton;
     }
 
-    private ConnectivityController(TaskManagerService service) {
-        super(service);
+    private ConnectivityController(StateChangedListener stateChangedListener, Context context) {
+        super(stateChangedListener, context);
         // Register connectivity changed BR.
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);

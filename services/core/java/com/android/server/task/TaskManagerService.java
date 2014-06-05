@@ -36,6 +36,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.server.task.controllers.BatteryController;
 import com.android.server.task.controllers.ConnectivityController;
 import com.android.server.task.controllers.IdleController;
 import com.android.server.task.controllers.StateController;
@@ -48,12 +49,19 @@ import java.util.LinkedList;
  * Responsible for taking tasks representing work to be performed by a client app, and determining
  * based on the criteria specified when that task should be run against the client application's
  * endpoint.
+ * Implements logic for scheduling, and rescheduling tasks. The TaskManagerService knows nothing
+ * about constraints, or the state of active tasks. It receives callbacks from the various
+ * controllers and completed tasks and operates accordingly.
+ *
+ * Note on locking: Any operations that manipulate {@link #mTasks} need to lock on that object, and
+ * similarly for {@link #mActiveServices}. If both locks need to be held take mTasksSet first and then
+ * mActiveService afterwards.
  * @hide
  */
 public class TaskManagerService extends com.android.server.SystemService
-        implements StateChangedListener, TaskCompletedListener {
+        implements StateChangedListener, TaskCompletedListener, TaskMapReadFinishedListener {
     // TODO: Switch this off for final version.
-    private static final boolean DEBUG = true;
+    static final boolean DEBUG = true;
     /** The number of concurrent tasks we run at one time. */
     private static final int MAX_TASK_CONTEXTS_COUNT = 3;
     static final String TAG = "TaskManager";
@@ -113,8 +121,8 @@ public class TaskManagerService extends com.android.server.SystemService
      */
     public int schedule(Task task, int uId, boolean canPersistTask) {
         TaskStatus taskStatus = new TaskStatus(task, uId, canPersistTask);
-        return startTrackingTask(taskStatus) ?
-                TaskManager.RESULT_SUCCESS : TaskManager.RESULT_FAILURE;
+        startTrackingTask(taskStatus);
+        return TaskManager.RESULT_SUCCESS;
     }
 
     public List<Task> getPendingTasks(int uid) {
@@ -210,7 +218,7 @@ public class TaskManagerService extends com.android.server.SystemService
      */
     public TaskManagerService(Context context) {
         super(context);
-        mTasks = new TaskStore(context);
+        mTasks = TaskStore.initAndGet(this);
         mHandler = new TaskHandler(context.getMainLooper());
         mTaskManagerStub = new TaskManagerStub();
         // Create the "runners".
@@ -218,12 +226,12 @@ public class TaskManagerService extends com.android.server.SystemService
             mActiveServices.add(
                     new TaskServiceContext(this, context.getMainLooper()));
         }
-
+        // Create the controllers.
         mControllers = new LinkedList<StateController>();
         mControllers.add(ConnectivityController.get(this));
         mControllers.add(TimeController.get(this));
         mControllers.add(IdleController.get(this));
-        // TODO: Add BatteryStateController when implemented.
+        mControllers.add(BatteryController.get(this));
     }
 
     @Override
@@ -236,17 +244,14 @@ public class TaskManagerService extends com.android.server.SystemService
      * {@link com.android.server.task.TaskStore}, and make sure all the relevant controllers know
      * about.
      */
-    private boolean startTrackingTask(TaskStatus taskStatus) {
-        boolean added = false;
+    private void startTrackingTask(TaskStatus taskStatus) {
         synchronized (mTasks) {
-            added = mTasks.add(taskStatus);
+            mTasks.add(taskStatus);
         }
-        if (added) {
-            for (StateController controller : mControllers) {
-                controller.maybeStartTrackingTask(taskStatus);
-            }
+        for (StateController controller : mControllers) {
+            controller.maybeStartTrackingTask(taskStatus);
+
         }
-        return added;
     }
 
     /**
@@ -402,6 +407,27 @@ public class TaskManagerService extends com.android.server.SystemService
     @Override
     public void onTaskDeadlineExpired(TaskStatus taskStatus) {
         mHandler.obtainMessage(MSG_TASK_EXPIRED, taskStatus);
+    }
+
+    /**
+     * Disk I/O is finished, take the list of tasks we read from disk and add them to our
+     * {@link TaskStore}.
+     * This is run on the {@link com.android.server.IoThread} instance, which is a separate thread,
+     * and is called once at boot.
+     */
+    @Override
+    public void onTaskMapReadFinished(List<TaskStatus> tasks) {
+        synchronized (mTasks) {
+            for (TaskStatus ts : tasks) {
+                if (mTasks.contains(ts)) {
+                    // An app with BOOT_COMPLETED *might* have decided to reschedule their task, in
+                    // the same amount of time it took us to read it from disk. If this is the case
+                    // we leave it be.
+                    continue;
+                }
+                startTrackingTask(ts);
+            }
+        }
     }
 
     private class TaskHandler extends Handler {

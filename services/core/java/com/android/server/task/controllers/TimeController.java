@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
 
+import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
 import java.util.Iterator;
@@ -58,13 +59,13 @@ public class TimeController extends StateController {
 
     public static synchronized TimeController get(TaskManagerService taskManager) {
         if (mSingleton == null) {
-            mSingleton = new TimeController(taskManager);
+            mSingleton = new TimeController(taskManager, taskManager.getContext());
         }
         return mSingleton;
     }
 
-    private TimeController(TaskManagerService service) {
-        super(service);
+    private TimeController(StateChangedListener stateChangedListener, Context context) {
+        super(stateChangedListener, context);
         mTaskExpiredAlarmIntent =
                 PendingIntent.getBroadcast(mContext, 0 /* ignored */,
                         new Intent(ACTION_TASK_EXPIRED), 0);
