@@ -26,10 +26,14 @@
 
 namespace android {
 
+class Layout;
+class TypefaceImpl;
+
 class MinikinUtils {
 public:
     static void SetLayoutProperties(Layout* layout, const SkPaint* paint, int flags,
         TypefaceImpl* face);
+
     static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
 
     // f is a functor of type void f(SkTypeface *, size_t start, size_t end);
