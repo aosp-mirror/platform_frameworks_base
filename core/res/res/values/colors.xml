@@ -115,6 +115,11 @@
     <color name="kg_multi_user_text_inactive">#ff808080</color>
     <color name="kg_widget_pager_gradient">#ffffffff</color>
 
+    <!-- LockPatternView -->
+    <color name="lock_pattern_view_regular_color">#ffffffff</color>
+    <color name="lock_pattern_view_success_color">#ff179d5b</color>
+    <color name="lock_pattern_view_error_color">#fff4511e</color>
+
     <!-- FaceLock -->
     <color name="facelock_spotlight_mask">#CC000000</color>
 
