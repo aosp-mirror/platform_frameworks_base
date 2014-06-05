@@ -468,7 +468,7 @@ public class InputMethodSubtypeSwitchingController {
         return new InputMethodSubtypeSwitchingController(settings, context);
     }
 
-    public void onCommitTextLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
+    public void onUserActionLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
         if (mController == null) {
             if (DEBUG) {
                 Log.e(TAG, "mController shouldn't be null.");

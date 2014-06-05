@@ -1913,13 +1913,13 @@ public final class InputMethodManager {
     }
 
     /**
-     * Notify the current IME commits text
+     * Notify that a user took some action with this input method.
      * @hide
      */
-    public void notifyTextCommitted() {
+    public void notifyUserAction() {
         synchronized (mH) {
             try {
-                mService.notifyTextCommitted();
+                mService.notifyUserAction();
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
