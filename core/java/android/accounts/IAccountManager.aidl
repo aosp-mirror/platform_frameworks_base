@@ -29,7 +29,7 @@ import android.os.Bundle;
 interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
-    AuthenticatorDescription[] getAuthenticatorTypes();
+    AuthenticatorDescription[] getAuthenticatorTypes(int userId);
     Account[] getAccounts(String accountType);
     Account[] getAccountsForPackage(String packageName, int uid);
     Account[] getAccountsByTypeForPackage(String type, String packageName);

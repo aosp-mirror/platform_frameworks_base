@@ -537,13 +537,16 @@ public class AccountManagerService
     }
 
     @Override
-    public AuthenticatorDescription[] getAuthenticatorTypes() {
+    public AuthenticatorDescription[] getAuthenticatorTypes(int userId) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAuthenticatorTypes: "
+                    + "for user id " + userId
                     + "caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
-        final int userId = UserHandle.getCallingUserId();
+        // Only allow the system process to read accounts of other users
+        enforceCrossUserPermission(userId, "User " + UserHandle.getCallingUserId()
+                + " trying get authenticator types for " + userId);
         final long identityToken = clearCallingIdentity();
         try {
             Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
@@ -559,6 +562,16 @@ public class AccountManagerService
             return types;
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void enforceCrossUserPermission(int userId, String errorMessage) {
+        if (userId != UserHandle.getCallingUserId()
+                && Binder.getCallingUid() != Process.myUid()
+                && mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(errorMessage);
         }
     }
 
@@ -1567,14 +1580,8 @@ public class AccountManagerService
             final Account account, final Bundle options, final boolean expectActivityLaunch,
             int userId) {
         // Only allow the system process to read accounts of other users
-        if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != Process.myUid()
-                && mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                    != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("User " + UserHandle.getCallingUserId()
+        enforceCrossUserPermission(userId, "User " + UserHandle.getCallingUserId()
                     + " trying to confirm account credentials for " + userId);
-        }
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "confirmCredentials: " + account

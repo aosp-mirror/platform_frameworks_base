@@ -359,7 +359,29 @@ public class AccountManager {
      */
     public AuthenticatorDescription[] getAuthenticatorTypes() {
         try {
-            return mService.getAuthenticatorTypes();
+            return mService.getAuthenticatorTypes(UserHandle.getCallingUserId());
+        } catch (RemoteException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @hide
+     * Lists the currently registered authenticators for a given user id.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>The caller has to be in the same user or have the permission
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @return An array of {@link AuthenticatorDescription} for every
+     *     authenticator known to the AccountManager service.  Empty (never
+     *     null) if no authenticators are known.
+     */
+    public AuthenticatorDescription[] getAuthenticatorTypesAsUser(int userId) {
+        try {
+            return mService.getAuthenticatorTypes(userId);
         } catch (RemoteException e) {
             // will never happen
             throw new RuntimeException(e);
@@ -381,6 +403,28 @@ public class AccountManager {
     public Account[] getAccounts() {
         try {
             return mService.getAccounts(null);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @hide
+     * Lists all accounts of any type registered on the device for a given
+     * user id. Equivalent to getAccountsByType(null).
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @return An array of {@link Account}, one for each account.  Empty
+     *     (never null) if no accounts have been added.
+     */
+    public Account[] getAccountsAsUser(int userId) {
+        try {
+            return mService.getAccountsAsUser(null, userId);
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
