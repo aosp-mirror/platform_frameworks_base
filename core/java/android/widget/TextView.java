@@ -222,6 +222,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_imeActionLabel
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
+ * @attr ref android.R.styleable#TextView_elegantTextHeight
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -2637,6 +2638,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * metrics, and also increases top and bottom bounds to provide more space.
      *
      * @param elegant set the paint's elegant metrics flag.
+     *
+     * @attr ref android.R.styleable#TextView_elegantTextHeight
      */
     public void setElegantTextHeight(boolean elegant) {
         mTextPaint.setElegantTextHeight(elegant);

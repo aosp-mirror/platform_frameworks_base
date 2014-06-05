@@ -490,6 +490,7 @@ package android {
     field public static final int editTextStyle = 16842862; // 0x101006e
     field public static final deprecated int editable = 16843115; // 0x101016b
     field public static final int editorExtras = 16843300; // 0x1010224
+    field public static final int elegantTextHeight = 16843867; // 0x101045b
     field public static final int elevation = 16843843; // 0x1010443
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
