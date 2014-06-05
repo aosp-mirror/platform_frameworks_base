@@ -33,11 +33,13 @@ import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -219,7 +221,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         int heightHalf = mBackgroundNormal.getActualHeight()/2;
         float radius = (float) Math.sqrt(widthHalf*widthHalf + heightHalf*heightHalf);
         ValueAnimator animator =
-                mBackgroundNormal.createRevealAnimator(widthHalf, heightHalf, 0, radius);
+                ViewAnimationUtils.createCircularReveal(mBackgroundNormal,
+                        widthHalf, heightHalf, 0, radius);
         mBackgroundNormal.setVisibility(View.VISIBLE);
         Interpolator interpolator;
         Interpolator alphaInterpolator;

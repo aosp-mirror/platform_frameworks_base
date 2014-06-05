@@ -10609,24 +10609,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns a ValueAnimator which can animate a clipping circle.
-     * <p>
-     * The View will be clipped to the animating circle.
-     * <p>
-     * Any shadow cast by the View will respect the circular clip from this animator.
-     *
-     * @param centerX The x coordinate of the center of the animating circle.
-     * @param centerY The y coordinate of the center of the animating circle.
-     * @param startRadius The starting radius of the animating circle.
-     * @param endRadius The ending radius of the animating circle.
-     */
-    public final ValueAnimator createRevealAnimator(int centerX,  int centerY,
-            float startRadius, float endRadius) {
-        return RevealAnimator.ofRevealCircle(this, centerX, centerY,
-                startRadius, endRadius, false);
-    }
-
-    /**
      * Returns a ValueAnimator which can animate a clearing circle.
      * <p>
      * The View is prevented from drawing within the circle, so the content
