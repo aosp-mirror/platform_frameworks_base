@@ -93,6 +93,8 @@ public class Paint_Delegate {
 
     private Locale mLocale = Locale.getDefault();
 
+    // Used only to assert invariants.
+    public long mNativeTypeface;
 
     // ---- Public Helper methods ----
 
@@ -888,6 +890,7 @@ public class Paint_Delegate {
         }
 
         delegate.mTypeface = Typeface_Delegate.getDelegate(typeface);
+        delegate.mNativeTypeface = typeface;
         delegate.updateFontObject();
         return typeface;
     }
@@ -966,14 +969,9 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float native_getTextRunAdvances(long native_object,
-            long native_typeface /*ignored*/,
+    /*package*/ static float native_getTextRunAdvances(long native_object, long native_typeface,
             char[] text, int index, int count, int contextIndex, int contextCount,
             int flags, float[] advances, int advancesIndex) {
-
-        // native_typeface is passed here since Framework's old implementation did not have the
-        // typeface object associated with the Paint. Since, we follow the new framework way,
-        // we store the typeface with the paint and use it directly.
 
         if (advances != null)
             for (int i = advancesIndex; i< advancesIndex+count; i++)
@@ -983,6 +981,12 @@ public class Paint_Delegate {
         if (delegate == null) {
             return 0.f;
         }
+
+        // native_typeface is passed here since Framework's old implementation did not have the
+        // typeface object associated with the Paint. Since, we follow the new framework way,
+        // we store the typeface with the paint and use it directly.
+        assert (native_typeface == delegate.mNativeTypeface);
+
         boolean isRtl = isRtl(flags);
 
         int limit = index + count;
@@ -1054,6 +1058,10 @@ public class Paint_Delegate {
         if (delegate == null) {
             return;
         }
+
+        // assert that the typeface passed is actually the one that we had stored.
+        assert (native_typeface == delegate.mNativeTypeface);
+
         delegate.measureText(text, index, count, isRtl(bidiFlags)).roundOut(bounds);
     }
 
@@ -1080,6 +1088,7 @@ public class Paint_Delegate {
         mJoin = paint.mJoin;
         mTextAlign = paint.mTextAlign;
         mTypeface = paint.mTypeface;
+        mNativeTypeface = paint.mNativeTypeface;
         mStrokeWidth = paint.mStrokeWidth;
         mStrokeMiter = paint.mStrokeMiter;
         mTextSize = paint.mTextSize;
@@ -1103,6 +1112,7 @@ public class Paint_Delegate {
         mJoin = Paint.Join.MITER.nativeInt;
         mTextAlign = 0;
         mTypeface = Typeface_Delegate.getDelegate(Typeface.sDefaults[0].native_instance);
+        mNativeTypeface = 0;
         mStrokeWidth = 1.f;
         mStrokeMiter = 4.f;
         mTextSize = 20.f;

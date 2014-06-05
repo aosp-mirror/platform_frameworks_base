@@ -977,7 +977,7 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawText(long nativeCanvas,
             final char[] text, final int index, final int count,
             final float startX, final float startY, final int flags, long paint,
-            long typeface) {
+            final long typeface) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -985,6 +985,11 @@ public final class Canvas_Delegate {
             public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                 // WARNING: the logic in this method is similar to Paint_Delegate.measureText.
                 // Any change to this method should be reflected in Paint.measureText
+
+                // assert that the typeface passed is actually the one stored in paint.
+                assert (typeface == paintDelegate.mNativeTypeface);
+
+
                 // Paint.TextAlign indicates how the text is positioned relative to X.
                 // LEFT is the default and there's nothing to do.
                 float x = startX;
