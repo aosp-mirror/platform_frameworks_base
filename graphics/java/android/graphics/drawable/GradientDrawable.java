@@ -1203,8 +1203,11 @@ public class GradientDrawable extends Drawable {
 
         st.mAttrStroke = a.extractThemeAttrs();
 
+        // We have an explicit stroke defined, so the default stroke width
+        // must be at least 0 or the current stroke width.
+        final int defaultStrokeWidth = Math.max(0, st.mStrokeWidth);
         final int width = a.getDimensionPixelSize(
-                R.styleable.GradientDrawableStroke_width, st.mStrokeWidth);
+                R.styleable.GradientDrawableStroke_width, defaultStrokeWidth);
         final float dashWidth = a.getDimension(
                 R.styleable.GradientDrawableStroke_dashWidth, st.mStrokeDashWidth);
 
@@ -1406,10 +1409,13 @@ public class GradientDrawable extends Drawable {
                 outline.setOval(bounds);
                 return true;
             case LINE:
-                float halfStrokeWidth = mStrokePaint.getStrokeWidth() * 0.5f;
-                float centerY = bounds.centerY();
-                int top = (int) Math.floor(centerY - halfStrokeWidth);
-                int bottom = (int) Math.ceil(centerY + halfStrokeWidth);
+                // Hairlines (0-width stroke) must have a non-empty outline for
+                // shadows to draw correctly, so we'll use a very small width.
+                final float halfStrokeWidth = mStrokePaint == null ?
+                        0.0001f : mStrokePaint.getStrokeWidth() * 0.5f;
+                final float centerY = bounds.centerY();
+                final int top = (int) Math.floor(centerY - halfStrokeWidth);
+                final int bottom = (int) Math.ceil(centerY + halfStrokeWidth);
 
                 outline.setRect(bounds.left, top, bounds.right, bottom);
                 return true;
