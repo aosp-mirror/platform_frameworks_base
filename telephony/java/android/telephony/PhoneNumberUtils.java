@@ -1742,14 +1742,16 @@ public class PhoneNumberUtils
 
     /**
      * Checks if a given number is an emergency number for the country that the user is in.
-     * @param context the specific context which the number should be checked against
-     * @param number the number to look up.
      *
+     * @param number the number to look up.
+     * @param context the specific context which the number should be checked against
      * @return true if the specified number is an emergency number for the country the user
      * is currently in.
      */
-    public static boolean isLocalEmergencyNumber(Context context, String number) {
-        return isLocalEmergencyNumberInternal(context, number, true /* useExactMatch */);
+    public static boolean isLocalEmergencyNumber(String number, Context context) {
+        return isLocalEmergencyNumberInternal(number,
+                                              context,
+                                              true /* useExactMatch */);
     }
 
     /**
@@ -1765,24 +1767,27 @@ public class PhoneNumberUtils
      * This method is intended for internal use by the phone app when
      * deciding whether to allow ACTION_CALL intents from 3rd party apps
      * (where we're required to *not* allow emergency calls to be placed.)
-     * @param context the specific context which the number should be checked against
-     * @param number the number to look up.
      *
+     * @param number the number to look up.
+     * @param context the specific context which the number should be checked against
      * @return true if the specified number is an emergency number for a local country, based on the
      *              CountryDetector.
      *
      * @see android.location.CountryDetector
      * @hide
      */
-    public static boolean isPotentialLocalEmergencyNumber(Context context, String number) {
-        return isLocalEmergencyNumberInternal(context, number, false /* useExactMatch */);
+    public static boolean isPotentialLocalEmergencyNumber(String number, Context context) {
+        return isLocalEmergencyNumberInternal(number,
+                                              context,
+                                              false /* useExactMatch */);
     }
 
     /**
      * Helper function for isLocalEmergencyNumber() and
      * isPotentialLocalEmergencyNumber().
-     * @param context the specific context which the number should be checked against
+     *
      * @param number the number to look up.
+     * @param context the specific context which the number should be checked against
      * @param useExactMatch if true, consider a number to be an emergency
      *           number only if it *exactly* matches a number listed in
      *           the RIL / SIM.  If false, a number is considered to be an
@@ -1794,8 +1799,9 @@ public class PhoneNumberUtils
      *
      * @see android.location.CountryDetector
      */
-    private static boolean isLocalEmergencyNumberInternal(Context context, String number,
-            boolean useExactMatch) {
+    private static boolean isLocalEmergencyNumberInternal(String number,
+                                                          Context context,
+                                                          boolean useExactMatch) {
         String countryIso;
         CountryDetector detector = (CountryDetector) context.getSystemService(
                 Context.COUNTRY_DETECTOR);
