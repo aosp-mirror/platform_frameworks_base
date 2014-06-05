@@ -27394,55 +27394,6 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class DisconnectCause {
-    method public static java.lang.String toString(int);
-    field public static final int BUSY = 4; // 0x4
-    field public static final int CALL_BARRED = 20; // 0x14
-    field public static final int CDMA_ACCESS_BLOCKED = 35; // 0x23
-    field public static final int CDMA_ACCESS_FAILURE = 32; // 0x20
-    field public static final int CDMA_CALL_LOST = 41; // 0x29
-    field public static final int CDMA_DROP = 27; // 0x1b
-    field public static final int CDMA_INTERCEPT = 28; // 0x1c
-    field public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 26; // 0x1a
-    field public static final int CDMA_NOT_EMERGENCY = 34; // 0x22
-    field public static final int CDMA_PREEMPTED = 33; // 0x21
-    field public static final int CDMA_REORDER = 29; // 0x1d
-    field public static final int CDMA_RETRY_ORDER = 31; // 0x1f
-    field public static final int CDMA_SO_REJECT = 30; // 0x1e
-    field public static final int CONGESTION = 5; // 0x5
-    field public static final int CS_RESTRICTED = 22; // 0x16
-    field public static final int CS_RESTRICTED_EMERGENCY = 24; // 0x18
-    field public static final int CS_RESTRICTED_NORMAL = 23; // 0x17
-    field public static final int DIALED_MMI = 39; // 0x27
-    field public static final int EMERGENCY_ONLY = 37; // 0x25
-    field public static final int ERROR_UNSPECIFIED = 36; // 0x24
-    field public static final int FDN_BLOCKED = 21; // 0x15
-    field public static final int ICC_ERROR = 19; // 0x13
-    field public static final int INCOMING_MISSED = 1; // 0x1
-    field public static final int INCOMING_REJECTED = 16; // 0x10
-    field public static final int INVALID_CREDENTIALS = 10; // 0xa
-    field public static final int INVALID_NUMBER = 7; // 0x7
-    field public static final int LIMIT_EXCEEDED = 15; // 0xf
-    field public static final int LOCAL = 3; // 0x3
-    field public static final int LOST_SIGNAL = 14; // 0xe
-    field public static final int MAXIMUM_VALID_VALUE = 42; // 0x2a
-    field public static final int MINIMUM_VALID_VALUE = 0; // 0x0
-    field public static final int MMI = 6; // 0x6
-    field public static final int NORMAL = 2; // 0x2
-    field public static final int NOT_DISCONNECTED = 0; // 0x0
-    field public static final int NOT_VALID = -1; // 0xffffffff
-    field public static final int NO_PHONE_NUMBER_SUPPLIED = 38; // 0x26
-    field public static final int NUMBER_UNREACHABLE = 8; // 0x8
-    field public static final int OUT_OF_NETWORK = 11; // 0xb
-    field public static final int OUT_OF_SERVICE = 18; // 0x12
-    field public static final int POWER_OFF = 17; // 0x11
-    field public static final int SERVER_ERROR = 12; // 0xc
-    field public static final int SERVER_UNREACHABLE = 9; // 0x9
-    field public static final int TIMED_OUT = 13; // 0xd
-    field public static final int UNOBTAINABLE_NUMBER = 25; // 0x19
-    field public static final int VOICEMAIL_NUMBER_MISSING = 40; // 0x28
-  }
-
   public class NeighboringCellInfo implements android.os.Parcelable {
     ctor public deprecated NeighboringCellInfo();
     ctor public deprecated NeighboringCellInfo(int, int);
@@ -27494,7 +27445,7 @@ package android.telephony {
     method public static boolean isEmergencyNumber(java.lang.String);
     method public static boolean isGlobalPhoneNumber(java.lang.String);
     method public static boolean isISODigit(char);
-    method public static boolean isLocalEmergencyNumber(java.lang.String, android.content.Context);
+    method public static boolean isLocalEmergencyNumber(android.content.Context, java.lang.String);
     method public static final boolean isNonSeparator(char);
     method public static final boolean isReallyDialable(char);
     method public static final boolean isStartsPostDial(char);

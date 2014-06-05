@@ -276,7 +276,7 @@ public class CallerInfo {
         // Change the callerInfo number ONLY if it is an emergency number
         // or if it is the voicemail number.  If it is either, take a
         // shortcut and skip the query.
-        if (PhoneNumberUtils.isLocalEmergencyNumber(number, context)) {
+        if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             return new CallerInfo().markAsEmergency(context);
         } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
             return new CallerInfo().markAsVoiceMail();
