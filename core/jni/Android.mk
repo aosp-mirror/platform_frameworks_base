@@ -140,6 +140,7 @@ LOCAL_SRC_FILES:= \
 	android_hardware_camera2_DngCreator.cpp \
 	android_hardware_SensorManager.cpp \
 	android_hardware_SerialPort.cpp \
+	android_hardware_SoundTrigger.cpp \
 	android_hardware_UsbDevice.cpp \
 	android_hardware_UsbDeviceConnection.cpp \
 	android_hardware_UsbRequest.cpp \
@@ -235,6 +236,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libpdfium \
 	libimg_utils \
 	libnetd_client \
+	libsoundtrigger
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
