@@ -153,6 +153,11 @@ public:
 
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
+protected:
+    // NOTE: must override these to avoid calling into super class, which calls GL. These may be
+    // removed once DisplayListRenderer no longer inherits from OpenGLRenderer
+    virtual void onViewportInitialized() {};
+    virtual void onSnapshotRestored() {};
 
 private:
     void insertRestoreToCount();
