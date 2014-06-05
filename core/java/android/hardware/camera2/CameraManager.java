@@ -225,7 +225,7 @@ public final class CameraManager {
 
             synchronized (mLock) {
 
-                ICameraDeviceUser cameraUser;
+                ICameraDeviceUser cameraUser = null;
 
                 android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
                         new android.hardware.camera2.impl.CameraDeviceImpl(
@@ -247,8 +247,23 @@ public final class CameraManager {
                         // Use legacy camera implementation for HAL1 devices
                         Log.i(TAG, "Using legacy camera HAL.");
                         cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id);
+                    } else if (e.getReason() == CameraAccessException.CAMERA_IN_USE ||
+                            e.getReason() == CameraAccessException.MAX_CAMERAS_IN_USE ||
+                            e.getReason() == CameraAccessException.CAMERA_DISABLED ||
+                            e.getReason() == CameraAccessException.CAMERA_DISCONNECTED ||
+                            e.getReason() == CameraAccessException.CAMERA_ERROR) {
+                        // Received one of the known connection errors
+                        // The remote camera device cannot be connected to, so
+                        // set the local camera to the startup error state
+                        deviceImpl.setRemoteFailure(e);
+
+                        if (e.getReason() == CameraAccessException.CAMERA_DISABLED ||
+                                e.getReason() == CameraAccessException.CAMERA_DISCONNECTED) {
+                            // Per API docs, these failures call onError and throw
+                            throw e;
+                        }
                     } else {
-                        // Rethrow otherwise
+                        // Unexpected failure - rethrow
                         throw e;
                     }
                 }
@@ -298,7 +313,7 @@ public final class CameraManager {
      *
      * <p>If opening the camera device fails, then the device listener's
      * {@link CameraDevice.StateListener#onError onError} method will be called, and subsequent
-     * calls on the camera device will throw an {@link IllegalStateException}.</p>
+     * calls on the camera device will throw a {@link CameraAccessException}.</p>
      *
      * @param cameraId
      *             The unique identifier of the camera device to open
