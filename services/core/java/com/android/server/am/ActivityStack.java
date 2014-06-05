@@ -549,14 +549,16 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.d(TAG, "Found matching affinity!");
                     return r;
                 }
-            } else if (taskIntent != null && taskIntent.getComponent().equals(cls) &&
+            } else if (taskIntent != null && taskIntent.getComponent() != null &&
+                    taskIntent.getComponent().compareTo(cls) == 0 &&
                     Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG, "For Intent " + intent + " bringing to top: "
                         + r.intent);
                 return r;
-            } else if (affinityIntent != null && affinityIntent.getComponent().equals(cls) &&
+            } else if (affinityIntent != null && affinityIntent.getComponent() != null &&
+                    affinityIntent.getComponent().compareTo(cls) == 0 &&
                     Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
