@@ -1729,15 +1729,14 @@ public class NotificationManagerService extends SystemService {
         }
         checkCallerIsSystemOrSameApp(pkg);
         final boolean isSystemNotification = isUidSystem(callingUid) || ("android".equals(pkg));
-        final boolean isNotificationFromListener = mEnabledListenerPackageNames.contains(pkg);
 
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
         final UserHandle user = new UserHandle(userId);
 
         // Limit the number of notifications that any given package except the android
-        // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
-        if (!isSystemNotification && !isNotificationFromListener) {
+        // package can enqueue.  Prevents DOS attacks and deals with leaks.
+        if (!isSystemNotification) {
             synchronized (mNotificationList) {
                 int count = 0;
                 final int N = mNotificationList.size();
