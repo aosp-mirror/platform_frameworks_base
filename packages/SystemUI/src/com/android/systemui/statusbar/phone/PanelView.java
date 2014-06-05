@@ -41,7 +41,6 @@ import java.io.PrintWriter;
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
-    protected float mOverExpansion;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -61,6 +60,7 @@ public abstract class PanelView extends FrameLayout {
     private int mTrackingPointer;
     protected int mTouchSlop;
     protected boolean mHintAnimationRunning;
+    private boolean mOverExpandedBeforeFling;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -370,13 +370,12 @@ public abstract class PanelView extends FrameLayout {
     protected void fling(float vel, boolean expand) {
         cancelPeek();
         float target = expand ? getMaxPanelHeight() : 0.0f;
-        if (target == mExpandedHeight || mOverExpansion > 0) {
+        if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             onExpandingFinished();
-            mExpandedHeight = target;
-            mOverExpansion = 0.0f;
             mBar.panelExpansionChanged(this, mExpandedFraction);
             return;
         }
+        mOverExpandedBeforeFling = getOverExpansionAmount() > 0f;
         ValueAnimator animator = createHeightAnimator(target);
         if (expand) {
             mFlingAnimationUtils.apply(animator, mExpandedHeight, target, vel, getHeight());
@@ -396,8 +395,8 @@ public abstract class PanelView extends FrameLayout {
                 onExpandingFinished();
             }
         });
-        animator.start();
         mHeightAnimator = animator;
+        animator.start();
     }
 
     @Override
@@ -433,7 +432,7 @@ public abstract class PanelView extends FrameLayout {
 
     public void setExpandedHeight(float height) {
         if (DEBUG) logf("setExpandedHeight(%.1f)", height);
-        setExpandedHeightInternal(height);
+        setExpandedHeightInternal(height + getOverExpansionPixels());
         mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
     }
 
@@ -451,31 +450,38 @@ public abstract class PanelView extends FrameLayout {
         // If the user isn't actively poking us, let's update the height
         if (!mTracking && mHeightAnimator == null
                 && mExpandedHeight > 0 && currentMaxPanelHeight != mExpandedHeight) {
-            setExpandedHeightInternal(currentMaxPanelHeight);
+            setExpandedHeight(currentMaxPanelHeight);
         }
     }
 
     public void setExpandedHeightInternal(float h) {
-        float fh = getMaxPanelHeight();
-        mExpandedHeight = Math.max(0, Math.min(fh, h));
-        float overExpansion = h - fh;
-        overExpansion = Math.max(0, overExpansion);
-        if (overExpansion != mOverExpansion) {
-            onOverExpansionChanged(overExpansion);
-            mOverExpansion = overExpansion;
-        }
-
-        if (DEBUG) {
-            logf("setExpansion: height=%.1f fh=%.1f tracking=%s", h, fh, mTracking ? "T" : "f");
+        float fhWithoutOverExpansion = getMaxPanelHeight() - getOverExpansionAmount();
+        if (mHeightAnimator == null) {
+            float overExpansionPixels = Math.max(0, h - fhWithoutOverExpansion);
+            if (getOverExpansionPixels() != overExpansionPixels && mTracking) {
+                setOverExpansion(overExpansionPixels, true /* isPixels */);
+            }
+            mExpandedHeight = Math.min(h, fhWithoutOverExpansion) + getOverExpansionAmount();
+        } else {
+            mExpandedHeight = h;
+            if (mOverExpandedBeforeFling) {
+                setOverExpansion(Math.max(0, h - fhWithoutOverExpansion), false /* isPixels */);
+            }
         }
 
         onHeightUpdated(mExpandedHeight);
-        mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : mExpandedHeight / fh);
+        mExpandedFraction = Math.min(1f, fhWithoutOverExpansion == 0
+                ? 0
+                : mExpandedHeight / fhWithoutOverExpansion);
     }
 
-    protected abstract void onOverExpansionChanged(float overExpansion);
+    protected abstract void setOverExpansion(float overExpansion, boolean isPixels);
 
     protected abstract void onHeightUpdated(float expandedHeight);
+
+    protected abstract float getOverExpansionAmount();
+
+    protected abstract float getOverExpansionPixels();
 
     /**
      * This returns the maximum height of the panel. Children should override this if their
@@ -624,7 +630,8 @@ public abstract class PanelView extends FrameLayout {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                setExpandedHeight((Float) animation.getAnimatedValue());
+                setExpandedHeightInternal((Float) animation.getAnimatedValue());
+                mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
             }
         });
         return animator;

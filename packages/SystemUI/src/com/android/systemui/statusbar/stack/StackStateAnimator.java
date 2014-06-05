@@ -726,11 +726,21 @@ public class StackStateAnimator {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentOverScroll = (float) animation.getAnimatedValue();
-                mHostLayout.setOverScrollAmount(currentOverScroll, onTop, false /* animate */,
-                        false /* cancelAnimators */);
+                mHostLayout.setOverScrollAmount(
+                        currentOverScroll, onTop, false /* animate */, false /* cancelAnimators */);
             }
         });
         overScrollAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        overScrollAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (onTop) {
+                    mTopOverScrollAnimator = null;
+                } else {
+                    mBottomOverScrollAnimator = null;
+                }
+            }
+        });
         overScrollAnimator.start();
         if (onTop) {
             mTopOverScrollAnimator = overScrollAnimator;
