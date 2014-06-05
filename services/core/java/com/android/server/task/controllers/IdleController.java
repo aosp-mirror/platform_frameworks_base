@@ -28,11 +28,11 @@ import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.util.Slog;
 
+import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
 public class IdleController extends StateController {
     private static final String TAG = "IdleController";
-    private static final boolean DEBUG = false;
 
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming for at least this long
@@ -52,14 +52,14 @@ public class IdleController extends StateController {
     public static IdleController get(TaskManagerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
-                sController = new IdleController(service);
+                sController = new IdleController(service, service.getContext());
             }
             return sController;
         }
     }
 
-    private IdleController(TaskManagerService service) {
-        super(service);
+    private IdleController(StateChangedListener stateChangedListener, Context context) {
+        super(stateChangedListener, context);
         initIdleStateTracking();
     }
 

@@ -5362,7 +5362,7 @@ package android.app.task {
   public class Task implements android.os.Parcelable {
     method public int describeContents();
     method public int getBackoffPolicy();
-    method public android.os.Bundle getExtras();
+    method public android.os.PersistableBundle getExtras();
     method public int getId();
     method public long getInitialBackoffMillis();
     method public long getIntervalMillis();
@@ -5386,7 +5386,7 @@ package android.app.task {
     ctor public Task.Builder(int, android.content.ComponentName);
     method public android.app.task.Task build();
     method public android.app.task.Task.Builder setBackoffCriteria(long, int);
-    method public android.app.task.Task.Builder setExtras(android.os.Bundle);
+    method public android.app.task.Task.Builder setExtras(android.os.PersistableBundle);
     method public android.app.task.Task.Builder setMinimumLatency(long);
     method public android.app.task.Task.Builder setOverrideDeadline(long);
     method public android.app.task.Task.Builder setPeriodic(long);
@@ -5413,7 +5413,7 @@ package android.app.task {
 
   public class TaskParams implements android.os.Parcelable {
     method public int describeContents();
-    method public android.os.Bundle getExtras();
+    method public android.os.PersistableBundle getExtras();
     method public int getTaskId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;

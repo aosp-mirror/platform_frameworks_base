@@ -18,7 +18,7 @@ package com.android.server.task.controllers;
 
 import android.app.task.Task;
 import android.content.ComponentName;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 
@@ -37,6 +37,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 public class TaskStatus {
+    public static final long DEFAULT_LATEST_RUNTIME = Long.MAX_VALUE;
+    public static final long DEFAULT_EARLIEST_RUNTIME = 0L;
+
     final Task task;
     final int uId;
 
@@ -61,7 +64,7 @@ public class TaskStatus {
      * indicates there is no deadline constraint. See {@link #hasDeadlineConstraint()}.
      */
     private long latestRunTimeElapsedMillis;
-
+    /** How many times this task has failed, used to compute back-off. */
     private final int numFailures;
 
     /** Provide a handle to the service that this task will be run on. */
@@ -69,36 +72,52 @@ public class TaskStatus {
         return uId;
     }
 
-    /** Create a newly scheduled task. */
-    public TaskStatus(Task task, int uId, boolean persisted) {
+    private TaskStatus(Task task, int uId, boolean persisted, int numFailures) {
         this.task = task;
         this.uId = uId;
-        this.numFailures = 0;
+        this.numFailures = numFailures;
         this.persisted = persisted;
+    }
+
+    /** Create a newly scheduled task. */
+    public TaskStatus(Task task, int uId, boolean persisted) {
+        this(task, uId, persisted, 0);
 
         final long elapsedNow = SystemClock.elapsedRealtime();
-        // Timing constraints
+
         if (task.isPeriodic()) {
             earliestRunTimeElapsedMillis = elapsedNow;
             latestRunTimeElapsedMillis = elapsedNow + task.getIntervalMillis();
         } else {
             earliestRunTimeElapsedMillis = task.hasEarlyConstraint() ?
-                    elapsedNow + task.getMinLatencyMillis() : 0L;
+                    elapsedNow + task.getMinLatencyMillis() : DEFAULT_EARLIEST_RUNTIME;
             latestRunTimeElapsedMillis = task.hasLateConstraint() ?
-                    elapsedNow + task.getMaxExecutionDelayMillis() : Long.MAX_VALUE;
+                    elapsedNow + task.getMaxExecutionDelayMillis() : DEFAULT_LATEST_RUNTIME;
         }
     }
 
-    public TaskStatus(TaskStatus rescheduling, long newEarliestRuntimeElapsed,
-                      long newLatestRuntimeElapsed, int backoffAttempt) {
-        this.task = rescheduling.task;
+    /**
+     * Create a new TaskStatus that was loaded from disk. We ignore the provided
+     * {@link android.app.task.Task} time criteria because we can load a persisted periodic task
+     * from the {@link com.android.server.task.TaskStore} and still want to respect its
+     * wallclock runtime rather than resetting it on every boot.
+     * We consider a freshly loaded task to no longer be in back-off.
+     */
+    public TaskStatus(Task task, int uId, long earliestRunTimeElapsedMillis,
+                      long latestRunTimeElapsedMillis) {
+        this(task, uId, true, 0);
 
-        this.uId = rescheduling.getUid();
-        this.persisted = rescheduling.isPersisted();
-        this.numFailures = backoffAttempt;
+        this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
+        this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
+    }
 
-        earliestRunTimeElapsedMillis = newEarliestRuntimeElapsed;
-        latestRunTimeElapsedMillis = newLatestRuntimeElapsed;
+    /** Create a new task to be rescheduled with the provided parameters. */
+    public TaskStatus(TaskStatus rescheduling, long newEarliestRuntimeElapsedMillis,
+                      long newLatestRuntimeElapsedMillis, int backoffAttempt) {
+        this(rescheduling.task, rescheduling.getUid(), rescheduling.isPersisted(), backoffAttempt);
+
+        earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
+        latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
     }
 
     public Task getTask() {
@@ -125,7 +144,7 @@ public class TaskStatus {
         return uId;
     }
 
-    public Bundle getExtras() {
+    public PersistableBundle getExtras() {
         return task.getExtras();
     }
 
@@ -142,11 +161,11 @@ public class TaskStatus {
     }
 
     public boolean hasTimingDelayConstraint() {
-        return earliestRunTimeElapsedMillis != 0L;
+        return earliestRunTimeElapsedMillis != DEFAULT_EARLIEST_RUNTIME;
     }
 
     public boolean hasDeadlineConstraint() {
-        return latestRunTimeElapsedMillis != Long.MAX_VALUE;
+        return latestRunTimeElapsedMillis != DEFAULT_LATEST_RUNTIME;
     }
 
     public boolean hasIdleConstraint() {

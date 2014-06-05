@@ -16,10 +16,10 @@
 
 package android.app.task;
 
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 
 /**
  * Contains the parameters used to configure/identify your task. You do not create this object
@@ -28,11 +28,11 @@ import android.os.Parcelable;
 public class TaskParams implements Parcelable {
 
     private final int taskId;
-    private final Bundle extras;
+    private final PersistableBundle extras;
     private final IBinder callback;
 
     /** @hide */
-    public TaskParams(int taskId, Bundle extras, IBinder callback) {
+    public TaskParams(int taskId, PersistableBundle extras, IBinder callback) {
         this.taskId = taskId;
         this.extras = extras;
         this.callback = callback;
@@ -47,10 +47,10 @@ public class TaskParams implements Parcelable {
 
     /**
      * @return The extras you passed in when constructing this task with
-     * {@link android.app.task.Task.Builder#setExtras(android.os.Bundle)}. This will
+     * {@link android.app.task.Task.Builder#setExtras(android.os.PersistableBundle)}. This will
      * never be null. If you did not set any extras this will be an empty bundle.
      */
-    public Bundle getExtras() {
+    public PersistableBundle getExtras() {
         return extras;
     }
 
@@ -61,7 +61,7 @@ public class TaskParams implements Parcelable {
 
     private TaskParams(Parcel in) {
         taskId = in.readInt();
-        extras = in.readBundle();
+        extras = in.readPersistableBundle();
         callback = in.readStrongBinder();
     }
 
@@ -73,7 +73,7 @@ public class TaskParams implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
-        dest.writeBundle(extras);
+        dest.writePersistableBundle(extras);
         dest.writeStrongBinder(callback);
     }
 

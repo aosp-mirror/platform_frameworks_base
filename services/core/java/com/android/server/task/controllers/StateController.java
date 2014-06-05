@@ -27,13 +27,13 @@ import com.android.server.task.TaskManagerService;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
-
+    protected static final boolean DEBUG = true;
     protected Context mContext;
     protected StateChangedListener mStateChangedListener;
 
-    public StateController(TaskManagerService service) {
-        mStateChangedListener = service;
-        mContext = service.getContext();
+    public StateController(StateChangedListener stateChangedListener, Context context) {
+        mStateChangedListener = stateChangedListener;
+        mContext = context;
     }
 
     /**
