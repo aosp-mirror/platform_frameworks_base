@@ -1103,6 +1103,9 @@ class WebVttTrack extends SubtitleTrack implements WebVttCueListener {
  */
 class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.RenderingWidget {
     private static final boolean DEBUG = false;
+
+    private static final CaptionStyle DEFAULT_CAPTION_STYLE = CaptionStyle.DEFAULT;
+
     private static final int DEBUG_REGION_BACKGROUND = 0x800000FF;
     private static final int DEBUG_CUE_BACKGROUND = 0x80FF0000;
 
@@ -1144,7 +1147,8 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public WebVttRenderingWidget(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public WebVttRenderingWidget(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         // Cannot render text over video when layer type is hardware.
@@ -1259,6 +1263,7 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
     }
 
     private void setCaptionStyle(CaptionStyle captionStyle, float fontSize) {
+        captionStyle = DEFAULT_CAPTION_STYLE.applyStyle(captionStyle);
         mCaptionStyle = captionStyle;
         mFontSize = fontSize;
 
