@@ -61,7 +61,7 @@ public abstract class CallService extends Service {
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 11;
     private static final int MSG_PLAY_DTMF_TONE = 12;
     private static final int MSG_STOP_DTMF_TONE = 13;
-    private static final int MSG_ADD_TO_CONFERENCE = 14;
+    private static final int MSG_CONFERENCE = 14;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 15;
     private static final int MSG_ON_POST_DIAL_CONTINUE = 16;
 
@@ -128,24 +128,12 @@ public abstract class CallService extends Service {
                 case MSG_STOP_DTMF_TONE:
                     stopDtmfTone((String) msg.obj);
                     break;
-                case MSG_ADD_TO_CONFERENCE: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        @SuppressWarnings("unchecked")
-                        List<String> callIds = (List<String>) args.arg2;
-                        String conferenceCallId = (String) args.arg1;
-                        addToConference(conferenceCallId, callIds);
-                    } finally {
-                        args.recycle();
-                    }
-                    break;
-                }
-                case MSG_SPLIT_FROM_CONFERENCE: {
+                case MSG_CONFERENCE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String conferenceCallId = (String) args.arg1;
                         String callId = (String) args.arg2;
-                        splitFromConference(conferenceCallId, callId);
+                        conference(conferenceCallId, callId);
                     } finally {
                         args.recycle();
                     }
@@ -162,6 +150,9 @@ public abstract class CallService extends Service {
                     }
                     break;
                 }
+                case MSG_SPLIT_FROM_CONFERENCE:
+                    splitFromConference((String) msg.obj);
+                    break;
                 default:
                     break;
             }
@@ -245,19 +236,16 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void addToConference(String conferenceCallId, List<String> callsToConference) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = conferenceCallId;
-            args.arg2 = callsToConference;
-            mMessageHandler.obtainMessage(MSG_ADD_TO_CONFERENCE, args).sendToTarget();
-        }
-
-        @Override
-        public void splitFromConference(String conferenceCallId, String callId) {
+        public void conference(String conferenceCallId, String callId) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = conferenceCallId;
             args.arg2 = callId;
-            mMessageHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, args).sendToTarget();
+            mMessageHandler.obtainMessage(MSG_CONFERENCE, args).sendToTarget();
+        }
+
+        @Override
+        public void splitFromConference(String callId) {
+            mMessageHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, callId).sendToTarget();
         }
 
         @Override
@@ -424,24 +412,22 @@ public abstract class CallService extends Service {
     public abstract void onAudioStateChanged(String activeCallId, CallAudioState audioState);
 
     /**
-     * Adds the specified calls to the specified conference call.
+     * Conferences the specified call.
      *
      * @param conferenceCallId The unique ID of the conference call onto which the specified calls
      *         should be added.
-     * @param callIds The calls to add to the conference call.
+     * @param callId The call to conference.
      * @hide
      */
-    public abstract void addToConference(String conferenceCallId, List<String> callIds);
+    public abstract void conference(String conferenceCallId, String callId);
 
     /**
-     * Removes the specified call from the specified conference call. This is a no-op if the call
-     * is not already part of the conference call.
+     * Removes the specified call from a conference call.
      *
-     * @param conferenceCallId The conference call.
      * @param callId The call to remove from the conference call
      * @hide
      */
-    public abstract void splitFromConference(String conferenceCallId, String callId);
+    public abstract void splitFromConference(String callId);
 
     public void onPostDialContinue(String callId, boolean proceed) {}
     public void onPostDialWait(Connection conn, String remaining) {}

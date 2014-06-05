@@ -20,10 +20,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.DisconnectCause;
 
+import android.os.SystemClock;
+
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link android.app.Service} that provides telephone connections to
@@ -32,7 +37,6 @@ import java.util.Map;
 public abstract class ConnectionService extends CallService {
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
-
     private static final Connection NULL_CONNECTION = new Connection() {};
 
     // Mappings from Connections to IDs as understood by the current CallService implementation
@@ -99,6 +103,20 @@ public abstract class ConnectionService extends CallService {
             Log.d(this, "Adapter onRingback %b", ringback);
             getAdapter().setRequestingRingback(id, ringback);
         }
+
+        @Override
+        public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {
+            String id = mIdByConnection.get(c);
+            getAdapter().setCanConference(id, isConferenceCapable);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onParentConnectionChanged(Connection c, Connection parent) {
+            String id = mIdByConnection.get(c);
+            String parentId = parent == null ? null : mIdByConnection.get(parent);
+            getAdapter().setIsConferenced(id, parentId);
+        }
     };
 
     @Override
@@ -110,8 +128,7 @@ public abstract class ConnectionService extends CallService {
                     @Override
                     public void onResult(Uri handle, Subscription... result) {
                         boolean isCompatible = result.length > 0;
-                        Log.d(this, "adapter setIsCompatibleWith "
-                                + callInfo.getId() + " " + isCompatible);
+                        Log.d(this, "adapter setIsCompatibleWith ");
                         getAdapter().setIsCompatibleWith(callInfo.getId(), isCompatible);
                     }
 
@@ -135,7 +152,7 @@ public abstract class ConnectionService extends CallService {
                 new Response<ConnectionRequest, Connection>() {
                     @Override
                     public void onResult(ConnectionRequest request, Connection... result) {
-                        if (result.length != 1) {
+                        if (result != null && result.length != 1) {
                             Log.d(this, "adapter handleFailedOutgoingCall %s", callInfo);
                             getAdapter().handleFailedOutgoingCall(
                                     request,
@@ -145,10 +162,10 @@ public abstract class ConnectionService extends CallService {
                                 c.abort();
                             }
                         } else {
-                            addConnection(callInfo.getId(), result[0]);
                             Log.d(this, "adapter handleSuccessfulOutgoingCall %s",
                                     callInfo.getId());
                             getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
+                            addConnection(callInfo.getId(), result[0]);
                         }
                     }
 
@@ -177,7 +194,7 @@ public abstract class ConnectionService extends CallService {
                 new Response<ConnectionRequest, Connection>() {
                     @Override
                     public void onResult(ConnectionRequest request, Connection... result) {
-                        if (result.length != 1) {
+                        if (result != null && result.length != 1) {
                             Log.d(this, "adapter handleFailedOutgoingCall %s", callId);
                             getAdapter().handleFailedOutgoingCall(
                                     request,
@@ -258,27 +275,43 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void addToConference(String conferenceCallId, List<String> callIds) {
-        Log.d(this, "addToConference %s, %s", conferenceCallId, callIds);
+    public final void conference(final String conferenceCallId, String callId) {
+        Log.d(this, "conference %s, %s", conferenceCallId, callId);
 
-        List<Connection> connections = new LinkedList<>();
-        for (String id : callIds) {
-            Connection connection = findConnectionForAction(id, "addToConference");
-            if (connection == NULL_CONNECTION) {
-                Log.w(this, "Connection missing in conference request %s.", id);
-                return;
-            }
-            connections.add(connection);
+        Connection connection = findConnectionForAction(callId, "conference");
+        if (connection == NULL_CONNECTION) {
+            Log.w(this, "Connection missing in conference request %s.", callId);
+            return;
         }
 
-        // TODO(santoscordon): Find an existing conference call or create a new one. Then call
-        // conferenceWith on it.
+        onCreateConferenceConnection(conferenceCallId, connection,
+                new Response<String, Connection>() {
+                    /** ${inheritDoc} */
+                    @Override
+                    public void onResult(String ignored, Connection... result) {
+                        Log.d(this, "onCreateConference.Response %s", (Object[]) result);
+                        if (result != null && result.length == 1) {
+                            Connection conferenceConnection = result[0];
+                            if (!mIdByConnection.containsKey(conferenceConnection)) {
+                                Log.v(this, "sending new conference call %s", conferenceCallId);
+                                getAdapter().addConferenceCall(conferenceCallId);
+                                addConnection(conferenceCallId, conferenceConnection);
+                            }
+                        }
+                    }
+
+                    /** ${inheritDoc} */
+                    @Override
+                    public void onError(String request, int code, String reason) {
+                        // no-op
+                    }
+                });
     }
 
     /** @hide */
     @Override
-    public final void splitFromConference(String conferenceCallId, String callId) {
-        Log.d(this, "splitFromConference(%s, %s)", conferenceCallId, callId);
+    public final void splitFromConference(String callId) {
+        Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
         if (connection == NULL_CONNECTION) {
@@ -309,6 +342,13 @@ public abstract class ConnectionService extends CallService {
     }
 
     /**
+     * Returns all connections currently associated with this connection service.
+     */
+    public Collection<Connection> getAllConnections() {
+        return mConnectionById.values();
+    }
+
+    /**
      * Find a set of Subscriptions matching a given handle (e.g. phone number).
      *
      * @param handle A handle (e.g. phone number) with which to connect.
@@ -329,6 +369,21 @@ public abstract class ConnectionService extends CallService {
             Response<ConnectionRequest, Connection> callback) {}
 
     /**
+     * Returns a new or existing conference connection when the the user elects to convert the
+     * specified connection into a conference call. The specified connection can be any connection
+     * which had previously specified itself as conference-capable including both simple connections
+     * and connections previously returned from this method.
+     *
+     * @param connection The connection from which the user opted to start a conference call.
+     * @param token The token to be passed into the response callback.
+     * @param callback The callback for providing the potentially-new conference connection.
+     */
+    public void onCreateConferenceConnection(
+            String token,
+            Connection connection,
+            Response<String, Connection> callback) {}
+
+    /**
      * Create a Connection to match an incoming connection notification.
      *
      * @param request Data encapsulating details of the desired Connection.
@@ -337,6 +392,20 @@ public abstract class ConnectionService extends CallService {
     public void onCreateIncomingConnection(
             ConnectionRequest request,
             Response<ConnectionRequest, Connection> callback) {}
+
+    /**
+     * Notifies that a connection has been added to this connection service and sent to Telecomm.
+     *
+     * @param connection The connection which was added.
+     */
+    public void onConnectionAdded(Connection connection) {}
+
+    /**
+     * Notified that a connection has been removed from this connection service.
+     *
+     * @param connection The connection which was removed.
+     */
+    public void onConnectionRemoved(Connection connection) {}
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
@@ -387,12 +456,14 @@ public abstract class ConnectionService extends CallService {
         mConnectionById.put(callId, connection);
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
+        onConnectionAdded(connection);
     }
 
     private void removeConnection(Connection connection) {
         connection.removeConnectionListener(mConnectionListener);
         mConnectionById.remove(mIdByConnection.get(connection));
         mIdByConnection.remove(connection);
+        onConnectionRemoved(connection);
     }
 
     private Connection findConnectionForAction(String callId, String action) {
