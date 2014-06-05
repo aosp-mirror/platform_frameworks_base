@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.bars;
 
+import com.android.layoutlib.bridge.impl.Config;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
 
@@ -30,14 +31,14 @@ import android.widget.TextView;
 
 public class StatusBar extends CustomBar {
 
-    public StatusBar(Context context, Density density, int direction, boolean RtlEnabled)
-            throws XmlPullParserException {
+    public StatusBar(Context context, Density density, int direction, boolean RtlEnabled,
+            int simulatePlatformVersion) throws XmlPullParserException {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
         super(context, density, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml");
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
-        setBackgroundColor(0xFF000000);
+        setBackgroundColor(Config.getStatusBarColor(simulatePlatformVersion));
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.

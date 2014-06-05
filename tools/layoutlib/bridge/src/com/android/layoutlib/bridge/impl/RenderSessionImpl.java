@@ -271,12 +271,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     mViewRoot = topLayout;
                     topLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                    try {
-                        NavigationBar navigationBar = createNavigationBar(context,
-                                hardwareConfig.getDensity(), isRtl, params.isRtlSupported());
-                        topLayout.addView(navigationBar);
-                    } catch (XmlPullParserException ignored) {
-
+                    if (Config.showOnScreenNavBar(params.getSimulatePlatformVersion())) {
+                        try {
+                            NavigationBar navigationBar = createNavigationBar(context,
+                                    hardwareConfig.getDensity(), isRtl, params.isRtlSupported());
+                            topLayout.addView(navigationBar);
+                        } catch (XmlPullParserException ignored) {
+                        }
                     }
                 }
 
@@ -329,7 +330,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // system bar
                     try {
                         StatusBar statusBar = createStatusBar(context, hardwareConfig.getDensity(),
-                                layoutDirection, params.isRtlSupported());
+                                layoutDirection, params.isRtlSupported(),
+                                params.getSimulatePlatformVersion());
                         topLayout.addView(statusBar);
                     } catch (XmlPullParserException ignored) {
 
@@ -372,7 +374,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     backgroundLayout.addView(mContentRoot);
                 }
 
-                if (mNavigationBarOrientation == LinearLayout.HORIZONTAL &&
+                if (Config.showOnScreenNavBar(params.getSimulatePlatformVersion()) &&
+                        mNavigationBarOrientation == LinearLayout.HORIZONTAL &&
                         mNavigationBarSize > 0) {
                     // system bar
                     try {
@@ -1572,9 +1575,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * Creates the status bar with wifi and battery icons.
      */
     private StatusBar createStatusBar(BridgeContext context, Density density, int direction,
-            boolean isRtlSupported) throws XmlPullParserException {
+            boolean isRtlSupported, int platformVersion) throws XmlPullParserException {
         StatusBar statusBar = new StatusBar(context, density,
-                direction, isRtlSupported);
+                direction, isRtlSupported, platformVersion);
         statusBar.setLayoutParams(
                 new LinearLayout.LayoutParams(
                         LayoutParams.MATCH_PARENT, mStatusBarSize));
