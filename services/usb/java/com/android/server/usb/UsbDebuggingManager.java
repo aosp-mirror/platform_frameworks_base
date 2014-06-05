@@ -84,7 +84,6 @@ public class UsbDebuggingManager implements Runnable {
             while (true) {
                 int count = inputStream.read(buffer);
                 if (count < 0) {
-                    Slog.e(TAG, "got " + count + " reading");
                     break;
                 }
 
@@ -100,9 +99,6 @@ public class UsbDebuggingManager implements Runnable {
                     break;
                 }
             }
-        } catch (IOException ex) {
-            Slog.e(TAG, "Communication error: ", ex);
-            throw ex;
         } finally {
             closeSocket();
         }
