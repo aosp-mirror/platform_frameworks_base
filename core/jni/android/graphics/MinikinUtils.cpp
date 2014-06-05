@@ -16,6 +16,7 @@
 
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
+#include <string>
 
 #include "SkPaint.h"
 #include "minikin/Layout.h"
@@ -36,8 +37,8 @@ static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
     return off + n;
 }
 
-void MinikinUtils::SetLayoutProperties(Layout* layout, const SkPaint* paint, int flags,
-    TypefaceImpl* typeface) {
+std::string MinikinUtils::setLayoutProperties(Layout* layout, const SkPaint* paint, int bidiFlags,
+        TypefaceImpl* typeface) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
@@ -51,13 +52,14 @@ void MinikinUtils::SetLayoutProperties(Layout* layout, const SkPaint* paint, int
         MinikinFontSkia::packPaintFlags(paint),
         style.getWeight() * 100,
         style.getItalic() ? "italic" : "normal",
-        flags);
+        bidiFlags);
     SkString langString = paint->getPaintOptionsAndroid().getLanguage().getTag();
     off = snprintfcat(css, off, sizeof(css), " lang: %s;", langString.c_str());
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
     const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
     off = snprintfcat(css, off, sizeof(css), " -minikin-variant: %s;", varstr);
     layout->setProperties(css);
+    return std::string(css);
 }
 
 float MinikinUtils::xOffsetForTextAlign(SkPaint* paint, const Layout& layout) {
