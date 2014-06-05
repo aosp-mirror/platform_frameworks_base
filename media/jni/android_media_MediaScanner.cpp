@@ -21,6 +21,7 @@
 #include <utils/threads.h>
 #include <media/mediascanner.h>
 #include <media/stagefright/StagefrightMediaScanner.h>
+#include <private/media/VideoFrame.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -347,21 +348,21 @@ android_media_MediaScanner_extractAlbumArt(
     }
 
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    char* data = mp->extractAlbumArt(fd);
-    if (!data) {
+    MediaAlbumArt* mediaAlbumArt =
+            reinterpret_cast<MediaAlbumArt*>(mp->extractAlbumArt(fd));
+    if (mediaAlbumArt != NULL) {
         return NULL;
     }
-    jsize len = *((uint32_t*)data);
 
-    jbyteArray array = env->NewByteArray(len);
+    jbyteArray array = env->NewByteArray(mediaAlbumArt->mSize);
     if (array != NULL) {
         jbyte* bytes = env->GetByteArrayElements(array, NULL);
-        memcpy(bytes, data + 4, len);
+        memcpy(bytes, &mediaAlbumArt->mData[0], mediaAlbumArt->mSize);
         env->ReleaseByteArrayElements(array, bytes, 0);
     }
 
 done:
-    free(data);
+    free(mediaAlbumArt);
     // if NewByteArray() returned NULL, an out-of-memory
     // exception will have been raised. I just want to
     // return null in that case.
