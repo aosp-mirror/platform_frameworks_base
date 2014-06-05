@@ -32537,7 +32537,6 @@ package android.view {
     method protected int computeVerticalScrollRange();
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
-    method public final android.animation.ValueAnimator createRevealAnimator(int, int, float, float);
     method public void destroyDrawingCache();
     method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
@@ -33184,6 +33183,10 @@ package android.view {
 
   public static abstract interface View.OnTouchListener {
     method public abstract boolean onTouch(android.view.View, android.view.MotionEvent);
+  }
+
+  public class ViewAnimationUtils {
+    method public static final android.animation.ValueAnimator createCircularReveal(android.view.View, int, int, float, float);
   }
 
   public class ViewConfiguration {
