@@ -2851,7 +2851,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updatePublicMode() {
-        setLockscreenPublicMode(mState == StatusBarState.KEYGUARD
+        setLockscreenPublicMode(
+                (mStatusBarKeyguardViewManager.isShowing() || 
+                    mStatusBarKeyguardViewManager.isOccluded())
                 && mStatusBarKeyguardViewManager.isSecure());
     }
 
