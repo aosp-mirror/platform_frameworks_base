@@ -892,6 +892,7 @@ public class ConnectivityManager {
                 case NetworkCapabilities.NET_CAPABILITY_IMS:
                 case NetworkCapabilities.NET_CAPABILITY_RCS:
                 case NetworkCapabilities.NET_CAPABILITY_XCAP:
+                case NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED: //there by default
                     continue;
                 default:
                     // At least one capability usually provided by unrestricted
