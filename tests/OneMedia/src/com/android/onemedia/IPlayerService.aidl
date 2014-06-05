@@ -15,6 +15,7 @@
 
 package com.android.onemedia;
 
+import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 
@@ -26,4 +27,5 @@ interface IPlayerService {
     void registerCallback(in IPlayerCallback cb);
     void unregisterCallback(in IPlayerCallback cb);
     void sendRequest(String action, in Bundle params, in IRequestCallback cb);
+    void setIcon(in Bitmap icon);
 }

@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.android.onemedia.playback.RequestUtils;
@@ -52,6 +53,7 @@ public class PlayerController {
     private Handler mHandler = new Handler();
 
     private boolean mResumed;
+    private Bitmap mArt;
 
     public PlayerController(Activity context, Intent serviceIntent) {
         mContext = context;
@@ -89,6 +91,16 @@ public class PlayerController {
         unbindFromService();
     }
 
+    public void setArt(Bitmap art) {
+        mArt = art;
+        if (mBinder != null) {
+            try {
+                mBinder.setIcon(art);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     public void play() {
         if (mTransportControls != null) {
             mTransportControls.play();
@@ -123,6 +135,16 @@ public class PlayerController {
 
     public void showRoutePicker() {
         // TODO
+    }
+
+    public MediaSession.Token getSessionToken() {
+        if (mBinder != null) {
+            try {
+                return mBinder.getSessionToken();
+            } catch (RemoteException e) {
+            }
+        }
+        return null;
     }
 
     private void unbindFromService() {
@@ -165,6 +187,9 @@ public class PlayerController {
             mContext.setMediaController(mController);
             mController.addCallback(mControllerCb, mHandler);
             mTransportControls = mController.getTransportControls();
+            if (mArt != null) {
+                setArt(mArt);
+            }
             Log.d(TAG, "Ready to use PlayerService");
 
             if (mListener != null) {
@@ -194,6 +219,9 @@ public class PlayerController {
                 return;
             }
             Log.d(TAG, "Received metadata change, " + metadata.getDescription());
+            if (mListener != null) {
+                mListener.onMetadataChange(metadata);
+            }
         }
     }
 
