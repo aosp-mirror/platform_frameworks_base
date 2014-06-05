@@ -64,6 +64,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private volatile StateListener mSessionStateListener;
     private final Handler mDeviceHandler;
 
+    private boolean mInError = false;
     private boolean mIdle = true;
 
     /** map request IDs to listener/request data */
@@ -211,10 +212,59 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
         // TODO: Move from decorator to direct binder-mediated exceptions
         synchronized(mLock) {
+            // If setRemoteFailure already called, do nothing
+            if (mInError) return;
+
             mRemoteDevice = CameraBinderDecorator.newInstance(remoteDevice);
 
             mDeviceHandler.post(mCallOnOpened);
             mDeviceHandler.post(mCallOnUnconfigured);
+        }
+    }
+
+    /**
+     * Call to indicate failed connection to a remote camera device.
+     *
+     * <p>This places the camera device in the error state and informs the listener.
+     * Use in place of setRemoteDevice() when startup fails.</p>
+     */
+    public void setRemoteFailure(final CameraRuntimeException failure) {
+        int failureCode = StateListener.ERROR_CAMERA_DEVICE;
+        boolean failureIsError = true;
+
+        switch (failure.getReason()) {
+            case CameraAccessException.CAMERA_IN_USE:
+                failureCode = StateListener.ERROR_CAMERA_IN_USE;
+                break;
+            case CameraAccessException.MAX_CAMERAS_IN_USE:
+                failureCode = StateListener.ERROR_MAX_CAMERAS_IN_USE;
+                break;
+            case CameraAccessException.CAMERA_DISABLED:
+                failureCode = StateListener.ERROR_CAMERA_DISABLED;
+                break;
+            case CameraAccessException.CAMERA_DISCONNECTED:
+                failureIsError = false;
+                break;
+            case CameraAccessException.CAMERA_ERROR:
+                failureCode = StateListener.ERROR_CAMERA_DEVICE;
+                break;
+            default:
+                Log.wtf(TAG, "Unknown failure in opening camera device: " + failure.getReason());
+                break;
+        }
+        final int code = failureCode;
+        final boolean isError = failureIsError;
+        synchronized (mLock) {
+            mInError = true;
+            mDeviceHandler.post(new Runnable() {
+                public void run() {
+                    if (isError) {
+                        mDeviceListener.onError(CameraDeviceImpl.this, code);
+                    } else {
+                        mDeviceListener.onDisconnected(CameraDeviceImpl.this);
+                    }
+                }
+            });
         }
     }
 
@@ -230,7 +280,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             outputs = new ArrayList<Surface>();
         }
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
 
             HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
             List<Integer> deleteList = new ArrayList<Integer>();        // Streams to delete
@@ -298,7 +348,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 Log.d(TAG, "createCaptureSession");
             }
 
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
 
             // TODO: we must be in UNCONFIGURED mode to begin with, or using another session
 
@@ -336,7 +386,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException {
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
 
             CameraMetadataNative templatedRequest = new CameraMetadataNative();
 
@@ -456,7 +506,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
 
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
             int requestId;
 
             if (repeating) {
@@ -528,7 +578,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     public void stopRepeating() throws CameraAccessException {
 
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
 
                 int requestId = mRepeatingRequestId;
@@ -559,7 +609,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private void waitUntilIdle() throws CameraAccessException {
 
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
                 throw new IllegalStateException("Active repeating request ongoing");
             }
@@ -580,7 +630,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     @Override
     public void flush() throws CameraAccessException {
         synchronized (mLock) {
-            checkIfCameraClosed();
+            checkIfCameraClosedOrInError();
 
             mDeviceHandler.post(mCallOnBusy);
             try {
@@ -614,11 +664,15 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 // impossible
             }
 
-            if (mRemoteDevice != null) {
+            // Only want to fire the onClosed callback once;
+            // either a normal close where the remote device is valid
+            // or a close after a startup error (no remote device but in error state)
+            if (mRemoteDevice != null || mInError) {
                 mDeviceHandler.post(mCallOnClosed);
             }
 
             mRemoteDevice = null;
+            mInError = false;
         }
     }
 
@@ -835,6 +889,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (isClosed()) return;
 
             synchronized(mLock) {
+                mInError = true;
                 switch (errorCode) {
                     case ERROR_CAMERA_DISCONNECTED:
                         r = mCallOnDisconnected;
@@ -1032,7 +1087,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return handler;
     }
 
-    private void checkIfCameraClosed() {
+    private void checkIfCameraClosedOrInError() throws CameraAccessException {
+        if (mInError) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
+                    "The camera device has encountered a serious error");
+        }
         if (mRemoteDevice == null) {
             throw new IllegalStateException("CameraDevice was already closed");
         }
