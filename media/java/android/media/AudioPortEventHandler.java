@@ -56,7 +56,6 @@ class AudioPortEventHandler {
             mHandler = new Handler(looper) {
                 @Override
                 public void handleMessage(Message msg) {
-                    Log.i(TAG, "handleMessage: "+msg.what);
                     ArrayList<AudioManager.OnAudioPortUpdateListener> listeners;
                     synchronized (this) {
                         if (msg.what == AUDIOPORT_EVENT_NEW_LISTENER) {
