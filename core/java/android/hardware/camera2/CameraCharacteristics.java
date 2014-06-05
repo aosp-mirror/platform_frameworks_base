@@ -751,6 +751,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
      * stream image format will be RAW_OPAQUE, the associated output stream image format
      * should be JPEG.</p>
+     * @hide
      */
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
             new Key<Integer>("android.request.maxNumInputStreams", int.class);
@@ -974,7 +975,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The mapping of image formats that are supported by this
      * camera device for input streams, to their corresponding output formats.</p>
      * <p>All camera devices with at least 1
-     * {@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} will have at least one
+     * android.request.maxNumInputStreams will have at least one
      * available input format.</p>
      * <p>The camera device will support the following map of formats,
      * if its dependent capability is supported:</p>
@@ -1021,8 +1022,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
      * <p>TODO: typedef to ReprocessFormatMap</p>
-     *
-     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @hide
      */
     public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =

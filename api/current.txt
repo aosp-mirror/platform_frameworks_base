@@ -12234,7 +12234,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_AVAILABLE_CAPABILITIES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_INPUT_STREAMS;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC_STALLING;
     field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_RAW;
@@ -12459,7 +12458,6 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 3; // 0x3
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2; // 0x2
-    field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
     field public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0; // 0x0
     field public static final int SCALER_CROPPING_TYPE_FREEFORM = 1; // 0x1
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3; // 0x3
