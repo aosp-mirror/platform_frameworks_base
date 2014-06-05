@@ -20,6 +20,10 @@ import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Various utilities to handle HDMI CEC messages.
  */
@@ -70,6 +74,22 @@ final class HdmiUtils {
         // TODO: Handle the exception when the length is wrong.
         return cmd.getParams().length > 0
                 && cmd.getParams()[0] == HdmiConstants.SYSTEM_AUDIO_STATUS_ON;
+    }
+
+    /**
+     * Convert integer array to list of {@link Integer}.
+     *
+     * <p>The result is immutable.
+     *
+     * @param is integer array
+     * @return {@link List} instance containing the elements in the given array
+     */
+    static List<Integer> asImmutableList(final int[] is) {
+        ArrayList<Integer> list = new ArrayList<>(is.length);
+        for (int type : is) {
+            list.add(type);
+        }
+        return Collections.unmodifiableList(list);
     }
 
     /**

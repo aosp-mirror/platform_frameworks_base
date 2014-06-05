@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
@@ -306,6 +307,10 @@ final class HdmiCecController {
     HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         return mDeviceInfos.get(logicalAddress);
+    }
+
+    HdmiPortInfo[] getPortInfos() {
+        return nativeGetPortInfos(mNativePtr);
     }
 
     /**
@@ -641,8 +646,8 @@ final class HdmiCecController {
     private static native int nativeGetPhysicalAddress(long controllerPtr);
     private static native int nativeGetVersion(long controllerPtr);
     private static native int nativeGetVendorId(long controllerPtr);
+    private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
     private static native void nativeSetOption(long controllerPtr, int flag, int value);
     private static native void nativeSetAudioReturnChannel(long controllerPtr, boolean flag);
     private static native boolean nativeIsConnected(long controllerPtr, int port);
-
 }

@@ -57,6 +57,8 @@ public:
     int getVersion();
     // Get vendor id used for vendor command.
     uint32_t getVendorId();
+    // Get Port information on all the HDMI ports.
+    jobjectArray getPortInfos();
     // Set a flag and its value.
     void setOption(int flag, int value);
     // Set audio return channel status.
@@ -229,6 +231,34 @@ uint32_t HdmiCecController::getVendorId() {
     return vendorId;
 }
 
+jobjectArray HdmiCecController::getPortInfos() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jclass hdmiPortInfo = env->FindClass("com/android/server/hdmi/HdmiPortInfo");
+    if (hdmiPortInfo == NULL) {
+        return NULL;
+    }
+    jmethodID ctor = env->GetMethodID(hdmiPortInfo, "<init>", "(IIIZZZ)V");
+    if (ctor == NULL) {
+        return NULL;
+    }
+    hdmi_port_info* ports;
+    int numPorts;
+    mDevice->get_port_info(mDevice, &ports, &numPorts);
+    jobjectArray res = env->NewObjectArray(numPorts, hdmiPortInfo, NULL);
+
+    // MHL support field will be obtained from MHL HAL. Leave it to false.
+    jboolean mhlSupported = (jboolean) 0;
+    for (int i = 0; i < numPorts; ++i) {
+        hdmi_port_info* info = &ports[i];
+        jboolean cecSupported = (jboolean) info->cec_supported;
+        jboolean arcSupported = (jboolean) info->arc_supported;
+        jobject infoObj = env->NewObject(hdmiPortInfo, ctor, info->port_num, info->type,
+                info->physical_address, cecSupported, mhlSupported, arcSupported);
+        env->SetObjectArrayElement(res, i, infoObj);
+    }
+    return res;
+}
+
 void HdmiCecController::setOption(int flag, int value) {
     mDevice->set_option(mDevice, flag, value);
 }
@@ -242,7 +272,6 @@ void HdmiCecController::setAudioReturnChannel(bool enabled) {
 bool HdmiCecController::isConnected(int port) {
     return mDevice->is_connected(mDevice, port) == HDMI_CONNECTED;
 }
-
 
 // static
 void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
@@ -338,6 +367,11 @@ static jint nativeGetVendorId(JNIEnv* env, jclass clazz, jlong controllerPtr) {
     return controller->getVendorId();
 }
 
+static jobjectArray nativeGetPortInfos(JNIEnv* env, jclass clazz, jlong controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getPortInfos();
+}
+
 static void nativeSetOption(JNIEnv* env, jclass clazz, jlong controllerPtr, jint flag, jint value) {
     HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
     controller->setOption(flag, value);
@@ -365,6 +399,9 @@ static JNINativeMethod sMethods[] = {
     { "nativeGetPhysicalAddress", "(J)I", (void *) nativeGetPhysicalAddress },
     { "nativeGetVersion", "(J)I", (void *) nativeGetVersion },
     { "nativeGetVendorId", "(J)I", (void *) nativeGetVendorId },
+    { "nativeGetPortInfos",
+      "(J)[Lcom/android/server/hdmi/HdmiPortInfo;",
+      (void *) nativeGetPortInfos },
     { "nativeSetOption", "(JII)V", (void *) nativeSetOption },
     { "nativeSetAudioReturnChannel", "(JZ)V", (void *) nativeSetAudioReturnChannel },
     { "nativeIsConnected", "(JI)Z", (void *) nativeIsConnected },

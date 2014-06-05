@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
@@ -40,6 +41,7 @@ import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,9 +107,8 @@ public final class HdmiControlService extends SystemService {
     // Used to synchronize the access to the service.
     private final Object mLock = new Object();
 
-    // Type of logical devices hosted in the system.
-    @GuardedBy("mLock")
-    private final int[] mLocalDevices;
+    // Type of logical devices hosted in the system. Stored in the unmodifiable list.
+    private final List<Integer> mLocalDevices;
 
     // List of listeners registered by callers that want to get notified of
     // hotplug events.
@@ -117,6 +118,9 @@ public final class HdmiControlService extends SystemService {
     private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
             new ArrayList<>();
 
+    // Handler running on service thread. It's used to run a task in service thread.
+    private final Handler mHandler = new Handler();
+
     private final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
 
     @Nullable
@@ -124,6 +128,10 @@ public final class HdmiControlService extends SystemService {
 
     @Nullable
     private HdmiMhlController mMhlController;
+
+    // HDMI port information. Stored in the unmodifiable list to keep the static information
+    // from being modified.
+    private List<HdmiPortInfo> mPortInfo;
 
     // Logical address of the active source.
     @GuardedBy("mLock")
@@ -149,13 +157,10 @@ public final class HdmiControlService extends SystemService {
     // Whether SystemAudioMode is "On" or not.
     private boolean mSystemAudioMode;
 
-    // Handler running on service thread. It's used to run a task in service thread.
-    private final Handler mHandler = new Handler();
-
     public HdmiControlService(Context context) {
         super(context);
-        mLocalDevices = getContext().getResources().getIntArray(
-                com.android.internal.R.array.config_hdmiCecLogicalDeviceType);
+        mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
+                com.android.internal.R.array.config_hdmiCecLogicalDeviceType));
         // TODO: Get control flag from persistent storage
         mInputChangeEnabled = true;
     }
@@ -175,14 +180,14 @@ public final class HdmiControlService extends SystemService {
         if (mMhlController == null) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
-
+        mPortInfo = initPortInfo();
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
         // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
     }
 
-    private void initializeLocalDevices(final int[] deviceTypes) {
+    private void initializeLocalDevices(final List<Integer> deviceTypes) {
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
         final SparseIntArray finished = new SparseIntArray();
@@ -206,7 +211,7 @@ public final class HdmiControlService extends SystemService {
 
                     // Once finish address allocation for all devices, notify
                     // it to each device.
-                    if (deviceTypes.length == finished.size()) {
+                    if (deviceTypes.size() == finished.size()) {
                         notifyAddressAllocated(devices);
                     }
                 }
@@ -220,6 +225,66 @@ public final class HdmiControlService extends SystemService {
             HdmiCecLocalDevice device = devices.valueAt(i);
             device.onAddressAllocated(address);
         }
+    }
+
+    // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
+    // keep them in one place.
+    private List<HdmiPortInfo> initPortInfo() {
+        HdmiPortInfo[] cecPortInfo = null;
+
+        // CEC HAL provides majority of the info while MHL does only MHL support flag for
+        // each port. Return empty array if CEC HAL didn't provide the info.
+        if (mCecController != null) {
+            cecPortInfo = mCecController.getPortInfos();
+        }
+        if (cecPortInfo == null) {
+            return Collections.emptyList();
+        }
+
+        HdmiPortInfo[] mhlPortInfo = new HdmiPortInfo[0];
+        if (mMhlController != null) {
+            // TODO: Implement plumbing logic to get MHL port information.
+            // mhlPortInfo = mMhlController.getPortInfos();
+        }
+
+        // Use the id (port number) to find the matched info between CEC and MHL to combine them
+        // into one. Leave the field `mhlSupported` to false if matched MHL entry is not found.
+        ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
+        for (int i = 0; i < cecPortInfo.length; ++i) {
+            HdmiPortInfo cec = cecPortInfo[i];
+            int id = cec.getId();
+            boolean mhlInfoFound = false;
+            for (HdmiPortInfo mhl : mhlPortInfo) {
+                if (id == mhl.getId()) {
+                    result.add(new HdmiPortInfo(id, cec.getType(), cec.getAddress(),
+                            cec.isCecSupported(), mhl.isMhlSupported(), cec.isArcSupported()));
+                    mhlInfoFound = true;
+                    break;
+                }
+            }
+            if (!mhlInfoFound) {
+                result.add(cec);
+            }
+        }
+
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * Returns HDMI port information for the given port id.
+     *
+     * @param portId HDMI port id
+     * @return {@link HdmiPortInfo} for the given port
+     */
+    HdmiPortInfo getPortInfo(int portId) {
+        // mPortInfo is an unmodifiable list and the only reference to its inner list.
+        // No lock is necessary.
+        for (HdmiPortInfo info : mPortInfo) {
+            if (portId == info.getId()) {
+                return info;
+            }
+        }
+        return null;
     }
 
     /**
@@ -291,6 +356,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
+        assertRunOnServiceThread();
         return mCecController.getDeviceInfo(logicalAddress);
     }
 
@@ -309,6 +375,24 @@ public final class HdmiControlService extends SystemService {
     List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includeLocalDevice) {
         assertRunOnServiceThread();
         return mCecController.getDeviceInfoList(includeLocalDevice);
+    }
+
+    /**
+     * Returns the {@link HdmiCecDeviceInfo} instance whose physical address matches
+     * the given routing path. CEC devices use routing path for its physical address to
+     * describe the hierarchy of the devices in the network.
+     *
+     * @param path routing path or physical address
+     * @return {@link HdmiCecDeviceInfo} if the matched info is found; otherwise null
+     */
+    HdmiCecDeviceInfo getDeviceInfoByPath(int path) {
+        assertRunOnServiceThread();
+        for (HdmiCecDeviceInfo info : mCecController.getDeviceInfoList(false)) {
+            if (info.getPhysicalAddress() == path) {
+                return info;
+            }
+        }
+        return null;
     }
 
     /**
@@ -625,9 +709,12 @@ public final class HdmiControlService extends SystemService {
         @Override
         public int[] getSupportedTypes() {
             enforceAccessPermission();
-            synchronized (mLock) {
-                return mLocalDevices;
+            // mLocalDevices is an unmodifiable list - no lock necesary.
+            int[] localDevices = new int[mLocalDevices.size()];
+            for (int i = 0; i < localDevices.length; ++i) {
+                localDevices[i] = mLocalDevices.get(i);
             }
+            return localDevices;
         }
 
         @Override
