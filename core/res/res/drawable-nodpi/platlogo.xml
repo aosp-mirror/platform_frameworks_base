@@ -19,18 +19,21 @@
     <viewport android:viewportHeight="25" android:viewportWidth="25" />
 
     <path
-        android:name="shadow"
-        android:pathData="m12,2.5 a11,11 0 1,0 1,0
-        M6.5,7.5
-        l5,0 l0,7 l7,0 l0,5 l-12,0 z"
-        android:fill="#40000000"
+        android:name="torso"
+        android:pathData="m2,2 l21,0 l0,21 l-21,0 z"
+        android:fill="#FFFFFFFF"
         />
+
     <path
-        android:name="circle-L-ranch"
-        android:pathData="m12,1.5 a11,11 0 1,0 1,0
-        M6.5,6.5
-        l5,0 l0,7 l7,0 l0,5 l-12,0 z"
-        android:fill="#FFFFFF40"
+        android:name="|"
+        android:pathData="m4,4 l8,0 l0,17 l-8,0 z"
+        android:fill="#FF0000FF"
+        />
+
+    <path
+        android:name="_"
+        android:pathData="m5,14 l16,0 l0,6 l-16,0 z"
+        android:fill="#FFFF0000"
         />
 
 </vector>
