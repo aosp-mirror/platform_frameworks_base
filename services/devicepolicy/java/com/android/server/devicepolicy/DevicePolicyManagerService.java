@@ -840,7 +840,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.sendOrderedBroadcastAsUser(intent, admin.getUserHandle(),
                     null, result, mHandler, Activity.RESULT_OK, null, null);
         } else {
-            mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
         }
     }
 
@@ -3123,6 +3123,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
+                // TODO This should send to parent of profile (which is always owner at the moment).
                 mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
             } finally {
                 restoreCallingIdentity(id);
