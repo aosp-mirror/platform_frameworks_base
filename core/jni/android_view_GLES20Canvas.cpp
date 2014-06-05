@@ -702,8 +702,8 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint, TypefaceImpl* typeface) {
 #ifdef USE_MINIKIN
     Layout layout;
-    MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
-    layout.doLayout(text, count);
+    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, flags, typeface);
+    layout.doLayout(text, 0, count, count, css);
     x += xOffsetForTextAlign(paint, layout.getAdvance());
     renderTextLayout(renderer, &layout, x, y, paint);
 #else
@@ -746,8 +746,8 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         int flags, SkPaint* paint, TypefaceImpl* typeface) {
 #ifdef USE_MINIKIN
     Layout layout;
-    MinikinUtils::SetLayoutProperties(&layout, paint, flags, typeface);
-    layout.doLayout(text + start, count);
+    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, flags, typeface);
+    layout.doLayout(text, start, count, contextCount, css);
     x += xOffsetForTextAlign(paint, layout.getAdvance());
     renderTextLayout(renderer, &layout, x, y, paint);
 #else
