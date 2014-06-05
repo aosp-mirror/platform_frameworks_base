@@ -500,6 +500,24 @@ public abstract class WebSettings {
     }
 
     /**
+     * Sets policy for third party cookies.
+     * Developers should access this via {@link CookieManager#setShouldAcceptThirdPartyCookies}.
+     * @hide Internal API.
+     */
+    public void setAcceptThirdPartyCookies(boolean accept) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Gets policy for third party cookies.
+     * Developers should access this via {@link CookieManager#getShouldAcceptThirdPartyCookies}.
+     * @hide Internal API
+     */
+    public boolean getAcceptThirdPartyCookies() {
+        throw new MustOverrideException();
+    }
+
+    /**
      * Sets the text size of the page. The default is {@link TextSize#NORMAL}.
      *
      * @param t the text size as a {@link TextSize} value

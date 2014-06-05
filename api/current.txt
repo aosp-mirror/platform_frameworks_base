@@ -35174,6 +35174,7 @@ package android.webkit {
 
   public class CookieManager {
     method public synchronized boolean acceptCookie();
+    method public synchronized boolean acceptThirdPartyCookies(android.webkit.WebView);
     method public static boolean allowFileSchemeCookies();
     method public java.lang.String getCookie(java.lang.String);
     method public static synchronized android.webkit.CookieManager getInstance();
@@ -35185,6 +35186,7 @@ package android.webkit {
     method public void removeSessionCookies(android.webkit.ValueCallback<java.lang.Boolean>);
     method public synchronized void setAcceptCookie(boolean);
     method public static void setAcceptFileSchemeCookies(boolean);
+    method public synchronized void setAcceptThirdPartyCookies(android.webkit.WebView, boolean);
     method public void setCookie(java.lang.String, java.lang.String);
     method public void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
   }

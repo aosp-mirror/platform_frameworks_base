@@ -68,7 +68,36 @@ public class CookieManager {
         throw new MustOverrideException();
     }
 
-     /**
+    /**
+     * Sets whether the {@link WebView} should allow third party cookies to be set.
+     * Allowing third party cookies is a per WebView policy and can be set
+     * differently on different WebView instances.
+     * <p>
+     * Apps that target {@link android.os.Build.VERSION_CODES#KITKAT} or below
+     * default to allowing third party cookies. Apps targeting
+     * {@link android.os.Build.VERSION_CODES#L} or later default to disallowing
+     * third party cookies.
+     *
+     * @param webview the {@link WebView} instance to set the cookie policy on
+     * @param accept whether the {@link WebView} instance should accept
+     *               third party cookies
+     */
+    public synchronized void setAcceptThirdPartyCookies(WebView webview,
+            boolean accept) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Gets whether the {@link WebView} should allow third party cookies to be set.
+     *
+     * @param webview the {@link WebView} instance to get the cookie policy for
+     * @return true if the {@link WebView} accepts third party cookies
+     */
+    public synchronized boolean acceptThirdPartyCookies(WebView webview) {
+        throw new MustOverrideException();
+    }
+
+    /**
      * Sets a cookie for the given URL. Any existing cookie with the same host,
      * path and name will be replaced with the new cookie. The cookie being set
      * will be ignored if it is expired.
