@@ -25767,7 +25767,9 @@ package android.renderscript {
 
   public class ScriptC extends android.renderscript.Script {
     ctor protected ScriptC(int, android.renderscript.RenderScript);
+    ctor protected ScriptC(long, android.renderscript.RenderScript);
     ctor protected ScriptC(android.renderscript.RenderScript, android.content.res.Resources, int);
+    ctor protected ScriptC(android.renderscript.RenderScript, java.lang.String, byte[], byte[]);
   }
 
   public final class ScriptGroup extends android.renderscript.BaseObj {

@@ -44,7 +44,6 @@ public class ScriptC extends Script {
      * @param id
      * @param rs
      *
-     * @hide
      */
     protected ScriptC(long id, RenderScript rs) {
         super(id, rs);
@@ -70,7 +69,6 @@ public class ScriptC extends Script {
      * Only intended for use by the generated derived classes.
      *
      * @param rs
-     * @hide
      */
     protected ScriptC(RenderScript rs, String resName, byte[] bitcode32, byte[] bitcode64) {
         super(0, rs);
