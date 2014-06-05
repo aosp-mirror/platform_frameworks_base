@@ -340,6 +340,7 @@ public abstract class CameraMetadata<TKey> {
      * (both input/output) will match the maximum available
      * resolution of JPEG streams.</li>
      * </ul>
+     * <p>@hide this, TODO: remove it when input related APIs are ready.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
