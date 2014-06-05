@@ -86,6 +86,27 @@ public final class TvContract {
     }
 
     /**
+     * Builds a URI that points to a channel logo. See {@link Channels.Logo}.
+     *
+     * @param channelId The ID of the channel whose logo is pointed to.
+     */
+    public static final Uri buildChannelLogoUri(long channelId) {
+        return buildChannelLogoUri(buildChannelUri(channelId));
+    }
+
+    /**
+     * Builds a URI that points to a channel logo. See {@link Channels.Logo}.
+     *
+     * @param channelUri The URI of the channel whose logo is pointed to.
+     */
+    public static final Uri buildChannelLogoUri(Uri channelUri) {
+        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+            throw new IllegalArgumentException("Not a channel: " + channelUri);
+        }
+        return Uri.withAppendedPath(channelUri, Channels.Logo.CONTENT_DIRECTORY);
+    }
+
+    /**
      * Builds a URI that points to all browsable channels from a given TV input.
      *
      * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
@@ -523,6 +544,48 @@ public final class TvContract {
         public static final String COLUMN_VERSION_NUMBER = "version_number";
 
         private Channels() {}
+
+        /**
+         * A sub-directory of a single TV channel that represents its primary logo.
+         * <p>
+         * To access this directory, append {@link Channels.Logo#CONTENT_DIRECTORY} to the raw
+         * channel URI.  The resulting URI represents an image file, and should be interacted
+         * using ContentResolver.openAssetFileDescriptor.
+         * </p>
+         * <p>
+         * Note that this sub-directory also supports opening the logo as an asset file in write
+         * mode.  Callers can create or replace the primary logo associated with this channel by
+         * opening the asset file and writing the full-size photo contents into it.  When the file
+         * is closed, the image will be parsed, sized down if necessary, and stored.
+         * </p>
+         * <p>
+         * Usage example:
+         * <pre>
+         * public void writeChannelLogo(long channelId, byte[] logo) {
+         *     Uri channelLogoUri = TvContract.buildChannelLogoUri(channelId);
+         *     try {
+         *         AssetFileDescriptor fd =
+         *             getContentResolver().openAssetFileDescriptor(channelLogoUri, "rw");
+         *         OutputStream os = fd.createOutputStream();
+         *         os.write(logo);
+         *         os.close();
+         *         fd.close();
+         *     } catch (IOException e) {
+         *         // Handle error cases.
+         *     }
+         * }
+         * </pre>
+         * </p>
+         */
+        public static final class Logo {
+
+            /**
+             * The directory twig for this sub-table.
+             */
+            public static final String CONTENT_DIRECTORY = "logo";
+
+            private Logo() {}
+        }
     }
 
     /** Column definitions for the TV programs table. */
@@ -629,6 +692,26 @@ public final class TvContract {
          * </p>
          */
         public static final String COLUMN_AUDIO_LANGUAGE = "audio_language";
+
+        /**
+         * The URI for the poster art of this TV program.
+         * <p>
+         * Can be empty.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
+
+        /**
+         * The URI for the thumbnail of this TV program.
+         * <p>
+         * Can be empty.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
 
         /**
          * Internal data used by individual TV input services.
