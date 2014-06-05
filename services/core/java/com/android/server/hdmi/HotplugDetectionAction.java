@@ -184,6 +184,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void removeDevice(int removedAddress) {
+        mService.removeCecDevice(removedAddress);
         // TODO: implements following steps.
         // 1. Launch routing control sequence
         // 2. Stop one touch play sequence if removed device is the device to be selected.

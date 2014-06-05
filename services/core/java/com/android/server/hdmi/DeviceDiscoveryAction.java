@@ -95,10 +95,10 @@ final class DeviceDiscoveryAction extends FeatureAction {
     private int mProcessedDeviceCount = 0;
 
     /**
-     * @Constructor
+     * Constructor.
      *
-     * @param service
-     * @param sourceAddress
+     * @param service an instance of {@link HdmiControlService}.
+     * @param sourceAddress a logical address which initiates this action
      */
     DeviceDiscoveryAction(HdmiControlService service, int sourceAddress,
             DeviceDiscoveryCallback callback) {
@@ -154,6 +154,11 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         mActionTimer.clearTimerMessage();
+
+        // Check cache first and send request if not exist.
+        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS)) {
+            return;
+        }
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(mSourceAddress, address));
         addTimer(mState, TIMEOUT_MS);
     }
@@ -173,6 +178,10 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         mActionTimer.clearTimerMessage();
+
+        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_SET_OSD_NAME)) {
+            return;
+        }
         sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress, address));
         addTimer(mState, TIMEOUT_MS);
     }
@@ -193,8 +202,21 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         mActionTimer.clearTimerMessage();
+
+        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
+            return;
+        }
         sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress, address));
         addTimer(mState, TIMEOUT_MS);
+    }
+
+    private boolean mayProcessMessageIfCached(int address, int opcode) {
+        HdmiCecMessage message = mService.getCecMessageCache().getMessage(address, opcode);
+        if (message != null) {
+            processCommand(message);
+            return true;
+        }
+        return false;
     }
 
     @Override
