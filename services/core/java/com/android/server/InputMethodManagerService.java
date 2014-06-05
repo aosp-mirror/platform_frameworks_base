@@ -2310,14 +2310,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void notifyTextCommitted() {
+    public void notifyUserAction() {
         if (DEBUG) {
-            Slog.d(TAG, "Got the notification of commitText");
+            Slog.d(TAG, "Got the notification of a user action");
         }
         synchronized (mMethodMap) {
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi != null) {
-                mSwitchingController.onCommitTextLocked(imi, mCurrentSubtype);
+                mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
             }
         }
     }
