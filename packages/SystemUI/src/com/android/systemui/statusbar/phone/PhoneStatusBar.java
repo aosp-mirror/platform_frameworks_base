@@ -77,6 +77,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
@@ -757,7 +758,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 @Override
                 public ValueAnimator createRevealAnimator(View v, int centerX, int centerY,
                         float startRadius, float endRadius) {
-                    return v.createRevealAnimator(centerX, centerY, startRadius, endRadius);
+                    return ViewAnimationUtils.createCircularReveal(v, centerX, centerY,
+                            startRadius, endRadius);
                 }
             });
             final QSTileHost qsh = new QSTileHost(mContext, this,
