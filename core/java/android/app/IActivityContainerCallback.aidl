@@ -21,4 +21,5 @@ import android.os.IBinder;
 /** @hide */
 interface IActivityContainerCallback {
     oneway void setVisible(IBinder container, boolean visible);
+    oneway void onAllActivitiesComplete(IBinder container);
 }
