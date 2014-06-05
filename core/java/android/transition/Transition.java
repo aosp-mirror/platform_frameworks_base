@@ -1763,7 +1763,7 @@ public abstract class Transition implements Cloneable {
 
     /**
      * Sets the callback to use to find the epicenter of a Transition. A null value indicates
-     * that there is no epicenter in the Transition and getEpicenter() will return null.
+     * that there is no epicenter in the Transition and onGetEpicenter() will return null.
      * Transitions like {@link android.transition.Explode} use a point or Rect to orient
      * the direction of travel. This is called the epicenter of the Transition and is
      * typically centered on a touched View. The
@@ -1799,7 +1799,7 @@ public abstract class Transition implements Cloneable {
         if (mEpicenterCallback == null) {
             return null;
         }
-        return mEpicenterCallback.getEpicenter(this);
+        return mEpicenterCallback.onGetEpicenter(this);
     }
 
     /**
@@ -2112,6 +2112,6 @@ public abstract class Transition implements Cloneable {
          * @return The Rect region of the epicenter of <code>transition</code> or null if
          * there is no epicenter.
          */
-        public abstract Rect getEpicenter(Transition transition);
+        public abstract Rect onGetEpicenter(Transition transition);
     }
 }

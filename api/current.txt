@@ -29903,20 +29903,12 @@ package android.transition {
     method public long getStartDelay(android.view.ViewGroup, android.transition.Transition, android.transition.TransitionValues, android.transition.TransitionValues);
     method public void setPropagationSpeed(float);
     method public void setSide(int);
-    field public static final int BOTTOM = 3; // 0x3
-    field public static final int LEFT = 0; // 0x0
-    field public static final int RIGHT = 2; // 0x2
-    field public static final int TOP = 1; // 0x1
   }
 
   public class Slide extends android.transition.Visibility {
     ctor public Slide();
     ctor public Slide(int);
     method public void setSlideEdge(int);
-    field public static final int BOTTOM = 3; // 0x3
-    field public static final int LEFT = 0; // 0x0
-    field public static final int RIGHT = 2; // 0x2
-    field public static final int TOP = 1; // 0x1
   }
 
   public abstract class Transition implements java.lang.Cloneable {
@@ -29970,7 +29962,7 @@ package android.transition {
 
   public static abstract class Transition.EpicenterCallback {
     ctor public Transition.EpicenterCallback();
-    method public abstract android.graphics.Rect getEpicenter(android.transition.Transition);
+    method public abstract android.graphics.Rect onGetEpicenter(android.transition.Transition);
   }
 
   public static abstract interface Transition.TransitionListener {

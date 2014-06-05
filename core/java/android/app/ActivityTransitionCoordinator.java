@@ -563,7 +563,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         public void setEpicenter(Rect epicenter) { mEpicenter = epicenter; }
 
         @Override
-        public Rect getEpicenter(Transition transition) {
+        public Rect onGetEpicenter(Transition transition) {
             return mEpicenter;
         }
     }
