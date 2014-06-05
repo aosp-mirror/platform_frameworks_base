@@ -340,6 +340,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 String name = mAllSharedElementNames.get(i);
                 View sharedElement = sharedElements.get(name);
                 if (sharedElement != null) {
+                    if (sharedElement.getViewName() == null) {
+                        throw new IllegalArgumentException("Shared elements must have " +
+                                "non-null viewNames");
+                    }
                     mSharedElementNames.add(name);
                     mSharedElements.add(sharedElement);
                 }

@@ -394,8 +394,18 @@ public class ActivityOptions {
         if (sharedElements != null) {
             for (int i = 0; i < sharedElements.length; i++) {
                 Pair<View, String> sharedElement = sharedElements[i];
-                names.add(sharedElement.second);
-                mappedNames.add(sharedElement.first.getViewName());
+                String sharedElementName = sharedElement.second;
+                if (sharedElementName == null) {
+                    throw new IllegalArgumentException("Shared element name must not be null");
+                }
+                String viewName = sharedElement.first.getViewName();
+                if (viewName == null) {
+                    throw new IllegalArgumentException("Shared elements must have non-null " +
+                            "viewNames");
+                }
+
+                names.add(sharedElementName);
+                mappedNames.add(viewName);
             }
         }
 
