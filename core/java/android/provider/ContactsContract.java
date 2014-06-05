@@ -184,9 +184,9 @@ public final class ContactsContract {
     public static final String DEFERRED_SNIPPETING_QUERY = "deferred_snippeting_query";
 
     /**
-     * A boolean parameter for {@link CommonDataKinds.Phone#CONTENT_URI},
-     * {@link CommonDataKinds.Email#CONTENT_URI}, and
-     * {@link CommonDataKinds.StructuredPostal#CONTENT_URI}.
+     * A boolean parameter for {@link CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI},
+     * {@link CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI}, and
+     * {@link CommonDataKinds.StructuredPostal#CONTENT_URI StructuredPostal.CONTENT_URI}.
      * This enables a content provider to remove duplicate entries in results.
      */
     public static final String REMOVE_DUPLICATE_ENTRIES = "remove_duplicate_entries";
@@ -244,6 +244,9 @@ public final class ContactsContract {
         public static final String KEY_AUTHORIZED_URI = "authorized_uri";
     }
 
+    /*
+     * @hide
+     */
     public static final class Preferences {
 
         /**
@@ -808,6 +811,7 @@ public final class ContactsContract {
          * The position at which the contact is pinned. If {@link PinnedPositions#UNPINNED},
          * the contact is not pinned. Also see {@link PinnedPositions}.
          * <P>Type: INTEGER </P>
+         * @hide
          */
         public static final String PINNED = "pinned";
 
@@ -7764,6 +7768,8 @@ public final class ContactsContract {
      * {@link PinnedPositions#STAR_WHEN_PINNING} to true to force all pinned and unpinned
      * contacts to be automatically starred and unstarred.
      * </p>
+     *
+     * @hide
      */
     public static final class PinnedPositions {
 
