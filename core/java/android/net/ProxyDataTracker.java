@@ -48,6 +48,7 @@ public class ProxyDataTracker extends BaseNetworkStateTracker {
     // TODO: investigate how to get these DNS addresses from the system.
     private static final String DNS1 = "8.8.8.8";
     private static final String DNS2 = "8.8.4.4";
+    private static final String INTERFACE_NAME = "ifb0";
     private static final String REASON_ENABLED = "enabled";
     private static final String REASON_DISABLED = "disabled";
     private static final String REASON_PROXY_DOWN = "proxy_down";
@@ -107,10 +108,11 @@ public class ProxyDataTracker extends BaseNetworkStateTracker {
         mNetworkCapabilities = new NetworkCapabilities();
         mNetworkInfo.setIsAvailable(true);
         try {
-          mLinkProperties.addDns(InetAddress.getByName(DNS1));
-          mLinkProperties.addDns(InetAddress.getByName(DNS2));
+            mLinkProperties.addDns(InetAddress.getByName(DNS1));
+            mLinkProperties.addDns(InetAddress.getByName(DNS2));
+            mLinkProperties.setInterfaceName(INTERFACE_NAME);
         } catch (UnknownHostException e) {
-          Log.e(TAG, "Could not add DNS address", e);
+            Log.e(TAG, "Could not add DNS address", e);
         }
     }
 
