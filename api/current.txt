@@ -15950,6 +15950,8 @@ package android.media.session {
 package android.media.tv {
 
   public final class TvContract {
+    method public static final android.net.Uri buildChannelLogoUri(long);
+    method public static final android.net.Uri buildChannelLogoUri(android.net.Uri);
     method public static final android.net.Uri buildChannelUri(long);
     method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName);
     method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName, boolean);
@@ -16007,6 +16009,10 @@ package android.media.tv {
     field public static final int TYPE_T_DMB = 393216; // 0x60000
   }
 
+  public static final class TvContract.Channels.Logo {
+    field public static final java.lang.String CONTENT_DIRECTORY = "logo";
+  }
+
   public static final class TvContract.Programs implements android.media.tv.TvContract.BaseTvColumns {
     field public static final java.lang.String COLUMN_AUDIO_LANGUAGE = "audio_language";
     field public static final java.lang.String COLUMN_BROADCAST_GENRE = "broadcast_genre";
@@ -16015,8 +16021,10 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
     field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
     field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final java.lang.String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final java.lang.String COLUMN_SHORT_DESCRIPTION = "short_description";
     field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
+    field public static final java.lang.String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
     field public static final java.lang.String COLUMN_TITLE = "title";
     field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
