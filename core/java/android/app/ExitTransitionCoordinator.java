@@ -199,7 +199,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     }
                 }
             });
-            mBackgroundAnimator.setDuration(FADE_BACKGROUND_DURATION_MS);
+            mBackgroundAnimator.setDuration(getFadeDuration());
             mBackgroundAnimator.start();
         }
     }

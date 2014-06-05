@@ -66,15 +66,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         Bundle resultReceiverBundle = new Bundle();
         resultReceiverBundle.putParcelable(KEY_REMOTE_RECEIVER, this);
         mResultReceiver.send(MSG_SET_REMOTE_RECEIVER, resultReceiverBundle);
-        getDecor().getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                if (mIsReadyForTransition) {
-                    getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
-                }
-                return mIsReadyForTransition;
-            }
-        });
+        getDecor().getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        if (mIsReadyForTransition) {
+                            getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        }
+                        return mIsReadyForTransition;
+                    }
+                });
     }
 
     public void viewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
@@ -315,7 +316,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (background != null) {
                 background = background.mutate();
                 mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 255);
-                mBackgroundAnimator.setDuration(FADE_BACKGROUND_DURATION_MS);
+                mBackgroundAnimator.setDuration(getFadeDuration());
                 mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {

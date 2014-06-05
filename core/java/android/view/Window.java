@@ -1516,6 +1516,29 @@ public abstract class Window {
     public boolean getAllowExitTransitionOverlap() { return true; }
 
     /**
+     * Returns the duration, in milliseconds, of the window background fade
+     * when transitioning into or away from an Activity when called with an Activity Transition.
+     * <p>When executing the enter transition, the background starts transparent
+     * and fades in. This requires {@link #FEATURE_CONTENT_TRANSITIONS}. The default is
+     * 300 milliseconds.</p>
+     * @return The duration of the window background fade to opaque during enter transition.
+     * @see #getEnterTransition()
+     */
+    public long getTransitionBackgroundFadeDuration() { return 0; }
+
+    /**
+     * Sets the duration, in milliseconds, of the window background fade
+     * when transitioning into or away from an Activity when called with an Activity Transition.
+     * <p>When executing the enter transition, the background starts transparent
+     * and fades in. This requires {@link #FEATURE_CONTENT_TRANSITIONS}. The default is
+     * 300 milliseconds.</p>
+     * @param fadeDurationMillis The duration of the window background fade to or from opaque
+     *                           during enter transition.
+     * @see #setEnterTransition(android.transition.Transition)
+     */
+    public void setTransitionBackgroundFadeDuration(long fadeDurationMillis) { }
+
+    /**
      * @return the color of the status bar.
      */
     public abstract int getStatusBarColor();

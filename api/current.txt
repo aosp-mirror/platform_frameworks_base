@@ -1343,6 +1343,7 @@ package android {
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
     field public static final int windowTitleSize = 16842842; // 0x101005a
     field public static final int windowTitleStyle = 16842843; // 0x101005b
+    field public static final int windowTransitionBackgroundFadeDuration = 16843875; // 0x1010463
     field public static final int windowTranslucentNavigation = 16843760; // 0x10103f0
     field public static final int windowTranslucentStatus = 16843759; // 0x10103ef
     field public static final int writePermission = 16842760; // 0x1010008
@@ -33518,6 +33519,7 @@ package android.view {
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
     method public abstract int getStatusBarColor();
+    method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
@@ -33576,6 +33578,7 @@ package android.view {
     method public abstract void setStatusBarColor(int);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
+    method public void setTransitionBackgroundFadeDuration(long);
     method public void setTransitionManager(android.transition.TransitionManager);
     method public void setType(int);
     method public void setUiOptions(int);

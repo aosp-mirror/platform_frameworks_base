@@ -129,9 +129,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected static final String KEY_SCALE_TYPE = "shared_element:scaleType";
     protected static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
 
-    // The background fade in/out duration. TODO: Enable tuning this.
-    public static final int FADE_BACKGROUND_DURATION_MS = 300;
-
     protected static final ImageView.ScaleType[] SCALE_TYPE_VALUES = ImageView.ScaleType.values();
 
     /**
@@ -510,6 +507,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             captureSharedElementState(sharedElement, name, bundle, tempBounds);
         }
         return bundle;
+    }
+
+    protected long getFadeDuration() {
+        return getWindow().getTransitionBackgroundFadeDuration();
     }
 
     /**
