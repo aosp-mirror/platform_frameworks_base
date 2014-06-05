@@ -61,6 +61,11 @@ public class Recents extends SystemUI implements RecentsComponent {
 
     @Override
     protected void onBootCompleted() {
+        if (mUseAlternateRecents) {
+            if (mAlternateRecents != null) {
+                mAlternateRecents.onBootCompleted();
+            }
+        }
         mBootCompleted = true;
     }
 

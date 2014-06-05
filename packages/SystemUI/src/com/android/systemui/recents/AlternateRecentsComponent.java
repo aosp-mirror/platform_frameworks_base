@@ -153,6 +153,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     Messenger mService = null;
     Messenger mMessenger;
     RecentsMessageHandler mHandler;
+    boolean mBootCompleted = false;
     boolean mServiceIsBound = false;
     boolean mToggleRecentsUponServiceBound;
     RecentsServiceConnection mConnection = new RecentsServiceConnection();
@@ -182,6 +183,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         bindToRecentsService(false);
     }
 
+    public void onBootCompleted() {
+        mBootCompleted = true;
+    }
+
     /** Shows the recents */
     public void onShowRecents(boolean triggeredFromAltTab, View statusBarView) {
         if (Console.Enabled) {
@@ -208,7 +213,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (Console.Enabled) {
             Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
         }
-        if (mServiceIsBound) {
+        if (mServiceIsBound && mBootCompleted) {
             // Notify recents to close it
             try {
                 Bundle data = new Bundle();
@@ -278,7 +283,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Updates each of the task animation rects. */
     void updateAnimationRects() {
-        if (mServiceIsBound) {
+        if (mServiceIsBound && mBootCompleted) {
             Resources res = mContext.getResources();
             int statusBarHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_height);
