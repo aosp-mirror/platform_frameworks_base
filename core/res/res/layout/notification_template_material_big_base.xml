@@ -145,7 +145,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:visibility="gone"
-                style="@style/Widget.Material.Light.ProgressBar.Horizontal"
+                style="@style/Widget.StatusBar.Material.ProgressBar"
                 />
         </LinearLayout>
         <ImageView

@@ -135,7 +135,6 @@
     <color name="notification_action_legacy_color_filter">#ff555555</color>
 
     <color name="notification_media_action_bg">#00000000</color>
-    <color name="notification_media_info_bg">#40FFFFFF</color>
     <color name="notification_media_progress">#FFFFFFFF</color>
 
     <!-- Keyguard colors -->

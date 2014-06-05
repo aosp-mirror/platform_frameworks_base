@@ -345,6 +345,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.StatusBar.Material.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal">
+    </style>
+
+    <style name="Widget.StatusBar.Material.ProgressBar.Media">
         <item name="android:progressDrawable">@drawable/notification_material_media_progress</item>
     </style>
 

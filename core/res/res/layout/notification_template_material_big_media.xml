@@ -38,7 +38,6 @@
             android:minHeight="@dimen/notification_large_icon_height"
             android:paddingTop="2dp"
             android:orientation="vertical"
-            android:background="@color/notification_media_info_bg"
             >
             <LinearLayout
                 android:id="@+id/line1"
@@ -147,7 +146,7 @@
                 android:layout_height="6dp"
                 android:layout_gravity="top"
                 android:visibility="gone"
-                style="@style/Widget.StatusBar.Material.ProgressBar"
+                style="@style/Widget.StatusBar.Material.ProgressBar.Media"
                 />
         </FrameLayout>
     </LinearLayout>
