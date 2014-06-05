@@ -52,4 +52,6 @@ oneway interface ICallServiceAdapter {
     void setIsConferenced(String conferenceCallId, String callId, boolean isConferenced);
 
     void removeCall(String callId);
+
+    void onPostDialWait(String callId, String remaining);
 }

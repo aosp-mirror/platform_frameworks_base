@@ -174,13 +174,14 @@ public final class InCallAdapter {
      * will pause playing the tones and notify the {@link InCallService} that the call is in the
      * {@link InCallService#setPostDialWait(String,String)} state. When the user decides to continue
      * the postdial sequence, the {@link InCallService} should invoke the
-     * {@link #postDialContinue(String)} method.
+     * {@link #postDialContinue(String,boolean)} method.
      *
      * @param callId The unique ID of the call for which postdial string playing should continue.
+     * @param proceed Whether or not to continue with the post-dial sequence.
      */
-    public void postDialContinue(String callId) {
+    public void postDialContinue(String callId, boolean proceed) {
         try {
-            mAdapter.postDialContinue(callId);
+            mAdapter.postDialContinue(callId, proceed);
         } catch (RemoteException e) {
         }
     }
