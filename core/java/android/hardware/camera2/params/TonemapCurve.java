@@ -78,7 +78,7 @@ public final class TonemapCurve {
     /**
      * Create a new immutable TonemapCurve instance.
      *
-     * <p>Values are stored as a contiguous {@code (Pin, Pout}) point.</p>
+     * <p>Values are stored as a contiguous array of {@code (Pin, Pout)} points.</p>
      *
      * <p>All parameters may have independent length but should have at most
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS} * {@value #POINT_SIZE} elements.</p>
@@ -88,15 +88,16 @@ public final class TonemapCurve {
      *
      * <p>This constructor copies the array contents and does not retain ownership of the array.</p>
      *
-     * @param elements An array of elements whose length is {@code CHANNEL_COUNT * rows * columns}
+     * @param red An array of elements whose length is divisible by {@value #POINT_SIZE}
+     * @param green An array of elements whose length is divisible by {@value #POINT_SIZE}
+     * @param blue An array of elements whose length is divisible by {@value #POINT_SIZE}
      *
      * @throws IllegalArgumentException
-     *            if the {@code elements} array length is invalid,
-     *            if any of the subelems are not finite
+     *            if any of input array length is invalid,
+     *            or if any of the elements in the array are not in the range of
+     *            [{@value #LEVEL_BLACK}, {@value #LEVEL_WHITE}]
      * @throws NullPointerException
-     *            if any of the parameters is {@code null}
-     *
-     * @hide
+     *            if any of the parameters are {@code null}
      */
     public TonemapCurve(float[] red, float[] green, float[] blue) {
         // TODO: maxCurvePoints check?

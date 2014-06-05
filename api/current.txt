@@ -12668,6 +12668,7 @@ package android.hardware.camera2.params {
   }
 
   public final class TonemapCurve {
+    ctor public TonemapCurve(float[], float[], float[]);
     method public void copyColorCurve(int, float[], int);
     method public android.graphics.PointF getPoint(int, int);
     method public int getPointCount(int);
