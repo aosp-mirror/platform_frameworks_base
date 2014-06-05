@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.location.Address;
@@ -55,10 +56,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -144,6 +147,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private GeofenceManager mGeofenceManager;
     private PackageManager mPackageManager;
     private PowerManager mPowerManager;
+    private UserManager mUserManager;
     private GeocoderProxy mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
@@ -197,6 +201,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_OWNER;
+    private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_OWNER };
 
     public LocationManagerService(Context context) {
         super();
@@ -241,6 +246,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             };
             mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null, callback);
 
+            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            updateUserProfiles(mCurrentUserId);
+
             // prepare providers
             loadProvidersLocked();
             updateProvidersLocked();
@@ -262,6 +270,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         // listen for user change
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -269,9 +279,44 @@ public class LocationManagerService extends ILocationManager.Stub {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)
+                        || Intent.ACTION_MANAGED_PROFILE_REMOVED.equals(action)) {
+                    updateUserProfiles(mCurrentUserId);
                 }
             }
         }, UserHandle.ALL, intentFilter, null, mLocationHandler);
+    }
+
+    /**
+     * Makes a list of userids that are related to the current user. This is
+     * relevant when using managed profiles. Otherwise the list only contains
+     * the current user.
+     *
+     * @param currentUserId the current user, who might have an alter-ego.
+     */
+    void updateUserProfiles(int currentUserId) {
+        List<UserInfo> profiles = mUserManager.getProfiles(currentUserId);
+        synchronized (mLock) {
+            mCurrentUserProfiles = new int[profiles.size()];
+            for (int i = 0; i < mCurrentUserProfiles.length; i++) {
+                mCurrentUserProfiles[i] = profiles.get(i).id;
+            }
+        }
+    }
+
+    /**
+     * Checks if the specified userId matches any of the current foreground
+     * users stored in mCurrentUserProfiles.
+     */
+    private boolean isCurrentProfile(int userId) {
+        synchronized (mLock) {
+            for (int i = 0; i < mCurrentUserProfiles.length; i++) {
+                if (mCurrentUserProfiles[i] == userId) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private void ensureFallbackFusedProviderPresentLocked(ArrayList<String> pkgs) {
@@ -492,9 +537,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             mLastLocation.clear();
             mLastLocationCoarseInterval.clear();
             for (LocationProviderInterface p : mProviders) {
-                updateProviderListenersLocked(p.getName(), false, mCurrentUserId);
+                updateProviderListenersLocked(p.getName(), false);
             }
             mCurrentUserId = userId;
+            updateUserProfiles(userId);
             updateProvidersLocked();
         }
     }
@@ -894,7 +940,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      * @return
      */
     private boolean isAllowedByUserSettingsLocked(String provider, int uid) {
-        if (UserHandle.getUserId(uid) != mCurrentUserId && !isUidALocationProvider(uid)) {
+        if (!isCurrentProfile(UserHandle.getUserId(uid)) && !isUidALocationProvider(uid)) {
             return false;
         }
         return isAllowedByCurrentUserSettingsLocked(provider);
@@ -1181,7 +1227,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             String name = p.getName();
             boolean shouldBeEnabled = isAllowedByCurrentUserSettingsLocked(name);
             if (isEnabled && !shouldBeEnabled) {
-                updateProviderListenersLocked(name, false, mCurrentUserId);
+                updateProviderListenersLocked(name, false);
                 // If any provider has been disabled, clear all last locations for all providers.
                 // This is to be on the safe side in case a provider has location derived from
                 // this disabled provider.
@@ -1189,7 +1235,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLastLocationCoarseInterval.clear();
                 changesMade = true;
             } else if (!isEnabled && shouldBeEnabled) {
-                updateProviderListenersLocked(name, true, mCurrentUserId);
+                updateProviderListenersLocked(name, true);
                 changesMade = true;
             }
         }
@@ -1201,7 +1247,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private void updateProviderListenersLocked(String provider, boolean enabled, int userId) {
+    private void updateProviderListenersLocked(String provider, boolean enabled) {
         int listeners = 0;
 
         LocationProviderInterface p = mProvidersByName.get(provider);
@@ -1214,7 +1260,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             final int N = records.size();
             for (int i = 0; i < N; i++) {
                 UpdateRecord record = records.get(i);
-                if (UserHandle.getUserId(record.mReceiver.mUid) == userId) {
+                if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
                     // Sends a notification message to the receiver
                     if (!record.mReceiver.callProviderEnabledLocked(provider, enabled)) {
                         if (deadReceivers == null) {
@@ -1253,7 +1299,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         if (records != null) {
             for (UpdateRecord record : records) {
-                if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
+                if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
                     if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
                             record.mReceiver.mAllowedResolutionLevel)) {
                         LocationRequest locationRequest = record.mRequest;
@@ -1274,7 +1320,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // under that threshold.
                 long thresholdInterval = (providerRequest.interval + 1000) * 3 / 2;
                 for (UpdateRecord record : records) {
-                    if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
+                    if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
                         LocationRequest locationRequest = record.mRequest;
                         if (locationRequest.getInterval() <= thresholdInterval) {
                             if (record.mReceiver.mWorkSource != null
@@ -2018,7 +2064,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             boolean receiverDead = false;
 
             int receiverUserId = UserHandle.getUserId(receiver.mUid);
-            if (receiverUserId != mCurrentUserId && !isUidALocationProvider(receiver.mUid)) {
+            if (!isCurrentProfile(receiverUserId) && !isUidALocationProvider(receiver.mUid)) {
                 if (D) {
                     Log.d(TAG, "skipping loc update for background user " + receiverUserId +
                             " (current user: " + mCurrentUserId + ", app: " +
