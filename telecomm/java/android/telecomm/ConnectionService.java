@@ -146,7 +146,8 @@ public abstract class ConnectionService extends CallService {
                             }
                         } else {
                             addConnection(callInfo.getId(), result[0]);
-                            Log.d(this, "adapter handleSuccessfulOutgoingCall %s", callInfo.getId());
+                            Log.d(this, "adapter handleSuccessfulOutgoingCall %s",
+                                    callInfo.getId());
                             getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
                         }
                     }
@@ -286,6 +287,25 @@ public abstract class ConnectionService extends CallService {
         }
 
         // TODO(santoscordon): Find existing conference call and invoke split(connection).
+    }
+
+    @Override
+    public final void onPostDialContinue(String callId, boolean proceed) {
+        Log.d(this, "onPostDialContinue(%s)", callId);
+
+        Connection connection = findConnectionForAction(callId, "onPostDialContinue");
+        if (connection == NULL_CONNECTION) {
+            Log.w(this, "Connection missing in post-dial request %s.", callId);
+            return;
+        }
+        connection.onPostDialContinue(proceed);
+    }
+
+    @Override
+    public final void onPostDialWait(Connection conn, String remaining) {
+        Log.d(this, "onPostDialWait(%s, %s)", conn, remaining);
+
+        getAdapter().onPostDialWait(mIdByConnection.get(conn), remaining);
     }
 
     /**

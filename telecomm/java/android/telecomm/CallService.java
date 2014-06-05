@@ -63,6 +63,7 @@ public abstract class CallService extends Service {
     private static final int MSG_STOP_DTMF_TONE = 13;
     private static final int MSG_ADD_TO_CONFERENCE = 14;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 15;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 16;
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -145,6 +146,17 @@ public abstract class CallService extends Service {
                         String conferenceCallId = (String) args.arg1;
                         String callId = (String) args.arg2;
                         splitFromConference(conferenceCallId, callId);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_ON_POST_DIAL_CONTINUE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean proceed = (args.argi1 == 1);
+                        onPostDialContinue(callId, proceed);
                     } finally {
                         args.recycle();
                     }
@@ -246,6 +258,14 @@ public abstract class CallService extends Service {
             args.arg1 = conferenceCallId;
             args.arg2 = callId;
             mMessageHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, args).sendToTarget();
+        }
+
+        @Override
+        public void onPostDialContinue(String callId, boolean proceed) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.argi1 = proceed ? 1 : 0;
+            mMessageHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
         }
     }
 
@@ -422,4 +442,7 @@ public abstract class CallService extends Service {
      * @hide
      */
     public abstract void splitFromConference(String conferenceCallId, String callId);
+
+    public void onPostDialContinue(String callId, boolean proceed) {}
+    public void onPostDialWait(Connection conn, String remaining) {}
 }
