@@ -7829,13 +7829,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean getApplicationBlockedSettingAsUser(String packageName, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true,
+                "getApplicationBlocked for user " + userId);
         PackageSetting pkgSetting;
-        final int uid = Binder.getCallingUid();
-        if (UserHandle.getUserId(uid) != userId) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "getApplicationBlocked for user " + userId);
-        }
         long callingId = Binder.clearCallingIdentity();
         try {
             // writer
