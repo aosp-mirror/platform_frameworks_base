@@ -37,13 +37,6 @@ public interface WebViewFactoryProvider {
         String findAddress(String addr);
 
         /**
-         * Implements the API methods:
-         * {@link android.webkit.WebView#enablePlatformNotifications()}
-         * {@link android.webkit.WebView#disablePlatformNotifications()}
-         */
-        void setPlatformNotificationsEnabled(boolean enable);
-
-        /**
          * Implements the API method:
          * {@link android.webkit.WebSettings#getDefaultUserAgent(Context) }
          */
