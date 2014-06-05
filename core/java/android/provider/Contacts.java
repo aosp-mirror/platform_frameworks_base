@@ -58,7 +58,7 @@ public class Contacts {
     @Deprecated
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
-    /** 
+    /**
      * Signifies an email address row that is stored in the ContactMethods table
      * @deprecated see {@link android.provider.ContactsContract}
      */
@@ -337,7 +337,7 @@ public class Contacts {
      * @deprecated see {@link android.provider.ContactsContract}
      */
     @Deprecated
-    public static final class People implements BaseColumns, SyncConstValue, PeopleColumns,
+    public static final class People implements BaseColumns, PeopleColumns,
             PhonesColumns, PresenceColumns {
         /**
          * no public constructor since this is a utility class
@@ -790,7 +790,7 @@ public class Contacts {
      */
     @Deprecated
     public static final class Groups
-            implements BaseColumns, SyncConstValue, GroupsColumns {
+            implements BaseColumns, GroupsColumns {
         /**
          * no public constructor since this is a utility class
          */
@@ -1864,7 +1864,7 @@ public class Contacts {
      * @deprecated see {@link android.provider.ContactsContract}
      */
     @Deprecated
-    public static final class Photos implements BaseColumns, PhotosColumns, SyncConstValue {
+    public static final class Photos implements BaseColumns, PhotosColumns {
         /**
          * no public constructor since this is a utility class
          */
@@ -2199,7 +2199,7 @@ public class Contacts {
             }
 
             /** The action code to use when adding a contact
-             * @deprecated see {@link android.provider.ContactsContract} 
+             * @deprecated see {@link android.provider.ContactsContract}
              */
             @Deprecated
             public static final String ACTION = ContactsContract.Intents.Insert.ACTION;

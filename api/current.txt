@@ -23011,16 +23011,6 @@ package android.provider {
     field public static final deprecated android.net.Uri DELETED_CONTENT_URI;
     field public static final deprecated java.lang.String GROUP_ANDROID_STARRED = "Starred in Android";
     field public static final deprecated java.lang.String GROUP_MY_CONTACTS = "Contacts";
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
-    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
-    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
-    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
-    field public static final java.lang.String _SYNC_ID = "_sync_id";
-    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
-    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
-    field public static final java.lang.String _SYNC_TIME = "_sync_time";
-    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static abstract deprecated interface Contacts.GroupsColumns {
@@ -23122,19 +23112,9 @@ package android.provider {
     field public static final deprecated android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String DEFAULT_SORT_ORDER = "name ASC";
     field public static final deprecated android.net.Uri DELETED_CONTENT_URI;
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
     field public static final deprecated java.lang.String PRIMARY_EMAIL_ID = "primary_email";
     field public static final deprecated java.lang.String PRIMARY_ORGANIZATION_ID = "primary_organization";
     field public static final deprecated java.lang.String PRIMARY_PHONE_ID = "primary_phone";
-    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
-    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
-    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
-    field public static final java.lang.String _SYNC_ID = "_sync_id";
-    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
-    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
-    field public static final java.lang.String _SYNC_TIME = "_sync_time";
-    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static final deprecated class Contacts.People.ContactMethods implements android.provider.BaseColumns android.provider.Contacts.ContactMethodsColumns android.provider.Contacts.PeopleColumns {
@@ -23197,16 +23177,6 @@ package android.provider {
     field public static final deprecated java.lang.String CONTENT_DIRECTORY = "photo";
     field public static final deprecated android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String DEFAULT_SORT_ORDER = "person ASC";
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT = "non_syncable";
-    field public static final java.lang.String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
-    field public static final java.lang.String _SYNC_ACCOUNT = "_sync_account";
-    field public static final java.lang.String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
-    field public static final java.lang.String _SYNC_DIRTY = "_sync_dirty";
-    field public static final java.lang.String _SYNC_ID = "_sync_id";
-    field public static final java.lang.String _SYNC_LOCAL_ID = "_sync_local_id";
-    field public static final java.lang.String _SYNC_MARK = "_sync_mark";
-    field public static final java.lang.String _SYNC_TIME = "_sync_time";
-    field public static final java.lang.String _SYNC_VERSION = "_sync_version";
   }
 
   public static abstract deprecated interface Contacts.PhotosColumns {
@@ -23534,7 +23504,6 @@ package android.provider {
   protected static abstract interface ContactsContract.ContactOptionsColumns {
     field public static final java.lang.String CUSTOM_RINGTONE = "custom_ringtone";
     field public static final java.lang.String LAST_TIME_CONTACTED = "last_time_contacted";
-    field public static final java.lang.String PINNED = "pinned";
     field public static final java.lang.String SEND_TO_VOICEMAIL = "send_to_voicemail";
     field public static final java.lang.String STARRED = "starred";
     field public static final java.lang.String TIMES_CONTACTED = "times_contacted";
@@ -23810,15 +23779,6 @@ package android.provider {
     field public static final int KOREAN = 5; // 0x5
     field public static final int PINYIN = 3; // 0x3
     field public static final int UNDEFINED = 0; // 0x0
-  }
-
-  public static final class ContactsContract.PinnedPositions {
-    ctor public ContactsContract.PinnedPositions();
-    field public static final int DEMOTED = -1; // 0xffffffff
-    field public static final java.lang.String STAR_WHEN_PINNING = "star_when_pinning";
-    field public static final java.lang.String UNDEMOTE = "undemote";
-    field public static final int UNPINNED = 2147483647; // 0x7fffffff
-    field public static final android.net.Uri UPDATE_URI;
   }
 
   public static final class ContactsContract.Preferences {
