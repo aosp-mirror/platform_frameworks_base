@@ -364,6 +364,9 @@
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
 
+    <!-- Set this true only if the device has separate attention and notification lights. -->
+    <bool name="config_useAttentionLight">false</bool>
+
     <!-- If this is true, the screen will fade off. -->
     <bool name="config_animateScreenLights">true</bool>
 
