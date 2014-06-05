@@ -48,7 +48,6 @@ public class NotificationPanelView extends PanelView implements
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardPageSwipeHelper.Callback {
 
-    private static final float EXPANSION_RUBBER_BAND_EXTRA_FACTOR = 0.6f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
     private KeyguardPageSwipeHelper mPageSwiper;
@@ -719,6 +718,16 @@ public class NotificationPanelView extends PanelView implements
         updateUnlockIcon();
     }
 
+    @Override
+    protected float getOverExpansionAmount() {
+        return mNotificationStackScroller.getCurrentOverScrollAmount(true /* top */);
+    }
+
+    @Override
+    protected float getOverExpansionPixels() {
+        return mNotificationStackScroller.getCurrentOverScrolledPixels(true /* top */);
+    }
+
     private void updateUnlockIcon() {
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
@@ -805,14 +814,17 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected void onOverExpansionChanged(float overExpansion) {
+    protected void setOverExpansion(float overExpansion, boolean isPixels) {
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
-            float currentOverScroll = mNotificationStackScroller.getCurrentOverScrolledPixels(true);
-            float expansionChange = overExpansion - mOverExpansion;
-            expansionChange *= EXPANSION_RUBBER_BAND_EXTRA_FACTOR;
-            mNotificationStackScroller.setOverScrolledPixels(currentOverScroll + expansionChange,
-                    true /* onTop */,
-                    false /* animate */);
+            mNotificationStackScroller.setOnHeightChangedListener(null);
+            if (isPixels) {
+                mNotificationStackScroller.setOverScrolledPixels(
+                        overExpansion, true /* onTop */, false /* animate */);
+            } else {
+                mNotificationStackScroller.setOverScrollAmount(
+                        overExpansion, true /* onTop */, false /* animate */);
+            }
+            mNotificationStackScroller.setOnHeightChangedListener(this);
         }
     }
 
@@ -828,7 +840,10 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onTrackingStopped(boolean expand) {
         super.onTrackingStopped(expand);
-        mNotificationStackScroller.setOverScrolledPixels(0.0f, true /* onTop */, true /* animate */);
+        if (expand) {
+            mNotificationStackScroller.setOverScrolledPixels(
+                    0.0f, true /* onTop */, true /* animate */);
+        }
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             mPageSwiper.showAllIcons(true);
