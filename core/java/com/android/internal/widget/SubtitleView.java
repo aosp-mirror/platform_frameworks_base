@@ -271,10 +271,13 @@ public class SubtitleView extends View {
             style = CaptionStyle.PRESETS[styleId];
         }
 
-        mForegroundColor = style.foregroundColor;
-        mBackgroundColor = style.backgroundColor;
-        mEdgeType = style.edgeType;
-        mEdgeColor = style.edgeColor;
+        final CaptionStyle defStyle = CaptionStyle.DEFAULT;
+        mForegroundColor = style.hasForegroundColor() ?
+                style.foregroundColor : defStyle.foregroundColor;
+        mBackgroundColor = style.hasBackgroundColor() ?
+                style.backgroundColor : defStyle.backgroundColor;
+        mEdgeType = style.hasEdgeType() ? style.edgeType : defStyle.edgeType;
+        mEdgeColor = style.hasEdgeColor() ? style.edgeColor : defStyle.edgeColor;
         mHasMeasurements = false;
 
         final Typeface typeface = style.getTypeface();
