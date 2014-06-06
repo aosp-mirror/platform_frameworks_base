@@ -1227,6 +1227,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             loadSettingsLocked(getUserData(UserHandle.USER_OWNER), UserHandle.USER_OWNER);
             loadDeviceOwner();
         }
+        cleanUpOldUsers();
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         if (mDeviceOwner != null) {
@@ -1244,6 +1245,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
                 }
             }
+        }
+    }
+
+    private void cleanUpOldUsers() {
+        // This is needed in case the broadcast {@link Intent.ACTION_USER_REMOVED} was not handled
+        // before reboot
+        Set<Integer> usersWithProfileOwners;
+        Set<Integer> usersWithData;
+        synchronized(this) {
+            usersWithProfileOwners = mDeviceOwner != null
+                    ? mDeviceOwner.getProfileOwnerKeys() : new HashSet<Integer>();
+            usersWithData = new HashSet<Integer>();
+            for (int i = 0; i < mUserData.size(); i++) {
+                usersWithData.add(mUserData.keyAt(i));
+            }
+        }
+        List<UserInfo> allUsers = mUserManager.getUsers();
+
+        Set<Integer> deletedUsers = new HashSet<Integer>();
+        deletedUsers.addAll(usersWithProfileOwners);
+        deletedUsers.addAll(usersWithData);
+        for (UserInfo userInfo : allUsers) {
+            deletedUsers.remove(userInfo.id);
+        }
+        for (Integer userId : deletedUsers) {
+            removeUserData(userId);
         }
     }
 
