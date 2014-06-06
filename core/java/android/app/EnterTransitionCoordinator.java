@@ -106,7 +106,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void sendSharedElementDestination() {
         ViewGroup decor = getDecor();
-        if (!decor.isLayoutRequested()) {
+        boolean allReady = !decor.isLayoutRequested();
+        if (allReady) {
+            for (int i = 0; i < mSharedElements.size(); i++) {
+                if (mSharedElements.get(i).isLayoutRequested()) {
+                    allReady = false;
+                    break;
+                }
+            }
+        }
+        if (allReady) {
             Bundle state = captureSharedElementState();
             mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
         } else {
@@ -115,6 +124,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         @Override
                         public boolean onPreDraw() {
                             getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                            Bundle state = captureSharedElementState();
+                            mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
                             return true;
                         }
                     });
