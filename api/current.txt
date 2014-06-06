@@ -28089,7 +28089,7 @@ package android.telephony {
     method public static boolean isEmergencyNumber(java.lang.String);
     method public static boolean isGlobalPhoneNumber(java.lang.String);
     method public static boolean isISODigit(char);
-    method public static boolean isLocalEmergencyNumber(java.lang.String, android.content.Context);
+    method public static boolean isLocalEmergencyNumber(android.content.Context, java.lang.String);
     method public static final boolean isNonSeparator(char);
     method public static final boolean isReallyDialable(char);
     method public static final boolean isStartsPostDial(char);
