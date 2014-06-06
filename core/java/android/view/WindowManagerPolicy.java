@@ -605,21 +605,21 @@ public interface WindowManagerPolicy {
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
 
     /**
-     * Return whether the given window should forcibly hide everything
-     * behind it.  Typically returns true for the keyguard.
+     * Return whether the given window is forcibly hiding all windows except windows with
+     * FLAG_SHOW_WHEN_LOCKED set.  Typically returns true for the keyguard.
      */
-    public boolean doesForceHide(WindowManager.LayoutParams attrs);
+    public boolean isForceHiding(WindowManager.LayoutParams attrs);
 
 
     /**
-     * Return whether the given window can become one that passes doesForceHide() test.
+     * Return whether the given window can become one that passes isForceHiding() test.
      * Typically returns true for the StatusBar.
      */
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
 
     /**
      * Determine if a window that is behind one that is force hiding
-     * (as determined by {@link #doesForceHide}) should actually be hidden.
+     * (as determined by {@link #isForceHiding}) should actually be hidden.
      * For example, typically returns false for the status bar.  Be careful
      * to return false for any window that you may hide yourself, since this
      * will conflict with what you set.
@@ -830,13 +830,11 @@ public interface WindowManagerPolicy {
      * setting the window's frame, either here or in finishLayout().
      * 
      * @param win The window being positioned.
-     * @param attrs The LayoutParams of the window.
      * @param attached For sub-windows, the window it is attached to; this
      *                 window will already have had layoutWindow() called on it
      *                 so you can use its Rect.  Otherwise null.
      */
-    public void layoutWindowLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached);
+    public void layoutWindowLw(WindowState win, WindowState attached);
 
     
     /**
