@@ -2161,6 +2161,7 @@
   <public type="attr" name="hideOnContentScroll" />
   <public type="attr" name="actionOverflowMenuStyle" />
   <public type="attr" name="documentLaunchMode" />
+  <public type="attr" name="maxRecents" />
   <public type="attr" name="autoRemoveFromRecents" />
   <public type="attr" name="stateListAnimator" />
   <public type="attr" name="toId" />

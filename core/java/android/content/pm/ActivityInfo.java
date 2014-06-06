@@ -99,6 +99,12 @@ public class ActivityInfo extends ComponentInfo
     public int documentLaunchMode;
 
     /**
+     * The maximum number of tasks rooted at this activity that can be in the recent task list.
+     * Refer to {@link android.R.attr#maxRecents}.
+     */
+    public int maxRecents;
+
+    /**
      * Optional name of a permission required to be able to access this
      * Activity.  From the "permission" attribute.
      */

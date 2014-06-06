@@ -227,7 +227,7 @@ public class TaskPersister {
         for (int fileNdx = 0; fileNdx < files.length; ++fileNdx) {
             File file = files[fileNdx];
             String filename = file.getName();
-            final int taskIdEnd = filename.indexOf('_') + 1;
+            final int taskIdEnd = filename.indexOf('_');
             if (taskIdEnd > 0) {
                 final int taskId;
                 try {
