@@ -217,6 +217,7 @@
   <java-symbol type="id" name="pin_confirm_text" />
   <java-symbol type="id" name="pin_error_message" />
   <java-symbol type="id" name="timePickerLayout" />
+  <java-symbol type="id" name="profile_icon" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1119,6 +1120,7 @@
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
   <java-symbol type="drawable" name="ic_corp_badge" />
+  <java-symbol type="drawable" name="ic_corp_icon_badge" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />
