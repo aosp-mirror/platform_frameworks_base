@@ -159,6 +159,7 @@ extern int register_android_net_TrafficStats(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_AndroidBidi(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
+extern int register_android_server_fingerprint_FingerprintService(JNIEnv* env);
 extern int register_android_server_NetworkManagementSocketTagger(JNIEnv* env);
 extern int register_android_server_Watchdog(JNIEnv* env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
@@ -1328,6 +1329,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_media_ToneGenerator),
 
     REG_JNI(register_android_opengl_classes),
+	REG_JNI(register_android_server_fingerprint_FingerprintService),
     REG_JNI(register_android_server_NetworkManagementSocketTagger),
     REG_JNI(register_android_server_Watchdog),
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),

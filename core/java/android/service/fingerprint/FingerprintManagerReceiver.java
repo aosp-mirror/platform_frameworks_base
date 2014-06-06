@@ -30,18 +30,32 @@ public class FingerprintManagerReceiver {
     public void onEnrollResult(int fingerprintId,  int remaining) { }
 
     /**
-     * Fingerprint scan detected. Most clients will use this function to detect a fingerprint
+     * Fingerprint touch detected, but not processed yet. Clients will use this message to
+     * determine a good or bad scan before the fingerprint is processed.  This is meant for the
+     * client to provide feedback about the scan or alert the user that recognition is to follow.
      *
-     * @param fingerprintId is the finger the hardware has detected.
-     * @param confidence from 0 (no confidence) to 65535 (high confidence). Fingerprint 0 has
-     * special meaning - the finger wasn't recognized.
+     * @param acquiredInfo one of:
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_GOOD},
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_PARTIAL},
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_INSUFFICIENT},
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_IMAGER_DIRTY},
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_TOO_SLOW},
+     * {@link FingerprintManager#FINGERPRINT_ACQUIRED_TOO_FAST}
      */
-    public void onScanned(int fingerprintId, int confidence) { }
+    public void onAcquired(int acquiredInfo) { }
+
+    /**
+     * Fingerprint has been detected and processed.  A non-zero return indicates a valid
+     * fingerprint was detected.
+     *
+     * @param fingerprintId the finger id, or 0 if not recognized.
+     */
+    public void onProcessed(int fingerprintId) { }
 
     /**
      * An error was detected during scan or enrollment.  One of
      * {@link FingerprintManager#FINGERPRINT_ERROR_HW_UNAVAILABLE},
-     * {@link FingerprintManager#FINGERPRINT_ERROR_BAD_CAPTURE} or
+     * {@link FingerprintManager#FINGERPRINT_ERROR_UNABLE_TO_PROCESS} or
      * {@link FingerprintManager#FINGERPRINT_ERROR_TIMEOUT}
      * {@link FingerprintManager#FINGERPRINT_ERROR_NO_SPACE}
      *

@@ -26011,29 +26011,61 @@ package android.service.dreams {
 package android.service.fingerprint {
 
   public class FingerprintManager {
-    ctor public FingerprintManager(android.content.Context);
+    ctor public FingerprintManager(android.content.Context, android.service.fingerprint.IFingerprintService);
     method public void enroll(long);
+    method public void enrollCancel();
     method public boolean enrolledAndEnabled();
     method public void remove(int);
     method public void startListening(android.service.fingerprint.FingerprintManagerReceiver);
     method public void stopListening();
+    field public static final int FINGERPRINT_ACQUIRED = 1; // 0x1
+    field public static final int FINGERPRINT_ACQUIRED_GOOD = 0; // 0x0
+    field public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 4; // 0x4
+    field public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2; // 0x2
+    field public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1; // 0x1
+    field public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 16; // 0x10
+    field public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 8; // 0x8
     field public static final int FINGERPRINT_ERROR = -1; // 0xffffffff
-    field public static final int FINGERPRINT_ERROR_BAD_CAPTURE = 2; // 0x2
     field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
     field public static final int FINGERPRINT_ERROR_NO_RECEIVER = -10; // 0xfffffff6
     field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
     field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
-    field public static final int FINGERPRINT_SCANNED = 1; // 0x1
-    field public static final int FINGERPRINT_TEMPLATE_ENROLLING = 2; // 0x2
+    field public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2; // 0x2
+    field public static final int FINGERPRINT_PROCESSED = 2; // 0x2
+    field public static final int FINGERPRINT_TEMPLATE_ENROLLING = 3; // 0x3
     field public static final int FINGERPRINT_TEMPLATE_REMOVED = 4; // 0x4
   }
 
   public class FingerprintManagerReceiver {
     ctor public FingerprintManagerReceiver();
+    method public void onAcquired(int);
     method public void onEnrollResult(int, int);
     method public void onError(int);
+    method public void onProcessed(int);
     method public void onRemoved(int);
-    method public void onScanned(int, int);
+  }
+
+  public class FingerprintUtils {
+    ctor public FingerprintUtils();
+    method public static void addFingerprintIdForUser(int, android.content.ContentResolver, int);
+    method public static int[] getFingerprintIdsForUser(android.content.ContentResolver, int);
+    method public static boolean removeFingerprintIdForUser(int, android.content.ContentResolver, int);
+  }
+
+  public abstract interface IFingerprintService implements android.os.IInterface {
+    method public abstract void enroll(android.os.IBinder, long, int) throws android.os.RemoteException;
+    method public abstract void enrollCancel(android.os.IBinder, int) throws android.os.RemoteException;
+    method public abstract void remove(android.os.IBinder, int, int) throws android.os.RemoteException;
+    method public abstract void startListening(android.os.IBinder, android.service.fingerprint.IFingerprintServiceReceiver, int) throws android.os.RemoteException;
+    method public abstract void stopListening(android.os.IBinder, int) throws android.os.RemoteException;
+  }
+
+  public abstract interface IFingerprintServiceReceiver implements android.os.IInterface {
+    method public abstract void onAcquired(int) throws android.os.RemoteException;
+    method public abstract void onEnrollResult(int, int) throws android.os.RemoteException;
+    method public abstract void onError(int) throws android.os.RemoteException;
+    method public abstract void onProcessed(int) throws android.os.RemoteException;
+    method public abstract void onRemoved(int) throws android.os.RemoteException;
   }
 
 }

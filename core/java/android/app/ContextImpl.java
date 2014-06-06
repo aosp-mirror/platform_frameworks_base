@@ -115,9 +115,8 @@ import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.service.fingerprint.IFingerprintService;
 import android.service.fingerprint.FingerprintManager;
-import android.service.fingerprint.FingerprintManagerReceiver;
-import android.service.fingerprint.FingerprintService;
 import android.telecomm.TelecommManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
@@ -466,11 +465,6 @@ class ContextImpl extends Context {
                     return new KeyguardManager();
                 }});
 
-        registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new FingerprintManager(ctx);
-            }});
-
         registerService(LAYOUT_INFLATER_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return PolicyManager.makeNewLayoutInflater(ctx.getOuterContext());
@@ -690,10 +684,19 @@ class ContextImpl extends Context {
                 return new MediaSessionManager(ctx);
             }
         });
+
         registerService(TRUST_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(TRUST_SERVICE);
                 return new TrustManager(b);
+            }
+        });
+
+        registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(FINGERPRINT_SERVICE);
+                IFingerprintService service = IFingerprintService.Stub.asInterface(b);
+                return new FingerprintManager(ctx.getOuterContext(), service);
             }
         });
 

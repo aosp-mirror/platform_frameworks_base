@@ -44,6 +44,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
+import android.service.fingerprint.FingerprintManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -63,6 +64,7 @@ import com.android.server.content.ContentService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
+import com.android.server.fingerprint.FingerprintService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.job.JobSchedulerService;
@@ -989,11 +991,19 @@ public final class SystemServer {
                 }
 
                 try {
+                    Slog.i(TAG, "Fingerprint Manager");
+                    mSystemServiceManager.startService(FingerprintService.class);
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting FingerprintService", e);
+                }
+
+                try {
                     Slog.i(TAG, "BackgroundDexOptService");
                     new BackgroundDexOptService(context);
                 } catch (Throwable e) {
                     reportWtf("starting BackgroundDexOptService", e);
                 }
+
             }
 
             try {
