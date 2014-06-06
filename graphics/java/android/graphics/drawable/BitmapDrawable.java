@@ -706,7 +706,21 @@ public class BitmapDrawable extends Drawable {
 
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.BitmapDrawable);
         updateStateFromTypedArray(a);
+        verifyState(a);
         a.recycle();
+    }
+
+    /**
+     * Ensures all required attributes are set.
+     *
+     * @throws XmlPullParserException if any required attributes are missing
+     */
+    private void verifyState(TypedArray a) throws XmlPullParserException {
+        final BitmapState state = mBitmapState;
+        if (state.mBitmap == null) {
+            throw new XmlPullParserException(a.getPositionDescription() +
+                    ": <bitmap> requires a valid src attribute");
+        }
     }
 
     /**
@@ -912,6 +926,7 @@ public class BitmapDrawable extends Drawable {
      */
     private BitmapDrawable(BitmapState state, Resources res, Theme theme) {
         if (theme != null && state.canApplyTheme()) {
+            // If we need to apply a theme, implicitly mutate.
             mBitmapState = new BitmapState(state);
             applyTheme(theme);
         } else {

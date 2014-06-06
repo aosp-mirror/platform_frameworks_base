@@ -1662,9 +1662,12 @@ public class GradientDrawable extends Drawable {
      * @param theme Theme to apply to the drawable
      */
     private GradientDrawable(GradientState state, Theme theme) {
-        mGradientState = new GradientState(state);
         if (theme != null && state.canApplyTheme()) {
+            // If we need to apply a theme, implicitly mutate.
+            mGradientState = new GradientState(state);
             applyTheme(theme);
+        } else {
+            mGradientState = state;
         }
 
         initializeWithState(state);

@@ -659,6 +659,7 @@ public class NinePatchDrawable extends Drawable {
      */
     private NinePatchDrawable(NinePatchState state, Resources res, Theme theme) {
         if (theme != null && state.canApplyTheme()) {
+            // If we need to apply a theme, implicitly mutate.
             mNinePatchState = new NinePatchState(state);
             applyTheme(theme);
         } else {
