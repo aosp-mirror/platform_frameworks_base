@@ -1821,6 +1821,23 @@ public class DevicePolicyManager {
         return isDeviceOwnerApp(packageName);
     }
 
+    /**
+     * Clears the current device owner.  The caller must be the device owner.
+     *
+     * This function should be used cautiously as once it is called it cannot
+     * be undone.  The device owner can only be set as a part of device setup
+     * before setup completes.
+     */
+    public void clearDeviceOwnerApp() {
+        if (mService != null) {
+            try {
+                mService.clearDeviceOwner(mContext.getPackageName());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to clear device owner");
+            }
+        }
+    }
+
     /** @hide */
     public String getDeviceOwner() {
         if (mService != null) {

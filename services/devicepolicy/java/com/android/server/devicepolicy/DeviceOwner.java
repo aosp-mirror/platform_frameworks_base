@@ -120,6 +120,10 @@ public class DeviceOwner {
         mDeviceOwner = new OwnerInfo(ownerName, packageName);
     }
 
+    void clearDeviceOwner() {
+        mDeviceOwner = null;
+    }
+
     void setProfileOwner(String packageName, String ownerName, int userId) {
         mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
     }

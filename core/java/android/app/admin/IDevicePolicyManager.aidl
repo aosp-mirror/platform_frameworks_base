@@ -108,6 +108,7 @@ interface IDevicePolicyManager {
     boolean isDeviceOwner(String packageName);
     String getDeviceOwner();
     String getDeviceOwnerName();
+    void clearDeviceOwner(String packageName);
 
     boolean setProfileOwner(String packageName, String ownerName, int userHandle);
     String getProfileOwner(int userHandle);
