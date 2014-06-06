@@ -17,8 +17,10 @@
 package com.android.internal.net;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -45,7 +47,10 @@ public class VpnConfig implements Parcelable {
 
     public static Intent getIntentForConfirmation() {
         Intent intent = new Intent();
-        intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ConfirmDialog");
+        ComponentName componentName = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(
+                        com.android.internal.R.string.config_customVpnConfirmDialogComponent));
+        intent.setClassName(componentName.getPackageName(), componentName.getClassName());
         return intent;
     }
 
