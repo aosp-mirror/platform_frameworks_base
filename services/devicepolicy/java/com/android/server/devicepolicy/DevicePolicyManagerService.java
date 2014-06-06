@@ -51,6 +51,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.net.ConnectivityManager;
 import android.net.ProxyInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -2720,6 +2721,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // No device admin sets the global proxy.
         return null;
+    }
+
+    public void setRecommendedGlobalProxy(ComponentName who, ProxyInfo proxyInfo) {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            connectivityManager.setGlobalProxy(proxyInfo);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void resetGlobalProxyLocked(DevicePolicyData policy) {

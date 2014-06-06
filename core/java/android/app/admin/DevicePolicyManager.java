@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.RestrictionsManager;
+import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -1273,6 +1274,32 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Set a network-independent global HTTP proxy.  This is not normally what you want
+     * for typical HTTP proxies - they are generally network dependent.  However if you're
+     * doing something unusual like general internal filtering this may be useful.  On
+     * a private network where the proxy is not accessible, you may break HTTP using this.
+     *
+     * <p>This method requires the caller to be the device owner.
+     *
+     * <p>This proxy is only a recommendation and it is possible that some apps will ignore it.
+     * @see ProxyInfo
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param proxyInfo The a {@link ProxyInfo} object defining the new global
+     *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
+     */
+    public void setRecommendedGlobalProxy(ComponentName admin, ProxyInfo proxyInfo) {
+        if (mService != null) {
+            try {
+                mService.setRecommendedGlobalProxy(admin, proxyInfo);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
     }
 
     /**
