@@ -18,6 +18,7 @@ package android.transition;
 import android.graphics.Rect;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -32,38 +33,19 @@ import android.view.ViewGroup;
 public class SidePropagation extends VisibilityPropagation {
     private static final String TAG = "SlidePropagation";
 
-    /**
-     * Transition propagates relative to the distance of the left side of the scene.
-     */
-    public static final int LEFT = Slide.LEFT;
-
-    /**
-     * Transition propagates relative to the distance of the top of the scene.
-     */
-    public static final int TOP = Slide.TOP;
-
-    /**
-     * Transition propagates relative to the distance of the right side of the scene.
-     */
-    public static final int RIGHT = Slide.RIGHT;
-
-    /**
-     * Transition propagates relative to the distance of the bottom of the scene.
-     */
-    public static final int BOTTOM = Slide.BOTTOM;
-
     private float mPropagationSpeed = 3.0f;
-    private int mSide = BOTTOM;
+    private int mSide = Gravity.BOTTOM;
 
     /**
      * Sets the side that is used to calculate the transition propagation. If the transitioning
      * View is visible in the start of the transition, then it will transition sooner when
      * closer to the side and later when farther. If the view is not visible in the start of
      * the transition, then it will transition later when closer to the side and sooner when
-     * farther from the edge. The default is {@link #BOTTOM}.
+     * farther from the edge. The default is {@link Gravity#BOTTOM}.
      *
      * @param side The side that is used to calculate the transition propagation. Must be one of
-     *             {@link #LEFT}, {@link #TOP}, {@link #RIGHT}, or {@link #BOTTOM}.
+     *             {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}, or
+     *             {@link Gravity#BOTTOM}.
      */
     public void setSide(int side) {
         mSide = side;
@@ -141,16 +123,16 @@ public class SidePropagation extends VisibilityPropagation {
             int left, int top, int right, int bottom) {
         int distance = 0;
         switch (mSide) {
-            case LEFT:
+            case Gravity.LEFT:
                 distance = right - viewX + Math.abs(epicenterY - viewY);
                 break;
-            case TOP:
+            case Gravity.TOP:
                 distance = bottom - viewY + Math.abs(epicenterX - viewX);
                 break;
-            case RIGHT:
+            case Gravity.RIGHT:
                 distance = viewX - left + Math.abs(epicenterY - viewY);
                 break;
-            case BOTTOM:
+            case Gravity.BOTTOM:
                 distance = viewY - top + Math.abs(epicenterX - viewX);
                 break;
         }
@@ -159,8 +141,8 @@ public class SidePropagation extends VisibilityPropagation {
 
     private int getMaxDistance(ViewGroup sceneRoot) {
         switch (mSide) {
-            case LEFT:
-            case RIGHT:
+            case Gravity.LEFT:
+            case Gravity.RIGHT:
                 return sceneRoot.getWidth();
             default:
                 return sceneRoot.getHeight();

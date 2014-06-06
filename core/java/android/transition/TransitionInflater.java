@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
+import android.view.Gravity;
 import android.view.InflateException;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -208,7 +209,7 @@ public class TransitionInflater {
     private Slide createSlideTransition(AttributeSet attrs) {
         TypedArray a = mContext.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Slide);
-        int edge = a.getInt(com.android.internal.R.styleable.Slide_slideEdge, Slide.BOTTOM);
+        int edge = a.getInt(com.android.internal.R.styleable.Slide_slideEdge, Gravity.BOTTOM);
         Slide slide = new Slide(edge);
         a.recycle();
         return slide;
