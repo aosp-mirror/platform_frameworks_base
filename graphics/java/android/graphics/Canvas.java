@@ -16,10 +16,16 @@
 
 package android.graphics;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -136,7 +142,7 @@ public class Canvas {
      *
      * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
      */
-    public Canvas(Bitmap bitmap) {
+    public Canvas(@NonNull Bitmap bitmap) {
         if (!bitmap.isMutable()) {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
@@ -192,7 +198,7 @@ public class Canvas {
      * @see #setDensity(int)
      * @see #getDensity()
      */
-    public void setBitmap(Bitmap bitmap) {
+    public void setBitmap(@Nullable Bitmap bitmap) {
         if (isHardwareAccelerated()) {
             throw new RuntimeException("Can't set a bitmap device on a GL canvas");
         }
@@ -327,6 +333,19 @@ public class Canvas {
 
     // the SAVE_FLAG constants must match their native equivalents
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                MATRIX_SAVE_FLAG,
+                CLIP_SAVE_FLAG,
+                HAS_ALPHA_LAYER_SAVE_FLAG,
+                FULL_COLOR_LAYER_SAVE_FLAG,
+                CLIP_TO_LAYER_SAVE_FLAG,
+                ALL_SAVE_FLAG
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Saveflags {}
+
     /** restore the current matrix when restore() is called */
     public static final int MATRIX_SAVE_FLAG = 0x01;
     /** restore the current clip when restore() is called */
@@ -364,7 +383,7 @@ public class Canvas {
      *                  to save/restore
      * @return The value to pass to restoreToCount() to balance this save()
      */
-    public int save(int saveFlags) {
+    public int save(@Saveflags int saveFlags) {
         return native_save(mNativeCanvasWrapper, saveFlags);
     }
 
@@ -384,7 +403,7 @@ public class Canvas {
      * @param saveFlags  see _SAVE_FLAG constants
      * @return       value to pass to restoreToCount() to balance this save()
      */
-    public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
+    public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint, @Saveflags int saveFlags) {
         return native_saveLayer(mNativeCanvasWrapper,
                 bounds.left, bounds.top, bounds.right, bounds.bottom,
                 paint != null ? paint.mNativePaint : 0,
@@ -394,15 +413,15 @@ public class Canvas {
     /**
      * Convenience for saveLayer(bounds, paint, {@link #ALL_SAVE_FLAG})
      */
-    public int saveLayer(RectF bounds, Paint paint) {
+    public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint) {
         return saveLayer(bounds, paint, ALL_SAVE_FLAG);
     }
 
     /**
      * Helper version of saveLayer() that takes 4 values rather than a RectF.
      */
-    public int saveLayer(float left, float top, float right, float bottom, Paint paint,
-            int saveFlags) {
+    public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint,
+            @Saveflags int saveFlags) {
         return native_saveLayer(mNativeCanvasWrapper, left, top, right, bottom,
                 paint != null ? paint.mNativePaint : 0,
                 saveFlags);
@@ -411,7 +430,7 @@ public class Canvas {
     /**
      * Convenience for saveLayer(left, top, right, bottom, paint, {@link #ALL_SAVE_FLAG})
      */
-    public int saveLayer(float left, float top, float right, float bottom, Paint paint) {
+    public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint) {
         return saveLayer(left, top, right, bottom, paint, ALL_SAVE_FLAG);
     }
 
@@ -431,7 +450,7 @@ public class Canvas {
      * @param saveFlags see _SAVE_FLAG constants
      * @return          value to pass to restoreToCount() to balance this call
      */
-    public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
+    public int saveLayerAlpha(@NonNull RectF bounds, int alpha, @Saveflags int saveFlags) {
         alpha = Math.min(255, Math.max(0, alpha));
         return native_saveLayerAlpha(mNativeCanvasWrapper,
                 bounds.left, bounds.top, bounds.right, bounds.bottom,
@@ -441,7 +460,7 @@ public class Canvas {
     /**
      * Convenience for saveLayerAlpha(bounds, alpha, {@link #ALL_SAVE_FLAG})
      */
-    public int saveLayerAlpha(RectF bounds, int alpha) {
+    public int saveLayerAlpha(@NonNull RectF bounds, int alpha) {
         return saveLayerAlpha(bounds, alpha, ALL_SAVE_FLAG);
     }
 
@@ -449,7 +468,7 @@ public class Canvas {
      * Helper for saveLayerAlpha() that takes 4 values instead of a RectF.
      */
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
-            int saveFlags) {
+            @Saveflags int saveFlags) {
         return native_saveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
                                      alpha, saveFlags);
     }
@@ -567,7 +586,7 @@ public class Canvas {
      *
      * @param matrix The matrix to preconcatenate with the current matrix
      */
-    public void concat(Matrix matrix) {
+    public void concat(@Nullable Matrix matrix) {
         if (matrix != null) native_concat(mNativeCanvasWrapper, matrix.native_instance);
     }
     
@@ -584,7 +603,7 @@ public class Canvas {
      *               
      * @see #concat(Matrix) 
      */
-    public void setMatrix(Matrix matrix) {
+    public void setMatrix(@Nullable Matrix matrix) {
         native_setMatrix(mNativeCanvasWrapper,
                          matrix == null ? 0 : matrix.native_instance);
     }
@@ -594,7 +613,7 @@ public class Canvas {
      * the matrix in the canvas, but just returns a copy of it.
      */
     @Deprecated
-    public void getMatrix(Matrix ctm) {
+    public void getMatrix(@NonNull Matrix ctm) {
         native_getCTM(mNativeCanvasWrapper, ctm.native_instance);
     }
 
@@ -603,7 +622,7 @@ public class Canvas {
      * matrix.
      */
     @Deprecated
-    public final Matrix getMatrix() {
+    public final @NonNull Matrix getMatrix() {
         Matrix m = new Matrix();
         //noinspection deprecation
         getMatrix(m);
@@ -617,7 +636,7 @@ public class Canvas {
      * @param op How the clip is modified
      * @return true if the resulting clip is non-empty
      */
-    public boolean clipRect(RectF rect, Region.Op op) {
+    public boolean clipRect(@NonNull RectF rect, @NonNull Region.Op op) {
         return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
     }
@@ -630,7 +649,7 @@ public class Canvas {
      * @param op How the clip is modified
      * @return true if the resulting clip is non-empty
      */
-    public boolean clipRect(Rect rect, Region.Op op) {
+    public boolean clipRect(@NonNull Rect rect, @NonNull Region.Op op) {
         return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
     }
@@ -642,7 +661,7 @@ public class Canvas {
      * @param rect The rectangle to intersect with the current clip.
      * @return true if the resulting clip is non-empty
      */
-    public boolean clipRect(RectF rect) {
+    public boolean clipRect(@NonNull RectF rect) {
         return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 Region.Op.INTERSECT.nativeInt);
     }
@@ -654,7 +673,7 @@ public class Canvas {
      * @param rect The rectangle to intersect with the current clip.
      * @return true if the resulting clip is non-empty
      */
-    public boolean clipRect(Rect rect) {
+    public boolean clipRect(@NonNull Rect rect) {
         return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 Region.Op.INTERSECT.nativeInt);
     }
@@ -674,7 +693,8 @@ public class Canvas {
      * @param op     How the clip is modified
      * @return       true if the resulting clip is non-empty
      */
-    public boolean clipRect(float left, float top, float right, float bottom, Region.Op op) {
+    public boolean clipRect(float left, float top, float right, float bottom,
+            @NonNull Region.Op op) {
         return native_clipRect(mNativeCanvasWrapper, left, top, right, bottom, op.nativeInt);
     }
 
@@ -721,7 +741,7 @@ public class Canvas {
      * @param op   How the clip is modified
      * @return     true if the resulting is non-empty
      */
-    public boolean clipPath(Path path, Region.Op op) {
+    public boolean clipPath(@NonNull Path path, @NonNull Region.Op op) {
         return native_clipPath(mNativeCanvasWrapper, path.ni(), op.nativeInt);
     }
     
@@ -731,7 +751,7 @@ public class Canvas {
      * @param path The path to intersect with the current clip
      * @return     true if the resulting is non-empty
      */
-    public boolean clipPath(Path path) {
+    public boolean clipPath(@NonNull Path path) {
         return clipPath(path, Region.Op.INTERSECT);
     }
     
@@ -749,7 +769,7 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
-    public boolean clipRegion(Region region, Region.Op op) {
+    public boolean clipRegion(@NonNull Region region, @NonNull Region.Op op) {
         return native_clipRegion(mNativeCanvasWrapper, region.ni(), op.nativeInt);
     }
 
@@ -766,15 +786,15 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
-    public boolean clipRegion(Region region) {
+    public boolean clipRegion(@NonNull Region region) {
         return clipRegion(region, Region.Op.INTERSECT);
     }
     
-    public DrawFilter getDrawFilter() {
+    public @Nullable DrawFilter getDrawFilter() {
         return mDrawFilter;
     }
     
-    public void setDrawFilter(DrawFilter filter) {
+    public void setDrawFilter(@Nullable DrawFilter filter) {
         long nativeFilter = 0;
         if (filter != null) {
             nativeFilter = filter.mNativeInt;
@@ -818,7 +838,7 @@ public class Canvas {
      * @return      true if the rect (transformed by the canvas' matrix)
      *              does not intersect with the canvas' clip
      */
-    public boolean quickReject(RectF rect, EdgeType type) {
+    public boolean quickReject(@NonNull RectF rect, @NonNull EdgeType type) {
         return native_quickReject(mNativeCanvasWrapper,
                 rect.left, rect.top, rect.right, rect.bottom);
     }
@@ -838,7 +858,7 @@ public class Canvas {
      * @return            true if the path (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
      */
-    public boolean quickReject(Path path, EdgeType type) {
+    public boolean quickReject(@NonNull Path path, @NonNull EdgeType type) {
         return native_quickReject(mNativeCanvasWrapper, path.ni());
     }
 
@@ -863,7 +883,7 @@ public class Canvas {
      *                    does not intersect with the canvas' clip
      */
     public boolean quickReject(float left, float top, float right, float bottom,
-                               EdgeType type) {
+            @NonNull EdgeType type) {
         return native_quickReject(mNativeCanvasWrapper, left, top, right, bottom);
     }
 
@@ -877,7 +897,7 @@ public class Canvas {
      *               still return true if the current clip is non-empty.
      * @return true if the current clip is non-empty.
      */
-    public boolean getClipBounds(Rect bounds) {
+    public boolean getClipBounds(@Nullable Rect bounds) {
         return native_getClipBounds(mNativeCanvasWrapper, bounds);
     }
     
@@ -886,7 +906,7 @@ public class Canvas {
      *
      * @return the clip bounds, or [0, 0, 0, 0] if the clip is empty.
      */
-    public final Rect getClipBounds() {
+    public final @NonNull Rect getClipBounds() {
         Rect r = new Rect();
         getClipBounds(r);
         return r;
@@ -934,7 +954,7 @@ public class Canvas {
      * @param color the color to draw with
      * @param mode  the porter-duff mode to apply to the color
      */
-    public void drawColor(int color, PorterDuff.Mode mode) {
+    public void drawColor(int color, @NonNull PorterDuff.Mode mode) {
         native_drawColor(mNativeCanvasWrapper, color, mode.nativeInt);
     }
 
@@ -945,7 +965,7 @@ public class Canvas {
      *
      * @param paint The paint used to draw onto the canvas
      */
-    public void drawPaint(Paint paint) {
+    public void drawPaint(@NonNull Paint paint) {
         native_drawPaint(mNativeCanvasWrapper, paint.mNativePaint);
     }
     
@@ -965,21 +985,21 @@ public class Canvas {
      *                 "points" that are drawn is really (count >> 1).
      * @param paint    The paint used to draw the points
      */
-    public void drawPoints(float[] pts, int offset, int count, Paint paint) {
+    public void drawPoints(float[] pts, int offset, int count, @NonNull Paint paint) {
         native_drawPoints(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
     }
 
     /**
      * Helper for drawPoints() that assumes you want to draw the entire array
      */
-    public void drawPoints(float[] pts, Paint paint) {
+    public void drawPoints(@NonNull float[] pts, @NonNull Paint paint) {
         drawPoints(pts, 0, pts.length, paint);
     }
 
     /**
      * Helper for drawPoints() for drawing a single point.
      */
-    public void drawPoint(float x, float y, Paint paint) {
+    public void drawPoint(float x, float y, @NonNull Paint paint) {
         native_drawPoint(mNativeCanvasWrapper, x, y, paint.mNativePaint);
     }
 
@@ -995,7 +1015,8 @@ public class Canvas {
      * @param startY The y-coordinate of the start point of the line
      * @param paint  The paint used to draw the line
      */
-    public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
+    public void drawLine(float startX, float startY, float stopX, float stopY,
+            @NonNull Paint paint) {
         native_drawLine(mNativeCanvasWrapper, startX, startY, stopX, stopY, paint.mNativePaint);
     }
 
@@ -1018,7 +1039,7 @@ public class Canvas {
         native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
     }
 
-    public void drawLines(float[] pts, Paint paint) {
+    public void drawLines(@NonNull float[] pts, @NonNull Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
 
@@ -1029,7 +1050,7 @@ public class Canvas {
      * @param rect  The rect to be drawn
      * @param paint The paint used to draw the rect
      */
-    public void drawRect(RectF rect, Paint paint) {
+    public void drawRect(@NonNull RectF rect, @NonNull Paint paint) {
         native_drawRect(mNativeCanvasWrapper,
                 rect.left, rect.top, rect.right, rect.bottom, paint.mNativePaint);
     }
@@ -1041,7 +1062,7 @@ public class Canvas {
      * @param r        The rectangle to be drawn.
      * @param paint    The paint used to draw the rectangle
      */
-    public void drawRect(Rect r, Paint paint) {
+    public void drawRect(@NonNull Rect r, @NonNull Paint paint) {
         drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
     
@@ -1056,7 +1077,7 @@ public class Canvas {
      * @param bottom The bottom side of the rectangle to be drawn
      * @param paint  The paint used to draw the rect
      */
-    public void drawRect(float left, float top, float right, float bottom, Paint paint) {
+    public void drawRect(float left, float top, float right, float bottom, @NonNull Paint paint) {
         native_drawRect(mNativeCanvasWrapper, left, top, right, bottom, paint.mNativePaint);
     }
 
@@ -1066,7 +1087,7 @@ public class Canvas {
      *
      * @param oval The rectangle bounds of the oval to be drawn
      */
-    public void drawOval(RectF oval, Paint paint) {
+    public void drawOval(@NonNull RectF oval, @NonNull Paint paint) {
         if (oval == null) {
             throw new NullPointerException();
         }
@@ -1083,7 +1104,7 @@ public class Canvas {
      * @param radius The radius of the cirle to be drawn
      * @param paint  The paint used to draw the circle
      */
-    public void drawCircle(float cx, float cy, float radius, Paint paint) {
+    public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {
         native_drawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.mNativePaint);
     }
 
@@ -1110,8 +1131,8 @@ public class Canvas {
                         close it if it is being stroked. This will draw a wedge
      * @param paint      The paint used to draw the arc
      */
-    public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
-            Paint paint) {
+    public void drawArc(@NonNull RectF oval, float startAngle, float sweepAngle, boolean useCenter,
+            @NonNull Paint paint) {
         if (oval == null) {
             throw new NullPointerException();
         }
@@ -1128,7 +1149,7 @@ public class Canvas {
      * @param ry    The y-radius of the oval used to round the corners
      * @param paint The paint used to draw the roundRect
      */
-    public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
+    public void drawRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Paint paint) {
         drawRoundRect(rect.left, rect.top, rect.right, rect.bottom, rx, ry, paint);
     }
 
@@ -1141,7 +1162,7 @@ public class Canvas {
      * @param paint The paint used to draw the roundRect
      */
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
-            Paint paint) {
+            @NonNull Paint paint) {
         native_drawRoundRect(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, paint.mNativePaint);
     }
 
@@ -1152,7 +1173,7 @@ public class Canvas {
      * @param path  The path to be drawn
      * @param paint The paint used to draw the path
      */
-    public void drawPath(Path path, Paint paint) {
+    public void drawPath(@NonNull Path path, @NonNull Paint paint) {
         native_drawPath(mNativeCanvasWrapper, path.ni(), paint.mNativePaint);
     }
 
@@ -1179,7 +1200,7 @@ public class Canvas {
      * 
      * @hide
      */
-    public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+    public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
         patch.drawSoftware(this, dst, paint);
     }
 
@@ -1192,7 +1213,7 @@ public class Canvas {
      *
      * @hide
      */
-    public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
+    public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
         patch.drawSoftware(this, dst, paint);
     }
 
@@ -1215,7 +1236,7 @@ public class Canvas {
      * @param top    The position of the top side of the bitmap being drawn
      * @param paint  The paint used to draw the bitmap (may be null)
      */
-    public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
+    public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         throwIfCannotDraw(bitmap);
         native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top,
                 paint != null ? paint.mNativePaint : 0, mDensity, mScreenDensity, bitmap.mDensity);
@@ -1243,7 +1264,8 @@ public class Canvas {
      *               to fit into
      * @param paint  May be null. The paint used to draw the bitmap
      */
-    public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
+    public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull RectF dst,
+            @Nullable Paint paint) {
         if (dst == null) {
             throw new NullPointerException();
         }
@@ -1274,7 +1296,8 @@ public class Canvas {
      *               to fit into
      * @param paint  May be null. The paint used to draw the bitmap
      */
-    public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
+    public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull Rect dst,
+            @Nullable Paint paint) {
         if (dst == null) {
             throw new NullPointerException();
         }
@@ -1308,8 +1331,8 @@ public class Canvas {
      * and copies of pixel data.
      */
     @Deprecated
-    public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
-            int width, int height, boolean hasAlpha, Paint paint) {
+    public void drawBitmap(@NonNull int[] colors, int offset, int stride, float x, float y,
+            int width, int height, boolean hasAlpha, @Nullable Paint paint) {
         // check for valid input
         if (width < 0) {
             throw new IllegalArgumentException("width must be >= 0");
@@ -1344,8 +1367,8 @@ public class Canvas {
      * and copies of pixel data.
      */
     @Deprecated
-    public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
-            int width, int height, boolean hasAlpha, Paint paint) {
+    public void drawBitmap(@NonNull int[] colors, int offset, int stride, int x, int y,
+            int width, int height, boolean hasAlpha, @Nullable Paint paint) {
         // call through to the common float version
         drawBitmap(colors, offset, stride, (float)x, (float)y, width, height,
                    hasAlpha, paint);
@@ -1358,7 +1381,7 @@ public class Canvas {
      * @param matrix The matrix used to transform the bitmap when it is drawn
      * @param paint  May be null. The paint used to draw the bitmap
      */
-    public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
+    public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
         nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.ni(), matrix.ni(),
                 paint != null ? paint.mNativePaint : 0);
     }
@@ -1398,8 +1421,9 @@ public class Canvas {
      * @param colorOffset Number of color elements to skip before drawing
      * @param paint  May be null. The paint used to draw the bitmap
      */
-    public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight,
-            float[] verts, int vertOffset, int[] colors, int colorOffset, Paint paint) {
+    public void drawBitmapMesh(@NonNull Bitmap bitmap, int meshWidth, int meshHeight,
+            @NonNull float[] verts, int vertOffset, @Nullable int[] colors, int colorOffset,
+            @Nullable Paint paint) {
         if ((meshWidth | meshHeight | vertOffset | colorOffset) < 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -1463,9 +1487,10 @@ public class Canvas {
      * @param indexCount number of entries in the indices array (if not null).
      * @param paint Specifies the shader to use if the texs array is non-null. 
      */
-    public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,
-            float[] texs, int texOffset, int[] colors, int colorOffset,
-            short[] indices, int indexOffset, int indexCount, Paint paint) {
+    public void drawVertices(@NonNull VertexMode mode, int vertexCount, @NonNull float[] verts,
+            int vertOffset, @Nullable float[] texs, int texOffset, @Nullable int[] colors,
+            int colorOffset, @Nullable short[] indices, int indexOffset, int indexCount,
+            @NonNull Paint paint) {
         checkRange(verts.length, vertOffset, vertexCount);
         if (texs != null) {
             checkRange(texs.length, texOffset, vertexCount);
@@ -1490,7 +1515,8 @@ public class Canvas {
      * @param y     The y-coordinate of the origin of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {
+    public void drawText(@NonNull char[] text, int index, int count, float x, float y,
+            @NonNull Paint paint) {
         if ((index | count | (index + count) |
             (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
@@ -1508,7 +1534,7 @@ public class Canvas {
      * @param y     The y-coordinate of the origin of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public void drawText(String text, float x, float y, Paint paint) {
+    public void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
         native_drawText(mNativeCanvasWrapper, text, 0, text.length(), x, y, paint.mBidiFlags,
                 paint.mNativePaint, paint.mNativeTypeface);
     }
@@ -1524,7 +1550,8 @@ public class Canvas {
      * @param y     The y-coordinate of the origin of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public void drawText(String text, int start, int end, float x, float y, Paint paint) {
+    public void drawText(@NonNull String text, int start, int end, float x, float y,
+            @NonNull Paint paint) {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -1545,7 +1572,8 @@ public class Canvas {
      * @param y        The y-coordinate of origin for where to draw the text
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
+    public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
+            @NonNull Paint paint) {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
@@ -1583,8 +1611,8 @@ public class Canvas {
      * @param paint the paint
      * @hide
      */
-    public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
-            float x, float y, int dir, Paint paint) {
+    public void drawTextRun(@NonNull char[] text, int index, int count, int contextIndex,
+            int contextCount, float x, float y, int dir, @NonNull Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1620,8 +1648,8 @@ public class Canvas {
      * @param paint the paint
      * @hide
      */
-    public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
-            float x, float y, int dir, Paint paint) {
+    public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
+            int contextEnd, float x, float y, int dir, @NonNull Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1668,7 +1696,8 @@ public class Canvas {
      * @param paint    The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(char[] text, int index, int count, float[] pos, Paint paint) {
+    public void drawPosText(@NonNull char[] text, int index, int count, @NonNull float[] pos,
+            @NonNull Paint paint) {
         if (index < 0 || index + count > text.length || count*2 > pos.length) {
             throw new IndexOutOfBoundsException();
         }
@@ -1688,7 +1717,7 @@ public class Canvas {
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(String text, float[] pos, Paint paint) {
+    public void drawPosText(@NonNull String text, @NonNull float[] pos, @NonNull Paint paint) {
         if (text.length()*2 > pos.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -1708,8 +1737,8 @@ public class Canvas {
      *                 the text
      * @param paint    The paint used for the text (e.g. color, size, style)
      */
-    public void drawTextOnPath(char[] text, int index, int count, Path path,
-            float hOffset, float vOffset, Paint paint) {
+    public void drawTextOnPath(@NonNull char[] text, int index, int count, @NonNull Path path,
+            float hOffset, float vOffset, @NonNull Paint paint) {
         if (index < 0 || index + count > text.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -1731,7 +1760,8 @@ public class Canvas {
      *                 the text
      * @param paint    The paint used for the text (e.g. color, size, style)
      */
-    public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
+    public void drawTextOnPath(@NonNull String text, @NonNull Path path, float hOffset,
+            float vOffset, @NonNull Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvasWrapper, text, path.ni(), hOffset, vOffset,
                     paint.mBidiFlags, paint.mNativePaint);
@@ -1749,7 +1779,7 @@ public class Canvas {
      * 
      * @param picture  The picture to be drawn
      */
-    public void drawPicture(Picture picture) {
+    public void drawPicture(@NonNull Picture picture) {
         picture.endRecording();
         int restoreCount = save();
         picture.draw(this);
@@ -1759,7 +1789,7 @@ public class Canvas {
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
-    public void drawPicture(Picture picture, RectF dst) {
+    public void drawPicture(@NonNull Picture picture, @NonNull RectF dst) {
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
@@ -1772,7 +1802,7 @@ public class Canvas {
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
-    public void drawPicture(Picture picture, Rect dst) {
+    public void drawPicture(@NonNull Picture picture, @NonNull Rect dst) {
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
