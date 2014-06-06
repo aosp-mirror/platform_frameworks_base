@@ -264,6 +264,13 @@ public class NotificationStackScrollLayout extends ViewGroup
                 : mPaddingBetweenElementsNormal;
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         updateContentHeight();
+        notifyHeightChangeListener(null);
+    }
+
+    private void notifyHeightChangeListener(ExpandableView view) {
+        if (mOnHeightChangedListener != null) {
+            mOnHeightChangedListener.onHeightChanged(view);
+        }
     }
 
     @Override
@@ -402,9 +409,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mNeedsAnimation =  true;
             }
             requestChildrenUpdate();
-            if (mOnHeightChangedListener != null) {
-                mOnHeightChangedListener.onHeightChanged(null);
-            }
+            notifyHeightChangeListener(null);
         }
     }
 
@@ -1725,9 +1730,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onHeightChanged(ExpandableView view) {
         updateContentHeight();
         updateScrollPositionIfNecessary();
-        if (mOnHeightChangedListener != null) {
-            mOnHeightChangedListener.onHeightChanged(view);
-        }
+        notifyHeightChangeListener(view);
         requestChildrenUpdate();
     }
 
