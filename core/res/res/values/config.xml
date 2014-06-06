@@ -1394,6 +1394,10 @@
     <string name="config_customAdbPublicKeyConfirmationComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
 
+    <!-- Name of the CustomDialog that is used for VPN -->
+    <string name="config_customVpnConfirmDialogComponent"
+            >com.android.vpndialogs/com.android.vpndialogs.CustomDialog</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
 
