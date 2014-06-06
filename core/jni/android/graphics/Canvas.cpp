@@ -298,7 +298,16 @@ public:
                                jlong deviceRgnHandle, jint op) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-        canvas->clipRegion(*deviceRgn, static_cast<SkRegion::Op>(op));
+        SkPath rgnPath;
+        if (deviceRgn->getBoundaryPath(&rgnPath)) {
+            // The region is specified in device space.
+            SkMatrix savedMatrix = canvas->getTotalMatrix();
+            canvas->resetMatrix();
+            canvas->clipPath(rgnPath, static_cast<SkRegion::Op>(op));
+            canvas->setMatrix(savedMatrix);
+        } else {
+            canvas->clipRect(SkRect::MakeEmpty(), static_cast<SkRegion::Op>(op));
+        }
         return hasNonEmptyClip(*canvas);
     }
 
