@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="test2">test2-overlay</string>
+    <integer-array name="integerArray1">
+        <item>10</item>
+        <item>11</item>
+    </integer-array>
+</resources>

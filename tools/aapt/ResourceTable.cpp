@@ -2292,8 +2292,14 @@ uint32_t ResourceTable::getCustomResourceWithCreation(
     if (resId != 0 || !createIfNotFound) {
         return resId;
     }
-    String16 value("false");
 
+    if (mAssetsPackage != package) {
+        mCurrentXmlPos.warning("creating resource for external package %s: %s/%s.",
+                String8(package).string(), String8(type).string(), String8(name).string());
+        mCurrentXmlPos.printf("This will be an error in a future version of AAPT.");
+    }
+
+    String16 value("false");
     status_t status = addEntry(mCurrentXmlPos, package, type, name, value, NULL, NULL, true);
     if (status == NO_ERROR) {
         resId = getResId(package, type, name);
@@ -3062,8 +3068,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
             for (size_t i = 0; i < N; ++i) {
                 if (!validResources[i]) {
                     sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
-                    fprintf(stderr, "%s: no entries written for %s/%s\n", log_prefix,
-                            String8(typeName).string(), String8(c->getName()).string());
+                    fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
+                            String8(typeName).string(), String8(c->getName()).string(),
+                            Res_MAKEID(p->getAssignedId() - 1, ti, i));
                     missing_entry = true;
                 }
             }

@@ -589,11 +589,11 @@ static bool applyFileOverlay(Bundle *bundle,
                 if (bundle->getVerbose()) {
                     printf("trying overlaySet Key=%s\n",overlaySet->keyAt(overlayIndex).string());
                 }
-                size_t baseIndex = UNKNOWN_ERROR;
+                ssize_t baseIndex = -1;
                 if (baseSet->get() != NULL) {
                     baseIndex = (*baseSet)->indexOfKey(overlaySet->keyAt(overlayIndex));
                 }
-                if (baseIndex < UNKNOWN_ERROR) {
+                if (baseIndex >= 0) {
                     // look for same flavor.  For a given file (strings.xml, for example)
                     // there may be a locale specific or other flavors - we want to match
                     // the same flavor.
@@ -619,10 +619,10 @@ static bool applyFileOverlay(Bundle *bundle,
                     for (size_t overlayGroupIndex = 0;
                             overlayGroupIndex<overlayGroupSize;
                             overlayGroupIndex++) {
-                        size_t baseFileIndex =
+                        ssize_t baseFileIndex =
                                 baseGroup->getFiles().indexOfKey(overlayFiles.
                                 keyAt(overlayGroupIndex));
-                        if (baseFileIndex < UNKNOWN_ERROR) {
+                        if (baseFileIndex >= 0) {
                             if (bundle->getVerbose()) {
                                 printf("found a match (" ZD ") for overlay file %s, for flavor %s\n",
                                         (ZD_TYPE) baseFileIndex,
@@ -1363,7 +1363,11 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
 
             if (split->isBase()) {
                 resFile = flattenedTable;
-                finalResTable.add(flattenedTable->getData(), flattenedTable->getSize());
+                err = finalResTable.add(flattenedTable->getData(), flattenedTable->getSize());
+                if (err != NO_ERROR) {
+                    fprintf(stderr, "Generated resource table is corrupt.\n");
+                    return err;
+                }
             } else {
                 sp<AaptFile> generatedManifest = new AaptFile(String8("AndroidManifest.xml"),
                         AaptGroupEntry(), String8());

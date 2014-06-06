@@ -64,8 +64,8 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguage) {
      config.packLanguage("eng");
 
      // 1-00110-01 101-00100
-     EXPECT_EQ(0x99, config.language[0]);
-     EXPECT_EQ(0xa4, config.language[1]);
+     EXPECT_EQ('\x99', config.language[0]);
+     EXPECT_EQ('\xA4', config.language[1]);
 
      char out[4] = { 1, 1, 1, 1};
      config.unpackLanguage(out);

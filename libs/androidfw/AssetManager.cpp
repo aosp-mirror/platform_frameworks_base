@@ -256,7 +256,7 @@ bool AssetManager::addOverlayPath(const String8& packagePath, int32_t* cookie)
     String8 targetPath;
     String8 overlayPath;
     if (!ResTable::getIdmapInfo(idmap->getBuffer(false), idmap->getLength(),
-                NULL, NULL, &targetPath, &overlayPath)) {
+                NULL, NULL, NULL, &targetPath, &overlayPath)) {
         ALOGW("failed to read idmap file %s\n", idmapPath.string());
         delete idmap;
         return false;
@@ -311,7 +311,7 @@ bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApk
             ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
             return false;
         }
-        tables[i].add(ass, 1, false /* copyData */, NULL /* idMap */);
+        tables[i].add(ass);
     }
 
     return tables[0].createIdmap(tables[1], targetCrc, overlayCrc,
@@ -617,7 +617,7 @@ const ResTable* AssetManager::getResTable(bool required) const
                     // can quickly copy it out for others.
                     ALOGV("Creating shared resources for %s", ap.path.string());
                     sharedRes = new ResTable();
-                    sharedRes->add(ass, i + 1, false, idmap);
+                    sharedRes->add(ass, idmap, i + 1, false);
 #ifdef HAVE_ANDROID_OS
                     const char* data = getenv("ANDROID_DATA");
                     LOG_ALWAYS_FATAL_IF(data == NULL, "ANDROID_DATA not set");
@@ -646,7 +646,7 @@ const ResTable* AssetManager::getResTable(bool required) const
                 mResources->add(sharedRes);
             } else {
                 ALOGV("Parsing resources for %s", ap.path.string());
-                mResources->add(ass, i + 1, !shared, idmap);
+                mResources->add(ass, idmap, i + 1, !shared);
             }
             onlyEmptyResources = false;
 
@@ -654,7 +654,7 @@ const ResTable* AssetManager::getResTable(bool required) const
                 delete ass;
             }
         } else {
-            ALOGW("Installing empty resources in to table %p\n", mResources);
+            ALOGV("Installing empty resources in to table %p\n", mResources);
             mResources->addEmpty(i + 1);
         }
 
@@ -736,7 +736,7 @@ void AssetManager::addSystemOverlays(const char* pathOverlaysList,
         if (oass != NULL) {
             Asset* oidmap = openIdmapLocked(oap);
             offset++;
-            sharedRes->add(oass, offset + 1, false, oidmap);
+            sharedRes->add(oass, oidmap, offset + 1, false);
             const_cast<AssetManager*>(this)->mAssetPaths.add(oap);
             const_cast<AssetManager*>(this)->mZipSet.addOverlay(targetPackagePath, oap);
         }

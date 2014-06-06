@@ -237,6 +237,7 @@ enum {
 #define Res_MAKEARRAY(entry) (0x02000000 | (entry&0xFFFF))
 
 #define Res_MAXPACKAGE 255
+#define Res_MAXTYPE 255
 
 /**
  * Representation of a value in a resource, supplying type
@@ -508,6 +509,23 @@ private:
     uint32_t                    mStringPoolSize;    // number of uint16_t
     const uint32_t*             mStyles;
     uint32_t                    mStylePoolSize;    // number of uint32_t
+};
+
+/**
+ * Wrapper class that allows the caller to retrieve a string from
+ * a string pool without knowing which string pool to look.
+ */
+class StringPoolRef {
+public:
+    StringPoolRef();
+    StringPoolRef(const ResStringPool* pool, uint32_t index);
+
+    const char* string8(size_t* outLen) const;
+    const char16_t* string16(size_t* outLen) const;
+
+private:
+    const ResStringPool*        mPool;
+    uint32_t                    mIndex;
 };
 
 /** ********************************************************************
@@ -835,6 +853,8 @@ struct ResTable_package
 
     // Last index into keyStrings that is for public use by others.
     uint32_t lastPublicKey;
+
+    uint32_t typeIdOffset;
 };
 
 // The most specific locale can consist of:
@@ -1469,9 +1489,13 @@ public:
              bool copyData=false);
     ~ResTable();
 
-    status_t add(Asset* asset, const int32_t cookie, bool copyData,
-                 const void* idmap = NULL);
-    status_t add(const void *data, size_t size);
+    status_t add(const void* data, size_t size, const int32_t cookie=-1, bool copyData=false);
+    status_t add(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
+            const int32_t cookie=-1, bool copyData=false);
+
+    status_t add(Asset* asset, const int32_t cookie=-1, bool copyData=false);
+    status_t add(Asset* asset, Asset* idmapAsset, const int32_t cookie=-1, bool copyData=false);
+
     status_t add(ResTable* src);
     status_t addEmpty(const int32_t cookie);
 
@@ -1610,13 +1634,14 @@ public:
             uint32_t typeSpecFlags;
             Res_value value;
         };
+
         struct type_info {
             size_t numEntries;
             theme_entry* entries;
         };
+
         struct package_info {
-            size_t numTypes;
-            type_info types[];
+            type_info types[Res_MAXTYPE + 1];
         };
 
         void free_package(package_info* pi);
@@ -1711,6 +1736,7 @@ public:
     size_t getBasePackageCount() const;
     const String16 getBasePackageName(size_t idx) const;
     uint32_t getBasePackageId(size_t idx) const;
+    uint32_t getLastTypeIdForPackage(size_t idx) const;
 
     // Return the number of resource tables that the object contains.
     size_t getTableCount() const;
@@ -1740,13 +1766,15 @@ public:
             void** outData, size_t* outSize) const;
 
     enum {
-        IDMAP_HEADER_SIZE_BYTES = 3 * sizeof(uint32_t) + 2 * 256,
+        IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256,
     };
+
     // Retrieve idmap meta-data.
     //
     // This function only requires the idmap header (the first
     // IDMAP_HEADER_SIZE_BYTES) bytes of an idmap file.
     static bool getIdmapInfo(const void* idmap, size_t size,
+            uint32_t* pVersion,
             uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
             String8* pTargetPath, String8* pOverlayPath);
 
@@ -1756,21 +1784,24 @@ public:
 private:
     struct Header;
     struct Type;
+    struct Entry;
     struct Package;
     struct PackageGroup;
     struct bag_set;
+    typedef Vector<Type*> TypeList;
 
-    status_t addInternal(const void* data, size_t size, const int32_t cookie,
-                 bool copyData, const Asset* idmap);
+    status_t addInternal(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
+            const int32_t cookie, bool copyData);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
-    ssize_t getEntry(
-        const Package* package, int typeIndex, int entryIndex,
+
+    status_t getEntry(
+        const PackageGroup* packageGroup, int typeIndex, int entryIndex,
         const ResTable_config* config,
-        const ResTable_type** outType, const ResTable_entry** outEntry,
-        const Type** outTypeClass) const;
+        Entry* outEntry) const;
+
     status_t parsePackage(
-        const ResTable_package* const pkg, const Header* const header, uint32_t idmap_id);
+        const ResTable_package* const pkg, const Header* const header);
 
     void print_value(const Package* pkg, const Res_value& value) const;
     

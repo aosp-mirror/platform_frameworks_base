@@ -10,92 +10,108 @@
 
 using namespace android;
 
-#define NEXT(b, i, o) do { if (buf.next(&i, &o) < 0) { return -1; } } while (0)
-
 namespace {
-    static const uint32_t IDMAP_MAGIC = 0x706d6469;
+    static const uint32_t IDMAP_MAGIC = 0x504D4449;
     static const size_t PATH_LENGTH = 256;
-    static const uint32_t IDMAP_HEADER_SIZE = (3 + 2 * (PATH_LENGTH / sizeof(uint32_t)));
 
     void printe(const char *fmt, ...);
 
     class IdmapBuffer {
         private:
-            char *buf_;
+            const char* buf_;
             size_t len_;
-            mutable size_t pos_;
+            size_t pos_;
         public:
-            IdmapBuffer() : buf_((char *)MAP_FAILED), len_(0), pos_(0) {}
+            IdmapBuffer() : buf_((const char *)MAP_FAILED), len_(0), pos_(0) {}
 
             ~IdmapBuffer() {
                 if (buf_ != MAP_FAILED) {
-                    munmap(buf_, len_);
+                    munmap(const_cast<char*>(buf_), len_);
                 }
             }
 
-            int init(const char *idmap_path)
-            {
+            status_t init(const char *idmap_path) {
                 struct stat st;
                 int fd;
 
                 if (stat(idmap_path, &st) < 0) {
                     printe("failed to stat idmap '%s': %s\n", idmap_path, strerror(errno));
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
                 len_ = st.st_size;
                 if ((fd = TEMP_FAILURE_RETRY(open(idmap_path, O_RDONLY))) < 0) {
                     printe("failed to open idmap '%s': %s\n", idmap_path, strerror(errno));
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
-                if ((buf_ = (char*)mmap(NULL, len_, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
+                if ((buf_ = (const char*)mmap(NULL, len_, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
                     close(fd);
                     printe("failed to mmap idmap: %s\n", strerror(errno));
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
                 close(fd);
-                return 0;
+                return NO_ERROR;
             }
 
-            int next(uint32_t *i, uint32_t *offset) const
-            {
+            status_t nextUint32(uint32_t* i) {
                 if (!buf_) {
                     printe("failed to read next uint32_t: buffer not initialized\n");
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
-                if (pos_ + 4 > len_) {
+
+                if (pos_ + sizeof(uint32_t) > len_) {
                     printe("failed to read next uint32_t: end of buffer reached at pos=0x%08x\n",
                             pos_);
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
-                *offset = pos_ / sizeof(uint32_t);
-                char a = buf_[pos_++];
-                char b = buf_[pos_++];
-                char c = buf_[pos_++];
-                char d = buf_[pos_++];
-                *i = (d << 24) | (c << 16) | (b << 8) | a;
-                return 0;
+
+                if ((reinterpret_cast<uintptr_t>(buf_ + pos_) & 0x3) != 0) {
+                    printe("failed to read next uint32_t: not aligned on 4-byte boundary\n");
+                    return UNKNOWN_ERROR;
+                }
+
+                *i = dtohl(*reinterpret_cast<const uint32_t*>(buf_ + pos_));
+                pos_ += sizeof(uint32_t);
+                return NO_ERROR;
             }
 
-            int nextPath(char *b, uint32_t *offset_start, uint32_t *offset_end) const
-            {
+            status_t nextUint16(uint16_t* i) {
+                if (!buf_) {
+                    printe("failed to read next uint16_t: buffer not initialized\n");
+                    return UNKNOWN_ERROR;
+                }
+
+                if (pos_ + sizeof(uint16_t) > len_) {
+                    printe("failed to read next uint16_t: end of buffer reached at pos=0x%08x\n",
+                            pos_);
+                    return UNKNOWN_ERROR;
+                }
+
+                if ((reinterpret_cast<uintptr_t>(buf_ + pos_) & 0x1) != 0) {
+                    printe("failed to read next uint32_t: not aligned on 2-byte boundary\n");
+                    return UNKNOWN_ERROR;
+                }
+
+                *i = dtohs(*reinterpret_cast<const uint16_t*>(buf_ + pos_));
+                pos_ += sizeof(uint16_t);
+                return NO_ERROR;
+            }
+
+            status_t nextPath(char *b) {
                 if (!buf_) {
                     printe("failed to read next path: buffer not initialized\n");
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
                 if (pos_ + PATH_LENGTH > len_) {
                     printe("failed to read next path: end of buffer reached at pos=0x%08x\n", pos_);
-                    return -1;
+                    return UNKNOWN_ERROR;
                 }
                 memcpy(b, buf_ + pos_, PATH_LENGTH);
-                *offset_start = pos_ / sizeof(uint32_t);
                 pos_ += PATH_LENGTH;
-                *offset_end = pos_ / sizeof(uint32_t) - 1;
-                return 0;
+                return NO_ERROR;
             }
     };
 
-    void printe(const char *fmt, ...)
-    {
+    void printe(const char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
@@ -104,44 +120,37 @@ namespace {
         va_end(ap);
     }
 
-    void print_header()
-    {
-        printf("SECTION      ENTRY        VALUE      OFFSET    COMMENT\n");
+    void print_header() {
+        printf("SECTION      ENTRY        VALUE      COMMENT\n");
     }
 
-    void print(const char *section, const char *subsection, uint32_t value, uint32_t offset,
-            const char *fmt, ...)
-    {
+    void print(const char *section, const char *subsection, uint32_t value, const char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
-        printf("%-12s %-12s 0x%08x 0x%-4x    ", section, subsection, value, offset);
+        printf("%-12s %-12s 0x%08x ", section, subsection, value);
         vprintf(fmt, ap);
         printf("\n");
         va_end(ap);
     }
 
-    void print_path(const char *section, const char *subsection, uint32_t offset_start,
-            uint32_t offset_end, const char *fmt, ...)
-    {
+    void print_path(const char *section, const char *subsection, const char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
-        printf("%-12s %-12s .......... 0x%02x-0x%02x ", section, subsection, offset_start,
-                offset_end);
+        printf("%-12s %-12s .......... ", section, subsection);
         vprintf(fmt, ap);
         printf("\n");
         va_end(ap);
     }
 
-    int resource_metadata(const AssetManager& am, uint32_t res_id,
-            String8 *package, String8 *type, String8 *name)
-    {
+    status_t resource_metadata(const AssetManager& am, uint32_t res_id,
+            String8 *package, String8 *type, String8 *name) {
         const ResTable& rt = am.getResources();
         struct ResTable::resource_name data;
         if (!rt.getResourceName(res_id, false, &data)) {
             printe("failed to get resource name id=0x%08x\n", res_id);
-            return -1;
+            return UNKNOWN_ERROR;
         }
         if (package) {
             *package = String8(String16(data.package, data.packageLen));
@@ -152,140 +161,150 @@ namespace {
         if (name) {
             *name = String8(String16(data.name, data.nameLen));
         }
-        return 0;
+        return NO_ERROR;
     }
 
-    int package_id(const AssetManager& am)
-    {
-        return (am.getResources().getBasePackageId(0)) << 24;
-    }
-
-    int parse_idmap_header(const IdmapBuffer& buf, AssetManager& am)
-    {
-        uint32_t i, o, e;
+    status_t parse_idmap_header(IdmapBuffer& buf, AssetManager& am) {
+        uint32_t i;
         char path[PATH_LENGTH];
 
-        NEXT(buf, i, o);
+        status_t err = buf.nextUint32(&i);
+        if (err != NO_ERROR) {
+            return err;
+        }
+
         if (i != IDMAP_MAGIC) {
             printe("not an idmap file: actual magic constant 0x%08x does not match expected magic "
                     "constant 0x%08x\n", i, IDMAP_MAGIC);
-            return -1;
+            return UNKNOWN_ERROR;
         }
+
         print_header();
-        print("IDMAP HEADER", "magic", i, o, "");
+        print("IDMAP HEADER", "magic", i, "");
 
-        NEXT(buf, i, o);
-        print("", "base crc", i, o, "");
-
-        NEXT(buf, i, o);
-        print("", "overlay crc", i, o, "");
-
-        if (buf.nextPath(path, &o, &e) < 0) {
-            // printe done from IdmapBuffer::nextPath
-            return -1;
+        err = buf.nextUint32(&i);
+        if (err != NO_ERROR) {
+            return err;
         }
-        print_path("", "base path", o, e, "%s", path);
+        print("", "version", i, "");
+
+        err = buf.nextUint32(&i);
+        if (err != NO_ERROR) {
+            return err;
+        }
+        print("", "base crc", i, "");
+
+        err = buf.nextUint32(&i);
+        if (err != NO_ERROR) {
+            return err;
+        }
+        print("", "overlay crc", i, "");
+
+        err = buf.nextPath(path);
+        if (err != NO_ERROR) {
+            // printe done from IdmapBuffer::nextPath
+            return err;
+        }
+        print_path("", "base path", "%s", path);
+
         if (!am.addAssetPath(String8(path), NULL)) {
             printe("failed to add '%s' as asset path\n", path);
-            return -1;
+            return UNKNOWN_ERROR;
         }
 
-        if (buf.nextPath(path, &o, &e) < 0) {
+        err = buf.nextPath(path);
+        if (err != NO_ERROR) {
             // printe done from IdmapBuffer::nextPath
-            return -1;
+            return err;
         }
-        print_path("", "overlay path", o, e, "%s", path);
+        print_path("", "overlay path", "%s", path);
 
-        return 0;
+        return NO_ERROR;
     }
 
-    int parse_data_header(const IdmapBuffer& buf, const AssetManager& am, Vector<uint32_t>& types)
-    {
-        uint32_t i, o;
-        const uint32_t numeric_package = package_id(am);
+    status_t parse_data(IdmapBuffer& buf, const AssetManager& am) {
+        const uint32_t packageId = am.getResources().getBasePackageId(0);
 
-        NEXT(buf, i, o);
-        print("DATA HEADER", "types count", i, o, "");
-        const uint32_t N = i;
+        uint16_t data16;
+        status_t err = buf.nextUint16(&data16);
+        if (err != NO_ERROR) {
+            return err;
+        }
+        print("DATA HEADER", "target pkg", static_cast<uint32_t>(data16), "");
 
-        for (uint32_t j = 0; j < N; ++j) {
-            NEXT(buf, i, o);
-            if (i == 0) {
-                print("", "padding", i, o, "");
-            } else {
+        err = buf.nextUint16(&data16);
+        if (err != NO_ERROR) {
+            return err;
+        }
+        print("", "types count", static_cast<uint32_t>(data16), "");
+
+        uint32_t typeCount = static_cast<uint32_t>(data16);
+        while (typeCount > 0) {
+            typeCount--;
+
+            err = buf.nextUint16(&data16);
+            if (err != NO_ERROR) {
+                return err;
+            }
+            const uint32_t targetTypeId = static_cast<uint32_t>(data16);
+            print("DATA BLOCK", "target type", targetTypeId, "");
+
+            err = buf.nextUint16(&data16);
+            if (err != NO_ERROR) {
+                return err;
+            }
+            print("", "overlay type", static_cast<uint32_t>(data16), "");
+
+            err = buf.nextUint16(&data16);
+            if (err != NO_ERROR) {
+                return err;
+            }
+            const uint32_t entryCount = static_cast<uint32_t>(data16);
+            print("", "entry count", entryCount, "");
+
+            err = buf.nextUint16(&data16);
+            if (err != NO_ERROR) {
+                return err;
+            }
+            const uint32_t entryOffset = static_cast<uint32_t>(data16);
+            print("", "entry offset", entryOffset, "");
+
+            for (uint32_t i = 0; i < entryCount; i++) {
+                uint32_t data32;
+                err = buf.nextUint32(&data32);
+                if (err != NO_ERROR) {
+                    return err;
+                }
+
+                uint32_t resID = (packageId << 24) | (targetTypeId << 16) | (entryOffset + i);
                 String8 type;
-                const uint32_t numeric_type = (j + 1) << 16;
-                const uint32_t res_id = numeric_package | numeric_type;
-                if (resource_metadata(am, res_id, NULL, &type, NULL) < 0) {
-                    // printe done from resource_metadata
-                    return -1;
+                String8 name;
+                err = resource_metadata(am, resID, NULL, &type, &name);
+                if (err != NO_ERROR) {
+                    return err;
                 }
-                print("", "type offset", i, o, "absolute offset 0x%02x, %s",
-                        i + IDMAP_HEADER_SIZE, type.string());
-                types.add(numeric_type);
+                print("", "entry", data32, "%s/%s", type.string(), name.string());
             }
         }
 
-        return 0;
-    }
-
-    int parse_data_block(const IdmapBuffer& buf, const AssetManager& am, size_t numeric_type)
-    {
-        uint32_t i, o, n, id_offset;
-        const uint32_t numeric_package = package_id(am);
-
-        NEXT(buf, i, o);
-        print("DATA BLOCK", "entry count", i, o, "");
-        n = i;
-
-        NEXT(buf, i, o);
-        print("", "entry offset", i, o, "");
-        id_offset = i;
-
-        for ( ; n > 0; --n) {
-            String8 type, name;
-
-            NEXT(buf, i, o);
-            if (i == 0) {
-                print("", "padding", i, o, "");
-            } else {
-                uint32_t res_id = numeric_package | numeric_type | id_offset;
-                if (resource_metadata(am, res_id, NULL, &type, &name) < 0) {
-                    // printe done from resource_metadata
-                    return -1;
-                }
-                print("", "entry", i, o, "%s/%s", type.string(), name.string());
-            }
-            ++id_offset;
-        }
-
-        return 0;
+        return NO_ERROR;
     }
 }
 
-int idmap_inspect(const char *idmap_path)
-{
+int idmap_inspect(const char *idmap_path) {
     IdmapBuffer buf;
     if (buf.init(idmap_path) < 0) {
         // printe done from IdmapBuffer::init
         return EXIT_FAILURE;
     }
     AssetManager am;
-    if (parse_idmap_header(buf, am) < 0) {
+    if (parse_idmap_header(buf, am) != NO_ERROR) {
         // printe done from parse_idmap_header
         return EXIT_FAILURE;
     }
-    Vector<uint32_t> types;
-    if (parse_data_header(buf, am, types) < 0) {
+    if (parse_data(buf, am) != NO_ERROR) {
         // printe done from parse_data_header
         return EXIT_FAILURE;
-    }
-    const size_t N = types.size();
-    for (size_t i = 0; i < N; ++i) {
-        if (parse_data_block(buf, am, types.itemAt(i)) < 0) {
-            // printe done from parse_data_block
-            return EXIT_FAILURE;
-        }
     }
     return EXIT_SUCCESS;
 }
