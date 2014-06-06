@@ -291,14 +291,14 @@ public class LockPatternView extends View {
         mPathPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // lot's of bitmaps!
-        // TODO: those bitmaps are hardcoded to the Quantum Theme which should not be the case!
-        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default_qntm_alpha);
-        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched_qntm_alpha);
+        // TODO: those bitmaps are hardcoded to the Material Theme which should not be the case!
+        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default_mtrl_alpha);
+        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched_mtrl_alpha);
         mBitmapCircleDefault = getBitmapFor(
-                R.drawable.indicator_code_lock_point_area_default_qntm_alpha);
-        mBitmapCircleAlpha = getBitmapFor(R.drawable.indicator_code_lock_point_area_qntm_alpha);
+                R.drawable.indicator_code_lock_point_area_default_mtrl_alpha);
+        mBitmapCircleAlpha = getBitmapFor(R.drawable.indicator_code_lock_point_area_mtrl_alpha);
         mBitmapArrowAlphaUp = getBitmapFor(
-                R.drawable.indicator_code_lock_drag_direction_up_qntm_alpha);
+                R.drawable.indicator_code_lock_drag_direction_up_mtrl_alpha);
 
         // bitmaps have the size of the largest bitmap in this group
         final Bitmap bitmaps[] = { mBitmapBtnDefault, mBitmapBtnTouched, mBitmapCircleDefault,

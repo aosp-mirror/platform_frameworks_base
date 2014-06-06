@@ -34,7 +34,7 @@ import android.view.animation.LinearInterpolator;
 import java.util.ArrayList;
 
 /**
- * Draws a Quantum Paper ripple.
+ * Draws a Material ripple.
  */
 class Ripple {
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();

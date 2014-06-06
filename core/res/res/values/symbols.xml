@@ -347,7 +347,7 @@
   <java-symbol type="dimen" name="notification_title_text_size" />
   <java-symbol type="dimen" name="notification_subtext_size" />
   <java-symbol type="dimen" name="immersive_mode_cling_width" />
-  <java-symbol type="dimen" name="notification_quantum_rounded_rect_radius" />
+  <java-symbol type="dimen" name="notification_material_rounded_rect_radius" />
 
   <java-symbol type="string" name="add_account_button_label" />
   <java-symbol type="string" name="addToDictionary" />
@@ -1018,11 +1018,11 @@
   <java-symbol type="drawable" name="text_edit_side_paste_window" />
   <java-symbol type="drawable" name="text_edit_paste_window" />
   <java-symbol type="drawable" name="btn_check_off" />
-  <java-symbol type="drawable" name="btn_code_lock_default_qntm_alpha" />
-  <java-symbol type="drawable" name="btn_code_lock_touched_qntm_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_default_qntm_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_qntm_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_up_qntm_alpha" />
+  <java-symbol type="drawable" name="btn_code_lock_default_mtrl_alpha" />
+  <java-symbol type="drawable" name="btn_code_lock_touched_mtrl_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_point_area_default_mtrl_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_point_area_mtrl_alpha" />
+  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_up_mtrl_alpha" />
   <java-symbol type="color" name="lock_pattern_view_regular_color" />
   <java-symbol type="color" name="lock_pattern_view_success_color" />
   <java-symbol type="color" name="lock_pattern_view_error_color" />
@@ -1657,25 +1657,25 @@
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
   <java-symbol type="array" name="config_notificationSignalExtractors" />
 
-  <java-symbol type="layout" name="notification_quantum_action" />
-  <java-symbol type="layout" name="notification_quantum_action_list" />
-  <java-symbol type="layout" name="notification_quantum_action_tombstone" />
-  <java-symbol type="layout" name="notification_template_quantum_base" />
-  <java-symbol type="layout" name="notification_template_quantum_big_base" />
-  <java-symbol type="layout" name="notification_template_quantum_big_picture" />
-  <java-symbol type="layout" name="notification_template_quantum_big_text" />
-  <java-symbol type="layout" name="notification_template_quantum_inbox" />
-  <java-symbol type="layout" name="notification_template_quantum_media" />
-  <java-symbol type="layout" name="notification_template_quantum_big_media" />
+  <java-symbol type="layout" name="notification_material_action" />
+  <java-symbol type="layout" name="notification_material_action_list" />
+  <java-symbol type="layout" name="notification_material_action_tombstone" />
+  <java-symbol type="layout" name="notification_template_material_base" />
+  <java-symbol type="layout" name="notification_template_material_big_base" />
+  <java-symbol type="layout" name="notification_template_material_big_picture" />
+  <java-symbol type="layout" name="notification_template_material_big_text" />
+  <java-symbol type="layout" name="notification_template_material_inbox" />
+  <java-symbol type="layout" name="notification_template_material_media" />
+  <java-symbol type="layout" name="notification_template_material_big_media" />
   <java-symbol type="layout" name="notification_template_icon_group" />
-  <java-symbol type="layout" name="notification_quantum_media_action" />
+  <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_action_legacy_color_filter" />
   <java-symbol type="color" name="notification_icon_bg_color" />
   <java-symbol type="drawable" name="notification_icon_legacy_bg" />
   <java-symbol type="drawable" name="notification_icon_legacy_bg_inset" />
-  <java-symbol type="drawable" name="notification_quantum_bg_dim" />
-  <java-symbol type="drawable" name="notification_quantum_bg" />
-  <java-symbol type="drawable" name="notification_quantum_media_progress" />
+  <java-symbol type="drawable" name="notification_material_bg_dim" />
+  <java-symbol type="drawable" name="notification_material_bg" />
+  <java-symbol type="drawable" name="notification_material_media_progress" />
   <java-symbol type="color" name="notification_media_action_bg" />
   <java-symbol type="color" name="notification_media_info_bg" />
   <java-symbol type="color" name="notification_media_progress" />
@@ -1864,7 +1864,7 @@
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
   <java-symbol type="array" name="config_clockTickVibePattern" />
 
-  <!-- From various Quantum changes -->
+  <!-- From various Material changes -->
   <java-symbol type="attr" name="toolbarStyle" />
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />
@@ -1873,12 +1873,12 @@
   <java-symbol type="id" name="icon_frame" />
   <java-symbol type="style" name="Animation.VolumePanel" />
   <java-symbol type="transition" name="no_transition" />
-  <java-symbol type="color" name="timepicker_default_text_color_quantum" />
-  <java-symbol type="color" name="timepicker_default_disabled_color_quantum" />
-  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_quantum" />
-  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_quantum" />
-  <java-symbol type="color" name="timepicker_default_selector_color_quantum" />
-  <java-symbol type="color" name="timepicker_default_numbers_background_color_quantum" />
-  <java-symbol type="style" name="TextAppearance.Quantum.TimePicker.TimeLabel" />
+  <java-symbol type="color" name="timepicker_default_text_color_material" />
+  <java-symbol type="color" name="timepicker_default_disabled_color_material" />
+  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_material" />
+  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_material" />
+  <java-symbol type="color" name="timepicker_default_selector_color_material" />
+  <java-symbol type="color" name="timepicker_default_numbers_background_color_material" />
+  <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
 
 </resources>

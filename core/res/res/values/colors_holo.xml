@@ -75,7 +75,7 @@
     <!-- A really bright Holo shade of gray -->
     <color name="holo_gray_bright">#33CCCCCC</color>
 
-    <!-- Forward compatibility for Quantum-style theme colors -->
+    <!-- Forward compatibility for Material-style theme colors -->
     <eat-comment />
 
     <color name="holo_primary_dark">#ff000000</color>

@@ -4556,8 +4556,8 @@
         <attr name="drawable" />
     </declare-styleable>
 
-    <!-- Drawable used to render the Quantum progress indicator. -->
-    <declare-styleable name="QuantumProgressDrawable">
+    <!-- Drawable used to render the Material progress indicator. -->
+    <declare-styleable name="MaterialProgressDrawable">
         <attr name="visible" />
         <attr name="thickness" />
         <attr name="innerRadius" />

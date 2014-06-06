@@ -3,7 +3,7 @@
 
     <application>
         <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"
-                android:theme="@android:style/Theme.Quantum">
+                android:theme="@android:style/Theme.Material">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -24,7 +24,7 @@
                 android:process=":session">
         </service>
         <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target"
-                  android:theme="@android:style/Theme.Quantum.Light.Voice">
+                  android:theme="@android:style/Theme.Material.Light.Voice">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

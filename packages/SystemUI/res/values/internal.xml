@@ -17,6 +17,6 @@
 <resources>
     <dimen name="status_bar_height">@*android:dimen/status_bar_height</dimen>
     <dimen name="navigation_bar_height">@*android:dimen/navigation_bar_height</dimen>
-    <drawable name="notification_quantum_bg">@*android:drawable/notification_quantum_bg</drawable>
+    <drawable name="notification_material_bg">@*android:drawable/notification_material_bg</drawable>
 </resources>
 

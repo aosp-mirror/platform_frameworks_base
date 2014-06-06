@@ -317,13 +317,13 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         final Resources res = getResources();
 
         mAmPmUnselectedColor = a.getColor(R.styleable.TimePicker_amPmUnselectedBackgroundColor,
-                res.getColor(R.color.timepicker_default_ampm_unselected_background_color_quantum));
+                res.getColor(R.color.timepicker_default_ampm_unselected_background_color_material));
 
         mAmPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
-                res.getColor(R.color.timepicker_default_ampm_selected_background_color_quantum));
+                res.getColor(R.color.timepicker_default_ampm_selected_background_color_material));
 
         mAmPmTextColor = a.getColor(R.styleable.TimePicker_amPmTextColor,
-                res.getColor(R.color.timepicker_default_text_color_quantum));
+                res.getColor(R.color.timepicker_default_text_color_material));
 
         mTypeface = Typeface.create("sans-serif", Typeface.NORMAL);
 
@@ -338,7 +338,7 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         }
 
         final int numbersTextColor = a.getColor(R.styleable.TimePicker_numbersTextColor,
-                res.getColor(R.color.timepicker_default_text_color_quantum));
+                res.getColor(R.color.timepicker_default_text_color_material));
 
         mPaint[HOURS] = new Paint();
         mPaint[HOURS].setAntiAlias(true);
@@ -358,39 +358,39 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mPaintSelector[HOURS][SELECTOR_CIRCLE].setAntiAlias(true);
         mColorSelector[HOURS][SELECTOR_CIRCLE] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintSelector[HOURS][SELECTOR_DOT] = new Paint();
         mPaintSelector[HOURS][SELECTOR_DOT].setAntiAlias(true);
         mColorSelector[HOURS][SELECTOR_DOT] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintSelector[HOURS][SELECTOR_LINE] = new Paint();
         mPaintSelector[HOURS][SELECTOR_LINE].setAntiAlias(true);
         mPaintSelector[HOURS][SELECTOR_LINE].setStrokeWidth(2);
         mColorSelector[HOURS][SELECTOR_LINE] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintSelector[MINUTES][SELECTOR_CIRCLE] = new Paint();
         mPaintSelector[MINUTES][SELECTOR_CIRCLE].setAntiAlias(true);
         mColorSelector[MINUTES][SELECTOR_CIRCLE] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintSelector[MINUTES][SELECTOR_DOT] = new Paint();
         mPaintSelector[MINUTES][SELECTOR_DOT].setAntiAlias(true);
         mColorSelector[MINUTES][SELECTOR_DOT] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintSelector[MINUTES][SELECTOR_LINE] = new Paint();
         mPaintSelector[MINUTES][SELECTOR_LINE].setAntiAlias(true);
         mPaintSelector[MINUTES][SELECTOR_LINE].setStrokeWidth(2);
         mColorSelector[MINUTES][SELECTOR_LINE] = a.getColor(
                 R.styleable.TimePicker_numbersSelectorColor,
-                R.color.timepicker_default_selector_color_quantum);
+                R.color.timepicker_default_selector_color_material);
 
         mPaintAmPmText.setColor(mAmPmTextColor);
         mPaintAmPmText.setTypeface(mTypeface);
@@ -403,11 +403,11 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mPaintAmPmCircle[PM].setAntiAlias(true);
 
         mPaintBackground.setColor(a.getColor(R.styleable.TimePicker_numbersBackgroundColor,
-                res.getColor(R.color.timepicker_default_numbers_background_color_quantum)));
+                res.getColor(R.color.timepicker_default_numbers_background_color_material)));
         mPaintBackground.setAntiAlias(true);
 
         mPaintDisabled.setColor(a.getColor(R.styleable.TimePicker_disabledColor,
-                res.getColor(R.color.timepicker_default_disabled_color_quantum)));
+                res.getColor(R.color.timepicker_default_disabled_color_material)));
         mPaintDisabled.setAntiAlias(true);
 
         if (DEBUG) {

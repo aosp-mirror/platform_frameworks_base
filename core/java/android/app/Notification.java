@@ -2499,7 +2499,7 @@ public class Notification implements Parcelable
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
-         *         doesn't create quantum notifications by itself) app.
+         *         doesn't create material notifications by itself) app.
          */
         private boolean isLegacy() {
             return mColorUtil != null;
@@ -2719,31 +2719,31 @@ public class Notification implements Parcelable
 
 
         private int getBaseLayoutResource() {
-            return R.layout.notification_template_quantum_base;
+            return R.layout.notification_template_material_base;
         }
 
         private int getBigBaseLayoutResource() {
-            return R.layout.notification_template_quantum_big_base;
+            return R.layout.notification_template_material_big_base;
         }
 
         private int getBigPictureLayoutResource() {
-            return R.layout.notification_template_quantum_big_picture;
+            return R.layout.notification_template_material_big_picture;
         }
 
         private int getBigTextLayoutResource() {
-            return R.layout.notification_template_quantum_big_text;
+            return R.layout.notification_template_material_big_text;
         }
 
         private int getInboxLayoutResource() {
-            return R.layout.notification_template_quantum_inbox;
+            return R.layout.notification_template_material_inbox;
         }
 
         private int getActionLayoutResource() {
-            return R.layout.notification_quantum_action;
+            return R.layout.notification_material_action;
         }
 
         private int getActionTombstoneLayoutResource() {
-            return R.layout.notification_quantum_action_tombstone;
+            return R.layout.notification_material_action_tombstone;
         }
     }
 
@@ -3238,7 +3238,7 @@ public class Notification implements Parcelable
         private RemoteViews generateMediaActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new RemoteViews(mBuilder.mContext.getPackageName(),
-                    R.layout.notification_quantum_media_action);
+                    R.layout.notification_material_media_action);
             button.setImageViewResource(R.id.action0, action.icon);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
@@ -3249,7 +3249,7 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaContentView() {
             RemoteViews view = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_quantum_media, true /* 1U */);
+                    R.layout.notification_template_material_media, true /* 1U */);
 
             final int numActions = mBuilder.mActions.size();
             final int N = mActionsToShowInCompact == null
@@ -3274,7 +3274,7 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaBigContentView() {
             RemoteViews big = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_quantum_big_media, false);
+                    R.layout.notification_template_material_big_media, false);
 
             final int N = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
             if (N > 0) {

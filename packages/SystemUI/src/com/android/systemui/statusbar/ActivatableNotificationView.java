@@ -90,8 +90,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private boolean mDimmed;
 
-    private int mBgResId = com.android.internal.R.drawable.notification_quantum_bg;
-    private int mDimmedBgResId = com.android.internal.R.drawable.notification_quantum_bg_dim;
+    private int mBgResId = com.android.internal.R.drawable.notification_material_bg;
+    private int mDimmedBgResId = com.android.internal.R.drawable.notification_material_bg_dim;
 
     private int mBgTint = 0;
     private int mDimmedBgTint = 0;
@@ -143,7 +143,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setClipToPadding(false);
         mAppearAnimationFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
         mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_quantum_rounded_rect_radius);
+                com.android.internal.R.dimen.notification_material_rounded_rect_radius);
     }
 
     @Override
