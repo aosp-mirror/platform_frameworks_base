@@ -149,6 +149,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_BIND_METHOD = 3010;
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_CURSOR_ANCHOR_MONITOR_MODE = 3030;
+    static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -172,7 +173,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerService mWindowManagerService;
 
-    final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1);
+    final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
@@ -378,6 +379,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * True if the screen is on.  The value is true initially.
      */
     boolean mScreenOn = true;
+
+    int mCurUserActionNotificationSequenceNumber = 0;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
     int mImeWindowVis;
@@ -1129,7 +1132,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             showCurrentInputLocked(getAppShowFlags(), null);
         }
         return new InputBindResult(session.session,
-                session.channel != null ? session.channel.dup() : null, mCurId, mCurSeq);
+                (session.channel != null ? session.channel.dup() : null),
+                mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
     }
 
     InputBindResult startInputLocked(IInputMethodClient client,
@@ -1205,7 +1209,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Return to client, and we will get back with it when
                     // we have had a session made for it.
                     requestClientSessionLocked(cs);
-                    return new InputBindResult(null, null, mCurId, mCurSeq);
+                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                            mCurUserActionNotificationSequenceNumber);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
                     // In this case we have connected to the service, but
@@ -1215,7 +1220,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // we can report back.  If it has been too long, we want
                     // to fall through so we can try a disconnect/reconnect
                     // to see if we can get back in touch with the service.
-                    return new InputBindResult(null, null, mCurId, mCurSeq);
+                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                            mCurUserActionNotificationSequenceNumber);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             mCurMethodId, SystemClock.uptimeMillis()-mLastBindTime, 0);
@@ -1234,7 +1240,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
             // party code.
-            return new InputBindResult(null, null, mCurMethodId, mCurSeq);
+            return new InputBindResult(null, null, mCurMethodId, mCurSeq,
+                    mCurUserActionNotificationSequenceNumber);
         }
 
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
@@ -1263,7 +1270,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         WindowManager.LayoutParams.TYPE_INPUT_METHOD);
             } catch (RemoteException e) {
             }
-            return new InputBindResult(null, null, mCurId, mCurSeq);
+            return new InputBindResult(null, null, mCurId, mCurSeq,
+                    mCurUserActionNotificationSequenceNumber);
         } else {
             mCurIntent = null;
             Slog.w(TAG, "Failure connecting to input method service: "
@@ -2310,11 +2318,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void notifyUserAction() {
+    public void notifyUserAction(int sequenceNumber) {
         if (DEBUG) {
-            Slog.d(TAG, "Got the notification of a user action");
+            Slog.d(TAG, "Got the notification of a user action. sequenceNumber:" + sequenceNumber);
         }
         synchronized (mMethodMap) {
+            if (mCurUserActionNotificationSequenceNumber != sequenceNumber) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring the user action notification due to the sequence number "
+                            + "mismatch. expected:" + mCurUserActionNotificationSequenceNumber
+                            + " actual: " + sequenceNumber);
+                }
+                return;
+            }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi != null) {
                 mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
@@ -2588,6 +2604,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + " uid " + ((ClientState)msg.obj).uid);
                 }
                 return true;
+            case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
+                final int sequenceNumber = msg.arg1;
+                final IInputMethodClient client = (IInputMethodClient)msg.obj;
+                try {
+                    client.setUserActionNotificationSequenceNumber(sequenceNumber);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending "
+                            + "setUserActionNotificationSequenceNumber("
+                            + sequenceNumber + ") notification to pid "
+                            + ((ClientState)msg.obj).pid + " uid "
+                            + ((ClientState)msg.obj).uid);
+                }
+                return true;
+            }
 
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
@@ -2998,6 +3028,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             boolean setSubtypeOnly) {
         // Update the history of InputMethod and Subtype
         mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
+
+        mCurUserActionNotificationSequenceNumber =
+                Math.max(mCurUserActionNotificationSequenceNumber + 1, 1);
+        if (DEBUG) {
+            Slog.d(TAG, "Bump mCurUserActionNotificationSequenceNumber:"
+                    + mCurUserActionNotificationSequenceNumber);
+        }
+
+        if (mCurClient != null && mCurClient.client != null) {
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                    MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
+                    mCurUserActionNotificationSequenceNumber, mCurClient.client));
+        }
 
         // Set Subtype here
         if (imi == null || subtypeId < 0) {
@@ -3490,6 +3533,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
+            p.println("  mCurUserActionNotificationSequenceNumber="
+                    + mCurUserActionNotificationSequenceNumber);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mScreenOn);
         }
 

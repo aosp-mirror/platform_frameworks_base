@@ -214,7 +214,7 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
-    public void notifyUserAction() throws RemoteException {
+    public void notifyUserAction(int sequenceNumber) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
