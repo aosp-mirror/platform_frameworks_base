@@ -128,29 +128,97 @@ public class BatteryManager {
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS;
 
+    /*
+     * Battery property identifiers.  These must match the values in
+     * frameworks/native/include/batteryservice/BatteryService.h
+     */
+    /** Battery capacity in microampere-hours, as an integer. */
+    public static final int BATTERY_PROPERTY_CHARGE_COUNTER = 1;
+
+    /**
+     * Instantaneous battery current in microamperes, as an integer.  Positive
+     * values indicate net current entering the battery from a charge source,
+     * negative values indicate net current discharging from the battery.
+     */
+    public static final int BATTERY_PROPERTY_CURRENT_NOW = 2;
+
+    /**
+     * Average battery current in microamperes, as an integer.  Positive
+     * values indicate net current entering the battery from a charge source,
+     * negative values indicate net current discharging from the battery.
+     * The time period over which the average is computed may depend on the
+     * fuel gauge hardware and its configuration.
+     */
+    public static final int BATTERY_PROPERTY_CURRENT_AVERAGE = 3;
+
+    /**
+     * Remaining battery capacity as an integer percentage of total capacity
+     * (with no fractional part).
+     */
+    public static final int BATTERY_PROPERTY_CAPACITY = 4;
+
+    /**
+     * Battery remaining energy in nanowatt-hours, as a long integer.
+     */
+    public static final int BATTERY_PROPERTY_ENERGY_COUNTER = 5;
+
     private IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
 
     /**
-     * Return the requested battery property.
+     * Query a battery property from the batteryproperties service.
      *
-     * @param id identifier from {@link BatteryProperty} of the requested property
-     * @return a {@link BatteryProperty} object that returns the property value, or null on error
+     * Returns the requested value, or Long.MIN_VALUE if property not
+     * supported on this system or on other error.
      */
-    public BatteryProperty getProperty(int id) throws RemoteException {
+    private long queryProperty(int id) {
+        long ret;
+
         if (mBatteryPropertiesRegistrar == null) {
             IBinder b = ServiceManager.getService("batteryproperties");
             mBatteryPropertiesRegistrar =
                 IBatteryPropertiesRegistrar.Stub.asInterface(b);
 
             if (mBatteryPropertiesRegistrar == null)
-                return null;
+                return Long.MIN_VALUE;
         }
 
-        BatteryProperty prop = new BatteryProperty();
-        if ((mBatteryPropertiesRegistrar.getProperty(id, prop) == 0) &&
-            (prop.getLong() != Long.MIN_VALUE))
-            return prop;
-        else
-            return null;
+        try {
+            BatteryProperty prop = new BatteryProperty();
+
+            if (mBatteryPropertiesRegistrar.getProperty(id, prop) == 0)
+                ret = prop.getLong();
+            else
+                ret = Long.MIN_VALUE;
+        } catch (RemoteException e) {
+            ret = Long.MIN_VALUE;
+        }
+
+        return ret;
+    }
+
+    /**
+     * Return the value of a battery property of integer type.  If the
+     * platform does not provide the property queried, this value will
+     * be Integer.MIN_VALUE.
+     *
+     * @param id identifier of the requested property
+     *
+     * @return the property value, or Integer.MIN_VALUE if not supported.
+     */
+    public int getIntProperty(int id) {
+        return (int)queryProperty(id);
+    }
+
+    /**
+     * Return the value of a battery property of long type If the
+     * platform does not provide the property queried, this value will
+     * be Long.MIN_VALUE.
+     *
+     * @param id identifier of the requested property
+     *
+     * @return the property value, or Long.MIN_VALUE if not supported.
+     */
+    public long getLongProperty(int id) {
+        return queryProperty(id);
     }
 }

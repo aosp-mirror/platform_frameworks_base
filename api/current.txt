@@ -20523,7 +20523,8 @@ package android.os {
 
   public class BatteryManager {
     ctor public BatteryManager();
-    method public android.os.BatteryProperty getProperty(int) throws android.os.RemoteException;
+    method public int getIntProperty(int);
+    method public long getLongProperty(int);
     field public static final int BATTERY_HEALTH_COLD = 7; // 0x7
     field public static final int BATTERY_HEALTH_DEAD = 4; // 0x4
     field public static final int BATTERY_HEALTH_GOOD = 2; // 0x2
@@ -20534,6 +20535,11 @@ package android.os {
     field public static final int BATTERY_PLUGGED_AC = 1; // 0x1
     field public static final int BATTERY_PLUGGED_USB = 2; // 0x2
     field public static final int BATTERY_PLUGGED_WIRELESS = 4; // 0x4
+    field public static final int BATTERY_PROPERTY_CAPACITY = 4; // 0x4
+    field public static final int BATTERY_PROPERTY_CHARGE_COUNTER = 1; // 0x1
+    field public static final int BATTERY_PROPERTY_CURRENT_AVERAGE = 3; // 0x3
+    field public static final int BATTERY_PROPERTY_CURRENT_NOW = 2; // 0x2
+    field public static final int BATTERY_PROPERTY_ENERGY_COUNTER = 5; // 0x5
     field public static final int BATTERY_STATUS_CHARGING = 2; // 0x2
     field public static final int BATTERY_STATUS_DISCHARGING = 3; // 0x3
     field public static final int BATTERY_STATUS_FULL = 5; // 0x5
@@ -20549,20 +20555,6 @@ package android.os {
     field public static final java.lang.String EXTRA_TECHNOLOGY = "technology";
     field public static final java.lang.String EXTRA_TEMPERATURE = "temperature";
     field public static final java.lang.String EXTRA_VOLTAGE = "voltage";
-  }
-
-  public class BatteryProperty implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getInt();
-    method public long getLong();
-    method public void readFromParcel(android.os.Parcel);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPACITY = 4; // 0x4
-    field public static final int CHARGE_COUNTER = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int CURRENT_AVERAGE = 3; // 0x3
-    field public static final int CURRENT_NOW = 2; // 0x2
-    field public static final int ENERGY_COUNTER = 5; // 0x5
   }
 
   public class Binder implements android.os.IBinder {
