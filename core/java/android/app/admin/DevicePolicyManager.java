@@ -83,6 +83,20 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Activity action: Used to indicate that the receiving activity is being started as part of the
+     * managed profile provisioning flow. This intent is typically sent to a mobile device
+     * management application (mdm) after the first part of the provisioning process is complete in
+     * the expectation that this app will (after optionally showing it's own UI) ultimately call
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} to complete the creation of the managed profile.
+     *
+     * <p> The intent may contain the extras {@link #EXTRA_PROVISIONING_TOKEN} and
+     * {@link #EXTRA_PROVISIONING_EMAIL_ADDRESS}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SEND_PROVISIONING_VALUES
+        = "android.app.action.ACTION_SEND_PROVISIONING_VALUES";
+
+    /**
      * Activity action: Starts the provisioning flow which sets up a managed profile.
      * This intent will typically be sent by a mobile device management application(mdm).
      * Managed profile provisioning creates a profile, moves the mdm to the profile,
@@ -123,8 +137,13 @@ public class DevicePolicyManager {
         = "deviceAdminPackageName";
 
     /**
-     * An int extra used to identify the consent of the user to create the managed profile.
-     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
+     * An int extra used to identify that during the current setup process the user has already
+     * consented to setting up a managed profile. This is typically received by
+     * a mobile device management application when it is started with
+     * {@link #ACTION_SEND_PROVISIONING_VALUES} and passed on in an intent
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} which starts the setup of the managed profile. The
+     * token indicates that steps asking for user consent can be skipped as the user has previously
+     * consented.
      */
     public static final String EXTRA_PROVISIONING_TOKEN
         = "android.app.extra.token";
@@ -136,6 +155,17 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
         = "defaultManagedProfileName";
+
+    /**
+     * A String extra holding the email address of the profile that is created during managed
+     * profile provisioning. This is typically received by a mobile management application when it
+     * is started with {@link #ACTION_SEND_PROVISIONING_VALUES} and passed on in an intent
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} which starts the setup of the managed profile. It
+     * is eventually passed on in an intent
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
+     */
+    public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
+        = "android.app.extra.ManagedProfileEmailAddress";
 
     /**
      * Activity action: ask the user to add a new device administrator to the system.
