@@ -188,7 +188,6 @@ public final class PdfRenderer implements AutoCloseable {
     private void doClose() {
         if (mCurrentPage != null) {
             mCurrentPage.close();
-            mCurrentPage = null;
         }
         nativeClose(mNativeDocument);
         try {
@@ -375,6 +374,7 @@ public final class PdfRenderer implements AutoCloseable {
             nativeClosePage(mNativePage);
             mNativePage = 0;
             mCloseGuard.close();
+            mCurrentPage = null;
         }
 
         private void throwIfClosed() {
