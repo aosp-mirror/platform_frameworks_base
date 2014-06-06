@@ -493,6 +493,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char profile_duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
     char profile_interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
     char profile_backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
+    char profile_top_k_threshold[sizeof("-Xprofile-top-k-threshold") + PROPERTY_VALUE_MAX];
+    char profile_top_k_change_threshold[sizeof("-Xprofile-top-k-change-threshold") + PROPERTY_VALUE_MAX];
     char langOption[sizeof("-Duser.language=") + 3];
     char regionOption[sizeof("-Duser.region=") + 3];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:") + sizeof(propBuf)];
@@ -816,31 +818,63 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * Set profiler options
      */
     if (libart) {
-      // Number of seconds during profile runs.
-      strcpy(profile_period, "-Xprofile-period:");
-      property_get("dalvik.vm.profile.period_secs", profile_period+17, "10");
-      opt.optionString = profile_period;
-      mOptions.add(opt);
+        // Number of seconds during profile runs.
+        property_get("dalvik.vm.profiler", propBuf, "0");
+        if (propBuf[0] == '1') {
+            opt.optionString = "-Xenable-profiler";
+            mOptions.add(opt);
+        }
 
-      // Length of each profile run (seconds).
-      strcpy(profile_duration, "-Xprofile-duration:");
-      property_get("dalvik.vm.profile.duration_secs", profile_duration+19, "30");
-      opt.optionString = profile_duration;
-      mOptions.add(opt);
+        property_get("dalvik.vm.profile.start-immediately", propBuf, "0");
+        if (propBuf[0] == '1') {
+            opt.optionString = "-Xprofile-start-immediately";
+            mOptions.add(opt);
+        }
 
+        // Number of seconds during profile runs.
+        strcpy(profile_period, "-Xprofile-period:");
+        if (property_get("dalvik.vm.profile.period-secs", profile_period+17, NULL) > 0) {
+           opt.optionString = profile_period;
+           mOptions.add(opt);
+        }
 
-      // Polling interval during profile run (microseconds).
-      strcpy(profile_interval, "-Xprofile-interval:");
-      property_get("dalvik.vm.profile.interval_us", profile_interval+19, "10000");
-      opt.optionString = profile_interval;
-      mOptions.add(opt);
+        // Length of each profile run (seconds).
+        strcpy(profile_duration, "-Xprofile-duration:");
+        if (property_get("dalvik.vm.profile.duration-secs", profile_duration+19, NULL) > 0) {
+            opt.optionString = profile_duration;
+            mOptions.add(opt);
+        }
 
-      // Coefficient for period backoff.  The the period is multiplied
-      // by this value after each profile run.
-      strcpy(profile_backoff, "-Xprofile-backoff:");
-      property_get("dalvik.vm.profile.backoff_coeff", profile_backoff+18, "2.0");
-      opt.optionString = profile_backoff;
-      mOptions.add(opt);
+        // Polling interval during profile run (microseconds).
+        strcpy(profile_interval, "-Xprofile-interval:");
+        if (property_get("dalvik.vm.profile.interval-us", profile_interval+19, NULL) > 0) {
+            opt.optionString = profile_interval;
+            mOptions.add(opt);
+        }
+
+        // Coefficient for period backoff.  The the period is multiplied
+        // by this value after each profile run.
+        strcpy(profile_backoff, "-Xprofile-backoff:");
+        if (property_get("dalvik.vm.profile.backoff-coeff", profile_backoff+18, NULL) > 0) {
+            opt.optionString = profile_backoff;
+            mOptions.add(opt);
+        }
+
+        // Top K% of samples that are considered relevant when deciding if the app should be recompiled.
+        strcpy(profile_top_k_threshold, "-Xprofile-top-k-threshold:");
+        if (property_get("dalvik.vm.profile.top-k-thr", profile_top_k_threshold+26, NULL) > 0) {
+            opt.optionString = profile_top_k_threshold;
+            mOptions.add(opt);
+        }
+
+        // The threshold after which a change in the structure of the top K% profiled samples becomes significant
+        // and triggers recompilation. A change in profile is considered significant if X% (top-k-change-threshold)
+        // of the top K% (top-k-threshold property) samples has changed.
+        strcpy(profile_top_k_change_threshold, "-Xprofile-top-k-change-threshold:");
+        if (property_get("dalvik.vm.profile.top-k-ch-thr", profile_top_k_change_threshold+33, NULL) > 0) {
+            opt.optionString = profile_top_k_change_threshold;
+            mOptions.add(opt);
+        }
     }
 
     initArgs.version = JNI_VERSION_1_4;
