@@ -47,6 +47,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.util.AsyncChannel;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.StatusBarHeaderView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -143,7 +144,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     ArrayList<TextView> mCombinedLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mMobileLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mWifiLabelViews = new ArrayList<TextView>();
-    ArrayList<TextView> mEmergencyLabelViews = new ArrayList<TextView>();
+    ArrayList<StatusBarHeaderView> mEmergencyViews = new ArrayList<>();
     ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
             new ArrayList<NetworkSignalChangedCallback>();
@@ -261,8 +262,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mWifiLabelViews.add(v);
     }
 
-    public void addEmergencyLabelView(TextView v) {
-        mEmergencyLabelViews.add(v);
+    public void addEmergencyLabelView(StatusBarHeaderView v) {
+        mEmergencyViews.add(v);
     }
 
     public void addSignalCluster(SignalCluster cluster) {
@@ -1251,15 +1252,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
 
         // e-call label
-        N = mEmergencyLabelViews.size();
+        N = mEmergencyViews.size();
         for (int i=0; i<N; i++) {
-            TextView v = mEmergencyLabelViews.get(i);
-            if (!emergencyOnly) {
-                v.setVisibility(View.GONE);
-            } else {
-                v.setText(mobileLabel); // comes from the telephony stack
-                v.setVisibility(View.VISIBLE);
-            }
+            StatusBarHeaderView v = mEmergencyViews.get(i);
+            v.setShowEmergencyCallsOnly(emergencyOnly);
         }
     }
 

@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -57,6 +58,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mSignalCluster;
     private View mSettingsButton;
     private View mBrightnessContainer;
+    private View mEmergencyCallsOnly;
+    private TextView mChargingInfo;
+
+    private boolean mShowEmergencyCallsOnly;
+    private boolean mShowChargingInfo;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -91,6 +97,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
+        mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
+        mChargingInfo = (TextView) findViewById(R.id.header_charging_info);
         loadDimens();
         updateVisibilities();
         addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -195,13 +203,32 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (mSignalCluster != null) {
             mSignalCluster.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
+        mEmergencyCallsOnly.setVisibility(mExpanded && !mOverscrolled && mShowEmergencyCallsOnly
+                ? VISIBLE : GONE);
+        mChargingInfo.setVisibility(mExpanded && !mOverscrolled && mShowChargingInfo
+                && !mShowEmergencyCallsOnly ? VISIBLE : GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsContainer.getLayoutParams();
-        lp.addRule(RelativeLayout.START_OF, mExpanded
-                ? mSettingsButton.getId()
-                : mMultiUserSwitch.getId());
+        boolean systemIconsAboveClock = mExpanded && !mOverscrolled
+                && mShowChargingInfo && !mShowEmergencyCallsOnly;
+        if (systemIconsAboveClock) {
+            lp.addRule(ALIGN_PARENT_START);
+            lp.removeRule(START_OF);
+        } else {
+            lp.addRule(RelativeLayout.START_OF, mExpanded
+                    ? mSettingsButton.getId()
+                    : mMultiUserSwitch.getId());
+            lp.removeRule(ALIGN_PARENT_START);
+        }
+
+        RelativeLayout.LayoutParams clockLp = (LayoutParams) mDateTime.getLayoutParams();
+        if (systemIconsAboveClock) {
+            clockLp.addRule(BELOW, mChargingInfo.getId());
+        } else {
+            clockLp.addRule(BELOW, mEmergencyCallsOnly.getId());
+        }
     }
 
     private void updateBrightnessControllerState() {
@@ -307,4 +334,24 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mBrightnessContainer.animate().alpha(showingDetail ? 0 : 1).withLayer().start();
         }
     };
+
+    public void setShowEmergencyCallsOnly(boolean show) {
+        mShowEmergencyCallsOnly = show;
+        if (mExpanded) {
+            updateVisibilities();
+            updateSystemIconsLayoutParams();
+        }
+    }
+
+    public void setShowChargingInfo(boolean showChargingInfo) {
+        mShowChargingInfo = showChargingInfo;
+        if (mExpanded) {
+            updateVisibilities();
+            updateSystemIconsLayoutParams();
+        }
+    }
+
+    public void setChargingInfo(CharSequence chargingInfo) {
+        mChargingInfo.setText(chargingInfo);
+    }
 }

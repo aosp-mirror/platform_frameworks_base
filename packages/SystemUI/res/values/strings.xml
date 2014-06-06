@@ -531,6 +531,18 @@
     <string name="recents_search_bar_label">search</string>
 
 
+    <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
+    <string name="expanded_header_battery_charged">Charged</string>
+
+    <!-- Expanded Status Bar Header: Charging, no known time [CHAR LIMIT=40] -->
+    <string name="expanded_header_battery_charging">Charging</string>
+
+    <!-- Expanded Status Bar Header: Charging, showing time left until charged [CHAR LIMIT=40] -->
+    <string name="expanded_header_battery_charging_with_time"><xliff:g id="charging_time" example="2 hrs 25 min">%s</xliff:g> until full</string>
+
+    <!-- Expanded Status Bar Header: Not charging [CHAR LIMIT=40] -->
+    <string name="expanded_header_battery_not_charging">Not charging</string>
+
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
     <string name="battery_meter_very_low_overlay_symbol">!</string>
 
