@@ -24264,7 +24264,6 @@ package android.provider {
   }
 
   public static final class MediaStore.Audio.Radio {
-    ctor public MediaStore.Audio.Radio();
     field public static final java.lang.String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/radio";
   }
 
