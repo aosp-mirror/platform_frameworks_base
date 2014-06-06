@@ -333,6 +333,7 @@ public class VolumePanel extends Handler {
                 public void onDismiss(DialogInterface dialog) {
                     mActiveStreamType = -1;
                     mAudioManager.forceVolumeControlStream(mActiveStreamType);
+                    collapse();
                 }
             });
 
@@ -651,12 +652,8 @@ public class VolumePanel extends Handler {
             mExpandDivider.setVisibility(show ? View.VISIBLE : View.GONE);
             mExpandButton.setImageResource(zen ? com.android.systemui.R.drawable.ic_vol_zen_on
                     : com.android.systemui.R.drawable.ic_vol_zen_off);
-            if (show) {
-                if (zen) {
-                    expand();
-                } else {
-                    collapse();
-                }
+            if (show && !zen) {
+                collapse();
             }
         } else {
             mExpandButton.setVisibility(View.GONE);

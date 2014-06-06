@@ -323,10 +323,6 @@ public class ZenModePanel extends LinearLayout {
             button1.setVisibility(View.GONE);
             button2.setVisibility(View.GONE);
         }
-        if (mExitConditionId != null && mExitConditionId.equals(tag.conditionId)) {
-            if (DEBUG) Log.d(mTag, "Auto-selecting row with mExitConditionId=" + mExitConditionId);
-            tag.rb.setChecked(true);
-        }
     }
 
     private void onClickTimeButton(View row, ConditionTag tag, boolean up) {
