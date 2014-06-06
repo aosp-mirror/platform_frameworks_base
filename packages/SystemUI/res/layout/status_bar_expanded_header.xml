@@ -75,7 +75,7 @@
         />
 
     <ImageButton android:id="@+id/settings_button"
-        style="@android:style/Widget.Quantum.Button.Borderless"
+        style="@android:style/Widget.Material.Button.Borderless"
         android:layout_toStartOf="@id/multi_user_switch"
         android:layout_width="56dp"
         android:layout_height="@dimen/status_bar_header_height"

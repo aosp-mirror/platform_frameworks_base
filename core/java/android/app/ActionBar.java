@@ -68,7 +68,7 @@ import java.util.Map;
  * select items accessible directly from the action bar as "action items". You can also
  * modify various characteristics of the action bar or remove it completely.</p>
  *
- * <p>When using the Quantum themes (default in API 21 or newer) the navigation button
+ * <p>When using the Material themes (default in API 21 or newer) the navigation button
  * (formerly "Home") takes over the space previously occupied by the application icon.
  * Apps wishing to express a stronger branding should use their brand colors heavily
  * in the action bar and other application chrome or use a {@link #setLogo(int) logo}
