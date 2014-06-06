@@ -28,6 +28,7 @@ import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.IVibratorService;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -64,6 +65,7 @@ public class VibratorService extends IVibratorService.Stub
     private final PowerManager.WakeLock mWakeLock;
     private final IAppOpsService mAppOpsService;
     private final IBatteryStats mBatteryStatsService;
+    private PowerManagerInternal mPowerManagerInternal;
     private InputManager mIm;
 
     volatile VibrateThread mThread;
@@ -169,13 +171,18 @@ public class VibratorService extends IVibratorService.Stub
         mIm = (InputManager)mContext.getSystemService(Context.INPUT_SERVICE);
         mSettingObserver = new SettingsObserver(mH);
 
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mPowerManagerInternal.registerLowPowerModeObserver(
+                new PowerManagerInternal.LowPowerModeListener() {
+            @Override
+            public void onLowPowerModeChanged(boolean enabled) {
+                updateInputDeviceVibrators();
+            }
+        });
+
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES),
                 true, mSettingObserver, UserHandle.USER_ALL);
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE), false,
-                mSettingObserver, UserHandle.USER_ALL);
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -448,8 +455,7 @@ public class VibratorService extends IVibratorService.Stub
                 } catch (SettingNotFoundException snfe) {
                 }
 
-                mLowPowerMode = Settings.Global.getInt(mContext.getContentResolver(),
-                         Settings.Global.LOW_POWER_MODE, 0) != 0;
+                mLowPowerMode = mPowerManagerInternal.getLowPowerModeEnabled();
 
                 if (mVibrateInputDevicesSetting) {
                     if (!mInputDeviceListenerRegistered) {

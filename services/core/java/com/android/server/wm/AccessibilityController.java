@@ -541,7 +541,7 @@ final class AccessibilityController {
                 if (isMagnifyingLocked()) {
                     setMagnifiedRegionBorderShownLocked(false, false);
                     final long delay = (long) (mLongAnimationDuration
-                            * mWindowManagerService.mWindowAnimationScale);
+                            * mWindowManagerService.getWindowAnimationScaleLocked());
                     Message message = mHandler.obtainMessage(
                             MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED);
                     mHandler.sendMessageDelayed(message, delay);

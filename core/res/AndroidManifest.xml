@@ -74,6 +74,8 @@
     <protected-broadcast android:name="android.intent.action.USER_FOREGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_SWITCHED" />
 
+    <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
+
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />

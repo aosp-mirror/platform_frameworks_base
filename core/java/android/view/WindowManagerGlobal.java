@@ -147,9 +147,14 @@ public final class WindowManagerGlobal {
                     InputMethodManager imm = InputMethodManager.getInstance();
                     IWindowManager windowManager = getWindowManagerService();
                     sWindowSession = windowManager.openSession(
+                            new IWindowSessionCallback.Stub() {
+                                @Override
+                                public void onAnimatorScaleChanged(float scale) {
+                                    ValueAnimator.setDurationScale(scale);
+                                }
+                            },
                             imm.getClient(), imm.getInputContext());
-                    float animatorScale = windowManager.getAnimationScale(2);
-                    ValueAnimator.setDurationScale(animatorScale);
+                    ValueAnimator.setDurationScale(windowManager.getCurrentAnimatorScale());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to open window session", e);
                 }

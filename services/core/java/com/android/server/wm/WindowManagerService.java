@@ -24,6 +24,7 @@ import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.view.IWindowId;
 
+import android.view.IWindowSessionCallback;
 import android.view.WindowContentFrameStats;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
@@ -339,7 +340,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * All currently active sessions with clients.
      */
-    final HashSet<Session> mSessions = new HashSet<Session>();
+    final ArraySet<Session> mSessions = new ArraySet<Session>();
 
     /**
      * Mapping from an IWindow IBinder to the server's Window object.
@@ -562,9 +563,10 @@ public class WindowManagerService extends IWindowManager.Stub
     PowerManager mPowerManager;
     PowerManagerInternal mPowerManagerInternal;
 
-    float mWindowAnimationScale = 1.0f;
-    float mTransitionAnimationScale = 1.0f;
-    float mAnimatorDurationScale = 1.0f;
+    float mWindowAnimationScaleSetting = 1.0f;
+    float mTransitionAnimationScaleSetting = 1.0f;
+    float mAnimatorDurationScaleSetting = 1.0f;
+    boolean mAnimationsDisabled = false;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -780,6 +782,19 @@ public class WindowManagerService extends IWindowManager.Stub
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mPowerManagerInternal.setPolicy(mPolicy); // TODO: register as local service instead
+        mPowerManagerInternal.registerLowPowerModeObserver(
+                new PowerManagerInternal.LowPowerModeListener() {
+            @Override
+            public void onLowPowerModeChanged(boolean enabled) {
+                synchronized (mWindowMap) {
+                    if (mAnimationsDisabled != enabled) {
+                        mAnimationsDisabled = enabled;
+                        dispatchNewAnimatorScaleLocked(null);
+                    }
+                }
+            }
+        });
+        mAnimationsDisabled = mPowerManagerInternal.getLowPowerModeEnabled();
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
@@ -799,12 +814,12 @@ public class WindowManagerService extends IWindowManager.Stub
         );
 
         // Get persisted window scale setting
-        mWindowAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
-        mTransitionAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+        mWindowAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
+        mTransitionAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScaleSetting);
         setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale));
+                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
 
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
@@ -5188,9 +5203,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         scale = fixScale(scale);
         switch (which) {
-            case 0: mWindowAnimationScale = scale; break;
-            case 1: mTransitionAnimationScale = scale; break;
-            case 2: mAnimatorDurationScale = scale; break;
+            case 0: mWindowAnimationScaleSetting = scale; break;
+            case 1: mTransitionAnimationScaleSetting = scale; break;
+            case 2: mAnimatorDurationScaleSetting = scale; break;
         }
 
         // Persist setting
@@ -5206,13 +5221,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (scales != null) {
             if (scales.length >= 1) {
-                mWindowAnimationScale = fixScale(scales[0]);
+                mWindowAnimationScaleSetting = fixScale(scales[0]);
             }
             if (scales.length >= 2) {
-                mTransitionAnimationScale = fixScale(scales[1]);
+                mTransitionAnimationScaleSetting = fixScale(scales[1]);
             }
             if (scales.length >= 3) {
-                setAnimatorDurationScale(fixScale(scales[2]));
+                mAnimatorDurationScaleSetting = fixScale(scales[2]);
+                dispatchNewAnimatorScaleLocked(null);
             }
         }
 
@@ -5221,24 +5237,43 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void setAnimatorDurationScale(float scale) {
-        mAnimatorDurationScale = scale;
+        mAnimatorDurationScaleSetting = scale;
         ValueAnimator.setDurationScale(scale);
+    }
+
+    public float getWindowAnimationScaleLocked() {
+        return mAnimationsDisabled ? 0 : mWindowAnimationScaleSetting;
+    }
+
+    public float getTransitionAnimationScaleLocked() {
+        return mAnimationsDisabled ? 0 : mTransitionAnimationScaleSetting;
     }
 
     @Override
     public float getAnimationScale(int which) {
         switch (which) {
-            case 0: return mWindowAnimationScale;
-            case 1: return mTransitionAnimationScale;
-            case 2: return mAnimatorDurationScale;
+            case 0: return mWindowAnimationScaleSetting;
+            case 1: return mTransitionAnimationScaleSetting;
+            case 2: return mAnimatorDurationScaleSetting;
         }
         return 0;
     }
 
     @Override
     public float[] getAnimationScales() {
-        return new float[] { mWindowAnimationScale, mTransitionAnimationScale,
-                mAnimatorDurationScale };
+        return new float[] { mWindowAnimationScaleSetting, mTransitionAnimationScaleSetting,
+                mAnimatorDurationScaleSetting };
+    }
+
+    @Override
+    public float getCurrentAnimatorScale() {
+        synchronized(mWindowMap) {
+            return mAnimationsDisabled ? 0 : mAnimatorDurationScaleSetting;
+        }
+    }
+
+    void dispatchNewAnimatorScaleLocked(Session session) {
+        mH.obtainMessage(H.NEW_ANIMATOR_SCALE, session).sendToTarget();
     }
 
     @Override
@@ -6096,7 +6131,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     && screenRotationAnimation.hasScreenshot()) {
                 if (screenRotationAnimation.setRotationInTransaction(
                         rotation, mFxSession,
-                        MAX_ANIMATION_DURATION, mTransitionAnimationScale,
+                        MAX_ANIMATION_DURATION, getTransitionAnimationScaleLocked(),
                         displayInfo.logicalWidth, displayInfo.logicalHeight)) {
                     scheduleAnimationLocked();
                 }
@@ -7181,6 +7216,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SHOW_DISPLAY_MASK = 33;
         public static final int ALL_WINDOWS_DRAWN = 34;
 
+        public static final int NEW_ANIMATOR_SCALE = 35;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7431,11 +7468,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case PERSIST_ANIMATION_SCALE: {
                     Settings.Global.putFloat(mContext.getContentResolver(),
-                            Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
+                            Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
                     Settings.Global.putFloat(mContext.getContentResolver(),
-                            Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+                            Settings.Global.TRANSITION_ANIMATION_SCALE,
+                            mTransitionAnimationScaleSetting);
                     Settings.Global.putFloat(mContext.getContentResolver(),
-                            Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale);
+                            Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting);
                     break;
                 }
 
@@ -7638,6 +7676,33 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
+                case NEW_ANIMATOR_SCALE: {
+                    float scale = getCurrentAnimatorScale();
+                    ValueAnimator.setDurationScale(scale);
+                    Session session = (Session)msg.obj;
+                    if (session != null) {
+                        try {
+                            session.mCallback.onAnimatorScaleChanged(scale);
+                        } catch (RemoteException e) {
+                        }
+                    } else {
+                        ArrayList<IWindowSessionCallback> callbacks
+                                = new ArrayList<IWindowSessionCallback>();
+                        synchronized (mWindowMap) {
+                            for (int i=0; i<mSessions.size(); i++) {
+                                callbacks.add(mSessions.valueAt(i).mCallback);
+                            }
+
+                        }
+                        for (int i=0; i<callbacks.size(); i++) {
+                            try {
+                                callbacks.get(i).onAnimatorScaleChanged(scale);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                }
+                break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");
@@ -7650,11 +7715,11 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     @Override
-    public IWindowSession openSession(IInputMethodClient client,
+    public IWindowSession openSession(IWindowSessionCallback callback, IInputMethodClient client,
             IInputContext inputContext) {
         if (client == null) throw new IllegalArgumentException("null client");
         if (inputContext == null) throw new IllegalArgumentException("null inputContext");
-        Session session = new Session(this, client, inputContext);
+        Session session = new Session(this, callback, client, inputContext);
         return session;
     }
 
@@ -8764,7 +8829,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             displayInfo.appWidth, displayInfo.appHeight, transit);
                     appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
-                    anim.scaleCurrentDuration(mTransitionAnimationScale);
+                    anim.scaleCurrentDuration(getTransitionAnimationScaleLocked());
                     Point p = new Point();
                     mAppTransition.getStartingPoint(p);
                     appAnimator.thumbnailX = p.x;
@@ -10072,7 +10137,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mExitAnimId = mEnterAnimId = 0;
             }
             if (screenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
-                    mTransitionAnimationScale, displayInfo.logicalWidth,
+                    getTransitionAnimationScaleLocked(), displayInfo.logicalWidth,
                         displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
                 scheduleAnimationLocked();
             } else {
@@ -10407,13 +10472,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
-        if (mSessions.size() > 0) {
-            Iterator<Session> it = mSessions.iterator();
-            while (it.hasNext()) {
-                Session s = it.next();
-                pw.print("  Session "); pw.print(s); pw.println(':');
-                s.dump(pw, "    ");
-            }
+        for (int i=0; i<mSessions.size(); i++) {
+            Session s = mSessions.valueAt(i);
+            pw.print("  Session "); pw.print(s); pw.println(':');
+            s.dump(pw, "    ");
         }
     }
 
@@ -10617,9 +10679,10 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
-            pw.print("  mWindowAnimationScale="); pw.print(mWindowAnimationScale);
-                    pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);
-                    pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
+            pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
+                    pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
+                    pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);
+                    pw.print(" animator="); pw.println(mAnimatorDurationScaleSetting);
             pw.print("  mTraversalScheduled="); pw.println(mTraversalScheduled);
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);

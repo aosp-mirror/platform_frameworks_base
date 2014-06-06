@@ -232,6 +232,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowId.aidl \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
+	core/java/android/view/IWindowSessionCallback.aidl \
 	core/java/android/speech/IRecognitionListener.aidl \
 	core/java/android/speech/IRecognitionService.aidl \
 	core/java/android/speech/tts/ITextToSpeechCallback.aidl \

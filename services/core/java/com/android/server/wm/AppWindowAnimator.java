@@ -87,7 +87,7 @@ public class AppWindowAnimator {
             anim.initialize(width, height, width, height);
         }
         anim.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
-        anim.scaleCurrentDuration(mService.mTransitionAnimationScale);
+        anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
         int zorder = anim.getZAdjustment();
         int adj = 0;
         if (zorder == Animation.ZORDER_TOP) {
@@ -227,7 +227,8 @@ public class AppWindowAnimator {
                 if (!animating) {
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(
                         TAG, "Starting animation in " + mAppToken +
-                        " @ " + currentTime + " scale=" + mService.mTransitionAnimationScale
+                        " @ " + currentTime + " scale="
+                        + mService.getTransitionAnimationScaleLocked()
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
                     animation.setStartTime(currentTime);
                     animating = true;
