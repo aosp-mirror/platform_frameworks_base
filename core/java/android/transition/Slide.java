@@ -24,6 +24,7 @@ import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.Property;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -41,35 +42,9 @@ import android.view.animation.DecelerateInterpolator;
 public class Slide extends Visibility {
     private static final String TAG = "Slide";
 
-    /**
-     * Move Views in or out of the left edge of the scene.
-     * @see #setSlideEdge(int)
-     */
-    public static final int LEFT = 0;
-
-    /**
-     * Move Views in or out of the top edge of the scene.
-     * @see #setSlideEdge(int)
-     */
-    public static final int TOP = 1;
-
-    /**
-     * Move Views in or out of the right edge of the scene.
-     * @see #setSlideEdge(int)
-     */
-    public static final int RIGHT = 2;
-
-    /**
-     * Move Views in or out of the bottom edge of the scene. This is the
-     * default slide direction.
-     * @see #setSlideEdge(int)
-     */
-    public static final int BOTTOM = 3;
-
     private static final TimeInterpolator sDecelerate = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerate = new AccelerateInterpolator();
 
-    private int[] mTempLoc = new int[2];
     private CalculateSlide mSlideCalculator = sCalculateBottom;
 
     private interface CalculateSlide {
@@ -136,11 +111,11 @@ public class Slide extends Visibility {
     };
 
     /**
-     * Constructor using the default {@link android.transition.Slide#BOTTOM}
+     * Constructor using the default {@link Gravity#BOTTOM}
      * slide edge direction.
      */
     public Slide() {
-        setSlideEdge(BOTTOM);
+        setSlideEdge(Gravity.BOTTOM);
     }
 
     /**
@@ -152,20 +127,22 @@ public class Slide extends Visibility {
 
     /**
      * Change the edge that Views appear and disappear from.
-     * @param slideEdge The edge of the scene to use for Views appearing and disappearing.
+     * @param slideEdge The edge of the scene to use for Views appearing and disappearing. One of
+     *                  {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
+     *                  {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
      */
     public void setSlideEdge(int slideEdge) {
         switch (slideEdge) {
-            case LEFT:
+            case Gravity.LEFT:
                 mSlideCalculator = sCalculateLeft;
                 break;
-            case TOP:
+            case Gravity.TOP:
                 mSlideCalculator = sCalculateTop;
                 break;
-            case RIGHT:
+            case Gravity.RIGHT:
                 mSlideCalculator = sCalculateRight;
                 break;
-            case BOTTOM:
+            case Gravity.BOTTOM:
                 mSlideCalculator = sCalculateBottom;
                 break;
             default:
