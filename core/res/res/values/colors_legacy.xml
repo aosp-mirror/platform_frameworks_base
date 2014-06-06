@@ -24,7 +24,7 @@
     <color name="legacy_selected_highlight">#fff17a0a</color>
     <color name="legacy_long_pressed_highlight">#ffffffff</color>
 
-    <!-- Forward compatibility for Quantum-style theme colors -->
+    <!-- Forward compatibility for Material-style theme colors -->
     <eat-comment />
 
     <color name="legacy_primary_dark">#ff000000</color>

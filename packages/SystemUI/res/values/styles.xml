@@ -214,7 +214,7 @@
         <item name="android:colorControlActivated">#ffffffff</item>
     </style>
 
-    <style name="BorderlessButton" parent="@android:style/Widget.Quantum.Button.Borderless" />
+    <style name="BorderlessButton" parent="@android:style/Widget.Material.Button.Borderless" />
 
     <style name="BorderlessButton.Tiny">
         <item name="android:minHeight">12dip</item>

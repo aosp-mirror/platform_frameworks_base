@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.WeakHashMap;
 
 /**
- * Helper class to process legacy (Holo) notifications to make them look like quantum notifications.
+ * Helper class to process legacy (Holo) notifications to make them look like material notifications.
  *
  * @hide
  */
