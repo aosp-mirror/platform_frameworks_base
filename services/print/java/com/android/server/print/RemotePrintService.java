@@ -121,15 +121,7 @@ final class RemotePrintService implements DeathRecipient {
         throwIfDestroyed();
 
         // Stop tracking printers.
-        if (mTrackedPrinterList != null) {
-            final int trackedPrinterCount = mTrackedPrinterList.size();
-            for (int i = 0; i < trackedPrinterCount; i++) {
-                PrinterId printerId = mTrackedPrinterList.get(i);
-                if (printerId.getServiceName().equals(mComponentName)) {
-                    handleStopPrinterStateTracking(printerId);
-                }
-            }
-        }
+        stopTrackingAllPrinters();
 
         // Stop printer discovery.
         if (mDiscoveryPriorityList != null) {
@@ -270,7 +262,7 @@ final class RemotePrintService implements DeathRecipient {
             try {
                 mPrintService.createPrinterDiscoverySession();
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error creating printer dicovery session.", re);
+                Slog.e(LOG_TAG, "Error creating printer discovery session.", re);
             }
         }
     }
@@ -365,10 +357,14 @@ final class RemotePrintService implements DeathRecipient {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterDiscovery()");
             }
+
+            // Stop tracking printers.
+            stopTrackingAllPrinters();
+
             try {
                 mPrintService.stopPrinterDiscovery();
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error stopping printer dicovery.", re);
+                Slog.e(LOG_TAG, "Error stopping printer discovery.", re);
             }
         }
     }
@@ -462,6 +458,19 @@ final class RemotePrintService implements DeathRecipient {
                 mPrintService.stopPrinterStateTracking(printerId);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error requesting stop printer tracking.", re);
+            }
+        }
+    }
+
+    private void stopTrackingAllPrinters() {
+        if (mTrackedPrinterList == null) {
+            return;
+        }
+        final int trackedPrinterCount = mTrackedPrinterList.size();
+        for (int i = trackedPrinterCount - 1; i >= 0; i--) {
+            PrinterId printerId = mTrackedPrinterList.get(i);
+            if (printerId.getServiceName().equals(mComponentName)) {
+                handleStopPrinterStateTracking(printerId);
             }
         }
     }

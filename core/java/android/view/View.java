@@ -7648,7 +7648,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
-     * notifucation this method is a NOP until the notification has been sent.
+     * notification this method is a NOP until the notification has been sent.
      *
      * @hide
      */

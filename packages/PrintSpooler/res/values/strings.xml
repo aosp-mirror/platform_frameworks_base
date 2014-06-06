@@ -19,14 +19,8 @@
     <!-- Title of the PrintSpooler application. [CHAR LIMIT=50] -->
     <string name="app_label">Print Spooler</string>
 
-    <!-- Label of the print dialog's button for advanced printer settings. [CHAR LIMIT=25] -->
-    <string name="advanced_settings_button">Printer settings</string>
-
-    <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
-    <string name="print_button">Print</string>
-
-    <!-- Label of the print dialog's save button. [CHAR LIMIT=16] -->
-    <string name="save_button">Save</string>
+    <!-- Label of the print dialog's button for more print options. [CHAR LIMIT=25] -->
+    <string name="more_options_button">More options</string>
 
     <!-- Label of the destination widget. [CHAR LIMIT=20] -->
     <string name="label_destination">Destination</string>
@@ -34,8 +28,14 @@
     <!-- Label of the copies count widget. [CHAR LIMIT=20] -->
     <string name="label_copies">Copies</string>
 
+    <!-- Label of the copies count for the print options summary. [CHAR LIMIT=20] -->
+    <string name="label_copies_summary">Copies:</string>
+
     <!-- Label of the paper size widget. [CHAR LIMIT=20] -->
-    <string name="label_paper_size">Paper Size</string>
+    <string name="label_paper_size">Paper size</string>
+
+    <!-- Label of the paper size for the print options summary. [CHAR LIMIT=20] -->
+    <string name="label_paper_size_summary">Paper size:</string>
 
     <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
     <string name="label_color">Color</string>
@@ -118,19 +118,19 @@
 
     <!-- Notifications -->
 
-    <!-- Template for the notificaiton label for a printing print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a printing print job. [CHAR LIMIT=25] -->
     <string name="printing_notification_title_template">Printing <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a cancelling print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a cancelling print job. [CHAR LIMIT=25] -->
     <string name="cancelling_notification_title_template">Cancelling <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a failed print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a failed print job. [CHAR LIMIT=25] -->
     <string name="failed_notification_title_template">Printer error <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a blocked print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a blocked print job. [CHAR LIMIT=25] -->
     <string name="blocked_notification_title_template">Printer blocked <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
     <plurals name="composite_notification_title_template">
         <item quantity="one"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print job</item>
         <item quantity="other"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print jobs</item>
@@ -139,7 +139,7 @@
     <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
     <string name="cancel">Cancel</string>
 
-    <!-- Label for the notification button for restrating a filed print job. [CHAR LIMIT=25] -->
+    <!-- Label for the notification button for restarting a filed print job. [CHAR LIMIT=25] -->
     <string name="restart">Restart</string>
 
     <!-- Message that there is no connection to a printer. [CHAR LIMIT=40] -->
@@ -150,9 +150,6 @@
 
     <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
     <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
-
-    <!-- Default message of an alert dialog for app error while generating a print job. [CHAR LIMIT=50] -->
-    <string name="print_error_default_message">Couldn\'t generate print job</string>
 
     <!-- Arrays -->
 
@@ -199,5 +196,24 @@
     <string name="permdesc_startPrintServiceConfigActivity" translatable="false">Allows the
         holder to start the configuration activities of a print service. Should never be needed
         for normal apps.</string>
+
+    <!-- Error messages -->
+
+    <!-- Message for an error when trying to print to a PDF file. [CHAR LIMIT=50] -->
+    <string name="print_write_error_message">Couldn\'t write to file</string>
+
+    <!-- Default message for an error while generating a print job. [CHAR LIMIT=50] -->
+    <string name="print_error_default_message">Couldn\'t generate print job</string>
+
+    <!-- Label for the retry button in the error message. [CHAR LIMIT=50] -->
+    <string name="print_error_retry">Retry</string>
+
+    <!-- Message for the currently selected printer becoming unavailable. [CHAR LIMIT=50] -->
+    <string name="print_error_printer_unavailable">Printer unavailable</string>
+
+    <!-- Long running operations -->
+
+    <!-- Message for the cancel print operation UI while waiting for cancel to be performed. [CHAR LIMIT=50] -->
+    <string name="print_operation_canceling">Cancelling\u2026</string>
 
 </resources>

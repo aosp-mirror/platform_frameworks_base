@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
      limitations under the License.
 -->
 
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/list"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:paddingStart="@dimen/printer_list_view_padding_start"
-    android:paddingEnd="@dimen/printer_list_view_padding_end"
-    android:scrollbarStyle="outsideOverlay"
-    android:cacheColorHint="@android:color/transparent"
-    android:scrollbarAlwaysDrawVerticalTrack="true" >
-</ListView>
+<resources>
+
+    <integer name="print_option_column_count">6</integer>
+
+</resources>

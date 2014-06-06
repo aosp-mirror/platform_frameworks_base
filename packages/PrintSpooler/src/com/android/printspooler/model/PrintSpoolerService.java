@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.printspooler;
+package com.android.printspooler.model;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,7 +39,6 @@ import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
-import android.print.PrinterInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -48,6 +48,7 @@ import android.util.Xml;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.printspooler.R;
 
 import libcore.io.IoUtils;
 
@@ -89,7 +90,7 @@ public final class PrintSpoolerService extends Service {
 
     private final Object mLock = new Object();
 
-    private final List<PrintJobInfo> mPrintJobs = new ArrayList<PrintJobInfo>();
+    private final List<PrintJobInfo> mPrintJobs = new ArrayList<>();
 
     private static PrintSpoolerService sInstance;
 
@@ -274,7 +275,7 @@ public final class PrintSpoolerService extends Service {
                             && isScheduledState(printJob.getState()));
                 if (sameComponent && sameAppId && sameState) {
                     if (foundPrintJobs == null) {
-                        foundPrintJobs = new ArrayList<PrintJobInfo>();
+                        foundPrintJobs = new ArrayList<>();
                     }
                     foundPrintJobs.add(printJob);
                 }
@@ -400,7 +401,7 @@ public final class PrintSpoolerService extends Service {
                 FileOutputStream out = null;
                 try {
                     if (printJob != null) {
-                        File file = generateFileForPrintJob(printJobId);
+                        File file = generateFileForPrintJob(PrintSpoolerService.this, printJobId);
                         in = new FileInputStream(file);
                         out = new FileOutputStream(fd.getFileDescriptor());
                     }
@@ -427,8 +428,8 @@ public final class PrintSpoolerService extends Service {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
     }
 
-    public File generateFileForPrintJob(PrintJobId printJobId) {
-        return new File(getFilesDir(), PRINT_JOB_FILE_PREFIX
+    public static File generateFileForPrintJob(Context context, PrintJobId printJobId) {
+        return new File(context.getFilesDir(), PRINT_JOB_FILE_PREFIX
                 + printJobId.flattenToString() + "." + PRINT_FILE_EXTENSION);
     }
 
@@ -461,7 +462,7 @@ public final class PrintSpoolerService extends Service {
     }
 
     private void removePrintJobFileLocked(PrintJobId printJobId) {
-        File file = generateFileForPrintJob(printJobId);
+        File file = generateFileForPrintJob(PrintSpoolerService.this, printJobId);
         if (file.exists()) {
             file.delete();
             if (DEBUG_PRINT_JOB_LIFECYCLE) {
@@ -557,7 +558,7 @@ public final class PrintSpoolerService extends Service {
     }
 
     private boolean isObsoleteState(int printJobState) {
-        return (isTeminalState(printJobState)
+        return (isTerminalState(printJobState)
                 || printJobState == PrintJobInfo.STATE_QUEUED);
     }
 
@@ -574,7 +575,7 @@ public final class PrintSpoolerService extends Service {
                 || printJobState == PrintJobInfo.STATE_BLOCKED;
     }
 
-    private boolean isTeminalState(int printJobState) {
+    private boolean isTerminalState(int printJobState) {
         return printJobState == PrintJobInfo.STATE_COMPLETED
                 || printJobState == PrintJobInfo.STATE_CANCELED;
     }
@@ -619,61 +620,23 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public void setPrintJobCopiesNoPersistence(PrintJobId printJobId, int copies) {
+    public void updatePrintJobUserConfigurableOptionsNoPersistence(PrintJobInfo printJob) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setCopies(copies);
+            final int printJobCount = mPrintJobs.size();
+            for (int i = 0; i < printJobCount; i++) {
+                PrintJobInfo cachedPrintJob = mPrintJobs.get(i);
+                if (cachedPrintJob.getId().equals(printJob.getId())) {
+                    cachedPrintJob.setPrinterId(printJob.getPrinterId());
+                    cachedPrintJob.setPrinterName(printJob.getPrinterName());
+                    cachedPrintJob.setCopies(printJob.getCopies());
+                    cachedPrintJob.setDocumentInfo(printJob.getDocumentInfo());
+                    cachedPrintJob.setPages(printJob.getPages());
+                    cachedPrintJob.setAttributes(printJob.getAttributes());
+                    cachedPrintJob.setAdvancedOptions(printJob.getAdvancedOptions());
+                    return;
+                }
             }
-        }
-    }
-
-    public void setPrintJobAdvancedOptionsNoPersistence(PrintJobId printJobId,
-            Bundle advancedOptions) {
-        synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setAdvancedOptions(advancedOptions);
-            }
-        }
-    }
-
-    public void setPrintJobPrintDocumentInfoNoPersistence(PrintJobId printJobId,
-            PrintDocumentInfo info) {
-        synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setDocumentInfo(info);
-            }
-        }
-    }
-
-    public void setPrintJobAttributesNoPersistence(PrintJobId printJobId,
-            PrintAttributes attributes) {
-        synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setAttributes(attributes);
-            }
-        }
-    }
-
-    public void setPrintJobPrinterNoPersistence(PrintJobId printJobId, PrinterInfo printer) {
-        synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setPrinterId(printer.getId());
-                printJob.setPrinterName(printer.getName());
-            }
-        }
-    }
-
-    public void setPrintJobPagesNoPersistence(PrintJobId printJobId, PageRange[] pages) {
-        synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
-            if (printJob != null) {
-                printJob.setPages(pages);
-            }
+            throw new IllegalArgumentException("No print job with id:" + printJob.getId());
         }
     }
 
@@ -1250,7 +1213,7 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    final class PrintSpooler extends IPrintSpooler.Stub {
+    public final class PrintSpooler extends IPrintSpooler.Stub {
         @Override
         public void getPrintJobInfos(IPrintSpoolerCallbacks callback,
                 ComponentName componentName, int state, int appId, int sequence)
