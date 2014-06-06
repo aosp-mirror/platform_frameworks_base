@@ -97,6 +97,27 @@ public final class Range<T extends Comparable<? super T>> {
     }
 
     /**
+     * Checks if the {@code value} is within the bounds of this range.
+     *
+     * <p>A value is considered to be within this range if it's {@code >=} then
+     * the lower endpoint <i>and</i> {@code <=} to the upper endpoint (using the {@link Comparable}
+     * interface.</p>
+     *
+     * @param value a non-{@code null} {@code T} reference
+     * @return {@code true} if the value is within this inclusive range, {@code false} otherwise
+     *
+     * @throws NullPointerException if {@code value} was {@code null}
+     */
+    public boolean inRange(T value) {
+        checkNotNull(value, "value must not be null");
+
+        boolean gteLower = value.compareTo(mLower) >= 0;
+        boolean lteUpper  = value.compareTo(mUpper) <= 0;
+
+        return gteLower && lteUpper;
+    }
+
+    /**
      * Compare two ranges for equality.
      *
      * <p>A range is considered equal if and only if both the lower and upper endpoints
@@ -105,16 +126,13 @@ public final class Range<T extends Comparable<? super T>> {
      * @return {@code true} if the ranges are equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
-        }
-        if (this == obj) {
+        } else if (this == obj) {
             return true;
-        }
-        if (obj instanceof Range) {
+        } else if (obj instanceof Range) {
             @SuppressWarnings("rawtypes")
-            final
             Range other = (Range) obj;
             return mLower.equals(other.mLower) && mUpper.equals(other.mUpper);
         }

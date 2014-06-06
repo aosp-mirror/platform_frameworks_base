@@ -30533,12 +30533,26 @@ package android.util {
     method public static android.util.Range<T> create(T, T);
     method public T getLower();
     method public T getUpper();
+    method public boolean inRange(T);
   }
 
-  public final class Rational {
+  public final class Rational extends java.lang.Number implements java.lang.Comparable {
     ctor public Rational(int, int);
+    method public int compareTo(android.util.Rational);
+    method public double doubleValue();
+    method public float floatValue();
     method public int getDenominator();
     method public int getNumerator();
+    method public int intValue();
+    method public boolean isFinite();
+    method public boolean isInfinite();
+    method public boolean isNaN();
+    method public boolean isZero();
+    method public long longValue();
+    field public static final android.util.Rational NEGATIVE_INFINITY;
+    field public static final android.util.Rational NaN;
+    field public static final android.util.Rational POSITIVE_INFINITY;
+    field public static final android.util.Rational ZERO;
   }
 
   public final class Size {
