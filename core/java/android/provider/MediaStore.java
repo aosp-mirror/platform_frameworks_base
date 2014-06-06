@@ -1886,6 +1886,9 @@ public final class MediaStore {
              * The MIME type for entries in this table.
              */
             public static final String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/radio";
+
+            // Not instantiable.
+            private Radio() { }
         }
     }
 
