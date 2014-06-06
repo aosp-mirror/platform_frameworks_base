@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,29 @@
 
 package android.annotation;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PACKAGE;
+import static java.lang.annotation.ElementType.TYPE;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Indicates an API is exposed for use by bundled applications.
+ * Indicates an API is exposed for use by bundled system applications.
  * <p>
  * These APIs are not guaranteed to remain consistent release-to-release,
- * and are not for use by apps linking against the SDK.
+ * and are not for use by apps linking against the Android SDK.
+ * </p><p>
+ * This annotation should only appear on API that is already marked <pre>@hide</pre>.
+ * </p>
+ *
  * @hide
  */
+@Target({TYPE, FIELD, METHOD, CONSTRUCTOR, ANNOTATION_TYPE, PACKAGE})
 @Retention(RetentionPolicy.SOURCE)
-public @interface PrivateApi {
+public @interface SystemApi {
 }
