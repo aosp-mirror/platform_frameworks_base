@@ -613,6 +613,7 @@ public final class Sensor {
     }
 
     /**
+     * @hide
      * @return The permission required to access this sensor. If empty, no permission is required.
      */
     public String getRequiredPermission() {

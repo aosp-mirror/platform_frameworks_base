@@ -11902,7 +11902,6 @@ package android.hardware {
     method public int getMinDelay();
     method public java.lang.String getName();
     method public float getPower();
-    method public java.lang.String getRequiredPermission();
     method public float getResolution();
     method public java.lang.String getStringType();
     method public int getType();
