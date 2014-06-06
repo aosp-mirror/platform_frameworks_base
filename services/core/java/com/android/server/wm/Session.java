@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.view.IWindowId;
+import android.view.IWindowSessionCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -54,6 +55,7 @@ import java.io.PrintWriter;
 final class Session extends IWindowSession.Stub
         implements IBinder.DeathRecipient {
     final WindowManagerService mService;
+    final IWindowSessionCallback mCallback;
     final IInputMethodClient mClient;
     final IInputContext mInputContext;
     final int mUid;
@@ -62,14 +64,17 @@ final class Session extends IWindowSession.Stub
     SurfaceSession mSurfaceSession;
     int mNumWindow = 0;
     boolean mClientDead = false;
+    float mLastReportedAnimatorScale;
 
-    public Session(WindowManagerService service, IInputMethodClient client,
-            IInputContext inputContext) {
+    public Session(WindowManagerService service, IWindowSessionCallback callback,
+            IInputMethodClient client, IInputContext inputContext) {
         mService = service;
+        mCallback = callback;
         mClient = client;
         mInputContext = inputContext;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
+        mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
@@ -464,6 +469,9 @@ final class Session extends IWindowSession.Stub
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
                     WindowManagerService.TAG, "  NEW SURFACE SESSION " + mSurfaceSession);
             mService.mSessions.add(this);
+            if (mLastReportedAnimatorScale != mService.getCurrentAnimatorScale()) {
+                mService.dispatchNewAnimatorScaleLocked(this);
+            }
         }
         mNumWindow++;
     }

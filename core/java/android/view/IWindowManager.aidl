@@ -30,6 +30,7 @@ import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
+import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.MagnificationSpec;
@@ -56,7 +57,7 @@ interface IWindowManager
     boolean stopViewServer();            // Transaction #2
     boolean isViewServerRunning();       // Transaction #3
 
-    IWindowSession openSession(in IInputMethodClient client,
+    IWindowSession openSession(in IWindowSessionCallback callback, in IInputMethodClient client,
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
 
@@ -129,6 +130,8 @@ interface IWindowManager
     float[] getAnimationScales();
     void setAnimationScale(int which, float scale);
     void setAnimationScales(in float[] scales);
+
+    float getCurrentAnimatorScale();
 
     // For testing
     void setInTouchMode(boolean showFocus);

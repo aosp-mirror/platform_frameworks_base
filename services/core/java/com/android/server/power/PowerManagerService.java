@@ -406,6 +406,12 @@ public final class PowerManagerService extends com.android.server.SystemService
     // If true, the device is in low power mode.
     private boolean mLowPowerModeEnabled;
 
+    // Current state of the low power mode setting.
+    private boolean mLowPowerModeSetting;
+
+    // True if the battery level is currently considered low.
+    private boolean mBatteryLevelLow;
+
     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
@@ -502,6 +508,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             mContext.registerReceiver(new BatteryReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
@@ -638,7 +645,18 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
-        if (lowPowerModeEnabled != mLowPowerModeEnabled) {
+        if (lowPowerModeEnabled != mLowPowerModeSetting) {
+            mLowPowerModeSetting = lowPowerModeEnabled;
+            updateLowPowerModeLocked();
+        }
+
+        mDirty |= DIRTY_SETTINGS;
+    }
+
+    void updateLowPowerModeLocked() {
+        final boolean lowPowerModeEnabled = mLowPowerModeSetting || mBatteryLevelLow;
+        if (mLowPowerModeEnabled != lowPowerModeEnabled) {
+            mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
             mLowPowerModeEnabled = lowPowerModeEnabled;
             BackgroundThread.getHandler().post(new Runnable() {
@@ -652,11 +670,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                     for (int i=0; i<listeners.size(); i++) {
                         listeners.get(i).onLowPowerModeChanged(lowPowerModeEnabled);
                     }
+                    Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcast(intent);
                 }
             });
         }
-
-        mDirty |= DIRTY_SETTINGS;
     }
 
     private void handleSettingsChangedLocked() {
@@ -1137,9 +1156,11 @@ public final class PowerManagerService extends com.android.server.SystemService
         if ((dirty & DIRTY_BATTERY_STATE) != 0) {
             final boolean wasPowered = mIsPowered;
             final int oldPlugType = mPlugType;
+            final boolean oldLevelLow = mBatteryLevelLow;
             mIsPowered = mBatteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
             mPlugType = mBatteryService.getPlugType();
             mBatteryLevel = mBatteryService.getBatteryLevel();
+            mBatteryLevelLow = mBatteryService.getBatteryLevelLow();
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
@@ -1174,6 +1195,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                 if (dockedOnWirelessCharger) {
                     mNotifier.onWirelessChargingStarted();
                 }
+            }
+
+            if (oldLevelLow != mBatteryLevelLow) {
+                updateLowPowerModeLocked();
             }
         }
     }
@@ -1893,6 +1918,12 @@ public final class PowerManagerService extends com.android.server.SystemService
     private boolean isInteractiveInternal() {
         synchronized (mLock) {
             return mInteractive;
+        }
+    }
+
+    private boolean isLowPowerModeInternal() {
+        synchronized (mLock) {
+            return mLowPowerModeEnabled;
         }
     }
 
@@ -2759,6 +2790,16 @@ public final class PowerManagerService extends com.android.server.SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 return isInteractiveInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isPowerSaveMode() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isLowPowerModeInternal();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

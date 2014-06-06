@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SdkConstant;
 import android.content.Context;
 import android.util.Log;
 
@@ -683,6 +684,30 @@ public final class PowerManager {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Returns true if the device is currently in power save mode.  When in this mode,
+     * applications should reduce their functionality in order to conserve battery as
+     * much as possible.  You can monitor for changes to this state with
+     * {@link #ACTION_POWER_SAVE_MODE_CHANGED}.
+     *
+     * @return Returns true if currently in low power mode, else false.
+     */
+    public boolean isPowerSaveMode() {
+        try {
+            return mService.isPowerSaveMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_MODE_CHANGED
+            = "android.os.action.POWER_SAVE_MODE_CHANGED";
 
     /**
      * A wake lock is a mechanism to indicate that your application needs

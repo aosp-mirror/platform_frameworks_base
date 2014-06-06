@@ -207,7 +207,7 @@ class WindowStateAnimator {
         mLocalAnimating = false;
         mAnimation = anim;
         mAnimation.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
-        mAnimation.scaleCurrentDuration(mService.mWindowAnimationScale);
+        mAnimation.scaleCurrentDuration(mService.getWindowAnimationScaleLocked());
         // Start out animation gone if window is gone, or visible if window is visible.
         mTransformation.clear();
         mTransformation.setAlpha(mLastHidden ? 0 : 1);
@@ -283,7 +283,7 @@ class WindowStateAnimator {
                         " @ " + currentTime + ": ww=" + mWin.mFrame.width() +
                         " wh=" + mWin.mFrame.height() +
                         " dw=" + mAnimDw + " dh=" + mAnimDh +
-                        " scale=" + mService.mWindowAnimationScale);
+                        " scale=" + mService.getWindowAnimationScaleLocked());
                     mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                             mAnimDw, mAnimDh);
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
