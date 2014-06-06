@@ -74,7 +74,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private boolean mProfilingEnabled;
 
     ThreadedRenderer(boolean translucent) {
-        AtlasInitializer.sInstance.init();
+        // Temporarily disabled
+        //AtlasInitializer.sInstance.init();
 
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
