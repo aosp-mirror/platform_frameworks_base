@@ -195,6 +195,7 @@ public class BaseInputConnection implements InputConnection {
     public boolean commitText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "commitText " + text);
         replaceText(text, newCursorPosition, false);
+        mIMM.notifyUserAction();
         sendCurrentText();
         return true;
     }
@@ -435,6 +436,7 @@ public class BaseInputConnection implements InputConnection {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "setComposingText " + text);
         replaceText(text, newCursorPosition, true);
+        mIMM.notifyUserAction();
         return true;
     }
 
@@ -518,6 +520,7 @@ public class BaseInputConnection implements InputConnection {
                 viewRootImpl.dispatchKeyFromIme(event);
             }
         }
+        mIMM.notifyUserAction();
         return false;
     }
     
@@ -601,9 +604,6 @@ public class BaseInputConnection implements InputConnection {
         }
         
         beginBatchEdit();
-        if (!composing && !TextUtils.isEmpty(text)) {
-            mIMM.notifyUserAction();
-        }
 
         // delete composing text set previously.
         int a = getComposingSpanStart(content);
