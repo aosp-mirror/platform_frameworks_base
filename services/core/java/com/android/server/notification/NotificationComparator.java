@@ -41,6 +41,6 @@ public class NotificationComparator
             return -1 * Float.compare(leftPeple, rightPeople);
         }
         // then break ties by time, most recent first
-        return -1 * Long.compare(lhs.sbn.getPostTime(), rhs.sbn.getPostTime());
+        return -1 * Long.compare(lhs.getRankingTimeMs(), rhs.getRankingTimeMs());
     }
 }
