@@ -16,9 +16,14 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
+
 /**
  * Defines constants and utility methods related to HDMI-CEC protocol.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiCec {
 
     /** TV device type. */
