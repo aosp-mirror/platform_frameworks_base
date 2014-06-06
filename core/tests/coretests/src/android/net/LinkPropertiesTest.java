@@ -88,8 +88,8 @@ public class LinkPropertiesTest extends TestCase {
             source.addLinkAddress(LINKADDRV4);
             source.addLinkAddress(LINKADDRV6);
             // set 2 dnses
-            source.addDns(DNS1);
-            source.addDns(DNS2);
+            source.addDnsServer(DNS1);
+            source.addDnsServer(DNS2);
             // set 2 gateways
             source.addRoute(new RouteInfo(GATEWAY1));
             source.addRoute(new RouteInfo(GATEWAY2));
@@ -101,8 +101,8 @@ public class LinkPropertiesTest extends TestCase {
             target.setInterfaceName(NAME);
             target.addLinkAddress(LINKADDRV4);
             target.addLinkAddress(LINKADDRV6);
-            target.addDns(DNS1);
-            target.addDns(DNS2);
+            target.addDnsServer(DNS1);
+            target.addDnsServer(DNS2);
             target.addRoute(new RouteInfo(GATEWAY1));
             target.addRoute(new RouteInfo(GATEWAY2));
             target.setMtu(MTU);
@@ -114,8 +114,8 @@ public class LinkPropertiesTest extends TestCase {
             target.setInterfaceName("qmi1");
             target.addLinkAddress(LINKADDRV4);
             target.addLinkAddress(LINKADDRV6);
-            target.addDns(DNS1);
-            target.addDns(DNS2);
+            target.addDnsServer(DNS1);
+            target.addDnsServer(DNS2);
             target.addRoute(new RouteInfo(GATEWAY1));
             target.addRoute(new RouteInfo(GATEWAY2));
             target.setMtu(MTU);
@@ -127,8 +127,8 @@ public class LinkPropertiesTest extends TestCase {
             target.addLinkAddress(new LinkAddress(
                     NetworkUtils.numericToInetAddress("75.208.6.2"), 32));
             target.addLinkAddress(LINKADDRV6);
-            target.addDns(DNS1);
-            target.addDns(DNS2);
+            target.addDnsServer(DNS1);
+            target.addDnsServer(DNS2);
             target.addRoute(new RouteInfo(GATEWAY1));
             target.addRoute(new RouteInfo(GATEWAY2));
             target.setMtu(MTU);
@@ -139,8 +139,8 @@ public class LinkPropertiesTest extends TestCase {
             target.addLinkAddress(LINKADDRV4);
             target.addLinkAddress(LINKADDRV6);
             // change dnses
-            target.addDns(NetworkUtils.numericToInetAddress("75.208.7.2"));
-            target.addDns(DNS2);
+            target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
+            target.addDnsServer(DNS2);
             target.addRoute(new RouteInfo(GATEWAY1));
             target.addRoute(new RouteInfo(GATEWAY2));
             target.setMtu(MTU);
@@ -150,8 +150,8 @@ public class LinkPropertiesTest extends TestCase {
             target.setInterfaceName(NAME);
             target.addLinkAddress(LINKADDRV4);
             target.addLinkAddress(LINKADDRV6);
-            target.addDns(DNS1);
-            target.addDns(DNS2);
+            target.addDnsServer(DNS1);
+            target.addDnsServer(DNS2);
             // change gateway
             target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress("75.208.8.2")));
             target.addRoute(new RouteInfo(GATEWAY2));
@@ -162,8 +162,8 @@ public class LinkPropertiesTest extends TestCase {
             target.setInterfaceName(NAME);
             target.addLinkAddress(LINKADDRV4);
             target.addLinkAddress(LINKADDRV6);
-            target.addDns(DNS1);
-            target.addDns(DNS2);
+            target.addDnsServer(DNS1);
+            target.addDnsServer(DNS2);
             target.addRoute(new RouteInfo(GATEWAY1));
             target.addRoute(new RouteInfo(GATEWAY2));
             // change mtu
@@ -185,8 +185,8 @@ public class LinkPropertiesTest extends TestCase {
             source.addLinkAddress(LINKADDRV4);
             source.addLinkAddress(LINKADDRV6);
             // set 2 dnses
-            source.addDns(DNS1);
-            source.addDns(DNS2);
+            source.addDnsServer(DNS1);
+            source.addDnsServer(DNS2);
             // set 2 gateways
             source.addRoute(new RouteInfo(GATEWAY1));
             source.addRoute(new RouteInfo(GATEWAY2));
@@ -197,8 +197,8 @@ public class LinkPropertiesTest extends TestCase {
             target.setInterfaceName(NAME);
             target.addLinkAddress(LINKADDRV6);
             target.addLinkAddress(LINKADDRV4);
-            target.addDns(DNS2);
-            target.addDns(DNS1);
+            target.addDnsServer(DNS2);
+            target.addDnsServer(DNS1);
             target.addRoute(new RouteInfo(GATEWAY2));
             target.addRoute(new RouteInfo(GATEWAY1));
             target.setMtu(MTU);

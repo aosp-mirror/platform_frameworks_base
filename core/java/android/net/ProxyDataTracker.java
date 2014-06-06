@@ -107,8 +107,8 @@ public class ProxyDataTracker extends BaseNetworkStateTracker {
         mNetworkCapabilities = new NetworkCapabilities();
         mNetworkInfo.setIsAvailable(true);
         try {
-          mLinkProperties.addDns(InetAddress.getByName(DNS1));
-          mLinkProperties.addDns(InetAddress.getByName(DNS2));
+          mLinkProperties.addDnsServer(InetAddress.getByName(DNS1));
+          mLinkProperties.addDnsServer(InetAddress.getByName(DNS2));
         } catch (UnknownHostException e) {
           Log.e(TAG, "Could not add DNS address", e);
         }

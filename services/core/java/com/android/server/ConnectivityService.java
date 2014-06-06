@@ -2691,7 +2691,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             dnsDiff = curLp.compareDnses(newLp);
         } else if (newLp != null) {
             routeDiff.added = newLp.getAllRoutes();
-            dnsDiff.added = newLp.getDnses();
+            dnsDiff.added = newLp.getDnsServers();
         }
 
         boolean routesChanged = (routeDiff.removed.size() != 0 || routeDiff.added.size() != 0);
@@ -2915,7 +2915,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (nt != null && nt.getNetworkInfo().isConnected() && !nt.isTeardownRequested()) {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
-            Collection<InetAddress> dnses = p.getDnses();
+            Collection<InetAddress> dnses = p.getDnsServers();
             int netId = nt.getNetwork().netId;
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();
@@ -5625,7 +5625,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId) {
         if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
-            Collection<InetAddress> dnses = newLp.getDnses();
+            Collection<InetAddress> dnses = newLp.getDnsServers();
             if (dnses.size() == 0 && mDefaultDns != null) {
                 dnses = new ArrayList();
                 dnses.add(mDefaultDns);
@@ -5790,7 +5790,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         isNewDefault = true;
                         updateActiveDefaultNetwork(newNetwork);
                         if (newNetwork.linkProperties != null) {
-                            setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnses());
+                            setDefaultDnsSystemProperties(
+                                    newNetwork.linkProperties.getDnsServers());
                         } else {
                             setDefaultDnsSystemProperties(new ArrayList<InetAddress>());
                         }
