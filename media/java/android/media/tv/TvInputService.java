@@ -152,7 +152,7 @@ public abstract class TvInputService extends Service {
     public abstract Session onCreateSession();
 
     /**
-     * Base class for derived classes to implement to provide {@link TvInputManager.Session}.
+     * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract class Session implements KeyEvent.Callback {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();

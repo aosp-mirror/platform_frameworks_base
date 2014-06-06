@@ -67,6 +67,7 @@ public final class TvInputManager {
 
     /**
      * Interface used to receive the created session.
+     * @hide
      */
     public abstract static class SessionCallback {
         /**
@@ -467,6 +468,7 @@ public final class TvInputManager {
      * @param callback a callback used to receive the created session.
      * @param handler a {@link Handler} that the session creation will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
+     * @hide
      */
     public void createSession(String inputId, final SessionCallback callback,
             Handler handler) {
@@ -491,7 +493,10 @@ public final class TvInputManager {
         }
     }
 
-    /** The Session provides the per-session functionality of TV inputs. */
+    /**
+     * The Session provides the per-session functionality of TV inputs.
+     * @hide
+     */
     public static final class Session {
         static final int DISPATCH_IN_PROGRESS = -1;
         static final int DISPATCH_NOT_HANDLED = 0;
