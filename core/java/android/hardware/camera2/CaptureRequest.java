@@ -43,14 +43,14 @@ import java.util.Objects;
  * <p>CaptureRequests can be created by using a {@link Builder} instance,
  * obtained by calling {@link CameraDevice#createCaptureRequest}</p>
  *
- * <p>CaptureRequests are given to {@link CameraDevice#capture} or
- * {@link CameraDevice#setRepeatingRequest} to capture images from a camera.</p>
+ * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
+ * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
  *
  * <p>Each request can specify a different subset of target Surfaces for the
  * camera to send the captured data to. All the surfaces used in a request must
  * be part of the surface list given to the last call to
- * {@link CameraDevice#configureOutputs}, when the request is submitted to the
- * camera device.</p>
+ * {@link CameraDevice#createCaptureSession}, when the request is submitted to the
+ * session.</p>
  *
  * <p>For example, a request meant for repeating preview might only include the
  * Surface for the preview SurfaceView or SurfaceTexture, while a
@@ -357,11 +357,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * request fields to one of the templates defined in {@link CameraDevice}.
      *
      * @see CameraDevice#createCaptureRequest
-     * @see #TEMPLATE_PREVIEW
-     * @see #TEMPLATE_RECORD
-     * @see #TEMPLATE_STILL_CAPTURE
-     * @see #TEMPLATE_VIDEO_SNAPSHOT
-     * @see #TEMPLATE_MANUAL
+     * @see CameraDevice#TEMPLATE_PREVIEW
+     * @see CameraDevice#TEMPLATE_RECORD
+     * @see CameraDevice#TEMPLATE_STILL_CAPTURE
+     * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
+     * @see CameraDevice#TEMPLATE_MANUAL
      */
     public final static class Builder {
 
@@ -381,7 +381,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * <p>Add a surface to the list of targets for this request</p>
          *
          * <p>The Surface added must be one of the surfaces included in the most
-         * recent call to {@link CameraDevice#configureOutputs}, when the
+         * recent call to {@link CameraDevice#createCaptureSession}, when the
          * request is given to the camera device.</p>
          *
          * <p>Adding a target more than once has no effect.</p>
@@ -473,7 +473,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>The mode control selects how the image data is converted from the
      * sensor's native color into linear sRGB color.</p>
-     * <p>When auto-white balance is enabled with {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, this
+     * <p>When auto-white balance (AWB) is enabled with {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, this
      * control is overridden by the AWB routine. When AWB is disabled, the
      * application controls how the color mapping is performed.</p>
      * <p>We define the expected processing pipeline below. For consistency
@@ -524,7 +524,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>A color transform matrix to use to transform
-     * from sensor RGB color space to output linear sRGB color space</p>
+     * from sensor RGB color space to output linear sRGB color space.</p>
      * <p>This matrix is either set by the camera device when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
@@ -600,13 +600,17 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.aeAntibandingMode", int.class);
 
     /**
-     * <p>Adjustment to AE target image
-     * brightness</p>
-     * <p>For example, if EV step is 0.333, '6' will mean an
-     * exposure compensation of +2 EV; -3 will mean an exposure
-     * compensation of -1 EV. Note that this control will only be effective
-     * if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} <code>!=</code> OFF. This control will take effect even when
-     * {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} <code>== true</code>.</p>
+     * <p>Adjustment to auto-exposure (AE) target image
+     * brightness.</p>
+     * <p>The adjustment is measured as a count of steps, with the
+     * step size defined by {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep} and the
+     * allowed range by {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_RANGE android.control.aeCompensationRange}.</p>
+     * <p>For example, if the exposure value (EV) step is 0.333, '6'
+     * will mean an exposure compensation of +2 EV; -3 will mean an
+     * exposure compensation of -1 EV. One EV represents a doubling
+     * of image brightness. Note that this control will only be
+     * effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} <code>!=</code> OFF. This control
+     * will take effect even when {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} <code>== true</code>.</p>
      * <p>In the event of exposure compensation value being changed, camera device
      * may take several frames to reach the newly requested exposure target.
      * During that time, {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} field will be in the SEARCHING
@@ -614,6 +618,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * change from SEARCHING to either CONVERGED, LOCKED (if AE lock is enabled), or
      * FLASH_REQUIRED (if the scene is too dark for still capture).</p>
      *
+     * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_RANGE
+     * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureResult#CONTROL_AE_STATE
@@ -622,7 +628,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.aeExposureCompensation", int.class);
 
     /**
-     * <p>Whether AE is currently locked to its latest
+     * <p>Whether auto-exposure (AE) is currently locked to its latest
      * calculated values.</p>
      * <p>Note that even when AE is locked, the flash may be
      * fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
@@ -711,9 +717,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>Range over which fps can be adjusted to
-     * maintain exposure</p>
-     * <p>Only constrains AE algorithm, not manual control
-     * of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</p>
+     * maintain exposure.</p>
+     * <p>Only constrains auto-exposure (AE) algorithm, not
+     * manual control of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</p>
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
@@ -727,9 +733,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * included at all in the request settings. When included and
      * set to START, the camera device will trigger the autoexposure
      * precapture metering sequence.</p>
-     * <p>The effect of AE precapture trigger depends on the current
-     * AE mode and state; see {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture
-     * state transition details.</p>
+     * <p>The effect of auto-exposure (AE) precapture trigger depends
+     * on the current AE mode and state; see
+     * {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture state transition
+     * details.</p>
      *
      * @see CaptureResult#CONTROL_AE_STATE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
@@ -739,8 +746,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.aePrecaptureTrigger", int.class);
 
     /**
-     * <p>Whether AF is currently enabled, and what
-     * mode it is set to</p>
+     * <p>Whether auto-focus (AF) is currently enabled, and what
+     * mode it is set to.</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO and the lens is not fixed focus
      * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>).</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
@@ -804,7 +811,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.afTrigger", int.class);
 
     /**
-     * <p>Whether AWB is currently locked to its
+     * <p>Whether auto-white balance (AWB) is currently locked to its
      * latest calculated values.</p>
      * <p>Note that AWB lock is only meaningful for AUTO
      * mode; in other modes, AWB is already fixed to a specific
@@ -814,7 +821,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Boolean>("android.control.awbLock", boolean.class);
 
     /**
-     * <p>Whether AWB is currently setting the color
+     * <p>Whether auto-white balance (AWB) is currently setting the color
      * transform fields, and what its illumination target
      * is.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is AUTO.</p>
@@ -988,7 +995,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>Whether video stabilization is
-     * active</p>
+     * active.</p>
      * <p>If enabled, video stabilization can modify the
      * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream
      * stabilized</p>
@@ -1030,7 +1037,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>When set to OFF, the camera device will not fire flash for this capture.</p>
      * <p>When set to SINGLE, the camera device will fire flash regardless of the camera
      * device's auto-exposure routine's result. When used in still capture case, this
-     * control should be used along with AE precapture metering sequence
+     * control should be used along with auto-exposure (AE) precapture metering sequence
      * ({@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}), otherwise, the image may be incorrectly exposed.</p>
      * <p>When set to TORCH, the flash will be on continuously. This mode can be used
      * for use cases such as preview, auto-focus assist, still capture, or video recording.</p>
@@ -1102,7 +1109,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>Compression quality of the final JPEG
-     * image</p>
+     * image.</p>
      * <p>85-95 is typical usage range</p>
      */
     public static final Key<Byte> JPEG_QUALITY =
@@ -1116,7 +1123,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
 
     /**
-     * <p>Resolution of embedded JPEG thumbnail</p>
+     * <p>Resolution of embedded JPEG thumbnail.</p>
      * <p>When set to (0, 0) value, the JPEG EXIF will not contain thumbnail,
      * but the captured JPEG will still be a valid image.</p>
      * <p>When a jpeg image capture is issued, the thumbnail size selected should have
@@ -1204,7 +1211,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>Distance to plane of sharpest focus,
-     * measured from frontmost surface of the lens</p>
+     * measured from frontmost surface of the lens.</p>
      * <p>0 means infinity focus. Used value will be clamped
      * to [0, {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}].</p>
      * <p>Like {@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, this setting won't be applied
@@ -1235,7 +1242,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.lens.opticalStabilizationMode", int.class);
 
     /**
-     * <p>Mode of operation for the noise reduction
+     * <p>Mode of operation for the noise reduction.
      * algorithm</p>
      * <p>Noise filtering control. OFF means no noise reduction
      * will be applied by the camera device.</p>
@@ -1265,40 +1272,39 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.request.id", int.class);
 
     /**
-     * <p>(x, y, width, height).</p>
-     * <p>A rectangle with the top-level corner of (x,y) and size
-     * (width, height). The region of the sensor that is used for
-     * output. Each stream must use this rectangle to produce its
-     * output, cropping to a smaller region if necessary to
-     * maintain the stream's aspect ratio.</p>
-     * <p>HAL2.x uses only (x, y, width)</p>
-     * <p>The crop region is applied after the RAW to other color space (e.g. YUV)
-     * conversion. Since raw streams (e.g. RAW16) don't have the conversion stage,
-     * it is not croppable. The crop region will be ignored by raw streams.</p>
+     * <p>The region of the sensor to read out for this capture.</p>
+     * <p>The crop region coordinate system is based off
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, with <code>(0, 0)</code> being the
+     * top-left corner of the sensor active array.</p>
+     * <p>Output streams use this rectangle to produce their output,
+     * cropping to a smaller region if necessary to maintain the
+     * stream's aspect ratio, then scaling the sensor input to
+     * match the output's configured resolution.</p>
+     * <p>The crop region is applied after the RAW to other color
+     * space (e.g. YUV) conversion. Since raw streams
+     * (e.g. RAW16) don't have the conversion stage, they are not
+     * croppable. The crop region will be ignored by raw streams.</p>
      * <p>For non-raw streams, any additional per-stream cropping will
      * be done to maximize the final pixel area of the stream.</p>
      * <p>For example, if the crop region is set to a 4:3 aspect
-     * ratio, then 4:3 streams should use the exact crop
-     * region. 16:9 streams should further crop vertically
+     * ratio, then 4:3 streams will use the exact crop
+     * region. 16:9 streams will further crop vertically
      * (letterbox).</p>
      * <p>Conversely, if the crop region is set to a 16:9, then 4:3
-     * outputs should crop horizontally (pillarbox), and 16:9
-     * streams should match exactly. These additional crops must
+     * outputs will crop horizontally (pillarbox), and 16:9
+     * streams will match exactly. These additional crops will
      * be centered within the crop region.</p>
-     * <p>The output streams must maintain square pixels at all
-     * times, no matter what the relative aspect ratios of the
-     * crop region and the stream are.  Negative values for
-     * corner are allowed for raw output if full pixel array is
-     * larger than active pixel array. Width and height may be
-     * rounded to nearest larger supportable width, especially
-     * for raw output, where only a few fixed scales may be
-     * possible. The width and height of the crop region cannot
-     * be set to be smaller than floor( activeArraySize.width /
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom} ) and floor(
-     * activeArraySize.height /
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom}), respectively.</p>
+     * <p>The width and height of the crop region cannot
+     * be set to be smaller than
+     * <code>floor( activeArraySize.width / {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom} )</code> and
+     * <code>floor( activeArraySize.height / {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom} )</code>, respectively.</p>
+     * <p>The camera device may adjust the crop region to account
+     * for rounding and other hardware requirements; the final
+     * crop region used will be included in the output capture
+     * result.</p>
      *
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<android.graphics.Rect> SCALER_CROP_REGION =
             new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
@@ -1391,12 +1397,20 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Long>("android.sensor.frameDuration", long.class);
 
     /**
-     * <p>Gain applied to image data. Must be
-     * implemented through analog gain only if set to values
-     * below 'maximum analog sensitivity'.</p>
-     * <p>If the sensor can't apply this exact gain, it should lessen the
-     * gain to the nearest possible value (rather than gain more).</p>
-     * <p>ISO 12232:2006 REI method</p>
+     * <p>The amount of gain applied to sensor data
+     * before processing.</p>
+     * <p>The sensitivity is the standard ISO sensitivity value,
+     * as defined in ISO 12232:2006.</p>
+     * <p>The sensitivity must be within {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}, and
+     * if if it less than {@link CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY android.sensor.maxAnalogSensitivity}, the camera device
+     * is guaranteed to use only analog amplification for applying the gain.</p>
+     * <p>If the camera device cannot apply the exact sensitivity
+     * requested, it will reduce the gain to the nearest supported
+     * value. The final sensitivity used will be available in the
+     * output capture result.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY
      */
     public static final Key<Integer> SENSOR_SENSITIVITY =
             new Key<Integer>("android.sensor.sensitivity", int.class);
@@ -1459,7 +1473,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * lens shading map data in android.statistics.lensShadingMap, with size specified
      * by android.lens.info.shadingMapSize; the returned shading map data will be the one
      * applied by the camera device for this capture request.</p>
-     * <p>The shading map data may depend on the AE and AWB statistics, therefore the reliability
+     * <p>The shading map data may depend on the auto-exposure (AE) and AWB statistics, therefore the reliability
      * of the map data may be affected by the AE and AWB algorithms. When AE and AWB are in
      * AUTO modes({@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} <code>!=</code> OFF and {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} <code>!=</code> OFF),
      * to get best results, it is recommended that the applications wait for the AE and AWB to
@@ -1477,7 +1491,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>State of the face detector
-     * unit</p>
+     * unit.</p>
      * <p>Whether face detection is enabled, and whether it
      * should output just the basic fields or the full set of
      * fields. Value must be one of the

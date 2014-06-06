@@ -29,19 +29,19 @@ import java.util.List;
  *
  * <p>Creating a session is an expensive operation and can take several hundred milliseconds, since
  * it requires configuring the camera device's internal pipelines and allocating memory buffers for
- * sending images to the desired targets. While
- * {@link CameraDevice#createCaptureSession createCaptureSession} will provide a
- * CameraCaptureSession object immediately, configuration won't be complete until the
- * {@link CameraCaptureSession.StateListener#onConfigured onConfigured} callback is called for the
- * first time. If configuration cannot be completed, then the
+ * sending images to the desired targets. Therefore the setup is done asynchronously, and
+ * {@link CameraDevice#createCaptureSession createCaptureSession} will send the ready-to-use
+ * CameraCaptureSession to the provided listener's
+ * {@link CameraCaptureSession.StateListener#onConfigured onConfigured} callback. If configuration
+ * cannot be completed, then the
  * {@link CameraCaptureSession.StateListener#onConfigureFailed onConfigureFailed} is called, and the
  * session will not become active.</p>
- *
+ *<!--
  * <p>Any capture requests (repeating or non-repeating) submitted before the session is ready will
  * be queued up and will begin capture once the session becomes ready. In case the session cannot be
  * configured and {@link StateListener#onConfigureFailed onConfigureFailed} is called, all queued
  * capture requests are discarded.</p>
- *
+ *-->
  * <p>If a new session is created by the camera device, then the previous session is closed, and its
  * associated {@link StateListener#onClosed onClosed} callback will be invoked.  All
  * of the session methods will throw an IllegalStateException if called once the session is
@@ -165,10 +165,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * {@link #capture} is called when a repeating request is active, the
      * capture request will be processed before any further repeating
      * requests are processed.<p>
-     *
-     * <p>Repeating requests are a simple way for an application to maintain a
-     * preview or other continuous stream of frames, without having to submit
-     * requests through {@link #capture} at video rates.</p>
      *
      * <p>To stop the repeating capture, call {@link #stopRepeating}. Calling
      * {@link #abortCaptures} will also clear the request.</p>
@@ -323,7 +319,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
-     * @see #configureOutputs
+     * @see CameraDevice#createCaptureSession
      */
     public abstract void abortCaptures() throws CameraAccessException;
 
