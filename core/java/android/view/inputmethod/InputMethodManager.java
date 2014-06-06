@@ -363,7 +363,7 @@ public final class InputMethodManager {
     static final int MSG_SEND_INPUT_EVENT = 5;
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
-    static final int SET_CURSOR_ANCHOR_MONITOR_MODE = 8;
+    static final int MSG_SET_CURSOR_ANCHOR_MONITOR_MODE = 8;
 
     class H extends Handler {
         H(Looper looper) {
@@ -494,7 +494,7 @@ public final class InputMethodManager {
                     finishedInputEvent(msg.arg1, false, false);
                     return;
                 }
-                case SET_CURSOR_ANCHOR_MONITOR_MODE: {
+                case MSG_SET_CURSOR_ANCHOR_MONITOR_MODE: {
                     synchronized (mH) {
                         mCursorAnchorMonitorMode = msg.arg1;
                         // Clear the cache.
@@ -570,7 +570,7 @@ public final class InputMethodManager {
 
         @Override
         public void setCursorAnchorMonitorMode(int monitorMode) {
-            mH.sendMessage(mH.obtainMessage(SET_CURSOR_ANCHOR_MONITOR_MODE, monitorMode, 0));
+            mH.sendMessage(mH.obtainMessage(MSG_SET_CURSOR_ANCHOR_MONITOR_MODE, monitorMode, 0));
         }
     };
 
