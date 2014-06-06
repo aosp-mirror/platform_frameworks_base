@@ -2183,6 +2183,7 @@
   <public type="attr" name="translateX" />
   <public type="attr" name="translateY" />
   <public type="attr" name="selectableItemBackgroundBorderless" />
+  <public type="attr" name="elegantTextHeight" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
