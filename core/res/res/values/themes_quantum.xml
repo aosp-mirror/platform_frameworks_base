@@ -733,6 +733,9 @@ please see themes_device_defaults.xml.
     <style name="Theme.Quantum.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Quantum.Dark.ActionBar</item>
+
+        <item name="colorPrimaryDark">@color/quantum_blue_grey_900</item>
+        <item name="colorPrimary">@color/quantum_blue_grey_800</item>
     </style>
 
     <style name="ThemeOverlay" />
