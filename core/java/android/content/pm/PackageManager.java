@@ -1460,21 +1460,19 @@ public abstract class PackageManager {
     public abstract String[] canonicalToCurrentPackageNames(String[] names);
 
     /**
-     * Return a "good" intent to launch a front-door activity in a package,
-     * for use for example to implement an "open" button when browsing through
-     * packages.  The current implementation will look first for a main
-     * activity in the category {@link Intent#CATEGORY_INFO}, next for a
-     * main activity in the category {@link Intent#CATEGORY_LAUNCHER}, or return
-     * null if neither are found.
-     *
-     * <p>Throws {@link NameNotFoundException} if a package with the given
-     * name cannot be found on the system.
+     * Returns a "good" intent to launch a front-door activity in a package.
+     * This is used, for example, to implement an "open" button when browsing
+     * through packages.  The current implementation looks first for a main
+     * activity in the category {@link Intent#CATEGORY_INFO}, and next for a
+     * main activity in the category {@link Intent#CATEGORY_LAUNCHER}. Returns
+     * <code>null</code> if neither are found.
      *
      * @param packageName The name of the package to inspect.
      *
-     * @return Returns either a fully-qualified Intent that can be used to
-     * launch the main activity in the package, or null if the package does
-     * not contain such an activity.
+     * @return A fully-qualified {@link Intent} that can be used to launch the
+     * main activity in the package. Returns <code>null</code> if the package
+     * does not contain such an activity, or if <em>packageName</em> is not
+     * recognized. 
      */
     public abstract Intent getLaunchIntentForPackage(String packageName);
 
