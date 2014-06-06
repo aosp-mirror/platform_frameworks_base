@@ -31,11 +31,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -54,7 +54,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     private static final int defaultMaxActiveTasksPerService =
             ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
     /** Amount of time a task is allowed to execute for before being considered timed-out. */
-    private static final long EXECUTING_TIMESLICE_MILLIS = 5 * 60 * 1000;
+    private static final long EXECUTING_TIMESLICE_MILLIS = 60 * 1000;
     /** Amount of time the TaskManager will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
     /** String prefix for all wakelock names. */
@@ -100,10 +100,14 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     /** Binder to the client service. */
     ITaskService service;
 
-    private final Object mAvailableLock = new Object();
+    private final Object mLock = new Object();
     /** Whether this context is free. */
-    @GuardedBy("mAvailableLock")
+    @GuardedBy("mLock")
     private boolean mAvailable;
+    /** Track start time. */
+    private long mExecutionStartTimeElapsed;
+    /** Track when job will timeout. */
+    private long mTimeoutElapsed;
 
     TaskServiceContext(TaskManagerService service, Looper looper) {
         this(service.getContext(), service, looper);
@@ -114,46 +118,43 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
         mContext = context;
         mCallbackHandler = new TaskServiceHandler(looper);
         mCompletedListener = completedListener;
+        mAvailable = true;
     }
 
     /**
      * Give a task to this context for execution. Callers must first check {@link #isAvailable()}
      * to make sure this is a valid context.
      * @param ts The status of the task that we are going to run.
-     * @return True if the task was accepted and is going to run.
+     * @return True if the task is valid and is running. False if the task cannot be executed.
      */
     boolean executeRunnableTask(TaskStatus ts) {
-        synchronized (mAvailableLock) {
+        synchronized (mLock) {
             if (!mAvailable) {
                 Slog.e(TAG, "Starting new runnable but context is unavailable > Error.");
                 return false;
             }
-            mAvailable = false;
-        }
 
-        final PowerManager pm =
-                (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                TM_WAKELOCK_PREFIX + ts.getServiceComponent().getPackageName());
-        mWakeLock.setWorkSource(new WorkSource(ts.getUid()));
-        mWakeLock.setReferenceCounted(false);
+            mRunningTask = ts;
+            mParams = new TaskParams(ts.getTaskId(), ts.getExtras(), this);
+            mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
-        mRunningTask = ts;
-        mParams = new TaskParams(ts.getTaskId(), ts.getExtras(), this);
-
-        mVerb = VERB_BINDING;
-        final Intent intent = new Intent().setComponent(ts.getServiceComponent());
-        boolean binding = mContext.bindServiceAsUser(intent, this,
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
-                new UserHandle(ts.getUserId()));
-        if (!binding) {
-            if (DEBUG) {
-                Slog.d(TAG, ts.getServiceComponent().getShortClassName() + " unavailable.");
+            mVerb = VERB_BINDING;
+            final Intent intent = new Intent().setComponent(ts.getServiceComponent());
+            boolean binding = mContext.bindServiceAsUser(intent, this,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
+                    new UserHandle(ts.getUserId()));
+            if (!binding) {
+                if (DEBUG) {
+                    Slog.d(TAG, ts.getServiceComponent().getShortClassName() + " unavailable.");
+                }
+                mRunningTask = null;
+                mParams = null;
+                mExecutionStartTimeElapsed = 0L;
+                return false;
             }
-            return false;
+            mAvailable = false;
+            return true;
         }
-
-        return true;
     }
 
     /** Used externally to query the running task. Will return null if there is no task running. */
@@ -170,9 +171,17 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
      * @return Whether this context is available to handle incoming work.
      */
     boolean isAvailable() {
-        synchronized (mAvailableLock) {
+        synchronized (mLock) {
             return mAvailable;
         }
+    }
+
+    long getExecutionStartTimeElapsed() {
+        return mExecutionStartTimeElapsed;
+    }
+
+    long getTimeoutElapsed() {
+        return mTimeoutElapsed;
     }
 
     @Override
@@ -217,6 +226,12 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
         this.service = ITaskService.Stub.asInterface(service);
         // Remove all timeouts.
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
+        final PowerManager pm =
+                (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                TM_WAKELOCK_PREFIX + mRunningTask.getServiceComponent().getPackageName());
+        mWakeLock.setWorkSource(new WorkSource(mRunningTask.getUid()));
+        mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
     }
@@ -263,7 +278,8 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     break;
                 case MSG_CALLBACK:
                     if (DEBUG) {
-                        Slog.d(TAG, "MSG_CALLBACK of : " + mRunningTask);
+                        Slog.d(TAG, "MSG_CALLBACK of : " + mRunningTask + " v:" +
+                                VERB_STRINGS[mVerb]);
                     }
                     removeMessages(MSG_TIMEOUT);
 
@@ -288,6 +304,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     break;
                 case MSG_SHUTDOWN_EXECUTION:
                     closeAndCleanupTaskH(true /* needsReschedule */);
+                    break;
                 default:
                     Log.e(TAG, "Unrecognised message: " + message);
             }
@@ -423,7 +440,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                 case VERB_EXECUTING:
                     // Not an error - client ran out of time.
                     Log.i(TAG, "Client timed out while executing (no taskFinished received)." +
-                            " Reporting failure and asking for reschedule. "  +
+                            " sending onStop. "  +
                             mRunningTask.getServiceComponent().getShortClassName() + "' tId: "
                             + taskId);
                     sendStopMessageH();
@@ -452,7 +469,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                 service.stopTask(mParams);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error sending onStopTask to client.", e);
-                closeAndCleanupTaskH(false);
+                closeAndCleanupTaskH(false /* reschedule */);
             }
         }
 
@@ -464,17 +481,17 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
          */
         private void closeAndCleanupTaskH(boolean reschedule) {
             removeMessages(MSG_TIMEOUT);
-            mWakeLock.release();
-            mContext.unbindService(TaskServiceContext.this);
-            mCompletedListener.onTaskCompleted(mRunningTask, reschedule);
+            synchronized (mLock) {
+                mWakeLock.release();
+                mContext.unbindService(TaskServiceContext.this);
+                mCompletedListener.onTaskCompleted(mRunningTask, reschedule);
 
-            mWakeLock = null;
-            mRunningTask = null;
-            mParams = null;
-            mVerb = -1;
-            mCancelled.set(false);
-            service = null;
-            synchronized (mAvailableLock) {
+                mWakeLock = null;
+                mRunningTask = null;
+                mParams = null;
+                mVerb = -1;
+                mCancelled.set(false);
+                service = null;
                 mAvailable = true;
             }
         }
@@ -496,6 +513,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
             }
             Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
             mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
+            mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
         }
     }
 }

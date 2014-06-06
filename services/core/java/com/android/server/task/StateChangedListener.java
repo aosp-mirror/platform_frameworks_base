@@ -35,5 +35,5 @@ public interface StateChangedListener {
      * it must be run immediately.
      * @param taskStatus The state of the task which is to be run immediately.
      */
-    public void onTaskDeadlineExpired(TaskStatus taskStatus);
+    public void onRunTaskNow(TaskStatus taskStatus);
 }

@@ -40,7 +40,7 @@ public class BatteryControllerTest extends AndroidTestCase {
         }
 
         @Override
-        public void onTaskDeadlineExpired(TaskStatus taskStatus) {
+        public void onRunTaskNow(TaskStatus taskStatus) {
 
         }
     };

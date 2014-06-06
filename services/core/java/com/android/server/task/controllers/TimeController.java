@@ -23,10 +23,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
+import android.util.Slog;
 
 import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,14 +41,16 @@ import java.util.ListIterator;
 public class TimeController extends StateController {
     private static final String TAG = "TaskManager.Time";
     private static final String ACTION_TASK_EXPIRED =
-            "android.content.taskmanager.TASK_EXPIRED";
+            "android.content.taskmanager.TASK_DEADLINE_EXPIRED";
     private static final String ACTION_TASK_DELAY_EXPIRED =
             "android.content.taskmanager.TASK_DELAY_EXPIRED";
 
     /** Set an alarm for the next task expiry. */
-    private final PendingIntent mTaskExpiredAlarmIntent;
+    private final PendingIntent mDeadlineExpiredAlarmIntent;
     /** Set an alarm for the next task delay expiry. This*/
     private final PendingIntent mNextDelayExpiredAlarmIntent;
+    /** Constant time determining how near in the future we'll set an alarm for. */
+    private static final long MIN_WAKEUP_INTERVAL_MILLIS = 15 * 1000;
 
     private long mNextTaskExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
@@ -66,12 +70,14 @@ public class TimeController extends StateController {
 
     private TimeController(StateChangedListener stateChangedListener, Context context) {
         super(stateChangedListener, context);
-        mTaskExpiredAlarmIntent =
+        mDeadlineExpiredAlarmIntent =
                 PendingIntent.getBroadcast(mContext, 0 /* ignored */,
                         new Intent(ACTION_TASK_EXPIRED), 0);
         mNextDelayExpiredAlarmIntent =
                 PendingIntent.getBroadcast(mContext, 0 /* ignored */,
                         new Intent(ACTION_TASK_DELAY_EXPIRED), 0);
+        mNextTaskExpiredElapsedMillis = Long.MAX_VALUE;
+        mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
 
         // Register BR for these intents.
         IntentFilter intentFilter = new IntentFilter(ACTION_TASK_EXPIRED);
@@ -85,61 +91,34 @@ public class TimeController extends StateController {
      */
     @Override
     public synchronized void maybeStartTrackingTask(TaskStatus task) {
-        if (task.hasTimingDelayConstraint()) {
+        if (task.hasTimingDelayConstraint() || task.hasDeadlineConstraint()) {
+            maybeStopTrackingTask(task);
             ListIterator<TaskStatus> it = mTrackedTasks.listIterator(mTrackedTasks.size());
             while (it.hasPrevious()) {
                 TaskStatus ts = it.previous();
-                if (ts.equals(task)) {
-                    // Update
-                    it.remove();
-                    it.add(task);
-                    break;
-                } else if (ts.getLatestRunTimeElapsed() < task.getLatestRunTimeElapsed()) {
+                if (ts.getLatestRunTimeElapsed() < task.getLatestRunTimeElapsed()) {
                     // Insert
-                    it.add(task);
                     break;
                 }
             }
-            maybeUpdateAlarms(task.getEarliestRunTime(), task.getLatestRunTimeElapsed());
+            it.add(task);
+            maybeUpdateAlarms(
+                    task.hasTimingDelayConstraint() ? task.getEarliestRunTime() : Long.MAX_VALUE,
+                    task.hasDeadlineConstraint() ? task.getLatestRunTimeElapsed() : Long.MAX_VALUE);
         }
     }
 
     /**
-     * If the task passed in is being tracked, figure out if we need to update our alarms, and if
-     * so, update them.
+     * When we stop tracking a task, we only need to update our alarms if the task we're no longer
+     * tracking was the one our alarms were based off of.
+     * Really an == comparison should be enough, but why play with fate? We'll do <=.
      */
     @Override
     public synchronized void maybeStopTrackingTask(TaskStatus taskStatus) {
         if (mTrackedTasks.remove(taskStatus)) {
-            if (mNextDelayExpiredElapsedMillis <= taskStatus.getEarliestRunTime()) {
-                handleTaskDelayExpired();
-            }
-            if (mNextTaskExpiredElapsedMillis <= taskStatus.getLatestRunTimeElapsed()) {
-                handleTaskDeadlineExpired();
-            }
+            checkExpiredDelaysAndResetAlarm();
+            checkExpiredDeadlinesAndResetAlarm();
         }
-    }
-
-    /**
-     * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a task's
-     * delay will expire.
-     * This alarm <b>will not</b> wake up the phone.
-     */
-    private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
-        ensureAlarmService();
-        mAlarmService.set(AlarmManager.ELAPSED_REALTIME, alarmTimeElapsedMillis,
-                mNextDelayExpiredAlarmIntent);
-    }
-
-    /**
-     * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a task's
-     * deadline will expire.
-     * This alarm <b>will</b> wake up the phone.
-     */
-    private void setDeadlineExpiredAlarm(long alarmTimeElapsedMillis) {
-        ensureAlarmService();
-        mAlarmService.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTimeElapsedMillis,
-                mTaskExpiredAlarmIntent);
     }
 
     /**
@@ -155,17 +134,6 @@ public class TimeController extends StateController {
                         taskStatus.deadlineConstraintSatisfied.get());
     }
 
-    private void maybeUpdateAlarms(long delayExpiredElapsed, long deadlineExpiredElapsed) {
-        if (delayExpiredElapsed < mNextDelayExpiredElapsedMillis) {
-            mNextDelayExpiredElapsedMillis = delayExpiredElapsed;
-            setDelayExpiredAlarm(mNextDelayExpiredElapsedMillis);
-        }
-        if (deadlineExpiredElapsed < mNextTaskExpiredElapsedMillis) {
-            mNextTaskExpiredElapsedMillis = deadlineExpiredElapsed;
-            setDeadlineExpiredAlarm(mNextTaskExpiredElapsedMillis);
-        }
-    }
-
     private void ensureAlarmService() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -173,38 +141,41 @@ public class TimeController extends StateController {
     }
 
     /**
-     * Handles alarm that notifies that a task has expired. When this function is called at least
-     * one task must be run.
+     * Checks list of tasks for ones that have an expired deadline, sending them to the TaskManager
+     * if so, removing them from this list, and updating the alarm for the next expiry time.
      */
-    private synchronized void handleTaskDeadlineExpired() {
+    private synchronized void checkExpiredDeadlinesAndResetAlarm() {
         long nextExpiryTime = Long.MAX_VALUE;
         final long nowElapsedMillis = SystemClock.elapsedRealtime();
 
         Iterator<TaskStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
             TaskStatus ts = it.next();
+            if (!ts.hasDeadlineConstraint()) {
+                continue;
+            }
             final long taskDeadline = ts.getLatestRunTimeElapsed();
 
             if (taskDeadline <= nowElapsedMillis) {
                 ts.deadlineConstraintSatisfied.set(true);
-                mStateChangedListener.onTaskDeadlineExpired(ts);
+                mStateChangedListener.onRunTaskNow(ts);
                 it.remove();
             } else {  // Sorted by expiry time, so take the next one and stop.
                 nextExpiryTime = taskDeadline;
                 break;
             }
         }
-        maybeUpdateAlarms(Long.MAX_VALUE, nextExpiryTime);
+        setDeadlineExpiredAlarm(nextExpiryTime);
     }
 
     /**
      * Handles alarm that notifies us that a task's delay has expired. Iterates through the list of
      * tracked tasks and marks them as ready as appropriate.
      */
-    private synchronized void handleTaskDelayExpired() {
+    private synchronized void checkExpiredDelaysAndResetAlarm() {
         final long nowElapsedMillis = SystemClock.elapsedRealtime();
         long nextDelayTime = Long.MAX_VALUE;
-
+        boolean ready = false;
         Iterator<TaskStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
             final TaskStatus ts = it.next();
@@ -212,10 +183,13 @@ public class TimeController extends StateController {
                 continue;
             }
             final long taskDelayTime = ts.getEarliestRunTime();
-            if (taskDelayTime < nowElapsedMillis) {
+            if (taskDelayTime <= nowElapsedMillis) {
                 ts.timeDelayConstraintSatisfied.set(true);
                 if (canStopTrackingTask(ts)) {
                     it.remove();
+                }
+                if (ts.isReady()) {
+                    ready = true;
                 }
             } else {  // Keep going through list to get next delay time.
                 if (nextDelayTime > taskDelayTime) {
@@ -223,20 +197,93 @@ public class TimeController extends StateController {
                 }
             }
         }
-        mStateChangedListener.onControllerStateChanged();
-        maybeUpdateAlarms(nextDelayTime, Long.MAX_VALUE);
+        if (ready) {
+            mStateChangedListener.onControllerStateChanged();
+        }
+        setDelayExpiredAlarm(nextDelayTime);
+    }
+
+    private void maybeUpdateAlarms(long delayExpiredElapsed, long deadlineExpiredElapsed) {
+        if (delayExpiredElapsed < mNextDelayExpiredElapsedMillis) {
+            setDelayExpiredAlarm(delayExpiredElapsed);
+        }
+        if (deadlineExpiredElapsed < mNextTaskExpiredElapsedMillis) {
+            setDeadlineExpiredAlarm(deadlineExpiredElapsed);
+        }
+    }
+
+    /**
+     * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a task's
+     * delay will expire.
+     * This alarm <b>will not</b> wake up the phone.
+     */
+    private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
+        final long earliestWakeupTimeElapsed =
+                SystemClock.elapsedRealtime() + MIN_WAKEUP_INTERVAL_MILLIS;
+        if (alarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
+            alarmTimeElapsedMillis = earliestWakeupTimeElapsed;
+        }
+        mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
+        updateAlarmWithPendingIntent(mNextDelayExpiredAlarmIntent, mNextDelayExpiredElapsedMillis);
+    }
+
+    /**
+     * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a task's
+     * deadline will expire.
+     * This alarm <b>will</b> wake up the phone.
+     */
+    private void setDeadlineExpiredAlarm(long alarmTimeElapsedMillis) {
+        final long earliestWakeupTimeElapsed =
+                SystemClock.elapsedRealtime() + MIN_WAKEUP_INTERVAL_MILLIS;
+        if (alarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
+            alarmTimeElapsedMillis = earliestWakeupTimeElapsed;
+        }
+        mNextTaskExpiredElapsedMillis = alarmTimeElapsedMillis;
+        updateAlarmWithPendingIntent(mDeadlineExpiredAlarmIntent, mNextTaskExpiredElapsedMillis);
+    }
+
+    private void updateAlarmWithPendingIntent(PendingIntent pi, long alarmTimeElapsed) {
+        ensureAlarmService();
+        if (alarmTimeElapsed == Long.MAX_VALUE) {
+            mAlarmService.cancel(pi);
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting " + pi.getIntent().getAction() + " for: " + alarmTimeElapsed);
+            }
+            mAlarmService.set(AlarmManager.ELAPSED_REALTIME, alarmTimeElapsed, pi);
+        }
     }
 
     private final BroadcastReceiver mAlarmExpiredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Just received alarm: " + intent.getAction());
+            }
             // An task has just expired, so we run through the list of tasks that we have and
             // notify our StateChangedListener.
             if (ACTION_TASK_EXPIRED.equals(intent.getAction())) {
-                handleTaskDeadlineExpired();
+                checkExpiredDeadlinesAndResetAlarm();
             } else if (ACTION_TASK_DELAY_EXPIRED.equals(intent.getAction())) {
-                handleTaskDelayExpired();
+                checkExpiredDelaysAndResetAlarm();
             }
         }
     };
+
+    @Override
+    public void dumpControllerState(PrintWriter pw) {
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        pw.println("Alarms (" + SystemClock.elapsedRealtime() + ")");
+        pw.println(
+                "Next delay alarm in " + (mNextDelayExpiredElapsedMillis - nowElapsed)/1000 + "s");
+        pw.println("Next deadline alarm in " + (mNextTaskExpiredElapsedMillis - nowElapsed)/1000
+                + "s");
+        pw.println("Tracking:");
+        for (TaskStatus ts : mTrackedTasks) {
+            pw.println(String.valueOf(ts.hashCode()).substring(0, 3) + ".."
+                    + ": (" + (ts.hasTimingDelayConstraint() ? ts.getEarliestRunTime() : "N/A")
+                    + ", " + (ts.hasDeadlineConstraint() ?ts.getLatestRunTimeElapsed() : "N/A")
+                    + ")");
+        }
+    }
 }

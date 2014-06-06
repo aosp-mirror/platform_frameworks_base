@@ -20,6 +20,7 @@ package android.app;
 import android.app.task.ITaskManager;
 import android.app.task.Task;
 import android.app.task.TaskManager;
+import android.os.RemoteException;
 
 import java.util.List;
 
@@ -37,26 +38,35 @@ public class TaskManagerImpl extends TaskManager {
 
     @Override
     public int schedule(Task task) {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return mBinder.schedule(task);
+        } catch (RemoteException e) {
+            return TaskManager.RESULT_FAILURE;
+        }
     }
 
     @Override
     public void cancel(int taskId) {
-        // TODO Auto-generated method stub
+        try {
+            mBinder.cancel(taskId);
+        } catch (RemoteException e) {}
 
     }
 
     @Override
     public void cancelAll() {
-        // TODO Auto-generated method stub
+        try {
+            mBinder.cancelAll();
+        } catch (RemoteException e) {}
 
     }
 
     @Override
     public List<Task> getAllPendingTasks() {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            return mBinder.getAllPendingTasks();
+        } catch (RemoteException e) {
+            return null;
+        }
     }
-
 }

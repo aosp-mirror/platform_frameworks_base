@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -54,7 +55,6 @@ import org.xmlpull.v1.XmlSerializer;
  *     - When a task is added, it will determine if the task requirements have changed (update) and
  *       whether the controllers need to be updated.
  *     - Persists Tasks, figures out when to to rewrite the Task to disk.
- *     - Is threadsafe.
  *     - Handles rescheduling of tasks.
  *       - When a periodic task is executed and must be re-added.
  *       - When a task fails and the client requests that it be retried with backoff.
@@ -96,7 +96,7 @@ public class TaskStore {
 
     @VisibleForTesting
     public static TaskStore initAndGetForTesting(Context context, File dataDir,
-                                          TaskMapReadFinishedListener callback) {
+                                                 TaskMapReadFinishedListener callback) {
         return new TaskStore(context, dataDir, callback);
     }
 
@@ -126,14 +126,22 @@ public class TaskStore {
         if (taskStatus.isPersisted()) {
             maybeWriteStatusToDiskAsync();
         }
+        if (DEBUG) {
+            Slog.d(TAG, "Added task status to store: " + taskStatus);
+        }
         return replaced;
     }
 
     /**
      * Whether this taskStatus object already exists in the TaskStore.
      */
-    public boolean contains(TaskStatus taskStatus) {
-        return mTasksSet.contains(taskStatus);
+    public boolean containsTaskIdForUid(int taskId, int uId) {
+        for (TaskStatus ts : mTasksSet) {
+            if (ts.getUid() == uId && ts.getTaskId() == taskId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int size() {
@@ -162,49 +170,48 @@ public class TaskStore {
         maybeWriteStatusToDiskAsync();
     }
 
+    public List<TaskStatus> getTasksByUser(int userHandle) {
+        List<TaskStatus> matchingTasks = new ArrayList<TaskStatus>();
+        Iterator<TaskStatus> it = mTasksSet.iterator();
+        while (it.hasNext()) {
+            TaskStatus ts = it.next();
+            if (UserHandle.getUserId(ts.getUid()) == userHandle) {
+                matchingTasks.add(ts);
+            }
+        }
+        return matchingTasks;
+    }
+
     /**
-     * Removes all TaskStatus objects for a given uid from the master list. Note that it is
-     * possible to remove a task that is pending/active. This operation will succeed, and the
-     * removal will take effect when the task has completed executing.
      * @param uid Uid of the requesting app.
-     * @return True if at least one task was removed, false if nothing matching the provided uId
-     * was found.
+     * @return All TaskStatus objects for a given uid from the master list.
      */
-    public boolean removeAllByUid(int uid) {
+    public List<TaskStatus> getTasksByUid(int uid) {
+        List<TaskStatus> matchingTasks = new ArrayList<TaskStatus>();
         Iterator<TaskStatus> it = mTasksSet.iterator();
         while (it.hasNext()) {
             TaskStatus ts = it.next();
             if (ts.getUid() == uid) {
-                it.remove();
-                maybeWriteStatusToDiskAsync();
-                return true;
+                matchingTasks.add(ts);
             }
         }
-        return false;
+        return matchingTasks;
     }
 
     /**
-     * Remove the TaskStatus that matches the provided uId and taskId.  Note that it is possible
-     * to remove a task that is pending/active. This operation will succeed, and the removal will
-     * take effect when the task has completed executing.
      * @param uid Uid of the requesting app.
      * @param taskId Task id, specified at schedule-time.
-     * @return true if a removal occurred, false if the provided parameters didn't match anything.
+     * @return the TaskStatus that matches the provided uId and taskId, or null if none found.
      */
-    public boolean remove(int uid, int taskId) {
-        boolean changed = false;
+    public TaskStatus getTaskByUidAndTaskId(int uid, int taskId) {
         Iterator<TaskStatus> it = mTasksSet.iterator();
         while (it.hasNext()) {
             TaskStatus ts = it.next();
             if (ts.getUid() == uid && ts.getTaskId() == taskId) {
-                it.remove();
-                changed = true;
+                return ts;
             }
         }
-        if (changed) {
-            maybeWriteStatusToDiskAsync();
-        }
-        return changed;
+        return null;
     }
 
     /**
@@ -326,7 +333,7 @@ public class TaskStore {
          */
         private void writeConstraintsToXml(XmlSerializer out, TaskStatus taskStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
-            if (taskStatus.hasMeteredConstraint()) {
+            if (taskStatus.hasUnmeteredConstraint()) {
                 out.attribute(null, "unmetered", Boolean.toString(true));
             }
             if (taskStatus.hasConnectivityConstraint()) {
@@ -393,9 +400,11 @@ public class TaskStore {
         public void run() {
             try {
                 List<TaskStatus> tasks;
+                FileInputStream fis = mTasksFile.openRead();
                 synchronized (TaskStore.this) {
-                    tasks = readTaskMapImpl();
+                    tasks = readTaskMapImpl(fis);
                 }
+                fis.close();
                 if (tasks != null) {
                     mCallback.onTaskMapReadFinished(tasks);
                 }
@@ -414,8 +423,7 @@ public class TaskStore {
             }
         }
 
-        private List<TaskStatus> readTaskMapImpl() throws XmlPullParserException, IOException {
-            FileInputStream fis = mTasksFile.openRead();
+        private List<TaskStatus> readTaskMapImpl(FileInputStream fis) throws XmlPullParserException, IOException {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
 
@@ -537,10 +545,10 @@ public class TaskStore {
                 }
             } else if (XML_TAG_ONEOFF.equals(parser.getName())) {
                 try {
-                    if (runtimes.first != TaskStatus.DEFAULT_EARLIEST_RUNTIME) {
+                    if (runtimes.first != TaskStatus.NO_EARLIEST_RUNTIME) {
                         taskBuilder.setMinimumLatency(runtimes.first - SystemClock.elapsedRealtime());
                     }
-                    if (runtimes.second != TaskStatus.DEFAULT_LATEST_RUNTIME) {
+                    if (runtimes.second != TaskStatus.NO_LATEST_RUNTIME) {
                         taskBuilder.setOverrideDeadline(
                                 runtimes.second - SystemClock.elapsedRealtime());
                     }
@@ -632,8 +640,8 @@ public class TaskStore {
             final long nowWallclock = System.currentTimeMillis();
             final long nowElapsed = SystemClock.elapsedRealtime();
 
-            long earliestRunTimeElapsed = TaskStatus.DEFAULT_EARLIEST_RUNTIME;
-            long latestRunTimeElapsed = TaskStatus.DEFAULT_LATEST_RUNTIME;
+            long earliestRunTimeElapsed = TaskStatus.NO_EARLIEST_RUNTIME;
+            long latestRunTimeElapsed = TaskStatus.NO_LATEST_RUNTIME;
             String val = parser.getAttributeValue(null, "deadline");
             if (val != null) {
                 long latestRuntimeWallclock = Long.valueOf(val);
