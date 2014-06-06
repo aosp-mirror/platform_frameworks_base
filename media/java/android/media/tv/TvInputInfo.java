@@ -138,21 +138,15 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Returns the .apk package that implements this TV input service.
+     * Returns the information of the service that implements this TV input.
      */
-    public String getPackageName() {
-        return mService.serviceInfo.packageName;
-    }
-
-    /**
-     * Returns the class name of the service component that implements this TV input service.
-     */
-    public String getServiceName() {
-        return mService.serviceInfo.name;
+    public ServiceInfo getServiceInfo() {
+        return mService.serviceInfo;
     }
 
     /**
      * Returns the component of the service that implements this TV input.
+     * @hide
      */
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
@@ -164,8 +158,8 @@ public final class TvInputInfo implements Parcelable {
     public Intent getIntentForSetupActivity() {
         if (!TextUtils.isEmpty(mSetupActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setClassName(getPackageName(), mSetupActivity);
-            intent.putExtra(EXTRA_SERVICE_NAME, getServiceName());
+            intent.setClassName(mService.serviceInfo.packageName, mSetupActivity);
+            intent.putExtra(EXTRA_SERVICE_NAME, mService.serviceInfo.name);
             return intent;
         }
         return null;
@@ -177,8 +171,8 @@ public final class TvInputInfo implements Parcelable {
     public Intent getIntentForSettingsActivity() {
         if (!TextUtils.isEmpty(mSettingsActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setClassName(getPackageName(), mSettingsActivity);
-            intent.putExtra(EXTRA_SERVICE_NAME, getServiceName());
+            intent.setClassName(mService.serviceInfo.packageName, mSettingsActivity);
+            intent.putExtra(EXTRA_SERVICE_NAME, mService.serviceInfo.name);
             return intent;
         }
         return null;
