@@ -16,7 +16,7 @@
 
 package android.service.notification;
 
-import android.annotation.PrivateApi;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.INotificationManager;
 import android.app.Service;
@@ -279,7 +279,7 @@ public abstract class NotificationListenerService extends Service {
      * @param currentUser the user to use as the stream filter
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public void registerAsSystemService(ComponentName componentName, int currentUser)
             throws RemoteException {
         if (mWrapper == null) {
@@ -297,7 +297,7 @@ public abstract class NotificationListenerService extends Service {
      * with (@link registerAsService).
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public void unregisterAsSystemService() throws RemoteException {
         if (mWrapper != null) {
             INotificationManager noMan = getNotificationInterface();

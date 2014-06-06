@@ -761,7 +761,7 @@ LOCAL_MODULE := private-api-stubs
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_private_stubs_current_intermediates/src \
-        -showAnnotation android.annotation.PrivateApi \
+        -showAnnotation android.annotation.SystemApi \
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk

@@ -17,7 +17,7 @@
 package android.service.trust;
 
 import android.Manifest;
-import android.annotation.PrivateApi;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.ComponentName;
@@ -60,7 +60,7 @@ import android.util.Slog;
  *
  * @hide
  */
-@PrivateApi
+@SystemApi
 public class TrustAgentService extends Service {
     private final String TAG = TrustAgentService.class.getSimpleName() +
             "[" + getClass().getSimpleName() + "]";

@@ -17,7 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
-import android.annotation.PrivateApi;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PackageInstallObserver;
@@ -370,7 +370,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} on success.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_SUCCEEDED = 1;
 
     /**
@@ -379,7 +379,7 @@ public abstract class PackageManager {
      * already installed.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;
 
     /**
@@ -388,7 +388,7 @@ public abstract class PackageManager {
      * file is invalid.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_INVALID_APK = -2;
 
     /**
@@ -397,7 +397,7 @@ public abstract class PackageManager {
      * is invalid.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_INVALID_URI = -3;
 
     /**
@@ -406,7 +406,7 @@ public abstract class PackageManager {
      * service found that the device didn't have enough storage space to install the app.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_INSUFFICIENT_STORAGE = -4;
 
     /**
@@ -415,7 +415,7 @@ public abstract class PackageManager {
      * package is already installed with the same name.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_DUPLICATE_PACKAGE = -5;
 
     /**
@@ -424,7 +424,7 @@ public abstract class PackageManager {
      * the requested shared user does not exist.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_NO_SHARED_USER = -6;
 
     /**
@@ -434,7 +434,7 @@ public abstract class PackageManager {
      * than the new package (and the old package's data was not removed).
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_UPDATE_INCOMPATIBLE = -7;
 
     /**
@@ -444,7 +444,7 @@ public abstract class PackageManager {
      * device and does not have matching signature.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_SHARED_USER_INCOMPATIBLE = -8;
 
     /**
@@ -453,7 +453,7 @@ public abstract class PackageManager {
      * the new package uses a shared library that is not available.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_MISSING_SHARED_LIBRARY = -9;
 
     /**
@@ -462,7 +462,7 @@ public abstract class PackageManager {
      * the new package uses a shared library that is not available.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_REPLACE_COULDNT_DELETE = -10;
 
     /**
@@ -472,7 +472,7 @@ public abstract class PackageManager {
      * either because there was not enough storage or the validation failed.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_DEXOPT = -11;
 
     /**
@@ -482,7 +482,7 @@ public abstract class PackageManager {
      * that required by the package.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_OLDER_SDK = -12;
 
     /**
@@ -492,7 +492,7 @@ public abstract class PackageManager {
      * same authority as a provider already installed in the system.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13;
 
     /**
@@ -502,7 +502,7 @@ public abstract class PackageManager {
      * that required by the package.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_NEWER_SDK = -14;
 
     /**
@@ -513,7 +513,7 @@ public abstract class PackageManager {
      * flag.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_TEST_ONLY = -15;
 
     /**
@@ -523,7 +523,7 @@ public abstract class PackageManager {
      * compatible with the the device's CPU_ABI.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
 
     /**
@@ -532,7 +532,7 @@ public abstract class PackageManager {
      * the new package uses a feature that is not available.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_MISSING_FEATURE = -17;
 
     // ------ Errors related to sdcard
@@ -542,7 +542,7 @@ public abstract class PackageManager {
      * a secure container mount point couldn't be accessed on external media.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_CONTAINER_ERROR = -18;
 
     /**
@@ -552,7 +552,7 @@ public abstract class PackageManager {
      * location.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_INVALID_INSTALL_LOCATION = -19;
 
     /**
@@ -562,7 +562,7 @@ public abstract class PackageManager {
      * location because the media is not available.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_MEDIA_UNAVAILABLE = -20;
 
     /**
@@ -571,7 +571,7 @@ public abstract class PackageManager {
      * the new package couldn't be installed because the verification timed out.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_VERIFICATION_TIMEOUT = -21;
 
     /**
@@ -580,7 +580,7 @@ public abstract class PackageManager {
      * the new package couldn't be installed because the verification did not succeed.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_VERIFICATION_FAILURE = -22;
 
     /**
@@ -589,7 +589,7 @@ public abstract class PackageManager {
      * the package changed from what the calling program expected.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23;
 
     /**
@@ -615,7 +615,7 @@ public abstract class PackageManager {
      * '.apk' extension.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_NOT_APK = -100;
 
     /**
@@ -624,7 +624,7 @@ public abstract class PackageManager {
      * if the parser was unable to retrieve the AndroidManifest.xml file.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_MANIFEST = -101;
 
     /**
@@ -633,7 +633,7 @@ public abstract class PackageManager {
      * if the parser encountered an unexpected exception.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102;
 
     /**
@@ -642,7 +642,7 @@ public abstract class PackageManager {
      * if the parser did not find any certificates in the .apk.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103;
 
     /**
@@ -651,7 +651,7 @@ public abstract class PackageManager {
      * if the parser found inconsistent certificates on the files in the .apk.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES = -104;
 
     /**
@@ -661,7 +661,7 @@ public abstract class PackageManager {
      * files in the .apk.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING = -105;
 
     /**
@@ -670,7 +670,7 @@ public abstract class PackageManager {
      * if the parser encountered a bad or missing package name in the manifest.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME = -106;
 
     /**
@@ -679,7 +679,7 @@ public abstract class PackageManager {
      * if the parser encountered a bad shared user id name in the manifest.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID = -107;
 
     /**
@@ -688,7 +688,7 @@ public abstract class PackageManager {
      * if the parser encountered some structural problem in the manifest.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_MANIFEST_MALFORMED = -108;
 
     /**
@@ -698,7 +698,7 @@ public abstract class PackageManager {
      * in the manifest.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_PARSE_FAILED_MANIFEST_EMPTY = -109;
 
     /**
@@ -707,7 +707,7 @@ public abstract class PackageManager {
      * if the system failed to install the package because of system issues.
      * @hide
      */
-    @PrivateApi
+    @SystemApi
     public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
 
     /**
@@ -2907,7 +2907,7 @@ public abstract class PackageManager {
      * instead.  This method will continue to be supported but the older observer interface
      * will not get additional failure details.
      */
-    // @PrivateApi
+    // @SystemApi
     public abstract void installPackage(
             Uri packageURI, IPackageInstallObserver observer, int flags,
             String installerPackageName);
@@ -2942,7 +2942,7 @@ public abstract class PackageManager {
      * continue to be supported but the older observer interface will not get additional failure
      * details.
      */
-    // @PrivateApi
+    // @SystemApi
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             Uri verificationURI, ManifestDigest manifestDigest,
@@ -3071,7 +3071,7 @@ public abstract class PackageManager {
      * on the system for other users, also install it for the calling user.
      * @hide
      */
-    // @PrivateApi
+    // @SystemApi
     public abstract int installExistingPackage(String packageName)
             throws NameNotFoundException;
 
@@ -3161,7 +3161,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    // @PrivateApi
+    // @SystemApi
     public abstract void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags);
 
@@ -3230,7 +3230,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    // @PrivateApi
+    // @SystemApi
     public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
 
     /**

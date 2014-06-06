@@ -16,7 +16,7 @@
 
 package android.telephony;
 
-import android.annotation.PrivateApi;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -1743,11 +1743,11 @@ public class TelephonyManager {
     }
 
     /**
-     * Expose the rest of ITelephony to @PrivateApi
+     * Expose the rest of ITelephony to @SystemApi
      */
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void dial(String number) {
         try {
             getITelephony().dial(number);
@@ -1757,7 +1757,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void call(String callingPackage, String number) {
         try {
             getITelephony().call(callingPackage, number);
@@ -1767,7 +1767,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean showCallScreen() {
         try {
             getTelecommService().showCallScreen(false);
@@ -1779,7 +1779,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean showCallScreenWithDialpad(boolean showDialpad) {
         try {
             getTelecommService().showCallScreen(showDialpad);
@@ -1791,7 +1791,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean endCall() {
         try {
             return getITelephony().endCall();
@@ -1802,7 +1802,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void answerRingingCall() {
         try {
             getITelephony().answerRingingCall();
@@ -1812,7 +1812,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void silenceRinger() {
         try {
             getTelecommService().silenceRinger();
@@ -1822,7 +1822,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isOffhook() {
         try {
             return getITelephony().isOffhook();
@@ -1833,7 +1833,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isRinging() {
         try {
             return getITelephony().isRinging();
@@ -1844,7 +1844,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isIdle() {
         try {
             return getITelephony().isIdle();
@@ -1855,7 +1855,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isRadioOn() {
         try {
             return getITelephony().isRadioOn();
@@ -1866,7 +1866,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isSimPinEnabled() {
         try {
             return getITelephony().isSimPinEnabled();
@@ -1877,7 +1877,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void cancelMissedCallsNotification() {
         try {
             getITelephony().cancelMissedCallsNotification();
@@ -1887,7 +1887,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean supplyPin(String pin) {
         try {
             return getITelephony().supplyPin(pin);
@@ -1898,7 +1898,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean supplyPuk(String puk, String pin) {
         try {
             return getITelephony().supplyPuk(puk, pin);
@@ -1909,7 +1909,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public int[] supplyPinReportResult(String pin) {
         try {
             return getITelephony().supplyPinReportResult(pin);
@@ -1920,7 +1920,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             return getITelephony().supplyPukReportResult(puk, pin);
@@ -1931,7 +1931,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean handlePinMmi(String dialString) {
         try {
             return getITelephony().handlePinMmi(dialString);
@@ -1942,7 +1942,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void toggleRadioOnOff() {
         try {
             getITelephony().toggleRadioOnOff();
@@ -1952,7 +1952,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean setRadio(boolean turnOn) {
         try {
             return getITelephony().setRadio(turnOn);
@@ -1963,7 +1963,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean setRadioPower(boolean turnOn) {
         try {
             return getITelephony().setRadioPower(turnOn);
@@ -1974,7 +1974,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void updateServiceLocation() {
         try {
             getITelephony().updateServiceLocation();
@@ -1984,7 +1984,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public int enableApnType(String type) {
         try {
             return getITelephony().enableApnType(type);
@@ -1995,7 +1995,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public int disableApnType(String type) {
         try {
             return getITelephony().disableApnType(type);
@@ -2006,7 +2006,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean enableDataConnectivity() {
         try {
             return getITelephony().enableDataConnectivity();
@@ -2017,7 +2017,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean disableDataConnectivity() {
         try {
             return getITelephony().disableDataConnectivity();
@@ -2028,7 +2028,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean isDataConnectivityPossible() {
         try {
             return getITelephony().isDataConnectivityPossible();
@@ -2039,7 +2039,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean needsOtaServiceProvisioning() {
         try {
             return getITelephony().needsOtaServiceProvisioning();
@@ -2050,7 +2050,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public void setDataEnabled(boolean enable) {
         try {
             getITelephony().setDataEnabled(enable);
@@ -2060,7 +2060,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @PrivateApi
+    @SystemApi
     public boolean getDataEnabled() {
         try {
             return getITelephony().getDataEnabled();
