@@ -87,6 +87,8 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -400,6 +402,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mSettingsClosing;
     private boolean mVisible;
 
+    private Interpolator mAlphaOut = new PathInterpolator(0f, 0.4f, 1f, 1f);
+    private Interpolator mAlphaIn = new PathInterpolator(0f, 0f, 0.8f, 1f);
+
     private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
             new OnChildLocationsChangedListener() {
         @Override
@@ -407,6 +412,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             userActivity();
         }
     };
+
+    private int mDisabledUnmodified;
 
     public void setOnFlipRunnable(Runnable onFlipRunnable) {
         mOnFlipRunnable = onFlipRunnable;
@@ -676,10 +683,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDateTimeView.setOnClickListener(mClockClickListener);
             mDateTimeView.setEnabled(true);
         }
-
-        mNotificationPanel.setSystemUiVisibility(
-                View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
-                View.STATUS_BAR_DISABLE_CLOCK);
 
         mTicker = new MyTicker(context, mStatusBarView);
 
@@ -1415,10 +1418,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    private int adjustDisableFlags(int state) {
+        if (mExpandedVisible) {
+            state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+            state |= StatusBarManager.DISABLE_SYSTEM_INFO;
+        }
+        return state;
+    }
+
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
     public void disable(int state) {
+        mDisabledUnmodified = state;
+        state = adjustDisableFlags(state);
         final int old = mDisabled;
         final int diff = state ^ old;
         mDisabled = state;
@@ -1456,20 +1469,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
                 mSystemIconArea.animate()
                     .alpha(0f)
-                    .translationY(mNaturalBarHeight*0.5f)
-                    .setDuration(175)
-                    .setInterpolator(new DecelerateInterpolator(1.5f))
-                    .setListener(mMakeIconsInvisible)
-                    .start();
+                    .withLayer()
+                    .setDuration(160)
+                    .setInterpolator(mAlphaIn)
+                    .setListener(mMakeIconsInvisible);
             } else {
                 mSystemIconArea.setVisibility(View.VISIBLE);
                 mSystemIconArea.animate()
                     .alpha(1f)
-                    .translationY(0)
-                    .setStartDelay(0)
-                    .setInterpolator(new DecelerateInterpolator(1.5f))
-                    .setDuration(175)
-                    .start();
+                    .withLayer()
+                    .setInterpolator(mAlphaOut)
+                    .setDuration(320);
             }
         }
 
@@ -1505,20 +1515,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
                 mNotificationIcons.animate()
                     .alpha(0f)
-                    .translationY(mNaturalBarHeight*0.5f)
-                    .setDuration(175)
-                    .setInterpolator(new DecelerateInterpolator(1.5f))
+                    .withLayer()
+                    .setDuration(160)
+                    .setInterpolator(mAlphaIn)
                     .setListener(mMakeIconsInvisible)
                     .start();
             } else {
                 mNotificationIcons.setVisibility(View.VISIBLE);
                 mNotificationIcons.animate()
                     .alpha(1f)
-                    .translationY(0)
-                    .setStartDelay(0)
-                    .setInterpolator(new DecelerateInterpolator(1.5f))
-                    .setDuration(175)
-                    .start();
+                    .withLayer()
+                    .setInterpolator(mAlphaOut)
+                    .setDuration(320);
             }
         }
     }
@@ -1618,7 +1626,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarWindowManager.setStatusBarExpanded(true);
 
         visibilityChanged(true);
-
+        disable(mDisabledUnmodified);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
@@ -1769,10 +1777,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView.collapseAllPanels(true);
     }
 
-    void makeExpandedInvisibleSoon() {
-        mHandler.postDelayed(new Runnable() { public void run() { makeExpandedInvisible(); }}, 50);
-    }
-
     void makeExpandedInvisible() {
         if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
                 + " mExpandedVisible=" + mExpandedVisible);
@@ -1816,7 +1820,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
-
+        disable(mDisabledUnmodified);
         showBouncer();
     }
 
