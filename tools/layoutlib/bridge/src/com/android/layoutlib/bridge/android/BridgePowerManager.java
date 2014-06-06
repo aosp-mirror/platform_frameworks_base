@@ -33,6 +33,11 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public boolean isPowerSaveMode() throws RemoteException {
+        return false;
+    }
+
+    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;
