@@ -171,8 +171,3 @@ const char* ASensor_getStringType(ASensor const* sensor)
 {
     return static_cast<Sensor const*>(sensor)->getStringType().string();
 }
-
-const char* ASensor_getRequiredPermission(ASensor const* sensor)
-{
-    return static_cast<Sensor const*>(sensor)->getRequiredPermission().string();
-}
