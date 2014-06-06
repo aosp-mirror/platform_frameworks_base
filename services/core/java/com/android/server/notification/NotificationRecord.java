@@ -54,6 +54,9 @@ public final class NotificationRecord {
     // InterceptedNotifications needs to know if this has been previously evaluated.
     private boolean mTouchedByZen;
 
+    // The timestamp used for ranking.
+    private long mRankingTimeMs;
+
     // Is this record an update of an old record?
     public boolean isUpdate;
 
@@ -61,6 +64,7 @@ public final class NotificationRecord {
     {
         this.sbn = sbn;
         this.score = score;
+        mRankingTimeMs = calculateRankingTimeMs(0L);
     }
 
     // copy any notes that the ranking system may have made before the update
@@ -69,6 +73,7 @@ public final class NotificationRecord {
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
         mTouchedByZen = previous.mTouchedByZen;
         mIntercept = previous.mIntercept;
+        mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
     }
 
     public Notification getNotification() { return sbn.getNotification(); }
@@ -139,6 +144,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mIntercept=" + mIntercept);
+        pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
     }
 
 
@@ -204,6 +210,31 @@ public final class NotificationRecord {
 
     public void setTouchedByZen() {
         mTouchedByZen = true;
+    }
+
+    /**
+     * Returns the timestamp to use for time-based sorting in the ranker.
+     */
+    public long getRankingTimeMs() {
+        return mRankingTimeMs;
+    }
+
+    /**
+     * @param previousRankingTimeMs for updated notifications, {@link #getRankingTimeMs()}
+     *     of the previous notification record, 0 otherwise
+     */
+    private long calculateRankingTimeMs(long previousRankingTimeMs) {
+        Notification n = getNotification();
+        // Take developer provided 'when', unless it's in the future.
+        if (n.when != 0 && n.when <= sbn.getPostTime()) {
+            return n.when;
+        }
+        // If we've ranked a previous instance with a timestamp, inherit it. This case is
+        // important in order to have ranking stability for updating notifications.
+        if (previousRankingTimeMs > 0) {
+            return previousRankingTimeMs;
+        }
+        return sbn.getPostTime();
     }
 
 }
