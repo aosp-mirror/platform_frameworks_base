@@ -10521,13 +10521,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setTranslationZ(z - getElevation());
     }
 
+    /**
+     * The base elevation of this view relative to its parent, in pixels.
+     *
+     * @return The base depth position of the view, in pixels.
+     */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getElevation() {
         return mRenderNode.getElevation();
     }
 
     /**
-     * Sets the base depth location of this view.
+     * Sets the base elevation of this view, in pixels.
      *
      * @attr ref android.R.styleable#View_elevation
      */
