@@ -446,7 +446,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
             @Override
             public void onUnconfigured(CameraDevice camera) {
-                mUnconfigureDrainer.taskFinished();
+                synchronized (session) {
+                    // Ignore #onUnconfigured before #close is called
+                    if (mClosed) {
+                        mUnconfigureDrainer.taskFinished();
+                    }
+                }
             }
         };
 

@@ -101,11 +101,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onOpened(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onOpened(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onOpened(CameraDeviceImpl.this);
             }
         }
     };
@@ -114,11 +114,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onUnconfigured(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
             }
         }
     };
@@ -127,11 +127,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onActive(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onActive(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onActive(CameraDeviceImpl.this);
             }
         }
     };
@@ -140,11 +140,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onBusy(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onBusy(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onBusy(CameraDeviceImpl.this);
             }
         }
     };
@@ -152,11 +152,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnClosed = new Runnable() {
         @Override
         public void run() {
-            mDeviceListener.onClosed(CameraDeviceImpl.this);
             StateListener sessionListener = mSessionStateListener;
             if (sessionListener != null) {
                 sessionListener.onClosed(CameraDeviceImpl.this);
             }
+            mDeviceListener.onClosed(CameraDeviceImpl.this);
         }
     };
 
@@ -164,11 +164,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onIdle(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onIdle(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onIdle(CameraDeviceImpl.this);
             }
         }
     };
@@ -177,11 +177,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         @Override
         public void run() {
             if (!CameraDeviceImpl.this.isClosed()) {
-                mDeviceListener.onDisconnected(CameraDeviceImpl.this);
                 StateListener sessionListener = mSessionStateListener;
                 if (sessionListener != null) {
                     sessionListener.onDisconnected(CameraDeviceImpl.this);
                 }
+                mDeviceListener.onDisconnected(CameraDeviceImpl.this);
             }
         }
     };
