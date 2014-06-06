@@ -21717,6 +21717,7 @@ package android.os {
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
+    method public boolean hasUserRestriction(java.lang.String);
     method public boolean isUserAGoat();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
