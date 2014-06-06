@@ -31,6 +31,7 @@ import android.util.Log;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
+ * @hide
  */
 
 public class FingerprintManager {
