@@ -150,6 +150,13 @@ public:
         }
     }
 
+protected:
+    virtual void damageSelf(TreeInfo& info) {
+        // Intentionally a no-op. As RootRenderNode gets a new DisplayListData
+        // every frame this would result in every draw push being a full inval,
+        // which is wrong. Only RootRenderNode has this issue.
+    }
+
 private:
     sp<Looper> mLooper;
     std::vector<OnFinishedEvent> mOnFinishedEvents;
@@ -242,11 +249,9 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong frameTimeNanos, jlong recordDuration, jfloat density,
-        jint dirtyLeft, jint dirtyTop, jint dirtyRight, jint dirtyBottom) {
+        jlong proxyPtr, jlong frameTimeNanos, jlong recordDuration, jfloat density) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density,
-            dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density);
 }
 
 static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
@@ -363,7 +368,7 @@ static JNINativeMethod gMethods[] = {
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JIIFFFF)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
-    { "nSyncAndDrawFrame", "(JJJFIIII)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
+    { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },

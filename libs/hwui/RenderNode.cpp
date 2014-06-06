@@ -25,6 +25,7 @@
 
 #include <utils/Trace.h>
 
+#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayListOp.h"
 #include "DisplayListLogBuffer.h"
@@ -110,14 +111,36 @@ void RenderNode::prepareTree(TreeInfo& info) {
     prepareTreeImpl(info);
 }
 
-void RenderNode::prepareTreeImpl(TreeInfo& info) {
-    if (info.performStagingPush) {
-        pushStagingChanges(info);
+static inline void pushNode(RenderNode* self, TreeInfo& info) {
+    if (info.damageAccumulator) {
+        info.damageAccumulator->pushNode(self);
     }
-    if (info.evaluateAnimations) {
+}
+
+static inline void popNode(TreeInfo& info) {
+    if (info.damageAccumulator) {
+        info.damageAccumulator->popNode();
+    }
+}
+
+void RenderNode::damageSelf(TreeInfo& info) {
+    if (info.damageAccumulator && isRenderable() && properties().getAlpha() > 0) {
+        info.damageAccumulator->dirty(0, 0, properties().getWidth(), properties().getHeight());
+    }
+}
+
+void RenderNode::prepareTreeImpl(TreeInfo& info) {
+    pushNode(this, info);
+    if (info.mode == TreeInfo::MODE_FULL) {
+        pushStagingChanges(info);
+        evaluateAnimations(info);
+    } else if (info.mode == TreeInfo::MODE_MAYBE_DETACHING) {
+        pushStagingChanges(info);
+    } else if (info.mode == TreeInfo::MODE_RT_ONLY) {
         evaluateAnimations(info);
     }
     prepareSubTree(info, mDisplayListData);
+    popNode(info);
 }
 
 class PushAnimatorsFunctor {
@@ -149,18 +172,28 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
     }
     if (mDirtyPropertyFields) {
         mDirtyPropertyFields = 0;
+        damageSelf(info);
+        popNode(info);
         mProperties = mStagingProperties;
+        pushNode(this, info);
+        // We could try to be clever and only re-damage if the matrix changed.
+        // However, we don't need to worry about that. The cost of over-damaging
+        // here is only going to be a single additional map rect of this node
+        // plus a rect join(). The parent's transform (and up) will only be
+        // performed once.
+        damageSelf(info);
     }
     if (mNeedsDisplayListDataSync) {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        TreeInfo oldTreeInfo;
+        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING);
+        oldTreeInfo.damageAccumulator = info.damageAccumulator;
         prepareSubTree(oldTreeInfo, mDisplayListData);
-        // TODO: The damage for the old tree should be accounted for
         delete mDisplayListData;
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = 0;
+        damageSelf(info);
     }
 }
 
@@ -180,12 +213,21 @@ private:
 void RenderNode::evaluateAnimations(TreeInfo& info) {
     if (!mAnimators.size()) return;
 
+    // TODO: Can we target this better? For now treat it like any other staging
+    // property push and just damage self before and after animators are run
+
+    damageSelf(info);
+    popNode(info);
+
     AnimateFunctor functor(this, info);
     std::vector< sp<BaseRenderNodeAnimator> >::iterator newEnd;
     newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mProperties.updateMatrix();
     info.out.hasAnimations |= mAnimators.size();
+
+    pushNode(this, info);
+    damageSelf(info);
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {

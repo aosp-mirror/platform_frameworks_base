@@ -40,6 +40,10 @@ namespace uirenderer {
 class Matrix4;
 class RenderNode;
 
+// The __VA_ARGS__ will be executed if a & b are not equal
+#define RP_SET(a, b, ...) (a != b ? (a = b, ##__VA_ARGS__, true) : false)
+#define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
+
 /*
  * Data structure that holds the properties for a RenderNode
  */
@@ -50,29 +54,30 @@ public:
 
     RenderProperties& operator=(const RenderProperties& other);
 
-    void setClipToBounds(bool clipToBounds) {
-        mPrimitiveFields.mClipToBounds = clipToBounds;
+    bool setClipToBounds(bool clipToBounds) {
+        return RP_SET(mPrimitiveFields.mClipToBounds, clipToBounds);
     }
 
-    void setProjectBackwards(bool shouldProject) {
-        mPrimitiveFields.mProjectBackwards = shouldProject;
+    bool setProjectBackwards(bool shouldProject) {
+        return RP_SET(mPrimitiveFields.mProjectBackwards, shouldProject);
     }
 
-    void setProjectionReceiver(bool shouldRecieve) {
-        mPrimitiveFields.mProjectionReceiver = shouldRecieve;
+    bool setProjectionReceiver(bool shouldRecieve) {
+        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldRecieve);
     }
 
     bool isProjectionReceiver() const {
         return mPrimitiveFields.mProjectionReceiver;
     }
 
-    void setStaticMatrix(const SkMatrix* matrix) {
+    bool setStaticMatrix(const SkMatrix* matrix) {
         delete mStaticMatrix;
         if (matrix) {
             mStaticMatrix = new SkMatrix(*matrix);
         } else {
             mStaticMatrix = NULL;
         }
+        return true;
     }
 
     // Can return NULL
@@ -80,72 +85,61 @@ public:
         return mStaticMatrix;
     }
 
-    void setAnimationMatrix(const SkMatrix* matrix) {
+    bool setAnimationMatrix(const SkMatrix* matrix) {
         delete mAnimationMatrix;
         if (matrix) {
             mAnimationMatrix = new SkMatrix(*matrix);
         } else {
             mAnimationMatrix = NULL;
         }
+        return true;
     }
 
-    void setAlpha(float alpha) {
+    bool setAlpha(float alpha) {
         alpha = fminf(1.0f, fmaxf(0.0f, alpha));
-        if (alpha != mPrimitiveFields.mAlpha) {
-            mPrimitiveFields.mAlpha = alpha;
-        }
+        return RP_SET(mPrimitiveFields.mAlpha, alpha);
     }
 
     float getAlpha() const {
         return mPrimitiveFields.mAlpha;
     }
 
-    void setHasOverlappingRendering(bool hasOverlappingRendering) {
-        mPrimitiveFields.mHasOverlappingRendering = hasOverlappingRendering;
+    bool setHasOverlappingRendering(bool hasOverlappingRendering) {
+        return RP_SET(mPrimitiveFields.mHasOverlappingRendering, hasOverlappingRendering);
     }
 
     bool hasOverlappingRendering() const {
         return mPrimitiveFields.mHasOverlappingRendering;
     }
 
-    void setElevation(float elevation) {
-        if (elevation != mPrimitiveFields.mElevation) {
-            mPrimitiveFields.mElevation = elevation;
-            // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
-        }
+    bool setElevation(float elevation) {
+        return RP_SET(mPrimitiveFields.mElevation, elevation);
+        // Don't dirty matrix/pivot, since they don't respect Z
     }
 
     float getElevation() const {
         return mPrimitiveFields.mElevation;
     }
 
-    void setTranslationX(float translationX) {
-        if (translationX != mPrimitiveFields.mTranslationX) {
-            mPrimitiveFields.mTranslationX = translationX;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setTranslationX(float translationX) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mTranslationX, translationX);
     }
 
     float getTranslationX() const {
         return mPrimitiveFields.mTranslationX;
     }
 
-    void setTranslationY(float translationY) {
-        if (translationY != mPrimitiveFields.mTranslationY) {
-            mPrimitiveFields.mTranslationY = translationY;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setTranslationY(float translationY) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mTranslationY, translationY);
     }
 
     float getTranslationY() const {
         return mPrimitiveFields.mTranslationY;
     }
 
-    void setTranslationZ(float translationZ) {
-        if (translationZ != mPrimitiveFields.mTranslationZ) {
-            mPrimitiveFields.mTranslationZ = translationZ;
-            // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
-        }
+    bool setTranslationZ(float translationZ) {
+        return RP_SET(mPrimitiveFields.mTranslationZ, translationZ);
+        // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
     }
 
     float getTranslationZ() const {
@@ -153,8 +147,8 @@ public:
     }
 
     // Animation helper
-    void setX(float value) {
-        setTranslationX(value - getLeft());
+    bool setX(float value) {
+        return setTranslationX(value - getLeft());
     }
 
     // Animation helper
@@ -163,8 +157,8 @@ public:
     }
 
     // Animation helper
-    void setY(float value) {
-        setTranslationY(value - getTop());
+    bool setY(float value) {
+        return setTranslationY(value - getTop());
     }
 
     // Animation helper
@@ -173,87 +167,80 @@ public:
     }
 
     // Animation helper
-    void setZ(float value) {
-        setTranslationZ(value - getElevation());
+    bool setZ(float value) {
+        return setTranslationZ(value - getElevation());
     }
 
     float getZ() const {
         return getElevation() + getTranslationZ();
     }
 
-    void setRotation(float rotation) {
-        if (rotation != mPrimitiveFields.mRotation) {
-            mPrimitiveFields.mRotation = rotation;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setRotation(float rotation) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mRotation, rotation);
     }
 
     float getRotation() const {
         return mPrimitiveFields.mRotation;
     }
 
-    void setRotationX(float rotationX) {
-        if (rotationX != mPrimitiveFields.mRotationX) {
-            mPrimitiveFields.mRotationX = rotationX;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setRotationX(float rotationX) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mRotationX, rotationX);
     }
 
     float getRotationX() const {
         return mPrimitiveFields.mRotationX;
     }
 
-    void setRotationY(float rotationY) {
-        if (rotationY != mPrimitiveFields.mRotationY) {
-            mPrimitiveFields.mRotationY = rotationY;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setRotationY(float rotationY) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mRotationY, rotationY);
     }
 
     float getRotationY() const {
         return mPrimitiveFields.mRotationY;
     }
 
-    void setScaleX(float scaleX) {
-        if (scaleX != mPrimitiveFields.mScaleX) {
-            mPrimitiveFields.mScaleX = scaleX;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setScaleX(float scaleX) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleX, scaleX);
     }
 
     float getScaleX() const {
         return mPrimitiveFields.mScaleX;
     }
 
-    void setScaleY(float scaleY) {
-        if (scaleY != mPrimitiveFields.mScaleY) {
-            mPrimitiveFields.mScaleY = scaleY;
-            mPrimitiveFields.mMatrixOrPivotDirty = true;
-        }
+    bool setScaleY(float scaleY) {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleY, scaleY);
     }
 
     float getScaleY() const {
         return mPrimitiveFields.mScaleY;
     }
 
-    void setPivotX(float pivotX) {
-        mPrimitiveFields.mPivotX = pivotX;
-        mPrimitiveFields.mMatrixOrPivotDirty = true;
-        mPrimitiveFields.mPivotExplicitlySet = true;
+    bool setPivotX(float pivotX) {
+        if (RP_SET(mPrimitiveFields.mPivotX, pivotX)
+                || !mPrimitiveFields.mPivotExplicitlySet) {
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
+            mPrimitiveFields.mPivotExplicitlySet = true;
+            return true;
+        }
+        return false;
     }
 
     /* Note that getPivotX and getPivotY are adjusted by updateMatrix(),
-     * so the value returned mPrimitiveFields.may be stale if the RenderProperties has been
-     * mPrimitiveFields.modified since the last call to updateMatrix()
+     * so the value returned may be stale if the RenderProperties has been
+     * modified since the last call to updateMatrix()
      */
     float getPivotX() const {
         return mPrimitiveFields.mPivotX;
     }
 
-    void setPivotY(float pivotY) {
-        mPrimitiveFields.mPivotY = pivotY;
-        mPrimitiveFields.mMatrixOrPivotDirty = true;
-        mPrimitiveFields.mPivotExplicitlySet = true;
+    bool setPivotY(float pivotY) {
+        if (RP_SET(mPrimitiveFields.mPivotY, pivotY)
+                || !mPrimitiveFields.mPivotExplicitlySet) {
+            mPrimitiveFields.mMatrixOrPivotDirty = true;
+            mPrimitiveFields.mPivotExplicitlySet = true;
+            return true;
+        }
+        return false;
     }
 
     float getPivotY() const {
@@ -264,11 +251,13 @@ public:
         return mPrimitiveFields.mPivotExplicitlySet;
     }
 
-    void setCameraDistance(float distance) {
+    bool setCameraDistance(float distance) {
         if (distance != getCameraDistance()) {
             mPrimitiveFields.mMatrixOrPivotDirty = true;
             mComputedFields.mTransformCamera.setCameraLocation(0, 0, distance);
+            return true;
         }
+        return false;
     }
 
     float getCameraDistance() const {
@@ -276,75 +265,73 @@ public:
         return const_cast<Sk3DView*>(&mComputedFields.mTransformCamera)->getCameraLocationZ();
     }
 
-    void setLeft(int left) {
-        if (left != mPrimitiveFields.mLeft) {
-            mPrimitiveFields.mLeft = left;
+    bool setLeft(int left) {
+        if (RP_SET(mPrimitiveFields.mLeft, left)) {
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
+            return true;
         }
+        return false;
     }
 
     float getLeft() const {
         return mPrimitiveFields.mLeft;
     }
 
-    void setTop(int top) {
-        if (top != mPrimitiveFields.mTop) {
-            mPrimitiveFields.mTop = top;
+    bool setTop(int top) {
+        if (RP_SET(mPrimitiveFields.mTop, top)) {
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
+            return true;
         }
+        return false;
     }
 
     float getTop() const {
         return mPrimitiveFields.mTop;
     }
 
-    void setRight(int right) {
-        if (right != mPrimitiveFields.mRight) {
-            mPrimitiveFields.mRight = right;
+    bool setRight(int right) {
+        if (RP_SET(mPrimitiveFields.mRight, right)) {
             mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
+            return true;
         }
+        return false;
     }
 
     float getRight() const {
         return mPrimitiveFields.mRight;
     }
 
-    void setBottom(int bottom) {
-        if (bottom != mPrimitiveFields.mBottom) {
-            mPrimitiveFields.mBottom = bottom;
+    bool setBottom(int bottom) {
+        if (RP_SET(mPrimitiveFields.mBottom, bottom)) {
             mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
+            return true;
         }
+        return false;
     }
 
     float getBottom() const {
         return mPrimitiveFields.mBottom;
     }
 
-    void setLeftTop(int left, int top) {
-        if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop) {
-            mPrimitiveFields.mLeft = left;
-            mPrimitiveFields.mTop = top;
-            mPrimitiveFields.mWidth = mPrimitiveFields.mRight - mPrimitiveFields.mLeft;
-            mPrimitiveFields.mHeight = mPrimitiveFields.mBottom - mPrimitiveFields.mTop;
-            if (!mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixOrPivotDirty = true;
-            }
-        }
+    bool setLeftTop(int left, int top) {
+        bool leftResult = setLeft(left);
+        bool topResult = setTop(top);
+        return leftResult || topResult;
     }
 
-    void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+    bool setLeftTopRightBottom(int left, int top, int right, int bottom) {
         if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop
                 || right != mPrimitiveFields.mRight || bottom != mPrimitiveFields.mBottom) {
             mPrimitiveFields.mLeft = left;
@@ -356,31 +343,47 @@ public:
             if (!mPrimitiveFields.mPivotExplicitlySet) {
                 mPrimitiveFields.mMatrixOrPivotDirty = true;
             }
+            return true;
         }
+        return false;
     }
 
-    void offsetLeftRight(float offset) {
+    bool offsetLeftRight(float offset) {
         if (offset != 0) {
             mPrimitiveFields.mLeft += offset;
             mPrimitiveFields.mRight += offset;
-            if (!mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixOrPivotDirty = true;
-            }
+            return true;
         }
+        return false;
     }
 
-    void offsetTopBottom(float offset) {
+    bool offsetTopBottom(float offset) {
         if (offset != 0) {
             mPrimitiveFields.mTop += offset;
             mPrimitiveFields.mBottom += offset;
-            if (!mPrimitiveFields.mPivotExplicitlySet) {
-                mPrimitiveFields.mMatrixOrPivotDirty = true;
-            }
+            return true;
         }
+        return false;
     }
 
-    void setCaching(bool caching) {
-        mPrimitiveFields.mCaching = caching;
+    bool setScrollX(int scrollX) {
+        return RP_SET(mPrimitiveFields.mScrollX, scrollX);
+    }
+
+    bool setScrollY(int scrollY) {
+        return RP_SET(mPrimitiveFields.mScrollY, scrollY);
+    }
+
+    int getScrollX() const {
+        return mPrimitiveFields.mScrollX;
+    }
+
+    int getScrollY() const {
+        return mPrimitiveFields.mScrollY;
+    }
+
+    bool setCaching(bool caching) {
+        return RP_SET(mPrimitiveFields.mCaching, caching);
     }
 
     int getWidth() const {
@@ -478,6 +481,7 @@ private:
         float mPivotX, mPivotY;
         int mLeft, mTop, mRight, mBottom;
         int mWidth, mHeight;
+        int mScrollX, mScrollY;
         bool mPivotExplicitlySet;
         bool mMatrixOrPivotDirty;
         bool mCaching;

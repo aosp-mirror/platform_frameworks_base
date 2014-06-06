@@ -95,13 +95,6 @@ static void android_view_HardwareLayer_updateRenderLayer(JNIEnv* env, jobject cl
     layer->setDisplayList(displayList, left, top, right, bottom);
 }
 
-static jboolean android_view_HardwareLayer_flushChanges(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    TreeInfo ignoredInfo;
-    return layer->apply(ignoredInfo);
-}
-
 static jlong android_view_HardwareLayer_getLayer(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
@@ -134,8 +127,6 @@ static JNINativeMethod gMethods[] = {
             (void*) android_view_HardwareLayer_setSurfaceTexture },
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
     { "nUpdateRenderLayer",      "(JJIIII)V",  (void*) android_view_HardwareLayer_updateRenderLayer },
-
-    { "nFlushChanges",           "(J)Z",       (void*) android_view_HardwareLayer_flushChanges },
 
     { "nGetLayer",               "(J)J",       (void*) android_view_HardwareLayer_getLayer },
     { "nGetTexName",             "(J)I",       (void*) android_view_HardwareLayer_getTexName },

@@ -14,6 +14,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		AmbientShadow.cpp \
 		Animator.cpp \
 		AssetAtlas.cpp \
+		DamageAccumulator.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		Caches.cpp \

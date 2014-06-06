@@ -4530,6 +4530,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Native-calculated damage path
+     * Returns false if this path was unable to complete successfully. This means
+     * it hit a ViewParent it doesn't recognize and needs to fall back to calculating
+     * damage area
+     * @hide
+     */
+    public boolean damageChildDeferred(View child) {
+        ViewParent parent = getParent();
+        while (parent != null) {
+            if (parent instanceof ViewGroup) {
+                parent = parent.getParent();
+            } else if (parent instanceof ViewRootImpl) {
+                ((ViewRootImpl) parent).invalidate();
+                return true;
+            } else {
+                parent = null;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Quick invalidation method called by View.invalidateViewProperty. This doesn't set the
      * DRAWN flags and doesn't handle the Animation logic that the default invalidation methods
      * do; all we want to do here is schedule a traversal with the appropriate dirty rect.
@@ -4537,6 +4559,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     public void damageChild(View child, final Rect dirty) {
+        if (damageChildDeferred(child)) {
+            return;
+        }
+
         ViewParent parent = this;
 
         final AttachInfo attachInfo = mAttachInfo;

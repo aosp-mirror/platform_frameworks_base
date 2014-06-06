@@ -81,6 +81,10 @@ bool DeferredLayerUpdater::apply(TreeInfo& info) {
             success = LayerRenderer::resizeLayer(mLayer, mWidth, mHeight);
         }
         mLayer->setBlend(mBlend);
+        // TODO: Use DamageAccumulator to get the damage area for the layer's
+        // subtree to only update that part of the layer. Do this as part of
+        // reworking layers to be a RenderProperty instead of a View-managed object
+        mDirtyRect.set(0, 0, mWidth, mHeight);
         mDisplayList->prepareTree(info);
         mLayer->updateDeferred(mDisplayList.get(),
                 mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);

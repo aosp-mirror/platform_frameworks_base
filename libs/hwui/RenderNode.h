@@ -148,7 +148,7 @@ public:
         mDirtyPropertyFields |= fields;
     }
 
-    const RenderProperties& properties() {
+    const RenderProperties& properties() const {
         return mProperties;
     }
 
@@ -186,6 +186,9 @@ public:
         mStagingAnimators.erase(animator);
         mNeedsAnimatorsSync = true;
     }
+
+protected:
+    virtual void damageSelf(TreeInfo& info);
 
 private:
     typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;

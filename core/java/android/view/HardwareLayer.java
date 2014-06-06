@@ -217,8 +217,6 @@ final class HardwareLayer {
     private static native void nUpdateRenderLayer(long layerUpdater, long displayList,
             int left, int top, int right, int bottom);
 
-    private static native boolean nFlushChanges(long layerUpdater);
-
     private static native long nGetLayer(long layerUpdater);
     private static native int nGetTexName(long layerUpdater);
 }

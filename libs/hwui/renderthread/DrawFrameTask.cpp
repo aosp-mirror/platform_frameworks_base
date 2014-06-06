@@ -68,10 +68,6 @@ void DrawFrameTask::removeLayerUpdate(DeferredLayerUpdater* layer) {
     }
 }
 
-void DrawFrameTask::setDirty(int left, int top, int right, int bottom) {
-    mDirty.set(left, top, right, bottom);
-}
-
 int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
@@ -83,7 +79,6 @@ int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos
     // Reset the single-frame data
     mFrameTimeNanos = 0;
     mRecordDurationNanos = 0;
-    mDirty.setEmpty();
 
     return mSyncResult;
 }
@@ -103,13 +98,12 @@ void DrawFrameTask::run() {
     bool canUnblockUiThread;
     bool canDrawThisFrame;
     {
-        TreeInfo info;
+        TreeInfo info(TreeInfo::MODE_FULL);
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
     }
 
     // Grab a copy of everything we need
-    Rect dirty(mDirty);
     CanvasContext* context = mContext;
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
@@ -118,7 +112,7 @@ void DrawFrameTask::run() {
     }
 
     if (CC_LIKELY(canDrawThisFrame)) {
-        context->draw(&dirty);
+        context->draw();
     }
 
     if (!canUnblockUiThread) {
@@ -126,18 +120,11 @@ void DrawFrameTask::run() {
     }
 }
 
-static void initTreeInfo(TreeInfo& info) {
-    info.prepareTextures = true;
-    info.performStagingPush = true;
-    info.evaluateAnimations = true;
-}
-
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     mRenderThread->timeLord().vsyncReceived(mFrameTimeNanos);
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
-    initTreeInfo(info);
 
     for (size_t i = 0; i < mLayers.size(); i++) {
         mContext->processLayerUpdate(mLayers[i].get(), info);
@@ -149,8 +136,6 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     mContext->prepareTree(info);
 
     if (info.out.hasAnimations) {
-        // TODO: dirty calculations, for now just do a full-screen inval
-        mDirty.setEmpty();
         if (info.out.requiresUiRedraw) {
             mSyncResult |= kSync_UIRedrawRequired;
         }

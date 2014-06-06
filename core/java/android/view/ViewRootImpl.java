@@ -181,7 +181,6 @@ public final class ViewRootImpl implements ViewParent,
     int mWidth;
     int mHeight;
     Rect mDirty;
-    final Rect mCurrentDirty = new Rect();
     boolean mIsAnimating;
 
     CompatibilityInfo.Translator mTranslator;
@@ -861,7 +860,9 @@ public final class ViewRootImpl implements ViewParent,
 
     void invalidate() {
         mDirty.set(0, 0, mWidth, mHeight);
-        scheduleTraversals();
+        if (!mWillDrawSoon) {
+            scheduleTraversals();
+        }
     }
 
     void invalidateWorld(View view) {
@@ -2436,12 +2437,10 @@ public final class ViewRootImpl implements ViewParent,
                 mHardwareYOffset = yoff;
                 mResizeAlpha = resizeAlpha;
 
-                mCurrentDirty.set(dirty);
                 dirty.setEmpty();
 
                 mBlockResizeBuffer = false;
-                attachInfo.mHardwareRenderer.draw(mView, attachInfo, this,
-                        animating ? null : mCurrentDirty);
+                attachInfo.mHardwareRenderer.draw(mView, attachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface

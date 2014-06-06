@@ -363,8 +363,7 @@ public abstract class HardwareRenderer {
      * @param callbacks Callbacks invoked when drawing happens.
      * @param dirty The dirty rectangle to update, can be null.
      */
-    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
-            Rect dirty);
+    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks);
 
     /**
      * Creates a new hardware layer. A hardware layer built by calling this

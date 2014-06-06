@@ -23,6 +23,7 @@
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
+#include "../DamageAccumulator.h"
 #include "../DrawProfiler.h"
 #include "../RenderNode.h"
 #include "RenderTask.h"
@@ -57,7 +58,7 @@ public:
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater, TreeInfo& info);
     void prepareTree(TreeInfo& info);
-    void draw(Rect* dirty);
+    void draw();
     void destroyCanvasAndSurface();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
@@ -99,6 +100,7 @@ private:
     bool mOpaque;
     OpenGLRenderer* mCanvas;
     bool mHaveNewSurface;
+    DamageAccumulator mDamageAccumulator;
 
     const sp<RenderNode> mRootRenderNode;
 

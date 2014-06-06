@@ -13732,6 +13732,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
+        renderNode.setScrollPosition(mScrollX, mScrollY);
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
                 || !renderNode.isValid()
                 || (!isLayer && mRecreateDisplayList)) {
