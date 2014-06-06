@@ -100,7 +100,7 @@ public class IpConfigStore {
                             out.writeInt(0);
                         }
                     }
-                    for (InetAddress inetAddr : linkProperties.getDnses()) {
+                    for (InetAddress inetAddr : linkProperties.getDnsServers()) {
                         out.writeUTF(DNS_KEY);
                         out.writeUTF(inetAddr.getHostAddress());
                     }
@@ -232,7 +232,7 @@ public class IpConfigStore {
                             }
                             linkProperties.addRoute(new RouteInfo(dest, gateway));
                         } else if (key.equals(DNS_KEY)) {
-                            linkProperties.addDns(
+                            linkProperties.addDnsServer(
                                     NetworkUtils.numericToInetAddress(in.readUTF()));
                         } else if (key.equals(PROXY_SETTINGS_KEY)) {
                             proxySettings = ProxySettings.valueOf(in.readUTF());
