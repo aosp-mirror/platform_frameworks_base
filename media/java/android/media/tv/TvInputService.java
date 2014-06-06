@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.media.tv.ITvInputService;
-import android.media.tv.TvInputManager.Session;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +45,17 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 /**
- * A base class for implementing television input service.
+ * The TvInputService class represents a TV input or source such as HDMI or built-in tuner which
+ * provides pass-through video or broadcast TV programs.
+ * <p>
+ * Applications will not normally use this service themselves, instead relying on the standard
+ * interaction provided by {@link TvView}. Those implementing TV input services should normally do
+ * so by deriving from this class and providing their own session implementation based on
+ * {@link TvInputService.Session}. All TV input services must require that clients hold the
+ * {@link android.Manifest.permission#BIND_TV_INPUT} in order to interact with the service; if this
+ * permission is not specified in the manifest, the system will refuse to bind to that TV input
+ * service.
+ * </p>
  */
 public abstract class TvInputService extends Service {
     // STOPSHIP: Turn debugging off.
@@ -74,7 +82,9 @@ public abstract class TvInputService extends Service {
     private final Handler mHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
-    private boolean mAvailable;
+    // STOPSHIP: Redesign the API around the availability change. For now, the service will be
+    // always available.
+    private final boolean mAvailable = true;
 
     @Override
     public void onCreate() {
@@ -124,19 +134,6 @@ public abstract class TvInputService extends Service {
     }
 
     /**
-     * Convenience method to notify an availability change of this TV input service.
-     *
-     * @param available {@code true} if the input service is available to show TV programs.
-     */
-    public final void setAvailable(boolean available) {
-        if (available != mAvailable) {
-            mAvailable = available;
-            mHandler.obtainMessage(ServiceHandler.DO_BROADCAST_AVAILABILITY_CHANGE, available)
-                    .sendToTarget();
-        }
-    }
-
-    /**
      * Get the number of callbacks that are registered.
      *
      * @hide
@@ -147,17 +144,17 @@ public abstract class TvInputService extends Service {
     }
 
     /**
-     * Returns a concrete implementation of {@link TvInputSessionImpl}.
+     * Returns a concrete implementation of {@link Session}.
      * <p>
      * May return {@code null} if this TV input service fails to create a session for some reason.
      * </p>
      */
-    public abstract TvInputSessionImpl onCreateSession();
+    public abstract Session onCreateSession();
 
     /**
      * Base class for derived classes to implement to provide {@link TvInputManager.Session}.
      */
-    public abstract class TvInputSessionImpl implements KeyEvent.Callback {
+    public abstract class Session implements KeyEvent.Callback {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         private WindowManager.LayoutParams mWindowParams;
@@ -168,7 +165,7 @@ public abstract class TvInputService extends Service {
         private Rect mOverlayFrame;
         private ITvInputSessionCallback mSessionCallback;
 
-        public TvInputSessionImpl() {
+        public Session() {
             mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         }
 
@@ -303,12 +300,12 @@ public abstract class TvInputService extends Service {
         public abstract boolean onSetSurface(Surface surface);
 
         /**
-         * Sets the relative volume of the current TV input session to handle the change of audio
-         * focus by setting.
+         * Sets the relative stream volume of the current TV input session to handle the change of
+         * audio focus by setting.
          *
          * @param volume Volume scale from 0.0 to 1.0.
          */
-        public abstract void onSetVolume(float volume);
+        public abstract void onSetStreamVolume(float volume);
 
         /**
          * Tunes to a given channel.
@@ -469,10 +466,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onSetVolume}.
+         * Calls {@link #onSetStreamVolume}.
          */
         void setVolume(float volume) {
-            onSetVolume(volume);
+            onSetStreamVolume(volume);
         }
 
         /**
@@ -565,33 +562,33 @@ public abstract class TvInputService extends Service {
             if (DEBUG) Log.d(TAG, "dispatchInputEvent(" + event + ")");
             if (event instanceof KeyEvent) {
                 if (((KeyEvent) event).dispatch(this, mDispatcherState, this)) {
-                    return Session.DISPATCH_HANDLED;
+                    return TvInputManager.Session.DISPATCH_HANDLED;
                 }
             } else if (event instanceof MotionEvent) {
                 MotionEvent motionEvent = (MotionEvent) event;
                 final int source = motionEvent.getSource();
                 if (motionEvent.isTouchEvent()) {
                     if (onTouchEvent(motionEvent)) {
-                        return Session.DISPATCH_HANDLED;
+                        return TvInputManager.Session.DISPATCH_HANDLED;
                     }
                 } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
                     if (onTrackballEvent(motionEvent)) {
-                        return Session.DISPATCH_HANDLED;
+                        return TvInputManager.Session.DISPATCH_HANDLED;
                     }
                 } else {
                     if (onGenericMotionEvent(motionEvent)) {
-                        return Session.DISPATCH_HANDLED;
+                        return TvInputManager.Session.DISPATCH_HANDLED;
                     }
                 }
             }
             if (mOverlayView == null || !mOverlayView.isAttachedToWindow()) {
-                return Session.DISPATCH_NOT_HANDLED;
+                return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
             if (!mOverlayView.hasWindowFocus()) {
                 mOverlayView.getViewRootImpl().windowFocusChanged(true, true);
             }
             mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
-            return Session.DISPATCH_IN_PROGRESS;
+            return TvInputManager.Session.DISPATCH_IN_PROGRESS;
         }
 
         private void setSessionCallback(ITvInputSessionCallback callback) {
@@ -611,7 +608,7 @@ public abstract class TvInputService extends Service {
                     InputChannel channel = (InputChannel) args.arg1;
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     try {
-                        TvInputSessionImpl sessionImpl = onCreateSession();
+                        Session sessionImpl = onCreateSession();
                         if (sessionImpl == null) {
                             // Failed to create a session.
                             cb.onSessionCreated(null);

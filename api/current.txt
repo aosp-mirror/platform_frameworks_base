@@ -16052,12 +16052,10 @@ package android.media.tv {
 
   public final class TvInputInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public android.content.ComponentName getComponent();
     method public java.lang.String getId();
     method public android.content.Intent getIntentForSettingsActivity();
     method public android.content.Intent getIntentForSetupActivity();
-    method public java.lang.String getPackageName();
-    method public java.lang.String getServiceName();
+    method public android.content.pm.ServiceInfo getServiceInfo();
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String EXTRA_SERVICE_NAME = "serviceName";
@@ -16067,13 +16065,11 @@ package android.media.tv {
     method public void createSession(java.lang.String, android.media.tv.TvInputManager.SessionCallback, android.os.Handler);
     method public boolean getAvailability(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
-    method public void registerListener(java.lang.String, android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
-    method public void unregisterListener(java.lang.String, android.media.tv.TvInputManager.TvInputListener);
   }
 
   public static final class TvInputManager.Session {
     method public void release();
-    method public void setVolume(float);
+    method public void setStreamVolume(float);
     method public void tune(android.net.Uri);
   }
 
@@ -16091,14 +16087,13 @@ package android.media.tv {
   public abstract class TvInputService extends android.app.Service {
     ctor public TvInputService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.media.tv.TvInputService.TvInputSessionImpl onCreateSession();
-    method public final void setAvailable(boolean);
+    method public abstract android.media.tv.TvInputService.Session onCreateSession();
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
     field public static final java.lang.String SERVICE_META_DATA = "android.media.tv.input";
   }
 
-  public abstract class TvInputService.TvInputSessionImpl implements android.view.KeyEvent.Callback {
-    ctor public TvInputService.TvInputSessionImpl();
+  public abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
+    ctor public TvInputService.Session();
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -16106,8 +16101,8 @@ package android.media.tv {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
+    method public abstract void onSetStreamVolume(float);
     method public abstract boolean onSetSurface(android.view.Surface);
-    method public abstract void onSetVolume(float);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
@@ -16122,6 +16117,7 @@ package android.media.tv {
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
+    method public void setStreamVolume(float);
     method public void unbindTvInput();
   }
 

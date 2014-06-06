@@ -18,8 +18,6 @@ package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.media.tv.TvInputManager.Session;
-import android.media.tv.TvInputService.TvInputSessionImpl;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Looper;
@@ -52,11 +50,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     private final HandlerCaller mCaller;
 
-    private TvInputSessionImpl mTvInputSessionImpl;
+    private TvInputService.Session mTvInputSessionImpl;
     private InputChannel mChannel;
     private TvInputEventReceiver mReceiver;
 
-    public ITvInputSessionWrapper(Context context, TvInputSessionImpl sessionImpl,
+    public ITvInputSessionWrapper(Context context, TvInputService.Session sessionImpl,
             InputChannel channel) {
         mCaller = new HandlerCaller(context, null, this, true /* asyncHandler */);
         mTvInputSessionImpl = sessionImpl;
@@ -169,8 +167,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
 
             int handled = mTvInputSessionImpl.dispatchInputEvent(event, this);
-            if (handled != Session.DISPATCH_IN_PROGRESS) {
-                finishInputEvent(event, handled == Session.DISPATCH_HANDLED);
+            if (handled != TvInputManager.Session.DISPATCH_IN_PROGRESS) {
+                finishInputEvent(event, handled == TvInputManager.Session.DISPATCH_HANDLED);
             }
         }
     }
