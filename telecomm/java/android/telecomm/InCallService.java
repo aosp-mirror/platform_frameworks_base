@@ -203,7 +203,7 @@ public abstract class InCallService extends Service {
      * {@link #setPostDial(String,String)} state but is now waiting for user confirmation before the
      * remaining digits can be sent. Normal transitions are to {@link #setPostDial(String,String)}
      * when the user asks Telecomm to proceed with the post-dial sequence and the in-call app
-     * informs Telecomm of this by invoking {@link InCallAdapter#postDialContinue(String)}.
+     * informs Telecomm of this by invoking {@link InCallAdapter#postDialContinue(String,boolean)}.
      *
      * @param callId The identifier of the call changing state.
      * @param remaining The remaining postdial string to be dialed.

@@ -27595,6 +27595,8 @@ package android.telecomm {
     method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onPostDialContinue(java.lang.String, boolean);
+    method public void onPostDialWait(android.telecomm.Connection, java.lang.String);
     method public abstract void playDtmfTone(java.lang.String, char);
     method public abstract void reject(java.lang.String);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
@@ -27606,6 +27608,7 @@ package android.telecomm {
     method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
     method public void handleSuccessfulOutgoingCall(java.lang.String);
     method public void notifyIncomingCall(android.telecomm.CallInfo);
+    method public void onPostDialWait(java.lang.String, java.lang.String);
     method public void setActive(java.lang.String);
     method public void setDialing(java.lang.String);
     method public void setDisconnected(java.lang.String, int, java.lang.String);
@@ -27683,6 +27686,7 @@ package android.telecomm {
     method protected void onDisconnect();
     method protected void onHold();
     method protected void onPlayDtmfTone(char);
+    method protected void onPostDialContinue(boolean);
     method protected void onReject();
     method protected void onSetAudioState(android.telecomm.CallAudioState);
     method protected void onSetSignal(android.os.Bundle);
@@ -27753,6 +27757,8 @@ package android.telecomm {
     method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public void onFindSubscriptions(android.net.Uri, android.telecomm.Response<android.net.Uri, android.telecomm.Subscription>);
+    method public final void onPostDialContinue(java.lang.String, boolean);
+    method public final void onPostDialWait(android.telecomm.Connection, java.lang.String);
     method public final void playDtmfTone(java.lang.String, char);
     method public final void reject(java.lang.String);
     method public final void setIncomingCallId(java.lang.String, android.os.Bundle);
@@ -27777,7 +27783,7 @@ package android.telecomm {
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
     method public void playDtmfTone(java.lang.String, char);
-    method public void postDialContinue(java.lang.String);
+    method public void postDialContinue(java.lang.String, boolean);
     method public void rejectCall(java.lang.String);
     method public void setAudioRoute(int);
     method public void stopDtmfTone(java.lang.String);
