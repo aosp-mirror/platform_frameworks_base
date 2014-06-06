@@ -45,6 +45,7 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_ALIAS_CHANGED);
         context.registerReceiver(this, filter);
 
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -104,8 +105,8 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
 
     @Override
     public String getLastDeviceName() {
-        return mLastDevice != null ? mLastDevice.getName()
-                : mBondedDevices.size() == 1 ? mBondedDevices.iterator().next().getName()
+        return mLastDevice != null ? mLastDevice.getAliasName()
+                : mBondedDevices.size() == 1 ? mBondedDevices.iterator().next().getAliasName()
                 : null;
     }
 
@@ -120,6 +121,9 @@ public class BluetoothControllerImpl extends BroadcastReceiver implements Blueto
         if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
             mConnecting = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1)
                     == BluetoothAdapter.STATE_CONNECTING;
+            mLastDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+        }
+        if (action.equals(BluetoothDevice.ACTION_ALIAS_CHANGED)) {
             mLastDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
         }
         fireCallbacks();
