@@ -557,9 +557,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int color = sbn.getNotification().color;
             if (isMediaNotification(entry)) {
                 entry.row.setBackgroundResourceIds(
-                        com.android.internal.R.drawable.notification_quantum_bg,
+                        com.android.internal.R.drawable.notification_material_bg,
                         color,
-                        com.android.internal.R.drawable.notification_quantum_bg_dim,
+                        com.android.internal.R.drawable.notification_material_bg_dim,
                         color);
             }
         }
@@ -981,7 +981,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (publicViewLocal == null) {
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
-                    com.android.internal.R.layout.notification_template_quantum_base,
+                    com.android.internal.R.layout.notification_template_material_base,
                     expandedPublic, true);
 
             final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);

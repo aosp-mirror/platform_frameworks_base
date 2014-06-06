@@ -28,7 +28,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:button="@null"
-        android:background="@*android:drawable/switch_track_quantum"
+        android:background="@*android:drawable/switch_track_material"
         android:visibility="gone"
         />
     <com.android.systemui.settings.ToggleSeekBar
