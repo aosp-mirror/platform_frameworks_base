@@ -706,8 +706,14 @@ final class DisplayPowerController {
                 // Turn the screen on.  The contents of the screen may not yet
                 // be visible if the electron beam has not been dismissed because
                 // its last frame of animation is solid black.
-                setScreenState(mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE
-                        ? Display.STATE_DOZING : Display.STATE_ON);
+
+                if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE) {
+                    if (!mScreenBrightnessRampAnimator.isAnimating()) {
+                        setScreenState(Display.STATE_DOZING);
+                    }
+                } else {
+                    setScreenState(Display.STATE_ON);
+                }
 
                 if (mPowerRequest.blockScreenOn
                         && mPowerState.getElectronBeamLevel() == 0.0f) {
