@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import android.annotation.PrivateApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Slog;
@@ -37,7 +37,7 @@ import libcore.io.IoUtils;
  *
  * @hide
  */
-@PrivateApi
+@SystemApi
 public class ManifestDigest implements Parcelable {
     private static final String TAG = "ManifestDigest";
 
