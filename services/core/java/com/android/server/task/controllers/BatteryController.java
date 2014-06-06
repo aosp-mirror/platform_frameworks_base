@@ -151,7 +151,7 @@ public class BatteryController extends StateController {
             // Initialise tracker state.
             BatteryService batteryService = (BatteryService) ServiceManager.getService("battery");
             if (batteryService != null) {
-                mBatteryHealthy = !batteryService.isBatteryLow();
+                mBatteryHealthy = !batteryService.getBatteryLevelLow();
                 mCharging = batteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
             } else {
                 // Unavailable for some reason, we default to false and let ACTION_BATTERY_[OK,LOW]
