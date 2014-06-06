@@ -233,7 +233,7 @@ static void android_drm_DrmManagerClient_setListeners(
 static void android_drm_DrmManagerClient_release(
         JNIEnv* env, jobject thiz, jint uniqueId) {
     ALOGV("release - Enter");
-    DrmManagerClientImpl::remove(uniqueId);
+    getDrmManagerClientImpl(env, thiz)->remove(uniqueId);
     getDrmManagerClientImpl(env, thiz)->setOnInfoListener(uniqueId, NULL);
 
     sp<DrmManagerClientImpl> oldClient = setDrmManagerClientImpl(env, thiz, NULL);
