@@ -39,6 +39,8 @@ public:
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
     static void forFontRun(const Layout& layout, SkPaint* paint, F& f) {
+        float saveSkewX = paint->getTextSkewX();
+        bool savefakeBold = paint->isFakeBoldText();
         MinikinFont* curFont = NULL;
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
@@ -47,6 +49,8 @@ public:
             if (i > 0 && nextFont != curFont) {
                 MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
                 f(start, i);
+                paint->setTextSkewX(saveSkewX);
+                paint->setFakeBoldText(savefakeBold);
                 start = i;
             }
             curFont = nextFont;
@@ -54,6 +58,8 @@ public:
         if (nGlyphs > start) {
             MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
             f(start, nGlyphs);
+            paint->setTextSkewX(saveSkewX);
+            paint->setFakeBoldText(savefakeBold);
         }
     }
 };
