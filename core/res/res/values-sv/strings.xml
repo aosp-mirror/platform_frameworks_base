@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillåter att appen spelar in ljud med mikrofonen. Med den här behörigheten tillåts appen att spela in ljud när som helst utan ditt godkännande."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-kommunikation"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillåter att appen skickar kommandon till SIM-kortet. Detta är mycket farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillåter att appen tar bilder och spelar in videor med kameran. Med den här behörigheten tillåts appen att använda kameran när som helst utan ditt godkännande."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"inaktivera LED-sändningsindikator när kameran används"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillåter att en app kontrollerar knapplåsfunktionen."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Lyssna efter ändringar i betrodda agenters status."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillåter att en app lyssnar efter ändringar i den betrodda agentens status."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bind till en tjänst från en betrodd agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillåter att en app binds vid en tjänst från en betrodd agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagera med uppdaterings- och återställningssystemet"</string>

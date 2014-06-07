@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"Communication avec la carte SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Autoriser l\'envoi de commandes à la carte SIM via l\'application. Cette fonctionnalité est très risquée."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"désactiver l\'indicateur d\'émission LED lorsque la caméra est en cours d\'utilisation"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permet à une application de contrôler la protection des touches."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Détecter les modifications de l\'état de confiance"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permettre à une application de détecter les modifications de l\'état de confiance."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"S\'associer à un service d\'agent de confiance"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permettre à une application de s\'associer à un service d\'agent de confiance."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagir avec le système de récupération et de mise à jour"</string>

@@ -176,7 +176,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Создание отчета об ошибке"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Режим без звука"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Выключить"</string>
@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Запись аудио"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Приложение сможет записывать аудио с помощью микрофона в любое время без уведомления."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"Обращение к SIM-карте"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Приложение сможет отправлять команды SIM-карте (данное разрешение представляет большую угрозу)."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Фото- и видеосъемка"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Приложение сможет снимать фотографии и видеоролики с помощью камеры в любое время без вашего разрешения."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Отключать светодиодный индикатор во время использования камеры"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Приложение сможет управлять хранилищем ключей."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Отслеживание изменений статуса доверия"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Приложение сможет отслеживать изменения в статусе доверия."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Подключение к службе Trust Agents"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Приложение сможет подключаться к службе Trust Agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаимодействовать с системой восстановления и обновлениями"</string>

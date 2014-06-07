@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite aplicaţiei să modifice setările audio globale, cum ar fi volumul şi difuzorul care este utilizat pentru ieşire."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistrare audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite aplicaţiei să efectueze înregistrări audio cu ajutorul microfonului. Cu această permisiune aplicaţia efectuează oricând înregistrări audio fără confirmare."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicare cu cardul SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite aplicației să trimită comenzi pe cardul SIM. Această permisiune este foarte periculoasă."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"realizarea de fotografii şi videoclipuri"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite aplicaţiei să realizeze fotografii şi videoclipuri cu camera foto. Cu această permisiune aplicaţia utilizează camera foto oricând şi fără confirmare."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"dezactivează ledul care indică când este utilizată camera foto"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite unei aplicații să controleze blocarea tastaturii."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Detectarea modificărilor în starea de încredere."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite unei aplicații să detecteze modificările în starea de încredere."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Asocierea la un serviciu „agenți de încredere”."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite unei aplicații să se asocieze la un serviciu „agent de încredere”."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacțiune cu sistemul de recuperare și de actualizare"</string>

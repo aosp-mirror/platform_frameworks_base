@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Cho phép ứng dụng ghi âm bằng micrô. Quyền này cho phép ứng dụng ghi âm bất kỳ lúc nào mà không cần sự xác nhận của bạn."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"liên lạc qua sim"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Cho phép ứng dụng gửi lệnh đến SIM. Việc này rất nguy hiểm."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Cho phép ứng dụng chụp ảnh và quay video bằng máy ảnh. Quyền này cho phép ứng dụng sử dụng máy ảnh bất kỳ lúc nào mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"vô hiệu hóa tính năng phát đèn LED chỉ báo khi máy ảnh đang được sử dụng"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Cho phép ứng dụng kiểm soát tính năng bảo vệ phím."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Quan sát các thay đổi ở trạng thái đáng tin cậy."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Cho phép ứng dụng quan sát các thay đổi ở trạng thái đáng tin cậy."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Liên kết với một dịch vụ của đại lý đáng tin cậy"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Cho phép ứng dụng liên kết với một dịch vụ của đại lý đáng tin cậy."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Tương tác với hệ thống khôi phục và bản cập nhật"</string>

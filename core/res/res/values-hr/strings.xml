@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vašeg odobrenja."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikacija sa SIM-om"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Omogućuje aplikaciji slanje naredbi SIM-u. To je vrlo opasno."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vašeg odobrenja."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"onemogućavanje lampice pokazivača prijenosa kada je fotoaparat u upotrebi"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Omogućuje aplikaciji upravljanje zaključavanjem tipkovnice."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Prati promjene pouzdanog stanja."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Omogućuje aplikaciji praćenje promjena pouzdanog stanja."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Povezivanje s uslugom pouzdanog predstavnika"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Omogućuje aplikaciji povezivanje s uslugom pouzdanog predstavnika."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcija s ažuriranjem i sustavom za oporavak"</string>

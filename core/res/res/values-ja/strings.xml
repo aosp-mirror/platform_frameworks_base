@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"マイクを使った録音をアプリに許可します。これにより、アプリがいつでも確認なしで録音できるようになります。"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM通信"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"カメラの使用中に通信インジケータLEDを無効にする"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"キーガードの制御をアプリに許可します。"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"信頼状態の変更をリッスン"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"信頼状態の変更をリッスンすることをアプリに許可します。"</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"信頼できるエージェントサービスへのバインド"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"信頼できるエージェントサービスにバインドすることをアプリに許可します。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"アップデートと回復システムへのアクセス"</string>

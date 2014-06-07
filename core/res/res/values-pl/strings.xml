@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pozwala aplikacji na modyfikowanie globalnych ustawień dźwięku, takich jak głośność oraz urządzenie wyjściowe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nagrywanie dźwięku"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Pozwala aplikacji na nagrywanie dźwięku przez mikrofon. Aplikacja z tym uprawnieniem może nagrywać dźwięk w dowolnym momencie bez Twojego potwierdzenia."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikacja z kartą SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Pozwala aplikacji na wysyłanie poleceń do karty SIM. To bardzo niebezpieczne."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"wykonywanie zdjęć i filmów wideo"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Pozwala aplikacji na robienie zdjęć i nagrywanie filmów przy użyciu aparatu. Aplikacja z tym uprawnieniem może użyć aparatu w dowolnym momencie bez Twojego potwierdzenia."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"wyłącz wskaźnik LED transmisji, gdy aparat jest w użyciu"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Umożliwia aplikacji kontrolowanie zabezpieczenia kluczami."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Monitoruj zmiany w stanie zaufania."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Zezwala aplikacji na monitorowanie zmian w stanie zaufania."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Powiąż z usługą agenta zaufania"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Zezwala aplikacji na powiązanie z usługą agenta zaufania."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcja z systemem odzyskiwania i aktualizacjami"</string>

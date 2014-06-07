@@ -530,8 +530,6 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optage lyd"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillader, at appen kan optage lyd med mikrofonen. Med denne tilladelse kan appen til enhver tid optage lyd uden din bekræftelse."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-kommunikation"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillader, at appen sender kommandoer til SIM-kortet. Dette er meget farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillader, at appen kan tage billeder og videoer med kameraet. Med denne tilladelse kan appen til enhver tid bruge kameraet uden din bekræftelse."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiver sendelysdioden, når kameraet er i brug"</string>
@@ -1356,6 +1354,10 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillader, at en applikation styrer nøglebeskyttelsen."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Registrere ændringer i trust-tilstand."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillader, at en applikation registrerer ændringer i trust-tilstand."</string>
+    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
+    <skip />
+    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Knytte sig til en trust agent-tjeneste"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation knytter sig til en trust agent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interager med opdaterings- og gendannelsessystemet"</string>
