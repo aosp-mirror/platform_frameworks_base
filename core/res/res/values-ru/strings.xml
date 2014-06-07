@@ -176,7 +176,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Создание отчета об ошибке"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Режим без звука"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Выключить"</string>
@@ -188,8 +188,10 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Личные данные"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Работа"</string>
+    <!-- no translation found for user_owner_label (6465364741001216388) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (3022906847647343112) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Платные услуги"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Приложение сможет использовать платные услуги."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Сообщения"</string>
