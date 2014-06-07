@@ -18,25 +18,25 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="top">
+        android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="normal">
 
-    <alpha android:fromAlpha="0" android:toAlpha="1.0"
+    <alpha android:fromAlpha="0.6" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quad"
-            android:startOffset="300"
-            android:duration="400"/>
+            android:interpolator="@interpolator/decelerate_cubic"
+            android:startOffset="600"
+            android:duration="133"/>
 
-    <translate android:fromYDelta="-120%" android:toYDelta="0"
+    <translate android:fromYDelta="10%" android:toYDelta="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quint"
+            android:interpolator="@interpolator/decelerate_cubic"
             android:startOffset="300"
-            android:duration="400" />
+            android:duration="433" />
 
-    <scale android:fromXScale=".5" android:toXScale="1.0"
-            android:fromYScale=".5" android:toYScale="1.0"
+    <scale android:fromXScale=".9" android:toXScale="1.0"
+            android:fromYScale=".9" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="0%p"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quad"
+            android:interpolator="@interpolator/fast_out_slow_in"
             android:startOffset="300"
-            android:duration="400" />
+            android:duration="433" />
 </set>
