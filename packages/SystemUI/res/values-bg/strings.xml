@@ -187,10 +187,14 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> устройства)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth е изключен"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркост"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Автоматична ориентация"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Ориентацията е заключена"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Заключено във вертикален режим"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Заключено в хоризонтален режим"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (7305323031808150099) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (6359205706154282377) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_portrait_label (5102691921442135053) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_landscape_label (8553157770061178719) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Метод на въвеждане"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Местоположение"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Местоположението е изключено"</string>
@@ -204,7 +208,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Няма връзка"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма мрежа"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi е изключен"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Екран за предаване"</string>
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (7482103121002965053) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркост"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТ."</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Обръщане на цветовете"</string>
@@ -232,6 +237,10 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Прекарайте пръст нагоре, за да отключите"</string>
+    <!-- no translation found for phone_hint (3101468054914424646) -->
+    <skip />
+    <!-- no translation found for camera_hint (5241441720959174226) -->
+    <skip />
     <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"За една минута"</item>

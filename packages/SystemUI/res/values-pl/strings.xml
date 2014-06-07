@@ -187,10 +187,14 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (urządzenia: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth wył."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jasność"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Autoobracanie"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Obracanie jest zablokowane"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Zablokowano w orientacji pionowej"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Zablokowano w orientacji poziomej"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (7305323031808150099) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (6359205706154282377) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_portrait_label (5102691921442135053) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_landscape_label (8553157770061178719) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metoda wprowadzania"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Lokalizacja"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Lokalizacja wyłączona"</string>
@@ -204,7 +208,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Brak połączenia"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Brak sieci"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wyłącz Wi-Fi"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Ekran Cast"</string>
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (7482103121002965053) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jasność"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATYCZNA"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Odwróć kolory"</string>
@@ -232,6 +237,10 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Poniżej widać mniej pilne powiadomienia"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Kliknij ponownie, by otworzyć"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Przesuń w górę, by odblokować"</string>
+    <!-- no translation found for phone_hint (3101468054914424646) -->
+    <skip />
+    <!-- no translation found for camera_hint (5241441720959174226) -->
+    <skip />
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dopóki nie wyłączysz"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Przez minutę"</item>

@@ -187,10 +187,14 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> laitetta)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth pois käytöstä"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Kirkkaus"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automaattinen kääntö"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Kääntö lukittu"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Vaaka lukittu"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Pysty lukittu"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (7305323031808150099) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (6359205706154282377) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_portrait_label (5102691921442135053) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_landscape_label (8553157770061178719) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Syöttötapa"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Sijainti"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Sijainti ei käytössä"</string>
@@ -204,7 +208,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ei yhteyttä"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ei verkkoa"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi-yhteys pois käytöstä"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Lähetysnäyttö"</string>
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (7482103121002965053) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kirkkaus"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Käänteiset värit"</string>
@@ -213,8 +218,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Jaettu yhteys"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Ilmoitukset"</string>
-    <!-- no translation found for recents_empty_message (7883614615463619450) -->
-    <skip />
+    <string name="recents_empty_message" msgid="7883614615463619450">"Ei viimeaikaisia sovelluksia"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Sovellustiedot"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"haku"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Verkkoa saatetaan\nvalvoa"</string>
@@ -233,6 +237,10 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähemmän kiireelliset ilmoitukset ovat alla"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avaa napauttamalla uudelleen"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Avaa lukitus pyyhkäisemällä ylös"</string>
+    <!-- no translation found for phone_hint (3101468054914424646) -->
+    <skip />
+    <!-- no translation found for camera_hint (5241441720959174226) -->
+    <skip />
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kunnes poistat tämän käytöstä"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Minuutiksi"</item>
