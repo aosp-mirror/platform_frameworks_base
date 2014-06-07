@@ -26,10 +26,14 @@ import android.app.task.ITaskManager;
 import android.app.task.Task;
 import android.app.task.TaskManager;
 import android.content.BroadcastReceiver;
+import android.app.task.TaskService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -608,24 +612,43 @@ public class TaskManagerService extends com.android.server.SystemService
          */
         private final SparseArray<Boolean> mPersistCache = new SparseArray<Boolean>();
 
-        // Determine whether the caller is allowed to persist tasks, with a small cache
-        // because the lookup is expensive enough that we'd like to avoid repeating it.
-        // This must be called from within the calling app's binder identity!
-        private boolean canCallerPersistTasks() {
+        // Enforce that only the app itself (or shared uid participant) can schedule a
+        // task that runs one of the app's services, as well as verifying that the
+        // named service properly requires the BIND_TASK_SERVICE permission
+        private void enforceValidJobRequest(int uid, Task job) {
+            final PackageManager pm = getContext().getPackageManager();
+            final ComponentName service = job.getService();
+            try {
+                ServiceInfo si = pm.getServiceInfo(service, 0);
+                if (si.applicationInfo.uid != uid) {
+                    throw new IllegalArgumentException("uid " + uid +
+                            " cannot schedule job in " + service.getPackageName());
+                }
+                if (!TaskService.PERMISSION_BIND.equals(si.permission)) {
+                    throw new IllegalArgumentException("Scheduled service " + service
+                            + " does not require android.permission.BIND_TASK_SERVICE permission");
+                }
+            } catch (NameNotFoundException e) {
+                throw new IllegalArgumentException("No such service: " + service);
+            }
+        }
+
+        private boolean canPersistJobs(int pid, int uid) {
+            // If we get this far we're good to go; all we need to do now is check
+            // whether the app is allowed to persist its scheduled work.
             final boolean canPersist;
-            final int callingUid = Binder.getCallingUid();
             synchronized (mPersistCache) {
-                Boolean cached = mPersistCache.get(callingUid);
+                Boolean cached = mPersistCache.get(uid);
                 if (cached != null) {
                     canPersist = cached.booleanValue();
                 } else {
                     // Persisting tasks is tantamount to running at boot, so we permit
                     // it when the app has declared that it uses the RECEIVE_BOOT_COMPLETED
                     // permission
-                    int result = getContext().checkCallingPermission(
-                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED);
+                    int result = getContext().checkPermission(
+                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED, pid, uid);
                     canPersist = (result == PackageManager.PERMISSION_GRANTED);
-                    mPersistCache.put(callingUid, canPersist);
+                    mPersistCache.put(uid, canPersist);
                 }
             }
             return canPersist;
@@ -637,8 +660,11 @@ public class TaskManagerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Scheduling task: " + task);
             }
-            final boolean canPersist = canCallerPersistTasks();
+            final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
+
+            enforceValidJobRequest(uid, task);
+            final boolean canPersist = canPersistJobs(pid, uid);
 
             long ident = Binder.clearCallingIdentity();
             try {

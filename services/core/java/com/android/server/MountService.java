@@ -629,6 +629,11 @@ class MountService extends IMountService.Stub
             sendUmsIntent(true);
             mSendUmsConnectedOnBoot = false;
         }
+
+        /*
+         * Start scheduling nominally-daily fstrim operations
+         */
+        MountServiceIdler.scheduleIdlePass(mContext);
     }
 
     private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
