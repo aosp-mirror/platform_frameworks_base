@@ -36,10 +36,13 @@ public:
 
     int32_t GetUniqueId() const;
 
-    SkTypeface *GetSkTypeface();
+    SkTypeface* GetSkTypeface() const;
 
     static uint32_t packPaintFlags(const SkPaint* paint);
     static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
+
+    // set typeface and fake bold/italic parameters
+    static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
 private:
     SkTypeface *mTypeface;
 };

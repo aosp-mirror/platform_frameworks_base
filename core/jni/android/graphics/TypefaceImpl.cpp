@@ -173,7 +173,7 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
     } else {
         const FontStyle defaultStyle;
         FontFamily* firstFamily = reinterpret_cast<FontFamily*>(families[0]);
-        MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle);
+        MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
         SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
         // TODO: probably better to query more precise style from family, will be important
         // when we open up API to access 100..900 weights
