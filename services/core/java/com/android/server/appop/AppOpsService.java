@@ -759,10 +759,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                     } catch (RemoteException ignored) {
                     }
                     if (curUid != ops.uidState.uid) {
-                        Slog.i(TAG, "Pruning old package " + ops.packageName
-                                + "/" + ops.uidState + ": new uid=" + curUid);
-                        it.remove();
-                        changed = true;
+                        // Do not prune apps that are not currently present in the device
+                        // (like SDcard ones). While booting, SDcards are not available but
+                        // must not be purged from AppOps, because they are still present
+                        // in the Android app database.
+                        String pkgName = mContext.getPackageManager().getNameForUid(ops.uidState.uid);
+                        if (curUid != -1 || pkgName == null || !pkgName.equals(ops.packageName)) {
+                            Slog.i(TAG, "Pruning old package " + ops.packageName
+                                    + "/" + ops.uidState + ": new uid=" + curUid);
+                            it.remove();
+                            changed = true;
+                        }
                     }
                 }
 
