@@ -270,7 +270,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number of recent tasks that we can remember.
-    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 10 : 20;
+    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 10 : 200;
 
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
@@ -3538,6 +3538,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Remove any existing entries that are the same kind of task.
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
+        final ComponentName comp = intent.getComponent();
+
+        int maxRecents = task.maxRecents - 1;
         for (int i=0; i<N; i++) {
             TaskRecord tr = mRecentTasks.get(i);
             if (task != tr) {
@@ -3549,14 +3552,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                     (intent == null || !intent.filterEquals(trIntent))) {
                     continue;
                 }
-                if (document || trIntent != null && trIntent.isDocument()) {
-                    // Document tasks do not match other tasks.
+                final boolean trIsDocument = trIntent != null && trIntent.isDocument();
+                if (document && trIsDocument) {
+                    // These are the same document activity (not necessarily the same doc).
+                    if (maxRecents > 0) {
+                        --maxRecents;
+                        continue;
+                    }
+                    // Hit the maximum number of documents for this task. Fall through
+                    // and remove this document from recents.
+                } else if (document || trIsDocument) {
+                    // Only one of these is a document. Not the droid we're looking for.
                     continue;
                 }
             }
 
             // Either task and tr are the same or, their affinities match or their intents match
-            // and neither of them is a document.
+            // and neither of them is a document, or they are documents using the same activity
+            // and their maxRecents has been reached.
             tr.disposeThumbnail();
             mRecentTasks.remove(i);
             i--;
@@ -3566,6 +3579,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // specified, then replace it with the existing recent task.
                 task = tr;
             }
+            mTaskPersister.notify(tr, false);
         }
         if (N >= MAX_RECENT_TASKS) {
             mRecentTasks.remove(N-1).disposeThumbnail();

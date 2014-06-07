@@ -933,6 +933,12 @@
         <enum name="always" value="2" />
     </attr>
 
+    <!-- The maximum number of entries of tasks rooted at this activity in the recent task list.
+         When this number of entries is reached the least recently used instance of this activity
+         will be removed from recents. The value will be clamped between 1 and 100 inclusive.
+         The default value for this if it is not specified is 15. -->
+    <attr name="maxRecents" format="integer" />
+
     <!-- Tasks launched by activities with this attribute will remain in the recent tasks
          list until the last activity in the task is completed. When that happens the task
          will be automatically removed from the recent tasks list.
@@ -1607,6 +1613,7 @@
         <attr name="persistable" />
         <attr name="allowEmbedded" />
         <attr name="documentLaunchMode" />
+        <attr name="maxRecents" />
         <attr name="autoRemoveFromRecents" />
     </declare-styleable>
     

@@ -96,6 +96,7 @@ final class TaskRecord extends ThumbnailHolder {
 
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
+    int maxRecents;
 
     /** Only used for persistable tasks, otherwise 0. The last time this task was moved. Used for
      * determining the order when restoring. Sign indicates whether last task movement was to front
@@ -104,6 +105,7 @@ final class TaskRecord extends ThumbnailHolder {
 
     /** True if persistable, has changed, and has not yet been persisted */
     boolean needsPersisting = false;
+
     /** Launch the home activity when leaving this task. Will be false for tasks that are not on
      * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
@@ -301,6 +303,8 @@ final class TaskRecord extends ThumbnailHolder {
         if (mActivities.isEmpty()) {
             taskType = r.mActivityType;
             isPersistable = r.isPersistable();
+            // Clamp to [1, 100].
+            maxRecents = Math.min(Math.max(r.info.maxRecents, 1), 100);
         } else {
             // Otherwise make all added activities match this one.
             r.mActivityType = taskType;
