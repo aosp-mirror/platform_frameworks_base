@@ -20,44 +20,13 @@ import android.os.Parcelable;
 
 /**
  * Battery properties that may be queried using
- * {@link BatteryManager#getProperty
  * BatteryManager.getProperty()}
  */
+
+/**
+ * @hide
+ */
 public class BatteryProperty implements Parcelable {
-    /*
-     * Battery property identifiers.  These must match the values in
-     * frameworks/native/include/batteryservice/BatteryService.h
-     */
-    /** Battery capacity in microampere-hours, as an integer. */
-    public static final int CHARGE_COUNTER = 1;
-
-    /**
-     * Instantaneous battery current in microamperes, as an integer.  Positive
-     * values indicate net current entering the battery from a charge source,
-     * negative values indicate net current discharging from the battery.
-     */
-    public static final int CURRENT_NOW = 2;
-
-    /**
-     * Average battery current in microamperes, as an integer.  Positive
-     * values indicate net current entering the battery from a charge source,
-     * negative values indicate net current discharging from the battery.
-     * The time period over which the average is computed may depend on the
-     * fuel gauge hardware and its configuration.
-     */
-    public static final int CURRENT_AVERAGE = 3;
-
-    /**
-     * Remaining battery capacity as an integer percentage of total capacity
-     * (with no fractional part).
-     */
-    public static final int CAPACITY = 4;
-
-    /**
-     * Battery remaining energy in nanowatt-hours, as a long integer.
-     */
-    public static final int ENERGY_COUNTER = 5;
-
     private long mValueLong;
 
     /**
@@ -68,30 +37,12 @@ public class BatteryProperty implements Parcelable {
     }
 
     /**
-     * Return the value of a property of integer type previously queried
-     * via {@link BatteryManager#getProperty
-     * BatteryManager.getProperty()}.  If the platform does
-     * not provide the property queried, this value will be
-     * Integer.MIN_VALUE.
-     *
-     * @return The queried property value, or Integer.MIN_VALUE if not supported.
-     */
-    public int getInt() {
-        return (int)mValueLong;
-    }
-
-    /**
-     * Return the value of a property of long type previously queried
-     * via {@link BatteryManager#getProperty
-     * BatteryManager.getProperty()}.  If the platform does
-     * not provide the property queried, this value will be
-     * Long.MIN_VALUE.
-     *
-     * @return The queried property value, or Long.MIN_VALUE if not supported.
+     * @hide
      */
     public long getLong() {
         return mValueLong;
     }
+
     /*
      * Parcel read/write code must be kept in sync with
      * frameworks/native/services/batteryservice/BatteryProperty.cpp
