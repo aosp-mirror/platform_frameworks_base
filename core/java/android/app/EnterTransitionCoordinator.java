@@ -130,6 +130,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         }
                     });
         }
+        if (allowOverlappingTransitions()) {
+            startEnterTransitionOnly();
+        }
     }
 
     private static SharedElementListener getListener(Activity activity, boolean isReturning) {
@@ -218,24 +221,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    protected void onTakeSharedElements() {
-        if (!mIsReadyForTransition || mSharedElementsBundle == null) {
-            return;
-        }
-        final Bundle sharedElementState = mSharedElementsBundle;
-        mSharedElementsBundle = null;
-        getDecor().getViewTreeObserver()
-                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
-                        startSharedElementTransition(sharedElementState);
-                        return false;
-                    }
-                });
-        getDecor().invalidate();
-    }
-
     private void startSharedElementTransition(Bundle sharedElementState) {
         setEpicenter();
         // Remove rejected shared elements
@@ -253,7 +238,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 setSharedElementState(sharedElementState, sharedElementSnapshots);
         requestLayoutForSharedElements();
 
-        boolean startEnterTransition = allowOverlappingTransitions();
+        boolean startEnterTransition = allowOverlappingTransitions() && !mIsReturning;
         boolean startSharedElementTransition = true;
         Transition transition = beginTransition(startEnterTransition, startSharedElementTransition);
 
@@ -267,6 +252,29 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             mResultReceiver.send(MSG_HIDE_SHARED_ELEMENTS, null);
         }
         mResultReceiver = null; // all done sending messages.
+    }
+
+    private void onTakeSharedElements() {
+        if (!mIsReadyForTransition || mSharedElementsBundle == null) {
+            return;
+        }
+        final Bundle sharedElementState = mSharedElementsBundle;
+        mSharedElementsBundle = null;
+        getDecor().getViewTreeObserver()
+                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        startTransition(new Runnable() {
+                            @Override
+                            public void run() {
+                                startSharedElementTransition(sharedElementState);
+                            }
+                        });
+                        return false;
+                    }
+                });
+        getDecor().invalidate();
     }
 
     private void requestLayoutForSharedElements() {
@@ -293,9 +301,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (transition == null) {
                 sharedElementTransitionStarted();
             } else {
-                transition.addListener(new Transition.TransitionListenerAdapter() {
+                transition.addListener(new ContinueTransitionListener() {
                     @Override
                     public void onTransitionStart(Transition transition) {
+                        super.onTransitionStart(transition);
                         transition.removeListener(this);
                         sharedElementTransitionStarted();
                     }
@@ -303,12 +312,17 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         }
         if (transition != null) {
+            if (sharedElementTransition == null) {
+                transition.addListener(new ContinueTransitionListener());
+            }
             TransitionManager.beginDelayedTransition(getDecor(), transition);
             if (startSharedElementTransition && !mSharedElementNames.isEmpty()) {
                 mSharedElements.get(0).invalidate();
             } else if (startEnterTransition && !mTransitioningViews.isEmpty()) {
                 mTransitioningViews.get(0).invalidate();
             }
+        } else {
+            transitionStarted();
         }
         return transition;
     }
@@ -399,11 +413,21 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     protected void onRemoteExitTransitionComplete() {
         if (!allowOverlappingTransitions()) {
-            boolean startEnterTransition = true;
-            boolean startSharedElementTransition = false;
-            Transition transition = beginTransition(startEnterTransition,
-                    startSharedElementTransition);
-            startEnterTransition(transition);
+            startEnterTransitionOnly();
         }
+    }
+
+    private void startEnterTransitionOnly() {
+        startTransition(new Runnable() {
+            @Override
+            public void run() {
+                setEpicenter();
+                boolean startEnterTransition = true;
+                boolean startSharedElementTransition = false;
+                Transition transition = beginTransition(startEnterTransition,
+                        startSharedElementTransition);
+                startEnterTransition(transition);
+            }
+        });
     }
 }

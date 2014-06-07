@@ -572,6 +572,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
     }
 
+    protected void transitionStarted() {
+        mIsStartingTransition = false;
+    }
+
     protected class ContinueTransitionListener extends Transition.TransitionListenerAdapter {
         @Override
         public void onTransitionStart(Transition transition) {
