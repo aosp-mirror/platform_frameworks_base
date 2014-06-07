@@ -27598,6 +27598,7 @@ package android.telecomm {
   public final class CallServiceAdapter {
     method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
     method public void handleSuccessfulOutgoingCall(java.lang.String);
+    method public void handoffCall(java.lang.String);
     method public void notifyIncomingCall(android.telecomm.CallInfo);
     method public void onPostDialWait(java.lang.String, java.lang.String);
     method public void setActive(java.lang.String);

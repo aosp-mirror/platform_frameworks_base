@@ -54,4 +54,6 @@ oneway interface ICallServiceAdapter {
     void removeCall(String callId);
 
     void onPostDialWait(String callId, String remaining);
+
+    void handoffCall(String callId);
 }
