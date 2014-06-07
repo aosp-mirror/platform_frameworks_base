@@ -20,13 +20,13 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false" android:zAdjustment="top">
     <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
-            android:interpolator="@interpolator/decelerate_cubic"
+            android:interpolator="@interpolator/accelerate_quart"
+            android:fillEnabled="true"
+            android:fillBefore="false" android:fillAfter="true"
+            android:startOffset="100"
+            android:duration="150"/>
+    <translate android:fromYDelta="0%" android:toYDelta="5%"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:duration="300"/>
-    <scale android:fromXScale="1.0" android:toXScale=".8"
-            android:fromYScale="1.0" android:toYScale=".8"
-            android:pivotX="50%p" android:pivotY="50%p"
-            android:interpolator="@interpolator/decelerate_cubic"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:duration="300"/>
+            android:interpolator="@interpolator/accelerate_quint"
+            android:duration="250"/>
 </set>
