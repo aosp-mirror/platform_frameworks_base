@@ -439,8 +439,8 @@ public:
 #ifdef USE_MINIKIN
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         typeface = TypefaceImpl_resolveDefault(typeface);
-        MinikinFont* baseFont = typeface->fFontCollection->baseFont(typeface->fStyle);
-        paint->setTypeface(reinterpret_cast<MinikinFontSkia*>(baseFont)->GetSkTypeface());
+        FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
+        MinikinFontSkia::populateSkPaint(paint, baseFont.font, baseFont.fakery);
 #endif
         SkScalar spacing = paint->getFontMetrics(metrics);
         SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
@@ -837,13 +837,12 @@ public:
                 : layout(layout), path(path), x(x), y(y), paint(paint), glyphs(glyphs), pos(pos) {
         }
 
-        void operator()(SkTypeface* t, size_t start, size_t end) {
+        void operator()(size_t start, size_t end) {
             for (size_t i = start; i < end; i++) {
                 glyphs[i] = layout.getGlyphId(i);
                 pos[i].fX = x + layout.getX(i);
                 pos[i].fY = y + layout.getY(i);
             }
-            paint->setTypeface(t);
             if (start == 0) {
                 paint->getPosTextPath(glyphs + start, (end - start) << 1, pos + start, path);
             } else {
@@ -878,7 +877,7 @@ public:
         paint->setTextAlign(SkPaint::kLeft_Align);
         paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         GetTextFunctor f(layout, path, x, y, paint, glyphs, pos);
-        MinikinUtils::forFontRun(layout, f);
+        MinikinUtils::forFontRun(layout, paint, f);
         paint->setTextAlign(align);
         delete[] glyphs;
         delete[] pos;
