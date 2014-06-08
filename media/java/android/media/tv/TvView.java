@@ -64,6 +64,8 @@ public class TvView extends SurfaceView {
     private MySessionCallback mSessionCallback;
     private TvInputListener mListener;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
+    private boolean mHasStreamVolume;
+    private float mStreamVolume;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -143,7 +145,10 @@ public class TvView extends SurfaceView {
      */
     public void setStreamVolume(float volume) {
         if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
+        mHasStreamVolume = true;
+        mStreamVolume = volume;
         if (mSession == null) {
+            // Volume will be set once the connection has been made.
             return;
         }
         mSession.setStreamVolume(volume);
@@ -476,6 +481,9 @@ public class TvView extends SurfaceView {
                 }
                 createSessionOverlayView();
                 mSession.tune(mChannelUri);
+                if (mHasStreamVolume) {
+                    mSession.setStreamVolume(mStreamVolume);
+                }
             } else {
                 if (mListener != null) {
                     mListener.onError(mInputId, ERROR_BUSY);
