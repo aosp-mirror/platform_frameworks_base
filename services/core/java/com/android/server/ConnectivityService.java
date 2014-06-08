@@ -630,8 +630,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (DBG) log("ConnectivityService starting up");
 
         NetworkCapabilities netCap = new NetworkCapabilities();
-        netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         mDefaultRequest = new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(null, mDefaultRequest, new Binder(),
                 NetworkRequestInfo.REQUEST);
