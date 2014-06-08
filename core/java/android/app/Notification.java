@@ -2488,16 +2488,16 @@ public class Notification implements Parcelable
     /**
      * Helper class for generating large-format notifications that include a large image attachment.
      *
-     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * Here's how you'd set the <code>BigPictureStyle</code> on a notification:
      * <pre class="prettyprint">
-     * Notification noti = new Notification.BigPictureStyle(
-     *      new Notification.Builder()
-     *         .setContentTitle(&quot;New photo from &quot; + sender.toString())
-     *         .setContentText(subject)
-     *         .setSmallIcon(R.drawable.new_post)
-     *         .setLargeIcon(aBitmap))
-     *      .bigPicture(aBigBitmap)
-     *      .build();
+     * Notification notif = new Notification.Builder(mContext)
+     *     .setContentTitle(&quot;New photo from &quot; + sender.toString())
+     *     .setContentText(subject)
+     *     .setSmallIcon(R.drawable.new_post)
+     *     .setLargeIcon(aBitmap)
+     *     .setStyle(new Notification.BigPictureStyle()
+     *         .bigPicture(aBigBitmap))
+     *     .build();
      * </pre>
      *
      * @see Notification#bigContentView
@@ -2584,16 +2584,16 @@ public class Notification implements Parcelable
     /**
      * Helper class for generating large-format notifications that include a lot of text.
      *
-     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * Here's how you'd set the <code>BigTextStyle</code> on a notification:
      * <pre class="prettyprint">
-     * Notification noti = new Notification.BigTextStyle(
-     *      new Notification.Builder()
-     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
-     *         .setContentText(subject)
-     *         .setSmallIcon(R.drawable.new_mail)
-     *         .setLargeIcon(aBitmap))
-     *      .bigText(aVeryLongString)
-     *      .build();
+     * Notification notif = new Notification.Builder(mContext)
+     *     .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *     .setContentText(subject)
+     *     .setSmallIcon(R.drawable.new_mail)
+     *     .setLargeIcon(aBitmap)
+     *     .setStyle(new Notification.BigTextStyle()
+     *         .bigText(aVeryLongString))
+     *     .build();
      * </pre>
      *
      * @see Notification#bigContentView
@@ -2678,19 +2678,19 @@ public class Notification implements Parcelable
     /**
      * Helper class for generating large-format notifications that include a list of (up to 5) strings.
      *
-     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * Here's how you'd set the <code>InboxStyle</code> on a notification:
      * <pre class="prettyprint">
-     * Notification noti = new Notification.InboxStyle(
-     *      new Notification.Builder()
-     *         .setContentTitle(&quot;5 New mails from &quot; + sender.toString())
-     *         .setContentText(subject)
-     *         .setSmallIcon(R.drawable.new_mail)
-     *         .setLargeIcon(aBitmap))
-     *      .addLine(str1)
-     *      .addLine(str2)
-     *      .setContentTitle("")
-     *      .setSummaryText(&quot;+3 more&quot;)
-     *      .build();
+     * Notification notif = new Notification.Builder(mContext)
+     *     .setContentTitle(&quot;5 New mails from &quot; + sender.toString())
+     *     .setContentText(subject)
+     *     .setSmallIcon(R.drawable.new_mail)
+     *     .setLargeIcon(aBitmap)
+     *     .setStyle(new Notification.InboxStyle()
+     *         .addLine(str1)
+     *         .addLine(str2)
+     *         .setContentTitle(&quot;&quot;)
+     *         .setSummaryText(&quot;+3 more&quot;))
+     *     .build();
      * </pre>
      *
      * @see Notification#bigContentView
