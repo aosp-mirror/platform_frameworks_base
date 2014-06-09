@@ -16,6 +16,8 @@
 LOCAL_PATH := $(my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_JAVACFLAGS := -source 6 -target 6
+
 #
 # Define rules to build temp_layoutlib.jar, which contains a subset of
 # the classes in framework.jar.  The layoutlib_create tool is used to
