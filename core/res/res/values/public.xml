@@ -2097,6 +2097,7 @@
   <public type="attr" name="isGame" id="0x10103f4" />
   <public type="attr" name="allowEmbedded" id="0x10103f5" />
   <public type="attr" name="setupActivity" id="0x10103f6"/>
+  <public type="attr" name="tvInputType" id="0x10103f7"/>
 
 <!-- ===============================================================
      Resources added in version 21 of the platform
