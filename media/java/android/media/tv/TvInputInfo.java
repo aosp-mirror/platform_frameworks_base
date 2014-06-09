@@ -46,6 +46,27 @@ public final class TvInputInfo implements Parcelable {
     private static final String TAG = "TvInputInfo";
 
     /**
+     * TV input type: the TV input service is not handling input from hardware. For example,
+     * services showing streaming from the internet falls into this type.
+     */
+    public static final int TYPE_VIRTUAL = 0;
+
+    // Should be in sync with hardware/libhardware/include/hardware/tv_input.h
+
+    /**
+     * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
+     */
+    public static final int TYPE_HDMI = 1;
+    /**
+     * TV input type: the TV input service is a tuner. (e.g. terrestrial tuner)
+     */
+    public static final int TYPE_TUNER = 2;
+    /**
+     * TV input type: the TV input service is stateless pass-through. (e.g. RGB, composite, etc.)
+     */
+    public static final int TYPE_PASSTHROUGH = 3;
+
+    /**
      * The name of the TV input service to provide to the setup activity and settings activity.
      */
     public static final String EXTRA_SERVICE_NAME = "serviceName";
@@ -58,6 +79,7 @@ public final class TvInputInfo implements Parcelable {
     // Attributes from XML meta data.
     private String mSetupActivity;
     private String mSettingsActivity;
+    private int mType;
 
     /**
      * Create a new instance of the TvInputInfo class,
@@ -104,6 +126,11 @@ public final class TvInputInfo implements Parcelable {
             if (DEBUG) {
                 Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
                         + si.name);
+            }
+            input.mType = sa.getInt(
+                    com.android.internal.R.styleable.TvInputService_tvInputType, TYPE_VIRTUAL);
+            if (DEBUG) {
+                Log.d(TAG, "Type loaded. [" + input.mType + "] for " + si.name);
             }
             sa.recycle();
 
@@ -176,6 +203,13 @@ public final class TvInputInfo implements Parcelable {
             return intent;
         }
         return null;
+    }
+
+    /**
+     * Returns the type of this TV input service.
+     */
+    public int getType() {
+        return mType;
     }
 
     /**
