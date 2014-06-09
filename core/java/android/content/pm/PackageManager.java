@@ -3594,6 +3594,33 @@ public abstract class PackageManager {
     public abstract boolean isSafeMode();
 
     /**
+     * Return the {@link KeySet} associated with the String alias for this
+     * application.
+     *
+     * @param Alias The alias for a given {@link KeySet} as defined in the
+     *        application's AndroidManifest.xml.
+     */
+    public abstract KeySet getKeySetByAlias(String packageName, String alias);
+
+    /** Return the signing {@link KeySet} for this application. */
+    public abstract KeySet getSigningKeySet(String packageName);
+
+    /**
+     * Return whether the package denoted by packageName has been signed by all
+     * of the keys specified by the {@link KeySet} ks.  This will return true if
+     * the package has been signed by additional keys (a superset) as well.
+     * Compare to {@link #isSignedByExactly(String packageName, KeySet ks)}.
+     */
+    public abstract boolean isSignedBy(String packageName, KeySet ks);
+
+    /**
+     * Return whether the package denoted by packageName has been signed by all
+     * of, and only, the keys specified by the {@link KeySet} ks. Compare to
+     * {@link #isSignedBy(String packageName, KeySet ks)}.
+     */
+    public abstract boolean isSignedByExactly(String packageName, KeySet ks);
+
+    /**
      * Attempts to move package resources from internal to external media or vice versa.
      * Since this may take a little while, the result will
      * be posted back to the given observer.   This call may fail if the calling context
