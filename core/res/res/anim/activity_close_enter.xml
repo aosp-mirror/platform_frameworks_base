@@ -18,7 +18,8 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android" android:zAdjustment="normal">
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
+    <alpha android:fromAlpha="0.7" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:duration="300"/>
+            android:interpolator="@interpolator/linear_out_slow_in"
+            android:duration="250"/>
 </set>
