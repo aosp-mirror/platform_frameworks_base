@@ -81,6 +81,7 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -289,6 +290,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mTrackingPosition; // the position of the top of the tracking view.
 
     // ticker
+    private boolean mTickerEnabled;
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
@@ -644,7 +646,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
-        mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
         mStackScroller = (NotificationStackScrollLayout) mStatusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
@@ -684,10 +685,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDateTimeView.setEnabled(true);
         }
 
-        mTicker = new MyTicker(context, mStatusBarView);
+        mTickerEnabled = res.getBoolean(R.bool.enable_ticker);
+        if (mTickerEnabled) {
+            final ViewStub tickerStub = (ViewStub) mStatusBarView.findViewById(R.id.ticker_stub);
+            if (tickerStub != null) {
+                mTickerView = tickerStub.inflate();
+                mTicker = new MyTicker(context, mStatusBarView);
 
-        TickerView tickerView = (TickerView)mStatusBarView.findViewById(R.id.tickerText);
-        tickerView.mTicker = mTicker;
+                TickerView tickerView = (TickerView) mStatusBarView.findViewById(R.id.tickerText);
+                tickerView.mTicker = mTicker;
+            }
+        }
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
@@ -1145,7 +1153,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (old != null) {
             // Cancel the ticker if it's still running
-            mTicker.removeEntry(old);
+            if (mTickerEnabled) {
+                mTicker.removeEntry(old);
+            }
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -2118,6 +2128,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     protected void tick(StatusBarNotification n, boolean firstTime) {
+        if (!mTickerEnabled) return;
+
         // no ticking in lights-out mode
         if (!areLightsOn()) return;
 
@@ -2134,7 +2146,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (n.getNotification().tickerText != null && mStatusBarWindow != null
                 && mStatusBarWindow.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
-                            | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
+                    | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
             }
         }
@@ -2143,10 +2155,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private class MyTicker extends Ticker {
         MyTicker(Context context, View sb) {
             super(context, sb);
+            if (!mTickerEnabled) {
+                Log.w(TAG, "MyTicker instantiated with mTickerEnabled=false", new Throwable());
+            }
         }
 
         @Override
         public void tickerStarting() {
+            if (!mTickerEnabled) return;
             mTicking = true;
             mStatusBarContents.setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
@@ -2156,6 +2172,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         @Override
         public void tickerDone() {
+            if (!mTickerEnabled) return;
             mStatusBarContents.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
@@ -2164,6 +2181,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         public void tickerHalting() {
+            if (!mTickerEnabled) return;
             if (mStatusBarContents.getVisibility() != View.VISIBLE) {
                 mStatusBarContents.setVisibility(View.VISIBLE);
                 mStatusBarContents
@@ -2202,11 +2220,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mExpandedVisible
                     + ", mTrackingPosition=" + mTrackingPosition);
-            pw.println("  mTicking=" + mTicking);
+            pw.println("  mTickerEnabled=" + mTickerEnabled);
+            if (mTickerEnabled) {
+                pw.println("  mTicking=" + mTicking);
+                pw.println("  mTickerView: " + viewInfo(mTickerView));
+            }
             pw.println("  mTracking=" + mTracking);
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
             pw.println("  mStackScroller: " + viewInfo(mStackScroller));
-            pw.println("  mTickerView: " + viewInfo(mTickerView));
             pw.println("  mStackScroller: " + viewInfo(mStackScroller)
                     + " scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
@@ -2676,7 +2697,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     protected void haltTicker() {
-        mTicker.halt();
+        if (mTickerEnabled) {
+            mTicker.halt();
+        }
     }
 
     @Override
