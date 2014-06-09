@@ -2050,6 +2050,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
      * other profile
+     * @param flags {@link DevicePolicyManager#FLAG_MANAGED_CAN_ACCESS_PARENT} and
+     * {@link DevicePolicyManager#FLAG_PARENT_CAN_ACCESS_MANAGED} are supported.
      */
     public void addCrossProfileIntentFilter(ComponentName admin, IntentFilter filter, int flags) {
         if (mService != null) {
