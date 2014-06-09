@@ -15,6 +15,9 @@
  */
 package android.media.session;
 
+import android.os.RemoteException;
+import android.util.Log;
+
 /**
  * Handles requests to adjust or set the volume on a session. This is also used
  * to push volume updates back to the session after a request has been handled.
@@ -22,6 +25,7 @@ package android.media.session;
  * {@link MediaSession#setPlaybackToRemote}.
  */
 public abstract class RemoteVolumeProvider {
+    private static final String TAG = "RemoteVolumeProvider";
 
     /**
      * The volume is fixed and can not be modified. Requests to change volume
@@ -45,6 +49,8 @@ public abstract class RemoteVolumeProvider {
 
     private final int mControlType;
     private final int mMaxVolume;
+
+    private MediaSession mSession;
 
     /**
      * Create a new volume provider for handling volume events. You must specify
@@ -88,7 +94,7 @@ public abstract class RemoteVolumeProvider {
      * Notify the system that the remote playback's volume has been changed.
      */
     public final void notifyVolumeChanged() {
-        // TODO
+        mSession.notifyRemoteVolumeChanged(this);
     }
 
     /**
@@ -106,5 +112,12 @@ public abstract class RemoteVolumeProvider {
      * @param delta The amount to change the volume
      */
     public void onAdjustVolumeBy(int delta) {
+    }
+
+    /**
+     * @hide
+     */
+    void setSession(MediaSession session) {
+        mSession = session;
     }
 }
