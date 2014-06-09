@@ -13255,4 +13255,83 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return mUserNeedsBadging.valueAt(index);
     }
+
+    @Override
+    public KeySetHandle getKeySetByAlias(String packageName, String alias) {
+        if (packageName == null || alias == null) {
+            return null;
+        }
+        synchronized(mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (pkg.applicationInfo.uid != Binder.getCallingUid()
+                    && Process.SYSTEM_UID != Binder.getCallingUid()) {
+                throw new SecurityException("May not access KeySets defined by"
+                        + " aliases in other applications.");
+            }
+            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            return ksms.getKeySetByAliasAndPackageNameLPr(packageName, alias);
+        }
+    }
+
+    @Override
+    public KeySetHandle getSigningKeySet(String packageName) {
+        if (packageName == null) {
+            return null;
+        }
+        synchronized(mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (pkg.applicationInfo.uid != Binder.getCallingUid()
+                    && Process.SYSTEM_UID != Binder.getCallingUid()) {
+                throw new SecurityException("May not access signing KeySet of other apps.");
+            }
+            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            return ksms.getSigningKeySetByPackageNameLPr(packageName);
+        }
+    }
+
+    @Override
+    public boolean isPackageSignedByKeySet(String packageName, IBinder ks) {
+        if (packageName == null || ks == null) {
+            return false;
+        }
+        synchronized(mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (ks instanceof KeySetHandle) {
+                KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                return ksms.packageIsSignedByLPr(packageName, (KeySetHandle) ks);
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isPackageSignedByKeySetExactly(String packageName, IBinder ks) {
+        if (packageName == null || ks == null) {
+            return false;
+        }
+        synchronized(mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (ks instanceof KeySetHandle) {
+                KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ks);
+            }
+            return false;
+        }
+    }
 }
