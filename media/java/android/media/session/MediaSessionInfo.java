@@ -26,18 +26,21 @@ import android.os.Parcelable;
 public final class MediaSessionInfo implements Parcelable {
     private final String mId;
     private final String mPackageName;
+    private final int mPid;
 
     /**
      * @hide
      */
-    public MediaSessionInfo(String id, String packageName) {
+    public MediaSessionInfo(String id, String packageName, int pid) {
         mId = id;
         mPackageName = packageName;
+        mPid = pid;
     }
 
     private MediaSessionInfo(Parcel in) {
         mId = in.readString();
         mPackageName = in.readString();
+        mPid = in.readInt();
     }
 
     /**
@@ -58,9 +61,13 @@ public final class MediaSessionInfo implements Parcelable {
         return mId;
     }
 
+    public int getPid() {
+        return mPid;
+    }
+
     @Override
     public String toString() {
-        return "SessionInfo {id=" + mId + ", pkg=" + mPackageName + "}";
+        return "SessionInfo {id=" + mId + ", pkg=" + mPackageName + ", pid=" + mPid + "}";
     }
 
     @Override
@@ -72,6 +79,7 @@ public final class MediaSessionInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mPackageName);
+        dest.writeInt(mPid);
     }
 
     public static final Parcelable.Creator<MediaSessionInfo> CREATOR

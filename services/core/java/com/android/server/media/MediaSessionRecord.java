@@ -130,7 +130,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
-        mSessionInfo = new MediaSessionInfo(UUID.randomUUID().toString(), ownerPackageName);
+        mSessionInfo = new MediaSessionInfo(UUID.randomUUID().toString(), ownerPackageName,
+                ownerPid);
         mTag = tag;
         mController = new ControllerStub();
         mSession = new SessionStub();
@@ -940,6 +941,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             synchronized (mLock) {
                 mControllerCallbacks.remove(cb);
             }
+        }
+
+        @Override
+        public MediaSessionInfo getSessionInfo() {
+            return mSessionInfo;
         }
 
         @Override

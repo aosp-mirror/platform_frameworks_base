@@ -246,6 +246,21 @@ public final class MediaController {
         }
     }
 
+    /**
+     * Get the info for the session this controller is connected to.
+     *
+     * @return The session info for the connected session.
+     * @hide
+     */
+    public MediaSessionInfo getSessionInfo() {
+        try {
+            return mSessionBinder.getSessionInfo();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getSessionInfo.", e);
+        }
+        return null;
+    }
+
     /*
      * @hide
      */

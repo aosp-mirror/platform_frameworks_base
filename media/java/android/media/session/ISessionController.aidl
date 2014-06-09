@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionControllerCallback;
+import android.media.session.MediaSessionInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -35,6 +36,7 @@ interface ISessionController {
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
     void showRoutePicker();
+    MediaSessionInfo getSessionInfo();
 
     // These commands are for the TransportController
     void play();
