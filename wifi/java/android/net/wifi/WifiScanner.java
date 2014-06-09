@@ -153,12 +153,17 @@ public class WifiScanner {
             dest.writeInt(band);
             dest.writeInt(periodInMs);
             dest.writeInt(reportEvents);
-            dest.writeInt(channels.length);
 
-            for (int i = 0; i < channels.length; i++) {
-                dest.writeInt(channels[i].frequency);
-                dest.writeInt(channels[i].dwellTimeMS);
-                dest.writeInt(channels[i].passive ? 1 : 0);
+            if (channels != null) {
+                dest.writeInt(channels.length);
+
+                for (int i = 0; i < channels.length; i++) {
+                    dest.writeInt(channels[i].frequency);
+                    dest.writeInt(channels[i].dwellTimeMS);
+                    dest.writeInt(channels[i].passive ? 1 : 0);
+                }
+            } else {
+                dest.writeInt(0);
             }
         }
 
@@ -211,10 +216,14 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mResults.length);
-            for (int i = 0; i < mResults.length; i++) {
-                ScanResult result = mResults[i];
-                result.writeToParcel(dest, flags);
+            if (mResults != null) {
+                dest.writeInt(mResults.length);
+                for (int i = 0; i < mResults.length; i++) {
+                    ScanResult result = mResults[i];
+                    result.writeToParcel(dest, flags);
+                }
+            } else {
+                dest.writeInt(0);
             }
         }
 
@@ -324,13 +333,17 @@ public class WifiScanner {
             dest.writeInt(unchangedSampleSize);
             dest.writeInt(minApsBreachingThreshold);
             dest.writeInt(periodInMs);
-            dest.writeInt(hotspotInfos.length);
-            for (int i = 0; i < hotspotInfos.length; i++) {
-                HotspotInfo info = hotspotInfos[i];
-                dest.writeString(info.bssid);
-                dest.writeInt(info.low);
-                dest.writeInt(info.high);
-                dest.writeInt(info.frequencyHint);
+            if (hotspotInfos != null) {
+                dest.writeInt(hotspotInfos.length);
+                for (int i = 0; i < hotspotInfos.length; i++) {
+                    HotspotInfo info = hotspotInfos[i];
+                    dest.writeString(info.bssid);
+                    dest.writeInt(info.low);
+                    dest.writeInt(info.high);
+                    dest.writeInt(info.frequencyHint);
+                }
+            } else {
+                dest.writeInt(0);
             }
         }
 
@@ -456,13 +469,18 @@ public class WifiScanner {
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(apLostThreshold);
-            dest.writeInt(hotspotInfos.length);
-            for (int i = 0; i < hotspotInfos.length; i++) {
-                HotspotInfo info = hotspotInfos[i];
-                dest.writeString(info.bssid);
-                dest.writeInt(info.low);
-                dest.writeInt(info.high);
-                dest.writeInt(info.frequencyHint);
+
+            if (hotspotInfos != null) {
+                dest.writeInt(hotspotInfos.length);
+                for (int i = 0; i < hotspotInfos.length; i++) {
+                    HotspotInfo info = hotspotInfos[i];
+                    dest.writeString(info.bssid);
+                    dest.writeInt(info.low);
+                    dest.writeInt(info.high);
+                    dest.writeInt(info.frequencyHint);
+                }
+            } else {
+                dest.writeInt(0);
             }
         }
 
