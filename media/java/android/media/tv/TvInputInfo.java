@@ -26,6 +26,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -221,6 +222,18 @@ public final class TvInputInfo implements Parcelable {
      */
     public CharSequence loadLabel(PackageManager pm) {
         return mService.loadLabel(pm);
+    }
+
+    /**
+     * Loads the user-displayed icon for this TV input service.
+     *
+     * @param pm Supplies a PackageManager used to load the TV input's resources.
+     * @return a Drawable containing the TV input's icon. If the TV input does not have
+     *         an icon, application icon is returned. If it's unavailable too, system default is
+     *         returned.
+     */
+    public Drawable loadIcon(PackageManager pm) {
+        return mService.serviceInfo.loadIcon(pm);
     }
 
     @Override
