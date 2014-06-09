@@ -12,7 +12,6 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_ConsumerIrService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_dreams_McuHal.cpp \
     $(LOCAL_REL_DIR)/com_android_server_hdmi_HdmiCecController.cpp \
-    $(LOCAL_REL_DIR)/com_android_server_hdmi_HdmiCecService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_hdmi_HdmiMhlController.cpp \
     $(LOCAL_REL_DIR)/com_android_server_input_InputApplicationHandle.cpp \
     $(LOCAL_REL_DIR)/com_android_server_input_InputManagerService.cpp \

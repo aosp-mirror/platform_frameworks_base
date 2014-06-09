@@ -7003,8 +7003,13 @@ package android.content {
     field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
+<<<<<<< HEAD
     field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
     field public static final java.lang.String HDMI_CEC_SERVICE = "hdmi_cec";
+||||||| merged common ancestors
+    field public static final java.lang.String HDMI_CEC_SERVICE = "hdmi_cec";
+=======
+>>>>>>> 4ce22057e48f7ca176057a9410bfcbbfd913cfde
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
@@ -12922,21 +12927,6 @@ package android.hardware.hdmi {
     field public static final int UNKNOWN_VENDOR_ID = 16777215; // 0xffffff
   }
 
-  public final class HdmiCecClient {
-    method public boolean isTvOn();
-    method public void sendActiveSource();
-    method public void sendGiveDevicePowerStatus(int);
-    method public void sendImageViewOn();
-    method public void sendInactiveSource();
-    method public void sendTextViewOn();
-  }
-
-  public static abstract class HdmiCecClient.Listener {
-    ctor public HdmiCecClient.Listener();
-    method public void onCableStatusChanged(boolean);
-    method public void onMessageReceived(android.hardware.hdmi.HdmiCecMessage);
-  }
-
   public final class HdmiCecDeviceInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getDeviceType();
@@ -12946,10 +12936,6 @@ package android.hardware.hdmi {
     method public int getVendorId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public final class HdmiCecManager {
-    method public android.hardware.hdmi.HdmiCecClient getClient(int, android.hardware.hdmi.HdmiCecClient.Listener);
   }
 
   public final class HdmiCecMessage implements android.os.Parcelable {
