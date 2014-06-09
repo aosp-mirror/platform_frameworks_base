@@ -95,6 +95,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
+import com.android.org.conscrypt.TrustedCertificateStore;
 import com.google.android.collect.Lists;
 
 import dalvik.system.VMRuntime;
@@ -5051,6 +5052,10 @@ public final class ActivityThread {
         EventLogger.setReporter(new EventLoggingReporter());
 
         Security.addProvider(new AndroidKeyStoreProvider());
+
+        // Make sure TrustedCertificateStore looks in the right place for CA certificates
+        final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
+        TrustedCertificateStore.setDefaultUserDirectory(configDir);
 
         Process.setArgV0("<pre-initialized>");
 
